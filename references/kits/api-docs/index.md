@@ -15,11 +15,11 @@
 
 | 组件 | 自动导入名 | 职责 | 详细文档 |
 |---|---|---|---|
-| `EndpointHeader.vue` | `<ApiEndpointHeader>` | HTTP method badge + 端点路径 + 描述 | `endpoint-header.md` |
-| `ParamsTable.vue` | `<ApiParamsTable>` | 参数表：名称 / 类型 / required / 说明 | `params-table.md` |
 | `CodeSample.vue` | `<ApiCodeSample>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
 | `RequestExample.vue` | `<ApiRequestExample>` | 按业务场景切换的请求示例（委托 CodeSample） | `request-example.md` |
 | `ResponseExample.vue` | `<ApiResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 CodeSample） | `response-example.md` |
+
+> **端点头 / 参数表**（原 EndpointHeader / ParamsTable）已移除，待重新设计。新造时按 `method/component-spec-template.md` 走 anatomy → states → accessibility 规格，再沉淀回本 kit。
 
 配套 composable：`composables/useCodeWrap.ts` —— 所有 CodeSample 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -39,10 +39,8 @@
 ```vue
 <template>
   <section id="api-docs" class="space-y-8">
-    <ApiEndpointHeader method="POST" path="/v1/deployments" description="创建一个新的部署。" />
-    <ApiParamsTable :params="params" />
-<ApiCodeSample :variants="requestSamples" />
-<ApiResponseExample :scenarios="responseScenarios" />
+    <ApiCodeSample :variants="requestSamples" />
+    <ApiResponseExample :scenarios="responseScenarios" />
   </section>
 </template>
 ```
@@ -51,9 +49,8 @@
 
 ## Accessibility（无障碍）
 
-- CodeSample 的复制按钮：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；UTabs 键盘导航与 `aria-selected` 由 Reka UI 内置。
-- ParamsTable：`<th scope>` 关联表头；required 色 + 词双通道。
-- EndpointHeader / ResponseExample：method / 状态码色 + 文本双通道，不单靠颜色传达含义。
+- CodeSample 的复制按钮：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
+- ResponseExample：状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 
 ## 为什么不用 @nuxt/content 走内容管线？
@@ -62,8 +59,6 @@
 
 ## 源码参考（skill 内）
 
-- `assets/kits/api-docs/components/EndpointHeader.vue`
-- `assets/kits/api-docs/components/ParamsTable.vue`
 - `assets/kits/api-docs/components/CodeSample.vue`
 - `assets/kits/api-docs/components/RequestExample.vue`
 - `assets/kits/api-docs/components/ResponseExample.vue`

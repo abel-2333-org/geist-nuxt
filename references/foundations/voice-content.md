@@ -44,12 +44,12 @@
 
 ## 应用到 API 文档场景组件
 
-本 starter 面向 API 文档领域（`EndpointHeader`、`ParamsTable`、`CodeSample`、`RequestExample`、`ResponseExample`），文案尤其要严谨：
+API 文档领域组件（`CodeSample`、`RequestExample`、`ResponseExample`）的文案尤其要严谨：
 
 - HTTP 方法、状态码、参数名用 **Mono**（`font-mono`），保持 tabular。
-- 参数说明用 sentence case，必填/可选用标签而非仅颜色（配合 `focus-a11y.md` 的"不要只用颜色"）。
+- 场景/状态标签用 sentence case，必填/可选、成功/错误用标签而非仅颜色（配合 `focus-a11y.md` 的"不要只用颜色"）。
 - 错误响应示例遵循"发生了什么 + 怎么办"。
-- 端点动作按钮用动词+名词（`Send Request`、`Copy cURL`）。
+- 动作按钮用动词+名词（`Send Request`、`Copy cURL`）。
 
 ## 源码参考
 

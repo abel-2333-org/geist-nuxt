@@ -13,7 +13,7 @@ geist-nuxt 的组件全部来自 Nuxt UI v4（公共包 `@nuxt/ui`，共 122 个
 | 导航 | `navigation.md` | UNavigationMenu, UTabs, UBreadcrumb, ULink, UPagination |
 | 覆盖层 | `overlays.md` | UModal, USlideover, UPopover, UTooltip, UDropdownMenu |
 
-> 上表是**任何项目都可用的通用组件**（Nuxt UI 原语）。领域专属组件（如 API 文档场景的 EndpointHeader / ParamsTable / CodeSample / RequestExample / ResponseExample）不在此处，见 `kits/`（用到才加载）。「主要组件」列即官方组件名映射，`U` 前缀为 Nuxt UI 自动导入名。
+> 上表是**任何项目都可用的通用组件**（Nuxt UI 原语）。领域专属组件（如 API 文档场景的 CodeSample / RequestExample / ResponseExample）不在此处，见 `kits/`（用到才加载）。「主要组件」列即官方组件名映射，`U` 前缀为 Nuxt UI 自动导入名。
 
 ## 该用哪个组件（决策）
 
