@@ -91,6 +91,80 @@
   --ui-color-primary-800: #4a2290;
   --ui-color-primary-900: #3d1d74;
   --ui-color-primary-950: #261047;
+
+  /*
+   * Functional colors — exact Geist accent scales (geist-colors: green / blue /
+   * amber / red / teal). Geist encodes intent by step (700 = solid fill, high
+   * contrast), so we map Geist 700 -> Tailwind 500 (Nuxt UI's light default
+   * shade) and let dark mode use the lighter 400 step, mirroring the primary
+   * ramp. This replaces Nuxt UI's stock Tailwind palettes so success/info/
+   * warning/error/secondary render in true Geist hues.
+   *   success<-green · info<-blue · warning<-amber · error<-red · secondary<-teal
+   */
+  /* success — Geist green */
+  --ui-color-success-50: #effbef;
+  --ui-color-success-100: #ebfaeb;
+  --ui-color-success-200: #daf6da;
+  --ui-color-success-300: #c6f1c7;
+  --ui-color-success-400: #6cda75;
+  --ui-color-success-500: #45a557;
+  --ui-color-success-600: #398e4a;
+  --ui-color-success-700: #297a3a;
+  --ui-color-success-800: #1b311e;
+  --ui-color-success-900: #142416;
+  --ui-color-success-950: #0e1a10;
+
+  /* info — Geist blue */
+  --ui-color-info-50: #f0f7ff;
+  --ui-color-info-100: #ebf5ff;
+  --ui-color-info-200: #e0f0ff;
+  --ui-color-info-300: #cce6ff;
+  --ui-color-info-400: #52aeff;
+  --ui-color-info-500: #0072f5;
+  --ui-color-info-600: #0062d1;
+  --ui-color-info-700: #0068d6;
+  --ui-color-info-800: #00254d;
+  --ui-color-info-900: #001b38;
+  --ui-color-info-950: #001429;
+
+  /* warning — Geist amber */
+  --ui-color-warning-50: #fff6e5;
+  --ui-color-warning-100: #fff4d6;
+  --ui-color-warning-200: #fef0cd;
+  --ui-color-warning-300: #ffdd8f;
+  --ui-color-warning-400: #f5b047;
+  --ui-color-warning-500: #ffb224;
+  --ui-color-warning-600: #ff990a;
+  --ui-color-warning-700: #a35200;
+  --ui-color-warning-800: #4e2009;
+  --ui-color-warning-900: #371706;
+  --ui-color-warning-950: #291105;
+
+  /* error — Geist red */
+  --ui-color-error-50: #fff0f0;
+  --ui-color-error-100: #ffebeb;
+  --ui-color-error-200: #ffe5e5;
+  --ui-color-error-300: #fdd8d8;
+  --ui-color-error-400: #f87275;
+  --ui-color-error-500: #e5484d;
+  --ui-color-error-600: #da2f35;
+  --ui-color-error-700: #cb2a2f;
+  --ui-color-error-800: #391417;
+  --ui-color-error-900: #2a0e11;
+  --ui-color-error-950: #1e0a0c;
+
+  /* secondary — Geist teal */
+  --ui-color-secondary-50: #eefcf9;
+  --ui-color-secondary-100: #e5faf6;
+  --ui-color-secondary-200: #d4f7f0;
+  --ui-color-secondary-300: #bef4eb;
+  --ui-color-secondary-400: #45dec5;
+  --ui-color-secondary-500: #12a594;
+  --ui-color-secondary-600: #0d8c7d;
+  --ui-color-secondary-700: #067a6e;
+  --ui-color-secondary-800: #073c34;
+  --ui-color-secondary-900: #052924;
+  --ui-color-secondary-950: #04201c;
 }
 
 :root,
@@ -100,6 +174,13 @@
   --ui-container: 1200px; /* Geist content column width */
 
   --ui-primary: var(--ui-color-primary-500);
+
+  /* Functional roles — light picks the solid-fill 500 step (= Geist 700). */
+  --ui-secondary: var(--ui-color-secondary-500);
+  --ui-success: var(--ui-color-success-500);
+  --ui-info: var(--ui-color-info-500);
+  --ui-warning: var(--ui-color-warning-500);
+  --ui-error: var(--ui-color-error-500);
 
   /*
    * Neutral gray — exact Geist LIGHT `--ds-gray` scale (hue 0, sat 0: truly
@@ -133,6 +214,14 @@
 
 .dark {
   --ui-primary: var(--ui-color-primary-400);
+
+  /* Functional roles — dark uses the lighter 400 step for contrast on the
+     near-black surface (mirrors primary). */
+  --ui-secondary: var(--ui-color-secondary-400);
+  --ui-success: var(--ui-color-success-400);
+  --ui-info: var(--ui-color-info-400);
+  --ui-warning: var(--ui-color-warning-400);
+  --ui-error: var(--ui-color-error-400);
 
   /*
    * Neutral gray — exact Geist DARK `--ds-gray` scale. Root surface is Geist's
