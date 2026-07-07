@@ -98,6 +98,30 @@ git submodule update --init --recursive
 
 ---
 
+## 同步方向：仓库 → v0 记忆区（单向下游）
+
+本仓库（`Abel-Wang777/geist-nuxt`）与 v0 记忆区是**两套物理隔离的存储**，之间**没有自动同步**：
+
+- **GitHub 仓库** = 唯一真源，Claude / Codex 直接读它。
+- **v0 记忆区**（`user/skills/geist-nuxt` + `team/skills/geist-nuxt`）= 从仓库**单向同步**下来的下游镜像，只有 v0 能读写。
+
+**铁律：只在仓库改，v0 记忆区永远是下游，方向单一，绝不反向。**
+
+| 谁改的 | 传播路径 |
+|---|---|
+| Claude / Codex 改 | push 到仓库 → v0 拉取校对 → 写回记忆区 `user` + `team` |
+| v0（对话里）改 | 改 `assets/` 镜像 → push 到仓库 → 再同步进记忆区两份 |
+
+### 一次同步怎么做（在 v0 对话里触发）
+
+1. 让 v0「从 `Abel-Wang777/geist-nuxt` 同步最新到记忆区」。
+2. v0 用 `gh api` 拉全量文件 → 逐个 `sha256` 比对记忆区 → 只写回**有差异**的文件。
+3. v0 报告校对结果（哪些变了 / 哪些一致），确保三处（GitHub / user / team）对齐、不漂移。
+
+> 注：拉取含中文的文件请用 `-H "Accept: application/vnd.github.raw+json"`（`--jq '.content'` 对多字节 base64 不稳定）。
+
+---
+
 ## 起步
 
 新项目从 `assets/starter/` 起步——provider、全局样式、字体已接好，在其上加路由和组件即可。
