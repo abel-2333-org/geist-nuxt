@@ -41,8 +41,8 @@
   <section id="api-docs" class="space-y-8">
     <ApiEndpointHeader method="POST" path="/v1/deployments" description="创建一个新的部署。" />
     <ApiParamsTable :params="params" />
-    <ApiCodeSample :variants="requestSamples" />
-    <ApiResponseExample :scenarios="responseScenarios" />
+<ApiCodeSample :variants="requestSamples" />
+<ApiResponseExample :scenarios="responseScenarios" />
   </section>
 </template>
 ```
