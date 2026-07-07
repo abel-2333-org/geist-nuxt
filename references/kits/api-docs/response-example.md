@@ -2,7 +2,7 @@
 
 按**业务场景 + HTTP 状态**切换的响应示例（200 / 400 / 401 …），带彩色状态 badge，body + 语言 + 复制 + 换行委托给 `<ApiCodeSample>`。场景/状态选择器注入 `#controls`，状态 badge 注入 `#leading`。
 
-> 这是单一固定响应组件 `<ApiResponseBlock>` 的**多状态兄弟**：一个固定响应用 `ApiResponseBlock`；要交互切换场景/状态时用本组件。
+> 覆盖响应的所有形态：多场景/多状态交互切换，也包括**单一固定响应**——传单场景单状态时选择器自动隐藏，只剩状态 badge + body。
 > 文件名 `components/api/ResponseExample.vue`，自动导入名 `<ApiResponseExample>`。
 
 ## Props

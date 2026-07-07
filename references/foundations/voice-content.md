@@ -44,7 +44,7 @@
 
 ## 应用到 API 文档场景组件
 
-本 starter 面向 API 文档领域（`EndpointHeader`、`ParamsTable`、`CodeSample`、`ResponseBlock`），文案尤其要严谨：
+本 starter 面向 API 文档领域（`EndpointHeader`、`ParamsTable`、`CodeSample`、`RequestExample`、`ResponseExample`），文案尤其要严谨：
 
 - HTTP 方法、状态码、参数名用 **Mono**（`font-mono`），保持 tabular。
 - 参数说明用 sentence case，必填/可选用标签而非仅颜色（配合 `focus-a11y.md` 的"不要只用颜色"）。

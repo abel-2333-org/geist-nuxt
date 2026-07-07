@@ -19,8 +19,7 @@
 | `ParamsTable.vue` | `<ApiParamsTable>` | 参数表：名称 / 类型 / required / 说明 | `params-table.md` |
 | `CodeSample.vue` | `<ApiCodeSample>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
 | `RequestExample.vue` | `<ApiRequestExample>` | 按业务场景切换的请求示例（委托 CodeSample） | `request-example.md` |
-| `ResponseExample.vue` | `<ApiResponseExample>` | 按场景+状态切换的响应示例（委托 CodeSample） | `response-example.md` |
-| `ResponseBlock.vue` | `<ApiResponseBlock>` | 单一固定响应：状态码 badge + body（复用 CodeSample） | `response-block.md` |
+| `ResponseExample.vue` | `<ApiResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 CodeSample） | `response-example.md` |
 
 配套 composable：`composables/useCodeWrap.ts` —— 所有 CodeSample 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -43,7 +42,7 @@
     <ApiEndpointHeader method="POST" path="/v1/deployments" description="创建一个新的部署。" />
     <ApiParamsTable :params="params" />
     <ApiCodeSample :variants="requestSamples" />
-    <ApiResponseBlock :status="200" status-text="部署已创建。" :body="responseBody" language="json" />
+    <ApiResponseExample :scenarios="responseScenarios" />
   </section>
 </template>
 ```
@@ -54,7 +53,7 @@
 
 - CodeSample 的复制按钮：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；UTabs 键盘导航与 `aria-selected` 由 Reka UI 内置。
 - ParamsTable：`<th scope>` 关联表头；required 色 + 词双通道。
-- EndpointHeader / ResponseBlock：method / 状态码色 + 文本双通道，不单靠颜色传达含义。
+- EndpointHeader / ResponseExample：method / 状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 
 ## 为什么不用 @nuxt/content 走内容管线？
@@ -68,7 +67,6 @@
 - `assets/kits/api-docs/components/CodeSample.vue`
 - `assets/kits/api-docs/components/RequestExample.vue`
 - `assets/kits/api-docs/components/ResponseExample.vue`
-- `assets/kits/api-docs/components/ResponseBlock.vue`
 - `assets/kits/api-docs/composables/useCodeWrap.ts`
 - `assets/kits/api-docs/ApiDocsSection.vue` — 组合演示
 
@@ -76,5 +74,5 @@
 
 - 不引入 `@nuxt/content` / Shiki / SQLite 来渲染这些代码块——组件式自包含即可。
 - 新增领域组件前，按 `method/component-spec-template.md` 先写 anatomy → states → accessibility 规格。
-- prop 名严格对齐：CodeSample **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ResponseBlock 对外用 `body`；Request/ResponseExample 用 `scenarios`。
+- prop 名严格对齐：CodeSample **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；Request/ResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
 - CodeSample 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化。

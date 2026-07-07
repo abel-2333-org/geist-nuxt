@@ -49,8 +49,7 @@
 ## 相关组件
 
 - `<ApiRequestExample>` — 场景切换的请求示例（见 `request-example.md`）。
-- `<ApiResponseExample>` — 场景+状态切换的响应示例（见 `response-example.md`）。
-- `<ApiResponseBlock>` — 单一固定响应（见 `response-block.md`）。
+- `<ApiResponseExample>` — 响应示例（多场景/多状态切换，也覆盖单一固定响应；见 `response-example.md`）。
 
 ## 规格与源码
 

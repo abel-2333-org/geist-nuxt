@@ -5,9 +5,9 @@
 // <ApiCodeSample>. Scenario + status selects are injected into ApiCodeSample's
 // unified toolbar via #controls; the status badge goes into #leading.
 //
-// This is the multi-status sibling of the kit's single-response
-// <ApiResponseBlock>. Use ApiResponseBlock for one fixed response; use this
-// when the reader should switch scenarios/statuses interactively.
+// Handles both the multi-status case and the single fixed response: pass one
+// scenario with one status and the selects hide, leaving just the status badge
+// + body (delegated to <ApiCodeSample>).
 //
 // Anatomy:  <ApiCodeSample> + status badge (#leading) + scenario/status (#controls)
 // State:    active scenario, active status; language/copy/wrap in ApiCodeSample.

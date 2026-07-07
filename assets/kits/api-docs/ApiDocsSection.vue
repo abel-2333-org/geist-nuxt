@@ -44,14 +44,31 @@ deployment = res.json()`,
   },
 ]
 
-const responseBody = `{
+const responseScenarios = [
+  {
+    id: 'created',
+    label: '创建部署',
+    statuses: [
+      {
+        status: 200,
+        statusText: '部署已创建。',
+        variants: [
+          {
+            language: 'json',
+            code: `{
   "id": "dpl_8Kx2fQ",
   "name": "my-app",
   "target": "production",
   "state": "READY",
   "url": "https://my-app.example.app",
   "createdAt": 1720000000000
-}`
+}`,
+          },
+        ],
+      },
+    ],
+  },
+]
 </script>
 
 <template>
@@ -63,7 +80,7 @@ const responseBody = `{
         <code class="font-mono text-[0.8125rem]">EndpointHeader</code>、
         <code class="font-mono text-[0.8125rem]">ParamsTable</code>、
         <code class="font-mono text-[0.8125rem]">CodeSample</code>、
-        <code class="font-mono text-[0.8125rem]">ResponseBlock</code>，
+        <code class="font-mono text-[0.8125rem]">ResponseExample</code>，
         全部基于 Nuxt UI 原语与 Geist token，自包含、无内容管线依赖。
       </p>
     </div>
@@ -87,7 +104,7 @@ const responseBody = `{
 
       <div>
         <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
-        <ApiResponseBlock :status="200" status-text="部署已创建。" :body="responseBody" language="json" />
+        <ApiResponseExample :scenarios="responseScenarios" />
       </div>
     </div>
   </section>
