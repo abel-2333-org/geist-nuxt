@@ -38,8 +38,7 @@ const color = computed<'success' | 'info' | 'warning' | 'error' | 'neutral'>(() 
       <span v-if="statusText" class="text-sm text-muted">{{ statusText }}</span>
     </div>
     <ApiCodeSample
-      :code="body"
-      :language="language ?? 'json'"
+      :variants="[{ language: language ?? 'json', code: body }]"
       :title="title ?? 'response.json'"
     />
   </div>

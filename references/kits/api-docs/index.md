@@ -17,16 +17,21 @@
 |---|---|---|---|
 | `EndpointHeader.vue` | `<ApiEndpointHeader>` | HTTP method badge + 端点路径 + 描述 | `endpoint-header.md` |
 | `ParamsTable.vue` | `<ApiParamsTable>` | 参数表：名称 / 类型 / required / 说明 | `params-table.md` |
-| `CodeSample.vue` | `<ApiCodeSample>` | 自包含多语言代码块（UTabs + 复制） | `code-sample.md` |
-| `ResponseBlock.vue` | `<ApiResponseBlock>` | 状态码 badge + 响应 body（复用 CodeSample） | `response-block.md` |
+| `CodeSample.vue` | `<ApiCodeSample>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
+| `RequestExample.vue` | `<ApiRequestExample>` | 按业务场景切换的请求示例（委托 CodeSample） | `request-example.md` |
+| `ResponseExample.vue` | `<ApiResponseExample>` | 按场景+状态切换的响应示例（委托 CodeSample） | `response-example.md` |
+| `ResponseBlock.vue` | `<ApiResponseBlock>` | 单一固定响应：状态码 badge + body（复用 CodeSample） | `response-block.md` |
+
+配套 composable：`composables/useCodeWrap.ts` —— 所有 CodeSample 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
 ## 如何装入项目
 
 组件源码在 `assets/kits/api-docs/`（不在通用基座里）。装入方式：
 
 1. 把 `assets/kits/api-docs/components/*.vue` 复制到项目的 `app/components/api/`。
-2. 如需组合演示，一并复制 `assets/kits/api-docs/ApiDocsSection.vue` 到 `app/components/sections/`。
-3. 无需额外依赖——这些组件只用 `@nuxt/ui` 原语，通用基座已具备。
+2. 把 `assets/kits/api-docs/composables/useCodeWrap.ts` 复制到项目的 `app/composables/`（`CodeSample` / `RequestExample` / `ResponseExample` 都依赖它）。
+3. 如需组合演示，一并复制 `assets/kits/api-docs/ApiDocsSection.vue` 到 `app/components/sections/`。
+4. 无需额外依赖——这些组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable，通用基座已具备。**不要**装 Shiki / `@nuxt/content`。
 
 > **自动导入前缀**：`app/components/api/` 下的组件，自动导入名带 `Api` 前缀（`api/CodeSample.vue` → `<ApiCodeSample>`）。在模板里用短名 `<CodeSample>` 会静默解析为空。
 
@@ -61,11 +66,15 @@
 - `assets/kits/api-docs/components/EndpointHeader.vue`
 - `assets/kits/api-docs/components/ParamsTable.vue`
 - `assets/kits/api-docs/components/CodeSample.vue`
+- `assets/kits/api-docs/components/RequestExample.vue`
+- `assets/kits/api-docs/components/ResponseExample.vue`
 - `assets/kits/api-docs/components/ResponseBlock.vue`
+- `assets/kits/api-docs/composables/useCodeWrap.ts`
 - `assets/kits/api-docs/ApiDocsSection.vue` — 组合演示
 
 ## 不要臆造
 
 - 不引入 `@nuxt/content` / Shiki / SQLite 来渲染这些代码块——组件式自包含即可。
 - 新增领域组件前，按 `method/component-spec-template.md` 先写 anatomy → states → accessibility 规格。
-- prop 名严格对齐（`variants` 而非 `samples`；ResponseBlock 用 `body` 而非 `code`）。
+- prop 名严格对齐：CodeSample **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ResponseBlock 对外用 `body`；Request/ResponseExample 用 `scenarios`。
+- CodeSample 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化。
