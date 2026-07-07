@@ -127,18 +127,18 @@
   --ui-color-info-900: #001b38;
   --ui-color-info-950: #001429;
 
-  /* warning — Geist amber */
-  --ui-color-warning-50: #fff6e5;
-  --ui-color-warning-100: #fff4d6;
-  --ui-color-warning-200: #fef0cd;
-  --ui-color-warning-300: #ffdd8f;
-  --ui-color-warning-400: #f5b047;
-  --ui-color-warning-500: #ffb224;
-  --ui-color-warning-600: #ff990a;
-  --ui-color-warning-700: #a35200;
-  --ui-color-warning-800: #4e2009;
-  --ui-color-warning-900: #371706;
-  --ui-color-warning-950: #291105;
+  /* warning — custom amber scale */
+  --ui-color-warning-50: #fff8e1;
+  --ui-color-warning-100: #fef0c7;
+  --ui-color-warning-200: #fde29a;
+  --ui-color-warning-300: #fbd16b;
+  --ui-color-warning-400: #f4b740;
+  --ui-color-warning-500: #e99b18;
+  --ui-color-warning-600: #c97807;
+  --ui-color-warning-700: #9d5705;
+  --ui-color-warning-800: #7b4207;
+  --ui-color-warning-900: #64350b;
+  --ui-color-warning-950: #3a1b03;
 
   /* error — Geist red */
   --ui-color-error-50: #fff0f0;
