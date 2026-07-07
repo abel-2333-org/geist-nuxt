@@ -24,7 +24,11 @@ geist-nuxt 基座（starter）是一个**纯 UI 基座**——只含 `@nuxt/ui` 
 
 ## i18n 接线
 
-**原则（已在 `foundations/conventions.md` 固化）**：kit 组件与自建组件都保持**文案无关**——文本通过 props/slot 传入，不在组件里写死字符串。i18n 是**消费项目**的职责，基座不含。
+**原则（已在 `foundations/conventions.md` 固化）**：区分两类文字——
+- **用户内容**（端点说明、参数描述、请求/响应体）→ 永远 props/slot 传入，组件不内置。
+- **结构性标签**（`Request`/`Response`、区块标题、复制提示等组件骨架文字）→ 组件**内置合理默认值 + 暴露 label prop 可覆盖**，对齐 Nuxt UI 自身的 locale 模型（它对 `alert.close`、`table.noData` 等就是内置默认 + 可覆盖）。
+
+i18n 是**消费项目**的职责，基座不含。单语言项目直接用默认标签、零负担；多语言项目通过覆盖注入 `$t(...)`。
 
 在项目里接 `@nuxtjs/i18n` 的典型做法：
 
@@ -42,11 +46,14 @@ const { t } = useI18n()
     method="POST"
     path="/v1/deployments"
     :description="t('api.deployments.create.desc')"
+    :request-label="t('api.labels.request')"
+    :response-label="t('api.labels.response')"
   />
 </template>
 ```
 
-- kit 组件（`ApiEndpointHeader` 等）**不感知** i18n——它只渲染传入的 `description`。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
+- **用户内容**（`description`）与**结构标签**（`request-label`/`response-label`）都从外部传入 `t(...)`。区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。
+- kit 组件（`ApiEndpointHeader` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `ApiCodeSample` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
@@ -76,5 +83,5 @@ const { data } = await useAsyncData('endpoint', () =>
 ## 不要臆造
 
 - 不要把领域模块（i18n / content / sitemap …）加进 **starter**——它们属消费项目，基座保持纯 UI。
-- 不要为了让 kit 组件「支持多语言」而在组件里塞 `useI18n()` / 硬编码字符串——文案一律从外部传入。
+- 不要为了让 kit 组件「支持多语言」而在组件里塞 `useI18n()`——组件对 i18n 无感知。用户内容从外部传入；结构标签用「内置默认值 + label prop 覆盖」，不要写死到无法覆盖，也不要强制每次都传。
 - 模块版本以各自官方文档为准，不要臆造配置项。
