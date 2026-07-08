@@ -1,24 +1,25 @@
 <script setup lang="ts">
-// Domain component (API docs) — a self-contained, multi-language code sample.
+// Domain component (API docs) — a self-contained, multi-language code block.
 //
 // This is NOT a Markdown code fence or a ProsePre. It renders structured
 // samples that come from an API spec. Per the Geist code aesthetic it is
 // deliberately near-monochrome: NO syntax highlighter, NO content pipeline —
 // just a calm `<pre><code>` on the Geist code surface. The component owns UI,
-// interaction (language switch, copy, wrap), responsive layout, and a11y.
+// interaction (language switch, wrap), responsive layout, and a11y; copy is
+// delegated to the shared <CopyButton>.
 //
-// Composed only from Nuxt UI primitives (USelect, UButton, UIcon) + Geist
-// semantic tokens. It is the reusable base that ApiRequestExample and
-// ApiResponseExample delegate their body to.
+// Composed only from Nuxt UI primitives (USelect, UButton, UIcon) + CopyButton
+// + Geist semantic tokens. It is the reusable base that RequestExample and
+// ResponseExample delegate their body to.
 //
 // Anatomy:  header/toolbar
 //             ├─ left:  icon · title · #leading slot (e.g. status badge)
 //             └─ right: #controls slot (scenario/status) · language · wrap · copy
 //           body: scrollable, max-height near-mono code surface
-// States:   active language, copied (transient, no layout shift), wrap on/off,
-//           empty / unavailable.
-// A11y:     icon buttons carry dynamic aria-labels; copy result is announced in
-//           a polite live region; selects are labelled; :focus-visible rings
+// States:   active language, wrap on/off, empty / unavailable. (Copied state
+//           lives in CopyButton.)
+// A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
+//           owned by CopyButton; selects are labelled; :focus-visible rings
 //           are preserved.
 
 export interface CodeVariant {
@@ -141,29 +142,9 @@ const languageItems = computed(() =>
 )
 
 /* ------------------------------------------------------------------ *
- * Word wrap (shared + persisted) and copy (transient, no layout shift)
+ * Word wrap (shared + persisted). Copy is delegated to <CopyButton>.
  * ------------------------------------------------------------------ */
 const wrap = useCodeWrap(props.defaultWrap)
-
-const copied = ref(false)
-let timer: ReturnType<typeof setTimeout> | undefined
-
-async function copy() {
-  const code = current.value?.code
-  if (!code) return
-  try {
-    await navigator.clipboard.writeText(code)
-    copied.value = true
-    if (timer) clearTimeout(timer)
-    timer = setTimeout(() => (copied.value = false), 1600)
-  } catch {
-    // Clipboard may be unavailable (e.g. insecure context); fail silently.
-  }
-}
-
-onBeforeUnmount(() => {
-  if (timer) clearTimeout(timer)
-})
 </script>
 
 <template>
@@ -224,16 +205,16 @@ onBeforeUnmount(() => {
           @click="wrap = !wrap"
         />
 
-        <!-- Copy -->
-        <UButton
+        <!-- Copy — shared CopyButton owns the clipboard logic, copied state,
+             toast, and polite announcement. Matches the toolbar's `xs` ghost
+             controls; no tooltip here since the sibling buttons don't use one. -->
+        <CopyButton
           v-if="hasContent"
-          :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
-          :color="copied ? 'success' : 'neutral'"
-          variant="ghost"
+          :value="current?.code ?? ''"
+          toast-label="Code"
+          :label="t.copy"
+          :copied-label="t.copied"
           size="xs"
-          class="shrink-0"
-          :aria-label="copied ? t.copied : t.copy"
-          @click="copy"
         />
       </div>
     </div>
@@ -257,11 +238,6 @@ onBeforeUnmount(() => {
       <p class="text-sm font-medium text-highlighted">{{ t.emptyTitle }}</p>
       <p class="max-w-xs text-sm text-muted">{{ t.emptyHint }}</p>
     </div>
-
-    <!-- Polite announcement for copy result -->
-    <span role="status" aria-live="polite" class="sr-only">
-      {{ copied ? t.copied : '' }}
-    </span>
   </section>
 </template>
 

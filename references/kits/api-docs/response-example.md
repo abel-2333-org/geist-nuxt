@@ -1,9 +1,9 @@
-# ResponseExample `<ApiResponseExample>`
+# ResponseExample `<ResponseExample>`
 
-按**业务场景 + HTTP 状态**切换的响应示例（200 / 400 / 401 …），带彩色状态 badge，body + 语言 + 复制 + 换行委托给 `<ApiCodeSample>`。场景/状态选择器注入 `#controls`，状态 badge 注入 `#leading`。
+按**业务场景 + HTTP 状态**切换的响应示例（200 / 400 / 401 …），带彩色状态 badge，body + 语言 + 复制 + 换行委托给 `<CodeBlock>`。场景/状态选择器注入 `#controls`，状态 badge 注入 `#leading`。
 
 > 覆盖响应的所有形态：多场景/多状态交互切换，也包括**单一固定响应**——传单场景单状态时选择器自动隐藏，只剩状态 badge + body。
-> 文件名 `components/api/ResponseExample.vue`，自动导入名 `<ApiResponseExample>`。
+> 文件名 `components/api/ResponseExample.vue`。starter 默认 `pathPrefix: false`，模板名 `<ResponseExample>`。
 
 ## Props
 
@@ -11,7 +11,7 @@
 |---|---|---|
 | `scenarios` | `ResponseScenario[]` | 场景列表，每个含一到多个状态 |
 | `title` | `string` | 覆盖标题（默认 `labels.title` / `'Response'`） |
-| `defaultWrap` / `maxHeight` / `languageLabels` | — | 传给 CodeSample |
+| `defaultWrap` / `maxHeight` / `languageLabels` | — | 传给 CodeBlock |
 | `labels` | `ApiResponseLabels` | `ApiCodeLabels` + `title` + `scenario` + `status` |
 
 ```ts
@@ -27,7 +27,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 ## 用法
 
 ```vue
-<ApiResponseExample :scenarios="[
+<ResponseExample :scenarios="[
   { id: 'checkout', label: '收银台支付', statuses: [
     { status: 200, statusText: 'OK', variants: [{ language: 'json', code: '{ ... }' }] },
     { status: 400, statusText: 'Bad Request', variants: [{ language: 'json', code: '{ ... }' }] },
@@ -37,4 +37,4 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## 源码
 
-- `assets/kits/api-docs/components/ResponseExample.vue`（依赖 `CodeSample.vue` + `composables/useCodeWrap.ts`）。
+- `assets/kits/api-docs/components/ResponseExample.vue`（依赖 `CodeBlock.vue` + `composables/useCodeWrap.ts`）。

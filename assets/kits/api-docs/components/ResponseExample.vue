@@ -2,19 +2,19 @@
 // Domain component (API docs) — an interactive RESPONSE example that switches
 // between business scenarios AND HTTP statuses (200 / 400 / 401 …), showing a
 // color-coded status badge, and delegates the body + language + copy + wrap to
-// <ApiCodeSample>. Scenario + status selects are injected into ApiCodeSample's
+// <CodeBlock>. Scenario + status selects are injected into CodeBlock's
 // unified toolbar via #controls; the status badge goes into #leading.
 //
 // Handles both the multi-status case and the single fixed response: pass one
 // scenario with one status and the selects hide, leaving just the status badge
-// + body (delegated to <ApiCodeSample>).
+// + body (delegated to <CodeBlock>).
 //
-// Anatomy:  <ApiCodeSample> + status badge (#leading) + scenario/status (#controls)
-// State:    active scenario, active status; language/copy/wrap in ApiCodeSample.
+// Anatomy:  <CodeBlock> + status badge (#leading) + scenario/status (#controls)
+// State:    active scenario, active status; language/copy/wrap in CodeBlock.
 // A11y:     status uses a numeric badge (text + color, never color alone);
 //           selects are labelled; the rest is inherited.
 
-import type { CodeVariant, ApiCodeLabels } from './CodeSample.vue'
+import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
 
 export interface ResponseStatus {
   /** Numeric HTTP status, e.g. 200 | 400 | 401. */
@@ -34,7 +34,7 @@ export interface ResponseScenario {
   statuses: ResponseStatus[]
 }
 
-/** Adds response-level chrome copy on top of ApiCodeSample's labels. */
+/** Adds response-level chrome copy on top of CodeBlock's labels. */
 export interface ApiResponseLabels extends ApiCodeLabels {
   title?: string
   scenario?: string
@@ -115,7 +115,7 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
 </script>
 
 <template>
-  <ApiCodeSample
+  <CodeBlock
     :variants="currentStatus?.variants ?? []"
     :title="title ?? t.title"
     icon="i-lucide-file-json-2"
@@ -163,5 +163,5 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
         :ui="{ content: 'min-w-fit' }"
       />
     </template>
-  </ApiCodeSample>
+  </CodeBlock>
 </template>

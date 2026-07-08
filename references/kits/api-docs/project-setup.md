@@ -42,7 +42,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <ApiResponseExample
+  <ResponseExample
     :scenarios="scenarios"
     :request-label="t('api.labels.request')"
     :response-label="t('api.labels.response')"
@@ -51,8 +51,8 @@ const { t } = useI18n()
 ```
 
 - **用户内容**（`scenarios` 里的说明、响应体）与**结构标签**（`request-label`/`response-label`）区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。
-- kit 组件（`ApiResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
-- 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `ApiCodeSample` 的 `variants`。
+- kit 组件（`ResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
+- 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
 ## @nuxt/content 取舍
@@ -61,7 +61,7 @@ kit 的 `index.md` 记录过：**starter 刻意不内置 `@nuxt/content`**——
 
 这条**针对的是 starter 的可靠性**，不是禁止在真实项目里用 content。二者调和如下：
 
-- **kit 组件是「内容管线无关」的**：`ApiCodeSample`、`ApiResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
+- **kit 组件是「内容管线无关」的**：`CodeBlock`、`ResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。starter 不内置 content 只是分发可靠性考量，真实项目可自行引入。
 
@@ -74,7 +74,7 @@ const { data } = await useAsyncData('endpoint', () =>
 </script>
 
 <template>
-  <ApiCodeSample :variants="data?.requestSamples ?? []" />
+  <CodeBlock :variants="data?.requestSamples ?? []" />
 </template>
 ```
 

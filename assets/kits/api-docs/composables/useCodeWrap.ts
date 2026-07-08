@@ -1,7 +1,7 @@
 /**
  * Shared, persisted line-wrap state for API code blocks.
  *
- * Every ApiCodeSample on a page shares ONE value (same `useState` key), so
+ * Every CodeBlock on a page shares ONE value (same `useState` key), so
  * toggling wrap on any block flips them all together. The choice is remembered
  * across visits via a cookie (SSR-safe — no localStorage). `defaultWrap` only
  * seeds the very first initialization; later callers inherit the shared value.

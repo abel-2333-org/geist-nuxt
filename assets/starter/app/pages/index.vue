@@ -6,10 +6,10 @@
   <div class="min-h-screen bg-default text-default antialiased">
     <AppHeader />
     <main>
-      <SectionsHeroSection />
+      <HeroSection />
       <UContainer class="py-16 sm:py-24 space-y-24">
-        <SectionsFoundationsSection />
-        <SectionsComponentsSection />
+        <FoundationsSection />
+        <ComponentsSection />
       </UContainer>
     </main>
     <footer class="border-t border-default">

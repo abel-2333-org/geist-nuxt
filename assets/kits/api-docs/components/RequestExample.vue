@@ -2,15 +2,15 @@
 // Domain component (API docs) — an interactive REQUEST example that switches
 // between business scenarios (e.g. 收银台支付 / 预授权支付 / 跳转支付) and
 // delegates the actual code body + language switch + copy + wrap to
-// <ApiCodeSample>. This wrapper owns ONLY scenario selection; it injects the
-// scenario <USelect> into ApiCodeSample's unified toolbar via #controls, so
+// <CodeBlock>. This wrapper owns ONLY scenario selection; it injects the
+// scenario <USelect> into CodeBlock's unified toolbar via #controls, so
 // everything stays on one aligned row.
 //
-// Anatomy:  <ApiCodeSample> with a scenario select injected into its toolbar
-// State:    active scenario; language/copy/wrap live in ApiCodeSample.
+// Anatomy:  <CodeBlock> with a scenario select injected into its toolbar
+// State:    active scenario; language/copy/wrap live in CodeBlock.
 // A11y:     scenario select is labelled; the rest is inherited.
 
-import type { CodeVariant, ApiCodeLabels } from './CodeSample.vue'
+import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
 
 export interface RequestScenario {
   /** Stable id for selection. */
@@ -21,7 +21,7 @@ export interface RequestScenario {
   variants: CodeVariant[]
 }
 
-/** Adds request-level chrome copy on top of ApiCodeSample's labels. */
+/** Adds request-level chrome copy on top of CodeBlock's labels. */
 export interface ApiRequestLabels extends ApiCodeLabels {
   title?: string
   scenario?: string
@@ -71,7 +71,7 @@ const scenarioItems = computed(() =>
 </script>
 
 <template>
-  <ApiCodeSample
+  <CodeBlock
     :variants="current?.variants ?? []"
     :title="title ?? t.title"
     :default-wrap="defaultWrap"
@@ -92,5 +92,5 @@ const scenarioItems = computed(() =>
         :ui="{ content: 'min-w-fit' }"
       />
     </template>
-  </ApiCodeSample>
+  </CodeBlock>
 </template>

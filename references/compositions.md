@@ -14,7 +14,7 @@
   <div class="min-h-screen flex flex-col">
     <AppHeader />                          <!-- 粘顶导航 + 主题切换 -->
     <main class="flex-1">
-      <SectionsHeroSection />
+      <HeroSection />
       <UContainer class="py-14 sm:py-20 space-y-20">
         <!-- 各内容区块 -->
       </UContainer>
