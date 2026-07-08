@@ -76,7 +76,9 @@
 1. 两栏自然高度之和 ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
 2. 溢出时（和 > 可用高度）→ 总高封顶为可用高度，按比例分，且**较短的一栏封顶到自然高度、把富余让给溢出的另一栏**；此时横向把手激活，拖动调比例。
 
-实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高，无反馈环）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**始终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**始终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+
+  - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟，不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观察了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高度→同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，且重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
 
 ## 如何装入项目
 

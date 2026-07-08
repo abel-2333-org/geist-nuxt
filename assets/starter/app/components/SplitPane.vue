@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import { toValue } from 'vue'
-import { useElementSize } from '@vueuse/core'
+import { useResizeObserver } from '@vueuse/core'
 
 // Self-contained, declarative two-pane split — the reusable layout primitive on
 // top of `useSplitPane` (drag state + persistence) and `<SplitPaneHandle>` (the
@@ -40,8 +40,10 @@ const props = withDefaults(
     /** `fixed` = one pane holds a fixed px size (draggable), the other flexes.
      *  `ratio` = both panes share space proportionally (0..1 split point). */
     mode?: Mode
-    /** Cookie + useState key for persistence. Omit for an ephemeral, unsaved
-     *  split (a stable per-instance key is generated). */
+    /** Cookie + useState key for persistence. Pass a stable string to persist
+     *  the split across reloads/instances. Omit it and a per-instance key is
+     *  generated with `useId()` — still persisted, but scoped to this
+     *  component position (not shared), which resets if the tree changes. */
     storageKey?: string
     /** First-visit size — px for `fixed`, a 0..1 fraction for `ratio`. */
     defaultSize?: number
@@ -98,10 +100,27 @@ onMounted(() => {
 })
 onBeforeUnmount(() => mql?.removeEventListener('change', onBp))
 
-/* --- container measurement (for ratio scale + fixed max clamp) -------- */
+/* --- container measurement (for ratio scale + fixed max clamp) -------- *
+ * We only need the container's MAIN-axis size. Crucially, the reactive write
+ * is deferred to rAF rather than done synchronously inside the RO callback:
+ * clamping `size` changes the panes' flex-basis, which resizes the code cards,
+ * which the page's own content-priority ResizeObserver reacts to — writing
+ * heights that shift layout again. Doing our write inside the callback closes
+ * that loop within a single delivery cycle and the browser throws
+ * "ResizeObserver loop completed with undelivered notifications". Deferring to
+ * the next frame breaks the synchronous chain. */
 const containerRef = ref<HTMLElement>()
-const { width, height } = useElementSize(containerRef)
-const mainSize = computed(() => Math.round(props.direction === 'row' ? width.value : height.value))
+const mainSize = ref(0)
+let measureRaf = 0
+useResizeObserver(containerRef, (entries) => {
+  const box = entries[0]?.contentRect
+  if (!box) return
+  cancelAnimationFrame(measureRaf)
+  measureRaf = requestAnimationFrame(() => {
+    mainSize.value = Math.round(props.direction === 'row' ? box.width : box.height)
+  })
+})
+onBeforeUnmount(() => cancelAnimationFrame(measureRaf))
 
 const isRatio = computed(() => props.mode === 'ratio')
 
@@ -143,7 +162,7 @@ const endStyle = computed<CSSProperties>(() => {
   return props.fixedPane === 'end' ? { flex: `0 0 ${size.value}px` } : { flex: '1 1 0' }
 })
 
-  const stickyRow = computed(() => enabled.value && props.sticky && props.direction === 'row')
+const stickyRow = computed(() => enabled.value && props.sticky && props.direction === 'row')
 const handleStyle = computed<CSSProperties>(() => {
   if (!enabled.value) return {}
   if (stickyRow.value) {
