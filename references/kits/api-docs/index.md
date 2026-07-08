@@ -29,6 +29,8 @@
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
+> **行内富文本：委托 Prose 组件，别手写 `<a>` / `<code>`**。spec 作者的字段描述里会带 `` `code` `` 和 `[label](url)`，用一个极小的 `ProseText`（把字符串切成 token）分派：行内代码交给 `InlineCode`（→ Nuxt UI `ProseCode`），链接交给 **`ProseA`（→ `ULink`）**。关键在链接——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 会自动判断内/外链，站内链接走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`。消费方只需为外链显式传 `target="_blank"`。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+
 ### 可拖动分栏（通用基座，非本 kit 独有）
 
 典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
