@@ -29,6 +29,20 @@
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
+### 可拖动分栏（通用基座，非本 kit 独有）
+
+典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。要让这两条边界可拖动，用通用基座里的两个原语（在 starter，不在 kit 里）：
+
+- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸（`bg-accented`，hover/drag 转 `bg-primary`），`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高钉住）。
+- `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。命名刻意避开 `useResizable`（Nuxt UI 已有同名自动导入 composable，会被遮蔽）。
+
+**内容优先重分配（避免内容少时留空）**：不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
+
+1. 两栏自然高度之和 ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
+2. 溢出时（和 > 可用高度）→ 总高封顶为可用高度，按比例分，且**较短的一栏封顶到自然高度、把富余让给溢出的另一栏**；此时横向把手激活，拖动调比例。
+
+实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高，无反馈环）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**始终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+
 ## 如何装入项目
 
 组件源码在 `assets/kits/api-docs/`（不在通用基座里）。装入方式：
@@ -72,6 +86,7 @@
 - `assets/kits/api-docs/composables/useCodeWrap.ts`
 - `assets/kits/api-docs/ApiDocsSection.vue` — 组合演示
 - 基座依赖：`assets/starter/app/components/CopyButton.vue`、`assets/starter/app/composables/useCopy.ts`
+- 可拖动分栏（基座）：`assets/starter/app/components/SplitPaneHandle.vue`、`assets/starter/app/composables/useSplitPane.ts`
 
 ## 不要臆造
 

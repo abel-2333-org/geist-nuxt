@@ -69,6 +69,8 @@ geist-nuxt 的组件全部来自 Nuxt UI v4（公共包 `@nuxt/ui`，共 122 个
 
 > 需求不在上表时，先查官方组件目录（https://ui.nuxt.com/components）再自建——122 个组件覆盖面很广，优先复用。
 
+> **可拖动分栏（左右 / 上下 resizable split）**：Nuxt UI 只有横向 %-based 的 `useResizable`（服务于 Dashboard 侧栏），没有通用的双轴分隔原语。要做「可拖动的两栏 / 上下分栏」用 starter 基座里的 `<SplitPaneHandle>`（把手，纯展示+a11y）+ `useSplitPane`（轴无关拖动状态 + cookie 持久化 + `computeSplitBudgets` 内容优先重分配）。详见 `kits/api-docs/index.md` 的「可拖动分栏」一节。
+
 ## 通用惯例
 
 - **变体（variant）**表达强弱：`solid`（强调）、`soft`/`subtle`、`outline`、`ghost`（安静）、`link`。
