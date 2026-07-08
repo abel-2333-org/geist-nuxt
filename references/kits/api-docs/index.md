@@ -31,11 +31,45 @@
 
 ### 可拖动分栏（通用基座，非本 kit 独有）
 
-典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。要让这两条边界可拖动，用通用基座里的两个原语（在 starter，不在 kit 里）：
+典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
+
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+
+  ```vue
+  <SplitPane
+    direction="row"          <!-- row=左右(竖分隔) / column=上下(横分隔) -->
+    mode="fixed"             <!-- fixed=一侧固定px可拖 / ratio=按比例分 -->
+    fixed-pane="end"         <!-- 哪一侧持有固定尺寸 -->
+    sticky sticky-top="5rem" <!-- 把手钉成视口高长条(仅 row)，配合 sticky 内容栏 -->
+    storage-key="geist-api-rail-width"
+    :default-size="460" :min-size="360" :max-size="720" :min-opposite="360"
+    label="Resize documentation and code panels"
+  >
+    <template #start> 左侧文档/指南正文 </template>
+    <template #end> 右侧代码栏 </template>
+  </SplitPane>
+  ```
+
+  **MDC / Nuxt Content 友好**：所有 prop 都是 `string|number|boolean` 字面量（不传函数、不传 computed ref），slot 名为 `start`/`end`，所以同一个组件在 `.vue` 页面和 markdown `::split-pane` 块里用法完全一致——将来装 `@nuxt/content` 做 guide 页零改造：
+
+  ```md
+  ::split-pane{direction="row" mode="fixed" fixed-pane="end" :default-size="460"}
+  #start
+  接入指南正文（**可直接写 markdown**）
+  #end
+  右侧代码示例
+  ::
+  ```
+
+  设计边界：`SplitPane` 只管**空间分割 + 拖动**。它不知道 slot 里是什么，所以「左 Tab 切换 → 右代码联动」这类内容协调由页面持有 `activeTab`、两个 slot 各自读它来做，`SplitPane` 无需参与。**内容优先重分配（见下）刻意不折进 `SplitPane`**——那与代码卡片的封顶+滚动强耦合，属 api-docs 页专属，留在页面里，`SplitPane` 保持纯净通用。
+
+  以下两个是 `SplitPane` 的**内部零件**，需要脱离容器单独用（比如手写更特殊的布局）时才直接碰：
 
 - `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高钉住）。
   - **坑**：`group-hover:` 在 Tailwind v4 会被包进 `@media (hover:hover)`，所以 grip 的 hover 浮现只在有鼠标的设备上生效（触屏/无头浏览器 `hover:none` 不触发，属预期）；触屏与键盘用户靠 `active`（拖动中，非 hover 门控）和 `group-focus-visible`（非 hover 门控）两条路径拿到 grip，affordance 不会丢。别用 `transition-[opacity,background-color]` 这种带逗号的 arbitrary value——逗号会打断 Tailwind 的类名扫描、导致其后同一 `class` 里的工具类（含 `group-hover:*`）不被生成；用普通 `transition` 即可。
-- `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。命名刻意避开 `useResizable`（Nuxt UI 已有同名自动导入 composable，会被遮蔽）。
+- `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。
+
+  **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、`computeSplitBudgets`）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
 **内容优先重分配（避免内容少时留空）**：不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
@@ -87,7 +121,7 @@
 - `assets/kits/api-docs/composables/useCodeWrap.ts`
 - `assets/kits/api-docs/ApiDocsSection.vue` — 组合演示
 - 基座依赖：`assets/starter/app/components/CopyButton.vue`、`assets/starter/app/composables/useCopy.ts`
-- 可拖动分栏（基座）：`assets/starter/app/components/SplitPaneHandle.vue`、`assets/starter/app/composables/useSplitPane.ts`
+- 可拖动分栏（基座）：`assets/starter/app/components/SplitPane.vue`（首选入口）、`assets/starter/app/components/SplitPaneHandle.vue`、`assets/starter/app/composables/useSplitPane.ts`
 
 ## 不要臆造
 
