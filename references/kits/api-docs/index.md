@@ -29,7 +29,19 @@
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
-> **行内富文本：委托 Prose 组件，别手写 `<a>` / `<code>`**。spec 作者的字段描述里会带 `` `code` `` 和 `[label](url)`，用一个极小的 `ProseText`（把字符串切成 token）分派：行内代码交给 `InlineCode`（→ Nuxt UI `ProseCode`），链接交给 **`ProseA`（→ `ULink`）**。关键在链接——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 会自动判断内/外链，站内链接走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`。消费方只需为外链显式传 `target="_blank"`。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+> **行内富文本：`ProseText` 递归 tokenizer + 委托 Prose 组件，别手写 `<a>` / `<code>`**。spec 作者的字段描述里会带行内 markdown。`ProseText` 是一个**极小、同步、零依赖**的行内 tokenizer（`h()` 递归渲染，不是正则一次性 replace），把字符串切成 token 后分派到设计系统组件：
+>
+> | 标记 | 渲染为 |
+> |---|---|
+> | `` `code` `` | `InlineCode` → Nuxt UI `ProseCode`（内容**不再**二次解析） |
+> | `[label](url)` | **`ProseA` → `ULink`**（label 会递归解析） |
+> | `**bold**` | `ProseStrong` |
+> | `*em*` / `_em_` | `ProseEm` |
+> | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
+>
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+>
+> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
 ### 可拖动分栏（通用基座，非本 kit 独有）
 
