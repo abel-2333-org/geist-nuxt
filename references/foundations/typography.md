@@ -87,6 +87,7 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 - **字重克制**：最重到 `font-semibold`（600）。避免 `font-bold`/`font-black`——Geist 靠对比和留白而非粗字重制造层级。
 - **长文本加 `text-balance`（标题）/ `text-pretty`（正文）**：见 hero 里的 `<h1 text-balance>` 与 `<p text-pretty>`，改善换行观感。
 - **颜色走语义 token**：标题用 `text-highlighted`，正文用默认 `text-default`，次要文本用 `text-muted`/`text-toned`（见 `tokens.md`），不要写死颜色。
+- **中文（CJK）正文放宽行高**：汉字字面框更满，`leading-relaxed`（≈1.625）对拉丁文合适，但中文多行正文偏挤。中文段落用 `leading-[1.7]` 提升可读性；标题保持 `leading-tight`/`leading-[1.1]` 不变。若同一组件需中英对等（bilingual parity），以中文的更高行高为准排版，保证两种语言在各自宽度下都成立。
 
 ## 文本颜色语义（与排版配套）
 
