@@ -81,7 +81,7 @@ function onKeydown(e: KeyboardEvent) {
 <template>
   <div
     :role="disabled ? undefined : 'separator'"
-    :aria-orientation="orientation"
+    :aria-orientation="disabled ? undefined : orientation"
     :aria-label="disabled ? undefined : ariaLabel"
     :aria-valuenow="disabled ? undefined : ariaValueNow"
     :aria-valuemin="disabled ? undefined : ariaValueMin"
