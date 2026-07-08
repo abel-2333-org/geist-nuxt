@@ -25,7 +25,7 @@
 
 配套依赖（**已在通用基座 starter 里**，无需从 kit 复制）：
 - `components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
-- `composables/useCopy.ts` —— 剪贴板逻辑单一来源（异步 Clipboard API + iframe/execCommand 兜底 + Geist voice toast）。
+- `composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。依赖 `@vueuse/core`（starter 已声明）。
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -37,7 +37,7 @@
 2. 把 `assets/kits/api-docs/composables/useCodeWrap.ts` 复制到项目的 `app/composables/`（`CodeBlock` / `RequestExample` / `ResponseExample` 都依赖它）。
 3. 确认 `CopyButton.vue` 与 `useCopy.ts` 在位——它们来自通用基座 starter（`app/components/CopyButton.vue`、`app/composables/useCopy.ts`），`CodeBlock` 的复制依赖它们。若项目不是从 starter 起的，从 `assets/starter/app/` 补齐这两份。
 4. 如需组合演示，一并复制 `assets/kits/api-docs/ApiDocsSection.vue` 到 `app/components/sections/`。
-5. 无需额外依赖——这些组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable，通用基座已具备。**不要**装 Shiki / `@nuxt/content`。
+5. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，而它已在 starter 的 `package.json` 里声明。**不要**装 Shiki / `@nuxt/content`。
 
 > **组件名不带前缀**：starter 默认 `pathPrefix: false`，所以 `app/components/api/CodeBlock.vue` 在模板里就是 `<CodeBlock>`。保持所有组件 basename 唯一，避免解析冲突。
 

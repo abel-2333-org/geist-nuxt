@@ -28,7 +28,7 @@
 - **换行状态共享+持久化**：所有 CodeBlock 共用 `useCodeWrap`（同一 `useState` key + cookie），切一个全联动，SSR 安全、无 localStorage。
 - **工具栏恒为单行**：左 icon·title·`#leading`（如状态 badge）；右 `#controls`（场景/状态选择器）·语言·换行·复制。标题优先截断，图标按钮不收缩。
 - **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；只有内容相关控件（语言/换行/复制）在无 code 时隐藏。
-- **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报，以及 iframe/insecure-context 的 execCommand 兜底 + toast。
+- **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报；`useCopy` 内部把写入交给 VueUse `useClipboard({ legacy: true })`，天然覆盖 iframe/insecure-context 的 execCommand 兜底 + toast。
 
 ## 用法
 
