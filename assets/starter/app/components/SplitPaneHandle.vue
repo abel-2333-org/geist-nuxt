@@ -112,14 +112,17 @@ function onKeydown(e: KeyboardEvent) {
         active ? 'border-primary' : 'border-default',
       ]"
     />
-    <!-- Grip pill (Tailwind 4px scale, rounded-full from --ui-radius family). -->
+    <!-- Grip pill (Tailwind 4px scale, rounded-full from --ui-radius family).
+         Hidden at rest; revealed on hover, while dragging (active), and on
+         keyboard focus (group-focus-visible) so keyboard users still see the
+         affordance. -->
     <span
       v-if="!disabled"
       aria-hidden="true"
-      class="relative rounded-full transition-colors duration-150 ease-out"
+      class="relative rounded-full opacity-0 transition duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
       :class="[
         orientation === 'vertical' ? 'h-6 w-1' : 'h-1 w-6',
-        active ? 'bg-primary' : 'bg-accented group-hover:bg-primary',
+        active ? 'bg-primary opacity-100' : 'bg-accented group-hover:bg-primary',
       ]"
     />
   </div>
