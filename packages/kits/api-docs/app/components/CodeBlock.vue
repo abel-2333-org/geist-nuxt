@@ -202,7 +202,7 @@ const wrap = useCodeWrap(props.defaultWrap)
           class="shrink-0"
           :aria-label="wrap ? t.wrapOff : t.wrapOn"
           :aria-pressed="wrap"
-          @click="wrap = !wrap"
+          @click="() => { wrap = !wrap }"
         />
 
         <!-- Copy — shared CopyButton owns the clipboard logic, copied state,
