@@ -1,0 +1,23 @@
+{
+  "name": "geist-nuxt",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "dev:gallery": "pnpm --filter @geist-nuxt/gallery dev",
+    "dev:starter": "pnpm --filter @geist-nuxt/starter dev"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.3.2",
+    "typescript": "~5.9.0",
+    "vue-tsc": "^3.3.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "vue-demi"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@geist-nuxt/core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./nuxt.config.ts",
+  "scripts": {
+    "prepare": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.116",
+    "@iconify-json/simple-icons": "^1.2.89",
+    "@nuxt/ui": "^4.9.0",
+    "@vueuse/core": "^14.3.0"
+  },
+  "devDependencies": {
+    "nuxt": "4.4.8",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  }
+}
