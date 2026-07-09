@@ -135,15 +135,69 @@
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
 - **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
 
-### 数据层 / 类型分层（review 沉淀）
+## 架构蓝图：spec 驱动的渲染栈（pattern，非 drop-in）
 
-当把这几个展示组件接到**真实数据源**（自定义 spec DSL、OpenAPI 等）而不只是演示数据时，下面几条是踩过坑后的定式。注意：**kit 只 ship 这 3 个自包含展示组件（类型内联在组件里），不 ship adapter 或 `types/*`**——以下是「整页接真实数据」时在项目侧的架构建议，不是把代码塞回 kit。
+> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit 的 `assets/` 只 ship 3 个**数据无关的展示积木**（CodeBlock / RequestExample / ResponseExample，类型内联、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、字段组件，是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
+>
+> **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永远比预建便宜，别过早建目录。
 
-- **类型分三层，依赖单向 `components → types ← adapter`**。① authoring 输入契约（spec/DSL 长什么样，如 `types/spec.ts`：`EndpointSpec` + 各 `Raw*` + `Localized`）——文档项目可直接 import 它给 `defineEndpointSpec` 做类型约束；② 领域输出类型（组件渲染 / adapter 产出，如 `types/reference.ts`：`FieldNode`、示例展示类型 `CodeVariant`/`RequestScenario`/`ResponseScenario` 等）；③ adapter 逻辑（`spec-adapter.ts`：只留转换函数 + `AdaptedSpec`）。**adapter 绝不 `import` 任何 `.vue`**——展示类型该下沉到 `types/`，让组件和 adapter 都从类型模块取，否则数据层反向依赖 UI 层，组件一改就断。
-- **组件间不互相借类型**。示例场景 / 变体类型放共享 `types/`，`RequestExample`/`ResponseExample`/`CodeBlock` 各自从 `types/reference` import，别从兄弟 `.vue` 里 import（那会织成组件互相依赖的网）。
-- **可空性用判别联合，让非法状态不可表达**。字段「值可空」建模成 `type Nullability = { nullable: false } | { nullable: true, when?: string }`，而不是 `value: { empty?, when? }` 这种把布尔和条件糊在一起的形状——后者能写出「不可空却带为空条件」的矛盾态。语义锁定为「字段结构上恒在、只是值可能为空」（CSV 列/JSON 键都适用），不要用它兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数的参数收窄到 `nullable: true` 分支，天然防错。
-- **examples 必须走 adapter，spec 是唯一数据源**。整体 request/response 示例（`request.examples` / `response.examples`）要在 adapter 里映射成 `scenarios` 喂给组件，**别在页面里硬编码场景常量**——踩过：页面用写死的假数据，改 spec 毫无反应，因为数据链路根本没接。spec 的单一 body 就按原样渲染成一个 `json` 变体，不要伪造 spec 里不存在的 curl/node/python 变体。
-- **字段锚点 id 用 slug 分段 + `.` 连接**。真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时，别直接拿 `name` 当 DOM id：会产生含空格的 id（`querySelector` 会崩）和与分隔符 `_` 撞车的歧义。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格、0 冲突、0 前缀歧义；`name` 只留作展示，保真原始拼写。
+### 分层总览（依赖方向图）
+
+```
+authoring 输入            适配                 领域输出              渲染
+  spec.ts        ──►   spec-adapter.ts   ──►   domain.ts     ◄──   components/
+ (Raw* + DSL)         (raw → resolved)      (FieldNode 等)        (reference/ + api/)
+
+依赖只指向 types，绝不反向：
+   components  ──►  domain.ts  ◄──  spec-adapter.ts
+                        ▲
+                        └── spec.ts（输入契约复用 domain 里的共享词汇枚举）
+```
+
+三条铁律：
+1. **adapter 绝不 `import` 任何 `.vue`**。展示类型（`CodeVariant`/`RequestScenario`/`ResponseScenario` 等）下沉到 `domain.ts`，组件与 adapter 都从类型模块取；否则数据层反向依赖 UI 层，组件一改就断。
+2. **组件间不互相借类型**。每个组件各自从 `~/types/domain` import，别从兄弟 `.vue` import（会织成互相依赖网）。
+3. **类型文件成对命名，输入 vs 输出**：`spec.ts`（作者写的 authoring 输入）↔ `domain.ts`（UI 渲染 / adapter 产出的领域模型）。不要用 `reference.ts` 这种混「域」与「层」的名字。
+
+### 层 1：authoring 输入契约（`types/spec.ts`）
+
+- 内容：`EndpointSpec` + 各 `Raw*`（`RawField`/`RawEnum`/`RawConstraint`/`RawExample`…）+ `Localized`。
+- 价值：文档项目 `import type { EndpointSpec }` 给 `defineEndpointSpec()` 做**类型约束**——spec 写错，authoring 时就报错，不用等运行。
+- 纯 type-only 模块，import 它不会拉进 adapter 的运行时逻辑。
+- **共享词汇枚举**（`FieldLifecycle`/`EndpointLifecycle`/`AuthRequirement`）放在 `domain.ts`、由 `spec.ts` 复用即可——它们输入输出同形（枚举是词汇表、Auth 是 passthrough），不值得为「纯粹」拆第三个文件。
+
+### 层 2：适配（`utils/spec-adapter.ts`）
+
+- 只留转换函数 + 产物类型 `AdaptedSpec`，输入从 `~/types/spec`、输出从 `~/types/domain` import。
+- **examples 必须走 adapter，spec 是唯一数据源**：`request.examples`/`response.examples` 在此映射成组件要的 `scenarios`，**别在页面硬编码场景常量**（踩过：页面用写死假数据，改 spec 毫无反应，因为链路根本没接）。spec 的单一 body 原样渲染成一个 `json` 变体，不伪造 spec 里不存在的 curl/node/python 变体。
+- i18n 收在这层：`loc()` 按 `LOCALE` 把 `Localized` 压成单语；切 `LOCALE='zh'` 全页转中文，组件无需改。
+
+### 层 3：领域输出 + 字段渲染（`types/domain.ts` + `components/reference/`）
+
+- `domain.ts`：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。
+- 字段组件清单（各自职责，实现看真源）：
+
+  | 组件 | 职责 |
+  |---|---|
+  | `OperationHeader` | 页面唯一 `<h1>` + method/path + 端点 lifecycle |
+  | `FieldGroup` | 字段分组容器，组标题是 `<h2>` |
+  | `FieldItem` | 单个字段行：名/类型/必填/nullability/约束/嵌套递归 |
+  | `EnumTable` | enum 值表（扁平 `flat` + 分组 `variants` 两种形态） |
+  | `ContractNote` | 字段下的约束/一致性提示（tone + label pill） |
+  | `ProseText` | 字段描述的行内 markdown tokenizer（见上文 ProseText 小节） |
+  | `InlineCode` | 结构性标识符的裸 code 样式 |
+  | `MethodBadge` / `StatusBadge` | HTTP method / 响应状态色标（色+文本双通道） |
+
+### 契约规则（跨层，务必遵守）
+
+- **可空性用判别联合，让非法状态不可表达**：`type Nullability = { nullable: false } | { nullable: true, when?: string }`，而非 `value: { empty?, when? }` 这种把布尔与条件糊在一起、能写出「不可空却带为空条件」的矛盾形状。语义锁定「字段结构上恒在、只是值可能为空」（CSV 列 / JSON 键都适用），不要兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数参数收窄到 `nullable: true` 分支，天然防错。
+- **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产生含空格 id 让 `querySelector` 崩、以及与分隔符 `_` 撞车的歧义）。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
+
+### 参考实现真源（copy & adapt，别 drop-in）
+
+具体实现不复制进 kit（会与项目漂移），去真源看最新版本，照着**重建**自己项目的 adapter/类型（spec 形状不同，本就该 adapt）：
+
+- `Abel-Wang777/geist-nuxt` 消费项目侧：`app/types/spec.ts`、`app/types/domain.ts`、`app/utils/spec-adapter.ts`、`app/components/reference/*.vue`、`app/composables/useFieldAnchor.ts`。
 
 ## 为什么不用 @nuxt/content 走内容管线？
 
