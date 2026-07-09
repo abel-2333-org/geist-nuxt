@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "dev": "pnpm --filter @geist-nuxt/gallery dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "dev:gallery": "pnpm --filter @geist-nuxt/gallery dev",
