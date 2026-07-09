@@ -135,6 +135,16 @@
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
 - **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
 
+### 数据层 / 类型分层（review 沉淀）
+
+当把这几个展示组件接到**真实数据源**（自定义 spec DSL、OpenAPI 等）而不只是演示数据时，下面几条是踩过坑后的定式。注意：**kit 只 ship 这 3 个自包含展示组件（类型内联在组件里），不 ship adapter 或 `types/*`**——以下是「整页接真实数据」时在项目侧的架构建议，不是把代码塞回 kit。
+
+- **类型分三层，依赖单向 `components → types ← adapter`**。① authoring 输入契约（spec/DSL 长什么样，如 `types/spec.ts`：`EndpointSpec` + 各 `Raw*` + `Localized`）——文档项目可直接 import 它给 `defineEndpointSpec` 做类型约束；② 领域输出类型（组件渲染 / adapter 产出，如 `types/reference.ts`：`FieldNode`、示例展示类型 `CodeVariant`/`RequestScenario`/`ResponseScenario` 等）；③ adapter 逻辑（`spec-adapter.ts`：只留转换函数 + `AdaptedSpec`）。**adapter 绝不 `import` 任何 `.vue`**——展示类型该下沉到 `types/`，让组件和 adapter 都从类型模块取，否则数据层反向依赖 UI 层，组件一改就断。
+- **组件间不互相借类型**。示例场景 / 变体类型放共享 `types/`，`RequestExample`/`ResponseExample`/`CodeBlock` 各自从 `types/reference` import，别从兄弟 `.vue` 里 import（那会织成组件互相依赖的网）。
+- **可空性用判别联合，让非法状态不可表达**。字段「值可空」建模成 `type Nullability = { nullable: false } | { nullable: true, when?: string }`，而不是 `value: { empty?, when? }` 这种把布尔和条件糊在一起的形状——后者能写出「不可空却带为空条件」的矛盾态。语义锁定为「字段结构上恒在、只是值可能为空」（CSV 列/JSON 键都适用），不要用它兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数的参数收窄到 `nullable: true` 分支，天然防错。
+- **examples 必须走 adapter，spec 是唯一数据源**。整体 request/response 示例（`request.examples` / `response.examples`）要在 adapter 里映射成 `scenarios` 喂给组件，**别在页面里硬编码场景常量**——踩过：页面用写死的假数据，改 spec 毫无反应，因为数据链路根本没接。spec 的单一 body 就按原样渲染成一个 `json` 变体，不要伪造 spec 里不存在的 curl/node/python 变体。
+- **字段锚点 id 用 slug 分段 + `.` 连接**。真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时，别直接拿 `name` 当 DOM id：会产生含空格的 id（`querySelector` 会崩）和与分隔符 `_` 撞车的歧义。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格、0 冲突、0 前缀歧义；`name` 只留作展示，保真原始拼写。
+
 ## 为什么不用 @nuxt/content 走内容管线？
 
 试过——content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在托管 dev server 上每次重启不能稳定 re-seed（`decompressSQLDump ... Received undefined` / `no such table`），导致页面时好时坏。对一个要被分发、套用到新对话的 starter 是不可接受的可靠性风险。且 brief 本就要求「用规格模板做领域组件」，组件式组合才是正解。
