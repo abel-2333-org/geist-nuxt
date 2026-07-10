@@ -10,6 +10,7 @@
       <UContainer class="py-16 sm:py-24 space-y-24">
         <FoundationsSection />
         <ComponentsSection />
+        <ApiDocsSection />
       </UContainer>
     </main>
     <footer class="border-t border-default">
