@@ -48,7 +48,7 @@ repo 已原地重构为 **pnpm workspace 单一真源**，成员见 `pnpm-worksp
 1. **先查有没有现成的（唯一硬前置，几乎零成本，不许跳过）**：翻 `references/components/index.md` 的决策表和 Nuxt UI 原语。大多数「新组件」其实是**用现有原语组合**（`UCard` + `UBadge` + `UButton` 拼业务块），或现成原语本身就够（要「状态标记」→ 就是 `UBadge`）。确认无现成、也无法简单组合，才真的进入「造新组件」。
 
 2. **按复杂度决定要不要写规格**（`references/method/component-spec-template.md`）：
-   - **有交互 / 状态 / 焦点管理的组件**（可展开、可复制、可切换、带校验等，如 `CodeBlock`、`CopyButton`）→ **走全套**：anatomy → state model → accessibility 三张表都过一遍再实现。这是 geist-nuxt 方法论的核��价值所在。
+   - **有交互 / 状态 / 焦点管理的组件**（可展开、可复制、可切换、带校验等，如 `CodeBlock`、`CopyButton`）→ **走全套**：anatomy → state model → accessibility 三张表都过一遍再实现。这是 geist-nuxt 方法论的核心价值所��。
    - **纯展示 / 无状态的原子**（只映射 token 的标记、容器）→ **轻量**：口头过一遍 anatomy 与 a11y 要点即可，不必产出三张完整表。
    - 拿不准就往「全套」靠——规格便宜，返工贵。
 
@@ -58,7 +58,7 @@ repo 已原地重构为 **pnpm workspace 单一真源**，成员见 `pnpm-worksp
 
 5. **归类**：任何项目都可能用的通用组件 → 进 `components/` 分组；只服务特定场景（如 API 文档）→ 沉淀到对应 `kits/<场景>/`，别塞进通用基座。
 
-> **多语言（i18n）**：组件本身保持文案无关（props/slot 传��本）；`@nuxtjs/i18n` 的接线、locale 组织、`$t` key 属于**消费项目**职责，不进基座。API 文档场景的接线见 `references/kits/api-docs/project-setup.md`。
+> **多语言（i18n）**：组件本身保持文案无关（props/slot 传文本）；`@nuxtjs/i18n` 的接线、locale 组织、`$t` key 属于**消费项目**职责，不进基座。API 文档场景的接线见 `references/kits/api-docs/project-setup.md`。
 
 ## 路由（按任务读取 references）
 
@@ -81,7 +81,7 @@ repo 已原地重构为 **pnpm workspace 单一真源**，成员见 `pnpm-worksp
 - **领域包 kits（仅当项目属于该场景时加载）**：
   - API 文档场景（CodeBlock / RequestExample / ResponseExample）：`references/kits/api-docs/index.md`
     - 该场景的项目配置（推荐模块、i18n 接线、@nuxt/content 取舍）：`references/kits/api-docs/project-setup.md`
-- **维护（仅维护本 skill 时读，非使用者内容）**：改动本 skill 后如何对账同步到 GitHub 真源 `Abel-Wang777/geist-nuxt`：`references/maintenance/sync.md`
+- **维护（仅维护本 skill 时读，非使用者内容）**：改动本 skill 后如何对账同步到 GitHub 真源 `abel-2333-org/geist-nuxt`：`references/maintenance/sync.md`
 
 ### 分层与加载策略
 
