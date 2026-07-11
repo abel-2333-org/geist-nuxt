@@ -20,8 +20,8 @@ export default defineNuxtConfig({
 
   // Auto-import this layer's components WITH directory-name prefixing (Nuxt
   // default). Root files stay bare (app/components/GeistShowcase.vue ->
-  // `<GeistShowcase>`); scene subdirs prefix the name (showcase/Components.vue
-  // -> `<ShowcaseComponents>`). See references/foundations/conventions.md.
+  // `<GeistShowcase>`); scene subdirs prefix the name (showcase/Compositions.vue
+  // -> `<ShowcaseCompositions>`). See references/foundations/conventions.md.
   components: [{ path: resolve('./app/components'), pathPrefix: true }],
 
   // Geist visual language uses a light-first canvas; color mode is toggled

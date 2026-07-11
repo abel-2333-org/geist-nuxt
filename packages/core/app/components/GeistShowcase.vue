@@ -1,13 +1,14 @@
 <script setup lang="ts">
 // GeistShowcase — the design system's self-describing showcase page.
 // Ships inside @geist-nuxt/core, so every consumer gets it via `extends`.
-// The starter's home page renders exactly `<GeistShowcase />`; when a new
-// component lands in core, add a demo entry in ShowcaseComponents and it
-// automatically appears in every consumer preview after the next release.
+// The starter's home page renders exactly `<GeistShowcase />`. Layers:
+// Hero + Foundations (tokens) + Compositions (signature real-world groupings).
+// A new signature composition → add a <Composition*> and drop it into
+// ShowcaseCompositions; single-component展示 belongs in gallery's Catalog.
 //
 // Slots:
 // - #header : replace the built-in minimal header (e.g. gallery's AppHeader)
-// - default : extra sections appended after ShowcaseComponents (e.g. kit demos)
+// - default : extra sections appended after ShowcaseCompositions (e.g. kit demos)
 withDefaults(
   defineProps<{
     /** Small mono badge next to the wordmark in the built-in header. */
@@ -39,7 +40,7 @@ withDefaults(
       <ShowcaseHero />
       <UContainer class="py-16 sm:py-24 space-y-24">
         <ShowcaseFoundations />
-        <ShowcaseComponents />
+        <ShowcaseCompositions />
         <slot />
       </UContainer>
     </main>
