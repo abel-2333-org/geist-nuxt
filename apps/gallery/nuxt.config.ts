@@ -9,7 +9,8 @@ export default defineNuxtConfig({
 
   extends: ['@geist-nuxt/core', '@geist-nuxt/kit-api-docs'],
 
-  // Local components (AppHeader, sections/*) auto-import without a directory
-  // prefix, so app/components/sections/HeroSection.vue is `<HeroSection>`.
-  components: [{ path: '~/components', pathPrefix: false }],
+  // Local components auto-import with directory-name prefixing (scene = subdir
+  // = prefix). Root: AppHeader.vue -> `<AppHeader>`; scene: gallery/Entry.vue
+  // -> `<GalleryEntry>`. See references/foundations/conventions.md.
+  components: [{ path: '~/components', pathPrefix: true }],
 })

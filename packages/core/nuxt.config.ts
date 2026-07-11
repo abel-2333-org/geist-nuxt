@@ -18,10 +18,11 @@ export default defineNuxtConfig({
   // consumer, not the layer).
   css: [resolve('./app/assets/css/main.css')],
 
-  // Auto-import this layer's components without a directory-name prefix, so
-  // e.g. app/components/CopyButton.vue is `<CopyButton>`. Consumers keep their
-  // own pathPrefix:false config for their local components.
-  components: [{ path: resolve('./app/components'), pathPrefix: false }],
+  // Auto-import this layer's components WITH directory-name prefixing (Nuxt
+  // default). Root files stay bare (app/components/GeistShowcase.vue ->
+  // `<GeistShowcase>`); scene subdirs prefix the name (showcase/Components.vue
+  // -> `<ShowcaseComponents>`). See references/foundations/conventions.md.
+  components: [{ path: resolve('./app/components'), pathPrefix: true }],
 
   // Geist visual language uses a light-first canvas; color mode is toggled
   // via the built-in @nuxtjs/color-mode integration (see ThemeToggle.vue).

@@ -9,6 +9,8 @@ export default defineNuxtConfig({
 
   extends: ['@geist-nuxt/core'],
 
-  // Local components auto-import without a directory-name prefix.
-  components: [{ path: '~/components', pathPrefix: false }],
+  // Local components auto-import with directory-name prefixing (scene = subdir
+  // = prefix). e.g. app/components/pricing/Hero.vue -> `<PricingHero>`; root
+  // files stay bare. See references/foundations/conventions.md.
+  components: [{ path: '~/components', pathPrefix: true }],
 })
