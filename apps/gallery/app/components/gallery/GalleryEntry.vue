@@ -3,8 +3,8 @@
 // code or props tables — those live in the skill's references/ (single source of
 // truth). The gallery's irreplaceable value is the *real rendered instance*.
 //
-// Structure: name + one-line description + optional Usage link (to references),
-// then labelled variant blocks passed via the default slot (use <GalleryVariant>).
+// Structure: name + one-line description + optional usage link (to references),
+// then labelled example blocks passed via the default slot (use <GalleryExample>).
 defineProps<{
   /** Component display name, e.g. "UButton". */
   name: string
@@ -12,6 +12,8 @@ defineProps<{
   description?: string
   /** Optional pointer to the authoritative usage docs (skill reference path or URL). */
   usageHref?: string
+  /** Label for the usage link chrome; override for localization. */
+  usageLabel?: string
 }>()
 </script>
 
@@ -27,14 +29,13 @@ defineProps<{
           v-if="usageHref"
           :to="usageHref"
           target="_blank"
+          :label="usageLabel ?? 'Usage'"
           color="neutral"
           variant="ghost"
           size="xs"
-          icon="i-lucide-book-open"
+          trailing-icon="i-lucide-arrow-up-right"
           class="shrink-0"
-        >
-          Usage
-        </UButton>
+        />
       </div>
     </template>
 
