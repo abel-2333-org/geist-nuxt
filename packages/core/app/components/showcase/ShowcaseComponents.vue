@@ -29,6 +29,7 @@ const semantics = ['primary', 'secondary', 'success', 'info', 'warning', 'error'
     <UCard>
       <template #header>
         <h3 class="font-medium text-highlighted">Semantic colors</h3>
+        <p class="mt-1 text-sm text-muted">Seven semantic roles, each a full ramp driven by Geist tokens.</p>
       </template>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div v-for="role in semantics" :key="role" class="space-y-2">
@@ -49,6 +50,7 @@ const semantics = ['primary', 'secondary', 'success', 'info', 'warning', 'error'
       <UCard>
         <template #header>
           <h3 class="font-medium text-highlighted">Actions &amp; status</h3>
+          <p class="mt-1 text-sm text-muted">Button variants and sizes, badges for status.</p>
         </template>
         <div class="space-y-5">
           <div class="flex flex-wrap items-center gap-3">
@@ -78,6 +80,7 @@ const semantics = ['primary', 'secondary', 'success', 'info', 'warning', 'error'
       <UCard>
         <template #header>
           <h3 class="font-medium text-highlighted">Sign-up form</h3>
+          <p class="mt-1 text-sm text-muted">Form fields, select, and switch wired with UFormField.</p>
         </template>
         <div class="space-y-4">
           <UFormField label="Email" name="email" help="We only email about incidents.">
@@ -95,6 +98,7 @@ const semantics = ['primary', 'secondary', 'success', 'info', 'warning', 'error'
       <UCard>
         <template #header>
           <h3 class="font-medium text-highlighted">Feedback</h3>
+          <p class="mt-1 text-sm text-muted">Alerts pairing icon, color, and message for each state.</p>
         </template>
         <div class="space-y-4">
           <UAlert
@@ -118,6 +122,7 @@ const semantics = ['primary', 'secondary', 'success', 'info', 'warning', 'error'
       <UCard>
         <template #header>
           <h3 class="font-medium text-highlighted">Navigation</h3>
+          <p class="mt-1 text-sm text-muted">Tabs for section switching, kbd for shortcut hints.</p>
         </template>
         <div class="space-y-4">
           <UTabs

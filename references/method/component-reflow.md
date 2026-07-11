@@ -32,10 +32,10 @@
 在 `packages/core/app/components/showcase/ShowcaseComponents.vue` 加一段，让组件出现在每个消费项目的默认预览里。**按现有条目模板**（每块 = 一个 `UCard`）：
 
 ```vue
-<!-- <Name>：一句话说明它是什么 -->
 <UCard>
   <template #header>
     <h3 class="font-medium text-highlighted">分组标题</h3>
+    <p class="mt-1 text-sm text-muted">一句话说明这块演示了什么。</p>
   </template>
   <div class="space-y-4">
     <!-- 主示例：最典型用法 -->
@@ -45,7 +45,7 @@
 </UCard>
 ```
 
-要求：主示例 + 关键变体各一；文案用占位示例值；明暗两种模式都要成立（用语义 token，不用原始色值）。
+要求：**每个 UCard 的 header 必须有标题 + 一句 `text-sm text-muted` description**（说明这块演示什么）；主示例 + 关键变体各一；文案用占位示例值；明暗两种模式都要成立（用语义 token，不用原始色值）。
 
 ## 第 4 步：验证
 
