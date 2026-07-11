@@ -86,14 +86,18 @@ jobs:
           echo "core@$V never appeared on the registry." >&2
           exit 1
 
+      # starter/ lives inside the repo (which has a root pnpm-workspace.yaml), but
+      # in v0 it is cloned as a STANDALONE project with no parent workspace. We must
+      # reproduce that here with --ignore-workspace, otherwise pnpm hoists deps to the
+      # repo root and the starter's own node_modules stays empty (nuxt: not found).
       - name: Generate starter lockfile
         working-directory: starter
-        run: pnpm install --lockfile-only
+        run: pnpm install --lockfile-only --ignore-workspace
 
       - name: Real install + build (must succeed or the skill is broken)
         working-directory: starter
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --ignore-workspace
           pnpm build
 
       - uses: actions/upload-artifact@v4
