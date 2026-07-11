@@ -52,4 +52,4 @@
 ## 源码参考
 
  - `src/runtime/components/{Card,Table,Badge,Kbd,Separator,Avatar}.vue`（reference workspace: nuxt/ui@v4）
- - starter 用法：`packages/core/app/components/showcase/ShowcaseComponents.vue`、`ShowcaseFoundations.vue`
+ - 基础用法：`packages/core/app/components/showcase/Foundations.vue`；组合用法：`composition/Feedback.vue`
