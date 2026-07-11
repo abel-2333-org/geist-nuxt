@@ -79,7 +79,7 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 - **页面标题** → `text-[2rem] leading-tight font-semibold tracking-tight`（Heading 32）
 - **内联代码** → `font-mono text-[0.8125rem]`（Copy 13 Mono）
 
-> starter 的 `ShowcaseFoundations.vue` 是活的字阶展示；`ShowcaseHero.vue` 是 Heading/Copy 组合的真实用例。
+> starter 的 `showcase/Foundations.vue` 是活的字阶展示；`showcase/Hero.vue` 是 Heading/Copy 组合的真实用例。
 
 ### 关键约定
 
@@ -102,11 +102,11 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 ## 源码参考
 
 - 字体 token：`packages/core/app/assets/css/main.css`（`@theme static`）
-- 活的字阶展示：`packages/core/app/components/showcase/ShowcaseFoundations.vue`
-- hero 标题用法：`packages/core/app/components/showcase/ShowcaseHero.vue`
+- 活的字阶展示：`packages/core/app/components/showcase/Foundations.vue`
+- hero 标题用法：`packages/core/app/components/showcase/Hero.vue`
 
 ## 不要做
 
 - 不要引入 Geist / Geist Mono 之外的字体族。
-- 不要用固定 `px` 字号；用 Tailwind 字阶类保持节奏一致。
+- 不要用固�� `px` 字号；用 Tailwind 字阶类保持节奏一致。
 - 不要用 `font-bold` 以上字重堆层级——改用字号、颜色与留白。

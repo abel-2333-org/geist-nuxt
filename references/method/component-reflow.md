@@ -1,6 +1,6 @@
 # core 组件回流规范
 
-当一个通用组件在 v0 会话里做成、并决定让它成为设计系统的一部分时，走这条链把它「回流」进 `@geist-nuxt/core`，发版后所有会话的默认预览自动带上它。
+当一个通用组件在 v0 会话里做成、并决定让它成为设计系统的一部分时，走这条链把它「回流」进 `@geist-nuxt/core`，发版后所有会话都能通过 extends core 用上它（自动导入），并在 gallery 目录里留下可视条目供人查看。
 
 本规范写成 **AI 可执行 checklist**：只有第 0 步（采纳决策）必须由人拍板，第 1–6 步 AI 可主导执行，人只在推送/发版处授权。
 
@@ -18,7 +18,7 @@
 
 ## 第 1 步：搬运源码到 core
 
-- 目标目录：`packages/core/app/components/<分组>/<Name>.vue`（分组子目录仅用于组织，`pathPrefix: false` 下不进组件名；**basename 必须全局唯一**，含 core 已有组件如 `CopyButton`/`ThemeToggle`）。
+- 目标目录：`packages/core/app/components/<场景>/<Name>.vue`（`pathPrefix: true`：子目录名=场景=组件名前缀，文件名精简不重复场景，如 `composition/SignupForm.vue` → `<CompositionSignupForm>`；跨场景公共件才放根目录用裸名，如 `CopyButton`/`ThemeToggle`）。
 - **文案无关化**：会话里可能硬编码了字符串，搬进 core 时一律改成 props/slot 传入，core 组件不含业务文案。
 - 只用 `@nuxt/ui` 原语 + 语义 token，守住硬规则（focus 环、`aria-label`、`UFormField`、无固定宽度）。
 - 若组件带自己的 composable/util，一并搬进 `packages/core/app/composables/` 或 `app/utils/`。
@@ -27,25 +27,24 @@
 
 按 `component-spec-template.md`：有交互/状态/焦点管理 → 走 anatomy→state→a11y 三表；纯展示原子 → 口头过 anatomy + a11y 即可。AI 起草规格，人评审。
 
-## 第 3 步：加 ShowcaseComponents 展示条目
+## 第 3 步：加 gallery catalog 条目
 
-在 `packages/core/app/components/showcase/ShowcaseComponents.vue` 加一段，让组件出现在每个消费项目的默认预览里。**按现有条目模板**（每块 = 一个 `UCard`）：
+新组件的可视落点是 **gallery 的逐组件目录**，不是 showcase（showcase 只放基础 + 招牌组合）。在组件所属分组的 section 里加一条 `<GalleryEntry>`（`apps/gallery/app/components/gallery/<Group>.vue`，如 `Forms.vue`/`Overlays.vue`）：
 
 ```vue
-<UCard>
-  <template #header>
-    <h3 class="font-medium text-highlighted">分组标题</h3>
-    <p class="mt-1 text-sm text-muted">一句话说明这块演示了什么。</p>
-  </template>
-  <div class="space-y-4">
-    <!-- 主示例：最典型用法 -->
+<GalleryEntry
+  name="NewComponent"
+  description="一句话说明这个组件是干什么的。"
+  usage-href="https://github.com/abel-2333-org/geist-nuxt/blob/main/references/components/<组>.md#newcomponent"
+>
+  <GalleryExample label="Variants">
     <NewComponent title="示例标题" />
     <!-- 关键变体：尺寸/语义色/状态各摆一个，用真实 token，不写死颜色 -->
-  </div>
-</UCard>
+  </GalleryExample>
+</GalleryEntry>
 ```
 
-要求：**每个 UCard 的 header 必须有标题 + 一句 `text-sm text-muted` description**（说明这块演示什么）；主示例 + 关键变体各一；文案用占位示例值；明暗两种模式都要成立（用语义 token，不用原始色值）。
+要求：`usage-href` 指回自家 `references/components/<组>.md` 的标题锚点（不复制源码/props）；按 facet 拆 `<GalleryExample>`，块级组件用 `layout="stack"`；明暗两种模式都要成立（用语义 token，不用原始色值）。同时确保 `references/components/<组>.md` 里该组件有对应说明（catalog 与文档同源）。
 
 ## 第 4 步：验证
 
@@ -67,7 +66,7 @@
 
 ## 完成后
 
-CI 绿灯后，按 `maintenance/sync.md` 把新 `dist-skill` 整体覆盖到记忆区。此后**所有 v0 账号的新会话**预览里都会出现这个组件——无需改任何 starter 文件（`index.vue` 永远只是 `<GeistShowcase />`，showcase 住在 core 里跟着发版走）。
+CI 绿灯后，按 `maintenance/sync.md` 把新 `dist-skill` 整体覆盖到记忆区。此后**所有 v0 账号的新会话**都能通过 extends core 直接用上这个组件（自动导入，无需改 starter 文件——`index.vue` 永远只是 `<GeistShowcase />`）；它的可视样子在 gallery 目录里查看。注意：starter 的默认预览（`<GeistShowcase />`）只展示基础 + 招牌组合，不会逐个列出新组件——那是 gallery catalog 的职责。
 
 ## 一句话记忆
 
