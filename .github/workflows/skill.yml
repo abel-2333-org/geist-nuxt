@@ -52,7 +52,9 @@ jobs:
           else
             echo "Publishing @geist-nuxt/core@$V ..."
             cd packages/core
-            pnpm publish --access public --no-git-checks
+            # core ships as source (Nuxt layer); skip the `prepare: nuxt prepare`
+            # lifecycle so publish doesn't need the toolchain/deps installed.
+            pnpm publish --access public --no-git-checks --ignore-scripts
           fi
 
   verify-starter:
