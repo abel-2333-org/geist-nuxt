@@ -10,6 +10,7 @@
       <AppHeader />
     </template>
 
+    <GalleryCatalog />
     <ApiDocsSection />
   </GeistShowcase>
 </template>
