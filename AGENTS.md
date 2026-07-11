@@ -20,6 +20,7 @@
 - **通用组件(任务域分组 + 官方名映射)**:`references/components/index.md`
   - `buttons.md`|`forms.md`|`feedback.md`|`data-display.md`|`navigation.md`|`overlays.md`
 - **整屏装配(页面外壳、卡片网格、空/加载态、a11y 清单)**:`references/compositions.md`
+- **常驻画廊(看组件真实渲染)**:https://geist-nuxt-gallery.vercel.app —— core 全量 + kit demo,用 agent-browser 打开
 - **品牌资源(logo/favicon/图标)**:`references/brand-assets.md`
 - **方法论(造新组件时才读)**:`references/method/component-spec-template.md`、`references/method/spec-example.md`
 - **领域包(仅当项目属于该场景时加载)**:`references/kits/api-docs/index.md`

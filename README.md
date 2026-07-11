@@ -48,7 +48,7 @@ pnpm dev:starter    # 起 starter(注意:装的是发布版 core,不反映未发
 pnpm -r typecheck && pnpm -r build
 ```
 
-**gallery**(`apps/gallery`)是常驻画廊,Vercel 部署(root directory 设为 `apps/gallery`),push main 自动更新。
+**gallery**(`apps/gallery`)是常驻画廊,唯一权威部署:**https://geist-nuxt-gallery.vercel.app**(Vercel root directory = `apps/gallery`,push main 自动更新)。一个部署服务所有 v0 账号,不要为其它账号另建平行部署——那只会重复消耗构建额度、造成画廊脑裂。
 
 ## 发版与分发(CI:`.github/workflows/skill.yml`)
 
