@@ -1,6 +1,50 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "@geist-nuxt/kit-api-docs",
-  "homepage": "https://github.com/Abel-Wang777/geist-nuxt",
-  "items": []
+  "homepage": "https://github.com/abel-2333-org/geist-nuxt",
+  "description": "API docs kit. Distribution unit is the SLICE: when copying a component into a consuming project, copy every file listed in its `files` array (components -> app/components/, composables -> app/composables/). `coreDeps` are satisfied automatically by extending @geist-nuxt/core. Dependency rules: kit -> own files (declared in slice) and kit -> core only; kit -> kit is forbidden — shared logic moves up to core.",
+  "items": [
+    {
+      "name": "code-block",
+      "type": "registry:component",
+      "title": "CodeBlock",
+      "description": "Syntax-highlighted code block with copy button and soft-wrap toggle.",
+      "files": [
+        { "path": "app/components/CodeBlock.vue", "type": "registry:component" },
+        { "path": "app/composables/useCodeWrap.ts", "type": "registry:hook" }
+      ],
+      "meta": { "coreDeps": ["useCopy", "CopyButton"] }
+    },
+    {
+      "name": "request-example",
+      "type": "registry:component",
+      "title": "RequestExample",
+      "description": "Multi-language request sample panel for API endpoint docs.",
+      "registryDependencies": ["code-block"],
+      "files": [
+        { "path": "app/components/RequestExample.vue", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "response-example",
+      "type": "registry:component",
+      "title": "ResponseExample",
+      "description": "Response payload panel (status variants) for API endpoint docs.",
+      "registryDependencies": ["code-block"],
+      "files": [
+        { "path": "app/components/ResponseExample.vue", "type": "registry:component" }
+      ]
+    },
+    {
+      "name": "api-docs-section",
+      "type": "registry:block",
+      "title": "ApiDocsSection",
+      "description": "Full-width API docs assembly composing RequestExample and ResponseExample in a split layout.",
+      "registryDependencies": ["request-example", "response-example"],
+      "files": [
+        { "path": "app/components/ApiDocsSection.vue", "type": "registry:block" }
+      ],
+      "meta": { "coreDeps": ["SplitPane", "useSplitPane"] }
+    }
+  ]
 }

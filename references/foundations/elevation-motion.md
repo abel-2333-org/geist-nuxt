@@ -54,7 +54,7 @@ starter 把 Geist 的招牌弹性曲线设为 Tailwind 默认 `--ease-out`，故
 
 ## 源码参考
 
-- token 定义：`assets/starter/app/assets/css/main.css`（`@theme` 的 `--shadow-*`/`--ease-out`、`:root`/`.dark` 的 `--shadow-xs`、末尾 reduced-motion 块）
-- modal/slideover 阴影提升：`assets/starter/app.config.ts`
+- token 定义：`packages/core/app/assets/css/main.css`（`@theme` 的 `--shadow-*`/`--ease-out`、`:root`/`.dark` 的 `--shadow-xs`、末尾 reduced-motion 块）
+- modal/slideover 阴影提升：`packages/core/app.config.ts`
 - Nuxt UI 阴影/动画用法：`src/theme/{modal,popover,card}.ts`（reference workspace: nuxt/ui@v4）
 - Geist 规范：`vercel.com/design`（Elevation & Depth / Motion）

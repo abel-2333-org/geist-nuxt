@@ -15,10 +15,10 @@
 ## 1. skill 上下文成本模型（已决）
 
 - **吃上下文**：SKILL.md 全文（触发时常驻）+ 被 `Read` 的 references。
-- **不吃上下文**：`assets/**` 源码，只在 `Move(copy)` / `Read` 时触碰。
+- **不吃上下文**：repo 源码（`packages/*`、`starter/`、kit 切片），只在 `Move(copy)` / `Read` 时触碰。
 - **控体积三纪律**：
   1. SKILL.md 只做路由器，立行数上限（≈200 行），永不内联源码/长示例。
-  2. 新增 kit/组件只加「一行路由 + 一段 kit index + registry 几行」，源码去 repo/assets。
+  2. 新增 kit/组件只加「一行路由 + 一段 kit index + registry 几行」，源码去 repo。
   3. 示例从 references 正文赶出，变成 gallery 里的活代码。
 
 ---
@@ -72,21 +72,25 @@ geist-nuxt/
 
 ---
 
-## 4. skill 内嵌策略（已决）
+## 4. skill 分发策略（已决,step2 修订）
 
-- **全 kit 内嵌** assets（不吃上下文），repo 是真源、skill `assets/` 是镜像。
-- 代价是同步负担 → 写进 sync.md，建议半自动脚本。
+- core 走 **npm 公共包**（`@geist-nuxt/core`），skill 不内嵌 core 源码副本；kit 源码随 dist-skill 分发，按 registry 切片 copy-in（不吃上下文）。
+- 同步负担已由 CI 消解：dist-skill 是构建产物，记忆区只做整体覆盖（见 `maintenance/sync.md`）。
 - gallery 永远只在 skill 里留一个 URL，不复制任何东西。
 
 ---
 
-## 5. registry 字段集（草案，待 repo 定型后敲定）
+## 5. registry 字段集（已敲定,step2 落地）
 
-现在**只记草案**，因为字段依赖 repo 目录层级（第 2 节待定）。repo 重构后再定死，避免返工。
+以「**切片**」为分发单位,schema 见 `packages/kits/api-docs/registry.json`(权威范例)。核心字段:
 
-草案字段：`name / kit / summary / sourcePath / galleryPath / status(stable|draft|deprecated) / specLevel(full|light) / kind(component|adapter|model)`
+- `name / type / title / description`:条目标识
+- `files[]`:切片文件清单——**copy-in 时必须整切片拷贝**(组件 + 依赖的 composables/utils 一起),这是「kit 组件依赖 composable 会断」问题的制度化解法
+- `registryDependencies`:kit 内条目间依赖(先拷被依赖切片)
+- `meta.coreDeps`:声明依赖 core 的组件/composables,消费项目 extends core 天然满足
 
-- 主从关系：repo 里各 kit 带分片 `registry.json`（源头，权威）→ 聚合出 skill 侧镜像 `references/components/registry.json`（缓存，供新会话快速读）。
+**依赖方向铁律**:kit→自身(声明进切片)、kit→core;**禁止 kit→kit**,跨 kit 共性一律上提 core。
+kit 内新增组件必须同步更新 registry 条目。kit 未来若发包,切片问题自动消失,registry 转为文档用途。
 
 ---
 
@@ -138,15 +142,32 @@ geist-nuxt/
 
 ## 9. 未决项清单（挂起）
 
-- [x] repo `packages/*` 目录与内容层级（第 2 节）→ 已定，见 `refactor-spec-step1.md`
+- [x] repo `packages/*` 目录与内容层级（第 2 节）→ 已定，见 `docs/archive/refactor-spec-step1.md`
 - [x] core/kit token 共享选项一/二 → 选项一（token 放 core）
-- [ ] registry 字段集最终定义（第 5 节草案 → repo 定型后敲定）
+- [x] registry 字段集最终定义 → 已敲定��第 5 节,step2 落地）
 - [ ] gallery story 假 ViewModel 的组织方式
 - [ ] 是否将晋升流程沉淀为独立 skill（如 geist-promote）
 - [ ] 是否将部分结论提升到 team scope 共享
 
-## 10. 进度
+## 10. 当前结构真相(step2 后,唯一权威描述)
 
-- 第一步（repo 重构）：**已执行并推到真源 `abel-2333-org/geist-nuxt` main**。原地重构为 pnpm workspace（`packages/core` + `packages/kits/api-docs` + `apps/gallery` + 干净 `starter`），根目录 `pnpm -r typecheck` / `pnpm -r build` 均通过，gallery 预览正常（含 ApiDocsSection）。旧 `assets/` 单体镜像已从 main 删除，workspace 直接落在 repo 根目录（= skill 真源与 workspace 合一）。规格见 `refactor-spec-step1.md`。
-- 下一步：第二步——定 registry schema 并填 `packages/kits/api-docs/registry.json` 分片（见第 5 节草案）。
-- 其余步骤按第 8 节路线推进。
+```
+abel-2333-org/geist-nuxt (唯一真源)
+├── packages/core/               # @geist-nuxt/core —— 唯一发 npm 的公共包(Nuxt layer)
+│   └── app/components/showcase/ # GeistShowcase + ShowcaseHero/Foundations/Components(自描述展示页)
+├── packages/kits/api-docs/      # 场景组件,不发包;registry.json 切片清单(见第 5 节)
+├── apps/gallery/                # 常驻画廊,workspace:* 引 core+kits,Vercel 部署
+├── starter/                     # 自足项目(非 workspace 成员!),依赖发布版 @geist-nuxt/core
+│                                # 首页 = <GeistShowcase />;即 v0 新会话预览
+├── SKILL.md / AGENTS.md / README.md / v0.json / references/   # skill 文档层
+├── docs/archive/                # 历史 refactor spec 归档
+└── .github/workflows/skill.yml  # CI:发包 + lock 生成 + boot 验证 + dist-skill release
+```
+
+三个展示面分工:starter 预览(GeistShowcase,仅 core,跟发版走)| gallery(core 全量 + kit demo,workspace 即时)| v0 会话(用户项目 + copy-in 的 kit 切片)。
+
+## 11. 进度
+
+- 第一步(repo 重构 → workspace):**已完成**,规格归档于 `docs/archive/refactor-spec-step1.md`。
+- 第二步(发包化与分发链路):**已完成**(2026-07-11),规格归档于 `docs/archive/refactor-spec-step2.md`。要点:core 公开发 npm(org `geist-nuxt`)、starter 移出 workspace 改依赖发布版、GeistShowcase 收编进 core、registry 切片敲定、CI 构建 dist-skill release、记忆区改整体覆盖同步(`references/maintenance/sync.md`)。
+- 后续按第 8 节路线:gallery Vercel 部署、晋升工作流沉淀(第 9 节未决项)。

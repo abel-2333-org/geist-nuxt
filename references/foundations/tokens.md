@@ -134,6 +134,6 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 
 ## 源码参考
 
-- token 覆盖：`assets/starter/app/assets/css/main.css`
-- 语义别名映射：`assets/starter/app.config.ts`
+- token 覆盖：`packages/core/app/assets/css/main.css`
+- 语义别名映射：`packages/core/app.config.ts`
 - Nuxt UI token 定义：`src/runtime/index.css`、`src/theme/index.ts`（reference workspace: nuxt/ui@v4）

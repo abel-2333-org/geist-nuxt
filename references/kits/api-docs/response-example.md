@@ -37,4 +37,4 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## 源码
 
-- `assets/kits/api-docs/components/ResponseExample.vue`（依赖 `CodeBlock.vue` + `composables/useCodeWrap.ts`）。
+- `packages/kits/api-docs/app/components/ResponseExample.vue`（依赖 `CodeBlock.vue` + `composables/useCodeWrap.ts`）。

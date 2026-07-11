@@ -14,7 +14,7 @@
   <div class="min-h-screen flex flex-col">
     <AppHeader />                          <!-- 粘顶导航 + 主题切换 -->
     <main class="flex-1">
-      <HeroSection />
+      <PricingSection />
       <UContainer class="py-14 sm:py-20 space-y-20">
         <!-- 各内容区块 -->
       </UContainer>
@@ -116,7 +116,7 @@
 
 # 完整外壳示例
 
-已验证的应用外壳，来自 starter（Nuxt 4）。展示：`UApp` 根容器、sticky 头部、logo(favicon) + wordmark、导航按钮、明暗切换、`--ui-container` 约束的主体。全部组件由 Nuxt UI 自动导入，无需手写 `import`。源码在 `assets/starter/app/`。
+已验证的应用外壳（Nuxt 4）。展示：`UApp` 根容器、sticky 头部、logo(favicon) + wordmark、导航按钮、明暗切换、`--ui-container` 约束的主体。全部组件由 Nuxt UI 自动导入，无需手写 `import`。源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/components/AppHeader.vue`（头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，项目里直接 `<ThemeToggle />`）。
 
 ## 根组件（`app/app.vue`）
 
@@ -141,9 +141,9 @@ useHead({
 </template>
 ```
 
-## 明暗切换（`app/components/ThemeToggle.vue`）
+## 明暗切换（`ThemeToggle`，core 提供）
 
-用 Nuxt UI 内置的 `@nuxtjs/color-mode`（随 `@nuxt/ui` 模块自动注册），通过 `useColorMode()` 读写偏好——不要自己写 class 切换或 localStorage 逻辑。`useColorMode` / `computed` 都由 Nuxt 自动导入。用 `<ClientOnly>` 包裹以避免 SSR 水合闪烁。
+用 Nuxt UI 内置的 `@nuxtjs/color-mode`（随 `@nuxt/ui` 模块自动注册），通过 `useColorMode()` 读写偏好——不要自己写 class 切换或 localStorage 逻辑。`useColorMode` / `computed` 都由 Nuxt 自动导入��用 `<ClientOnly>` 包裹以避免 SSR 水合闪烁。
 
 ```vue
 <script setup lang="ts">
@@ -176,7 +176,7 @@ function toggle() {
 
 ## Header（`app/components/AppHeader.vue`）
 
-`ThemeToggle` 放在 `app/components/` 里，同样由 Nuxt 自动导入，无需 `import`。
+`ThemeToggle` 由 core layer 提供，自动导入，无需 `import`。
 
 ```vue
 <template>
@@ -189,7 +189,7 @@ function toggle() {
       <UBadge color="neutral" variant="subtle" size="sm" class="font-mono max-sm:hidden">Nuxt · Nuxt UI</UBadge>
       <nav class="ms-auto flex items-center gap-1">
         <UButton label="文档" color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-up-right" to="https://ui.nuxt.com" target="_blank" class="max-sm:hidden" />
-        <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" aria-label="GitHub 仓库" to="https://github.com/nuxt/ui" target="_blank" />
+        <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" aria-label="GitHub 仓库" to="https://github.com/abel-2333-org/geist-nuxt" target="_blank" />
         <ThemeToggle />
       </nav>
     </div>

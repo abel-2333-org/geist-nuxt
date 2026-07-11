@@ -79,7 +79,7 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 - **页面标题** → `text-[2rem] leading-tight font-semibold tracking-tight`（Heading 32）
 - **内联代码** → `font-mono text-[0.8125rem]`（Copy 13 Mono）
 
-> starter 的 `FoundationsSection.vue` 是活的字阶展示；`HeroSection.vue` 是 Heading/Copy 组合的真实用例。
+> starter 的 `ShowcaseFoundations.vue` 是活的字阶展示；`ShowcaseHero.vue` 是 Heading/Copy 组合的真实用例。
 
 ### 关键约定
 
@@ -101,9 +101,9 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 
 ## 源码参考
 
-- 字体 token：`assets/starter/app/assets/css/main.css`（`@theme static`）
-- 活的字阶展示：`assets/starter/app/components/sections/FoundationsSection.vue`
-- hero 标题用法：`assets/starter/app/components/sections/HeroSection.vue`
+- 字体 token：`packages/core/app/assets/css/main.css`（`@theme static`）
+- 活的字阶展示：`packages/core/app/components/showcase/ShowcaseFoundations.vue`
+- hero 标题用法：`packages/core/app/components/showcase/ShowcaseHero.vue`
 
 ## 不要做
 

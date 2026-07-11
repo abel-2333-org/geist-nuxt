@@ -1,9 +1,31 @@
 {
   "name": "@geist-nuxt/core",
-  "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Geist visual language on Nuxt UI — a reusable Nuxt layer: tokens, fonts, color mode, base components and composables.",
   "type": "module",
   "main": "./nuxt.config.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abel-2333-org/geist-nuxt.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/abel-2333-org/geist-nuxt",
+  "keywords": [
+    "nuxt",
+    "nuxt-layer",
+    "nuxt-ui",
+    "design-system",
+    "geist"
+  ],
+  "files": [
+    "app",
+    "app.config.ts",
+    "nuxt.config.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "prepare": "nuxt prepare",
     "typecheck": "nuxt typecheck"

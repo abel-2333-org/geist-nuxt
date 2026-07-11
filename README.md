@@ -1,133 +1,74 @@
 # geist-nuxt
 
-Geist 风格设计系统（视觉参考 Vercel Geist，组件基座 Nuxt UI v4 / Vue，方法论参考 Adobe Spectrum）。
-本仓库是**唯一真源（single source of truth）**，同一份内容同时服务 **v0 / Claude Code / Codex** 三个入口。
+Geist 风格设计系统:视觉参考 Vercel Geist,组件基座 Nuxt UI v4 (Vue),方法论参考 Adobe Spectrum。
+本仓库是**唯一真源**,产出两个分发物,均由 CI 构建,**不靠手抄**:
 
-## 目录结构
+1. **npm 公共包 [`@geist-nuxt/core`](https://www.npmjs.com/package/@geist-nuxt/core)** — 基座 Nuxt layer(token、字体、明暗模式、公共组件、GeistShowcase 展示页)
+2. **v0 skill 分发物(`skill-v*` release)** — 文档 + 自足 starter,供 v0 记忆区整体覆盖同步
 
-```
-geist-nuxt/
-  SKILL.md                 # 契约与路由（三工具共用正文）
-  v0.json                  # v0 专用元数据（其他工具忽略，无害）
-  AGENTS.md                # Codex 入口（指针，指向 references/**）
-  README.md                # 本文件
-  references/              # 全部规范正文（三工具共用）
-    foundations/           #   基础地基：token/排版/间距/响应式/a11y/约定/文案
-    components/            #   通用组件：任务域分组 + 官方名映射
-    compositions.md        #   整屏装配（外壳/卡片网格/空态/a11y 清单）
-    brand-assets.md        #   logo / favicon / 图标规则
-    method/                #   方法论：规格模板 + 落地范例（造新组件时读）
-    kits/                  #   领域包：用到才读（含 api-docs）
-  assets/
-    starter/               # 通用基座项目（provider/全局样式/字体已接好）
-    kits/                  # 领域组件源码（api-docs：4 组件 + section）
-```
+> 目录结构与决策依据**只写在一处**:`references/architecture-decisions.md`。本文件不复述结构,只讲怎么用。
 
-## 分层理念
+## 消费方式
 
-`foundations`（值）→ `components`（零件）→ `compositions`（整屏装配）→ `method`（造新零件）→ `kits`（领域零件）。
-**通用层对所有项目生效；`kits/` 按项目类型可选加载；`method/` 是造新领域组件的模具。**
-做新场景时只需新增 `kits/<场景>/`，通用层与基座零改动。
-
----
-
-## 三个入口怎么接
-
-真源只有一份（本仓库）。三个工具各自用**引用**方式接入，**绝不复制正文**。
-
-### 1. v0
-已内置于 v0 记忆系统（Personal + Team 两个范围），本仓库是其可移植镜像。
-`v0.json` 与 `SKILL.md` frontmatter 的 `metadata.v0.kind: design-system` 为 v0 专用。
-
-### 2. Claude Code（原生 skill，几乎零适配）
-Claude Code 有原生 Agent Skills 机制：只要 `SKILL.md` 在约定目录且 frontmatter 有 `name` + `description`，
-它会**自动发现并按需加载**，无需额外适配文件。
-
-- 个人级：`~/.claude/skills/geist-nuxt/`
-- 项目级：`<repo>/.claude/skills/geist-nuxt/`
-
-推荐用软链指向本仓库（见下方 submodule 工作流）。`v0.json` / `AGENTS.md` 对 Claude 无害，可保留。
-
-### 3. Codex（无 skill 概念，必须 AGENTS.md）
-Codex 只读仓库根的 `AGENTS.md`，不认识 `SKILL.md`。本仓库根已提供 `AGENTS.md`（指针）。
-**当本仓库作为 submodule 嵌入其他项目时**，需在**宿主项目根**的 `AGENTS.md` 里加一段指针，
-把路径改为 submodule 的相对路径，例如（假设挂在 `design-system/geist-nuxt/`）：
-
-```markdown
-构建任何 UI 时，geist-nuxt 是唯一权威设计系统来源。
-- 契约：design-system/geist-nuxt/SKILL.md
-- 基础/组件/装配：design-system/geist-nuxt/references/{foundations,components}/、compositions.md
-- 领域包（用到才读）：design-system/geist-nuxt/references/kits/
-硬规则：只用 Nuxt UI (Vue) + 设计 token，不用 React、不硬编码颜色/尺寸。
-```
-
----
-
-## 同步机制：Git submodule（防漂移）
-
-真源只维护本仓库一份；各消费项目通过 submodule 引用，`git pull` 即全同步。
-
-### 在消费项目里引入
+### 新项目(从 starter 起步)
 
 ```bash
-# 把设计系统作为 submodule 拉进来（放在 design-system/geist-nuxt）
-git submodule add <本仓库地址> design-system/geist-nuxt
-git submodule update --init --recursive
-
-# Claude 入口：软链到 .claude/skills（指向 submodule）
-mkdir -p .claude/skills
-ln -s ../../design-system/geist-nuxt .claude/skills/geist-nuxt
-
-# Codex 入口：在项目根 AGENTS.md 里加上指向 submodule 的指针（见上方片段）
-```
-
-### 更新到最新
-
-```bash
-git submodule update --remote design-system/geist-nuxt
-git add design-system/geist-nuxt && git commit -m "chore: bump geist-nuxt"
-```
-
-### 首次 clone 消费项目
-
-```bash
-git clone --recurse-submodules <消费项目地址>
-# 或已 clone 后：
-git submodule update --init --recursive
-```
-
----
-
-## 同步方向：仓库 → v0 记忆区（单向下游）
-
-本仓库（`abel-2333-org/geist-nuxt`）与 v0 记忆区是**两套物理隔离的存储**，之间**没有自动同步**：
-
-- **GitHub 仓库** = 唯一真源，Claude / Codex 直接读它。
-- **v0 记忆区**（`user/skills/geist-nuxt` + `team/skills/geist-nuxt`）= 从仓库**单向同步**下来的下游镜像，只有 v0 能读写。
-
-**铁律：只在仓库改，v0 记忆区永远是下游，方向单一，绝不反向。**
-
-| 谁改的 | 传播路径 |
-|---|---|
-| Claude / Codex 改 | push 到仓库 → v0 拉取校对 → 写回记忆区 `user` + `team` |
-| v0（对话里）改 | 改 `assets/` 镜像 → push 到仓库 → 再同步进记忆区两份 |
-
-### 一次同步怎么做（在 v0 对话里触发）
-
-1. 让 v0「从 `abel-2333-org/geist-nuxt` 同步最新到记忆区」。
-2. v0 用 `gh api` 拉全量文件 → 逐个 `sha256` 比对记忆区 → 只写回**有差异**的文件。
-3. v0 报告校对结果（哪些变了 / 哪些一致），确保三处（GitHub / user / team）对齐、不漂移。
-
-> 注：拉取含中文的文件请用 `-H "Accept: application/vnd.github.raw+json"`（`--jq '.content'` 对多字节 base64 不稳定）。
-
----
-
-## 起步
-
-新项目从 `assets/starter/` 起步——provider、全局样式、字体已接好，在其上加路由和组件即可。
-
-```bash
-cd assets/starter
+# starter 是自足项目:依赖发布版 @geist-nuxt/core,不依赖本仓库其他内容
+cp -r starter my-app && cd my-app
 pnpm install
 pnpm dev
 ```
+
+首页默认渲染 `<GeistShowcase />`(设计系统自描述展示页)。做自己的应用时替换 `app/pages/index.vue` 即可。
+
+### 已有 Nuxt 项目
+
+```bash
+pnpm add @geist-nuxt/core
+```
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  extends: ['@geist-nuxt/core'],
+  modules: ['@nuxt/ui'],
+})
+```
+
+### 场景组件(kits,不发包)
+
+按 kit 的 `packages/kits/<场景>/registry.json` **整切片 copy-in**:把条目 `files` 列的所有文件一起拷进项目。规则见 registry 文件内 description。
+
+## 开发(本仓库内)
+
+```bash
+pnpm install        # workspace: packages/core + packages/kits/* + apps/gallery
+pnpm dev            # 起 gallery(改 core/kit 即时热更,workspace:* 引用)
+pnpm dev:starter    # 起 starter(注意:装的是发布版 core,不反映未发版改动)
+pnpm -r typecheck && pnpm -r build
+```
+
+**gallery**(`apps/gallery`)是常驻画廊,Vercel 部署(root directory 设为 `apps/gallery`),push main 自动更新。
+
+## 发版与分发(CI:`.github/workflows/skill.yml`)
+
+1. bump `packages/core/package.json` 的 `version` → push main
+2. CI 自动:发包(版本未发布时)→ 生成 starter lockfile → **真实 install + build 验证**(v0 预览必能跑的机械保证)→ 组装 dist-skill → 打 `skill-v*` release
+3. core 发版后 bump `starter/package.json` 里的 `@geist-nuxt/core` 版本
+
+需要 GitHub secret `NPM_TOKEN`(npm granular token,对 `@geist-nuxt` scope 有 read-write)。发包失败报 401/403 = token 过期或权限不足。
+
+## 多入口接线
+
+- **v0**:记忆区 skill 从 `skill-v*` release 整体覆盖同步(流程见 `references/maintenance/sync.md`)
+- **Claude Code**:submodule 或 clone 本仓库后,软链到 `.claude/skills/geist-nuxt/`(SKILL.md 原生被发现)
+- **Codex**:读根 `AGENTS.md`;作为 submodule 时在宿主项目根 AGENTS.md 加指针指向本仓库路径
+
+**铁律:只在本仓库改。** v0 记忆区、消费项目里的拷贝都是下游,绝不反向同步。
+
+## 工程纪律(摘要,详见 SKILL.md 与 ADR)
+
+- 新增**通用**组件 → 进 `packages/core` + 在 `ShowcaseComponents` 加展示条目 → 发版后所有消费端预览自动带上
+- 新增**场景**组件 → 进对应 `packages/kits/<场景>` + 更新其 `registry.json` 切片 + gallery 加 demo
+- 依赖方向:kit→自身、kit→core;**禁止 kit→kit**(共性上提 core)
+- starter 永远依赖**发布版** core,不用 `workspace:*`

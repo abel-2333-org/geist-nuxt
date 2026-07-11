@@ -79,7 +79,7 @@
 
   以下两个是 `SplitPane` 的**内部零件**，需要脱离容器单独用（比如手写更特殊的布局）时才直接碰：
 
-- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高���住）。
+- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高�����住）。
   - **坑**：`group-hover:` 在 Tailwind v4 会被包进 `@media (hover:hover)`，所以 grip 的 hover 浮现只在有鼠标的设备上生效（触屏/无头浏览器 `hover:none` 不触发，属预期）；触屏与键盘用户靠 `active`（拖动中，非 hover 门控）和 `group-focus-visible`（非 hover 门控）两条路径拿到 grip，affordance 不会丢。别用 `transition-[opacity,background-color]` 这种带逗号的 arbitrary value——逗号会打断 Tailwind 的类名扫描、导致其后同一 `class` 里的工具类（含 `group-hover:*`）不被生成；用普通 `transition` 即可。
 - `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。
 
@@ -96,13 +96,12 @@
 
 ## 如何装入项目
 
-组件源码在 `assets/kits/api-docs/`（不在通用基座里）。装入方式：
+组件源码在 `packages/kits/api-docs/`（不在通用基座里）。**装入以 `registry.json` 切片为单位**（权威清单：`packages/kits/api-docs/registry.json`），按条目把 `files` 列的文件**全部**拷进项目：
 
-1. 把 `assets/kits/api-docs/components/*.vue` 复制到项目的 `app/components/api/`。
-2. 把 `assets/kits/api-docs/composables/useCodeWrap.ts` 复制到项目的 `app/composables/`（`CodeBlock` / `RequestExample` / `ResponseExample` 都依赖它）。
-3. 确认 `CopyButton.vue` 与 `useCopy.ts` 在位——它们来自通用基座 starter（`app/components/CopyButton.vue`、`app/composables/useCopy.ts`），`CodeBlock` 的复制依赖它们。若项目不是从 starter 起的，从 `assets/starter/app/` 补齐这两份。
-4. 如需组合演示，一并复制 `assets/kits/api-docs/ApiDocsSection.vue` 到 `app/components/sections/`。
-5. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，而它已在 starter 的 `package.json` 里声明。**不要**装 Shiki / `@nuxt/content`。
+1. 按需要的条目整切片复制：如 `code-block` 切片 = `app/components/CodeBlock.vue` + `app/composables/useCodeWrap.ts`，分别拷到项目的 `app/components/api/` 与 `app/composables/`。`registryDependencies` 里列的切片要先拷（如 `request-example` 依赖 `code-block`）。
+2. **core 依赖零动作**：`CopyButton` / `useCopy` 由 `@geist-nuxt/core` layer 提供（registry 条目的 `meta.coreDeps` 有声明），项目 `extends: ['@geist-nuxt/core']` 即天然在位，不需要复制。
+3. 如需组合演示，一并复制 `ApiDocsSection.vue` 到 `app/components/sections/`。
+4. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，它是 core 包的依赖、随 core 自动就位。**不要**装 Shiki / `@nuxt/content`。
 
 > **组件名不带前缀**：starter 默认 `pathPrefix: false`，所以 `app/components/api/CodeBlock.vue` 在模板里就是 `<CodeBlock>`。保持所有组件 basename 唯一，避免解析冲突。
 
@@ -137,7 +136,7 @@
 
 ## 架构蓝图：spec 驱动的渲染栈（pattern，非 drop-in）
 
-> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit 的 `assets/` 只 ship 3 个**数据无关的展示积木**（CodeBlock / RequestExample / ResponseExample，类型内联、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、字段组件，是**消��项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
+> **这一节是「怎么设计」的蓝图，不是可���制的资产。** kit 只 ship 3 个**数据无关的展示积木**（CodeBlock / RequestExample / ResponseExample，类型内联、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、字段组件，是**消��项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
 >
 > **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永远比预建便宜，别过早建目录。
 
@@ -205,13 +204,13 @@ authoring 输入            适配                 领域输出              渲
 
 ## 源码参考（skill 内）
 
-- `assets/kits/api-docs/components/CodeBlock.vue`
-- `assets/kits/api-docs/components/RequestExample.vue`
-- `assets/kits/api-docs/components/ResponseExample.vue`
-- `assets/kits/api-docs/composables/useCodeWrap.ts`
-- `assets/kits/api-docs/ApiDocsSection.vue` — 组合演示
-- 基座依赖：`assets/starter/app/components/CopyButton.vue`、`assets/starter/app/composables/useCopy.ts`
-- 可拖动分栏（基座）：`assets/starter/app/components/SplitPane.vue`（首选入口）、`assets/starter/app/components/SplitPaneHandle.vue`、`assets/starter/app/composables/useSplitPane.ts`
+- `packages/kits/api-docs/app/components/CodeBlock.vue`
+- `packages/kits/api-docs/app/components/RequestExample.vue`
+- `packages/kits/api-docs/app/components/ResponseExample.vue`
+- `packages/kits/api-docs/app/composables/useCodeWrap.ts`
+- `packages/kits/api-docs/app/components/ApiDocsSection.vue` — 组合演示
+- 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`
+- 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 
 ## 不要臆造
 

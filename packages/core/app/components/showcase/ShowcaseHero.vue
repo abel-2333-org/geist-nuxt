@@ -1,10 +1,7 @@
-<script setup lang="ts">
-</script>
-
 <template>
   <UContainer class="flex flex-col items-start gap-6 py-14 sm:py-20">
     <UBadge color="neutral" variant="outline" size="sm" class="font-mono">
-      Design System · v0.1
+      Design System
     </UBadge>
 
     <h1 class="text-4xl font-semibold tracking-tight text-highlighted sm:text-5xl lg:text-6xl text-balance">

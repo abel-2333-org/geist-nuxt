@@ -44,4 +44,4 @@
 ## 源码参考
 
  - `src/runtime/components/{NavigationMenu,Tabs,Breadcrumb,Link,Pagination}.vue`（reference workspace: nuxt/ui@v4）
- - starter 用法：`assets/starter/app/components/AppHeader.vue`
+ - starter 用法：`apps/gallery/app/components/AppHeader.vue`

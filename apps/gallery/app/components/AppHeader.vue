@@ -27,7 +27,7 @@
           color="neutral"
           variant="ghost"
           aria-label="GitHub 仓库"
-          to="https://github.com/nuxt/ui"
+          to="https://github.com/abel-2333-org/geist-nuxt"
           target="_blank"
         />
         <ThemeToggle />

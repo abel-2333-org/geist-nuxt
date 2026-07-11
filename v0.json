@@ -16,6 +16,6 @@
   },
   "starter": {
     "source": "skill-directory",
-    "path": "assets/starter"
+    "path": "starter"
   }
 }

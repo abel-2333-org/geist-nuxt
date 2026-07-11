@@ -98,27 +98,6 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(rollup@4.62.2)(vite@7.3.6(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.49.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
 
-  starter:
-    dependencies:
-      '@geist-nuxt/core':
-        specifier: workspace:*
-        version: link:../packages/core
-      '@iconify-json/lucide':
-        specifier: ^1.2.116
-        version: 1.2.116
-      '@nuxt/ui':
-        specifier: ^4.9.0
-        version: 4.9.0(bdcc328a2889ecffae26292139bf60db)
-      nuxt:
-        specifier: 4.4.8
-        version: 4.4.8(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7))(@parcel/watcher@2.5.6)(@vue/compiler-sfc@3.5.39)(cac@6.7.14)(db0@0.3.4)(esbuild@0.28.1)(ioredis@5.11.1)(lightningcss@1.32.0)(magicast@0.5.3)(rollup-plugin-visualizer@7.0.1(rollup@4.62.2))(rollup@4.62.2)(terser@5.49.0)(typescript@5.9.3)(vite@7.3.6(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.49.0)(yaml@2.9.0))(vue-tsc@3.3.7(typescript@5.9.3))(yaml@2.9.0)
-      vue:
-        specifier: ^3.5.39
-        version: 3.5.39(typescript@5.9.3)
-      vue-router:
-        specifier: ^5.1.0
-        version: 5.1.0(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(rollup@4.62.2)(vite@7.3.6(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.49.0)(yaml@2.9.0))(vue@3.5.39(typescript@5.9.3))
-
 packages:
 
   '@alloc/quick-lru@5.2.0':

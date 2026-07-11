@@ -1,5 +1,7 @@
 <script setup lang="ts">
 // Signature Nuxt UI components composed in realistic groupings, themed by Geist tokens.
+// Engineering discipline: when a new shared component lands in @geist-nuxt/core,
+// add a demo entry here so it shows up in every consumer preview after release.
 // `ref` is auto-imported by Nuxt.
 const email = ref('')
 const framework = ref('nuxt')

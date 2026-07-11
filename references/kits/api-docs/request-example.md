@@ -34,4 +34,4 @@ interface RequestScenario { id: string; label: string; variants: CodeVariant[] }
 
 ## 源码
 
-- `assets/kits/api-docs/components/RequestExample.vue`（依赖 `CodeBlock.vue` + `composables/useCodeWrap.ts`）。
+- `packages/kits/api-docs/app/components/RequestExample.vue`（依赖 `CodeBlock.vue` + `composables/useCodeWrap.ts`）。

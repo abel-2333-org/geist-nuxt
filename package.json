@@ -7,8 +7,7 @@
     "dev": "pnpm --filter @geist-nuxt/gallery dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "dev:gallery": "pnpm --filter @geist-nuxt/gallery dev",
-    "dev:starter": "pnpm --filter @geist-nuxt/starter dev"
+    "dev:starter": "pnpm -C starter dev"
   },
   "devDependencies": {
     "tailwindcss": "^4.3.2",
