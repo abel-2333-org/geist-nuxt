@@ -156,7 +156,7 @@ abel-2333-org/geist-nuxt (唯一真源)
 ├── packages/core/               # @geist-nuxt/core —— 唯一发 npm 的公共包(Nuxt layer)
 │   └── app/components/showcase/ # GeistShowcase + ShowcaseHero/Foundations/Components(自描述展示页)
 ├── packages/kits/api-docs/      # 场景组件,不发包;registry.json 切片清单(见第 5 节)
-├── apps/gallery/                # 常驻画廊,workspace:* 引 core+kits,Vercel 部署
+├── apps/gallery/                # 常驻画廊,workspace:* 引 core+kits;部署 https://geist-nuxt-gallery.vercel.app
 ├── starter/                     # 自足项目(非 workspace 成员!),依赖发布版 @geist-nuxt/core
 │                                # 首页 = <GeistShowcase />;即 v0 新会话预览
 ├── SKILL.md / AGENTS.md / README.md / v0.json / references/   # skill 文档层
@@ -170,4 +170,6 @@ abel-2333-org/geist-nuxt (唯一真源)
 
 - 第一步(repo 重构 → workspace):**已完成**,规格归档于 `docs/archive/refactor-spec-step1.md`。
 - 第二步(发包化与分发链路):**已完成**(2026-07-11),规格归档于 `docs/archive/refactor-spec-step2.md`。要点:core 公开发 npm(org `geist-nuxt`)、starter 移出 workspace 改依赖发布版、GeistShowcase 收编进 core、registry 切片敲定、CI 构建 dist-skill release、记忆区改整体覆盖同步(`references/maintenance/sync.md`)。
-- 后续按第 8 节路线:gallery Vercel 部署、晋升工作流沉淀(第 9 节未决项)。
+- gallery 部署:**已完成**——唯一权威部署 https://geist-nuxt-gallery.vercel.app(push main 自动更新;一个部署服务所有 v0 账号,不另建平行部署)。
+- core 组件回流规范:**已完成**——AI 可执行 checklist,见 `references/method/component-reflow.md`(人只拍采纳/推送两个决策)。starter 依赖 core 采用钉死精确版本策略。
+- 后续:晋升工作流是否独立成 skill、gallery story 组织方式(第 9 节未决项,按需推进)。
