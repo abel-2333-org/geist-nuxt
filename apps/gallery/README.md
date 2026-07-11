@@ -4,6 +4,7 @@
 
 ## 部署（Vercel）
 
+- **地址**：https://geist-nuxt-gallery.vercel.app
 - **Root Directory**：`apps/gallery`（monorepo 子目录，务必设对）
 - **触发**：push `main` 自动部署；改到 `apps/gallery/**` 才会触发构建（monorepo 跳过逻辑）
 - **归属**：部署建在 repo org owner 对应的 Vercel 账号下，与仓库归属对齐
