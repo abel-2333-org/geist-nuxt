@@ -34,17 +34,6 @@
       "files": [
         { "path": "app/components/api-docs/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue", "type": "registry:component" }
       ]
-    },
-    {
-      "name": "api-docs-section",
-      "type": "registry:block",
-      "title": "ApiDocsSection",
-      "description": "Full-width API docs assembly composing ApiDocsRequestExample and ApiDocsResponseExample in a split layout.",
-      "registryDependencies": ["request-example", "response-example"],
-      "files": [
-        { "path": "app/components/api-docs/Section.vue", "target": "app/components/api-docs/Section.vue", "type": "registry:block" }
-      ],
-      "meta": { "coreDeps": ["SplitPane", "useSplitPane"] }
     }
   ]
 }

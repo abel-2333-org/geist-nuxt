@@ -11,7 +11,8 @@ export default defineNuxtConfig({
   extends: ['@geist-nuxt/core'],
 
   // Auto-import this layer's API-docs components with directory-name prefixing
-  // (Nuxt default). Current files sit at the root, so names stay bare
-  // (ApiDocsSection, CodeBlock…). See references/foundations/conventions.md.
+  // (Nuxt default). Files sit under app/components/api-docs/, so they get the
+  // ApiDocs* prefix (ApiDocsCodeBlock, ApiDocsResponseExample…).
+  // See references/foundations/conventions.md.
   components: [{ path: resolve('./app/components'), pathPrefix: true }],
 })
