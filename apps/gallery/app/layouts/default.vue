@@ -22,7 +22,6 @@ const items = useGalleryNav()
           trailing-icon="i-lucide-arrow-up-right"
           to="https://ui.nuxt.com"
           target="_blank"
-          class="max-sm:hidden"
         />
         <UButton
           icon="i-simple-icons-github"
@@ -42,7 +41,7 @@ const items = useGalleryNav()
 
     <footer class="border-t border-default">
       <UContainer class="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-sm text-muted">geist-nuxt · Geist visual language on Nuxt UI</p>
+        <p class="text-sm text-muted">geist-nuxt · 基于 Nuxt UI 的 Geist 设计语言</p>
         <p class="text-sm text-muted font-mono">@geist-nuxt/core</p>
       </UContainer>
     </footer>
