@@ -45,7 +45,7 @@ AI 再 `Read v0_memories/team/skills/geist-nuxt/RELEASE`,与上面 tag 比对:
    ```bash
    node scripts/sync-skill-memory.mjs /tmp/skill-sync/dist-skill.tar.gz
    ```
-   它打印解包目录、`RELEASE` 戳、文件清单,并把 `manifest.json`(完整目标态)写到解包目录旁。
+   它打印解包目录、`RELEASE` 戳、文件清单,并把 `sync-manifest.json`(完整目标态)写到临时目录(路径见输出的 `Manifest :` 一行)。
 3. **AI 套用计划,整体覆盖**记忆区 `v0_memories/team/skills/geist-nuxt/`:
    - `Read` manifest → 对每个 `files[]` 条目 `Move(copy)` `<root>/f` → `<memoryRoot>/f`;
    - `Glob` 记忆区,`Delete` 任何**不在** `files[]` 里的文件(旧布局残留必须清);
