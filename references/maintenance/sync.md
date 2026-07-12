@@ -50,6 +50,7 @@ AI 再 `Read v0_memories/team/skills/geist-nuxt/RELEASE`,与上面 tag 比对:
    - `Read` manifest → 对每个 `files[]` 条目 `Move(copy)` `<root>/f` → `<memoryRoot>/f`;
    - `Glob` 记忆区,`Delete` 任何**不在** `files[]` 里的文件(旧布局残留必须清);
    - **例外**:绝不碰 `…/skills/**`(独立 skills 系统,不属本 dist)。
+   - **顶层 `RELEASE`**:记忆区会含一个 `RELEASE` 戳文件(它在 `files[]` 内,当普通文件照拷),它是新鲜度戳、不是内容文件,**别当杂物删**。
    - **不做逐文件内容比对**——整体覆盖就是流程本身。`RELEASE` 戳随 dist 一起被覆盖,自动更新,无需额外记录。
 
 ## 改真源:工作区、push 与审查纪律
