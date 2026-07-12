@@ -89,10 +89,32 @@ apps/gallery/app/pages/
 > （`kits/api-docs/index.vue`），不进全局 compositions 路由。"kit 也可有自己的 compositions"
 > 成立，归位方式由上面规则 3 定死。
 
-**导航自动生成（押后调研）**：AppHeader 导航从 `pages/` 路由树自动派生——
-加一个页面文件 = 自动多一个导航项，不可能忘。分组用目录层级（components/ compositions/ kits/），
-移动端用 Nuxt UI 抽屉/USlideover 折叠。这部分需专项调研（Nuxt 文件路由 meta + Nuxt UI 导航组件），
-**押后到契约定稿后再做**（见未决清单）。
+**导航自动生成（调研已完成，结论如下）**：AppHeader 导航从 `pages/` 路由树自动派生——
+加一个页面文件 = 自动多一个导航项，不可能忘。
+
+- **数据源**：gallery 本地 composable `useGalleryNav()`，用 `useRouter().getRoutes()` 拿全部路由记录，
+  过滤掉动态路由（含 `:`）与显式 `nav: false` 的隐藏页（如保留但不展示的 playground），
+  按 `path` 段折叠成 `components/` `compositions/` `kits/<name>/` 的嵌套结构。
+- **每页声明**：可选 `definePageMeta({ nav: { label, icon, order } })`。静态 meta 构建期并入路由记录，
+  运行时直接读；缺省则从 path 兜底派生 label。**排序必须用 `meta.nav.order`**——`getRoutes()` 顺序不保证。
+- **渲染**：用 `UNavigationMenu`（items 为 `ArrayOrNested<NavigationMenuItem>`，
+  支持 `type: 'label' | 'trigger' | 'link'`、`icon`、`badge`、`children` 嵌套），
+  目录层级天然映射为 kit 子树的 `children`。
+- **§4 兼容**：`kits/api-docs/reference.vue` 出现即自动成为 `api-docs` 子树下的兄弟项；
+  删文件则导航项自动消失（呼应 §5 playground 删除即无残留）。**不依赖 @nuxt/content**。
+
+**移动端方案（调研已完成，结论如下）**：直接采用 Nuxt UI v4 内建的 **`UHeader`（Pro 已合入公共包）**，
+移动端抽屉是**开箱能力，不手写**。核对 `@nuxt/ui` 的 `theme/header.ts` 断点行为：
+
+- `center` slot（放桌面导航）= `hidden lg:flex`（仅 ≥lg 显示）；
+- `toggle`（汉堡按钮）= `lg:hidden`，自动切 menu/close 图标；
+- 移动浮层（`content`/`overlay`）= `lg:hidden`；`root` 已是 `bg-default/75 backdrop-blur border-b sticky top-0`（Geist 观感）。
+- `UHeader` 的 `mode` 支持 `'slideover' | 'drawer' | 'modal'`——§4 提到的 USlideover 抽屉即 `mode="slideover"`；
+  `autoClose`（默认开）在路由变化时自动收起。
+- **一份数据源两处渲染**：桌面导航放 `center` slot 的 `UNavigationMenu`；移动端把同一份 `useGalleryNav()` items
+  以 `orientation="vertical"` 的 `UNavigationMenu` 放进 `#body` slot。
+- 与现状差异：当前 `AppHeader` 是手写 `<header>`，迁到 `UHeader` 断点为 `lg`、高度用 `--ui-header-height`；观感一致。
+- 符合 design system 硬规则「响应式用 Nuxt UI 的方式（UContainer / UPage* / UHeader + 断点）」。
 
 > **playground 处置是"提升"动作的强制收尾**，并进 push 前清单（见 §5、§6）；
 > 多路由下，删 `pages/playground.vue` = 导航项自动消失，无残留。
@@ -178,5 +200,6 @@ apps/gallery/app/pages/
 - [x] §4 待核对项：kit compositions 陈列位置 → 定为 kit 自己子树（`kits/api-docs/index.vue`），见 §4 规则 3
 - [x] git 连接方式 → 方案 B（chat 连接仓库 + push 前确认），见 §6.5
 - [x] 落盘目标 → 折进现有 `maintenance/sync.md`（不新增文档），见 §8 映射表
-- [ ] §4 导航自动生成 + 移动端方案（专项调研，契约定稿后）——**唯一剩余项**，属实现类任务
-- [ ] 待导航调研完成 → 按 §8 一次性搬迁并删除本 WIP
+- [x] §4 导航自动生成 + 移动端方案（专项调研）→ 已定：`useGalleryNav()`（`getRoutes()` + `definePageMeta({ nav })`）
+      派生导航；移动端用 `UHeader mode="slideover"` 内建抽屉。见 §4 结论
+- [ ] 待落盘 → 按 §8 一次性搬迁（§4 结论写进 `references/gallery.md`；维护类节写进 `maintenance/sync.md`）并删除本 WIP
