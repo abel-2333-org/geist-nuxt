@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import type { BadgeProps } from '@nuxt/ui'
+import { methodPreset, methodFallback, type HttpMethod } from '~/utils/method-preset'
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+// PRESET WRAPPER: turns an HTTP method into the tone-based SemanticBadge atom
+// via `methodPreset`. Mirrors LifecycleBadge — domain vocabulary lives in the
+// preset, the atom stays vocabulary-agnostic. The mono/tabular typography is
+// the method's visual identity, passed through as a class so the atom's
+// calibration (tone → color + a11y) is reused unchanged.
 
 const props = withDefaults(
   defineProps<{
@@ -11,27 +16,16 @@ const props = withDefaults(
   { size: 'md' },
 )
 
-// HTTP method → semantic color. Color is a *reinforcement*, never the sole
-// signal: the method text itself always spells out the verb.
-const COLOR: Record<HttpMethod, BadgeProps['color']> = {
-  GET: 'info',
-  POST: 'success',
-  PUT: 'warning',
-  PATCH: 'secondary',
-  DELETE: 'error',
-}
-
 const method = computed(() => props.method.toUpperCase() as HttpMethod)
-const color = computed<BadgeProps['color']>(() => COLOR[method.value] ?? 'neutral')
+const meta = computed(() => methodPreset[method.value] ?? methodFallback)
 </script>
 
 <template>
-  <UBadge
-    :color="color"
-    variant="subtle"
-    :size="size"
-    class="font-mono font-semibold tracking-wide tabular-nums"
-  >
-    {{ method }}
-  </UBadge>
+  <SemanticBadge
+    :tone="meta.tone"
+    :variant="meta.variant"
+    :size="props.size"
+    :label="method"
+    class="font-mono tracking-wide tabular-nums"
+  />
 </template>

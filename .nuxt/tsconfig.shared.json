@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "paths": {
+      "nuxt": [
+        "../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt"
+      ],
       "@unhead/vue": [
         "../node_modules/.pnpm/@unhead+vue@2.1.15_vue@3.5.39_typescript@5.9.3_/node_modules/@unhead/vue"
       ],
@@ -16,9 +19,6 @@
       "@nuxt/schema": [
         "../node_modules/.pnpm/@nuxt+schema@4.4.8/node_modules/@nuxt/schema"
       ],
-      "nuxt": [
-        "../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt"
-      ],
       "@nuxt/icon": [
         "../node_modules/.pnpm/@nuxt+icon@2.3.1_magicast@0.5.3_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_476f9573cc4eaa115da83d7c83e283d0/node_modules/@nuxt/icon"
       ],
@@ -27,9 +27,6 @@
       ],
       "@nuxtjs/color-mode": [
         "../node_modules/.pnpm/@nuxtjs+color-mode@4.0.1_magicast@0.5.3/node_modules/@nuxtjs/color-mode"
-      ],
-      "nitropack": [
-        "../node_modules/.pnpm/nitropack@2.13.4_better-sqlite3@12.11.1_oxc-parser@0.133.0_vite@7.3.6_jiti@2.7.0_lightn_2e56fc77c8c9e52c57b8f852eda2ca4d/node_modules/nitropack"
       ],
       "defu": [
         "../node_modules/.pnpm/defu@6.1.7/node_modules/defu"
@@ -43,8 +40,8 @@
       "ofetch": [
         "../node_modules/.pnpm/ofetch@1.5.1/node_modules/ofetch"
       ],
-      "crossws": [
-        "../node_modules/.pnpm/crossws@0.3.5/node_modules/crossws"
+      "nitropack": [
+        "../node_modules/.pnpm/nitropack@2.13.4_better-sqlite3@12.11.1_oxc-parser@0.133.0_vite@7.3.6_jiti@2.7.0_lightn_2e56fc77c8c9e52c57b8f852eda2ca4d/node_modules/nitropack"
       ],
       "vite/client": [
         "../node_modules/.pnpm/vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_yaml@2.9.0/node_modules/vite/client"
@@ -116,7 +113,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/dev.json"
+        "./manifest/meta/e8841785-cd3c-4154-a0e1-e85b211a24aa.json"
       ],
       "#build": [
         "."

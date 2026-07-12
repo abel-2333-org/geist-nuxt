@@ -37,6 +37,7 @@ export { useActiveFieldPath, useFieldAnchor } from '../app/composables/useFieldA
 export { useSplitPane, computeSplitBudgets, UseSplitPaneOptions, StartDragOptions } from '../app/composables/useSplitPane';
 export { authPreset, AuthParam, AuthPresetEntry } from '../app/utils/auth-preset';
 export { lifecyclePreset, LifecyclePresetEntry } from '../app/utils/lifecycle-preset';
+export { methodPreset, methodFallback, HttpMethod, MethodPresetEntry } from '../app/utils/method-preset';
 export { adaptSpec, AdaptedSpec } from '../app/utils/spec-adapter';
 export { defineLocale, extendLocale } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/defineLocale';
 export { defineShortcuts, extractShortcuts } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/defineShortcuts';
@@ -50,5 +51,4 @@ export { useScrollShadow } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f39
 export { useScrollspy } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/useScrollspy';
 export { useToast } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/useToast';
 export { useTour } from '../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/useTour';
-export { useNuxtDevTools } from '../node_modules/.pnpm/@nuxt+devtools@3.2.4_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_yaml@2.9.0__vue@3.5.39_typescript@5.9.3_/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';
 export { useColorMode } from '../node_modules/.pnpm/@nuxtjs+color-mode@4.0.1_magicast@0.5.3/node_modules/@nuxtjs/color-mode/dist/runtime/composables';

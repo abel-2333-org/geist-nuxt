@@ -136,6 +136,8 @@ const TONE_TEXT: Record<BadgeTone, string> = {
   warning: 'text-warning',
   neutral: 'text-dimmed',
   error: 'text-error',
+  info: 'text-info',
+  secondary: 'text-secondary',
 }
 const lifecycleMeta = computed(() => {
   if (!props.lifecycle) return undefined

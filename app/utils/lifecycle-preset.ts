@@ -2,7 +2,7 @@ import type { BadgeProps } from '@nuxt/ui'
 import type { BadgeTone, LifecycleStatus } from '~/types/domain'
 
 /**
- * OPINIONATED PRESET: maps each lifecycle value to StatusBadge atom props.
+ * OPINIONATED PRESET: maps each lifecycle value to SemanticBadge atom props.
  *
  * This is the layer that "knows" the lifecycle vocabulary — deliberately split
  * from the atom so the atom stays reusable and this calibration is easy to

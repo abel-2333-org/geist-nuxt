@@ -54,6 +54,8 @@ declare global {
   const lifecyclePreset: typeof import('../../app/utils/lifecycle-preset').lifecyclePreset
   const loadPayload: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/payload').loadPayload
   const markRaw: typeof import('vue').markRaw
+  const methodFallback: typeof import('../../app/utils/method-preset').methodFallback
+  const methodPreset: typeof import('../../app/utils/method-preset').methodPreset
   const navigateTo: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/router').navigateTo
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
@@ -133,7 +135,6 @@ declare global {
   const useModel: typeof import('vue').useModel
   const useNuxtApp: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
-  const useNuxtDevTools: typeof import('../../node_modules/.pnpm/@nuxt+devtools@3.2.4_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_yaml@2.9.0__vue@3.5.39_typescript@5.9.3_/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools').useNuxtDevTools
   const useOverlay: typeof import('../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/useOverlay').useOverlay
   const usePreviewMode: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/preview').usePreviewMode
   const useRequestEvent: typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/ssr').useRequestEvent
@@ -234,6 +235,9 @@ declare global {
   export type { LifecyclePresetEntry } from '../../app/utils/lifecycle-preset'
   import('../../app/utils/lifecycle-preset')
   // @ts-ignore
+  export type { HttpMethod, MethodPresetEntry } from '../../app/utils/method-preset'
+  import('../../app/utils/method-preset')
+  // @ts-ignore
   export type { AdaptedSpec } from '../../app/utils/spec-adapter'
   import('../../app/utils/spec-adapter')
 }
@@ -294,6 +298,8 @@ declare module 'vue' {
     readonly lifecyclePreset: UnwrapRef<typeof import('../../app/utils/lifecycle-preset')['lifecyclePreset']>
     readonly loadPayload: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/payload')['loadPayload']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
+    readonly methodFallback: UnwrapRef<typeof import('../../app/utils/method-preset')['methodFallback']>
+    readonly methodPreset: UnwrapRef<typeof import('../../app/utils/method-preset')['methodPreset']>
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/router')['navigateTo']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
@@ -373,7 +379,6 @@ declare module 'vue' {
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
-    readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxt+devtools@3.2.4_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_yaml@2.9.0__vue@3.5.39_typescript@5.9.3_/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly useOverlay: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/composables/useOverlay')['useOverlay']>
     readonly usePreviewMode: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/preview')['usePreviewMode']>
     readonly useRequestEvent: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__@babel+plugin-syntax-typ_b393dd0ea6c59793db8a4640bc9c74a7/node_modules/nuxt/dist/app/composables/ssr')['useRequestEvent']>
