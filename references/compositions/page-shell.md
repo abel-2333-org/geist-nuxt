@@ -6,29 +6,30 @@
 
 ## 结构总览
 
-标准结构：`UApp` 根 → 粘顶 header + 主内容区 + 可选 footer。
+标准结构：`UApp` 根 → 粘顶 header + 主内容区 + 可选 footer。用 Nuxt `layouts/default.vue` 承载外壳，`pages/**` 只写内容。
 
 ```vue
-<!-- app/app.vue 已提供 <UApp> 与 <NuxtPage>；页面只写内容 -->
+<!-- app/layouts/default.vue —— 外壳；app.vue 里 <NuxtLayout><NuxtPage/></NuxtLayout> -->
+<script setup lang="ts">
+const items = /* 你的导航数据源，NavigationMenuItem[] */
+</script>
 <template>
-  <div class="min-h-screen flex flex-col">
-    <AppHeader />                          <!-- 粘顶导航 + 主题切换 -->
-    <main class="flex-1">
-      <PricingSection />
-      <UContainer class="py-14 sm:py-20 space-y-20">
-        <!-- 各内容区块，见 patterns.md -->
-      </UContainer>
-    </main>
-    <AppFooter />
+  <div class="min-h-screen flex flex-col bg-default text-default antialiased">
+    <CompositionAppHeader :items="items">      <!-- core 提供的响应式头部 -->
+      <template #brand>…</template>            <!-- logo/wordmark -->
+      <template #actions>…<ThemeToggle /></template>
+    </CompositionAppHeader>
+    <main class="flex-1"><slot /></main>
+    <footer class="border-t border-default">…</footer>
   </div>
 </template>
 ```
 
-- **header 粘顶**：`sticky top-0 z-50` + `border-b border-default` + 半透明背景 `bg-default/80 backdrop-blur`。
-- **主题切换**放 header 右侧，用 `ThemeToggle`（`useColorMode`）。
+- **粘顶 header 用 core 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
+- **主题切换**默认已内置在 `<CompositionAppHeader>` 的 `#actions`；覆盖该 slot 时需自己带上 `<ThemeToggle />`。
 - **logo/wordmark**用真实资源（见 `brand-assets.md`），不要占位图。
 
-已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/components/AppHeader.vue`（头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，项目里直接 `<ThemeToggle />`）。
+已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`packages/core/app/components/composition/AppHeader.vue`（core 提供的响应式头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
 
 ## 根组件（`app/app.vue`）
 
@@ -86,32 +87,43 @@ function toggle() {
 
 `nuxt.config.ts` 里配 `colorMode: { preference: 'system', fallback: 'light' }`——Geist 是浅色优先的画布。
 
-## Header（`app/components/AppHeader.vue`）
+## Header（`<CompositionAppHeader>`，core 提供）
 
-`ThemeToggle` 由 core layer 提供，自动导入，无需 `import`。
+粘顶 + 响应式头部是 core 的 composition 组件（`packages/core/app/components/composition/AppHeader.vue`），
+基于 Nuxt UI `UHeader mode="slideover"`：**桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由变化自动收起**——全部内建，不手写 `<header>`、不手写 media query。它**数据无关**：
+
+- **prop `items: NavigationMenuItem[]`** —— 导航数据由消费方传入（如从路由树自动派生，见 `references/gallery.md`「页面组织」）。
+- **slot `#brand`** —— logo / wordmark / badge，默认给 geist-nuxt 兜底，可完全覆盖。
+- **slot `#actions`** —— 右侧动作区，**默认内置 `<ThemeToggle />`**；覆盖后需自己带上。
 
 ```vue
+<script setup lang="ts">
+// items 通常来自导航数据源（gallery 用 useGalleryNav() 从路由树自动派生）
+const items = useGalleryNav()
+</script>
 <template>
-  <header class="sticky top-0 z-40 border-b border-default bg-default/80 backdrop-blur supports-[backdrop-filter]:bg-default/60">
-    <div class="mx-auto flex h-16 w-full max-w-(--ui-container) items-center gap-3 px-4 sm:px-6 lg:px-8">
-      <a href="/" class="flex items-center gap-2.5 text-highlighted" aria-label="geist-nuxt 首页">
+  <CompositionAppHeader :items="items">
+    <template #brand>
+      <NuxtLink to="/" class="flex items-center gap-2.5 text-highlighted" aria-label="geist-nuxt 首页">
         <img src="/favicon.svg" alt="" class="size-6" width="24" height="24" />
         <span class="font-mono text-sm font-semibold tracking-tight">geist-nuxt</span>
-      </a>
+      </NuxtLink>
       <UBadge color="neutral" variant="subtle" size="sm" class="font-mono max-sm:hidden">Nuxt · Nuxt UI</UBadge>
-      <nav class="ms-auto flex items-center gap-1">
-        <UButton label="文档" color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-up-right" to="https://ui.nuxt.com" target="_blank" class="max-sm:hidden" />
-        <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" aria-label="GitHub 仓库" to="https://github.com/abel-2333-org/geist-nuxt" target="_blank" />
-        <ThemeToggle />
-      </nav>
-    </div>
-  </header>
+    </template>
+    <template #actions>
+      <UButton label="文档" color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-up-right" to="https://ui.nuxt.com" target="_blank" class="max-sm:hidden" />
+      <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" aria-label="GitHub 仓库" to="https://github.com/abel-2333-org/geist-nuxt" target="_blank" />
+      <ThemeToggle />
+    </template>
+  </CompositionAppHeader>
 </template>
 ```
 
+导航项按 `to` 与当前路由**自动高亮**（`NavigationMenuItem` 内部用 `ULink`），无需手写 active 逻辑。
+
 ## 要点
 
-- 头部用 `border-default` / `bg-default` 语义 token，宽度用 `max-w-(--ui-container)`。
+- 头部观感（`bg-default/75 backdrop-blur`、`border-b border-default`、`sticky top-0`、`h-(--ui-header-height)`）由 `UHeader` 主题内建，不要另写。
 - 图标按钮都带 `aria-label`；logo 图片 `alt=""`（旁边有文字）。
 - `UApp` 只在 `app/app.vue` 挂一次（提供 toast/overlay 上下文），不要重复挂载。
-- 明暗切换只用 `useColorMode()`，不要手写 class / localStorage。
+- 明暗切换只用 `useColorMode()`（封装在 `ThemeToggle`），不要手写 class / localStorage。

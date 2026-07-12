@@ -1,16 +1,12 @@
 <script setup lang="ts">
-// Gallery home: the core showcase (GeistShowcase, from @geist-nuxt/core) with
-// the gallery's own header slotted in and kit demos appended via the default
-// slot. Kit sections update instantly through workspace:* — no release needed.
+definePageMeta({ nav: { label: 'Overview', icon: 'i-lucide-home', order: 0 } })
 </script>
 
 <template>
-  <GeistShowcase>
-    <template #header>
-      <AppHeader />
-    </template>
-
-    <GalleryCatalog />
-    <ApiDocsSection />
-  </GeistShowcase>
+  <div>
+    <ShowcaseHero />
+    <UContainer class="py-16 sm:py-24">
+      <ShowcaseFoundations />
+    </UContainer>
+  </div>
 </template>
