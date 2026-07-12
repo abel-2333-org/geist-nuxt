@@ -1,0 +1,3819 @@
+{
+  "endpoint": {
+    "domain": "payments",
+    "method": "POST",
+    "path": "/txn/payment",
+    "lifecycle": "active"
+  },
+  "request": {
+    "authentication": {
+      "requirements": [
+        {
+          "scheme": "body-sign",
+          "field": "sign",
+          "algorithm": "sha256",
+          "rule": "acquiring-sorted-concat-secret",
+          "reference": "/payments/get-started/request-signing"
+        },
+        {
+          "scheme": "ip-allowlist",
+          "reference": "/payments/get-started/setup"
+        }
+      ]
+    },
+    "headers": [
+      {
+        "name": "apikey",
+        "type": "string",
+        "required": true,
+        "description": {
+          "en": "Account service API key request header assigned by Onerway. Use the value for the same environment as the request base URL.",
+          "zh": "Onerway 分配的账户服务 API 密钥请求头。请使用与请求基础 URL 相同环境的值。"
+        },
+        "example": "replace_with_account_service_apikey"
+      }
+    ],
+    "body": [
+      {
+        "name": "billingInformation",
+        "type": "object",
+        "format": "json_string",
+        "required": true,
+        "description": {
+          "en": "Transaction billing information, including customer billing address and contact details.",
+          "zh": "交易账单信息，包括客户账单地址与联系方式。"
+        },
+        "children": [
+          {
+            "name": "firstName",
+            "type": "string",
+            "description": {
+              "en": "Customer first name.",
+              "zh": "客户名字。"
+            }
+          },
+          {
+            "name": "lastName",
+            "type": "string",
+            "description": {
+              "en": "Customer last name.",
+              "zh": "客户姓氏。"
+            }
+          },
+          {
+            "name": "jpFirstName",
+            "type": "string",
+            "description": {
+              "en": "Customer first name in Japanese Katakana. Required only for Japan payment methods and Japan-issued cards.",
+              "zh": "日语片假名格式的名字；仅日本支付方式和日本发行的卡需要。"
+            }
+          },
+          {
+            "name": "jpLastName",
+            "type": "string",
+            "description": {
+              "en": "Customer last name in Japanese Katakana. Required only for Japan payment methods and Japan-issued cards.",
+              "zh": "日语片假名格式的姓氏；仅日本支付方式和日本发行的卡需要。"
+            }
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "example": "replace_with_phone_number",
+            "description": {
+              "en": "Customer phone number, local part only (without country code); pass the country code separately in `phoneCountryCode`, which combines with this field into the full number. Onerway does not strictly validate the format.",
+              "zh": "客户电话号码，仅填本地号码（不含国家码）；国家码请单独传入 `phoneCountryCode`，二者组合为完整号码。Onerway 当前不强校验格式。"
+            }
+          },
+          {
+            "name": "phoneCountryCode",
+            "type": "string",
+            "required": "conditional",
+            "example": [
+              "351",
+              "1"
+            ],
+            "condition": {
+              "en": "Required when paying with the MB Way local payment method.",
+              "zh": "使用 MB Way 本地支付方式时必填。"
+            },
+            "description": {
+              "en": "Country dialing code of the customer phone number, digits only without `+`; combines with `phone` to form the full number.",
+              "zh": "客户电话号码的国家拨号码，纯数字、不含 `+`；与 `phone` 组合为完整号码。"
+            }
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Customer email address; used for transaction confirmations and dispute handling.",
+              "zh": "客户邮箱地址，用于交易确认和争议处理。"
+            }
+          },
+          {
+            "name": "postalCode",
+            "type": "string",
+            "description": {
+              "en": "Postal or ZIP code. Commonly used by AVS checks.",
+              "zh": "邮政编码；许多地区的 AVS 验证需要此字段。"
+            }
+          },
+          {
+            "name": "address",
+            "type": "string",
+            "description": {
+              "en": "Full address in a single field. It can replace split street, house number, and city fields for general address capture, but should not be used as the only address input when AVS is required.",
+              "zh": "完整地址字段，可替代街道、门牌号和城市等拆分字段；开启 AVS 时不建议仅用该字段替代拆分地址字段。"
+            }
+          },
+          {
+            "name": "country",
+            "type": "string",
+            "required": true,
+            "example": [
+              "US",
+              "CA"
+            ],
+            "description": {
+              "en": "Country in [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format.",
+              "zh": "[ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) 国家或地区代码。"
+            }
+          },
+          {
+            "name": "province",
+            "type": "string",
+            "required": "conditional",
+            "example": [
+              "CA",
+              "ON"
+            ],
+            "condition": {
+              "en": "Required when `country` is `US` or `CA`.",
+              "zh": "当 `country` 为 `US` 或 `CA` 时必填。"
+            },
+            "description": {
+              "en": "Province or state code in [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) format.",
+              "zh": "[ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) 省/州代码。"
+            }
+          },
+          {
+            "name": "city",
+            "type": "string",
+            "description": {
+              "en": "City name. Recommended when AVS or a complete billing address is required to improve address completeness, authorization rate, and risk checks. Actual validation dimensions vary by issuer and region.",
+              "zh": "城市名称。开启 AVS 或需要完整账单地址时建议传入，用于补充地址完整性、授权率和风控判断；不同发卡行和地区的实际校验维度可能不同。"
+            }
+          },
+          {
+            "name": "street",
+            "type": "string",
+            "description": {
+              "en": "Street name. When AVS is enabled, provide it separately with `number`, `postalCode`, and `city` as billing-address verification data instead of relying only on the full `address` field.",
+              "zh": "街道名称。开启 AVS 时建议与 `number`、`postalCode`、`city` 拆分传入，作为账单地址验证相关信息；不要仅用完整 `address` 字段替代拆分地址。"
+            }
+          },
+          {
+            "name": "number",
+            "type": "string",
+            "description": {
+              "en": "House or building number. When AVS is enabled, provide it separately with `street`, `postalCode`, and `city` as billing-address verification data.",
+              "zh": "门牌号或建筑号。开启 AVS 时建议与 `street`、`postalCode`、`city` 拆分传入，作为账单地址验证相关信息。"
+            }
+          },
+          {
+            "name": "identityNumber",
+            "type": "string",
+            "description": {
+              "en": "Government-issued identity identifier, usually required by selected local payment methods. It may be a national ID number or a personal tax number.",
+              "zh": "政府颁发的身份标识，通常用于特定本地支付方式；可能是身份证号码，也可能是个人税号。"
+            }
+          },
+          {
+            "name": "birthDate",
+            "type": "string",
+            "description": {
+              "en": "Birth date in `yyyy/MM/dd` format.",
+              "zh": "出生日期，格式为 `yyyy/MM/dd`。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "cardInfo",
+        "type": "object",
+        "format": "json_string",
+        "description": {
+          "en": "Card payment information. Checkout currently supports only `holderName`; when provided, it pre-fills the cardholder name on the hosted checkout form.",
+          "zh": "卡支付信息。收银台场景当前仅支持 `holderName`；提供后可预填持卡人姓名。"
+        },
+        "children": [
+          {
+            "name": "holderName",
+            "type": "string",
+            "example": "John Smith",
+            "description": {
+              "en": "Cardholder name. When provided, it pre-fills the hosted checkout payment form.",
+              "zh": "持卡人姓名；提供后将预填到收银台支付表单。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "lpmsInfo",
+        "type": "object",
+        "format": "json_string",
+        "description": {
+          "en": "Local payment method information. When used with `productType=ALL`, setting `lpmsType` limits checkout to the specified local payment method.",
+          "zh": "本地支付方式信息。结合 `productType=ALL` 使用时，设置 `lpmsType` 后收银台仅展示指定本地支付方式。"
+        },
+        "children": [
+          {
+            "name": "lpmsType",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Local payment method type.",
+              "zh": "本地支付方式类型。"
+            },
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "JdPay",
+                  "description": {
+                    "en": "JD Pay payment method.",
+                    "zh": "JD Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Alipay+",
+                  "description": {
+                    "en": "Alipay+ payment method.",
+                    "zh": "Alipay+ 支付方式。"
+                  }
+                },
+                {
+                  "value": "WeChat",
+                  "description": {
+                    "en": "WeChat Pay payment method.",
+                    "zh": "微信支付方式。"
+                  }
+                },
+                {
+                  "value": "AlipayHK",
+                  "description": {
+                    "en": "AlipayHK payment method.",
+                    "zh": "支付宝香港支付方式。"
+                  }
+                },
+                {
+                  "value": "AlipayCN",
+                  "description": {
+                    "en": "Alipay payment method in mainland China.",
+                    "zh": "支付宝中国内地支付方式。"
+                  }
+                },
+                {
+                  "value": "Kakao_Pay",
+                  "description": {
+                    "en": "Kakao Pay payment method.",
+                    "zh": "Kakao Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Klarna",
+                  "description": {
+                    "en": "Klarna payment method.",
+                    "zh": "Klarna 支付方式。"
+                  }
+                },
+                {
+                  "value": "Boleto",
+                  "description": {
+                    "en": "Boleto payment method.",
+                    "zh": "Boleto 支付方式。"
+                  }
+                },
+                {
+                  "value": "BankTransfer",
+                  "description": {
+                    "en": "Bank transfer payment method.",
+                    "zh": "银行转账支付方式。"
+                  }
+                },
+                {
+                  "value": "Banrisul",
+                  "description": {
+                    "en": "Banrisul bank payment method.",
+                    "zh": "Banrisul 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "Bradesco",
+                  "description": {
+                    "en": "Bradesco bank payment method.",
+                    "zh": "Bradesco 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "Banco do Brasil",
+                  "description": {
+                    "en": "Banco do Brasil bank payment method.",
+                    "zh": "Banco do Brasil 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "Itau",
+                  "description": {
+                    "en": "Itaú bank payment method.",
+                    "zh": "Itaú 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "MercadoPago",
+                  "description": {
+                    "en": "Mercado Pago payment method.",
+                    "zh": "Mercado Pago 支付方式。"
+                  }
+                },
+                {
+                  "value": "PIX",
+                  "description": {
+                    "en": "PIX instant payment method.",
+                    "zh": "PIX 即时支付方式。"
+                  }
+                },
+                {
+                  "value": "Servipag",
+                  "description": {
+                    "en": "Servipag payment method.",
+                    "zh": "Servipag 支付方式。"
+                  }
+                },
+                {
+                  "value": "Sencillito",
+                  "description": {
+                    "en": "Sencillito payment method.",
+                    "zh": "Sencillito 支付方式。"
+                  }
+                },
+                {
+                  "value": "Webpay",
+                  "description": {
+                    "en": "Webpay payment method.",
+                    "zh": "Webpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Multicaja",
+                  "description": {
+                    "en": "Multicaja payment method.",
+                    "zh": "Multicaja 支付方式。"
+                  }
+                },
+                {
+                  "value": "Baloto",
+                  "description": {
+                    "en": "Baloto cash payment method.",
+                    "zh": "Baloto 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "EFT",
+                  "description": {
+                    "en": "Electronic funds transfer payment method.",
+                    "zh": "电子资金转账支付方式。"
+                  }
+                },
+                {
+                  "value": "Efecty",
+                  "description": {
+                    "en": "Efecty cash payment method.",
+                    "zh": "Efecty 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "SPEI",
+                  "description": {
+                    "en": "SPEI bank transfer payment method.",
+                    "zh": "SPEI 银行转账支付方式。"
+                  }
+                },
+                {
+                  "value": "OXXO",
+                  "description": {
+                    "en": "OXXO cash voucher payment method.",
+                    "zh": "OXXO 现金凭证支付方式。"
+                  }
+                },
+                {
+                  "value": "OXXOPAY",
+                  "description": {
+                    "en": "OXXO Pay payment method.",
+                    "zh": "OXXO Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "PagoEfectivo",
+                  "description": {
+                    "en": "PagoEfectivo cash payment method.",
+                    "zh": "PagoEfectivo 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "safetypay-cash",
+                  "description": {
+                    "en": "SafetyPay Cash payment method.",
+                    "zh": "SafetyPay Cash 支付方式。"
+                  }
+                },
+                {
+                  "value": "safetypay-online",
+                  "description": {
+                    "en": "SafetyPay Online payment method.",
+                    "zh": "SafetyPay Online 支付方式。"
+                  }
+                },
+                {
+                  "value": "PayU",
+                  "description": {
+                    "en": "PayU payment method.",
+                    "zh": "PayU 支付方式。"
+                  }
+                },
+                {
+                  "value": "Przelewy24",
+                  "description": {
+                    "en": "Przelewy24 payment method.",
+                    "zh": "Przelewy24 支付方式。"
+                  }
+                },
+                {
+                  "value": "Pagosnet",
+                  "description": {
+                    "en": "Pagosnet payment method.",
+                    "zh": "Pagosnet 支付方式。"
+                  }
+                },
+                {
+                  "value": "SEPADD",
+                  "description": {
+                    "en": "SEPA Direct Debit payment method.",
+                    "zh": "SEPA 直接借记支付方式。"
+                  }
+                },
+                {
+                  "value": "Sofort",
+                  "description": {
+                    "en": "Sofort payment method.",
+                    "zh": "Sofort 支付方式。"
+                  }
+                },
+                {
+                  "value": "Giropay",
+                  "description": {
+                    "en": "giropay payment method.",
+                    "zh": "giropay 支付方式。"
+                  }
+                },
+                {
+                  "value": "iDEAL",
+                  "description": {
+                    "en": "iDEAL payment method.",
+                    "zh": "iDEAL 支付方式。"
+                  }
+                },
+                {
+                  "value": "Konbini",
+                  "description": {
+                    "en": "Konbini convenience store payment method.",
+                    "zh": "Konbini 便利店支付方式。"
+                  }
+                },
+                {
+                  "value": "PayEasy",
+                  "description": {
+                    "en": "Pay-easy payment method.",
+                    "zh": "Pay-easy 支付方式。"
+                  }
+                },
+                {
+                  "value": "POLi",
+                  "description": {
+                    "en": "POLi payment method.",
+                    "zh": "POLi 支付方式。"
+                  }
+                },
+                {
+                  "value": "Bancontact",
+                  "description": {
+                    "en": "Bancontact payment method.",
+                    "zh": "Bancontact 支付方式。"
+                  }
+                },
+                {
+                  "value": "OVO",
+                  "description": {
+                    "en": "OVO wallet payment method.",
+                    "zh": "OVO 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "MyBank",
+                  "description": {
+                    "en": "MyBank payment method.",
+                    "zh": "MyBank 支付方式。"
+                  }
+                },
+                {
+                  "value": "Dragonpay",
+                  "description": {
+                    "en": "Dragonpay payment method.",
+                    "zh": "Dragonpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Skrill",
+                  "description": {
+                    "en": "Skrill payment method.",
+                    "zh": "Skrill 支付方式。"
+                  }
+                },
+                {
+                  "value": "eNETS",
+                  "description": {
+                    "en": "eNETS payment method.",
+                    "zh": "eNETS 支付方式。"
+                  }
+                },
+                {
+                  "value": "PayseraWallet",
+                  "description": {
+                    "en": "Paysera Wallet payment method.",
+                    "zh": "Paysera Wallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "LithuanianBanks",
+                  "description": {
+                    "en": "Lithuanian bank payment method.",
+                    "zh": "立陶宛银行支付方式。"
+                  }
+                },
+                {
+                  "value": "PaySafeCard",
+                  "description": {
+                    "en": "paysafecard prepaid payment method.",
+                    "zh": "paysafecard 预付卡支付方式。"
+                  }
+                },
+                {
+                  "value": "Paysafecash",
+                  "description": {
+                    "en": "paysafecash payment method.",
+                    "zh": "paysafecash 支付方式。"
+                  }
+                },
+                {
+                  "value": "Payconiq",
+                  "description": {
+                    "en": "Payconiq payment method.",
+                    "zh": "Payconiq 支付方式。"
+                  }
+                },
+                {
+                  "value": "Trustly",
+                  "description": {
+                    "en": "Trustly payment method.",
+                    "zh": "Trustly 支付方式。"
+                  }
+                },
+                {
+                  "value": "PAY_BY_BANK",
+                  "description": {
+                    "en": "Pay by Bank payment method.",
+                    "zh": "Pay by Bank 银行账户支付方式。"
+                  }
+                },
+                {
+                  "value": "GCash",
+                  "description": {
+                    "en": "GCash wallet payment method.",
+                    "zh": "GCash 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "GrabPay",
+                  "description": {
+                    "en": "GrabPay wallet payment method.",
+                    "zh": "GrabPay 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "PayMaya",
+                  "description": {
+                    "en": "Maya wallet payment method.",
+                    "zh": "Maya 钱包支��方式。"
+                  }
+                },
+                {
+                  "value": "ELEVEN",
+                  "description": {
+                    "en": "7-Eleven payment method.",
+                    "zh": "7-Eleven 支付方式。"
+                  }
+                },
+                {
+                  "value": "GrabPay SG",
+                  "description": {
+                    "en": "GrabPay Singapore wallet payment method.",
+                    "zh": "GrabPay Singapore 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "TrueMoney Wallet",
+                  "description": {
+                    "en": "TrueMoney Wallet payment method.",
+                    "zh": "TrueMoney Wallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "Rabbit_Line_pay",
+                  "description": {
+                    "en": "Rabbit LINE Pay payment method.",
+                    "zh": "Rabbit LINE Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "PromptPay",
+                  "description": {
+                    "en": "PromptPay payment method.",
+                    "zh": "PromptPay 支付方式。"
+                  }
+                },
+                {
+                  "value": "KRUNGSRI_ONLINE",
+                  "description": {
+                    "en": "Krungsri Online banking payment method.",
+                    "zh": "Krungsri Online 网银支付方式。"
+                  }
+                },
+                {
+                  "value": "BUALUANG_IBANKING",
+                  "description": {
+                    "en": "Bualuang iBanking payment method.",
+                    "zh": "Bualuang iBanking 支付方式。"
+                  }
+                },
+                {
+                  "value": "CITI_POINTS",
+                  "description": {
+                    "en": "Citi Rewards Points payment method.",
+                    "zh": "Citi Rewards Points 支付方式。"
+                  }
+                },
+                {
+                  "value": "K_PLUS",
+                  "description": {
+                    "en": "K PLUS payment method.",
+                    "zh": "K PLUS 支付方式。"
+                  }
+                },
+                {
+                  "value": "MCASH",
+                  "description": {
+                    "en": "MCash wallet payment method.",
+                    "zh": "MCash 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "TOUCH_GO_EWALLET",
+                  "description": {
+                    "en": "Touch 'n Go eWallet payment method.",
+                    "zh": "Touch 'n Go eWallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "ShopeePay",
+                  "description": {
+                    "en": "ShopeePay wallet payment method.",
+                    "zh": "ShopeePay 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "Boost",
+                  "description": {
+                    "en": "Boost wallet payment method.",
+                    "zh": "Boost 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "BNI",
+                  "description": {
+                    "en": "BNI virtual account payment method.",
+                    "zh": "BNI 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "MANDIRI",
+                  "description": {
+                    "en": "Mandiri virtual account payment method.",
+                    "zh": "Mandiri 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "Maybank",
+                  "description": {
+                    "en": "Maybank virtual account payment method.",
+                    "zh": "Maybank 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "PERMATA",
+                  "description": {
+                    "en": "Permata virtual account payment method.",
+                    "zh": "Permata 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "BRI",
+                  "description": {
+                    "en": "BRI virtual account payment method.",
+                    "zh": "BRI 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "CIMB",
+                  "description": {
+                    "en": "CIMB virtual account payment method.",
+                    "zh": "CIMB 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "DANA",
+                  "description": {
+                    "en": "DANA wallet payment method.",
+                    "zh": "DANA 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "QRIS",
+                  "description": {
+                    "en": "QRIS payment method.",
+                    "zh": "QRIS 支付方式。"
+                  }
+                },
+                {
+                  "value": "AKULAKU",
+                  "description": {
+                    "en": "Akulaku payment method.",
+                    "zh": "Akulaku 支付方式。"
+                  }
+                },
+                {
+                  "value": "Paypay",
+                  "description": {
+                    "en": "PayPay payment method.",
+                    "zh": "PayPay 支付方式。"
+                  }
+                },
+                {
+                  "value": "LINE_Pay",
+                  "description": {
+                    "en": "LINE Pay payment method.",
+                    "zh": "LINE Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Merpay",
+                  "description": {
+                    "en": "Merpay payment method.",
+                    "zh": "Merpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Rakuten_Pay",
+                  "description": {
+                    "en": "Rakuten Pay payment method.",
+                    "zh": "Rakuten Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "BitCash",
+                  "description": {
+                    "en": "BitCash payment method.",
+                    "zh": "BitCash 支付方式。"
+                  }
+                },
+                {
+                  "value": "Net_Cash",
+                  "description": {
+                    "en": "NetCash payment method.",
+                    "zh": "NetCash 支付方式。"
+                  }
+                },
+                {
+                  "value": "WebMoney",
+                  "description": {
+                    "en": "WebMoney payment method.",
+                    "zh": "WebMoney 支付方式。"
+                  }
+                },
+                {
+                  "value": "au",
+                  "description": {
+                    "en": "au PAY payment method.",
+                    "zh": "au PAY 支付方式。"
+                  }
+                },
+                {
+                  "value": "SoftBank",
+                  "description": {
+                    "en": "SoftBank carrier payment method.",
+                    "zh": "SoftBank 运营商支付方式。"
+                  }
+                },
+                {
+                  "value": "NTT_Docomo",
+                  "description": {
+                    "en": "d払い (Docomo) carrier payment method.",
+                    "zh": "d払い（Docomo）运营商支付方式。"
+                  }
+                },
+                {
+                  "value": "Paidy",
+                  "description": {
+                    "en": "Paidy payment method.",
+                    "zh": "Paidy 支付方式。"
+                  }
+                },
+                {
+                  "value": "BLIK",
+                  "description": {
+                    "en": "BLIK payment method.",
+                    "zh": "BLIK 支付方式。"
+                  }
+                },
+                {
+                  "value": "BLIK_SEAMLESS",
+                  "description": {
+                    "en": "BLIK Seamless payment method.",
+                    "zh": "BLIK Seamless 支付方式。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "bankName",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required when `lpmsType=EFT` or `lpmsType=Przelewy24`.",
+              "zh": "当 `lpmsType=EFT` 或 `lpmsType=Przelewy24` 时必填。"
+            },
+            "enum": {
+              "kind": "variants",
+              "variants": [
+                {
+                  "title": "EFT",
+                  "when": {
+                    "en": "When `lpmsType=EFT`.",
+                    "zh": "当 `lpmsType=EFT` 时。"
+                  },
+                  "values": [
+                    {
+                      "value": "banco_agrario",
+                      "description": {
+                        "en": "BANCO AGRARIO",
+                        "zh": "BANCO AGRARIO"
+                      }
+                    },
+                    {
+                      "value": "banco_av_villas",
+                      "description": {
+                        "en": "BANCO AV VILLAS",
+                        "zh": "BANCO AV VILLAS"
+                      }
+                    },
+                    {
+                      "value": "banco_bbva_colombia_s.a.",
+                      "description": {
+                        "en": "BANCO BBVA COLOMBIA S.A.",
+                        "zh": "BANCO BBVA COLOMBIA S.A."
+                      }
+                    },
+                    {
+                      "value": "banco_caja_social",
+                      "description": {
+                        "en": "BANCO CAJA SOCIAL",
+                        "zh": "BANCO CAJA SOCIAL"
+                      }
+                    },
+                    {
+                      "value": "banco_colpatria",
+                      "description": {
+                        "en": "BANCO COLPATRIA",
+                        "zh": "BANCO COLPATRIA"
+                      }
+                    },
+                    {
+                      "value": "banco_cooperativo_coopcentral",
+                      "description": {
+                        "en": "BANCO COOPERATIVO COOPCENTRAL",
+                        "zh": "BANCO COOPERATIVO COOPCENTRAL"
+                      }
+                    },
+                    {
+                      "value": "banco_corpbanca_s.a",
+                      "description": {
+                        "en": "BANCO CORPBANCA S.A",
+                        "zh": "BANCO CORPBANCA S.A"
+                      }
+                    },
+                    {
+                      "value": "banco_davivienda",
+                      "description": {
+                        "en": "BANCO DAVIVIENDA",
+                        "zh": "BANCO DAVIVIENDA"
+                      }
+                    },
+                    {
+                      "value": "banco_de_bogota",
+                      "description": {
+                        "en": "BANCO DE BOGOTA",
+                        "zh": "BANCO DE BOGOTA"
+                      }
+                    },
+                    {
+                      "value": "banco_de_occidente",
+                      "description": {
+                        "en": "BANCO DE OCCIDENTE",
+                        "zh": "BANCO DE OCCIDENTE"
+                      }
+                    },
+                    {
+                      "value": "banco_falabella_",
+                      "description": {
+                        "en": "BANCO FALABELLA",
+                        "zh": "BANCO FALABELLA"
+                      }
+                    },
+                    {
+                      "value": "banco_gnb_sudameris",
+                      "description": {
+                        "en": "BANCO GNB SUDAMERIS",
+                        "zh": "BANCO GNB SUDAMERIS"
+                      }
+                    },
+                    {
+                      "value": "banco_pichincha_s.a.",
+                      "description": {
+                        "en": "BANCO PICHINCHA S.A.",
+                        "zh": "BANCO PICHINCHA S.A."
+                      }
+                    },
+                    {
+                      "value": "banco_procredit",
+                      "description": {
+                        "en": "BANCO PROCREDIT",
+                        "zh": "BANCO PROCREDIT"
+                      }
+                    },
+                    {
+                      "value": "bancolombia",
+                      "description": {
+                        "en": "BANCOLOMBIA",
+                        "zh": "BANCOLOMBIA"
+                      }
+                    },
+                    {
+                      "value": "bancoomeva_s.a.",
+                      "description": {
+                        "en": "BANCOOMEVA S.A.",
+                        "zh": "BANCOOMEVA S.A."
+                      }
+                    },
+                    {
+                      "value": "citibank_",
+                      "description": {
+                        "en": "CITIBANK",
+                        "zh": "CITIBANK"
+                      }
+                    },
+                    {
+                      "value": "itau",
+                      "description": {
+                        "en": "ITAU",
+                        "zh": "ITAU"
+                      }
+                    },
+                    {
+                      "value": "nequi",
+                      "description": {
+                        "en": "NEQUI",
+                        "zh": "NEQUI"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "Przelewy24",
+                  "when": {
+                    "en": "When `lpmsType=Przelewy24`.",
+                    "zh": "当 `lpmsType=Przelewy24` 时。"
+                  },
+                  "values": [
+                    {
+                      "value": "20",
+                      "description": {
+                        "en": "Santander Bank Polska - Pretzel24 payment system",
+                        "zh": "Santander Bank Polska - Pretzel24 payment system"
+                      }
+                    },
+                    {
+                      "value": "26",
+                      "description": {
+                        "en": "Pay with Inteligo",
+                        "zh": "Pay with Inteligo"
+                      }
+                    },
+                    {
+                      "value": "31",
+                      "description": {
+                        "en": "Pay with iPKO (PKO BP)",
+                        "zh": "Pay with iPKO (PKO BP)"
+                      }
+                    },
+                    {
+                      "value": "33",
+                      "description": {
+                        "en": "BNP Paribas banking group",
+                        "zh": "BNP Paribas banking group"
+                      }
+                    },
+                    {
+                      "value": "43",
+                      "description": {
+                        "en": "Bank Polska Kasa Opieki Spółka Akcyjna",
+                        "zh": "Bank Polska Kasa Opieki Spółka Akcyjna"
+                      }
+                    },
+                    {
+                      "value": "45",
+                      "description": {
+                        "en": "Credit Agricole banking group",
+                        "zh": "Credit Agricole banking group"
+                      }
+                    },
+                    {
+                      "value": "49",
+                      "description": {
+                        "en": "ING Bank Śląski",
+                        "zh": "ING Bank Śląski"
+                      }
+                    },
+                    {
+                      "value": "52",
+                      "description": {
+                        "en": "Inteligo Account",
+                        "zh": "Inteligo Account"
+                      }
+                    },
+                    {
+                      "value": "53",
+                      "description": {
+                        "en": "Powszechna Kasa Oszczędności Bank Polski (iPKO)",
+                        "zh": "Powszechna Kasa Oszczędności Bank Polski (iPKO)"
+                      }
+                    },
+                    {
+                      "value": "54",
+                      "description": {
+                        "en": "Santander Bank Polska",
+                        "zh": "Santander Bank Polska"
+                      }
+                    },
+                    {
+                      "value": "64",
+                      "description": {
+                        "en": "Toyota Bank",
+                        "zh": "Toyota Bank"
+                      }
+                    },
+                    {
+                      "value": "65",
+                      "description": {
+                        "en": "Bank Polska Kasa Opieki Spółka Akcyjna (duplicate entry)",
+                        "zh": "Bank Polska Kasa Opieki Spółka Akcyjna (duplicate entry)"
+                      }
+                    },
+                    {
+                      "value": "69",
+                      "description": {
+                        "en": "Volkswagen Bank",
+                        "zh": "Volkswagen Bank"
+                      }
+                    },
+                    {
+                      "value": "85",
+                      "description": {
+                        "en": "Bank Millennium S.A.",
+                        "zh": "Bank Millennium S.A."
+                      }
+                    },
+                    {
+                      "value": "88",
+                      "description": {
+                        "en": "Pay with Alior Bank",
+                        "zh": "Pay with Alior Bank"
+                      }
+                    },
+                    {
+                      "value": "90",
+                      "description": {
+                        "en": "Nest Bank",
+                        "zh": "Nest Bank"
+                      }
+                    },
+                    {
+                      "value": "95",
+                      "description": {
+                        "en": "Credit Agricole banking group (duplicate entry)",
+                        "zh": "Credit Agricole banking group (duplicate entry)"
+                      }
+                    },
+                    {
+                      "value": "99",
+                      "description": {
+                        "en": "Pay with BOŚ Bank",
+                        "zh": "Pay with BOŚ Bank"
+                      }
+                    },
+                    {
+                      "value": "112",
+                      "description": {
+                        "en": "Pay with ING Bank",
+                        "zh": "Pay with ING Bank"
+                      }
+                    },
+                    {
+                      "value": "119",
+                      "description": {
+                        "en": "Pay with Citi Handlowy",
+                        "zh": "Pay with Citi Handlowy"
+                      }
+                    },
+                    {
+                      "value": "129",
+                      "description": {
+                        "en": "Alior Bank - Installment payments",
+                        "zh": "Alior Bank - Installment payments"
+                      }
+                    },
+                    {
+                      "value": "131",
+                      "description": {
+                        "en": "Pay with Plus Bank",
+                        "zh": "Pay with Plus Bank"
+                      }
+                    },
+                    {
+                      "value": "136",
+                      "description": {
+                        "en": "mBank - Installment payments",
+                        "zh": "mBank - Installment payments"
+                      }
+                    },
+                    {
+                      "value": "141",
+                      "description": {
+                        "en": "E-transfer with Pocztowy24",
+                        "zh": "E-transfer with Pocztowy24"
+                      }
+                    },
+                    {
+                      "value": "143",
+                      "description": {
+                        "en": "Cooperative Banks",
+                        "zh": "Cooperative Banks"
+                      }
+                    },
+                    {
+                      "value": "144",
+                      "description": {
+                        "en": "Bank Nowy BFG S.A.",
+                        "zh": "Bank Nowy BFG S.A."
+                      }
+                    },
+                    {
+                      "value": "153",
+                      "description": {
+                        "en": "Getin Bank",
+                        "zh": "Getin Bank"
+                      }
+                    },
+                    {
+                      "value": "154",
+                      "description": {
+                        "en": "Polish mobile payment system",
+                        "zh": "Polish mobile payment system"
+                      }
+                    },
+                    {
+                      "value": "158",
+                      "description": {
+                        "en": "Noble Pay payment system",
+                        "zh": "Noble Pay payment system"
+                      }
+                    },
+                    {
+                      "value": "161",
+                      "description": {
+                        "en": "Pay with Idea Bank",
+                        "zh": "Pay with Idea Bank"
+                      }
+                    },
+                    {
+                      "value": "185",
+                      "description": {
+                        "en": "Envelope Bank",
+                        "zh": "Envelope Bank"
+                      }
+                    },
+                    {
+                      "value": "222",
+                      "description": {
+                        "en": "Nest Bank Transfer",
+                        "zh": "Nest Bank Transfer"
+                      }
+                    },
+                    {
+                      "value": "223",
+                      "description": {
+                        "en": "BNP Paribas - Pay with Pl@net",
+                        "zh": "BNP Paribas - Pay with Pl@net"
+                      }
+                    },
+                    {
+                      "value": "243",
+                      "description": {
+                        "en": "mBank - mTransfer service",
+                        "zh": "mBank - mTransfer service"
+                      }
+                    },
+                    {
+                      "value": "266",
+                      "description": {
+                        "en": "P24now payment service",
+                        "zh": "P24now payment service"
+                      }
+                    },
+                    {
+                      "value": "270",
+                      "description": {
+                        "en": "mBank (ITP Service)",
+                        "zh": "mBank (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "271",
+                      "description": {
+                        "en": "ING Bank Śląski (ITP Service)",
+                        "zh": "ING Bank Śląski (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "272",
+                      "description": {
+                        "en": "BNP Paribas (ITP Service)",
+                        "zh": "BNP Paribas (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "274",
+                      "description": {
+                        "en": "PKO BP (ITP Service)",
+                        "zh": "PKO BP (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "275",
+                      "description": {
+                        "en": "Santander (ITP Service)",
+                        "zh": "Santander (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "279",
+                      "description": {
+                        "en": "Inteligo (ITP Service)",
+                        "zh": "Inteligo (ITP Service)"
+                      }
+                    },
+                    {
+                      "value": "280",
+                      "description": {
+                        "en": "mBank - Installment payments (duplicate entry)",
+                        "zh": "mBank - Installment payments (duplicate entry)"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "description": {
+              "en": "Bank identifier. Send the enum item `value`; `description` is only the bank name display text.",
+              "zh": "银行标识。请求中传入枚举项的 `value`，`description` 仅用于说明银行名称。"
+            }
+          },
+          {
+            "name": "walletAccountId",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required when the selected local payment method collects a wallet account or local account identifier.",
+              "zh": "所选本地支付方式需要采集钱包账户或本地账户标识符时必填。"
+            },
+            "description": {
+              "en": "Wallet or local account identifier.",
+              "zh": "钱包或本地账户标识符。"
+            }
+          },
+          {
+            "name": "walletAccountName",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required by selected `ATM_CARD` local payment methods.",
+              "zh": "特定 `ATM_CARD` 类本地支付方式需要。"
+            },
+            "description": {
+              "en": "Wallet or local account name.",
+              "zh": "钱包或本地账户名称。"
+            }
+          },
+          {
+            "name": "iBan",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for regional bank-transfer flows that use IBAN for bank identification.",
+              "zh": "在使用 IBAN 进行银行识别的地区转账时必填。"
+            },
+            "description": {
+              "en": "International Bank Account Number (IBAN).",
+              "zh": "国际银行账号。"
+            }
+          },
+          {
+            "name": "prepaidNumber",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required when the selected Japan prepaid payment method collects a prepaid card or voucher number.",
+              "zh": "所选日本预付类支付方式需要采集预付卡或充值卡号时必填。"
+            },
+            "description": {
+              "en": "Prepaid card or voucher number.",
+              "zh": "预付卡或充值卡号。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "merchantCustId",
+        "type": "string",
+        "example": "customer_12345",
+        "description": {
+          "en": "Unique customer identifier in the merchant system.",
+          "zh": "客户在商户系统中的唯一标识。"
+        },
+        "constraints": [
+          {
+            "kind": "rule",
+            "text": {
+              "en": "For non-subscription checkout, provide it when you want the hosted checkout page to offer saved-payment-method options.",
+              "zh": "非订阅收银台场景下，商户如希望降低复购摩擦，可传入该字段，收银台会向客户提供保存卡信息的选项。"
+            }
+          },
+          {
+            "kind": "consistency",
+            "text": {
+              "en": "For subscription checkout, use `subscription.merchantCustId` as the required subscription customer identifier; if top-level `merchantCustId` is submitted together with `subscription.merchantCustId`, the two values must match.",
+              "zh": "订阅交易中应以 `subscription.merchantCustId` 作为订阅客户标识；外层 `merchantCustId` 可不传，若同传则必须与 `subscription.merchantCustId` 保持一致。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "merchantNo",
+        "type": "string",
+        "required": true,
+        "example": "800209",
+        "description": {
+          "en": "Merchant number assigned by Onerway. See [Setup](/payments/get-started/setup#retrieve-your-credentials) for how to obtain it.",
+          "zh": "Onerway 分配的商户号；获取方式参见[接入准备](/zh/payments/get-started/setup#获取凭证)。"
+        }
+      },
+      {
+        "name": "merchantTxnId",
+        "type": "string",
+        "required": true,
+        "description": {
+          "en": "Unique transaction identifier generated by the merchant system for tracking, reconciliation, and duplicate prevention.",
+          "zh": "商户系统生成的每笔支付唯一交易标识，用于交易跟踪、对账和防重复处理。"
+        }
+      },
+      {
+        "name": "jpFirstName",
+        "type": "string",
+        "description": {
+          "en": "Customer first name in Japanese Katakana. Required only for Japan payment methods and Japan-issued cards.",
+          "zh": "日语片假名格式的名字；仅日本支付方式和日本发行的卡需要。"
+        },
+        "lifecycle": {
+          "status": "beta",
+          "since": "v1.4",
+          "description": {
+            "en": "Katakana name fields are in beta while we expand Japan coverage; validation rules may still change.",
+            "zh": "片假名姓名字段处于 Beta 阶段，日本覆盖范围仍在扩展，校验规则可能变动。"
+          }
+        }
+      },
+      {
+        "name": "merchantTxnTimeZone",
+        "type": "string",
+        "example": "+08:00",
+        "description": {
+          "en": "Timezone offset for `merchantTxnTime`. If omitted, Onerway records the transaction time in UTC+8.",
+          "zh": "`merchantTxnTime` 对应的时区偏移量；未传时 Onerway 默认使用 UTC+8 时区记录交易时间。"
+        }
+      },
+      {
+        "name": "metaData",
+        "type": "string",
+        "description": {
+          "en": "Merchant custom transaction data returned in transaction queries and asynchronous notifications.",
+          "zh": "商户自定义交易数据，可在交易查询和异步通知中返回。"
+        },
+        "constraints": [
+          {
+            "kind": "rule",
+            "text": {
+              "en": "JSON string format is recommended; when omitted, `metaData` is empty in queries and notifications.",
+              "zh": "建议使用 JSON 字符串；未传入时，交易查询和异步通知中的 `metaData` 为空。"
+            }
+          },
+          {
+            "kind": "consistency",
+            "text": {
+              "en": "If both top-level `metaData` and `subscription.metaData` are submitted, `subscription.metaData` takes precedence.",
+              "zh": "若外层 `metaData` 与 `subscription.metaData` 同时传入，以 `subscription.metaData` 为准。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "orderAmount",
+        "type": "string",
+        "required": true,
+        "example": "99.99",
+        "description": {
+          "en": "Transaction amount in the specified currency, formatted as a decimal string. For zero-decimal currencies, the amount must represent a whole amount; an all-zero decimal part is accepted, while non-zero decimals are rejected. Format rules follow [currency and amount validation](/payments/get-started/currency-and-amount).",
+          "zh": "指定货币的交易金额，使用十进制字符串。零小数币种必须表示整数金额，可带 `.00` 这类全 0 小数；非零小数会被拒绝。格式要求详见[币种与金额校验](/zh/payments/get-started/currency-and-amount)。"
+        }
+      },
+      {
+        "name": "orderCurrency",
+        "type": "string",
+        "required": true,
+        "example": "USD",
+        "description": {
+          "en": "Three-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) transaction currency. Must match `orderAmount`.",
+          "zh": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) 三位字母货币代码，需与 `orderAmount` 匹配。"
+        }
+      },
+      {
+        "name": "osType",
+        "type": "string",
+        "required": "conditional",
+        "condition": {
+          "en": "Required when `paymentMode` is `APP` or `WAP`.",
+          "zh": "当 `paymentMode` 为 `APP` 或 `WAP` 时必填。"
+        },
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "IOS",
+              "description": {
+                "en": "iOS device.",
+                "zh": "iOS 设备。"
+              }
+            },
+            {
+              "value": "ANDROID",
+              "description": {
+                "en": "Android device.",
+                "zh": "Android 设备。"
+              }
+            }
+          ]
+        },
+        "example": "IOS",
+        "description": {
+          "en": "Operating system type for mobile and app-based checkout transactions. Hosted checkout recommends `WEB` mode and usually does not require this field.",
+          "zh": "移动端和应用交易的操作系统类型。收银台建议使用 `WEB` 模式，通常不建议传此字段。"
+        }
+      },
+      {
+        "name": "paymentMode",
+        "type": "string",
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "WEB",
+              "description": {
+                "en": "Desktop browser payment.",
+                "zh": "桌面浏览器支付。"
+              }
+            },
+            {
+              "value": "APP",
+              "description": {
+                "en": "Native mobile app payment.",
+                "zh": "原生移动 App 支付。"
+              }
+            },
+            {
+              "value": "WAP",
+              "description": {
+                "en": "Mobile browser payment.",
+                "zh": "移动浏览器支付。"
+              }
+            }
+          ]
+        },
+        "default": "WEB",
+        "example": "WEB",
+        "description": {
+          "en": "Payment mode indicating the platform or environment for the transaction. Checkout recommends the default `WEB` mode.",
+          "zh": "交易平台或环境的支付模式；收银台建议使用默认值 `WEB`。"
+        }
+      },
+      {
+        "name": "paymentMethodOptions",
+        "type": "object",
+        "format": "json_string",
+        "description": {
+          "en": "Payment method configuration options. Checkout currently supports the `card` object.",
+          "zh": "支付方式配置选项。收银台当前仅包含 `card` 对象。"
+        },
+        "children": [
+          {
+            "name": "card",
+            "type": "object",
+            "description": {
+              "en": "Card-specific checkout options.",
+              "zh": "卡支付相关的收银台配置。"
+            },
+            "children": [
+              {
+                "name": "avsEnabled",
+                "type": "boolean",
+                "description": {
+                  "en": "Whether AVS (Address Verification Service) validation is enabled. Contact Onerway before enabling it. When set to `true`, the billing address is used for AVS checks and results are returned in `paymentMethodDetails.card.checks` through transaction queries and webhooks.",
+                  "zh": "是否开启 AVS（地址验证服务）验证；使用前需提前联系 Onerway。设为 `true` 时，将使用账单地址进行 AVS 验证；验证结果通过交易查询和 Webhook 在 `paymentMethodDetails.card.checks` 中返回。"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "productType",
+        "type": "string",
+        "required": true,
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "ALL",
+              "description": {
+                "en": "Unified Checkout. Display all payment methods available for the merchant and transaction conditions; when `lpmsInfo.lpmsType` is also provided, display only the specified local payment method.",
+                "zh": "聚合收银台，展示当前商户和交易条件下可用的所有支付方式；如同时传入 `lpmsInfo.lpmsType`，��仅展示指定本地支付方式。"
+              }
+            },
+            {
+              "value": "CARD",
+              "description": {
+                "en": "Card-only checkout. Display card payment methods only; support for authorization, subscriptions, installments, or saving payment information still depends on `subProductType`, `txnType`, and the merchant's enabled configuration.",
+                "zh": "仅展示卡支付方式；是否支持预授权、订阅、分期或保存卡等能力，还需结合 `subProductType`、`txnType` 和商户开通配置确认。"
+              }
+            }
+          ]
+        },
+        "example": "ALL",
+        "description": {
+          "en": "Payment method display scope for the hosted checkout. It controls which payment method categories the customer can choose from; the processing model is further determined by `subProductType` and `txnType`.",
+          "zh": "收银台支付方式展示范围，用于决定客户在收银台可选择的支付方式类别；后续交易处理方式还需结合 `subProductType` 和 `txnType` 判断。"
+        }
+      },
+      {
+        "name": "risk3dsStrategy",
+        "type": "string",
+        "lifecycle": {
+          "status": "new",
+          "since": "v1.6",
+          "description": {
+            "en": "Newly added to let you override Onerway's default 3DS decisioning per transaction.",
+            "zh": "新增字段，可按单笔交易覆盖 Onerway 默认的 3DS 决策策略。"
+          }
+        },
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "DEFAULT",
+              "description": {
+                "en": "Default strategy. Onerway decides whether to trigger 3DS based on the transaction, merchant configuration, and risk controls.",
+                "zh": "默认策略，由 Onerway 根据交易、商户配置和风控判断是否发起 3DS 验证。"
+              }
+            },
+            {
+              "value": "INNER",
+              "description": {
+                "en": "Force Onerway internal 3DS authentication.",
+                "zh": "强制走 Onerway 内部 3DS 验证流程。"
+              }
+            },
+            {
+              "value": "NONE",
+              "description": {
+                "en": "Do not use 3DS authentication. Availability depends on merchant configuration and risk requirements.",
+                "zh": "不走 3DS 验证；是否可用需结合商户配置和风控要求确认。"
+              }
+            }
+          ]
+        },
+        "default": "DEFAULT",
+        "example": "DEFAULT",
+        "description": {
+          "en": "3DS risk strategy for checkout transactions.",
+          "zh": "收银台交易的 3DS 风控策略。"
+        },
+        "constraints": [
+          {
+            "kind": "unsupported",
+            "text": {
+              "en": "Checkout does not support `EXTERNAL`.",
+              "zh": "收银台不支持 `EXTERNAL`。"
+            }
+          },
+          {
+            "kind": "rule",
+            "text": {
+              "en": "Contact Onerway before specifying a non-default strategy.",
+              "zh": "如需指定非默认策略，需提前联系 Onerway 确认配置。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "shippingInformation",
+        "type": "object",
+        "format": "json_string",
+        "required": true,
+        "description": {
+          "en": "Transaction shipping information, including customer delivery address and contact details.",
+          "zh": "交易收货信息，包括客户收货地址与联系方式。"
+        },
+        "children": [
+          {
+            "name": "firstName",
+            "type": "string",
+            "description": {
+              "en": "Customer first name.",
+              "zh": "客户名字。"
+            }
+          },
+          {
+            "name": "lastName",
+            "type": "string",
+            "description": {
+              "en": "Customer last name.",
+              "zh": "客户姓氏。"
+            }
+          },
+          {
+            "name": "jpFirstName",
+            "type": "string",
+            "description": {
+              "en": "Customer first name in Japanese Katakana. Required only for Japan payment methods and Japan-issued cards.",
+              "zh": "日语片假名格式的名字；仅日本支付方式和日本发行的卡需要。"
+            }
+          },
+          {
+            "name": "jpLastName",
+            "type": "string",
+            "description": {
+              "en": "Customer last name in Japanese Katakana. Required only for Japan payment methods and Japan-issued cards.",
+              "zh": "日语片假名格式的姓氏；仅日本支付方式和日本发行的卡需要。"
+            }
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "example": "replace_with_phone_number",
+            "description": {
+              "en": "Customer phone number, local part only (without country code); pass the country code separately in `phoneCountryCode`, which combines with this field into the full number. Onerway does not strictly validate the format.",
+              "zh": "客户电话号码，仅填本地号码（不含国家码）；国家码请单独传入 `phoneCountryCode`，二者组合为完整号码。Onerway 当前不强校验格式。"
+            }
+          },
+          {
+            "name": "phoneCountryCode",
+            "type": "string",
+            "required": "conditional",
+            "example": [
+              "351",
+              "1"
+            ],
+            "condition": {
+              "en": "Required when paying with the MB Way local payment method.",
+              "zh": "使用 MB Way 本地支付方式时必填。"
+            },
+            "description": {
+              "en": "Country dialing code of the customer phone number, digits only without `+`; combines with `phone` to form the full number.",
+              "zh": "客户电话号码的国家拨号码，纯数字、不含 `+`；与 `phone` 组合为完整号码。"
+            }
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Customer email address; used for transaction confirmations and dispute handling.",
+              "zh": "客户邮箱地址，用于交易确认和争议处理。"
+            }
+          },
+          {
+            "name": "postalCode",
+            "type": "string",
+            "description": {
+              "en": "Postal or ZIP code. Commonly used by AVS checks.",
+              "zh": "邮政编码；许多地区的 AVS 验证需要此字段。"
+            }
+          },
+          {
+            "name": "address",
+            "type": "string",
+            "description": {
+              "en": "Full address in a single field. It can replace split street, house number, and city fields for general address capture, but should not be used as the only address input when AVS is required.",
+              "zh": "完整地址字段，可替代街道、门牌号和城市等拆分字段；开启 AVS 时不建议仅用该字段替代拆分地址字段。"
+            }
+          },
+          {
+            "name": "country",
+            "type": "string",
+            "required": true,
+            "example": [
+              "US",
+              "CA"
+            ],
+            "description": {
+              "en": "Country in [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) format.",
+              "zh": "[ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) 国家或地区代码。"
+            }
+          },
+          {
+            "name": "province",
+            "type": "string",
+            "required": "conditional",
+            "example": [
+              "CA",
+              "ON"
+            ],
+            "condition": {
+              "en": "Required when `country` is `US` or `CA`.",
+              "zh": "当 `country` 为 `US` 或 `CA` 时必填。"
+            },
+            "description": {
+              "en": "Province or state code in [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) format.",
+              "zh": "[ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) 省/州代码。"
+            }
+          },
+          {
+            "name": "city",
+            "type": "string",
+            "description": {
+              "en": "City name. Recommended when AVS or a complete billing address is required to improve address completeness, authorization rate, and risk checks. Actual validation dimensions vary by issuer and region.",
+              "zh": "城市名称。开启 AVS 或需要完整账单地址时建议传入，用于补充地址完整性、授权率和风控判断；不同发卡行和地区的实际校验维度可能不同。"
+            }
+          },
+          {
+            "name": "street",
+            "type": "string",
+            "description": {
+              "en": "Street name. When AVS is enabled, provide it separately with `number`, `postalCode`, and `city` as billing-address verification data instead of relying only on the full `address` field.",
+              "zh": "街道名称。开启 AVS 时建议与 `number`、`postalCode`、`city` 拆分传入，作为账单地址验证相关信息；不要仅用完整 `address` 字段替代拆分地址。"
+            }
+          },
+          {
+            "name": "number",
+            "type": "string",
+            "description": {
+              "en": "House or building number. When AVS is enabled, provide it separately with `street`, `postalCode`, and `city` as billing-address verification data.",
+              "zh": "门牌号或建筑号。开启 AVS 时建议与 `street`、`postalCode`、`city` 拆分传入，作为账单地址验证相关信息。"
+            }
+          },
+          {
+            "name": "identityNumber",
+            "type": "string",
+            "description": {
+              "en": "Government-issued identity identifier, usually required by selected local payment methods. It may be a national ID number or a personal tax number.",
+              "zh": "政府颁发的身份标识，通常用于特定本地支付方式；可能是身份证号码，也可能是个人税号。"
+            }
+          },
+          {
+            "name": "birthDate",
+            "type": "string",
+            "description": {
+              "en": "Birth date in `yyyy/MM/dd` format.",
+              "zh": "出生日期，格式为 `yyyy/MM/dd`。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "sign",
+        "type": "string",
+        "required": true,
+        "description": {
+          "en": "Request signature string. See [Request signing](/payments/get-started/request-signing) for how to generate it.",
+          "zh": "请求签名字符串；生成方式详见[请求签名](/zh/payments/get-started/request-signing)。"
+        }
+      },
+      {
+        "name": "subProductType",
+        "type": "string",
+        "required": true,
+        "lifecycle": {
+          "status": "deprecated",
+          "since": "v1.5",
+          "description": {
+            "en": "Deprecated in favor of `productType`. Still accepted for backward compatibility but will be removed in a future version.",
+            "zh": "已弃用，请改用 `productType`。为向后兼容仍暂时接受，未来版本将移除。"
+          }
+        },
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "DIRECT",
+              "description": {
+                "en": "Ordinary checkout payment. Execute a one-time debit or authorization according to `txnType`.",
+                "zh": "普通收银台支付，按 `txnType` 执行一次性扣款或预授权。"
+              }
+            },
+            {
+              "value": "SUBSCRIBE",
+              "description": {
+                "en": "Initial subscription transaction. Used to create a subscription contract through checkout; `subscription` is required, and recurring billing, cancellation, and updates use the corresponding subscription APIs.",
+                "zh": "初始订阅交易，用于通过收银台创建订阅合约；需同时传入 `subscription`，后续扣款、取消和更新需走对应订阅接口。"
+              }
+            },
+            {
+              "value": "INSTALLMENT",
+              "description": {
+                "en": "Installment transaction. `txnOrderMsg.periodValue` must use a period value returned by the installment inquiry API.",
+                "zh": "分期交易；需在 `txnOrderMsg.periodValue` 中传入咨询分期期数���口返回的期数值。"
+              }
+            }
+          ]
+        },
+        "example": "DIRECT",
+        "description": {
+          "en": "Transaction processing mode under the selected payment method scope.",
+          "zh": "所选支付方式范围下的交易处理模式。"
+        },
+        "constraints": [
+          {
+            "kind": "consistency",
+            "text": {
+              "en": "Works with `productType` and `txnType` to define the transaction model.",
+              "zh": "需要与 `productType` 和 `txnType` 配合定义交易模型。"
+            }
+          },
+          {
+            "kind": "unsupported",
+            "text": {
+              "en": "Checkout does not support `TOKEN`.",
+              "zh": "收银台不支持 `TOKEN`。"
+            }
+          },
+          {
+            "kind": "rule",
+            "text": {
+              "en": "For saved-payment-method scenarios, pass `merchantCustId` in non-subscription checkout flows or use `subscription.bindCard` in hosted card subscription flows.",
+              "zh": "收银台如需让客户保存支付信息，可在非订阅场景传入 `merchantCustId`，或在托管卡订阅场景使用 `subscription.bindCard`。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "subscription",
+        "type": "object",
+        "format": "json_string",
+        "required": "conditional",
+        "condition": {
+          "en": "Required when `subProductType=SUBSCRIBE`.",
+          "zh": "当 `subProductType=SUBSCRIBE` 时必填。"
+        },
+        "description": {
+          "en": "Subscription information for creating or initializing a subscription through Checkout. This endpoint is only for the initial subscription request; subsequent billing, cancellation, and updates use the corresponding subscription APIs. Use `selfExecute=1` for Onerway-managed billing, or `selfExecute=2` for merchant-managed recurring billing.",
+          "zh": "用于通过收银台创建或初始化订阅的信息。本接口仅用于初始订阅；订阅后续扣款、取消、更新需走对应订阅接口。`selfExecute=1` 表示托管订阅；`selfExecute=2` 表示自主管理订阅。"
+        },
+        "children": [
+          {
+            "name": "requestType",
+            "type": "string",
+            "required": true,
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "0",
+                  "description": {
+                    "en": "Initial subscription request.",
+                    "zh": "初始订阅请求。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Subscription request type. Checkout subscription only supports `0` for the initial subscription request. `1` is not supported here and is used for subsequent billing APIs.",
+              "zh": "订阅请求类型。本接口仅用于初始订阅，仅支持 `0`。`1` 用于后续扣款场景，本接口不支持传入。"
+            }
+          },
+          {
+            "name": "merchantCustId",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Required subscription customer identifier in the merchant system, used to associate the subscription contract, payment method, and transaction records.",
+              "zh": "订阅客户在商户系统中的唯一标识，用于关联订阅合约、支付信息和交易记录。"
+            },
+            "constraints": [
+              {
+                "kind": "consistency",
+                "text": {
+                  "en": "If top-level `merchantCustId` is also submitted, it must match this value; the top-level field may be omitted.",
+                  "zh": "如果外层 `merchantCustId` 同时传入，必须与本字段保持一致；外层 `merchantCustId` 可不传。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "productName",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for Onerway-managed subscriptions (`selfExecute=1`).",
+              "zh": "Onerway 托管订阅（`selfExecute=1`）时必填。"
+            },
+            "description": {
+              "en": "Subscription product or plan name. Required for Onerway-managed subscriptions (`selfExecute=1`) and supported for merchant-managed subscriptions (`selfExecute=2`) when you need to identify the product or plan in the subscription record. The same customer cannot purchase the same product again before the existing subscription ends.",
+              "zh": "订阅产品或计划名称。Onerway 托管订阅（`selfExecute=1`）必填；商户自主管理订阅（`selfExecute=2`）也支持传入，用于在订阅记录中区分商品或计划。同一用户在订阅结束前不能重复购买同一商品。"
+            }
+          },
+          {
+            "name": "frequencyType",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for initial subscription purchases through checkout.",
+              "zh": "通过收银台发起订阅首次购买时必填。"
+            },
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "D",
+                  "description": {
+                    "en": "Bill by day.",
+                    "zh": "按天计费。"
+                  }
+                },
+                {
+                  "value": "M",
+                  "description": {
+                    "en": "Bill by month.",
+                    "zh": "按月计费。"
+                  }
+                },
+                {
+                  "value": "Y",
+                  "description": {
+                    "en": "Bill by year.",
+                    "zh": "按年计费。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Subscription billing frequency type.",
+              "zh": "订阅计费频率类型。"
+            },
+            "constraints": [
+              {
+                "kind": "values",
+                "text": {
+                  "en": "`selfExecute=1` supports `D`, `M`, and `Y`; `selfExecute=2` supports `D` only.",
+                  "zh": "`selfExecute=1` 支持 `D`、`M`、`Y`；`selfExecute=2` 仅支持 `D`。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "frequencyPoint",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for initial subscription purchases through checkout.",
+              "zh": "通过收银台发起订阅首次购买时必填。"
+            },
+            "description": {
+              "en": "Billing frequency point or interval used together with `frequencyType`.",
+              "zh": "与 `frequencyType` 配合使用的计费频率点或间隔值。"
+            },
+            "constraints": [
+              {
+                "kind": "values",
+                "text": {
+                  "en": "For `selfExecute=1`, allowed values are `1`, `7`, or `14` when `frequencyType=D`; `1`, `3`, or `6` when `frequencyType=M`; and only `1` when `frequencyType=Y`.",
+                  "zh": "托管订阅（`selfExecute=1`）中，`frequencyType=D` 时可传 `1`、`7`、`14`；`frequencyType=M` 时可传 `1`、`3`、`6`；`frequencyType=Y` 时仅可传 `1`。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "cycleCount",
+            "type": "integer",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for Onerway-managed subscriptions (`selfExecute=1`) when the plan end is defined by a fixed number of billing cycles.",
+              "zh": "托管订阅中使用固定周期数定义订阅计划时提供。"
+            },
+            "description": {
+              "en": "Number of Onerway-managed subscription cycles.",
+              "zh": "托管订阅计费周期数量。"
+            },
+            "constraints": [
+              {
+                "kind": "range",
+                "min": 1,
+                "max": 99,
+                "unit": {
+                  "en": "cycles",
+                  "zh": "期"
+                }
+              },
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "expireDate",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required when the subscription end is defined by an expiration date.",
+              "zh": "使用到期日期定义订阅结束时间时提供。"
+            },
+            "description": {
+              "en": "Subscription expiration date.",
+              "zh": "订阅到期日期。"
+            },
+            "constraints": [
+              {
+                "kind": "consistency",
+                "text": {
+                  "en": "Shares the maximum cycle count constraint with `cycleCount`; the subscription derived from `frequencyType` and `frequencyPoint` must not exceed `99` cycles.",
+                  "zh": "与 `cycleCount` 共享最大期数约束；按 `frequencyType` 和 `frequencyPoint` 推导出的订阅周期不得超过 `99` 期。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "mode",
+            "type": "string",
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "1",
+                  "description": {
+                    "en": "Obtain subscription authorization only; the first payment is collected by the merchant later. Available only for self-managed subscriptions (`selfExecute=2`).",
+                    "zh": "仅获取用户订阅授权，首期扣款改由商户自行发起；仅自主管理订阅（`selfExecute=2`）适用。"
+                  }
+                },
+                {
+                  "value": "2",
+                  "description": {
+                    "en": "Collect the first payment once the customer has authorized; applicable to card subscriptions and local payment methods that require authorization.",
+                    "zh": "获取用户授权后立即完成首期扣款；适用于卡订阅及需用户授权的本地支付方式。"
+                  }
+                }
+              ]
+            },
+            "default": "2",
+            "example": "2",
+            "description": {
+              "en": "How the first subscription payment is collected.",
+              "zh": "订阅首期扣款方式。"
+            },
+            "constraints": [
+              {
+                "kind": "values",
+                "text": {
+                  "en": "`1` obtains subscription authorization only and lets the merchant collect the first payment later; it is available only for `selfExecute=2`.",
+                  "zh": "`1` 仅获取用户订阅授权并返回授权结果，暂不扣款，首期扣款改由商户自行发起；仅自主管理订阅（`selfExecute=2`）适用。"
+                }
+              },
+              {
+                "kind": "rule",
+                "text": {
+                  "en": "`2` collects the first payment once the customer has authorized and is the default when omitted.",
+                  "zh": "`2` 获取用户授权后立即完成首期扣款；不传时默认为 `2`。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "selfExecute",
+            "type": "string",
+            "required": true,
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "1",
+                  "description": {
+                    "en": "Automatic billing by Onerway according to the subscription plan.",
+                    "zh": "由 Onerway 按订阅计划自动扣款。"
+                  }
+                },
+                {
+                  "value": "2",
+                  "description": {
+                    "en": "Merchant-triggered billing for each subscription cycle.",
+                    "zh": "由商户在每个订阅周期主动触发扣款。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Subscription execution mode.",
+              "zh": "订阅执行方式。"
+            }
+          },
+          {
+            "name": "bindCard",
+            "type": "boolean",
+            "description": {
+              "en": "Whether to save the customer card after a successful Onerway-managed card subscription.",
+              "zh": "托管卡订阅场景下，订阅成功后是否保存客户卡信息。"
+            },
+            "constraints": [
+              {
+                "kind": "rule",
+                "text": {
+                  "en": "The saved payment token is returned as `tokenId` in the asynchronous notification and should be stored for subsequent subscription APIs.",
+                  "zh": "保存的支付信息会通过异步通知中的 `tokenId` 返回，商户需保存并用于后续订阅接口。"
+                }
+              },
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "trialFromPlan",
+            "type": "string",
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "0",
+                  "description": {
+                    "en": "Trial period is not charged.",
+                    "zh": "试用期不收费。"
+                  }
+                },
+                {
+                  "value": "1",
+                  "description": {
+                    "en": "Trial period is charged according to the subscription plan.",
+                    "zh": "试用期按订阅计划收费。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Trial period billing mode for Onerway-managed subscriptions.",
+              "zh": "托管订阅的试用期计费控制。"
+            },
+            "constraints": [
+              {
+                "kind": "values",
+                "text": {
+                  "en": "`0` means the trial period is not charged; `1` means it is charged according to the plan.",
+                  "zh": "`0` 表示不计费；`1` 表示按订阅计划计费。"
+                }
+              },
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "trialDays",
+            "type": "integer",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for Onerway-managed subscriptions (`selfExecute=1`) when a trial length is configured by days.",
+              "zh": "Onerway 托管订阅（`selfExecute=1`）且按天数配置试用期时必填。"
+            },
+            "description": {
+              "en": "Trial period duration in days, counted from the subscription start.",
+              "zh": "试用期持续天数，用于指定从订阅生效后连续试用多少天。"
+            },
+            "constraints": [
+              {
+                "kind": "range",
+                "min": 3,
+                "max": 365,
+                "unit": {
+                  "en": "days",
+                  "zh": "天"
+                }
+              },
+              {
+                "kind": "consistency",
+                "text": {
+                  "en": "Supported for Onerway-managed subscriptions and mutually exclusive with `trialEnd`.",
+                  "zh": "托管订阅支持；与 `trialEnd` 二选一。"
+                }
+              },
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "trialEnd",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for Onerway-managed subscriptions (`selfExecute=1`) when a trial end date is configured.",
+              "zh": "Onerway 托管订阅（`selfExecute=1`）且配置试用期结束日期时必填。"
+            },
+            "description": {
+              "en": "Trial period end date used to specify when the trial period ends.",
+              "zh": "试用期结束日期，用于直接指定试用期截止到哪一天。"
+            },
+            "constraints": [
+              {
+                "kind": "consistency",
+                "text": {
+                  "en": "Supported for Onerway-managed subscriptions and mutually exclusive with `trialDays`.",
+                  "zh": "托管订阅支持；与 `trialDays` 二选一。"
+                }
+              },
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "notificationEmail",
+            "type": "string",
+            "description": {
+              "en": "Buyer email address used for subscription confirmation, status-change, and billing notifications.",
+              "zh": "订阅通知邮箱；订阅确认、状态变更、扣款通知都会发送到该邮箱。"
+            },
+            "constraints": [
+              {
+                "kind": "unsupported",
+                "text": {
+                  "en": "Not supported for `selfExecute=2`.",
+                  "zh": "`selfExecute=2` 自主管理订阅不支持。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "metaData",
+            "type": "string",
+            "description": {
+              "en": "Merchant custom subscription data.",
+              "zh": "订阅交易的自定义数据。"
+            },
+            "constraints": [
+              {
+                "kind": "consistency",
+                "text": {
+                  "en": "If both top-level `metaData` and `subscription.metaData` are submitted, `subscription.metaData` takes precedence.",
+                  "zh": "若外层 `metaData` 与 `subscription.metaData` 同时传入，以 `subscription.metaData` 为准。"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "txnOrderMsg",
+        "type": "object",
+        "format": "json_string",
+        "required": true,
+        "description": {
+          "en": "Transaction business information, including `returnUrl`, `notifyUrl`, `appId`, and product details. Browser, device, and cardholder IP data are collected by the hosted checkout page and are not submitted by the merchant in this request.",
+          "zh": "交易业务信息，包含 `returnUrl`、`notifyUrl`、`appId` 和商品信息等。浏览器、设备和持卡人 IP 信息由收银台页面侧采集，不在本请求中由商户传入。"
+        },
+        "children": [
+          {
+            "name": "returnUrl",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Synchronous return URL used to redirect the customer after payment. Add the merchant order ID or another identifier to the URL and query the transaction result after the customer returns.",
+              "zh": "客户付款完成后的同步返回地址。建议在 `returnUrl` 后拼接订单号或其他标识，并在客户同步返回时主动查询交易结果。"
+            }
+          },
+          {
+            "name": "products",
+            "type": "array<object>",
+            "format": "json_string",
+            "required": true,
+            "description": {
+              "en": "List of products purchased by the customer. Product amount, discount, and shipping fee entries must add up to `orderAmount`.",
+              "zh": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 `orderAmount`。"
+            },
+            "children": [
+              {
+                "name": "name",
+                "type": "string",
+                "required": true,
+                "description": {
+                  "en": "Product name.",
+                  "zh": "商品名称。"
+                }
+              },
+              {
+                "name": "price",
+                "type": "string",
+                "required": true,
+                "description": {
+                  "en": "Product unit price.",
+                  "zh": "商品单价。"
+                }
+              },
+              {
+                "name": "num",
+                "type": "string",
+                "required": true,
+                "description": {
+                  "en": "Product quantity.",
+                  "zh": "商品数量。"
+                }
+              },
+              {
+                "name": "currency",
+                "type": "string",
+                "required": true,
+                "description": {
+                  "en": "Three-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.",
+                  "zh": "[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) 货币代码。"
+                }
+              },
+              {
+                "name": "productAvatarUrl",
+                "type": "string",
+                "required": "conditional",
+                "condition": {
+                  "en": "Required for `stc pay`, `Tamara`, `Tabby`, and `MADA`.",
+                  "zh": "`stc pay`、`Tamara`、`Tabby`、`MADA` 必填。"
+                },
+                "description": {
+                  "en": "Product image URL.",
+                  "zh": "商品图片链接。"
+                }
+              },
+              {
+                "name": "desc",
+                "type": "string",
+                "description": {
+                  "en": "Product description.",
+                  "zh": "商品描述。"
+                }
+              },
+              {
+                "name": "type",
+                "type": "string",
+                "required": "conditional",
+                "condition": {
+                  "en": "Required for `stc pay`, `Tamara`, `Tabby`, and `MADA`; use `virtual` or `physical` for product lines that those methods must categorize.",
+                  "zh": "`stc pay`、`Tamara`、`Tabby`、`MADA` 必填；这些支付方式需要区分商品项时使用 `virtual` 或 `physical`。"
+                },
+                "enum": {
+                  "kind": "flat",
+                  "values": [
+                    {
+                      "value": "virtual",
+                      "description": {
+                        "en": "Virtual product.",
+                        "zh": "虚拟商品。"
+                      }
+                    },
+                    {
+                      "value": "physical",
+                      "description": {
+                        "en": "Physical product.",
+                        "zh": "实物商品。"
+                      }
+                    },
+                    {
+                      "value": "shipping_fee",
+                      "description": {
+                        "en": "Shipping fee line item.",
+                        "zh": "运费商品项。"
+                      }
+                    },
+                    {
+                      "value": "discount",
+                      "description": {
+                        "en": "Discount line item. The amount must be negative.",
+                        "zh": "折扣商品项，金额需要传负数。"
+                      }
+                    }
+                  ]
+                },
+                "description": {
+                  "en": "Product category. Omit this field for regular products. `virtual` and `physical` distinguish whether fulfillment is required; `shipping_fee` and `discount` can be used for all payment methods.",
+                  "zh": "商品类别；默认不填即普通商品。`virtual` 和 `physical` 用于区分是否涉及发货；`shipping_fee` 和 `discount` 可用于所有支付方式。"
+                }
+              }
+            ]
+          },
+          {
+            "name": "appId",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Store ID generated during Onerway onboarding.",
+              "zh": "店铺 ID，商户在 Onerway 入驻时生成并可在后台获取。"
+            }
+          },
+          {
+            "name": "customerPlatform",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required for `stc pay`, `Tamara`, `Tabby`, and `MADA`.",
+              "zh": "`stc pay`、`Tamara`、`Tabby`、`MADA` 必填。"
+            },
+            "description": {
+              "en": "Merchant platform identifier. Use the website domain for web transactions or the app name for app transactions.",
+              "zh": "商户平台标识。Web 端传网站域名，App 端传应用名称。"
+            }
+          },
+          {
+            "name": "periodValue",
+            "type": "string",
+            "required": "conditional",
+            "condition": {
+              "en": "Required when top-level `subProductType=INSTALLMENT`.",
+              "zh": "外层 `subProductType=INSTALLMENT` 时必填。"
+            },
+            "description": {
+              "en": "Installment payment period returned by the installment consultation API.",
+              "zh": "分期付款期数，应使用咨询分期期数接口返回的期数值。"
+            }
+          },
+          {
+            "name": "notifyUrl",
+            "type": "string",
+            "required": true,
+            "description": {
+              "en": "Server-side notification URL for asynchronous payment result callbacks. Merchants are advised to query the transaction result after receiving the webhook notification.",
+              "zh": "支付结果异步通知地址；商户收到 Webhook 通知后建议主动查询确认交易结果。"
+            }
+          }
+        ]
+      },
+      {
+        "name": "txnType",
+        "type": "string",
+        "required": true,
+        "enum": {
+          "kind": "flat",
+          "values": [
+            {
+              "value": "SALE",
+              "description": {
+                "en": "Debit-style transaction. Together with `subProductType=DIRECT`, `SUBSCRIBE`, or `INSTALLMENT`, it is used for ordinary payment, initial subscription, or installment payment.",
+                "zh": "扣款型交易。与 `subProductType=DIRECT` / `SUBSCRIBE` / `INSTALLMENT` 组合时，分别用于普通支付、初始订阅或分期交易。"
+              }
+            },
+            {
+              "value": "AUTH",
+              "description": {
+                "en": "Authorization-style transaction. Funds are authorized first and not captured immediately. It is usually used for card payment scenarios that support authorization; availability depends on the selected `productType`, `subProductType`, and the merchant's enabled configuration.",
+                "zh": "预授权型交易，先完成授权不立即请款。通常用于支持预授权的卡支付场景，仍需结合 `productType`、`subProductType` 和商户开通配置确认是否可用。"
+              }
+            }
+          ]
+        },
+        "example": "SALE",
+        "description": {
+          "en": "Transaction operation type. It works together with `productType` and `subProductType` to define the transaction model and is also returned in transaction queries and asynchronous notifications.",
+          "zh": "要执行的支付操作类型；该字段与 `productType`、`subProductType` 共同定义交易模型，交易查询和异步通知也会返回。"
+        }
+      }
+    ],
+    "examples": [
+      {
+        "id": "one-time-card",
+        "title": {
+          "en": "One-time checkout payment",
+          "zh": "一次性收银台支付"
+        },
+        "body": {
+          "billingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "cardInfo": "{\"holderName\":\"John Smith\"}",
+          "merchantNo": "{{MERCHANT-NO}}",
+          "merchantTxnId": "txn_demo_202605260001",
+          "merchantTxnTime": "2026-05-26 10:30:00",
+          "merchantTxnTimeZone": "+08:00",
+          "metaData": "{\"orderSource\":\"checkout-demo\"}",
+          "orderAmount": "99.99",
+          "orderCurrency": "USD",
+          "paymentMethodOptions": "{\"card\":{\"avsEnabled\":true}}",
+          "paymentMode": "WEB",
+          "productType": "ALL",
+          "shippingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "sign": "{{SIGN}}",
+          "subProductType": "DIRECT",
+          "txnOrderMsg": "{\"returnUrl\":\"{{RETURN-URL}}\",\"notifyUrl\":\"{{WEBHOOK-ENDPOINT}}\",\"products\":\"[{\\\"name\\\":\\\"Demo product\\\",\\\"price\\\":\\\"99.99\\\",\\\"num\\\":\\\"1\\\",\\\"currency\\\":\\\"USD\\\"}]\",\"appId\":\"{{APPID}}\",\"customerPlatform\":\"WEB\"}",
+          "txnType": "SALE"
+        }
+      },
+      {
+        "id": "save-payment-method",
+        "title": {
+          "en": "Save a payment method",
+          "zh": "保存支付方式"
+        },
+        "body": {
+          "billingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "cardInfo": "{\"holderName\":\"John Smith\"}",
+          "merchantCustId": "cust_demo_202605260001",
+          "merchantNo": "{{MERCHANT-NO}}",
+          "merchantTxnId": "txn_demo_save_method_202605260001",
+          "merchantTxnTime": "2026-05-26 10:30:00",
+          "merchantTxnTimeZone": "+08:00",
+          "metaData": "{\"orderSource\":\"checkout-demo\"}",
+          "orderAmount": "99.99",
+          "orderCurrency": "USD",
+          "paymentMethodOptions": "{\"card\":{\"avsEnabled\":true}}",
+          "paymentMode": "WEB",
+          "productType": "ALL",
+          "shippingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "sign": "{{SIGN}}",
+          "subProductType": "DIRECT",
+          "txnOrderMsg": "{\"returnUrl\":\"{{RETURN-URL}}\",\"notifyUrl\":\"{{WEBHOOK-ENDPOINT}}\",\"products\":\"[{\\\"name\\\":\\\"Demo product\\\",\\\"price\\\":\\\"99.99\\\",\\\"num\\\":\\\"1\\\",\\\"currency\\\":\\\"USD\\\"}]\",\"appId\":\"{{APPID}}\",\"customerPlatform\":\"WEB\"}",
+          "txnType": "SALE"
+        }
+      },
+      {
+        "id": "subscription",
+        "title": {
+          "en": "Subscription checkout payment",
+          "zh": "订阅收银台支付"
+        },
+        "body": {
+          "billingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "cardInfo": "{\"holderName\":\"John Smith\"}",
+          "merchantCustId": "cust_demo_subscription_202605260001",
+          "merchantNo": "{{MERCHANT-NO}}",
+          "merchantTxnId": "txn_demo_subscription_202605260001",
+          "merchantTxnTime": "2026-05-26 10:30:00",
+          "merchantTxnTimeZone": "+08:00",
+          "metaData": "{\"orderSource\":\"checkout-demo\"}",
+          "orderAmount": "99.99",
+          "orderCurrency": "USD",
+          "paymentMethodOptions": "{\"card\":{\"avsEnabled\":true}}",
+          "paymentMode": "WEB",
+          "productType": "ALL",
+          "shippingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "sign": "{{SIGN}}",
+          "subProductType": "SUBSCRIBE",
+          "subscription": "{\"requestType\":\"0\",\"merchantCustId\":\"cust_demo_subscription_202605260001\",\"productName\":\"Demo monthly subscription\",\"frequencyType\":\"M\",\"frequencyPoint\":\"1\",\"cycleCount\":12,\"mode\":\"2\",\"selfExecute\":\"1\",\"bindCard\":true,\"trialFromPlan\":\"0\",\"notificationEmail\":\"customer@example.com\",\"metaData\":\"{\\\"planCode\\\":\\\"monthly_basic\\\"}\"}",
+          "txnOrderMsg": "{\"returnUrl\":\"{{RETURN-URL}}\",\"notifyUrl\":\"{{WEBHOOK-ENDPOINT}}\",\"products\":\"[{\\\"name\\\":\\\"Demo product\\\",\\\"price\\\":\\\"99.99\\\",\\\"num\\\":\\\"1\\\",\\\"currency\\\":\\\"USD\\\"}]\",\"appId\":\"{{APPID}}\",\"customerPlatform\":\"WEB\"}",
+          "txnType": "SALE"
+        }
+      },
+      {
+        "id": "pre-authorization",
+        "title": {
+          "en": "Pre-authorization checkout payment",
+          "zh": "预授权收银台支付"
+        },
+        "body": {
+          "billingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "cardInfo": "{\"holderName\":\"John Smith\"}",
+          "merchantNo": "{{MERCHANT-NO}}",
+          "merchantTxnId": "txn_demo_auth_202605260001",
+          "merchantTxnTime": "2026-05-26 10:30:00",
+          "merchantTxnTimeZone": "+08:00",
+          "metaData": "{\"orderSource\":\"checkout-demo\"}",
+          "orderAmount": "99.99",
+          "orderCurrency": "USD",
+          "paymentMethodOptions": "{\"card\":{\"avsEnabled\":true}}",
+          "paymentMode": "WEB",
+          "productType": "ALL",
+          "shippingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "sign": "{{SIGN}}",
+          "subProductType": "DIRECT",
+          "txnOrderMsg": "{\"returnUrl\":\"{{RETURN-URL}}\",\"notifyUrl\":\"{{WEBHOOK-ENDPOINT}}\",\"products\":\"[{\\\"name\\\":\\\"Demo product\\\",\\\"price\\\":\\\"99.99\\\",\\\"num\\\":\\\"1\\\",\\\"currency\\\":\\\"USD\\\"}]\",\"appId\":\"{{APPID}}\",\"customerPlatform\":\"WEB\"}",
+          "txnType": "AUTH"
+        }
+      },
+      {
+        "id": "specify-local-payment-methods",
+        "title": {
+          "en": "Specify local payment methods",
+          "zh": "指定本地支付方式"
+        },
+        "body": {
+          "billingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "cardInfo": "{\"holderName\":\"John Smith\"}",
+          "lpmsInfo": "{\"lpmsType\":\"EFT\",\"bankName\":\"bancolombia\"}",
+          "merchantNo": "{{MERCHANT-NO}}",
+          "merchantTxnId": "txn_demo_lpms_202605260001",
+          "merchantTxnTime": "2026-05-26 10:30:00",
+          "merchantTxnTimeZone": "+08:00",
+          "metaData": "{\"orderSource\":\"checkout-demo\"}",
+          "orderAmount": "99.99",
+          "orderCurrency": "USD",
+          "paymentMethodOptions": "{\"card\":{\"avsEnabled\":true}}",
+          "paymentMode": "WEB",
+          "productType": "ALL",
+          "shippingInformation": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"phone\":\"4848980027\",\"phoneCountryCode\":\"1\",\"email\":\"customer@example.com\",\"postalCode\":\"94016\",\"address\":\"100 Market Street\",\"country\":\"US\",\"province\":\"CA\",\"city\":\"San Francisco\",\"street\":\"Market Street\",\"number\":\"100\"}",
+          "sign": "{{SIGN}}",
+          "subProductType": "DIRECT",
+          "txnOrderMsg": "{\"returnUrl\":\"{{RETURN-URL}}\",\"notifyUrl\":\"{{WEBHOOK-ENDPOINT}}\",\"products\":\"[{\\\"name\\\":\\\"Demo product\\\",\\\"price\\\":\\\"99.99\\\",\\\"num\\\":\\\"1\\\",\\\"currency\\\":\\\"USD\\\"}]\",\"appId\":\"{{APPID}}\",\"customerPlatform\":\"WEB\"}",
+          "txnType": "SALE"
+        }
+      }
+    ]
+  },
+  "response": {
+    "body": [
+      {
+        "name": "respCode",
+        "type": "string",
+        "description": {
+          "en": "Response code; `20000` means the request was processed successfully, other values are error codes. See [Response codes](/payments/api-reference/response-codes).",
+          "zh": "响应码；`20000` 表示请求处理成功，其余为错误码。完整码表见[响应码](/zh/payments/api-reference/response-codes)。"
+        }
+      },
+      {
+        "name": "respMsg",
+        "type": "string",
+        "description": {
+          "en": "Human-readable message for the response code.",
+          "zh": "响应码对应的可读说明。"
+        }
+      },
+      {
+        "name": "data",
+        "type": "object",
+        "description": {
+          "en": "Business data object for the checkout session creation response.",
+          "zh": "收银台会话创建响应的业务数据对象。"
+        },
+        "children": [
+          {
+            "name": "transactionId",
+            "type": "string",
+            "description": {
+              "en": "Transaction number generated by Onerway for tracking and querying.",
+              "zh": "Onerway 为本次交易生成的交易号，用于跟踪与查询。"
+            }
+          },
+          {
+            "name": "paymentId",
+            "type": "string",
+            "description": {
+              "en": "Payment intent ID identifying this payment; currently one request maps to one `paymentId`, one-to-one with `transactionId`.",
+              "zh": "支付意图 ID，标识本次支付；当前一笔请求对应一个 `paymentId`，与 `transactionId` 一一对应。"
+            }
+          },
+          {
+            "name": "merchantTxnId",
+            "type": "string",
+            "description": {
+              "en": "Merchant payment order number, echoing the `merchantTxnId` from the request.",
+              "zh": "商户支付订单号，回显请求中的 `merchantTxnId`。"
+            }
+          },
+          {
+            "name": "merchantNo",
+            "type": "string",
+            "description": {
+              "en": "Merchant number assigned by Onerway, identifying the merchant account.",
+              "zh": "Onerway 分配的商户号，标识商户账户。"
+            }
+          },
+          {
+            "name": "responseTime",
+            "type": "string",
+            "description": {
+              "en": "API response time in `yyyy-MM-dd HH:mm:ss` format.",
+              "zh": "接口响应时间，格式 `yyyy-MM-dd HH:mm:ss`。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value after the transaction is processed; empty at the checkout session creation stage.",
+                "zh": "交易处理后才有值；会话创建阶段为空。"
+              }
+            }
+          },
+          {
+            "name": "txnTime",
+            "type": "string",
+            "description": {
+              "en": "Transaction completion time in `yyyy-MM-dd HH:mm:ss` format.",
+              "zh": "交易完成时间，格式 `yyyy-MM-dd HH:mm:ss`。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value after the transaction completes; empty at the checkout session creation stage.",
+                "zh": "交易完成后才有值；会话创建阶段为空。"
+              }
+            }
+          },
+          {
+            "name": "orderAmount",
+            "type": "string",
+            "description": {
+              "en": "Original order amount in the transaction currency. Returned as a decimal string using the amount precision accepted for the submitted `orderCurrency`.",
+              "zh": "原始订单金额，以交易币种计价；以十进制字符串返回，精度遵循提交的 `orderCurrency` 可接受的小数规则。"
+            }
+          },
+          {
+            "name": "orderCurrency",
+            "type": "string",
+            "description": {
+              "en": "Order currency, a three-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.",
+              "zh": "下单币种，[ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) 三位字母货币代码。"
+            }
+          },
+          {
+            "name": "txnAmount",
+            "type": "string",
+            "deprecated": {
+              "description": {
+                "en": "Do not rely on this field for the settled amount. The actual settlement amount is settled per settlement batch; refer to the batch settlement details or report.",
+                "zh": "请勿依赖本字段判断到账金额。实际结算金额按结算批次结算，以对应批次的结算明细 / 结算报表为准。"
+              }
+            },
+            "description": {
+              "en": "Legacy settlement amount field.",
+              "zh": "旧版到账金额字段。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Deprecated field; no reliable settlement amount is available from the checkout session creation response.",
+                "zh": "已弃用字段；收银台会话创建响应中不提供可靠到账金额。"
+              }
+            }
+          },
+          {
+            "name": "txnCurrency",
+            "type": "string",
+            "deprecated": {
+              "description": {
+                "en": "Do not rely on this field for the settlement currency. The settlement currency follows the settlement configuration pre-agreed between the merchant and Onerway.",
+                "zh": "请勿依赖本字段判断结算币种。结算币种以商户与 Onerway 预先约定的结算配置为准。"
+              }
+            },
+            "description": {
+              "en": "Legacy settlement currency field.",
+              "zh": "旧版结算币种字段。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Deprecated field; no reliable settlement currency is available from the checkout session creation response.",
+                "zh": "已弃用字段；收银台会话创建响应中不提供可靠结算币种。"
+              }
+            }
+          },
+          {
+            "name": "txnTimeZone",
+            "type": "string",
+            "description": {
+              "en": "Transaction time zone offset in `±HH:mm` format.",
+              "zh": "交易时区偏移量，格式 `±HH:mm`。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value after the transaction completes; empty at the checkout session creation stage.",
+                "zh": "交易完成后才有值；会话创建阶段为空。"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "S",
+                  "description": {
+                    "en": "Successful transaction.",
+                    "zh": "交易成功。"
+                  }
+                },
+                {
+                  "value": "F",
+                  "description": {
+                    "en": "Failed transaction.",
+                    "zh": "交易失败。"
+                  }
+                },
+                {
+                  "value": "P",
+                  "description": {
+                    "en": "Transaction is processing.",
+                    "zh": "交易处理中。"
+                  }
+                },
+                {
+                  "value": "R",
+                  "description": {
+                    "en": "Redirect is required to continue payment.",
+                    "zh": "需要跳转以继续支付。"
+                  }
+                },
+                {
+                  "value": "N",
+                  "description": {
+                    "en": "Transaction was canceled.",
+                    "zh": "交易已取消。"
+                  }
+                },
+                {
+                  "value": "I",
+                  "description": {
+                    "en": "Transaction is under review or approval.",
+                    "zh": "交易审核或审批中。"
+                  }
+                },
+                {
+                  "value": "U",
+                  "description": {
+                    "en": "Checkout transaction is unpaid or unfinished.",
+                    "zh": "收银台交易未支付或未完成。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Current transaction processing status; always `U` (unpaid) right after the checkout session is created.",
+              "zh": "当前交易处理状态；收银台会话创建后恒为 `U`（未支付）。"
+            }
+          },
+          {
+            "name": "paymentStatus",
+            "type": "string",
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "I",
+                  "description": {
+                    "en": "Initialized payment intent.",
+                    "zh": "Payment intent 已初始化。"
+                  }
+                },
+                {
+                  "value": "U",
+                  "description": {
+                    "en": "Payment intent is pending.",
+                    "zh": "Payment intent 待处理。"
+                  }
+                },
+                {
+                  "value": "P",
+                  "description": {
+                    "en": "Payment intent is processing.",
+                    "zh": "Payment intent 处理中。"
+                  }
+                },
+                {
+                  "value": "R",
+                  "description": {
+                    "en": "Payment intent requires redirect.",
+                    "zh": "Payment intent 需要跳转。"
+                  }
+                },
+                {
+                  "value": "A",
+                  "description": {
+                    "en": "Payment intent is authorized.",
+                    "zh": "Payment intent 已授权。"
+                  }
+                },
+                {
+                  "value": "O",
+                  "description": {
+                    "en": "Payment intent is open.",
+                    "zh": "Payment intent 仍打开。"
+                  }
+                },
+                {
+                  "value": "S",
+                  "description": {
+                    "en": "Payment intent succeeded.",
+                    "zh": "Payment intent 已成功。"
+                  }
+                },
+                {
+                  "value": "N",
+                  "description": {
+                    "en": "Payment intent was canceled.",
+                    "zh": "Payment intent 已取消。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Payment-intent-level status. Currently one request maps to one payment intent and `paymentStatus` stays consistent with the transaction status; cross-attempt intent state transitions are not yet supported. `U` right after session creation.",
+              "zh": "支付意图级状态。当前一笔请求对应一个支付意图，`paymentStatus` 与交易状态保持一致，暂不支持跨多次尝试的意图状态流转；会话创建后为 `U`。"
+            }
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "description": {
+              "en": "Description of the failure reason for merchant troubleshooting and customer messaging.",
+              "zh": "交易失败原因说明，供商户排查与向客户提示。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value when the transaction is declined or fails; empty when the checkout session is created successfully.",
+                "zh": "交易被拒绝 / 失败时才有值；会话创建成功时为空。"
+              }
+            }
+          },
+          {
+            "name": "redirectUrl",
+            "type": "string",
+            "description": {
+              "en": "Checkout page URL; the merchant should redirect the customer here to complete the payment.",
+              "zh": "收银台页面地址；商户应将客户跳转至该地址完成支付流程。"
+            }
+          },
+          {
+            "name": "sign",
+            "type": "string",
+            "description": {
+              "en": "Response signature string; verifying the response signature is currently not recommended for merchants.",
+              "zh": "响应签名字符串；当前不建议商户对响应验签。"
+            }
+          },
+          {
+            "name": "contractId",
+            "type": "string",
+            "description": {
+              "en": "Subscription contract ID identifying the subscription; a key parameter for subsequent charges.",
+              "zh": "订阅合约号，标识订阅，是完成后续扣款的关键参数。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value after the initial subscription succeeds via asynchronous notification or query, usually stored together with `tokenId`; empty at checkout session creation.",
+                "zh": "初始订阅成功后才有值（经异步通知 / 查询），通常与 `tokenId` 成对存储；会话创建时为空。"
+              }
+            }
+          },
+          {
+            "name": "tokenId",
+            "type": "string",
+            "description": {
+              "en": "Payment token generated from the buyer's payment information. It may be a subscription token for subsequent charges or a card tokenization token for token payments; the two belong to different systems and must not be mixed. Store securely per PCI requirements.",
+              "zh": "支付 token，基于买家支付信息生成。可能是订阅 token（用于后续扣款）或卡令牌化 token（用于 token 支付）；两者属不同体系、不可混用。需按 PCI 要求妥善保管。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value after the initial subscription or card tokenization succeeds via asynchronous notification or query; empty at checkout session creation.",
+                "zh": "初始订阅成功或卡令牌化成��后才有值（经异步通知 / 查询）；会话创建时无值。"
+              }
+            }
+          },
+          {
+            "name": "eci",
+            "type": "string",
+            "description": {
+              "en": "Electronic Commerce Indicator (ECI) marking the transaction security level and liability shift.",
+              "zh": "电子商务指示符（ECI），标识交易安全等级与责任转移。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value only for 3DS transactions.",
+                "zh": "3DS 交易才有值。"
+              }
+            }
+          },
+          {
+            "name": "periodValue",
+            "type": "string",
+            "description": {
+              "en": "Number of installment periods.",
+              "zh": "分期付款期数。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value only for installment transactions.",
+                "zh": "分期交易才有值。"
+              }
+            }
+          },
+          {
+            "name": "lpmsType",
+            "type": "string",
+            "enum": {
+              "kind": "flat",
+              "values": [
+                {
+                  "value": "JdPay",
+                  "description": {
+                    "en": "JD Pay payment method.",
+                    "zh": "JD Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Alipay+",
+                  "description": {
+                    "en": "Alipay+ payment method.",
+                    "zh": "Alipay+ 支付方式。"
+                  }
+                },
+                {
+                  "value": "WeChat",
+                  "description": {
+                    "en": "WeChat Pay payment method.",
+                    "zh": "微信支付方式。"
+                  }
+                },
+                {
+                  "value": "AlipayHK",
+                  "description": {
+                    "en": "AlipayHK payment method.",
+                    "zh": "支付宝香港支付方式。"
+                  }
+                },
+                {
+                  "value": "AlipayCN",
+                  "description": {
+                    "en": "Alipay payment method in mainland China.",
+                    "zh": "支付宝中国内地支付方式。"
+                  }
+                },
+                {
+                  "value": "Kakao_Pay",
+                  "description": {
+                    "en": "Kakao Pay payment method.",
+                    "zh": "Kakao Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Klarna",
+                  "description": {
+                    "en": "Klarna payment method.",
+                    "zh": "Klarna 支付方式。"
+                  }
+                },
+                {
+                  "value": "Boleto",
+                  "description": {
+                    "en": "Boleto payment method.",
+                    "zh": "Boleto 支付方式。"
+                  }
+                },
+                {
+                  "value": "BankTransfer",
+                  "description": {
+                    "en": "Bank transfer payment method.",
+                    "zh": "银行转账支付方式。"
+                  }
+                },
+                {
+                  "value": "Banrisul",
+                  "description": {
+                    "en": "Banrisul bank payment method.",
+                    "zh": "Banrisul 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "Bradesco",
+                  "description": {
+                    "en": "Bradesco bank payment method.",
+                    "zh": "Bradesco 银���支付方式。"
+                  }
+                },
+                {
+                  "value": "Banco do Brasil",
+                  "description": {
+                    "en": "Banco do Brasil bank payment method.",
+                    "zh": "Banco do Brasil 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "Itau",
+                  "description": {
+                    "en": "Itaú bank payment method.",
+                    "zh": "Itaú 银行支付方式。"
+                  }
+                },
+                {
+                  "value": "MercadoPago",
+                  "description": {
+                    "en": "Mercado Pago payment method.",
+                    "zh": "Mercado Pago 支付方式。"
+                  }
+                },
+                {
+                  "value": "PIX",
+                  "description": {
+                    "en": "PIX instant payment method.",
+                    "zh": "PIX 即时支付方式。"
+                  }
+                },
+                {
+                  "value": "Servipag",
+                  "description": {
+                    "en": "Servipag payment method.",
+                    "zh": "Servipag 支付方式。"
+                  }
+                },
+                {
+                  "value": "Sencillito",
+                  "description": {
+                    "en": "Sencillito payment method.",
+                    "zh": "Sencillito 支付方式。"
+                  }
+                },
+                {
+                  "value": "Webpay",
+                  "description": {
+                    "en": "Webpay payment method.",
+                    "zh": "Webpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Multicaja",
+                  "description": {
+                    "en": "Multicaja payment method.",
+                    "zh": "Multicaja 支付方式。"
+                  }
+                },
+                {
+                  "value": "Baloto",
+                  "description": {
+                    "en": "Baloto cash payment method.",
+                    "zh": "Baloto 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "EFT",
+                  "description": {
+                    "en": "Electronic funds transfer payment method.",
+                    "zh": "电子资金转账支付方式。"
+                  }
+                },
+                {
+                  "value": "Efecty",
+                  "description": {
+                    "en": "Efecty cash payment method.",
+                    "zh": "Efecty 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "SPEI",
+                  "description": {
+                    "en": "SPEI bank transfer payment method.",
+                    "zh": "SPEI 银行转账支付方式。"
+                  }
+                },
+                {
+                  "value": "OXXO",
+                  "description": {
+                    "en": "OXXO cash voucher payment method.",
+                    "zh": "OXXO 现金凭证支付方式。"
+                  }
+                },
+                {
+                  "value": "OXXOPAY",
+                  "description": {
+                    "en": "OXXO Pay payment method.",
+                    "zh": "OXXO Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "PagoEfectivo",
+                  "description": {
+                    "en": "PagoEfectivo cash payment method.",
+                    "zh": "PagoEfectivo 现金支付方式。"
+                  }
+                },
+                {
+                  "value": "safetypay-cash",
+                  "description": {
+                    "en": "SafetyPay Cash payment method.",
+                    "zh": "SafetyPay Cash 支付方式。"
+                  }
+                },
+                {
+                  "value": "safetypay-online",
+                  "description": {
+                    "en": "SafetyPay Online payment method.",
+                    "zh": "SafetyPay Online 支付方式。"
+                  }
+                },
+                {
+                  "value": "PayU",
+                  "description": {
+                    "en": "PayU payment method.",
+                    "zh": "PayU 支付方式。"
+                  }
+                },
+                {
+                  "value": "Przelewy24",
+                  "description": {
+                    "en": "Przelewy24 payment method.",
+                    "zh": "Przelewy24 支付方式。"
+                  }
+                },
+                {
+                  "value": "Pagosnet",
+                  "description": {
+                    "en": "Pagosnet payment method.",
+                    "zh": "Pagosnet 支付方式。"
+                  }
+                },
+                {
+                  "value": "SEPADD",
+                  "description": {
+                    "en": "SEPA Direct Debit payment method.",
+                    "zh": "SEPA 直接借记支付方式。"
+                  }
+                },
+                {
+                  "value": "Sofort",
+                  "description": {
+                    "en": "Sofort payment method.",
+                    "zh": "Sofort 支付方式。"
+                  }
+                },
+                {
+                  "value": "Giropay",
+                  "description": {
+                    "en": "giropay payment method.",
+                    "zh": "giropay 支付方式。"
+                  }
+                },
+                {
+                  "value": "iDEAL",
+                  "description": {
+                    "en": "iDEAL payment method.",
+                    "zh": "iDEAL 支付方式。"
+                  }
+                },
+                {
+                  "value": "Konbini",
+                  "description": {
+                    "en": "Konbini convenience store payment method.",
+                    "zh": "Konbini 便利店支付方式。"
+                  }
+                },
+                {
+                  "value": "PayEasy",
+                  "description": {
+                    "en": "Pay-easy payment method.",
+                    "zh": "Pay-easy 支付方式。"
+                  }
+                },
+                {
+                  "value": "POLi",
+                  "description": {
+                    "en": "POLi payment method.",
+                    "zh": "POLi 支付方式。"
+                  }
+                },
+                {
+                  "value": "Bancontact",
+                  "description": {
+                    "en": "Bancontact payment method.",
+                    "zh": "Bancontact 支付方式。"
+                  }
+                },
+                {
+                  "value": "OVO",
+                  "description": {
+                    "en": "OVO wallet payment method.",
+                    "zh": "OVO 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "MyBank",
+                  "description": {
+                    "en": "MyBank payment method.",
+                    "zh": "MyBank 支付方式。"
+                  }
+                },
+                {
+                  "value": "Dragonpay",
+                  "description": {
+                    "en": "Dragonpay payment method.",
+                    "zh": "Dragonpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Skrill",
+                  "description": {
+                    "en": "Skrill payment method.",
+                    "zh": "Skrill 支付方式。"
+                  }
+                },
+                {
+                  "value": "eNETS",
+                  "description": {
+                    "en": "eNETS payment method.",
+                    "zh": "eNETS 支付方式。"
+                  }
+                },
+                {
+                  "value": "PayseraWallet",
+                  "description": {
+                    "en": "Paysera Wallet payment method.",
+                    "zh": "Paysera Wallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "LithuanianBanks",
+                  "description": {
+                    "en": "Lithuanian bank payment method.",
+                    "zh": "立陶宛银行支付方式。"
+                  }
+                },
+                {
+                  "value": "PaySafeCard",
+                  "description": {
+                    "en": "paysafecard prepaid payment method.",
+                    "zh": "paysafecard 预付卡支付方式。"
+                  }
+                },
+                {
+                  "value": "Paysafecash",
+                  "description": {
+                    "en": "paysafecash payment method.",
+                    "zh": "paysafecash 支付方式。"
+                  }
+                },
+                {
+                  "value": "Payconiq",
+                  "description": {
+                    "en": "Payconiq payment method.",
+                    "zh": "Payconiq 支付方式。"
+                  }
+                },
+                {
+                  "value": "Trustly",
+                  "description": {
+                    "en": "Trustly payment method.",
+                    "zh": "Trustly 支付方式。"
+                  }
+                },
+                {
+                  "value": "PAY_BY_BANK",
+                  "description": {
+                    "en": "Pay by Bank payment method.",
+                    "zh": "Pay by Bank 银行账户支付方式。"
+                  }
+                },
+                {
+                  "value": "GCash",
+                  "description": {
+                    "en": "GCash wallet payment method.",
+                    "zh": "GCash 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "GrabPay",
+                  "description": {
+                    "en": "GrabPay wallet payment method.",
+                    "zh": "GrabPay 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "PayMaya",
+                  "description": {
+                    "en": "Maya wallet payment method.",
+                    "zh": "Maya 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "ELEVEN",
+                  "description": {
+                    "en": "7-Eleven payment method.",
+                    "zh": "7-Eleven 支付方式。"
+                  }
+                },
+                {
+                  "value": "GrabPay SG",
+                  "description": {
+                    "en": "GrabPay Singapore wallet payment method.",
+                    "zh": "GrabPay Singapore 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "TrueMoney Wallet",
+                  "description": {
+                    "en": "TrueMoney Wallet payment method.",
+                    "zh": "TrueMoney Wallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "Rabbit_Line_pay",
+                  "description": {
+                    "en": "Rabbit LINE Pay payment method.",
+                    "zh": "Rabbit LINE Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "PromptPay",
+                  "description": {
+                    "en": "PromptPay payment method.",
+                    "zh": "PromptPay 支付方式。"
+                  }
+                },
+                {
+                  "value": "KRUNGSRI_ONLINE",
+                  "description": {
+                    "en": "Krungsri Online banking payment method.",
+                    "zh": "Krungsri Online 网银支付方式。"
+                  }
+                },
+                {
+                  "value": "BUALUANG_IBANKING",
+                  "description": {
+                    "en": "Bualuang iBanking payment method.",
+                    "zh": "Bualuang iBanking 支付方式。"
+                  }
+                },
+                {
+                  "value": "CITI_POINTS",
+                  "description": {
+                    "en": "Citi Rewards Points payment method.",
+                    "zh": "Citi Rewards Points 支付方式。"
+                  }
+                },
+                {
+                  "value": "K_PLUS",
+                  "description": {
+                    "en": "K PLUS payment method.",
+                    "zh": "K PLUS 支付方式。"
+                  }
+                },
+                {
+                  "value": "MCASH",
+                  "description": {
+                    "en": "MCash wallet payment method.",
+                    "zh": "MCash 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "TOUCH_GO_EWALLET",
+                  "description": {
+                    "en": "Touch 'n Go eWallet payment method.",
+                    "zh": "Touch 'n Go eWallet 支付方式。"
+                  }
+                },
+                {
+                  "value": "ShopeePay",
+                  "description": {
+                    "en": "ShopeePay wallet payment method.",
+                    "zh": "ShopeePay 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "Boost",
+                  "description": {
+                    "en": "Boost wallet payment method.",
+                    "zh": "Boost 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "BNI",
+                  "description": {
+                    "en": "BNI virtual account payment method.",
+                    "zh": "BNI 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "MANDIRI",
+                  "description": {
+                    "en": "Mandiri virtual account payment method.",
+                    "zh": "Mandiri 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "Maybank",
+                  "description": {
+                    "en": "Maybank virtual account payment method.",
+                    "zh": "Maybank 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "PERMATA",
+                  "description": {
+                    "en": "Permata virtual account payment method.",
+                    "zh": "Permata 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "BRI",
+                  "description": {
+                    "en": "BRI virtual account payment method.",
+                    "zh": "BRI 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "CIMB",
+                  "description": {
+                    "en": "CIMB virtual account payment method.",
+                    "zh": "CIMB 虚拟账户支付方式。"
+                  }
+                },
+                {
+                  "value": "DANA",
+                  "description": {
+                    "en": "DANA wallet payment method.",
+                    "zh": "DANA 钱包支付方式。"
+                  }
+                },
+                {
+                  "value": "QRIS",
+                  "description": {
+                    "en": "QRIS payment method.",
+                    "zh": "QRIS 支付方式。"
+                  }
+                },
+                {
+                  "value": "AKULAKU",
+                  "description": {
+                    "en": "Akulaku payment method.",
+                    "zh": "Akulaku 支付方式。"
+                  }
+                },
+                {
+                  "value": "Paypay",
+                  "description": {
+                    "en": "PayPay payment method.",
+                    "zh": "PayPay 支付方式。"
+                  }
+                },
+                {
+                  "value": "LINE_Pay",
+                  "description": {
+                    "en": "LINE Pay payment method.",
+                    "zh": "LINE Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Merpay",
+                  "description": {
+                    "en": "Merpay payment method.",
+                    "zh": "Merpay 支付方式。"
+                  }
+                },
+                {
+                  "value": "Rakuten_Pay",
+                  "description": {
+                    "en": "Rakuten Pay payment method.",
+                    "zh": "Rakuten Pay 支付方式。"
+                  }
+                },
+                {
+                  "value": "BitCash",
+                  "description": {
+                    "en": "BitCash payment method.",
+                    "zh": "BitCash 支付方式。"
+                  }
+                },
+                {
+                  "value": "Net_Cash",
+                  "description": {
+                    "en": "NetCash payment method.",
+                    "zh": "NetCash 支付方式。"
+                  }
+                },
+                {
+                  "value": "WebMoney",
+                  "description": {
+                    "en": "WebMoney payment method.",
+                    "zh": "WebMoney 支付方式。"
+                  }
+                },
+                {
+                  "value": "au",
+                  "description": {
+                    "en": "au PAY payment method.",
+                    "zh": "au PAY 支付方式。"
+                  }
+                },
+                {
+                  "value": "SoftBank",
+                  "description": {
+                    "en": "SoftBank carrier payment method.",
+                    "zh": "SoftBank 运营商支付方式。"
+                  }
+                },
+                {
+                  "value": "NTT_Docomo",
+                  "description": {
+                    "en": "d払い (Docomo) carrier payment method.",
+                    "zh": "d払い（Docomo）运营商支付方式。"
+                  }
+                },
+                {
+                  "value": "Paidy",
+                  "description": {
+                    "en": "Paidy payment method.",
+                    "zh": "Paidy 支付方式。"
+                  }
+                },
+                {
+                  "value": "BLIK",
+                  "description": {
+                    "en": "BLIK payment method.",
+                    "zh": "BLIK 支付方式。"
+                  }
+                },
+                {
+                  "value": "BLIK_SEAMLESS",
+                  "description": {
+                    "en": "BLIK Seamless payment method.",
+                    "zh": "BLIK Seamless 支付方式。"
+                  }
+                }
+              ]
+            },
+            "description": {
+              "en": "Local payment method type used for this transaction.",
+              "zh": "本次交易使用的本地支付方式类型。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value only for local payment method transactions; empty at checkout session creation.",
+                "zh": "使用本地支付方式的交易才有值；会话创建时为空。"
+              }
+            }
+          },
+          {
+            "name": "qrCode",
+            "type": "string",
+            "description": {
+              "en": "QR code value carrying the encoded payment information.",
+              "zh": "二维码值，承载编码的支付信息。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value only for QR-code-based payment methods; empty at checkout session creation.",
+                "zh": "使用二维码的支付方式才有值；会话创建时为空。"
+              }
+            }
+          },
+          {
+            "name": "subscriptionManageUrl",
+            "type": "string",
+            "description": {
+              "en": "Subscription management URL where the buyer can view and manage their subscription.",
+              "zh": "订阅管理地址，买家可通过该地址查看和管理订阅。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Has a value only in subscription scenarios.",
+                "zh": "订阅场景才有值。"
+              }
+            }
+          },
+          {
+            "name": "subscriptionsManageUrl",
+            "type": "string",
+            "description": {
+              "en": "Subscriptions list management URL for managing multiple subscriptions. Distinct from `subscriptionManageUrl` (singular), which manages a single subscription.",
+              "zh": "订阅列表管理地址，供买家集中管理其多个订阅。与 `subscriptionManageUrl`（单数）区分：单数为单个订阅管理页，复数为多订阅列表页。"
+            },
+            "nullability": {
+              "nullable": true,
+              "when": {
+                "en": "Returned when the buyer subscribes to multiple products at the same time.",
+                "zh": "买家同时订阅多个产品时返回。"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "examples": [
+      {
+        "id": "created",
+        "title": {
+          "en": "Checkout payment created",
+          "zh": "收银台支付已创建"
+        },
+        "body": {
+          "respCode": "20000",
+          "respMsg": "Success",
+          "data": {
+            "transactionId": "2064485863093829632",
+            "paymentId": "2064485863068663808",
+            "merchantTxnId": "txn_demo_202605260001",
+            "merchantNo": "{{MERCHANT-NO}}",
+            "responseTime": "",
+            "txnTime": "",
+            "orderAmount": "99.99",
+            "orderCurrency": "USD",
+            "txnAmount": "",
+            "txnCurrency": null,
+            "txnTimeZone": null,
+            "status": "U",
+            "paymentStatus": "U",
+            "reason": null,
+            "redirectUrl": "https://developers.onerway.com/example-checkout-redirect",
+            "sign": "{{SIGN}}",
+            "contractId": "",
+            "tokenId": null,
+            "eci": null,
+            "periodValue": null,
+            "lpmsType": null,
+            "qrCode": null,
+            "subscriptionManageUrl": null,
+            "subscriptionsManageUrl": null
+          }
+        }
+      }
+    ]
+  }
+}
