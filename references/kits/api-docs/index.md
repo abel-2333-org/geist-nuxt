@@ -13,13 +13,13 @@
 
 ## 组件清单
 
-| 组件 | 组件名 | 职责 | 详细文档 |
+| 文件 | 组件名 | 职责 | 详细文档 |
 |---|---|---|---|
-| `CodeBlock.vue` | `<CodeBlock>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
-| `RequestExample.vue` | `<RequestExample>` | 按业务场景切换的请求示例（委托 CodeBlock） | `request-example.md` |
-| `ResponseExample.vue` | `<ResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 CodeBlock） | `response-example.md` |
+| `api-docs/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
+| `api-docs/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
+| `api-docs/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
 
-> **组件名不带目录前缀**：starter 的 `nuxt.config.ts` 默认 `components: [{ path: '~/components', pathPrefix: false }]`，所以 `app/components/api/CodeBlock.vue` 的模板名就是 `<CodeBlock>`（不是 `<ApiCodeBlock>`）。保持文件 basename 唯一即可。
+> **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
 > **端点头 / 参数表**（原 EndpointHeader / ParamsTable）已移除，待重新设计。新造时按 `method/component-spec-template.md` 走 anatomy → states → accessibility 规格，再沉淀回本 kit。
 
@@ -47,7 +47,7 @@
 
 典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
 
-- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，���断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
   ```vue
   <SplitPane
@@ -98,20 +98,20 @@
 
 组件源码在 `packages/kits/api-docs/`（不在通用基座里）。**装入以 `registry.json` 切片为单位**（权威清单：`packages/kits/api-docs/registry.json`），按条目把 `files` 列的文件**全部**拷进项目：
 
-1. 按需要的条目整切片复制：如 `code-block` 切片 = `app/components/CodeBlock.vue` + `app/composables/useCodeWrap.ts`，分别拷到项目的 `app/components/api/` 与 `app/composables/`。`registryDependencies` 里列的切片要先拷（如 `request-example` 依赖 `code-block`）。
+1. 按需要的条目整切片复制：如 `code-block` 切片 = `app/components/api-docs/CodeBlock.vue` + `app/composables/useCodeWrap.ts`，按各文件 `target` 拷到项目的 `app/components/api-docs/` 与 `app/composables/`（保留 `api-docs/` 目录）。`registryDependencies` 里列的切片要先拷（如 `request-example` 依赖 `code-block`）。
 2. **core 依赖零动作**：`CopyButton` / `useCopy` 由 `@geist-nuxt/core` layer 提供（registry 条目的 `meta.coreDeps` 有声明），项目 `extends: ['@geist-nuxt/core']` 即天然在位，不需要复制。
-3. 如需组合演示，一并复制 `ApiDocsSection.vue` 到 `app/components/sections/`。
+3. 如需组合演示，一并复制 `Section.vue` 到 `app/components/api-docs/`（模板名 `<ApiDocsSection>`）。
 4. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，它是 core 包的依赖、随 core 自动就位。**不要**装 Shiki / `@nuxt/content`。
 
-> **组件名不带前缀**：starter 默认 `pathPrefix: false`，所以 `app/components/api/CodeBlock.vue` 在模板里就是 `<CodeBlock>`。保持所有组件 basename 唯一，避免解析冲突。
+> **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立、也才与消费者自有组件隔离。
 
-## 组合示例：`ApiDocsSection.vue`
+## 组合示例：`api-docs/Section.vue`（`<ApiDocsSection>`）
 
 ```vue
 <template>
   <section id="api-docs" class="space-y-8">
-    <CodeBlock :variants="requestSamples" />
-    <ResponseExample :scenarios="responseScenarios" />
+    <ApiDocsCodeBlock :variants="requestSamples" />
+    <ApiDocsResponseExample :scenarios="responseScenarios" />
   </section>
 </template>
 ```
@@ -134,7 +134,7 @@
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
 - **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
 
-## 架构蓝图：spec 驱动的渲染栈（pattern，非 drop-in）
+## 架构蓝图：spec 驱动的渲染���（pattern，非 drop-in）
 
 > **这一节是「怎么设计」的蓝图，不是可���制的资产。** kit 只 ship 3 个**数据无关的展示积木**（CodeBlock / RequestExample / ResponseExample，类型内联、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、字段组件，是**消��项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
 >
@@ -204,11 +204,11 @@ authoring 输入            适配                 领域输出              渲
 
 ## 源码参考（skill 内）
 
-- `packages/kits/api-docs/app/components/CodeBlock.vue`
-- `packages/kits/api-docs/app/components/RequestExample.vue`
-- `packages/kits/api-docs/app/components/ResponseExample.vue`
+- `packages/kits/api-docs/app/components/api-docs/CodeBlock.vue`
+- `packages/kits/api-docs/app/components/api-docs/RequestExample.vue`
+- `packages/kits/api-docs/app/components/api-docs/ResponseExample.vue`
 - `packages/kits/api-docs/app/composables/useCodeWrap.ts`
-- `packages/kits/api-docs/app/components/ApiDocsSection.vue` — 组合演示
+- `packages/kits/api-docs/app/components/api-docs/Section.vue` — 组合演示（`<ApiDocsSection>`）
 - 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`
 - 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 
@@ -216,5 +216,5 @@ authoring 输入            适配                 领域输出              渲
 
 - 不引入 `@nuxt/content` / Shiki / SQLite 来渲染这些代码块——组件式自包含即可。
 - 新增领域组件前，按 `method/component-spec-template.md` 先写 anatomy → states → accessibility 规格。
-- prop 名严格对齐：CodeBlock **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；Request/ResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
-- CodeBlock 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化；复制不要在 CodeBlock 里重写，用共享 `CopyButton`。
+- prop 名严格对齐：ApiDocsCodeBlock **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ApiDocsRequestExample/ApiDocsResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
+- ApiDocsCodeBlock 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化；复制不要在 ApiDocsCodeBlock 里重写，用共享 `CopyButton`。

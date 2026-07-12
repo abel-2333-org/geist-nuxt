@@ -2,47 +2,47 @@
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "@geist-nuxt/kit-api-docs",
   "homepage": "https://github.com/abel-2333-org/geist-nuxt",
-  "description": "API docs kit. Distribution unit is the SLICE: when copying a component into a consuming project, copy every file listed in its `files` array (components -> app/components/, composables -> app/composables/). `coreDeps` are satisfied automatically by extending @geist-nuxt/core. Dependency rules: kit -> own files (declared in slice) and kit -> core only; kit -> kit is forbidden — shared logic moves up to core.",
+  "description": "API docs kit. Distribution unit is the SLICE: when copying a component into a consuming project, copy every file listed in its `files` array to its `target` (components -> app/components/api-docs/, composables -> app/composables/). Keeping the api-docs/ directory gives every component the ApiDocs* prefix (pathPrefix:true) and isolates it from the consumer's own components. `coreDeps` are satisfied automatically by extending @geist-nuxt/core. Dependency rules: kit -> own files (declared in slice) and kit -> core only; kit -> kit is forbidden — shared logic moves up to core.",
   "items": [
     {
       "name": "code-block",
       "type": "registry:component",
-      "title": "CodeBlock",
+      "title": "ApiDocsCodeBlock",
       "description": "Syntax-highlighted code block with copy button and soft-wrap toggle.",
       "files": [
-        { "path": "app/components/CodeBlock.vue", "type": "registry:component" },
-        { "path": "app/composables/useCodeWrap.ts", "type": "registry:hook" }
+        { "path": "app/components/api-docs/CodeBlock.vue", "target": "app/components/api-docs/CodeBlock.vue", "type": "registry:component" },
+        { "path": "app/composables/useCodeWrap.ts", "target": "app/composables/useCodeWrap.ts", "type": "registry:hook" }
       ],
       "meta": { "coreDeps": ["useCopy", "CopyButton"] }
     },
     {
       "name": "request-example",
       "type": "registry:component",
-      "title": "RequestExample",
+      "title": "ApiDocsRequestExample",
       "description": "Multi-language request sample panel for API endpoint docs.",
       "registryDependencies": ["code-block"],
       "files": [
-        { "path": "app/components/RequestExample.vue", "type": "registry:component" }
+        { "path": "app/components/api-docs/RequestExample.vue", "target": "app/components/api-docs/RequestExample.vue", "type": "registry:component" }
       ]
     },
     {
       "name": "response-example",
       "type": "registry:component",
-      "title": "ResponseExample",
+      "title": "ApiDocsResponseExample",
       "description": "Response payload panel (status variants) for API endpoint docs.",
       "registryDependencies": ["code-block"],
       "files": [
-        { "path": "app/components/ResponseExample.vue", "type": "registry:component" }
+        { "path": "app/components/api-docs/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue", "type": "registry:component" }
       ]
     },
     {
       "name": "api-docs-section",
       "type": "registry:block",
       "title": "ApiDocsSection",
-      "description": "Full-width API docs assembly composing RequestExample and ResponseExample in a split layout.",
+      "description": "Full-width API docs assembly composing ApiDocsRequestExample and ApiDocsResponseExample in a split layout.",
       "registryDependencies": ["request-example", "response-example"],
       "files": [
-        { "path": "app/components/ApiDocsSection.vue", "type": "registry:block" }
+        { "path": "app/components/api-docs/Section.vue", "target": "app/components/api-docs/Section.vue", "type": "registry:block" }
       ],
       "meta": { "coreDeps": ["SplitPane", "useSplitPane"] }
     }

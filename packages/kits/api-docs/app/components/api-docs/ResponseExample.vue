@@ -115,7 +115,7 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
 </script>
 
 <template>
-  <CodeBlock
+  <ApiDocsCodeBlock
     :variants="currentStatus?.variants ?? []"
     :title="title ?? t.title"
     icon="i-lucide-file-json-2"
@@ -163,5 +163,5 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
         :ui="{ content: 'min-w-fit' }"
       />
     </template>
-  </CodeBlock>
+  </ApiDocsCodeBlock>
 </template>

@@ -70,9 +70,9 @@ const responseScenarios = [
       <h2 class="text-2xl font-semibold tracking-tight text-highlighted">API 文档场景</h2>
       <p class="text-muted max-w-2xl">
         用「组件规格模板」（anatomy → states → accessibility）设计的领域组件：
-        <code class="font-mono text-[0.8125rem]">CodeBlock</code>、
-        <code class="font-mono text-[0.8125rem]">RequestExample</code>、
-        <code class="font-mono text-[0.8125rem]">ResponseExample</code>，
+        <code class="font-mono text-[0.8125rem]">ApiDocsCodeBlock</code>、
+        <code class="font-mono text-[0.8125rem]">ApiDocsRequestExample</code>、
+        <code class="font-mono text-[0.8125rem]">ApiDocsResponseExample</code>，
         全部基于 Nuxt UI 原语与 Geist token，自包含、无内容管线依赖。
       </p>
     </div>
@@ -80,12 +80,12 @@ const responseScenarios = [
     <div class="space-y-8">
       <div>
         <h3 class="mb-3 text-sm font-semibold text-highlighted">请求示例</h3>
-        <CodeBlock :variants="requestSamples" />
+        <ApiDocsCodeBlock :variants="requestSamples" />
       </div>
 
       <div>
         <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
-        <ResponseExample :scenarios="responseScenarios" />
+        <ApiDocsResponseExample :scenarios="responseScenarios" />
       </div>
     </div>
   </section>
