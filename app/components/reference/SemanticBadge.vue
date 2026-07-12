@@ -2,11 +2,11 @@
 import type { BadgeProps } from '@nuxt/ui'
 import type { BadgeTone } from '~/types/domain'
 
-// Presentation ATOM: a semantic status badge. It knows nothing about
-// lifecycle / HTTP status / any domain concept — it only renders a curated
-// `tone` (color + a11y icon + text label). Mapping a domain value to a tone is
-// a PRESET concern (see lifecycle-preset.ts + LifecycleBadge.vue), kept out of
-// here so this atom is drop-in reusable for any state vocabulary.
+// Presentation ATOM: a semantic badge. It knows nothing about lifecycle /
+// HTTP method / any domain concept — it only renders a curated `tone` (color +
+// a11y icon + text label). Mapping a domain value to a tone is a PRESET concern
+// (see lifecycle-preset.ts + LifecycleBadge.vue, method-preset.ts + MethodBadge.vue),
+// kept out of here so this atom is drop-in reusable for any state vocabulary.
 //
 // Tone → UBadge color is the design-system's semantic calibration:
 //   success → healthy / available        warning → proceed with care

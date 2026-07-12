@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-// (inline rich text is rendered by a synchronous tokenizer in ProseText.vue,
+// (inline rich text is rendered by a synchronous tokenizer in InlineMarkdown.vue,
 //  so no markdown/MDC module is needed here.)
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',

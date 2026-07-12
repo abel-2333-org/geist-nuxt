@@ -230,7 +230,7 @@ const lifecycleMeta = computed(() => {
          it apart from the secondary metadata band below. -->
     <div v-if="hasDetail" class="mt-2.5 flex flex-col gap-4">
       <p v-if="description" class="text-sm leading-relaxed text-toned">
-        <ProseText :text="description" />
+        <InlineMarkdown :text="description" />
       </p>
 
       <!-- Secondary metadata band, ordered by a developer's call-time flow:
@@ -251,7 +251,7 @@ const lifecycleMeta = computed(() => {
           <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
             <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
           </span>
-          <ProseText :text="condition" />
+          <InlineMarkdown :text="condition" />
         </p>
 
         <!-- 2. Allowed values — the most actionable metadata. -->
@@ -287,7 +287,7 @@ const lifecycleMeta = computed(() => {
                 {{ note.label ?? 'Note' }}
               </dt>
               <dd class="min-w-0 text-toned">
-                <ProseText :text="note.text" />
+                <InlineMarkdown :text="note.text" />
               </dd>
             </div>
           </dl>
@@ -307,7 +307,7 @@ const lifecycleMeta = computed(() => {
         >
           <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>
           <template v-if="lifecycle.since">Since {{ lifecycle.since }}<template v-if="lifecycle.description">. </template></template>
-          <ProseText v-if="lifecycle.description" :text="lifecycle.description" />
+          <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </p>
       </div>
     </div>

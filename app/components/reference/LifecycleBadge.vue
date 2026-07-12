@@ -3,7 +3,7 @@ import type { BadgeProps } from '@nuxt/ui'
 import type { LifecycleStatus } from '~/types/domain'
 import { lifecyclePreset } from '~/utils/lifecycle-preset'
 
-// PRESET WRAPPER: turns a lifecycle value into the tone-based StatusBadge atom
+// PRESET WRAPPER: turns a lifecycle value into the tone-based SemanticBadge atom
 // via `lifecyclePreset`. This is where domain knowledge lives; the atom below
 // stays vocabulary-agnostic. Swap/extend the preset to retheme without editing
 // either this wrapper or the atom.
@@ -22,7 +22,7 @@ const meta = computed(() => lifecyclePreset[props.status])
 </script>
 
 <template>
-  <StatusBadge
+  <SemanticBadge
     :tone="meta.tone"
     :variant="meta.variant"
     :icon="meta.icon"

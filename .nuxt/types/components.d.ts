@@ -29,11 +29,11 @@ interface _GlobalComponents {
   FieldGroup: typeof import("../../app/components/reference/FieldGroup.vue")['default']
   FieldItem: typeof import("../../app/components/reference/FieldItem.vue")['default']
   InlineCode: typeof import("../../app/components/reference/InlineCode.vue")['default']
+  InlineMarkdown: typeof import("../../app/components/reference/InlineMarkdown.vue")['default']
   LifecycleBadge: typeof import("../../app/components/reference/LifecycleBadge.vue")['default']
   MethodBadge: typeof import("../../app/components/reference/MethodBadge.vue")['default']
   OperationHeader: typeof import("../../app/components/reference/OperationHeader.vue")['default']
-  ProseText: typeof import("../../app/components/reference/ProseText.vue")['default']
-  StatusBadge: typeof import("../../app/components/reference/StatusBadge.vue")['default']
+  SemanticBadge: typeof import("../../app/components/reference/SemanticBadge.vue")['default']
   ProseA: typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/A.vue")['default']
   ProseAccordion: typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/Accordion.vue")['default']
   ProseAccordionItem: typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/AccordionItem.vue")['default']
@@ -249,11 +249,11 @@ interface _GlobalComponents {
   LazyFieldGroup: LazyComponent<typeof import("../../app/components/reference/FieldGroup.vue")['default']>
   LazyFieldItem: LazyComponent<typeof import("../../app/components/reference/FieldItem.vue")['default']>
   LazyInlineCode: LazyComponent<typeof import("../../app/components/reference/InlineCode.vue")['default']>
+  LazyInlineMarkdown: LazyComponent<typeof import("../../app/components/reference/InlineMarkdown.vue")['default']>
   LazyLifecycleBadge: LazyComponent<typeof import("../../app/components/reference/LifecycleBadge.vue")['default']>
   LazyMethodBadge: LazyComponent<typeof import("../../app/components/reference/MethodBadge.vue")['default']>
   LazyOperationHeader: LazyComponent<typeof import("../../app/components/reference/OperationHeader.vue")['default']>
-  LazyProseText: LazyComponent<typeof import("../../app/components/reference/ProseText.vue")['default']>
-  LazyStatusBadge: LazyComponent<typeof import("../../app/components/reference/StatusBadge.vue")['default']>
+  LazySemanticBadge: LazyComponent<typeof import("../../app/components/reference/SemanticBadge.vue")['default']>
   LazyProseA: LazyComponent<typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/A.vue")['default']>
   LazyProseAccordion: LazyComponent<typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/Accordion.vue")['default']>
   LazyProseAccordionItem: LazyComponent<typeof import("../../node_modules/.pnpm/@nuxt+ui@4.9.0_2175488f394f813b71eec767251fb101/node_modules/@nuxt/ui/dist/runtime/components/prose/AccordionItem.vue")['default']>

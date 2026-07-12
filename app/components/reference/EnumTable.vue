@@ -128,7 +128,7 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
             <InlineCode class="break-all">{{ item.value }}</InlineCode>
           </dt>
           <dd v-if="item.description" class="min-w-0 text-sm leading-relaxed text-muted">
-            <ProseText :text="item.description" />
+            <InlineMarkdown :text="item.description" />
           </dd>
         </div>
       </dl>

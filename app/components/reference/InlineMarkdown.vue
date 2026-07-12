@@ -26,7 +26,7 @@ import InlineCode from './InlineCode.vue'
  * becomes a real requirement, revisit MDC instead of extending this.
  */
 export default defineComponent({
-  name: 'ProseText',
+  name: 'InlineMarkdown',
   props: {
     text: { type: String, required: true },
   },
@@ -87,7 +87,7 @@ export default defineComponent({
       return out
     }
 
-    return () => h('span', { class: 'prose-text' }, tokenize(props.text))
+    return () => h('span', { class: 'inline-markdown' }, tokenize(props.text))
   },
 })
 </script>
