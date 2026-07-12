@@ -4,10 +4,10 @@ declare module "nitropack/types" {
   type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
   interface InternalApi {
     '/__nuxt_error': {
-      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/.pnpm/@nuxt+nitro-server@4.4.8_@babel+plugin-syntax-typescript@7.29.7_@babel+core@7.29.7__db0_40a31237beea1d30401aee949d6c562f/node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/.pnpm/@nuxt+nitro-server@4.4.8_@babel+plugin-syntax-typescript@7.29.7_@babel+core@7.29.7__bet_a7ce5b569965f8449b01e65d503ed96f/node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
     }
     '/api/_nuxt_icon/:collection': {
-      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/.pnpm/@nuxt+icon@2.3.1_magicast@0.5.3_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.49.0_b82f0f50c4147604a3df567f0f3ee8ef/node_modules/@nuxt/icon/dist/runtime/server/api').default>>>>
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/.pnpm/@nuxt+icon@2.3.1_magicast@0.5.3_vite@7.3.6_jiti@2.7.0_lightningcss@1.32.0_terser@5.48.0_476f9573cc4eaa115da83d7c83e283d0/node_modules/@nuxt/icon/dist/runtime/server/api').default>>>>
     }
     '/__nuxt_island/**': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/#internal/nuxt/island-renderer').default>>>>

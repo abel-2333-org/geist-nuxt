@@ -5,18 +5,18 @@ import { resolve, dirname, join } from 'node:path';
 import crypto$1 from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///vercel/share/v0-project/node_modules/.pnpm/@vue+shared@3.5.39/node_modules/@vue/shared/dist/shared.cjs.js';
-import viteNodeEntry_mjs from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_3393f24801fa96139ef5ea1afedf8f46/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
-import { viteNodeFetch } from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_3393f24801fa96139ef5ea1afedf8f46/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
+import viteNodeEntry_mjs from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_6b8f2c7d9a6455cf6e326aa231fcb3af/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
+import { viteNodeFetch } from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_6b8f2c7d9a6455cf6e326aa231fcb3af/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///vercel/share/v0-project/node_modules/.pnpm/vue-bundle-renderer@2.3.1/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, parseQuery, parsePath, encodePath } from 'file:///vercel/share/v0-project/node_modules/.pnpm/ufo@1.6.4/node_modules/ufo/dist/index.mjs';
 import destr, { destr as destr$1 } from 'file:///vercel/share/v0-project/node_modules/.pnpm/destr@2.0.5/node_modules/destr/dist/index.mjs';
 import { createHooks } from 'file:///vercel/share/v0-project/node_modules/.pnpm/hookable@5.5.3/node_modules/hookable/dist/index.mjs';
 import { createFetch, Headers as Headers$1 } from 'file:///vercel/share/v0-project/node_modules/.pnpm/ofetch@1.5.1/node_modules/ofetch/dist/node.mjs';
 import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///vercel/share/v0-project/node_modules/.pnpm/node-mock-http@1.0.4/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, defineDriver, prefixStorage } from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_ioredis@5.11.1/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_ioredis@5.11.1/node_modules/unstorage/drivers/fs.mjs';
-import fsDriver from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_ioredis@5.11.1/node_modules/unstorage/drivers/fs-lite.mjs';
-import lruCache from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_ioredis@5.11.1/node_modules/unstorage/drivers/lru-cache.mjs';
+import { createStorage, defineDriver, prefixStorage } from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_better-sqlite3@12.11.1__ioredis@5.11.1/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_better-sqlite3@12.11.1__ioredis@5.11.1/node_modules/unstorage/drivers/fs.mjs';
+import fsDriver from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_better-sqlite3@12.11.1__ioredis@5.11.1/node_modules/unstorage/drivers/fs-lite.mjs';
+import lruCache from 'file:///vercel/share/v0-project/node_modules/.pnpm/unstorage@1.17.5_db0@0.3.4_better-sqlite3@12.11.1__ioredis@5.11.1/node_modules/unstorage/drivers/lru-cache.mjs';
 import { digest, hash as hash$1 } from 'file:///vercel/share/v0-project/node_modules/.pnpm/ohash@2.0.11/node_modules/ohash/dist/index.mjs';
 import { klona } from 'file:///vercel/share/v0-project/node_modules/.pnpm/klona@2.0.6/node_modules/klona/dist/index.mjs';
 import defu, { defuFn } from 'file:///vercel/share/v0-project/node_modules/.pnpm/defu@6.1.7/node_modules/defu/dist/defu.mjs';
@@ -31,15 +31,15 @@ import { SourceMapConsumer } from 'file:///vercel/share/v0-project/node_modules/
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { stringify, uneval } from 'file:///vercel/share/v0-project/node_modules/.pnpm/devalue@5.8.1/node_modules/devalue/index.js';
 import { captureRawStackTrace, parseRawStackTrace } from 'file:///vercel/share/v0-project/node_modules/.pnpm/errx@0.1.0/node_modules/errx/dist/index.js';
-import { isVNode, isRef, toValue } from 'file:///vercel/share/v0-project/node_modules/.pnpm/vue@3.5.39_typescript@6.0.3/node_modules/vue/index.mjs';
-import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_3393f24801fa96139ef5ea1afedf8f46/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { isVNode, isRef, toValue } from 'file:///vercel/share/v0-project/node_modules/.pnpm/vue@3.5.39_typescript@5.9.3/node_modules/vue/index.mjs';
+import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///vercel/share/v0-project/node_modules/.pnpm/@nuxt+vite-builder@4.4.8_@babel+plugin-syntax-jsx@7.29.7_@babel+core@7.29.7__lightningc_6b8f2c7d9a6455cf6e326aa231fcb3af/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file:///vercel/share/v0-project/node_modules/.pnpm/pathe@2.0.3/node_modules/pathe/dist/index.mjs';
 import { getIcons } from 'file:///vercel/share/v0-project/node_modules/.pnpm/@iconify+utils@3.1.4/node_modules/@iconify/utils/lib/index.js';
 import { collections } from 'file:///vercel/share/v0-project/.nuxt/nuxt-icon-server-bundle.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///vercel/share/v0-project/node_modules/.pnpm/unhead@2.1.15/node_modules/unhead/dist/server.mjs';
-import { renderToString } from 'file:///vercel/share/v0-project/node_modules/.pnpm/vue@3.5.39_typescript@6.0.3/node_modules/vue/server-renderer/index.mjs';
+import { renderToString } from 'file:///vercel/share/v0-project/node_modules/.pnpm/vue@3.5.39_typescript@5.9.3/node_modules/vue/server-renderer/index.mjs';
 import { walkResolver } from 'file:///vercel/share/v0-project/node_modules/.pnpm/unhead@2.1.15/node_modules/unhead/dist/utils.mjs';
 
 const serverAssets = [{"baseName":"server","dir":"/vercel/share/v0-project/server/assets"}];
@@ -63,7 +63,7 @@ function normalizeFsKey (item) {
   return `${prefix}-${hash}`
 }
 
-const _47vercel_47share_47v0_45project_47node_modules_47_46pnpm_47_64nuxt_43nitro_45server_644_464_468__64babel_43plugin_45syntax_45typescript_647_4629_467__64babel_43core_647_4629_467__db0_40a31237beea1d30401aee949d6c562f_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js = defineDriver(
+const _47vercel_47share_47v0_45project_47node_modules_47_46pnpm_47_64nuxt_43nitro_45server_644_464_468__64babel_43plugin_45syntax_45typescript_647_4629_467__64babel_43core_647_4629_467__bet_a7ce5b569965f8449b01e65d503ed96f_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js = defineDriver(
   /**
    * @param {{ base?: string }} opts
    */
@@ -95,7 +95,7 @@ storage.mount('/assets', assets$1);
 
 storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/vercel/share/v0-project","watchOptions":{"ignored":[null]}}));
 storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/vercel/share/v0-project/server","watchOptions":{"ignored":[null]}}));
-storage.mount('cache:nuxt:payload', _47vercel_47share_47v0_45project_47node_modules_47_46pnpm_47_64nuxt_43nitro_45server_644_464_468__64babel_43plugin_45syntax_45typescript_647_4629_467__64babel_43core_647_4629_467__db0_40a31237beea1d30401aee949d6c562f_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"/vercel/share/v0-project/node_modules/.pnpm/@nuxt+nitro-server@4.4.8_@babel+plugin-syntax-typescript@7.29.7_@babel+core@7.29.7__db0_40a31237beea1d30401aee949d6c562f/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"/vercel/share/v0-project/.nuxt/cache/nuxt/payload"}));
+storage.mount('cache:nuxt:payload', _47vercel_47share_47v0_45project_47node_modules_47_46pnpm_47_64nuxt_43nitro_45server_644_464_468__64babel_43plugin_45syntax_45typescript_647_4629_467__64babel_43core_647_4629_467__bet_a7ce5b569965f8449b01e65d503ed96f_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"/vercel/share/v0-project/node_modules/.pnpm/@nuxt+nitro-server@4.4.8_@babel+plugin-syntax-typescript@7.29.7_@babel+core@7.29.7__bet_a7ce5b569965f8449b01e65d503ed96f/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"/vercel/share/v0-project/.nuxt/cache/nuxt/payload"}));
 storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/vercel/share/v0-project/.nuxt"}));
 storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/vercel/share/v0-project/.nuxt/cache"}));
 storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/vercel/share/v0-project/.data/kv"}));
@@ -2401,7 +2401,7 @@ if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
 window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
 `;
 
-const _GFowTxh7qzFNaNojnfWXJudc7EPdxoSbLnJ7Ee0p8Ew = (function(nitro) {
+const _NGNmxTabEeFJvhHbnfSgvMZfkxHJo27bZMtQ6MTC1A = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script$1}<\/script>`);
   });
@@ -2437,7 +2437,7 @@ const asyncContext = getContext("nuxt-dev", {
 	asyncContext: true,
 	AsyncLocalStorage
 });
-const _jq1snwbzTD_Nq_uXQyZbIXW25pkc04awGaPE2tNS1Cc = (nitroApp) => {
+const _ZNuQktlPVvgbYkB9u_Ebgkg_BG0egwLre3pRZ37Bc = (nitroApp) => {
 	const handler = nitroApp.h3App.handler;
 	nitroApp.h3App.handler = (event) => {
 		return asyncContext.callAsync({
@@ -2521,8 +2521,8 @@ const _0WJ0tx4s6ciXXrhER9f4gZo1yqu5HZOVgshki1uunpI = (function(nitro) {
 });
 
 const plugins = [
-  _GFowTxh7qzFNaNojnfWXJudc7EPdxoSbLnJ7Ee0p8Ew,
-_jq1snwbzTD_Nq_uXQyZbIXW25pkc04awGaPE2tNS1Cc,
+  _NGNmxTabEeFJvhHbnfSgvMZfkxHJo27bZMtQ6MTC1A,
+_ZNuQktlPVvgbYkB9u_Ebgkg_BG0egwLre3pRZ37Bc,
 _0WJ0tx4s6ciXXrhER9f4gZo1yqu5HZOVgshki1uunpI,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
@@ -2552,7 +2552,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _liTc9e = eventHandler((event) => {
+const _pzjDmb = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -2715,7 +2715,7 @@ function getInstallCommand(pkg) {
   if (ua.startsWith("bun")) return `bun add -D ${pkg}`;
   return `npm i -D ${pkg}`;
 }
-const _SW4qtj = defineCachedEventHandler(async (event) => {
+const _NHVkhz = defineCachedEventHandler(async (event) => {
   const options = useAppConfig().icon;
   const collectionName = event.context.params?.collection?.replace(/\.json$/, "");
   const collection = collectionName && Object.hasOwn(collections, collectionName) ? await collections[collectionName]?.() : null;
@@ -3198,15 +3198,15 @@ async function getIslandContext(event) {
 	};
 }
 
-const _lazy_pirJnH = () => Promise.resolve().then(function () { return renderer; });
+const _lazy_Lrt6oG = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
-  { route: '', handler: _liTc9e, lazy: false, middleware: true, method: undefined },
-  { route: '/__nuxt_error', handler: _lazy_pirJnH, lazy: true, middleware: false, method: undefined },
-  { route: '/api/_nuxt_icon/:collection', handler: _SW4qtj, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _pzjDmb, lazy: false, middleware: true, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_Lrt6oG, lazy: true, middleware: false, method: undefined },
+  { route: '/api/_nuxt_icon/:collection', handler: _NHVkhz, lazy: false, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/_fonts/**', handler: _lazy_pirJnH, lazy: true, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_pirJnH, lazy: true, middleware: false, method: undefined }
+  { route: '/_fonts/**', handler: _lazy_Lrt6oG, lazy: true, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_Lrt6oG, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
