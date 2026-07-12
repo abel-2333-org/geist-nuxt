@@ -47,7 +47,7 @@
 
 典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
 
-- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，���断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
   ```vue
   <SplitPane
@@ -79,7 +79,7 @@
 
   以下两个是 `SplitPane` 的**内部零件**，需要脱离容器单独用（比如手写更特殊的布局）时才直接碰：
 
-- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高�����住）。
+- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高度撑住）。
   - **坑**：`group-hover:` 在 Tailwind v4 会被包进 `@media (hover:hover)`，所以 grip 的 hover 浮现只在有鼠标的设备上生效（触屏/无头浏览器 `hover:none` 不触发，属预期）；触屏与键盘用户靠 `active`（拖动中，非 hover 门控）和 `group-focus-visible`（非 hover 门控）两条路径拿到 grip，affordance 不会丢。别用 `transition-[opacity,background-color]` 这种带逗号的 arbitrary value——逗号会打断 Tailwind 的类名扫描、导致其后同一 `class` 里的工具类（含 `group-hover:*`）不被生成；用普通 `transition` 即可。
 - `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。
 
@@ -129,10 +129,10 @@
 装配整页时容易漏掉、但 review 必查的几条：
 
 - **标题层级不跳级**。页面只有一个 `<h1>`（operation 标题，在 `OperationHeader`，加 `text-balance` 防孤字）；其下的字段分组标题（`FieldGroup`）必须是 `<h2>`，不要图视觉小就写成 `<h3>`/`<h4>` 造成 `h1→h3` 跳跃。**用原生语义标题 `<h1>/<h2>`，不要用 Nuxt UI 的 `ProseH*`**——`ProseH*` 是 markdown 内容管线组件（读 `mdc.headings` 配置决定是否注入 `#` 锚点、排版是长文正文尺度），本 kit 刻意不装 MDC，用它只会退化成带正文尺度的普通标题并引入隐式 MDC 依赖。这些标题是「应用界面结构」而非「渲染出的 markdown 正文」，属不同层。
-- **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会整页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘要区被漏掉。
+- **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会整页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘��区被漏掉。
 - **提供 skip link**。`header + main` 结构要在最顶部放一个聚焦前 `sr-only`、`focus:not-sr-only` 的「Skip to content」锚点，`href="#main-content"` 指向 `<main id="main-content">`，让键盘 / AT 用户跳过 header。
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
-- **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
+- **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩���`truncate` 失效。
 
 ## 架构蓝图：spec 驱动的渲染���（pattern，非 drop-in）
 
