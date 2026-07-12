@@ -40,6 +40,9 @@
       "ofetch": [
         "../node_modules/.pnpm/ofetch@1.5.1/node_modules/ofetch"
       ],
+      "crossws": [
+        "../node_modules/.pnpm/crossws@0.3.5/node_modules/crossws"
+      ],
       "nitropack": [
         "../node_modules/.pnpm/nitropack@2.13.4_better-sqlite3@12.11.1_oxc-parser@0.133.0_vite@7.3.6_jiti@2.7.0_lightn_2e56fc77c8c9e52c57b8f852eda2ca4d/node_modules/nitropack"
       ],
