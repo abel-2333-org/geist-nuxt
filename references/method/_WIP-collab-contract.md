@@ -153,9 +153,30 @@ apps/gallery/app/pages/
 
 ---
 
+## 8. 落盘目标（已定：折进现有文件，不新增文档）
+
+契约定稿后各节的归宿。**执行时机**：待 §4 导航调研完成后一次性搬迁，随后删除本 WIP。
+
+| 契约节 | 落盘去向 | 说明 |
+|---|---|---|
+| §1 双区心智 | **`maintenance/sync.md`**（并入「改动方向」段） | 维护者纪律，消费对象=维护 skill 的人，不进每次建 UI 都读的 SKILL.md |
+| §2 即时 push | **`maintenance/sync.md`** | 同上，push 纪律属维护流程 |
+| §3 分包 / registry 边界 | **已固化在 `SKILL.md`**（第 20/22/23 行），契约不重复 | 只在契约留指针，避免漂移 |
+| §4 多路由展示模型 | **`references/gallery.md`** | gallery 结构知识；随导航调研落地一并写 |
+| §5 playground 生命周期 | **`method/component-reflow.md`** 补一段 | 它是「提升/回流」工作流的收尾环节 |
+| §6 push 前清单 | **`maintenance/sync.md`** | 维护者操作纪律 |
+| §6.5 git 连接方式（B） | **`maintenance/sync.md`** | 与「改动方向：只在真源改」同段，说明 chat 连接 + push 确认 |
+| §7 完整链路 | **`maintenance/sync.md`** 或 `method/`，作为端到端示例 | 定稿搬迁时二选一，倾向 sync.md 收尾处 |
+
+> **不新增文件**：maintenance 类内容全部折进现有 `maintenance/sync.md`（sync.md 会变长、
+> 职责从「同步机制」扩为「同步机制 + 协作纪律」，可接受）。符合「不盲目新增文档」原则。
+
+---
+
 ## 待办 / 未决
 
 - [x] §4 待核对项：kit compositions 陈列位置 → 定为 kit 自己子树（`kits/api-docs/index.vue`），见 §4 规则 3
 - [x] git 连接方式 → 方案 B（chat 连接仓库 + push 前确认），见 §6.5
-- [ ] §4 导航自动生成 + 移动端方案（专项调研，契约定稿后）
-- [ ] 落盘目标：本契约各节并入哪个正式文件（SKILL.md / method/ / maintenance/）
+- [x] 落盘目标 → 折进现有 `maintenance/sync.md`（不新增文档），见 §8 映射表
+- [ ] §4 导航自动生成 + 移动端方案（专项调研，契约定稿后）——**唯一剩余项**，属实现类任务
+- [ ] 待导航调研完成 → 按 §8 一次性搬迁并删除本 WIP
