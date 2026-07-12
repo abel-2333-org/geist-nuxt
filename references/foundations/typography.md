@@ -108,5 +108,5 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 ## 不要做
 
 - 不要引入 Geist / Geist Mono 之外的字体族。
-- 不要用固�� `px` 字号；用 Tailwind 字阶类保持节奏一致。
+- 不要用固定 `px` 字号；用 Tailwind 字阶类保持节奏一致。
 - 不要用 `font-bold` 以上字重堆层级——改用字号、颜色与留白。
