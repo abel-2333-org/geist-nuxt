@@ -109,3 +109,15 @@ apps/gallery/app/pages/
 - `mode="slideover"` 即 USlideover 抽屉（另有 `drawer`/`modal`）；`autoClose` 默认开，路由变化自动收起。
 - **一份数据源两处渲染**：桌面把 `useGalleryNav()` items 放进 `center` slot 的 `UNavigationMenu`；
   移动端把同一份 items 以 `orientation="vertical"` 放进 `#body` slot。符合硬规则「响应式用 Nuxt UI 的方式」。
+
+## Story 数据分层（按路由层级分，不是二选一）
+
+铁律先行：**kit 组件只认 ViewModel（`domain.ts` 形状），永不认识私有 spec**——像「文案无关」一样做到「数据格式无关」。
+`spec.ts`、`adaptSpec`、fixture **全住 gallery app**（对齐分包纪律：数据/helper 不进 kit）。在这条之上按路由层级分两层：
+
+| 层级 | 数据形态 | 为什么 |
+|---|---|---|
+| **原子/组件级 story**（`kits/<kit>/index.vue` 逐个 `<GalleryEntry>`） | **内联假 ViewModel** | 自包含、截图稳定；且恰好证明组件只靠 ViewModel 就能跑（不牵扯 adapter） |
+| **页面级毕业形态**（`reference.vue` 整屏成品） | **fixture `spec.json` + gallery 本地 adapter** | 整页要真实丰富数据；且这正是消费项目真实要做的端到端链路（spec → 自己的 adapter → ViewModel → 组件），拿真链路演示最诚实 |
+
+两层不矛盾——它们精确对应上面 §「页面组织」的两层路由。无论哪层，**kit 组件始终只见 ViewModel，复用性零损伤**。
