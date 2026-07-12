@@ -32,6 +32,14 @@ export default defineNuxtConfig({
   },
 
   ui: {
+    // Register Nuxt UI's Prose components (ProseCode/ProseA/ProseStrong/ProseEm…)
+    // for EVERY consumer of this layer. They are gated behind this flag in Nuxt
+    // UI (and otherwise ignored by component scanning), so without it the core
+    // atoms that build on them — InlineCode and InlineMarkdown — fail to resolve
+    // at runtime. Enabling `prose` alone does NOT require @nuxt/content; it just
+    // registers the standalone styled Prose components.
+    prose: true,
+
     // Register the extra semantic alias so `secondary`-colored components work.
     // Geist has no cyan; its accent maps to `teal`.
     theme: {
