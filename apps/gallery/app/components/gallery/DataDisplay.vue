@@ -60,6 +60,45 @@ const columns = [
     </GalleryEntry>
 
     <GalleryEntry
+      name="SemanticBadge"
+      description="Tone atom over UBadge: a curated semantic tone (success/warning/neutral/error/info/secondary) paired with an icon + label. Domain→tone mapping stays in presets."
+      :usage-href="`${DOC}#semanticbadge`"
+    >
+      <GalleryExample label="Tones">
+        <SemanticBadge tone="success" label="Available" icon="i-lucide-check-circle" />
+        <SemanticBadge tone="warning" label="Deprecated" icon="i-lucide-alert-triangle" />
+        <SemanticBadge tone="neutral" label="Sunset" icon="i-lucide-moon" />
+        <SemanticBadge tone="error" label="Removed" icon="i-lucide-x-circle" />
+        <SemanticBadge tone="info" label="Read-only" icon="i-lucide-info" />
+        <SemanticBadge tone="secondary" label="Alternate" icon="i-lucide-sparkles" />
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
+      name="InlineCode"
+      description="Inline code token on a tonal surface (Nuxt UI ProseCode calibrated to Geist: 6px radius, Copy 13 Mono). For values, defaults and allowed values within prose."
+      :usage-href="`${DOC}#inlinecode`"
+    >
+      <GalleryExample label="In a sentence" layout="stack">
+        <p class="text-sm text-muted">
+          Set <InlineCode>timeout_ms</InlineCode> to a value such as <InlineCode>3000</InlineCode>.
+        </p>
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
+      name="InlineMarkdown"
+      description="Synchronous, SSR-stable renderer for the inline markdown subset (code, links, bold, em, strikethrough). Lighter than MDC for authored copy that is always inline."
+      :usage-href="`${DOC}#inlinemarkdown`"
+    >
+      <GalleryExample label="Inline subset" layout="stack">
+        <p class="text-sm text-muted">
+          <InlineMarkdown text="Supports **bold**, *em*, `code`, ~~strikethrough~~ and [links](https://vercel.com)." />
+        </p>
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
       name="UKbd"
       description="Keyboard key hint (display only)."
       :usage-href="`${DOC}#ukbd`"
