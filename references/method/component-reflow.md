@@ -6,6 +6,20 @@
 
 ---
 
+## 开发阶段：playground 生命周期（回流前的脚手架）
+
+组件在做成、决定回流之前，先在 gallery 的 **playground 草稿路由**里开发，不弄脏正式页：
+
+| 阶段 | playground 角色 |
+|---|---|
+| 开发中 | **主力**。建 `apps/gallery/app/pages/playground.vue`（独立草稿路由，**不碰正式页**），用 chrome + 示例数据摆出在改的组件，预览切 `/playground` 看 HMR 即时刷新。 |
+| 定稿后 | **退场**。有价值的演示提升进正式路由（下面第 3 步 / kit 子树的页面级形态）；纯脚手架部分删除。若想留作调试页，则用 `definePageMeta({ nav: false })` 隐藏（不进导航，见 `references/gallery.md`）。 |
+
+- 名字就叫 `playground`，核心是"草稿页 ≠ 正式页，各占各的路由"。
+- 提升是 copy 动作、易忘删 → **"删除/降级 playground"是回流的强制收尾**，并入 push 前清单（见 `maintenance/sync.md`）。多路由下删 `playground.vue` = 导航项自动消失，无残留。
+
+---
+
 ## 第 0 步：采纳决策（人拍板，AI 不替代）
 
 回流前先确认这组件**值得进 core**。逐条自检，全部为「是」才继续：
@@ -67,6 +81,18 @@
 ## 完成后
 
 CI 绿灯后，按 `maintenance/sync.md` 把新 `dist-skill` 整体覆盖到记忆区。此后**所有 v0 账号的新会话**都能通过 extends core 直接用上这个组件（自动导入，无需改 starter 文件——`index.vue` 永远只是 `<GeistShowcase />`）；它的可视样子在 gallery 目录里查看。注意：starter 的默认预览（`<GeistShowcase />`）只展示基础 + 招牌组合，不会逐个列出新组件——那是 gallery catalog 的职责。
+
+## 端到端链路（以一套 API reference 组件为例）
+
+把上面的阶段串成一次真实会话的样子：
+
+1. 「设计一个 API 字段介绍组件」→ 组件建进 kit `packages/kits/api-docs/app/components/api-docs/`（`<ApiDocs*>`）。
+2. gallery 建 `pages/playground.vue`，用 chrome + fixture 摆出来 → 预览 `/playground` 实时调。
+3. 定稿 → 演示提升进 `pages/kits/api-docs/reference.vue`（页面级形态，自动进导航）；playground 临时件删除。
+4. 走 push 前清单（见 `maintenance/sync.md`）：kit 组件 + registry / gallery 的 api-docs 路由 + fixture / 丢弃 playground 临时件——三类分别说明，人审授权。
+5. push → CI 发版 → 同步记忆区（见 `maintenance/sync.md`）。gallery 导航自动从路由树生成，所有组件可见。
+
+> **数据分层铁律**（详见 `references/gallery.md`）：kit 组件只认 ViewModel；`spec.ts` / `adaptSpec` / fixture 全住 gallery app，永不进 kit。原子级 story 用内联假 ViewModel，页面级形态用 fixture + gallery 本地 adapter 演示真实链路。
 
 ## 一句话记忆
 
