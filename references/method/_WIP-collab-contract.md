@@ -56,29 +56,46 @@
 
 ---
 
-## 4. 展示三档模型（catalog / compositions / pages）
+## 4. 展示模型：多路由 + kit 子树 + 按需毕业
 
-粒度分三档，每档都有既定归宿：
+gallery 从**单页竖向堆叠**（`pages/index.vue` 里 Showcase→Catalog→ApiDocsSection）
+改为**文件路由**：一个逻辑分组 = 一个路由。粒度不再是结构分类（"该堆哪"的轴消失），
+只是"某个视图里 demo 多大"的表现细节。路由树本身就是唯一的一维结构。
 
-| 粒度 | 例子 | 展示位 |
-|---|---|---|
-| **原子组件** | UButton、MethodBadge、InlineCode | **catalog**：`pages/index.vue` 逐个 `<GalleryEntry>`，带 facet |
-| **组合 composition** | FieldGroup（=FieldItem+Badge+Code）、SignupForm | **compositions 层**（见下方待核对项） |
-| **页面级成品** | 完整 API reference 文档页 | **独立路由** `pages/xxx.vue` + 导航入口 |
+**路由结构（目标形态）：**
 
-**三条补丁（review 后加入，防碎片化 / 孤儿路由 / 重复漂移）：**
+```plaintext
+apps/gallery/app/pages/
+  index.vue                    → Overview（Hero + Foundations + 招牌组合）
+  components/index.vue         → 原子组件 catalog（现在的六组 <GalleryEntry>）
+  compositions/index.vue       → core 组合陈列（SignupForm 等）
+  kits/
+    api-docs/
+      index.vue                → 该 kit 零件总览（原子 + 组合，小 demo）
+      reference.vue            → 页面级完整形态（整屏 chrome，SplitPane 分栏）
+```
 
-1. **中间态归 compositions**：比原子大、比页面小的组合件，放 compositions 层，
-   不塞 catalog、不为它单开路由。新路由**只**留给"页面级、多区块、有布局的成品形态"。
-2. **导航自动生成**：AppHeader 导航从 `pages/` 路由自动生成（不手工维护），
-   "加页面"与"加入口"合并为一件事。→ 需专项调研（Nuxt 文件路由 meta + Nuxt UI 导航组件；
-   入口变多要分组；移动端收进抽屉/USlideover）。**押后到契约定稿再做。**
-3. **playground 处置是"提升"动作的强制收尾**，并进 push 前清单（见 §5、§6）。
+**三条规则（定死）：**
 
-> **待核对项（写正式文档前需查 gallery 现有结构再定）**：
-> compositions 目前是 core 概念（`composition/` + showcase 的 `Compositions.vue`）。
-> 但 FieldGroup 属于 kit(api-docs)。需明确 **kit 也可有自己的 compositions**，
-> 以及 gallery 里"core compositions"与"kit compositions"各陈列在哪个位置/路由。
+1. **一个 kit 一个子树（方案乙）**：kit 是"一个领域的整套零件"，不是单个组件。
+   一个 kit 占一个目录子树，kit 内部再按粒度分——尊重 kit 的内聚（成套可见、成套复制）。
+2. **按需毕业**：一个 kit 默认只有 `index.vue`（零件总览）。只有当它出现"页面级形态"
+   （需整屏布局/chrome、多区块的成品，如 SplitPane API reference）时，才为那个形态毕业出
+   一个兄弟路由（如 `reference.vue`）。没有页面级形态的小 kit 就一页搞定，不强行分。
+3. **kit 的原子/组合留在自己子树**：不在全局 `components/`、`compositions/` 路由里重复露出。
+   全局那两个路由只放 core 的原子/组合；跨 kit 横向对比不作为目标，避免重复展示成本。
+
+> **原「待核对项」已解决**：kit 的 compositions（如 FieldGroup）陈列在**该 kit 自己的子树**
+> （`kits/api-docs/index.vue`），不进全局 compositions 路由。"kit 也可有自己的 compositions"
+> 成立，归位方式由上面规则 3 定死。
+
+**导航自动生成（押后调研）**：AppHeader 导航从 `pages/` 路由树自动派生——
+加一个页面文件 = 自动多一个导航项，不可能忘。分组用目录层级（components/ compositions/ kits/），
+移动端用 Nuxt UI 抽屉/USlideover 折叠。这部分需专项调研（Nuxt 文件路由 meta + Nuxt UI 导航组件），
+**押后到契约定稿后再做**（见未决清单）。
+
+> **playground 处置是"提升"动作的强制收尾**，并进 push 前清单（见 §5、§6）；
+> 多路由下，删 `pages/playground.vue` = 导航项自动消失，无残留。
 
 ---
 
@@ -105,23 +122,40 @@
 
 ---
 
+## 6.5 git 连接方式（已定：方案 B）
+
+**决策：chat 连接仓库 + push 前确认（方案 B）。**
+
+- chat 连接到 GitHub 仓库 `abel-2333-org/geist-nuxt`（v0 设置→Git），改动同步到分支，
+  可用 v0 原生 Git 面板（看活动 / 拉取 / PR）；
+- push 仍**每次经你确认**——保留 §6 的 push 前清单纪律，不放弃逐次审；
+- 好处：v0 直接以仓库为工作区，从根上缓解 `.v0` 被清、反复手动 clone 的不便。
+
+> 排除项：方案 A（手动 clone + 即时 push）是保底，但没解决 `.v0` 被清的根本不便；
+> 方案 C（连接 + 自动同步、不逐次确认）与 §6"push 前给清单"冲突，不采用。
+> 前提：连接动作需你在 v0 界面操作（设置→Git），我无法替你连。
+
+---
+
 ## 7. 一次新会话的完整链路（以你截图那套 reference 组件为例）
 
 1. 「设计一个 API 字段介绍组件」→ 组件建进 kit `packages/kits/api-docs/app/components/api-docs/`
    （Convention C，`<ApiDocs*>`）；
 2. gallery 建 `pages/playground.vue`，用 chrome + `txn-payment.spec.json` 摆出来
    → 预览 `/playground` 实时看、反复调；
-3. 定稿 → 演示提升进 `pages/api-docs.vue`（正式形态，自动进导航）；playground 临时件删除；
-4. 提交：kit 组件 + registry / gallery 的 api-docs page + fixture / 丢弃 playground 临时件
+3. 定稿 → 演示提升进 `pages/kits/api-docs/reference.vue`（页面级形态，自动进导航）；
+   playground 临时件删除；
+4. 提交：kit 组件 + registry / gallery 的 api-docs 路由 + fixture / 丢弃 playground 临时件
    —— 三类清单给你审；
-5. push 后 CI 发版 + 同步记忆区。gallery 展示 `/`(catalog) + `/api-docs`(reference) + compositions，
-   导航切换，所有组件可见。
+5. push 后 CI 发版 + 同步记忆区。gallery 导航自动从路由树生成：
+   `/`(Overview) + `/components`(catalog) + `/compositions`(core 组合)
+   + `/kits/api-docs`(零件总览) + `/kits/api-docs/reference`(页面级)，所有组件可见。
 
 ---
 
 ## 待办 / 未决
 
-- [ ] §4 待核对项：kit compositions 在 gallery 的陈列位置（需查 gallery 现有结构）
-- [ ] §4 补丁2：导航自动生成 + 移动端方案（专项调研，契约定稿后）
+- [x] §4 待核对项：kit compositions 陈列位置 → 定为 kit 自己子树（`kits/api-docs/index.vue`），见 §4 规则 3
+- [x] git 连接方式 → 方案 B（chat 连接仓库 + push 前确认），见 §6.5
+- [ ] §4 导航自动生成 + 移动端方案（专项调研，契约定稿后）
 - [ ] 落盘目标：本契约各节并入哪个正式文件（SKILL.md / method/ / maintenance/）
-- [ ] 工作区切换的具体执行步骤（git 连接方式：问题3，尚未定）
