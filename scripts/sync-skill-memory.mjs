@@ -70,7 +70,10 @@ const release = existsSync(join(dist, 'RELEASE'))
   : '(no RELEASE stamp in this artifact)'
 
 const manifest = { release, root: dist, memoryRoot: MEMORY_ROOT, fileCount: files.length, files }
-const manifestPath = join(dist, '..', 'sync-manifest.json')
+// Pin the manifest to a dedicated temp dir. Deriving it from `dist/..` would land in
+// the parent of a caller-supplied unpacked dir (possibly the repo, or anywhere), so
+// isolate it instead.
+const manifestPath = join(mkdtempSync(join(tmpdir(), 'skill-sync-plan-')), 'sync-manifest.json')
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
 
 console.log(`\nRelease stamp : ${release}`)
