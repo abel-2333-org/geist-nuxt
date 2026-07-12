@@ -140,6 +140,11 @@ jobs:
         run: |
           TAG="skill-v$(date -u +%Y%m%d-%H%M)"
           CORE_V="${{ needs.publish-core.outputs.version }}"
+          # Bake the release tag into the artifact so the memory area carries a
+          # freshness stamp. The sync script reads it; the maintenance self-check
+          # compares it against the latest release tag. Travels with the dist, so
+          # wholesale overwrite keeps it current with zero exceptions.
+          printf '%s\n' "$TAG" > dist-skill/RELEASE
           tar czf dist-skill.tar.gz -C dist-skill .
           gh release create "$TAG" dist-skill.tar.gz \
             --title "$TAG" \

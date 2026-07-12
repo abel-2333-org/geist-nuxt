@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+// sync-skill-memory.mjs — turn a downloaded dist-skill artifact into a deterministic
+// sync plan for the v0 memory area. OFFLINE ONLY: no network, no gh, no git.
+//
+// WHY OFFLINE
+//   Two hard constraints shape this:
+//   1. The v0 memory area (v0_memories/) is a virtual overlay reachable ONLY from
+//      v0's AI file tools (Read/Write/Move/Delete/Glob), never from Bash. A script
+//      therefore CANNOT write it — it can only prepare a plan the AI then applies.
+//   2. `gh` authentication does not reliably propagate to a node-spawned child, so
+//      this script never calls gh. The caller downloads the release with a direct
+//      `gh` command (top-level, reliably authed), then hands the artifact here.
+//
+// WHAT IT DOES
+//   Given the downloaded dist-skill.tar.gz (or an already-unpacked dir), it unpacks
+//   (if needed), lists every file, and emits a manifest = the complete desired state
+//   of the memory area. It prints the exact copy/delete plan for the AI to apply
+//   mechanically (wholesale overwrite: copy all listed files, delete anything else).
+//
+// USAGE (see references/maintenance/sync.md for the full flow, incl. the gh download)
+//   node scripts/sync-skill-memory.mjs <path-to-dist-skill.tar.gz>
+//   node scripts/sync-skill-memory.mjs <path-to-unpacked-dir>
+
+import { execFileSync } from 'node:child_process'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, readdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
+
+const MEMORY_ROOT = 'v0_memories/team/skills/geist-nuxt'
+
+const input = process.argv[2]
+if (!input) {
+  console.error(
+    'Usage: node scripts/sync-skill-memory.mjs <dist-skill.tar.gz | unpacked-dir>\n' +
+      'Download the artifact first with a direct gh command (see references/maintenance/sync.md).',
+  )
+  process.exit(1)
+}
+
+const inputPath = resolve(input)
+if (!existsSync(inputPath)) {
+  console.error(`Not found: ${inputPath}`)
+  process.exit(1)
+}
+
+// Resolve to an unpacked directory.
+let dist
+if (statSync(inputPath).isDirectory()) {
+  dist = inputPath
+} else {
+  const work = mkdtempSync(join(tmpdir(), 'skill-sync-'))
+  dist = join(work, 'dist')
+  mkdirSync(dist, { recursive: true })
+  console.log(`Unpacking ${inputPath} ...`)
+  execFileSync('tar', ['xzf', inputPath, '-C', dist])
+}
+
+function walk(dir, base = dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name)
+    if (statSync(full).isDirectory()) walk(full, base, out)
+    else out.push(full.slice(base.length + 1))
+  }
+  return out
+}
+
+const files = walk(dist).sort()
+const release = existsSync(join(dist, 'RELEASE'))
+  ? readFileSync(join(dist, 'RELEASE'), 'utf8').trim()
+  : '(no RELEASE stamp in this artifact)'
+
+const manifest = { release, root: dist, memoryRoot: MEMORY_ROOT, fileCount: files.length, files }
+const manifestPath = join(dist, '..', 'sync-manifest.json')
+writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+
+console.log(`\nRelease stamp : ${release}`)
+console.log(`Unpacked dir  : ${dist}`)
+console.log(`Files         : ${files.length}`)
+console.log(`Manifest      : ${manifestPath}`)
+console.log(
+  `\n=== NEXT — the AI applies this plan (Bash cannot write the memory area) ===\n` +
+    `1. Read the manifest above.\n` +
+    `2. For each file f in manifest.files: Move(operation="copy") ${dist}/f  ->  ${MEMORY_ROOT}/f\n` +
+    `3. Glob ${MEMORY_ROOT}/** and Delete any file NOT in manifest.files.\n` +
+    `   EXCEPTION: never touch ${MEMORY_ROOT}/skills/** — separate skills system, not part of this dist.\n` +
+    `This is a wholesale overwrite: the manifest is the complete desired state.`,
+)

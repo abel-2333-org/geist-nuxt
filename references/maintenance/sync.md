@@ -15,22 +15,42 @@
 
 **多账号一致性保证**:同一 tag + 同一 `@geist-nuxt/core` npm 版本 + lockfile,三者机械钉死,无人工判断空间。
 
+## 两条硬约束(决定了同步为什么半自动)
+
+1. **记忆区只有 AI 够得着**:`v0_memories/` 是虚拟层,**Bash 读不到**,只能用 AI 文件工具(Read/Write/Move/Delete/Glob)读写。所以脚本**无法直接写记忆区**,只能备好"该有哪些文件"的计划,由 AI 机械套用。
+2. **gh 鉴权不进 node 子进程**:node 里 spawn 的 `gh` 常拿不到 token;**直接的 top-level `gh` 命令**(鉴权正常时)才可靠。所以下载用直接 `gh`,脚本只做离线的解包 + 生成计划。
+
+## 新鲜度自检(维护会话开场,兜底"怕漏同步")
+
+dist 里带一个 `RELEASE` 戳(CI 在打包时写入 = 该次 release tag,随产物走)。开场比对:
+
+```bash
+# 最新分发 tag(直接 gh,可靠)
+gh release list -R abel-2333-org/geist-nuxt --limit 20 --json tagName,isLatest \
+  -q 'map(select(.isLatest))[0].tagName'
+```
+AI 再 `Read v0_memories/team/skills/geist-nuxt/RELEASE`,与上面 tag 比对:
+- 一致 → 记忆区已最新,无需同步;
+- 不一致 / 无 `RELEASE`(旧 dist 没有戳) → 记忆区落后,执行下面的同步。
+
 ## 同步操作(在 v0 会话里执行)
 
-1. 查最新分发版本:
+1. **下载**最新 dist(直接 `gh`,不经脚本):
    ```bash
-   gh release list -R abel-2333-org/geist-nuxt --limit 5
+   TAG=$(gh release list -R abel-2333-org/geist-nuxt --limit 20 --json tagName,isLatest \
+     -q 'map(select(.isLatest))[0].tagName')
+   gh release download "$TAG" -R abel-2333-org/geist-nuxt -p dist-skill.tar.gz -D /tmp/skill-sync
    ```
-2. 下载并解包(Bash 可访问的临时目录):
+2. **生成同步计划**(离线脚本,解包 + 输出 manifest):
    ```bash
-   gh release download <skill-v-tag> -R abel-2333-org/geist-nuxt -p dist-skill.tar.gz -D /tmp/skill-sync
-   mkdir -p /tmp/skill-sync/dist && tar xzf /tmp/skill-sync/dist-skill.tar.gz -C /tmp/skill-sync/dist
+   node scripts/sync-skill-memory.mjs /tmp/skill-sync/dist-skill.tar.gz
    ```
-3. **整体覆盖**记忆区 `v0_memories/team/skills/geist-nuxt/`:
-   - Bash 读不到 `v0_memories/`,须用 **Write/Move(copy)/Delete 工具**逐文件落盘;
-   - 以 dist 内容为准:dist 有 → 覆盖写入;记忆区有而 dist 无 → 删除(旧布局残留必须清)。
-   - **不做逐文件内容比对**——整体覆盖就是流程本身。
-4. 同步后在记忆区 SKILL.md 无需记录 tag 之外的任何状态;当前 tag 可在会话开头用第 1 步命令核对是否落后。
+   它打印解包目录、`RELEASE` 戳、文件清单,并把 `manifest.json`(完整目标态)写到解包目录旁。
+3. **AI 套用计划,整体覆盖**记忆区 `v0_memories/team/skills/geist-nuxt/`:
+   - `Read` manifest → 对每个 `files[]` 条目 `Move(copy)` `<root>/f` → `<memoryRoot>/f`;
+   - `Glob` 记忆区,`Delete` 任何**不在** `files[]` 里的文件(旧布局残留必须清);
+   - **例外**:绝不碰 `…/skills/**`(独立 skills 系统,不属本 dist)。
+   - **不做逐文件内容比对**——整体覆盖就是流程本身。`RELEASE` 戳随 dist 一起被覆盖,自动更新,无需额外记录。
 
 ## 改真源:工作区、push 与审查纪律
 
