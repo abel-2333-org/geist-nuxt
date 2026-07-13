@@ -104,17 +104,19 @@ export function useFieldAnchor() {
     })
   }
 
-  /** Copy a field's deep link and focus it. Pass `fieldName` so the toast names
-   *  what was copied ("`<field>` link copied to clipboard") — important when
-   *  copying from a long field list; falls back to a generic "Link" otherwise.
-   *  Navigation runs regardless of whether the clipboard write succeeds
-   *  (permissions can reject it). */
-  async function copyLink(path: string, fieldName?: string) {
+  /** Copy a field's deep link and focus it. Pass a fully-formed `successMessage`
+   *  to own the whole toast sentence (so the caller can localize it through its
+   *  own labels/i18n, e.g. "`<field>` link copied"); omit it to fall back to
+   *  core's shared English "Link copied to clipboard". We deliberately do NOT
+   *  concatenate a field name onto core's half-sentence here — the caller owns
+   *  the complete string or none of it. Navigation runs regardless of whether
+   *  the clipboard write succeeds (permissions can reject it). */
+  async function copyLink(path: string, successMessage?: string) {
     // Fire-and-forget: navigation/scroll runs independently of the clipboard
     // write below; we don't want to block the copy on the scroll animation.
     void goTo(path, { updateHash: true })
     try {
-      await copy(urlFor(path), fieldName ? `${fieldName} link` : 'Link')
+      await copy(urlFor(path), 'Link', successMessage ? { successMessage } : {})
     }
     catch {
       // Clipboard unavailable/denied — the hash is still updated so the user

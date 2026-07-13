@@ -32,7 +32,7 @@
 
 配套依赖（**已在通用基座 starter 里**，无需从 kit 复制）：
 - `components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
-- `composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。依赖 `@vueuse/core`（starter 已声明）。
+- `composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。签名 `copy(text, label?, { successMessage?, errorMessage? })`：默认 `label` 填英文句，调用方可传完整 `successMessage` 独占整句以便本地化（见下「复制 toast 完整消息注入」契约）。依赖 `@vueuse/core`（starter 已声明）。
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -48,7 +48,7 @@
 >
 > 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性���识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
-> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，��� props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
+> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，��� props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。���论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
 ### 可拖动分栏（通用基座，非本 kit 独有）
 
@@ -199,12 +199,13 @@ authoring 输入            适配                 领域输出              渲
   | `InlineMarkdown` | **core** | 字段描述的行内 markdown tokenizer（`code`/链接/粗斜/删除线） |
 
 - **字段深链接（`useFieldAnchor`，随 `field-item` 切片同 ship）消费者须知**：
-  - **必需**：在渲染字段树的页面 `onMounted` 里调 `useFieldAnchor().initFromHash()`，让带 `#field-path` 进入时自动展开祖先 + 滚动 + 高亮。
+  - **必需**：在渲染字段树的页面 `onMounted` 里��� `useFieldAnchor().initFromHash()`，让带 `#field-path` 进入时自动展开祖先 + 滚动 + 高亮。
   - **可选打磨**：在自己的 `app/router.options.ts` 的 `scrollBehavior` 里加 `if (to.hash) return false`，消除冷启动深链接的一次滚动闪烁。**kit 不下发 `router.options.ts`**——它是全局单例、属消费层职����，多数消费者已有该文件，合并这一行即可。缺了它 composable 仍功能正确（只是冷启动会闪一下）。
   - composable 自足：`copyLink` 走 `history.replaceState`（不触发路由导航）、`goTo` 自管「展开→等布局稳→滚动→高亮」，均不依赖 Vue Router 的 scrollBehavior。
 
 - **跨切片共享类型走「导入而非各抄一份」**：`FieldItem` 运行时就渲染 `<ApiDocsEnumTable>`/`<ApiDocsLifecycleBadge>`（已在 `registryDependencies` 声明），因此它直接 `import type` 这两个切片的 `EnumValue`/`EnumVariant`/`FieldLifecycle` 并 re-export，而不是重定义同形副本。导入只是让编译器承认这个既有依赖——某切片改了类型另一处立即报错，而非静默漂移；仍 copy-safe（依赖切片必随 field-item 一起复制，相对路径成立）。这正是 registry 依赖规则第 2 条的落地。
-- **复制反馈不放 per-row live region**：字段深链接复制走 core `useCopy()`，它已 `toast.add(...)` 经 Nuxt UI 单一 app 级 polite region 播报「Link copied」，锚点按钮 `aria-label` 亦随 copied 切换。故 FieldItem **不**为每行放 `role="status"`——否则大表会堆几十个（多为空）region 且三重播报。新增 CodeBlock 之外的复制场景时沿用此约定：复制播报交给 toast，别在每个可复制元素上再加 live region。
+- **复制反馈不放 per-row live region**：字段深链接复制走 core `useCopy()`，它已 `toast.add(...)` 经 Nuxt UI 单一 app 级 polite region 播报，锚点按钮 `aria-label` 亦随 copied 切换。故 FieldItem **不**为每行放 `role="status"`——否则大表会堆几十个（多为空）region 且三重播报。新增 CodeBlock 之外的复制场景时沿用此约定：复制播报交给 toast，别在每个可复制元素上再加 live region。
+- **复制 toast 文案走「完整消息注入」，不拼半句**：`useCopy().copy(text, label?, { successMessage?, errorMessage? })`——默认用 `label` 填英文句 `<label> copied to clipboard`（共享 Geist voice）；需本地化整句的调用方传**完整** `successMessage` 独占所有权。FieldItem 即经其 `labels.linkCopied(fieldName)` 槽提供整句（与 `copyLink`/`required` 等 chrome 文案同一本地化面），`useFieldAnchor.copyLink(path, successMessage?)` 只透传、**不**在 composable 内拼字段名。原因：半句拼接（core 拥半句英文脚手架 + 调用方拼另半句）无法整体本地化、会造成「aria 中文 / toast 英文」混语；完整消息让每条文案要么完全由 core 默认拥有、要么完全由调用方 `labels` 拥有，无中间态。新增需要具名/本地化 toast 的复制场景时照此传 `successMessage`，勿回退到拼接。
 
 ### 契约规则（跨层，务必遵守）
 

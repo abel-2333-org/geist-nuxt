@@ -112,6 +112,10 @@ export interface FieldItemLabels {
   hideChildren?: string
   copyLink?: string
   copiedLink?: string
+  /** Full toast sentence after copying a field's link. Receives the field name
+   *  so the whole string is owned here (not concatenated in the composable),
+   *  e.g. `(name) => `${name} 的链接已复制``. */
+  linkCopied?: (fieldName: string) => string
 }
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
@@ -143,6 +147,7 @@ const t = computed<Required<FieldItemLabels>>(() => ({
   hideChildren: 'Hide Child Parameters',
   copyLink: 'Copy link to this field',
   copiedLink: 'Link copied',
+  linkCopied: (fieldName: string) => `${fieldName} link copied to clipboard`,
   ...props.labels,
 }))
 
@@ -156,9 +161,10 @@ const descendantActive = computed(
 )
 
 function onCopyLink() {
-  // Pass the field name so the copy toast names what was copied — meaningful
-  // feedback when copying from a long field list, not a generic "Link".
-  if (props.path) anchor.copyLink(props.path, props.name)
+  // Build the *complete* toast sentence here via our own labels, so it flows
+  // through the same localization surface as every other chrome string (aria,
+  // required, etc.) — no half-sentence concatenation inside the composable.
+  if (props.path) anchor.copyLink(props.path, t.value.linkCopied(props.name))
 }
 
 // Collapsible open state is a real ref (v-model:open) so the user can toggle
