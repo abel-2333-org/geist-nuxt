@@ -58,8 +58,11 @@ export default defineComponent({
       { re: /\*\*([\s\S]+?)\*\*/, build: (m) => h(ProseStrong, () => tokenize(m[1] ?? '')) },
       { re: /~~([\s\S]+?)~~/, build: (m) => h('del', tokenize(m[1] ?? '')) },
       // Em with `*`: require non-space at the inner edges so a stray/lone `*`
-      // (e.g. `func(a, b) with * star`, maths) doesn't open an italic run.
-      { re: /\*(\S(?:[\s\S]*?\S)?)\*/, build: (m) => h(ProseEm, () => tokenize(m[1] ?? '')) },
+      // (e.g. `func(a, b) with * star`) doesn't open an italic run. Also forbid
+      // a digit on either OUTSIDE edge so arithmetic (`2*3*4`, `5*3`) is left
+      // alone — the lookbehind/lookahead are zero-width, so slicing by m.index
+      // still works.
+      { re: /(?<!\d)\*(\S(?:[\s\S]*?\S)?)\*(?!\d)/, build: (m) => h(ProseEm, () => tokenize(m[1] ?? '')) },
       // Em with `_`: additionally require word boundaries on the OUTSIDE so
       // intra-word underscores (`snake_case_name`, identifiers, URLs) are left
       // alone — only `_word_` flanked by non-alphanumerics italicises. The
