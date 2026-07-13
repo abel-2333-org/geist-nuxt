@@ -234,7 +234,7 @@ onMounted(() => anchor.initFromHash())
             带入页面时自动展开并滚动定位）。
           </p>
           <ApiDocsFieldGroup label="Request Body" :count="fields.length">
-            <ApiDocsFieldItem v-for="f in fields" :key="f.name" v-bind="f" />
+            <ApiDocsFieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
           </ApiDocsFieldGroup>
         </div>
       </div>

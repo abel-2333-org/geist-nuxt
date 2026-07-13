@@ -107,7 +107,9 @@ export function useFieldAnchor() {
   /** Copy a field's deep link and focus it. Navigation runs regardless of
    *  whether the clipboard write succeeds (permissions can reject it). */
   async function copyLink(path: string, label = 'Link') {
-    goTo(path, { updateHash: true })
+    // Fire-and-forget: navigation/scroll runs independently of the clipboard
+    // write below; we don't want to block the copy on the scroll animation.
+    void goTo(path, { updateHash: true })
     try {
       await copy(urlFor(path), label)
     }

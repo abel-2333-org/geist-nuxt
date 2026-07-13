@@ -166,26 +166,20 @@ function onCopyLink() {
   if (props.path) anchor.copyLink(props.path)
 }
 
-// Collapsible open state is controlled by a real ref. The user can toggle it,
-// and it is also forced open when a descendant is the active anchor so deep
+// Collapsible open state is a real ref (v-model:open) so the user can toggle
+// it. It is also forced open when a descendant is the active anchor so deep
 // links resolve. We push the auto-open as an actual mutation (not a computed
 // getter): the initial render matches SSR (closed), and the open happens after
 // hydration, which Reka's controlled Collapsible reliably animates — a
 // getter-driven `open` left the SSR-closed state stuck after hydration.
-const manualOpen = ref(false)
-const open = computed({
-  get: () => manualOpen.value,
-  set: (v: boolean) => {
-    manualOpen.value = v
-  },
-})
+const open = ref(false)
 
 // Open on (or after) mount when this row is an ancestor of the active anchor.
 onMounted(() => {
-  if (descendantActive.value) manualOpen.value = true
+  if (descendantActive.value) open.value = true
 })
 watch(descendantActive, (v) => {
-  if (v) manualOpen.value = true
+  if (v) open.value = true
 })
 
 const hasChildren = computed(() => (props.children?.length ?? 0) > 0)
@@ -211,6 +205,8 @@ const hasDetail = computed(
 const requiredState = computed<'required' | 'conditional' | 'optional'>(() =>
   props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : 'optional',
 )
+// Localized label for the current requirement state (chrome copy).
+const requiredLabel = computed(() => t.value[requiredState.value])
 
 // Everything below the main description is secondary metadata. Grouping it lets
 // the template pull the description up as the primary content and set the band
@@ -302,7 +298,7 @@ const lifecycleMeta = computed(() => {
           'text-dimmed': requiredState === 'optional',
         }"
       >
-        {{ requiredState === 'required' ? t.required : requiredState === 'conditional' ? t.conditional : t.optional }}
+        {{ requiredLabel }}
       </span>
 
       <span v-if="defaultValue !== undefined" class="inline-flex items-center gap-1.5">
@@ -320,12 +316,16 @@ const lifecycleMeta = computed(() => {
       <button
         v-if="path"
         type="button"
-        :aria-label="t.copyLink"
+        :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
         class="ms-auto inline-flex shrink-0 items-center rounded-sm p-1 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary lg:hidden"
-        :class="{ 'text-primary': isActive }"
+        :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
       >
-        <UIcon name="i-lucide-link-2" class="size-4" aria-hidden="true" />
+        <UIcon
+          :name="anchor.copied.value ? 'i-lucide-check' : 'i-lucide-link-2'"
+          class="size-4"
+          aria-hidden="true"
+        />
       </button>
     </div>
 
@@ -442,7 +442,7 @@ const lifecycleMeta = computed(() => {
         <div class="mt-1 border-s border-default ps-4">
           <ApiDocsFieldItem
             v-for="child in children"
-            :key="child.name"
+            :key="child.path ?? child.name"
             v-bind="child"
             :labels="labels"
           />
