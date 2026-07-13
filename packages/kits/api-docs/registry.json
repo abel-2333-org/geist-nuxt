@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "@geist-nuxt/kit-api-docs",
   "homepage": "https://github.com/abel-2333-org/geist-nuxt",
-  "description": "API docs kit. Distribution unit is the SLICE: when copying a component into a consuming project, copy every file listed in its `files` array to its `target` (components -> app/components/api-docs/, composables -> app/composables/). Keeping the api-docs/ directory gives every component the ApiDocs* prefix (pathPrefix:true) and isolates it from the consumer's own components. `coreDeps` are satisfied automatically by extending @geist-nuxt/core. Dependency rules: kit -> own files (declared in slice) and kit -> core only; kit -> kit is forbidden — shared logic moves up to core.",
+  "description": "API docs kit. Distribution unit is the SLICE: when copying a component into a consuming project, copy every file listed in its `files` array to its `target` (components -> app/components/api-docs/, composables -> app/composables/, presets -> app/utils/). Keeping the api-docs/ directory gives every component the ApiDocs* prefix (pathPrefix:true) and isolates it from the consumer's own components. `coreDeps` are satisfied automatically by extending @geist-nuxt/core. Dependency rules: kit -> own files (declared in slice) and kit -> core only; kit -> kit is forbidden — shared logic moves up to core.",
   "items": [
     {
       "name": "code-block",
@@ -34,6 +34,38 @@
       "files": [
         { "path": "app/components/api-docs/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue", "type": "registry:component" }
       ]
+    },
+    {
+      "name": "lifecycle-badge",
+      "type": "registry:component",
+      "title": "ApiDocsLifecycleBadge",
+      "description": "Lifecycle status badge (new/beta/active/maintenance/deprecated/sunset). Preset wrapper over core SemanticBadge; the lifecycle vocabulary + tone calibration ship in the preset.",
+      "files": [
+        { "path": "app/components/api-docs/LifecycleBadge.vue", "target": "app/components/api-docs/LifecycleBadge.vue", "type": "registry:component" },
+        { "path": "app/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts", "type": "registry:lib" }
+      ],
+      "meta": { "coreDeps": ["SemanticBadge"] }
+    },
+    {
+      "name": "method-badge",
+      "type": "registry:component",
+      "title": "ApiDocsMethodBadge",
+      "description": "HTTP method badge (GET/POST/PUT/PATCH/DELETE) in mono type. Preset wrapper over core SemanticBadge; the method vocabulary + tone calibration ship in the preset.",
+      "files": [
+        { "path": "app/components/api-docs/MethodBadge.vue", "target": "app/components/api-docs/MethodBadge.vue", "type": "registry:component" },
+        { "path": "app/utils/method-preset.ts", "target": "app/utils/method-preset.ts", "type": "registry:lib" }
+      ],
+      "meta": { "coreDeps": ["SemanticBadge"] }
+    },
+    {
+      "name": "enum-table",
+      "type": "registry:component",
+      "title": "ApiDocsEnumTable",
+      "description": "Allowed-values table for a field: flat list or condition-grouped variants, with filter + scroll for long lists. Enum display types travel inline with the component.",
+      "files": [
+        { "path": "app/components/api-docs/EnumTable.vue", "target": "app/components/api-docs/EnumTable.vue", "type": "registry:component" }
+      ],
+      "meta": { "coreDeps": ["InlineCode", "InlineMarkdown"] }
     }
   ]
 }
