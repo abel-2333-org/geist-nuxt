@@ -4,7 +4,8 @@ definePageMeta({ nav: { label: 'API Docs', icon: 'i-lucide-file-code', order: 0 
 // API 文档场景的组合演示（demo/story）——按 geist-nuxt「demo 归 gallery、kit 只 ship
 // 数据无关积木」的分层，这里用内联假 ViewModel 驱动 kit 的数据无关组件：代码块 /
 // 请求 / 响应（ApiDocsCodeBlock、ApiDocsResponseExample）+ method / lifecycle 徽章
-// + enum 值表（ApiDocsMethodBadge、ApiDocsLifecycleBadge、ApiDocsEnumTable）。
+// + enum 值表（ApiDocsMethodBadge、ApiDocsLifecycleBadge、ApiDocsEnumTable）+ 字段树
+// （ApiDocsFieldGroup、ApiDocsFieldItem，含递归子字段与 useFieldAnchor 深链接）。
 const requestSamples = [
   {
     label: 'cURL',
@@ -76,6 +77,97 @@ const enumValues = [
   { value: 'preview', description: 'Per-branch deploy for review. Supports `?token=` access.' },
   { value: 'development', description: 'Local or ephemeral environment. **Not** publicly routed.' },
 ]
+
+// Field tree — the recursive schema view. Inline sample data exercises every
+// facet ApiDocsFieldItem renders: the three requiredness states, default value,
+// examples, a condition, an enum, constraint notes (both tones), field
+// lifecycle (new/beta/deprecated), and nested object children (collapsible +
+// deep-linkable). `path` is the stable id used for the URL hash anchor.
+const fields = [
+  {
+    path: 'body_name',
+    name: 'name',
+    type: 'string',
+    required: true,
+    description: 'Unique project name. Becomes part of the default domain.',
+    examples: ['my-app'],
+    notes: [
+      { label: 'Range', text: '1–52 characters.' },
+      { tone: 'caution' as const, label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
+    ],
+  },
+  {
+    path: 'body_target',
+    name: 'target',
+    type: 'enum',
+    required: false,
+    defaultValue: 'production',
+    description: 'Deploy environment.',
+    enumValues,
+  },
+  {
+    path: 'body_gitSource',
+    name: 'gitSource',
+    type: 'object',
+    required: 'conditional' as const,
+    condition: 'Required when `type` is `git`.',
+    lifecycle: { status: 'beta' as const, since: 'v2.4', description: 'Shape may still change during beta.' },
+    description: 'Git repository to deploy from.',
+    children: [
+      {
+        path: 'body_gitSource_repoId',
+        name: 'repoId',
+        type: 'string',
+        required: true,
+        description: 'Connected repository id.',
+        examples: ['ghr_9f2a'],
+      },
+      {
+        path: 'body_gitSource_ref',
+        name: 'ref',
+        type: 'string',
+        required: false,
+        defaultValue: 'main',
+        description: 'Branch, tag, or commit SHA to build.',
+      },
+      {
+        path: 'body_gitSource_legacyBranch',
+        name: 'legacyBranch',
+        type: 'string',
+        required: false,
+        lifecycle: { status: 'deprecated' as const, since: 'v2.4', description: 'Use `ref` instead.' },
+        description: 'Legacy branch selector.',
+      },
+    ],
+  },
+  {
+    path: 'body_meta',
+    name: 'meta',
+    type: 'object',
+    required: false,
+    lifecycle: { status: 'new' as const, since: 'v2.5' },
+    description: 'Arbitrary key/value metadata attached to the deployment.',
+    children: [
+      {
+        path: 'body_meta_key',
+        name: 'key',
+        type: 'string',
+        required: true,
+        notes: [{ label: 'Range', text: 'Up to 64 characters.' }],
+      },
+      {
+        path: 'body_meta_value',
+        name: 'value',
+        type: 'string',
+        required: true,
+      },
+    ],
+  },
+]
+
+// Honor an incoming `#path` hash: navigate + expand + scroll to the field.
+const anchor = useFieldAnchor()
+onMounted(() => anchor.initFromHash())
 </script>
 
 <template>
@@ -93,7 +185,10 @@ const enumValues = [
           <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code> /
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleBadge</code>
           与 enum 值表
-          <code class="font-mono text-[0.8125rem]">ApiDocsEnumTable</code>。
+          <code class="font-mono text-[0.8125rem]">ApiDocsEnumTable</code>，
+          以及字段树
+          <code class="font-mono text-[0.8125rem]">ApiDocsFieldGroup</code> /
+          <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
           <code class="font-mono text-[0.8125rem]">SemanticBadge</code> 之上包一层域词汇。
         </p>
@@ -127,6 +222,20 @@ const enumValues = [
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Enum 值表</h3>
           <ApiDocsEnumTable :values="enumValues" />
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">字段树</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            递归 schema 视图：对象字段可折叠展开子字段，覆盖 required 三态、默认值、
+            示例、条件、enum、约束注记与字段 lifecycle。每行悬停时行首出现链接图标，
+            点击即复制该字段的深链接（<code class="font-mono text-[0.8125rem]">#body_gitSource_ref</code>
+            这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
+            带入页面时自动展开并滚动定位）。
+          </p>
+          <ApiDocsFieldGroup label="Request Body" :count="fields.length">
+            <ApiDocsFieldItem v-for="f in fields" :key="f.name" v-bind="f" />
+          </ApiDocsFieldGroup>
         </div>
       </div>
     </section>

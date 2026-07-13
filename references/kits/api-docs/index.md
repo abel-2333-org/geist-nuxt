@@ -21,12 +21,14 @@
 | `api-docs/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 core `SemanticBadge` | — |
 | `api-docs/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 core `SemanticBadge` | — |
 | `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，长表带筛选+滚动） | — |
+| `api-docs/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
+| `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；深链接由 `useFieldAnchor` 驱动。字段数据模型（`FieldNode`/`EnumValue`/`EnumVariant`/`FieldNote`…）内联随组件走 | — |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
 > **preset 型徽章（MethodBadge / LifecycleBadge）** = 在 core 的 `SemanticBadge`（tone 原子）之上，包一层"域词汇 → tone"映射。域词汇 + tone 校准住在随切片一起复制的 `app/utils/{method,lifecycle}-preset.ts`；`SemanticBadge`/`BadgeTone` 由 core 经 `coreDeps` 天然在位。二者写法对称，改词汇只动 preset、不碰组件。
 
-> **端点头 / 参数表**（原 EndpointHeader / ParamsTable）已移除，待重新设计。新造时按 `method/component-spec-template.md` 走 anatomy → states → accessibility 规格，再沉淀回本 kit。
+> **参数表**（原 ParamsTable）已按规格重造为 `FieldGroup` + `FieldItem` 两个切片并沉淀进本 kit（见上表）：`FieldGroup` 管分组标题，`FieldItem` 管递归字段行 + 深链接。**端点头**（原 EndpointHeader / `OperationHeader`）仍留在消费层——它是页面唯一 `<h1>` 且形状因项目而异，copy & adapt 更合适；待有稳定通用形态再评估沉淀。
 
 配套依赖（**已在通用基座 starter 里**，无需从 kit 复制）：
 - `components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
@@ -46,13 +48,13 @@
 >
 > 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
-> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
+> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，��� props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
 ### 可拖动分栏（通用基座，非本 kit 独有）
 
 典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
 
-- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指��接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
   ```vue
   <SplitPane
@@ -144,7 +146,7 @@
 
 ## 架构蓝图：spec 驱动的渲染栈（pattern，非 drop-in）
 
-> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit ship 的是一组**数据无关的展示积木**（代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表，类型内联或依赖 core、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、以及吃 domain 树的字段组件（`OperationHeader`/`FieldGroup`/`FieldItem`/`ContractNote`），是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
+> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit ship 的是一组**数据无关的展示积木**（代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树 `FieldGroup`·`FieldItem`，类型内联或依赖 core、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、以及页面唯一 `<h1>` 的端点头 `OperationHeader`，是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
 >
 > **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永远比预建便宜，别过早建目录。
 
@@ -181,21 +183,25 @@ authoring 输入            适配                 领域输出              渲
 
 ### 层 3：领域输出 + 字段渲染（`types/domain.ts` + `components/reference/`）
 
-- `domain.ts`：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。
-- 字段组件清单（各自职责，实现看真源）：
+- `domain.ts`（消费层）：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。注：这些字段展示类型现已随 `ApiDocsFieldItem` 切片**内联进 kit**（其中 `FieldContractNote` 在 kit 侧更名为更中性的 `FieldNote`）；消费层的 `domain.ts` 仍是 adapter 的输出真源，按需 adapt，两侧结构化兼容。
+- 组件清单（各自职责，实现看真源）：
 
   | 组件 | 归属 | 职责 |
   |---|---|---|
   | `OperationHeader` | 消费层 | 页面唯一 `<h1>` + method/path + 端点 lifecycle（吃端点 domain，头因项目而异，copy & adapt） |
-  | `FieldGroup` | 消费层 | 字段分组容器，组标题是 `<h2>` |
-  | `FieldItem` | 消费层 | 单个字段行：名/类型/必填/nullability/约束/嵌套递归（吃 `FieldNode` 树） |
-  | `ContractNote` | 消费层 | 字段下的约束/一致性提示（tone + label pill） |
+  | `ApiDocsFieldGroup` | **kit 切片** | 字段分组容器，组标题是 `<h2>` + 可选计数；零依赖，拷贝即用 |
+  | `ApiDocsFieldItem` | **kit 切片** | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记（`FieldNote`）/lifecycle/嵌套递归；字段数据模型内联随组件走。深链接由 `useFieldAnchor`（随切片同 ship）驱动 |
   | `ApiDocsEnumTable` | **kit 切片** | enum 值表（扁平 `values` + 分组 `variants` 两种形态）；类型内联，拷贝即用 |
   | `ApiDocsMethodBadge` | **kit 切片** | HTTP method 色标（色+文本双通道）；preset 包装 core `SemanticBadge` |
   | `ApiDocsLifecycleBadge` | **kit 切片** | 字段/端点生命周期色标；preset 包装 core `SemanticBadge` |
   | `SemanticBadge` | **core** | tone 原子（色+图标+文本）；域→tone 映射留在上面的 preset 徽章里 |
   | `InlineCode` | **core** | 行内代码 token（ProseCode 校准到 Geist） |
   | `InlineMarkdown` | **core** | 字段描述的行内 markdown tokenizer（`code`/链接/粗斜/删除线） |
+
+- **字段深链接（`useFieldAnchor`，随 `field-item` 切片同 ship）消费者须知**：
+  - **必需**：在渲染字段树的页面 `onMounted` 里调 `useFieldAnchor().initFromHash()`，让带 `#field-path` 进入时自动展开祖先 + 滚动 + 高亮。
+  - **可选打磨**：在自己的 `app/router.options.ts` 的 `scrollBehavior` 里加 `if (to.hash) return false`，消除冷启动深链接的一次滚动闪烁。**kit 不下发 `router.options.ts`**——它是全局单例、属消费层职责，多数消费者已有该文件，合并这一行即可。缺了它 composable 仍功能正确（只是冷启动会闪一下）。
+  - composable 自足：`copyLink` 走 `history.replaceState`（不触发路由导航）、`goTo` 自管「展开→等布局稳→滚动→高亮」，均不依赖 Vue Router 的 scrollBehavior。
 
 ### 契约规则（跨层，务必遵守）
 
