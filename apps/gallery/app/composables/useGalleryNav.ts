@@ -9,6 +9,9 @@ declare module '#app' {
 
 type NavMeta = { label?: string; icon?: string; order?: number }
 
+// "Kits" group sits after top-level pages. Kept well clear of page orders (default 99).
+const KITS_GROUP_ORDER = 1000
+
 // kebab / path segment → Title Case fallback (e.g. "api-docs" → "Api Docs").
 function titleCase(seg: string): string {
   return seg
@@ -23,7 +26,7 @@ function byOrderThenLabel(a: { order: number; label: string }, b: { order: numbe
   return a.order - b.order || a.label.localeCompare(b.label)
 }
 
-interface NavLink {
+interface Sortable {
   label: string
   icon?: string
   to: string
@@ -31,24 +34,23 @@ interface NavLink {
 }
 
 /**
- * Derive the gallery sidebar navigation from the Nuxt route tree.
- * Adding a `pages/**` file = one more nav entry automatically;
- * hide a page with `definePageMeta({ nav: false })`.
+ * Derive the gallery navigation from the Nuxt route tree.
+ * Adding a `pages/**` file = one more nav item automatically.
+ * Hide a page with `definePageMeta({ nav: false })`.
  *
- * Returns a single vertical tree: top-level destinations first, then a "Kits"
- * section heading, then one entry per kit — single-page kits collapse to a
- * link, multi-page kits become an accordion (their pages as children, open by
- * default). This feeds the vertical UNavigationMenu in both the desktop
- * sidebar and the mobile slideover, so nesting depth is unlimited.
+ * Structure: top-level pages ("/", "/components", ...) render inline; every
+ * `kits/<name>/**` page folds into a "Kits" group, one sub-tree per kit
+ * (single-page kit → a link; multi-page kit → an expandable sub-tree).
  */
 export function useGalleryNav() {
   const router = useRouter()
 
   return computed<NavigationMenuItem[]>(() => {
-    const topLevel: NavLink[] = []
-    const kitPages = new Map<string, NavLink[]>()
+    const topLevel: Sortable[] = []
+    const kitPages = new Map<string, Sortable[]>()
 
     for (const route of router.getRoutes()) {
+      // Skip dynamic routes and explicitly hidden pages.
       if (route.path.includes(':')) continue
       const meta = route.meta?.nav as false | NavMeta | undefined
       if (meta === false) continue
@@ -58,6 +60,7 @@ export function useGalleryNav() {
       const order = meta?.order ?? 99
 
       if (segs[0] === 'kits' && segs.length >= 2) {
+        // Page inside a kit sub-tree. Kit root (`/kits/<name>`) defaults to "Overview".
         const kitName = segs[1]!
         const label = meta?.label ?? (segs.length === 2 ? 'Overview' : titleCase(segs[segs.length - 1]!))
         const pages = kitPages.get(kitName) ?? []
@@ -66,35 +69,42 @@ export function useGalleryNav() {
         continue
       }
 
+      // Top-level pages: "/", "/components", "/compositions".
       if (segs.length <= 1) {
         const label = meta?.label ?? (segs.length === 0 ? 'Overview' : titleCase(segs[0]!))
         topLevel.push({ label, icon, to: route.path, order })
       }
     }
 
-    const tree: NavigationMenuItem[] = topLevel
-      .sort(byOrderThenLabel)
-      .map(({ order: _o, ...link }) => link)
+    // Sortable is structurally a NavigationMenuItem plus `order`.
+    const items: (NavigationMenuItem & { order: number })[] = topLevel.sort(byOrderThenLabel)
 
-    const kits = [...kitPages.entries()].sort(([a], [b]) => a.localeCompare(b))
-    if (kits.length > 0) {
-      tree.push({ label: 'Kits', type: 'label' })
-      for (const [kitName, pages] of kits) {
-        const sorted = pages.sort(byOrderThenLabel)
-        const label = titleCase(kitName)
-        tree.push(
-          sorted.length === 1
-            ? { label, icon: sorted[0]!.icon, to: sorted[0]!.to }
-            : {
-                label,
-                icon: sorted[0]?.icon,
-                defaultOpen: true,
-                children: sorted.map(({ order: _o, ...page }) => page),
-              },
-        )
-      }
+    if (kitPages.size > 0) {
+      // One sub-tree per kit, kits sorted by name for stability.
+      const kitChildren: NavigationMenuItem[] = [...kitPages.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([kitName, pages]) => {
+          const sorted = pages.sort(byOrderThenLabel)
+          const label = titleCase(kitName)
+          // Single-page kit collapses to a plain link; multi-page kit stays expandable.
+          if (sorted.length === 1) {
+            return { label, icon: sorted[0]!.icon, to: sorted[0]!.to }
+          }
+          return {
+            label,
+            icon: sorted[0]?.icon,
+            children: sorted.map(({ order: _order, ...page }) => page),
+          }
+        })
+
+      items.push({
+        label: 'Kits',
+        icon: 'i-lucide-package',
+        children: kitChildren,
+        order: KITS_GROUP_ORDER,
+      })
     }
 
-    return tree
+    return items.map(({ order: _order, ...item }) => item)
   })
 }
