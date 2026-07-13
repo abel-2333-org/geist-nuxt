@@ -15,6 +15,15 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 // - default  : page content
 // - #footer  : optional content-column footer below the page
 defineProps<{ items?: NavigationMenuItem[] }>()
+
+// As primary sidebar destinations, inactive nav items belong to the "次要文字"
+// tier (text-toned), not the "弱化/禁用" tier (text-muted) that NavigationMenu
+// defaults to for horizontal top-nav. Scope the bump to inactive links only
+// (via aria-current) so the active item keeps its primary-purple color, and
+// re-assert the hover→highlighted feedback so it still wins.
+const navUi = {
+  link: '[&:not([aria-current=page])]:text-toned [&:not([aria-current=page])]:hover:text-highlighted',
+} as const
 </script>
 
 <template>
@@ -34,6 +43,7 @@ defineProps<{ items?: NavigationMenuItem[] }>()
           color="primary"
           highlight
           highlight-color="primary"
+          :ui="navUi"
         />
       </nav>
 
@@ -64,6 +74,7 @@ defineProps<{ items?: NavigationMenuItem[] }>()
               color="primary"
               highlight
               highlight-color="primary"
+              :ui="navUi"
             />
           </template>
         </USlideover>
