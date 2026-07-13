@@ -270,7 +270,7 @@ body {
  * Bilingual parity — CJK body copy needs more leading than Latin. Geist's
  * default line-height suits Latin prose but feels cramped in multi-line Han
  * script, so Chinese/Japanese/Korean paragraph-level text opts up to ~1.7.
- * Scoped to `:lang(zh|ja|ko)` block-text elements only ��� headings, controls,
+ * Scoped to `:lang(zh|ja|ko)` block-text elements only — headings, controls,
  * and code keep their tighter leading. Set the lang attribute on <html> (or a
  * subtree) for this to apply; the rule is unlayered so it wins over utilities.
  */
