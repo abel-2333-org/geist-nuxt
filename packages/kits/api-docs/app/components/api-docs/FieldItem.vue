@@ -3,11 +3,12 @@
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
 // constraints, example, lifecycle), and recursive object/array subfields.
 //
-// Self-contained per the kit slice convention: the field data model travels
-// inline with the component (exported below), mirroring how EnumTable/CodeBlock
-// carry their own display types. `EnumValue`/`EnumVariant` are intentionally
-// the same shape as EnumTable's — structural typing lets this row hand them
-// straight to <ApiDocsEnumTable> without a shared module (copy-in philosophy).
+// Self-contained per the kit slice convention: the field data model (FieldNode
+// and friends) travels inline with the component, mirroring how EnumTable/
+// CodeBlock carry their own display types. The types it shares with the sibling
+// slices it already depends on — EnumValue/EnumVariant (enum-table) and
+// FieldLifecycle (lifecycle-badge) — are imported from those slices rather than
+// re-declared, so the shared contract is compiler-enforced (see imports below).
 //
 // Composed from Nuxt UI primitives (UIcon, UCollapsible) + core atoms
 // (InlineCode, InlineMarkdown, auto-imported from @geist-nuxt/core) + kit
@@ -23,11 +24,17 @@
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
 //           carry dynamic aria-labels; copied state announced politely.
 
+// Types shared with sibling slices are imported from their canonical owner (not
+// re-declared) so drift is a compile error, not a silent structural mismatch.
+// Both slices are declared in this component's registryDependencies, so they're
+// always copied alongside field-item and these relative paths resolve in the
+// consuming project. Re-exported to keep one import surface for FieldNode users.
+import type { EnumValue, EnumVariant } from './EnumTable.vue'
+import type { FieldLifecycle } from '../../utils/lifecycle-preset'
+export type { EnumValue, EnumVariant, FieldLifecycle }
+
 /** `true` / `false`(absent) / `'conditional'` (required only in certain cases). */
 export type RequiredState = boolean | 'conditional'
-
-/** Field lifecycle stage (a parameter-level maturity signal). */
-export type FieldLifecycle = 'new' | 'beta' | 'deprecated'
 
 /**
  * Field lifecycle metadata. `status` drives the badge; `since` and
@@ -47,20 +54,6 @@ export interface FieldNote {
   /** Category tag (Range / Rule / Unsupported…) rendered as a leading pill. */
   label?: string
   text: string
-}
-
-/** A single enum member. Same shape EnumTable consumes. */
-export interface EnumValue {
-  value: string
-  description: string
-}
-
-/** A named group of enum members — e.g. bank lists that apply under a condition. */
-export interface EnumVariant {
-  title?: string
-  /** When this group of values applies (already localized). */
-  when?: string
-  values: EnumValue[]
 }
 
 /**
@@ -272,9 +265,11 @@ const lifecycleMeta = computed(() => {
           aria-hidden="true"
         />
       </button>
-      <span v-if="path" role="status" aria-live="polite" class="sr-only">
-        {{ anchor.copied.value ? t.copiedLink : '' }}
-      </span>
+      <!-- No per-row live region: useCopy() already fires an app-level toast
+           ("Link copied to clipboard") announced through Nuxt UI's single
+           polite live region, and each button reflects the copied state via its
+           own aria-label. A per-row status node would be a third, redundant
+           announcement (and dozens of empty regions on a large table). -->
 
       <code
         class="font-mono text-sm font-medium"

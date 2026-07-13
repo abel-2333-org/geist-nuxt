@@ -165,6 +165,103 @@ const fields = [
   },
 ]
 
+// A second, deliberately DENSE tree — the layout torture test the compact
+// example above never reaches. It pushes what a real API endpoint throws at the
+// row: very long field names, many summary facets on a single line
+// (name · type · format · requiredness · default · lifecycle badge → wrap
+// behavior), four levels of nesting, and an enum long enough to trip
+// EnumTable's filter/scroll threshold (30) when embedded inside a field.
+const currencyCodes = [
+  'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD', 'SEK',
+  'NOK', 'DKK', 'NZD', 'KRW', 'INR', 'BRL', 'ZAR', 'MXN', 'RUB', 'TRY', 'PLN',
+  'THB', 'IDR', 'MYR', 'PHP', 'CZK', 'HUF', 'ILS', 'AED', 'SAR', 'TWD', 'CLP', 'COP',
+]
+const currencyEnum = currencyCodes.map(code => ({
+  value: code,
+  description: `ISO 4217 alphabetic code for ${code}.`,
+}))
+
+const denseFields = [
+  {
+    path: 'payload_transactionSettlementInstruction',
+    name: 'transactionSettlementInstruction',
+    type: 'object',
+    format: 'json_string',
+    required: true,
+    lifecycle: { status: 'beta' as const, since: 'v3.1' },
+    description: 'Full settlement instruction envelope for a cross-border transfer.',
+    children: [
+      {
+        path: 'payload_transactionSettlementInstruction_originatingAccountReference',
+        name: 'originatingAccountReference',
+        type: 'string',
+        format: 'iban',
+        required: true,
+        defaultValue: 'DE00 0000 0000 0000',
+        description: 'IBAN of the account to debit.',
+        examples: ['DE89370400440532013000'],
+        notes: [
+          { label: 'Range', text: '15–34 characters, country-dependent.' },
+          { tone: 'caution' as const, label: 'Rule', text: 'Checksum must pass ISO 7064 MOD-97-10.' },
+        ],
+      },
+      {
+        path: 'payload_transactionSettlementInstruction_settlementCurrency',
+        name: 'settlementCurrency',
+        type: 'enum',
+        format: 'iso_4217',
+        required: true,
+        defaultValue: 'USD',
+        description: 'Currency the settlement clears in.',
+        enumValues: currencyEnum,
+      },
+      {
+        path: 'payload_transactionSettlementInstruction_intermediaryInstitutions',
+        name: 'intermediaryInstitutions',
+        type: 'array<object>',
+        required: false,
+        description: 'Ordered correspondent banks in the settlement chain.',
+        children: [
+          {
+            path: 'payload_transactionSettlementInstruction_intermediaryInstitutions_bankIdentifierCode',
+            name: 'bankIdentifierCode',
+            type: 'string',
+            format: 'bic',
+            required: true,
+            description: 'SWIFT/BIC of the intermediary institution.',
+            examples: ['DEUTDEFFXXX'],
+          },
+          {
+            path: 'payload_transactionSettlementInstruction_intermediaryInstitutions_correspondentAccountReference',
+            name: 'correspondentAccountReference',
+            type: 'object',
+            required: 'conditional' as const,
+            condition: 'Required when the intermediary is not directly reachable.',
+            description: 'Nostro/vostro account held at the intermediary.',
+            children: [
+              {
+                path: 'payload_transactionSettlementInstruction_intermediaryInstitutions_correspondentAccountReference_accountServicingInstitution',
+                name: 'accountServicingInstitution',
+                type: 'string',
+                required: true,
+                description: 'Institution servicing the correspondent account — a fourth nesting level.',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        path: 'payload_transactionSettlementInstruction_legacyRoutingNumber',
+        name: 'legacyRoutingNumber',
+        type: 'string',
+        required: false,
+        lifecycle: { status: 'deprecated' as const, since: 'v3.0', description: 'Use `bankIdentifierCode` instead.' },
+        description: 'Legacy ABA routing number.',
+      },
+    ],
+  },
+]
+
 // Honor an incoming `#path` hash: navigate + expand + scroll to the field.
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -231,11 +328,19 @@ onMounted(() => anchor.initFromHash())
             示例、条件、enum、约束注记与字段 lifecycle。每行悬停时行首出现链接图标，
             点击即复制该字段的深链接（<code class="font-mono text-[0.8125rem]">#body_gitSource_ref</code>
             这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
-            带入页面时自动展开并滚动定位）。
+            带入页面时自动展开并滚动定位）。下面第一组是紧凑示例；第二组是刻意加压的
+            高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超 30 项的长
+            enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。
           </p>
           <ApiDocsFieldGroup label="Request Body" :count="fields.length">
             <ApiDocsFieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
           </ApiDocsFieldGroup>
+
+          <div class="mt-8">
+            <ApiDocsFieldGroup label="Settlement Payload" :count="denseFields.length">
+              <ApiDocsFieldItem v-for="f in denseFields" :key="f.path ?? f.name" v-bind="f" />
+            </ApiDocsFieldGroup>
+          </div>
         </div>
       </div>
     </section>

@@ -22,7 +22,7 @@
 | `api-docs/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 core `SemanticBadge` | — |
 | `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，长表带筛选+滚动） | — |
 | `api-docs/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
-| `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；深链接由 `useFieldAnchor` 驱动。字段数据模型（`FieldNode`/`EnumValue`/`EnumVariant`/`FieldNote`…）内联随组件走 | — |
+| `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -46,7 +46,7 @@
 > | `*em*` / `_em_` | `ProseEm` |
 > | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
 >
-> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性���识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
 > **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，��� props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
@@ -140,7 +140,7 @@
 
 - **标题层级不跳级**。页面只有一个 `<h1>`（operation 标题，在 `OperationHeader`，加 `text-balance` 防孤字）；其下的字段分组标题（`FieldGroup`）必须是 `<h2>`，不要图视觉小就写成 `<h3>`/`<h4>` 造成 `h1→h3` 跳跃。**用原生语义标题 `<h1>/<h2>`，不要用 Nuxt UI 的 `ProseH*`**——`ProseH*` 是 markdown 内容管线组件（读 `mdc.headings` 配置决定是否注入 `#` 锚点、排版是长文正文尺度），本 kit 刻意不装 MDC，用它只会退化成带正文尺度的普通标题并引入隐式 MDC 依赖。这些标题是「应用界面结构」而非「渲染出的 markdown 正文」，属不同层。
 - **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会��页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘要被漏掉。
-- **提供 skip link**。`header + main` 结构要在最顶部放一个聚焦前 `sr-only`、`focus:not-sr-only` 的「Skip to content」锚点，`href="#main-content"` 指向 `<main id="main-content">`，让键盘 / AT 用户跳过 header。
+- **提供 skip link**��`header + main` 结构要在最顶部放一个聚焦前 `sr-only`、`focus:not-sr-only` 的「Skip to content」锚点，`href="#main-content"` 指向 `<main id="main-content">`，让键盘 / AT 用户跳过 header。
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
 - **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
 
@@ -183,14 +183,14 @@ authoring 输入            适配                 领域输出              渲
 
 ### 层 3：领域输出 + 字段渲染（`types/domain.ts` + `components/reference/`）
 
-- `domain.ts`（消费层）：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。注：这些字段展示类型现已随 `ApiDocsFieldItem` 切片**内联进 kit**（其中 `FieldContractNote` 在 kit 侧更名为更中性的 `FieldNote`）；消费层的 `domain.ts` 仍是 adapter 的输出真源，按需 adapt，两侧结构化兼容。
+- `domain.ts`（消费层）：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。注：这些字段展示类型现已进 kit，按归属分散在各切片——`FieldNode`/`FieldNote` 在 field-item（`FieldContractNote` 在 kit 侧更名为更中性的 `FieldNote`），`EnumValue`/`EnumVariant` 在 enum-table，`FieldLifecycle` 在 lifecycle-badge，field-item 再导入后两者;消费层的 `domain.ts` 仍是 adapter 的输出真源，按需 adapt，两侧结构化兼容。
 - 组件清单（各自职责，实现看真源）：
 
   | 组件 | 归属 | 职责 |
   |---|---|---|
   | `OperationHeader` | 消费层 | 页面唯一 `<h1>` + method/path + 端点 lifecycle（吃端点 domain，头因项目而异，copy & adapt） |
   | `ApiDocsFieldGroup` | **kit 切片** | 字段分组容器，组标题是 `<h2>` + 可选计数；零依赖，拷贝即用 |
-  | `ApiDocsFieldItem` | **kit 切片** | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记（`FieldNote`）/lifecycle/嵌套递归；字段数据模型内联随组件走。深链接由 `useFieldAnchor`（随切片同 ship）驱动 |
+  | `ApiDocsFieldItem` | **kit 切片** | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记（`FieldNote`）/lifecycle/嵌套递归；`FieldNode`/`FieldNote` 内联定义，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从所依赖的兄弟切片（enum-table / lifecycle-badge）**导入并 re-export**（编译期强制、防跨切片漂移）。深链接由 `useFieldAnchor`（随切片同 ship）驱动 |
   | `ApiDocsEnumTable` | **kit 切片** | enum 值表（扁平 `values` + 分组 `variants` 两种形态）；类型内联，拷贝即用 |
   | `ApiDocsMethodBadge` | **kit 切片** | HTTP method 色标（色+文本双通道）；preset 包装 core `SemanticBadge` |
   | `ApiDocsLifecycleBadge` | **kit 切片** | 字段/端点生命周期色标；preset 包装 core `SemanticBadge` |
@@ -200,8 +200,11 @@ authoring 输入            适配                 领域输出              渲
 
 - **字段深链接（`useFieldAnchor`，随 `field-item` 切片同 ship）消费者须知**：
   - **必需**：在渲染字段树的页面 `onMounted` 里调 `useFieldAnchor().initFromHash()`，让带 `#field-path` 进入时自动展开祖先 + 滚动 + 高亮。
-  - **可选打磨**：在自己的 `app/router.options.ts` 的 `scrollBehavior` 里加 `if (to.hash) return false`，消除冷启动深链接的一次滚动闪烁。**kit 不下发 `router.options.ts`**——它是全局单例、属消费层职责，多数消费者已有该文件，合并这一行即可。缺了它 composable 仍功能正确（只是冷启动会闪一下）。
+  - **可选打磨**：在自己的 `app/router.options.ts` 的 `scrollBehavior` 里加 `if (to.hash) return false`，消除冷启动深链接的一次滚动闪烁。**kit 不下发 `router.options.ts`**——它是全局单例、属消费层职����，多数消费者已有该文件，合并这一行即可。缺了它 composable 仍功能正确（只是冷启动会闪一下）。
   - composable 自足：`copyLink` 走 `history.replaceState`（不触发路由导航）、`goTo` 自管「展开→等布局稳→滚动→高亮」，均不依赖 Vue Router 的 scrollBehavior。
+
+- **跨切片共享类型走「导入而非各抄一份」**：`FieldItem` 运行时就渲染 `<ApiDocsEnumTable>`/`<ApiDocsLifecycleBadge>`（已在 `registryDependencies` 声明），因此它直接 `import type` 这两个切片的 `EnumValue`/`EnumVariant`/`FieldLifecycle` 并 re-export，而不是重定义同形副本。导入只是让编译器承认这个既有依赖——某切片改了类型另一处立即报错，而非静默漂移；仍 copy-safe（依赖切片必随 field-item 一起复制，相对路径成立）。这正是 registry 依赖规则第 2 条的落地。
+- **复制反馈不放 per-row live region**：字段深链接复制走 core `useCopy()`，它已 `toast.add(...)` 经 Nuxt UI 单一 app 级 polite region 播报「Link copied」，锚点按钮 `aria-label` 亦随 copied 切换。故 FieldItem **不**为每行放 `role="status"`——否则大表会堆几十个（多为空）region 且三重播报。新增 CodeBlock 之外的复制场景时沿用此约定：复制播报交给 toast，别在每个可复制元素上再加 live region。
 
 ### 契约规则（跨层，务必遵守）
 
@@ -226,8 +229,11 @@ authoring 输入            适配                 领域输出              渲
 - `packages/kits/api-docs/app/components/api-docs/MethodBadge.vue` + `app/utils/method-preset.ts`
 - `packages/kits/api-docs/app/components/api-docs/LifecycleBadge.vue` + `app/utils/lifecycle-preset.ts`
 - `packages/kits/api-docs/app/components/api-docs/EnumTable.vue`
+- `packages/kits/api-docs/app/components/api-docs/FieldGroup.vue`
+- `packages/kits/api-docs/app/components/api-docs/FieldItem.vue`（字段展示类型内联导出于此）
 - `packages/kits/api-docs/app/composables/useCodeWrap.ts`
-- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`
+- `packages/kits/api-docs/app/composables/useFieldAnchor.ts`（字段深链接，随 field-item 切片同 ship）
+- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`（含 `router.options.ts` 演示可选打磨）
 - 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`、`packages/core/app/components/SemanticBadge.vue`、`packages/core/app/components/{InlineCode,InlineMarkdown}.vue`、`packages/core/app/utils/badge.ts`
 - 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 
