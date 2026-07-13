@@ -21,7 +21,7 @@ defineProps<{ items?: NavigationMenuItem[] }>()
   <div class="min-h-screen bg-default text-default antialiased">
     <!-- Desktop: persistent sidebar -->
     <aside
-      class="max-lg:hidden fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-default bg-elevated"
+      class="max-lg:hidden fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-default bg-elevated/40"
     >
       <div class="flex h-16 items-center gap-2.5 border-b border-default px-5">
         <slot name="brand" />
