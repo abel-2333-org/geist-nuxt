@@ -15,3 +15,5 @@ node_modules
 .DS_Store
 # transient reflow clone (not part of starter)
 .reflow-src/
+.reflow-src2/
+.reflow/
