@@ -38,15 +38,20 @@ defineProps<{ items?: NavigationMenuItem[] }>()
     </UHeader>
 
     <UMain class="flex-1">
-      <UPage>
-        <template #left>
-          <UPageAside>
-            <UNavigationMenu :items="items" orientation="vertical" />
-          </UPageAside>
-        </template>
+      <!-- Same UContainer width as UHeader's internal container, so the sidebar
+           left edge aligns with the brand and the content right edge aligns with
+           the header actions — one centered 80rem column, no misalignment. -->
+      <UContainer>
+        <UPage>
+          <template #left>
+            <UPageAside>
+              <UNavigationMenu :items="items" orientation="vertical" />
+            </UPageAside>
+          </template>
 
-        <slot />
-      </UPage>
+          <slot />
+        </UPage>
+      </UContainer>
     </UMain>
 
     <slot name="footer" />
