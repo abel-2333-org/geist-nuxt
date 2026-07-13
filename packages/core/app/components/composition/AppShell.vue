@@ -42,25 +42,33 @@ defineProps<{ items?: NavigationMenuItem[] }>()
       </div>
     </aside>
 
-    <!-- Mobile: slim top bar + slideover carrying the same nav -->
-    <UHeader mode="slideover" class="lg:hidden">
-      <template #left>
-        <slot name="brand" />
-      </template>
-      <template #right>
+    <!-- Mobile: slim sticky bar + USlideover carrying the same nav -->
+    <header
+      class="lg:hidden sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-default bg-default/80 px-4 backdrop-blur"
+    >
+      <slot name="brand" />
+
+      <div class="flex items-center gap-1">
         <slot name="actions" />
-      </template>
-      <template #body>
-        <UNavigationMenu
-          :items="items"
-          orientation="vertical"
-          color="primary"
-          highlight
-          highlight-color="primary"
-          class="-mx-2.5"
-        />
-      </template>
-    </UHeader>
+        <USlideover side="left" title="导航">
+          <UButton
+            icon="i-lucide-menu"
+            color="neutral"
+            variant="ghost"
+            aria-label="打开导航"
+          />
+          <template #body>
+            <UNavigationMenu
+              :items="items"
+              orientation="vertical"
+              color="primary"
+              highlight
+              highlight-color="primary"
+            />
+          </template>
+        </USlideover>
+      </div>
+    </header>
 
     <!-- Content column, offset by the sidebar width on desktop -->
     <div class="flex min-h-screen flex-col lg:pl-64">
