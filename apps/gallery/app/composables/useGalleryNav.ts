@@ -39,8 +39,12 @@ interface Sortable {
  * Hide a page with `definePageMeta({ nav: false })`.
  *
  * Structure: top-level pages ("/", "/components", ...) render inline; every
- * `kits/<name>/**` page folds into a "Kits" group, one sub-tree per kit
- * (single-page kit → a link; multi-page kit → an expandable sub-tree).
+ * `kits/<name>/**` page folds into a single "Kits" dropdown. Nuxt UI's
+ * horizontal navigation menu only renders two levels (trigger → one flat
+ * child list), so kits are NOT nested as per-kit sub-trees. Instead each kit
+ * page is a direct child of "Kits"; a multi-page kit carries its kit name as
+ * every entry's `description`, which lands in Nuxt UI's native mega-menu
+ * description slot and keeps the pages visually grouped.
  */
 export function useGalleryNav() {
   const router = useRouter()
@@ -80,21 +84,22 @@ export function useGalleryNav() {
     const items: (NavigationMenuItem & { order: number })[] = topLevel.sort(byOrderThenLabel)
 
     if (kitPages.size > 0) {
-      // One sub-tree per kit, kits sorted by name for stability.
+      // Flatten every kit page into the single "Kits" dropdown (two levels max).
+      // kits sorted by name for stability.
       const kitChildren: NavigationMenuItem[] = [...kitPages.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([kitName, pages]) => {
+        .flatMap(([kitName, pages]) => {
           const sorted = pages.sort(byOrderThenLabel)
-          const label = titleCase(kitName)
-          // Single-page kit collapses to a plain link; multi-page kit stays expandable.
+          const kitTitle = titleCase(kitName)
+          // Single-page kit: one entry labelled by the kit itself, no description.
           if (sorted.length === 1) {
-            return { label, icon: sorted[0]!.icon, to: sorted[0]!.to }
+            return [{ label: kitTitle, icon: sorted[0]!.icon, to: sorted[0]!.to }]
           }
-          return {
-            label,
-            icon: sorted[0]?.icon,
-            children: sorted.map(({ order: _order, ...page }) => page),
-          }
+          // Multi-page kit: one entry per page, kit name as the grouping description.
+          return sorted.map(({ order: _order, ...page }) => ({
+            ...page,
+            description: kitTitle,
+          }))
         })
 
       items.push({
