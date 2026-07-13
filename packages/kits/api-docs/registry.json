@@ -44,7 +44,7 @@
         { "path": "app/components/api-docs/LifecycleBadge.vue", "target": "app/components/api-docs/LifecycleBadge.vue", "type": "registry:component" },
         { "path": "app/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts", "type": "registry:file" }
       ],
-      "meta": { "coreDeps": ["SemanticBadge", "BadgeTone"] }
+      "meta": { "coreDeps": ["SemanticBadge"] }
     },
     {
       "name": "method-badge",
@@ -55,7 +55,7 @@
         { "path": "app/components/api-docs/MethodBadge.vue", "target": "app/components/api-docs/MethodBadge.vue", "type": "registry:component" },
         { "path": "app/utils/method-preset.ts", "target": "app/utils/method-preset.ts", "type": "registry:file" }
       ],
-      "meta": { "coreDeps": ["SemanticBadge", "BadgeTone"] }
+      "meta": { "coreDeps": ["SemanticBadge"] }
     },
     {
       "name": "enum-table",

@@ -17,7 +17,9 @@ const props = withDefaults(
     method: string
     size?: BadgeProps['size']
   }>(),
-  { size: 'md' },
+  // Default matches LifecycleBadge so the two align when they co-occur (e.g.
+  // in an operation header). Callers can still size up explicitly.
+  { size: 'sm' },
 )
 
 const method = computed(() => props.method.toUpperCase() as HttpMethod)
