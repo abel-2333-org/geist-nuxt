@@ -69,7 +69,7 @@ geist-nuxt 的组件全部来自 Nuxt UI v4（公共包 `@nuxt/ui`，共 122 个
 
 > 需求不在上表时，先查官方组件目录（https://ui.nuxt.com/components）再自建——122 个组件覆盖面很广，优先复用。
 
-> **可拖动分栏（左右 / 上下 resizable split）**：Nuxt UI 只有横向 %-based 的 `useResizable`（服务于 Dashboard 侧栏），没有通用的双轴分隔原语。首选用 starter 基座里的 **`<SplitPane>`**——声明式、自包含、MDC/Nuxt Content 友好的双 slot 容器（`#start`/`#end`），把拖动/持久化/断点/键盘/SSR 全封装，一行即可复用。它内部由 `<SplitPaneHandle>`（把手，纯展示+a11y）+ `useSplitPane`（轴无关拖动状态 + cookie 持久化，附 `computeSplitBudgets` 内容优先重分配纯函数）组成，需要更特殊布局时才直接碰这两个零件。详见 `kits/api-docs/index.md` 的「可拖动分栏」一节。
+> **可拖动分栏（左右 / 上下 resizable split）**：Nuxt UI 只有横向 %-based 的 `useResizable`（服务于 Dashboard 侧栏），没有通用的双轴分隔原语。首选用 starter 基座里的 **`<SplitPane>`**——声明式、自包含、MDC/Nuxt Content 友好的双 slot 容器（`#start`/`#end`），把拖动/持久化/断点/键盘/SSR 全封装，一行即可复用。它内部由 `<SplitPaneHandle>`（把手，纯展示+a11y）+ `useSplitPane`（轴无关拖动状态 + cookie 持久化）组成，需要更特殊布局时才直接碰这两个零件。内容优先重分配是消费页专属逻辑、以页面 recipe 下发而非住在 core，详见 `kits/api-docs/index.md` 的「可拖动分栏」一节。
 
 ## 通用惯例
 
