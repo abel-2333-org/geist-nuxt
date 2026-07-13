@@ -28,7 +28,7 @@ const menuItems = [
           <UButton color="error" variant="soft">Delete project</UButton>
           <template #footer>
             <UButton color="error">Confirm</UButton>
-            <UButton color="neutral" variant="outline" @click="modalOpen = false">Cancel</UButton>
+            <UButton color="neutral" variant="outline" @click="() => { modalOpen = false }">Cancel</UButton>
           </template>
         </UModal>
       </GalleryExample>
