@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BadgeProps } from '@nuxt/ui'
 import type { BadgeTone } from '../utils/badge'
+import { BADGE_TONE_COLOR } from '../utils/badge'
 
 // Presentation ATOM: a semantic badge. It knows nothing about lifecycle /
 // HTTP method / any domain concept — it only renders a curated `tone` (color +
@@ -32,7 +33,7 @@ const props = withDefaults(
 
 <template>
   <UBadge
-    :color="props.tone"
+    :color="BADGE_TONE_COLOR[props.tone]"
     :variant="props.variant"
     :size="props.size"
     :icon="props.icon"

@@ -6,11 +6,12 @@
 // Delegates to Nuxt UI's ProseCode primitive (available via `ui.prose: true`,
 // no @nuxt/content needed). We override two theme defaults to stay on Geist
 // foundations: radius back to the control tier (`rounded-sm`, 6px) instead of
-// the primitive's `rounded-md`, and font size to Copy 13 Mono per the type scale.
+// the primitive's `rounded-md`, and font size to Copy 13 Mono (`text-code`,
+// 13px) per the type scale.
 </script>
 
 <template>
-  <ProseCode class="rounded-sm text-[0.8125rem]">
+  <ProseCode class="rounded-sm text-code">
     <slot />
   </ProseCode>
 </template>
