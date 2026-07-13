@@ -42,7 +42,7 @@
       "description": "Lifecycle status badge (new/beta/active/maintenance/deprecated/sunset). Preset wrapper over core SemanticBadge; the lifecycle vocabulary + tone calibration ship in the preset.",
       "files": [
         { "path": "app/components/api-docs/LifecycleBadge.vue", "target": "app/components/api-docs/LifecycleBadge.vue", "type": "registry:component" },
-        { "path": "app/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts", "type": "registry:file" }
+        { "path": "app/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts", "type": "registry:lib" }
       ],
       "meta": { "coreDeps": ["SemanticBadge"] }
     },
@@ -53,7 +53,7 @@
       "description": "HTTP method badge (GET/POST/PUT/PATCH/DELETE) in mono type. Preset wrapper over core SemanticBadge; the method vocabulary + tone calibration ship in the preset.",
       "files": [
         { "path": "app/components/api-docs/MethodBadge.vue", "target": "app/components/api-docs/MethodBadge.vue", "type": "registry:component" },
-        { "path": "app/utils/method-preset.ts", "target": "app/utils/method-preset.ts", "type": "registry:file" }
+        { "path": "app/utils/method-preset.ts", "target": "app/utils/method-preset.ts", "type": "registry:lib" }
       ],
       "meta": { "coreDeps": ["SemanticBadge"] }
     },

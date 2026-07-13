@@ -120,8 +120,9 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
       class="w-full"
     />
 
-    <!-- Large lists scroll within a bounded area so a 60-item enum never blows
-         out the page; small lists render at full height. -->
+    <!-- Filterable lists (>= filterThreshold, default 30) scroll within a
+         bounded area so a long enum never blows out the page; short lists
+         render at full height. -->
     <div
       class="overflow-hidden rounded-lg border border-default"
       :class="filterable ? 'max-h-80 overflow-y-auto' : ''"

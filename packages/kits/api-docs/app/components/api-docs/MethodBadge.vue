@@ -22,6 +22,8 @@ const props = withDefaults(
   { size: 'sm' },
 )
 
+// The cast is only to index `methodPreset`; an unknown/custom method falls
+// through to `methodFallback`, so it is safe despite the cast not being provable.
 const method = computed(() => props.method.toUpperCase() as HttpMethod)
 const meta = computed(() => methodPreset[method.value] ?? methodFallback)
 </script>
