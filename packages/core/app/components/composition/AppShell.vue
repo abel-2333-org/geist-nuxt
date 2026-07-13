@@ -23,6 +23,10 @@ defineProps<{ items?: NavigationMenuItem[] }>()
 // re-assert the hover→highlighted feedback so it still wins.
 const navUi = {
   link: '[&:not([aria-current=page])]:text-toned [&:not([aria-current=page])]:hover:text-highlighted',
+  // Section headings ("Kits") = the Label 12 tier from typography.md:
+  // uppercase + tracking-wide + font-medium, dimmed so it sits below the
+  // nav destinations rather than competing with them.
+  label: 'font-medium text-dimmed uppercase tracking-wide',
 } as const
 </script>
 
