@@ -65,6 +65,16 @@ const responseScenarios = [
     ],
   },
 ]
+
+// Domain badges + enum table — preset wrappers over core's SemanticBadge, plus
+// the allowed-values table. Data-agnostic, driven here by inline sample data.
+const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+const lifecycles = ['new', 'beta', 'active', 'maintenance', 'deprecated', 'sunset'] as const
+const enumValues = [
+  { value: 'production', description: 'Live environment served to end users.' },
+  { value: 'preview', description: 'Per-branch deploy for review. Supports `?token=` access.' },
+  { value: 'development', description: 'Local or ephemeral environment. **Not** publicly routed.' },
+]
 </script>
 
 <template>
@@ -90,6 +100,25 @@ const responseScenarios = [
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
           <ApiDocsResponseExample :scenarios="responseScenarios" />
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Method 徽章</h3>
+          <div class="flex flex-wrap items-center gap-2">
+            <ApiDocsMethodBadge v-for="m in methods" :key="m" :method="m" />
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 徽章</h3>
+          <div class="flex flex-wrap items-center gap-2">
+            <ApiDocsLifecycleBadge v-for="s in lifecycles" :key="s" :status="s" />
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Enum 值表</h3>
+          <ApiDocsEnumTable :values="enumValues" />
         </div>
       </div>
     </section>

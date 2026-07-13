@@ -18,8 +18,13 @@
 | `api-docs/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
 | `api-docs/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
 | `api-docs/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
+| `api-docs/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 core `SemanticBadge` | — |
+| `api-docs/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 core `SemanticBadge` | — |
+| `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，长表带筛选+滚动） | — |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
+
+> **preset 型徽章（MethodBadge / LifecycleBadge）** = 在 core 的 `SemanticBadge`（tone 原子）之上，包一层"域词汇 → tone"映射。域词汇 + tone 校准住在随切片一起复制的 `app/utils/{method,lifecycle}-preset.ts`；`SemanticBadge`/`BadgeTone` 由 core 经 `coreDeps` 天然在位。二者写法对称，改词汇只动 preset、不碰组件。
 
 > **端点头 / 参数表**（原 EndpointHeader / ParamsTable）已移除，待重新设计。新造时按 `method/component-spec-template.md` 走 anatomy → states → accessibility 规格，再沉淀回本 kit。
 
@@ -79,7 +84,7 @@
 
   以下两个是 `SplitPane` 的**内部零件**，需要脱离容器单独用（比如手写更特殊的布局）时才直接碰：
 
-- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸交由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高钉住）。
+- `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸���由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高钉住）。
   - **坑**：`group-hover:` 在 Tailwind v4 会被包进 `@media (hover:hover)`，所以 grip 的 hover 浮现只在有鼠标的设备上生效（触屏/无头浏览器 `hover:none` 不触发，属预期）；触屏与键盘用户靠 `active`（拖动中，非 hover 门控）和 `group-focus-visible`（非 hover 门控）两条路径拿到 grip，affordance 不会丢。别用 `transition-[opacity,background-color]` 这种带逗号的 arbitrary value——逗号会打断 Tailwind 的类名扫描、导致其后同一 `class` 里的工具类（含 `group-hover:*`）不被生成；用普通 `transition` 即可。
 - `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。附纯函数 `computeSplitBudgets(H, natTop, natBottom, ratio, minPane)` 实现**内容优先重分配**。
 
@@ -100,7 +105,7 @@
 
 1. 按需要的条目整切片复制：如 `code-block` 切片 = `app/components/api-docs/CodeBlock.vue` + `app/composables/useCodeWrap.ts`，按各文件 `target` 拷到项目的 `app/components/api-docs/` 与 `app/composables/`（保留 `api-docs/` 目录）。`registryDependencies` 里列的切片要先拷（如 `request-example` 依赖 `code-block`）。
 2. **core 依赖零动作**：`CopyButton` / `useCopy` 由 `@geist-nuxt/core` layer 提供（registry 条目的 `meta.coreDeps` 有声明），项目 `extends: ['@geist-nuxt/core']` 即天然在位，不需要复制。
-3. 组合方式（怎么把请求 + 响应拼成一页）不作为切片分发——kit 只 ship 3 个数据无关积木，组合示例见 gallery 页面 `apps/gallery/app/pages/kits/api-docs/index.vue`，按需在自己项目里照着拼。
+3. 组合方式（怎么把请求 + 响应 + 徽章拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表），组合示例见 gallery 页面 `apps/gallery/app/pages/kits/api-docs/index.vue`，按需在自己项目里照着拼。
 4. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，它是 core 包的依赖、随 core 自动就位。**不要**装 Shiki / `@nuxt/content`。
 
 > **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立、也才与消费者自有组件隔离。
@@ -132,14 +137,14 @@
 装配整页时容易漏掉、但 review 必查的几条：
 
 - **标题层级不跳级**。页面只有一个 `<h1>`（operation 标题，在 `OperationHeader`，加 `text-balance` 防孤字）；其下的字段分组标题（`FieldGroup`）必须是 `<h2>`，不要图视觉小就写成 `<h3>`/`<h4>` 造成 `h1→h3` 跳跃。**用原生语义标题 `<h1>/<h2>`，不要用 Nuxt UI 的 `ProseH*`**——`ProseH*` 是 markdown 内容管线组件（读 `mdc.headings` 配置决定是否注入 `#` 锚点、排版是长文正文尺度），本 kit 刻意不装 MDC，用它只会退化成带正文尺度的普通标题并引入隐式 MDC 依赖。这些标题是「应用界面结构」而非「渲染出的 markdown 正文」，属不同层。
-- **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会整页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘要被漏掉。
+- **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会��页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘要被漏掉。
 - **提供 skip link**。`header + main` 结构要在最顶部放一个聚焦前 `sr-only`、`focus:not-sr-only` 的「Skip to content」锚点，`href="#main-content"` 指向 `<main id="main-content">`，让键盘 / AT 用户跳过 header。
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
 - **flex 子项要截断先加 `min-w-0`**。像端点 path 的 `<code class="flex-1 truncate">` 必须配 `min-w-0`，否则 flex item 默认 `min-width:auto` 不会收缩、`truncate` 失效。
 
 ## 架构蓝图：spec 驱动的渲染栈（pattern，非 drop-in）
 
-> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit 只 ship 3 个**数据无关的展示积木**（CodeBlock / RequestExample / ResponseExample，类型内联、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、字段组件，是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
+> **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit ship 的是一组**数据无关的展示积木**（代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表，类型内联或依赖 core、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、以及吃 domain 树的字段组件（`OperationHeader`/`FieldGroup`/`FieldItem`/`ContractNote`），是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
 >
 > **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永远比预建便宜，别过早建目录。
 
@@ -179,16 +184,18 @@ authoring 输入            适配                 领域输出              渲
 - `domain.ts`：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。
 - 字段组件清单（各自职责，实现看真源）：
 
-  | 组件 | 职责 |
-  |---|---|
-  | `OperationHeader` | 页面唯一 `<h1>` + method/path + 端点 lifecycle |
-  | `FieldGroup` | 字段分组容器，组标题是 `<h2>` |
-  | `FieldItem` | 单个字段行：名/类型/必填/nullability/约束/嵌套递归 |
-  | `EnumTable` | enum 值表（扁平 `flat` + 分组 `variants` 两种形态） |
-  | `ContractNote` | 字段下的约束/一致性提示（tone + label pill） |
-  | `ProseText` | 字段描述的行内 markdown tokenizer（见上文 ProseText 小节） |
-  | `InlineCode` | 结构性标识符的裸 code 样式 |
-  | `MethodBadge` / `StatusBadge` | HTTP method / 响应状态色标（色+文本双通道） |
+  | 组件 | 归属 | 职责 |
+  |---|---|---|
+  | `OperationHeader` | 消费层 | 页面唯一 `<h1>` + method/path + 端点 lifecycle（吃端点 domain，头因项目而异，copy & adapt） |
+  | `FieldGroup` | 消费层 | 字段分组容器，组标题是 `<h2>` |
+  | `FieldItem` | 消费层 | 单个字段行：名/类型/必填/nullability/约束/嵌套递归（吃 `FieldNode` 树） |
+  | `ContractNote` | 消费层 | 字段下的约束/一致性提示（tone + label pill） |
+  | `ApiDocsEnumTable` | **kit 切片** | enum 值表（扁平 `values` + 分组 `variants` 两种形态）；类型内联，拷贝即用 |
+  | `ApiDocsMethodBadge` | **kit 切片** | HTTP method 色标（色+文本双通道）；preset 包装 core `SemanticBadge` |
+  | `ApiDocsLifecycleBadge` | **kit 切片** | 字段/端点生命周期色标；preset 包装 core `SemanticBadge` |
+  | `SemanticBadge` | **core** | tone 原子（色+图标+文本）；域→tone 映射留在上面的 preset 徽章里 |
+  | `InlineCode` | **core** | 行内代码 token（ProseCode 校准到 Geist） |
+  | `InlineMarkdown` | **core** | 字段描述的行内 markdown tokenizer（`code`/链接/粗斜/删除线） |
 
 ### 契约规则（跨层，务必遵守）
 
@@ -210,9 +217,12 @@ authoring 输入            适配                 领域输出              渲
 - `packages/kits/api-docs/app/components/api-docs/CodeBlock.vue`
 - `packages/kits/api-docs/app/components/api-docs/RequestExample.vue`
 - `packages/kits/api-docs/app/components/api-docs/ResponseExample.vue`
+- `packages/kits/api-docs/app/components/api-docs/MethodBadge.vue` + `app/utils/method-preset.ts`
+- `packages/kits/api-docs/app/components/api-docs/LifecycleBadge.vue` + `app/utils/lifecycle-preset.ts`
+- `packages/kits/api-docs/app/components/api-docs/EnumTable.vue`
 - `packages/kits/api-docs/app/composables/useCodeWrap.ts`
 - 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`
-- 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`
+- 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`、`packages/core/app/components/SemanticBadge.vue`、`packages/core/app/components/{InlineCode,InlineMarkdown}.vue`、`packages/core/app/utils/badge.ts`
 - 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 
 ## 不要臆造
