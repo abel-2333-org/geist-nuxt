@@ -24,7 +24,6 @@ interface _GlobalComponents {
   ResponseExample: typeof import("../../app/components/api/ResponseExample.vue")['default']
   AuthMethod: typeof import("../../app/components/reference/AuthMethod.vue")['default']
   AuthPanel: typeof import("../../app/components/reference/AuthPanel.vue")['default']
-  ContractNote: typeof import("../../app/components/reference/ContractNote.vue")['default']
   EnumTable: typeof import("../../app/components/reference/EnumTable.vue")['default']
   FieldGroup: typeof import("../../app/components/reference/FieldGroup.vue")['default']
   FieldItem: typeof import("../../app/components/reference/FieldItem.vue")['default']
@@ -244,7 +243,6 @@ interface _GlobalComponents {
   LazyResponseExample: LazyComponent<typeof import("../../app/components/api/ResponseExample.vue")['default']>
   LazyAuthMethod: LazyComponent<typeof import("../../app/components/reference/AuthMethod.vue")['default']>
   LazyAuthPanel: LazyComponent<typeof import("../../app/components/reference/AuthPanel.vue")['default']>
-  LazyContractNote: LazyComponent<typeof import("../../app/components/reference/ContractNote.vue")['default']>
   LazyEnumTable: LazyComponent<typeof import("../../app/components/reference/EnumTable.vue")['default']>
   LazyFieldGroup: LazyComponent<typeof import("../../app/components/reference/FieldGroup.vue")['default']>
   LazyFieldItem: LazyComponent<typeof import("../../app/components/reference/FieldItem.vue")['default']>
