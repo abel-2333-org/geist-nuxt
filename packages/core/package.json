@@ -1,6 +1,6 @@
 {
   "name": "@geist-nuxt/core",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Geist visual language on Nuxt UI — a reusable Nuxt layer: tokens, fonts, color mode, base components and composables.",
   "type": "module",
   "main": "./nuxt.config.ts",

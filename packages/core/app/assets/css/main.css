@@ -18,6 +18,15 @@
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /*
+   * Type scale addition — "Copy 13 Mono" (13px). Geist sits inline code between
+   * Tailwind's text-xs (12) and text-sm (14); neither matches, so the atom used
+   * an arbitrary value. Promoted to a semantic token: `--text-code` generates a
+   * `text-code` utility, making 13px inline code a single source of truth
+   * instead of a magic number scattered across components.
+   */
+  --text-code: 0.8125rem;
+
+  /*
    * Breakpoints — exact Geist values (vercel.com/design). Overriding Tailwind's
    * `--breakpoint-*` remaps every `sm:`/`md:`/`lg:`/`xl:`/`2xl:` utility, so all
    * of Nuxt UI's built-in responsive classes (e.g. container `sm:px-6 lg:px-8`)
