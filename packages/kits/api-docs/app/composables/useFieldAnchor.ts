@@ -104,14 +104,17 @@ export function useFieldAnchor() {
     })
   }
 
-  /** Copy a field's deep link and focus it. Navigation runs regardless of
-   *  whether the clipboard write succeeds (permissions can reject it). */
-  async function copyLink(path: string, label = 'Link') {
+  /** Copy a field's deep link and focus it. Pass `fieldName` so the toast names
+   *  what was copied ("`<field>` link copied to clipboard") — important when
+   *  copying from a long field list; falls back to a generic "Link" otherwise.
+   *  Navigation runs regardless of whether the clipboard write succeeds
+   *  (permissions can reject it). */
+  async function copyLink(path: string, fieldName?: string) {
     // Fire-and-forget: navigation/scroll runs independently of the clipboard
     // write below; we don't want to block the copy on the scroll animation.
     void goTo(path, { updateHash: true })
     try {
-      await copy(urlFor(path), label)
+      await copy(urlFor(path), fieldName ? `${fieldName} link` : 'Link')
     }
     catch {
       // Clipboard unavailable/denied — the hash is still updated so the user

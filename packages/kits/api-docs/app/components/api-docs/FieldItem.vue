@@ -156,7 +156,9 @@ const descendantActive = computed(
 )
 
 function onCopyLink() {
-  if (props.path) anchor.copyLink(props.path)
+  // Pass the field name so the copy toast names what was copied — meaningful
+  // feedback when copying from a long field list, not a generic "Link".
+  if (props.path) anchor.copyLink(props.path, props.name)
 }
 
 // Collapsible open state is a real ref (v-model:open) so the user can toggle
