@@ -15,7 +15,16 @@ export function useCopy(timeout = 2000) {
   const clipboard = useClipboard({ legacy: true })
   let timer: ReturnType<typeof setTimeout> | undefined
 
-  async function copy(text: string, label = 'Code') {
+  // `label` names *what* was copied and fills the default "<label> copied to
+  // clipboard" sentence — the English Geist voice every caller shares. Callers
+  // that need to own the *whole* sentence (e.g. to localize it through their
+  // own labels/i18n) pass `successMessage` instead, so no caller has to
+  // string-concatenate half a sentence onto our hardcoded other half.
+  async function copy(
+    text: string,
+    label = 'Code',
+    opts: { successMessage?: string } = {},
+  ) {
     let ok = false
     try {
       // With `legacy: true`, `isSupported` is only false in truly capability-less
@@ -32,7 +41,7 @@ export function useCopy(timeout = 2000) {
     if (ok) {
       copied.value = true
       toast.add({
-        title: `${label} copied to clipboard`,
+        title: opts.successMessage ?? `${label} copied to clipboard`,
         color: 'success',
         icon: 'i-lucide-check',
       })
