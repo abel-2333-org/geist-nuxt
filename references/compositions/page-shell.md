@@ -4,6 +4,17 @@
 
 > 想拼**页面内的一块**（区块/卡片网格/表单/空态/反馈）看同目录 `patterns.md`；想查「单个组件用法」看 `components/`。本文件只讲**整页外壳怎么搭**。
 
+## 两种外壳，先选对（按导航深度）
+
+core 提供两个并列的外壳 composition，**按导航层级深度选**，不要混用：
+
+| 外壳 | 导航布局 | 层级能力 | 什么时候用 |
+|---|---|---|---|
+| `<CompositionAppHeader>` | 横排顶栏（移动端 slideover） | **最多两层**：顶栏项 → 一层下拉子项（可选 description 做 mega-menu） | 扁平站点：落地页、少量顶级页、每个入口无需再分子页 |
+| `<CompositionAppShell>` | 瘦顶栏（仅全局动作）+ 左侧常驻竖向 sidebar | **任意层级**：sidebar 用竖向 `UNavigationMenu`，`type:'label'` 分组标题 + children 原生 accordion 嵌套 | 文档/多区站点：分组区段、多页 kit、嵌套子页（gallery 本身即用此） |
+
+> **为什么不是一个外壳搞定**：Nuxt UI 的**横向** `UNavigationMenu` 渲染器硬性只吃两层（孙级 children 在横向模式被丢弃，`content-orientation` 只切换那一层子项的排布方向、不加深度）；**竖向** `UNavigationMenu` 才把 children 渲染成 accordion、支持真正的层级。所以导航一旦有第三层，就必须走 `AppShell` 的侧栏，而不是给 header 打补丁。两者都只用 Nuxt UI 原语，同一份 `NavigationMenuItem[]` 数据源可无缝喂给任一外壳。
+
 ## 结构总览
 
 标准结构：`UApp` 根 → 粘顶 header + 主内容区 + 可选 footer。用 Nuxt `layouts/default.vue` 承载外壳，`pages/**` 只写内容。
@@ -29,7 +40,7 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 - **主题切换**默认已内置在 `<CompositionAppHeader>` 的 `#actions`；覆盖该 slot 时需自己带上 `<ThemeToggle />`。
 - **logo/wordmark**用真实资源（见 `brand-assets.md`），不要占位图。
 
-已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`packages/core/app/components/composition/AppHeader.vue`（core 提供的响应式头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
+上面的总览用 `<CompositionAppHeader>` 演示扁平外壳；`apps/gallery/app/layouts/default.vue` 是**侧栏外壳** `<CompositionAppShell>` 的完整活样例（瘦顶栏 + 竖向多层级导航 + footer，因为 gallery 有多页 kit）。已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（侧栏外壳活样例）、`packages/core/app/components/composition/AppHeader.vue`（横排头部）、`packages/core/app/components/composition/AppShell.vue`（侧栏外壳）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
 
 ## 根组件（`app/app.vue`）
 
@@ -120,6 +131,33 @@ const items = useGalleryNav()
 ```
 
 导航项按 `to` 与当前路由**自动高亮**（`NavigationMenuItem` 内部用 `ULink`），无需手写 active 逻辑。
+
+## Sidebar 外壳（`<CompositionAppShell>`，core 提供）
+
+导航有真实层级（分组区段、多页 kit、嵌套子页）时用它替代 `AppHeader`（`packages/core/app/components/composition/AppShell.vue`）。它把导航从顶栏移到**左侧常驻 sidebar**：顶栏瘦身成只放全局动作（brand / 主题 / 外链），主体用 Nuxt UI 文档站布局原语 `UMain` + `UPage` + `UPageAside`，sidebar 内是**竖向** `UNavigationMenu`——children 原生渲染为 accordion，`type:'label'` 项渲染为分组标题，层级不限深。移动端（`< lg`）sidebar 自动隐藏，导航落进顶栏 `UHeader mode="slideover"` 的抽屉（同一份 `items` 竖向渲染），断点/汉堡/路由收起全内建。同样**数据无关**：
+
+- **prop `items: NavigationMenuItem[]`** —— 与 `AppHeader` 同一份数据源，直接互换。多页分组用 `{ label, type: 'label' }` 起一个区段标题，其后跟带 `children` 的可折叠项（`defaultOpen: true` 让当前区段默认展开）。
+- **slot `#brand` / `#actions`** —— 同 `AppHeader`；`#actions` 覆盖后需自带 `<ThemeToggle />`。
+- **默认 slot** —— 页面内容（渲染进 `UPage` 右侧内容列）。
+- **slot `#footer`** —— 可选页脚，落在主体之下。
+
+```vue
+<script setup lang="ts">
+const items = useGalleryNav() // 含 type:'label' 分组 + 带 children 的 accordion 项
+</script>
+<template>
+  <CompositionAppShell :items="items">
+    <template #brand>…</template>
+    <template #actions>…<ThemeToggle /></template>
+
+    <slot />                          <!-- 页面内容进 UPage 内容列 -->
+
+    <template #footer>…</template>
+  </CompositionAppShell>
+</template>
+```
+
+sidebar 项与移动抽屉项都按路由自动高亮，无需手写 active。活样例：`apps/gallery/app/layouts/default.vue`（外壳装配）+ `apps/gallery/app/composables/useGalleryNav.ts`（如何把路由树整形成 `label` 分组 + accordion 层级）。
 
 ## 要点
 
