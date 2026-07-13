@@ -84,30 +84,31 @@ export function useGalleryNav() {
     const items: (NavigationMenuItem & { order: number })[] = topLevel.sort(byOrderThenLabel)
 
     if (kitPages.size > 0) {
-      // Flatten every kit page into the single "Kits" dropdown (two levels max).
-      // kits sorted by name for stability.
-      const kitChildren: NavigationMenuItem[] = [...kitPages.entries()]
+      // "Kits" section heading, then one entry per kit (sorted by name).
+      items.push({ label: 'Kits', type: 'label', order: KITS_GROUP_ORDER })
+
+      const kitItems = [...kitPages.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
-        .flatMap(([kitName, pages]) => {
+        .map(([kitName, pages], i) => {
           const sorted = pages.sort(byOrderThenLabel)
           const kitTitle = titleCase(kitName)
-          // Single-page kit: one entry labelled by the kit itself, no description.
+          const order = KITS_GROUP_ORDER + 1 + i
+          // Single-page kit: a plain link. Multi-page kit: a collapsible
+          // accordion (its pages as children), open by default so the current
+          // section is visible without an extra click.
           if (sorted.length === 1) {
-            return [{ label: kitTitle, icon: sorted[0]!.icon, to: sorted[0]!.to }]
+            return { label: kitTitle, icon: sorted[0]!.icon, to: sorted[0]!.to, order }
           }
-          // Multi-page kit: one entry per page, kit name as the grouping description.
-          return sorted.map(({ order: _order, ...page }) => ({
-            ...page,
-            description: kitTitle,
-          }))
+          return {
+            label: kitTitle,
+            icon: sorted[0]?.icon,
+            defaultOpen: true,
+            children: sorted.map(({ order: _order, ...page }) => page),
+            order,
+          }
         })
 
-      items.push({
-        label: 'Kits',
-        icon: 'i-lucide-package',
-        children: kitChildren,
-        order: KITS_GROUP_ORDER,
-      })
+      items.push(...kitItems)
     }
 
     return items.map(({ order: _order, ...item }) => item)
