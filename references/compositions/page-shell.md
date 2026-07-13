@@ -1,53 +1,68 @@
 # 整页骨架（Page shell）
 
-把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、粘顶 header、主题切换、`--ui-container` 约束的主体。都只用核心 Nuxt UI 组件 + Geist token，全部由 Nuxt 自动导入，无需手写 `import`。
+把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、导航外壳、主题切换、主体内容区。都只用核心 Nuxt UI 组件 + Geist token，全部由 Nuxt 自动导入，无需手写 `import`。
 
 > 想拼**页面内的一块**（区块/卡片网格/表单/空态/反馈）看同目录 `patterns.md`；想查「单个组件用法」看 `components/`。本文件只讲**整页外壳怎么搭**。
 
-## 一套外壳：Geist 顶栏
+## 两种外壳，按导航体量选
 
-geist-nuxt 用**单一顶栏外壳**（`<CompositionAppHeader>`）：粘顶 header 放导航与全局动作，下面接一个 `--ui-container` 约束的主体。**header 与页面内容共用同一个 `UContainer` 宽度**，因此 brand 左缘与内容左缘对齐、动作右缘与内容右缘对齐——一列居中的 Geist 版式，不会出现「header 缩在中间、内容铺满」的错位。
+core 提供两个并列的外壳 composition，**按站点的导航体量选**：
 
-> **不用文档站那种左侧 sidebar 外壳**：对少量顶级区段而言，侧栏又重又像模板。深层级导航不靠侧栏解决，而是靠下面「导航深度」一节的下拉分组。
+| 外壳 | 导航布局 | 适用 |
+|---|---|---|
+| `<CompositionAppShell>`（侧栏，**多区站点默认**） | 左侧常驻 sidebar：brand → 分组竖向导航 → 底部动作区；移动端收进 slideover | 多个顶级区段 + 多页 kit（gallery 本身即用此） |
+| `<CompositionAppHeader>`（顶栏） | 粘顶 header 横排导航 + 全局动作 | 扁平站点：落地页、少量顶级页 |
 
-## 导航深度：横向两层上限怎么破
+两者都**只用 Nuxt UI 原语 + Geist token**，共享同一份 `NavigationMenuItem[]` 数据源，可直接互换。下面以 gallery 采用的**侧栏外壳**为主线。
 
-Nuxt UI 的**横向** `UNavigationMenu` 渲染器只吃两层（触发器 → 一层子项；孙级 children 被丢弃，`content-orientation` 只切换那一层子项的排布方向、不加深度）。所以有真实层级时：
+## 导航深度：竖向菜单原生解决
 
-- **桌面**：顶级项内联平铺；更深的分组（如「多个 kit，每个 kit 又有多页」）收进一个**分组 `UDropdownMenu`**——items 用嵌套数组 `T[][]` + `type: 'label'` 起每组标题，组间自动分隔。加再多组也清爽，且全是原生能力。
-- **移动端**：`#body` slideover 用**竖向** `UNavigationMenu`，children 原生渲染为 accordion、`type:'label'` 渲染为分组标题，**层级不限深**——直接喂完整导航树即可。
+侧栏用**竖向** `UNavigationMenu`——`children` 原生渲染为 accordion、`type: 'label'` 渲染为分组标题，**层级不限深**。所以有真实层级（如「多个 kit，每个 kit 又有多页」）时，直接喂一棵完整导航树即可，不需要任何下拉或 hack：
 
-也就是说：一份路由数据派生出三个视图（顶级链接、分组、完整树），桌面用前两者、移动端用第三者。gallery 的 `useGalleryNav()` 就返回 `{ primary, kits, tree }` 三视图（`apps/gallery/app/composables/useGalleryNav.ts`）。
+- 顶级项（Overview / Components / …）平铺在最上；
+- 一个 `{ type: 'label' }` 项起「Kits」区段标题；
+- 每个 kit：单页 → 一条链接；多页 → 一个 `children` accordion（`defaultOpen: true` 让当前区段默认展开）。
+
+移动端（`< lg`）sidebar 隐藏，同一棵树落进顶栏 `UHeader mode="slideover"` 的抽屉里，竖向菜单照样展开完整层级。一份路由数据派生出这一棵树即可，桌面/移动共用——gallery 的 `useGalleryNav()` 就返回这棵 `NavigationMenuItem[]`（`apps/gallery/app/composables/useGalleryNav.ts`）。
+
+> 顶栏外壳（`AppHeader`）遇到深层级时才需要变通：Nuxt UI 的**横向** `UNavigationMenu` 只吃两层（孙级 children 被丢弃），届时把分组收进一个 `UDropdownMenu`（`items` 用嵌套数组 `T[][]` + `type:'label'` 起每组标题）。这是顶栏的专属考量，侧栏没有这个限制。
 
 ## 结构总览
 
-标准结构：`UApp` 根 → 粘顶 header + 主内容区 + 可选 footer。用 Nuxt `layouts/default.vue` 承载外壳，`pages/**` 只写内容（各页自带 `UContainer`，与 header 同宽对齐）。
+标准结构：`UApp` 根 → 侧栏外壳（sidebar + 内容列）。用 Nuxt `layouts/default.vue` 承载外壳，`pages/**` 只写内容（各页自带 `UContainer`）。
 
 ```vue
 <!-- app/layouts/default.vue —— 外壳；app.vue 里 <NuxtLayout><NuxtPage/></NuxtLayout> -->
 <script setup lang="ts">
-const nav = useGalleryNav() // { primary, kits, tree }
+const nav = useGalleryNav() // 一棵 NavigationMenuItem[]：顶级项 + Kits 分组 + kit accordion
 </script>
 <template>
-  <div class="min-h-screen flex flex-col bg-default text-default antialiased">
-    <CompositionAppHeader :items="nav.tree">   <!-- items 供移动端竖向菜单兜底 -->
-      <template #brand>…</template>            <!-- logo/wordmark -->
-      <template #nav>                          <!-- 桌面导航：顶级链接 + 分组下拉 -->
-        <GalleryHeaderNav :primary="nav.primary" :kits="nav.kits" />
-      </template>
-      <template #actions>…<ThemeToggle /></template>
-    </CompositionAppHeader>
-    <main class="flex-1"><slot /></main>       <!-- 各页自带 UContainer -->
-    <footer class="border-t border-default">…</footer>
-  </div>
+  <CompositionAppShell :items="nav">
+    <template #brand>…</template>              <!-- logo / wordmark -->
+    <template #actions>…<ThemeToggle /></template>  <!-- 底部动作区（桌面）/ 顶栏右侧（移动） -->
+    <slot />                                    <!-- 页面内容，各页自带 UContainer -->
+    <template #footer>…</template>              <!-- 可选：内容列下方页脚 -->
+  </CompositionAppShell>
 </template>
 ```
 
-- **粘顶 header 用 core 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
-- **主题切换**默认已内置在 `#actions`；覆盖该 slot 时需自己带上 `<ThemeToggle />`。
-- **logo/wordmark**用真实资源（见 `brand-assets.md`），不要占位图。
+- **侧栏 + 移动 slideover、断点 `lg`、路由变化自动收起**全部由 `<CompositionAppShell>` 内建，不手写 `<aside>`、不手写 media query。
+- **主题切换**放在 `#actions`；该 slot 覆盖后需自己带上 `<ThemeToggle />`。
+- **logo/wordmark** 用真实资源（见 `brand-assets.md`），不要占位图；窄侧栏里 wordmark 加 `whitespace-nowrap`、图标 `shrink-0`，别塞装饰性 badge。
 
-已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（外壳装配活样例）、`packages/core/app/components/composition/AppHeader.vue`（core 顶栏）、`apps/gallery/app/components/gallery/HeaderNav.vue`（桌面导航：顶级链接 + 分组 Kits 下拉）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
+已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（侧栏外壳装配活样例）、`packages/core/app/components/composition/AppShell.vue`（侧栏外壳）、`packages/core/app/components/composition/AppHeader.vue`（顶栏外壳）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
+
+## 侧栏外壳（`<CompositionAppShell>`，core 提供）
+
+`packages/core/app/components/composition/AppShell.vue`。桌面是一条常驻左侧栏（`fixed inset-y-0 w-64`，`bg-elevated/40` + 右侧 hairline），内容列用 `lg:pl-64` 让位；`< lg` 时 sidebar 隐藏、导航收进顶部 `UHeader mode="slideover"` 抽屉。**场景无关**（分组/文案留给消费方）：
+
+- **prop `items: NavigationMenuItem[]`** —— 导航树，桌面侧栏与移动抽屉共用同一份，竖向渲染，层级不限深。
+- **slot `#brand`** —— sidebar 顶部与移动 bar 的 logo / wordmark 区。
+- **slot `#actions`** —— sidebar 底部动作区（主题切换、外链等），桌面固定在底、移动落在顶栏右侧。
+- **默认 slot** —— 页面内容（进内容列）。
+- **slot `#footer`** —— 可选，内容列下方页脚。
+
+active 高亮：竖向 `UNavigationMenu` 按 `to` 与当前路由**自动高亮**（`color="primary"` + `highlight` + `highlight-color="primary"` 给出 Geist 紫色指示条），无需手写 active 逻辑。sidebar 三段式结构（brand `h-16` + 可滚动 `nav` + 底部 `actions`）已在组件内定好，消费方只填 slot。
 
 ## 根组件（`app/app.vue`）
 
@@ -105,46 +120,14 @@ function toggle() {
 
 `nuxt.config.ts` 里配 `colorMode: { preference: 'system', fallback: 'light' }`——Geist 是浅色优先的画布。
 
-## Header（`<CompositionAppHeader>`，core 提供）
+## 顶栏外壳（`<CompositionAppHeader>`，core 提供）
 
-粘顶 + 响应式头部是 core 的 composition（`packages/core/app/components/composition/AppHeader.vue`），基于 Nuxt UI `UHeader mode="slideover"`：**桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由变化自动收起、与内容同宽的容器**——全部内建，不手写 `<header>`、不手写 media query。它**场景无关**（分组逻辑留给消费方，不写死在 core）：
-
-- **prop `items: NavigationMenuItem[]`** —— 兜底导航数据；`#nav`/`#body` 未覆盖时，桌面渲染横向菜单、移动端渲染竖向菜单。
-- **slot `#brand`** —— logo / wordmark / badge，默认给 geist-nuxt 兜底，可完全覆盖。
-- **slot `#nav`** —— **桌面中部导航**；默认是 `items` 的横向菜单，需要顶级链接 + 分组下拉时在这里注入消费方组件（如 gallery 的 `<GalleryHeaderNav>`）。
-- **slot `#actions`** —— 右侧动作区，**默认内置 `<ThemeToggle />`**；覆盖后需自己带上。
-- **slot `#body`** —— **移动端 slideover 导航**；默认是 `items` 的竖向菜单（支持完整层级），一般传完整导航树即可。
-
-active 高亮：横向/竖向 `UNavigationMenu` 都按 `to` 与当前路由**自动高亮**（`variant="link"` + `highlight` + `highlight-color="primary"` 给出 Geist 紫色指示条）；自定义的下拉触发器需自己按 `route.path` 判活（见 `HeaderNav.vue`）。
-
-```vue
-<!-- 消费方桌面导航：顶级链接（横向菜单）+ 分组下拉（UDropdownMenu, T[][]） -->
-<script setup lang="ts">
-const props = defineProps<{ primary: NavigationMenuItem[]; kits: KitGroup[] }>()
-const route = useRoute()
-const kitsActive = computed(() => route.path.startsWith('/kits'))
-const kitMenu = computed<DropdownMenuItem[][]>(() =>
-  props.kits.map((kit) => [
-    { label: kit.label, type: 'label' },
-    ...kit.pages.map((p) => ({ label: p.label, icon: p.icon, to: p.to })),
-  ]),
-)
-</script>
-<template>
-  <div class="flex items-center gap-1">
-    <UNavigationMenu :items="primary" variant="link" color="primary" highlight highlight-color="primary" />
-    <UDropdownMenu v-if="kits.length" :items="kitMenu">
-      <UButton label="Kits" trailing-icon="i-lucide-chevron-down" color="neutral" variant="ghost"
-        :class="kitsActive ? 'text-highlighted' : 'text-muted hover:text-highlighted'" />
-    </UDropdownMenu>
-  </div>
-</template>
-```
+扁平站点用它替代侧栏（`packages/core/app/components/composition/AppHeader.vue`），基于 `UHeader mode="slideover"`：桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由自动收起、与内容同宽的内建容器。slot 对齐 `AppShell`：`#brand` / `#actions`（默认内置 `ThemeToggle`）/ `#nav`（桌面中部导航，默认 `items` 横向菜单）/ `#body`（移动竖向菜单）。深层级时按上文「导航深度」把分组收进 `UDropdownMenu`。
 
 ## 要点
 
-- 头部观感（`bg-default/75 backdrop-blur`、`border-b border-default`、`sticky top-0`、`h-(--ui-header-height)`、内建 `UContainer`）由 `UHeader` 主题提供，不要另写；页面内容也用 `UContainer`，二者同宽即对齐。
+- 外壳观感（sidebar 的 `bg-elevated/40` + `border-r`、header 的 `backdrop-blur` + `sticky`、`--ui-header-height`）由组件与 `UHeader`/token 提供，不要另写。
 - 图标按钮都带 `aria-label`；logo 图片 `alt=""`（旁边有文字）。
 - `UApp` 只在 `app/app.vue` 挂一次（提供 toast/overlay 上下文），不要重复挂载。
 - 明暗切换只用 `useColorMode()`（封装在 `ThemeToggle`），不要手写 class / localStorage。
-- 导航深了别加侧栏：桌面用分组 `UDropdownMenu`，移动端用竖向菜单的 accordion。
+- 多区站点默认侧栏（`AppShell`），竖向菜单原生撑起任意层级；扁平站点才用顶栏（`AppHeader`）。

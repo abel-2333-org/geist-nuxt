@@ -30,43 +30,21 @@ interface NavLink {
   order: number
 }
 
-/** One kit and the pages it owns (already sorted). */
-export interface KitGroup {
-  /** Kit display name, e.g. "Api Docs". */
-  label: string
-  /** Representative icon (first page's). */
-  icon?: string
-  /** Landing target = the kit's first page, so "Kits › <kit>" is clickable. */
-  to: string
-  pages: { label: string; icon?: string; to: string }[]
-}
-
-export interface GalleryNav {
-  /** Top-level destinations rendered inline in the header ("Overview", …). */
-  primary: NavigationMenuItem[]
-  /** Kits, each a titled group — feeds the desktop "Kits" dropdown. */
-  kits: KitGroup[]
-  /** Full depth as a flat vertical list — feeds the mobile slideover menu. */
-  tree: NavigationMenuItem[]
-}
-
 /**
- * Derive gallery navigation from the Nuxt route tree.
+ * Derive the gallery sidebar navigation from the Nuxt route tree.
  * Adding a `pages/**` file = one more nav entry automatically;
  * hide a page with `definePageMeta({ nav: false })`.
  *
- * Returns three views of the same routes so each surface uses the shape it
- * renders best:
- * - `primary` + `kits` drive the desktop top-nav (inline links + a grouped
- *   "Kits" dropdown), sidestepping the two-level ceiling of the horizontal
- *   navigation menu by moving kit grouping into a dropdown.
- * - `tree` drives the mobile slideover, where a vertical navigation menu
- *   renders the full depth as accordions.
+ * Returns a single vertical tree: top-level destinations first, then a "Kits"
+ * section heading, then one entry per kit — single-page kits collapse to a
+ * link, multi-page kits become an accordion (their pages as children, open by
+ * default). This feeds the vertical UNavigationMenu in both the desktop
+ * sidebar and the mobile slideover, so nesting depth is unlimited.
  */
 export function useGalleryNav() {
   const router = useRouter()
 
-  return computed<GalleryNav>(() => {
+  return computed<NavigationMenuItem[]>(() => {
     const topLevel: NavLink[] = []
     const kitPages = new Map<string, NavLink[]>()
 
@@ -94,35 +72,29 @@ export function useGalleryNav() {
       }
     }
 
-    const sortedTop = topLevel.sort(byOrderThenLabel)
-    const primary: NavigationMenuItem[] = sortedTop.map(({ order: _o, ...link }) => link)
+    const tree: NavigationMenuItem[] = topLevel
+      .sort(byOrderThenLabel)
+      .map(({ order: _o, ...link }) => link)
 
-    const kits: KitGroup[] = [...kitPages.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([kitName, pages]) => {
-        const sorted = pages.sort(byOrderThenLabel)
-        return {
-          label: titleCase(kitName),
-          icon: sorted[0]?.icon,
-          to: sorted[0]!.to,
-          pages: sorted.map(({ order: _o, ...page }) => page),
-        }
-      })
-
-    // Mobile tree: primary links, then a "Kits" heading, then one item per kit
-    // (single-page → link; multi-page → accordion with its pages as children).
-    const tree: NavigationMenuItem[] = [...primary]
+    const kits = [...kitPages.entries()].sort(([a], [b]) => a.localeCompare(b))
     if (kits.length > 0) {
       tree.push({ label: 'Kits', type: 'label' })
-      for (const kit of kits) {
+      for (const [kitName, pages] of kits) {
+        const sorted = pages.sort(byOrderThenLabel)
+        const label = titleCase(kitName)
         tree.push(
-          kit.pages.length === 1
-            ? { label: kit.label, icon: kit.icon, to: kit.pages[0]!.to }
-            : { label: kit.label, icon: kit.icon, defaultOpen: true, children: kit.pages },
+          sorted.length === 1
+            ? { label, icon: sorted[0]!.icon, to: sorted[0]!.to }
+            : {
+                label,
+                icon: sorted[0]?.icon,
+                defaultOpen: true,
+                children: sorted.map(({ order: _o, ...page }) => page),
+              },
         )
       }
     }
 
-    return { primary, kits, tree }
+    return tree
   })
 }
