@@ -34,7 +34,6 @@ defineProps<{ items?: NavigationMenuItem[] }>()
           color="primary"
           highlight
           highlight-color="primary"
-          :ui="{ link: 'before:rounded-md' }"
         />
       </nav>
 
