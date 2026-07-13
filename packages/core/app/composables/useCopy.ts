@@ -23,7 +23,7 @@ export function useCopy(timeout = 2000) {
   async function copy(
     text: string,
     label = 'Code',
-    opts: { successMessage?: string; errorMessage?: string } = {},
+    opts: { successMessage?: string } = {},
   ) {
     let ok = false
     try {
@@ -49,7 +49,7 @@ export function useCopy(timeout = 2000) {
       timer = setTimeout(() => (copied.value = false), timeout)
     } else {
       toast.add({
-        title: opts.errorMessage ?? 'Copy failed. Select the text and copy manually',
+        title: 'Copy failed. Select the text and copy manually',
         color: 'error',
         icon: 'i-lucide-triangle-alert',
       })

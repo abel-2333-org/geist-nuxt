@@ -32,7 +32,7 @@
 
 配套依赖（**已在通用基座 starter 里**，无需从 kit 复制）：
 - `components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
-- `composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。签名 `copy(text, label?, { successMessage?, errorMessage? })`：默认 `label` 填英文句，调用方可传完整 `successMessage` 独占整句以便本地化（见下「复制 toast 完整消息注入」契约）。依赖 `@vueuse/core`（starter 已声明）。
+- `composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。签名 `copy(text, label?, { successMessage? })`：默认 `label` 填英文句，调用方可传完整 `successMessage` 独占整句以便本地化（见下「复制 toast 完整消息注入」契约）。依赖 `@vueuse/core`（starter 已声明）。
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -110,12 +110,12 @@
 3. 组合方式（怎么把请求 + 响应 + 徽章拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表），组合示例见 gallery 页面 `apps/gallery/app/pages/kits/api-docs/index.vue`，按需在自己项目里照着拼。
 4. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，它是 core 包的依赖、随 core 自动就位。**不要**装 Shiki / `@nuxt/content`。
 
-> **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立、也才与消费者自有组件隔离。
+> **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立��也才与消费者自有组件隔离。
 
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层，
-活样例在 `apps/gallery/app/pages/kits/api-docs/index.vue`（内联假 ViewModel 驱动两个组件）。最小拼法：
+活样例在 `apps/gallery/app/pages/kits/api-docs/index.vue`（内联假 ViewModel 驱动两个组件）。���小拼法：
 
 ```vue
 <template>
@@ -196,7 +196,7 @@ authoring 输入            适配                 领域输出              渲
   | `ApiDocsLifecycleBadge` | **kit 切片** | 字段/端点生命周期色标；preset 包装 core `SemanticBadge` |
   | `SemanticBadge` | **core** | tone 原子（色+图标+文本）；域→tone 映射留在上面的 preset 徽章里 |
   | `InlineCode` | **core** | 行内代码 token（ProseCode 校准到 Geist） |
-  | `InlineMarkdown` | **core** | 字段描述的行内 markdown tokenizer（`code`/链接/粗斜/删除线） |
+  | `InlineMarkdown` | **core** | 字段描述��行内 markdown tokenizer（`code`/链接/粗斜/删除线） |
 
 - **字段深链接（`useFieldAnchor`，随 `field-item` 切片同 ship）消费者须知**：
   - **必需**：在渲染字段树的页面 `onMounted` 里��� `useFieldAnchor().initFromHash()`，让带 `#field-path` 进入时自动展开祖先 + 滚动 + 高亮。
@@ -205,7 +205,7 @@ authoring 输入            适配                 领域输出              渲
 
 - **跨切片共享类型走「导入而非各抄一份」**：`FieldItem` 运行时就渲染 `<ApiDocsEnumTable>`/`<ApiDocsLifecycleBadge>`（已在 `registryDependencies` 声明），因此它直接 `import type` 这两个切片的 `EnumValue`/`EnumVariant`/`FieldLifecycle` 并 re-export，而不是重定义同形副本。导入只是让编译器承认这个既有依赖——某切片改了类型另一处立即报错，而非静默漂移；仍 copy-safe（依赖切片必随 field-item 一起复制，相对路径成立）。这正是 registry 依赖规则第 2 条的落地。
 - **复制反馈不放 per-row live region**：字段深链接复制走 core `useCopy()`，它已 `toast.add(...)` 经 Nuxt UI 单一 app 级 polite region 播报，锚点按钮 `aria-label` 亦随 copied 切换。故 FieldItem **不**为每行放 `role="status"`——否则大表会堆几十个（多为空）region 且三重播报。新增 CodeBlock 之外的复制场景时沿用此约定：复制播报交给 toast，别在每个可复制元素上再加 live region。
-- **复制 toast 文案走「完整消息注入」，不拼半句**：`useCopy().copy(text, label?, { successMessage?, errorMessage? })`——默认用 `label` 填英文句 `<label> copied to clipboard`（共享 Geist voice）；需本地化整句的调用方传**完整** `successMessage` 独占所有权。FieldItem 即经其 `labels.linkCopied(fieldName)` 槽提供整句（与 `copyLink`/`required` 等 chrome 文案同一本地化面），`useFieldAnchor.copyLink(path, successMessage?)` 只透传、**不**在 composable 内拼字段名。原因：半句拼接（core 拥半句英文脚手架 + 调用方拼另半句）无法整体本地化、会造成「aria 中文 / toast 英文」混语；完整消息让每条文案要么完全由 core 默认拥有、要么完全由调用方 `labels` 拥有，无中间态。新增需要具名/本地化 toast 的复制场景时照此传 `successMessage`，勿回退到拼接。
+- **复制 toast 文案走「完整消息注入」，不拼半句**：`useCopy().copy(text, label?, { successMessage? })`——默认用 `label` 填英文句 `<label> copied to clipboard`（共享 Geist voice）；需本地化整句的调用方传**完整** `successMessage` 独占所有权。FieldItem 即经其 `labels.linkCopied(fieldName)` 槽提供整句（与 `copyLink`/`required` 等 chrome 文案同一本地化面），`useFieldAnchor.copyLink(path, successMessage?)` 只透传、**不**在 composable 内拼字段名。原因：半句拼接（core 拥半句英文脚手架 + 调用方拼另半句）无法整体本地化、会造成「aria 中文 / toast 英文」混语；完整消息让每条文案要么完全由 core 默认拥有、要么完全由调用方 `labels` 拥有，无中间态。新增需要具名/本地化 toast 的复制场景时照此传 `successMessage`，勿回退到拼接。
 
 ### 契约规则（跨层，务必遵守）
 
