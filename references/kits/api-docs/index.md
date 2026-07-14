@@ -46,7 +46,7 @@
 > | `*em*` / `_em_` | `ProseEm` |
 > | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
 >
-> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后��**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
 > **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
@@ -130,7 +130,7 @@ export function computeSplitBudgets(
 
 实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**始终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
 
-  - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟，不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观察了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高度→同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，且重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
+  - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟，不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观��了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高度��同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，��重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
 
 ## 如何装入项目
 
@@ -206,7 +206,7 @@ authoring 输入            适配                 领域输出              渲
 三条铁律：
 1. **adapter 绝不 `import` 任何 `.vue`**。展示类型（`CodeVariant`/`RequestScenario`/`ResponseScenario` 等）下沉到 `domain.ts`，组件与 adapter 都从类型模块取；否则数据层反向依赖 UI 层，组件一改就断。
 2. **组件间不互相借类型**。每个组件各自从 `~/types/domain` import，别从兄弟 `.vue` import（会织成互相依赖网）。
-3. **类型文件成对命名，输入 vs 输出**：`spec.ts`（作者写的 authoring 输入）↔ `domain.ts`（UI 渲染 / adapter 产出的领域模型）。不要用 `reference.ts` 这种混「域」与「层」的名字。
+3. **类型文件成对命名，输入 vs 输出**：`spec.ts`（作者写的 authoring 输入）↔ `domain.ts`（UI 渲�� / adapter 产出的领域模型）。不要用 `reference.ts` 这种混「域」与「层」的名字。
 
 ### 层 1：authoring 输入契约（`types/spec.ts`）
 
@@ -223,7 +223,7 @@ authoring 输入            适配                 领域输出              渲
 
 ### 层 3：领域输出 + 字段渲染（`types/domain.ts` + `components/reference/`）
 
-- `domain.ts`（消费层）：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。注：这些字段展示类型现已进 kit，按归属分散在各切片——`FieldNode`/`FieldNote` 在 field-item（`FieldContractNote` 在 kit 侧更名为更中性的 `FieldNote`），`EnumValue`/`EnumVariant` 在 enum-table，`FieldLifecycle` 在 lifecycle-badge，field-item 再导���后两者;消费层的 `domain.ts` 仍是 adapter 的输出真源，按需 adapt，两侧结构化兼容。
+- `domain.ts`（消费层）：`FieldNode`（递归字段树）、`Nullability`、`EnumValue`/`EnumVariant`、`FieldContractNote`、lifecycle、以及示例展示类型。注：这些字段展示类型现已进 kit，按归属分散在各切片——`FieldNode`/`FieldNote` 在 field-item（`FieldContractNote` 在 kit 侧更名为更中性的 `FieldNote`），`EnumValue`/`EnumVariant` 在 enum-table，`FieldLifecycle` 在 lifecycle-badge，field-item 再导入后两者;消费层的 `domain.ts` 仍是 adapter 的输出真源，按需 adapt，两侧结构化兼容。
 - 组件清单（各自职责，实现看真源）：
 
   | 组件 | 归属 | 职责 |
@@ -260,7 +260,7 @@ authoring 输入            适配                 领域输出              渲
 
 ## 为什么不用 @nuxt/content 走内容管线？
 
-试过——content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在托管 dev server 上每次重启不能稳定 re-seed（`decompressSQLDump ... Received undefined` / `no such table`），导致页面时好时坏。对一个要被分发、套用到新对话的 starter 是不可接受的可靠性风险。且 brief 本就要求「用规格模板做领域组件」，组件式组合才是正解。
+试过——content v3 靠构建时生成、运行时导入的 SQLite dump 建表，���托管 dev server 上每次重启不能稳定 re-seed（`decompressSQLDump ... Received undefined` / `no such table`），导致页面时好时坏。对一个要被分发、套用到新对话的 starter 是不可接受的可靠性风险。且 brief 本就要求「用规格模板做领域组件」，组件式组合才是正解。
 
 ## 源码参考（skill 内）
 
@@ -274,7 +274,7 @@ authoring 输入            适配                 领域输出              渲
 - `packages/kits/api-docs/app/components/api-docs/FieldItem.vue`（字段展示类型内联导出于此）
 - `packages/kits/api-docs/app/composables/useCodeWrap.ts`
 - `packages/kits/api-docs/app/composables/useFieldAnchor.ts`（字段深链接，随 field-item 切片同 ship）
-- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`（组件目录）、`apps/gallery/app/pages/kits/api-docs/reference.vue`（整页两栏参考页）+ `apps/gallery/app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分栏 + 内容优先重分配，gallery 页私有）（含 `router.options.ts` 演示可选打磨）
+- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`（组件目录，含 `router.options.ts` 演示可选打磨）、`apps/gallery/app/pages/kits/api-docs/reference.vue`（整页两栏参考页）+ `apps/gallery/app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分栏 + 内容优先重分配，gallery 页私有）
 - 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`、`packages/core/app/components/SemanticBadge.vue`、`packages/core/app/components/{InlineCode,InlineMarkdown}.vue`、`packages/core/app/utils/badge.ts`
 - 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 
