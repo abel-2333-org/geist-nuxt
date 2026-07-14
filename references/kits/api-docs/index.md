@@ -46,7 +46,7 @@
 > | `*em*` / `_em_` | `ProseEm` |
 > | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
 >
-> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后��**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
 > **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
@@ -92,7 +92,9 @@
 
   **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、内容优先重分配）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
-**内容优先重分配（页面 recipe，不在 core）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（core 只提供拖动状态）。gallery 的整页组合 demo `apps/gallery/app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ 页面私有的 `components/reference/CodeRail.vue`（`<ReferenceCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery 页私有、数据无关的 recipe 载体，刻意不进 core、不入 kit 切片**——下游消费页照它在自己项目里重建即可（放页面同目录 `components`/`utils` 或页面内联，别塞回 core）。
+**内容优先重分配（页面 recipe，不在 core）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（core 只提供拖动状态）。gallery 的整页组合 demo `apps/gallery/app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ 页面私有的 `components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery 页私有、数据无关的 recipe 载体，刻意不进 core、不入 kit 切片**——下游消费页照它在自己项目里重建即可（放页面同目录 `components`/`utils` 或页面内联，别塞回 core）。
+
+> **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：这类只服务某个 kit demo 页、既非 core 也非 kit 切片的组件，统一落到 `apps/gallery/app/components/demo/<kit>/`（如 `demo/api-docs/CodeRail.vue` → `<DemoApiDocsCodeRail>`）。这样 ① kit 归属编码进目录与调用名；② 与可 copy-in 的真·kit 切片 `ApiDocs*` 命名空间区隔；③ 也不与消费侧领域渲染组件目录 `app/components/reference/*.vue`（下文层 3）撞名。api-docs 后续再加页面级私有组件时一并放进 `demo/api-docs/`，不要按页面名（如 `reference/`）分组。
 
 不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
@@ -136,7 +138,7 @@ export function computeSplitBudgets(
 
 1. 按需要的条目整切片复制：如 `code-block` 切片 = `app/components/api-docs/CodeBlock.vue` + `app/composables/useCodeWrap.ts`，按各文件 `target` 拷到项目的 `app/components/api-docs/` 与 `app/composables/`（保留 `api-docs/` 目录）。`registryDependencies` 里列的切片要先拷（如 `request-example` 依赖 `code-block`）。
 2. **core 依赖零动作**：`CopyButton` / `useCopy` 由 `@geist-nuxt/core` layer 提供（registry 条目的 `meta.coreDeps` 有声明），项目 `extends: ['@geist-nuxt/core']` 即天然在位，不需要复制。
-3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树），组合示例见 gallery 两个 demo 页：单组件陈列看 `index.vue`、整页两栏参考页装配看 `reference.vue`（含 `<ReferenceCodeRail>` 重分配 recipe），按需在自己项目里照着拼。
+3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树），组合示例见 gallery 两个 demo 页：单组件陈列看 `index.vue`、整页两栏参考页装配看 `reference.vue`（含 `<DemoApiDocsCodeRail>` 重分配 recipe），按需在自己项目里照着拼。
 4. 无需为本 kit 额外装包——组件只用 `@nuxt/ui` 原语 + Nuxt 内置 composable；唯一的第三方依赖是 `useCopy` 用到的 `@vueuse/core`，它是 core 包的依赖、随 core 自动就位。**不要**装 Shiki / `@nuxt/content`。
 
 > **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立，也才与消费者自有组件隔离。
@@ -149,7 +151,7 @@ gallery 有**两个 api-docs demo 页，职责互补**：
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
 | `apps/gallery/app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
-| `apps/gallery/app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ 页面私有 `<ReferenceCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
+| `apps/gallery/app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ 页面私有 `<DemoApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
 
 > 两页都用内联假 ViewModel 驱动，数据不写进 kit。**新增单组件的陈列进 `index.vue`；新增整页装配 recipe 进 `reference.vue`**（或另起一页）。
 
@@ -272,7 +274,7 @@ authoring 输入            适配                 领域输出              渲
 - `packages/kits/api-docs/app/components/api-docs/FieldItem.vue`（字段展示类型内联导出于此）
 - `packages/kits/api-docs/app/composables/useCodeWrap.ts`
 - `packages/kits/api-docs/app/composables/useFieldAnchor.ts`（字段深链接，随 field-item 切片同 ship）
-- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`（组件目录）、`apps/gallery/app/pages/kits/api-docs/reference.vue`（整页两栏参考页）+ `apps/gallery/app/components/reference/CodeRail.vue`（`<ReferenceCodeRail>`，纵向分栏 + 内容优先重分配，gallery 页私有）（含 `router.options.ts` 演示可选打磨）
+- 组合演示（demo，不在 kit）：`apps/gallery/app/pages/kits/api-docs/index.vue`（组件目录）、`apps/gallery/app/pages/kits/api-docs/reference.vue`（整页两栏参考页）+ `apps/gallery/app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分栏 + 内容优先重分配，gallery 页私有）（含 `router.options.ts` 演示可选打磨）
 - 基座依赖：`packages/core/app/components/CopyButton.vue`、`packages/core/app/composables/useCopy.ts`、`packages/core/app/components/SemanticBadge.vue`、`packages/core/app/components/{InlineCode,InlineMarkdown}.vue`、`packages/core/app/utils/badge.ts`
 - 可拖动分栏（基座）：`packages/core/app/components/SplitPane.vue`（首选入口）、`packages/core/app/components/SplitPaneHandle.vue`、`packages/core/app/composables/useSplitPane.ts`
 

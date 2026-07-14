@@ -4,7 +4,7 @@ definePageMeta({ nav: { label: '参考页组合', icon: 'i-lucide-columns-2', or
 // API 文档场景的「整页级组合」demo（不是可分发切片，也不是通用组件）——
 // 招牌两栏布局：左侧字段树（可滚动文档流），右侧代码栏（Request 在上 / Response
 // 在下，可拖动纵向分栏 + 内容优先重分配）。横向分栏用通用基座的 <SplitPane>，
-// 纵向分栏 + 重分配用 gallery 页私有的 <ReferenceCodeRail>（recipe 留在消费页，
+// 纵向分栏 + 重分配用 gallery 页私有的 <DemoApiDocsCodeRail>（recipe 留在消费页，
 // 不进 core）。所有代码块 / 请求 / 响应 / 字段树组件来自 api-docs kit，数据一律
 // 由本页内联假 ViewModel 注入。
 
@@ -290,14 +290,14 @@ onMounted(() => anchor.initFromHash())
            <lg 回退为普通堆叠（rail 自身按断点降级为各卡片自滚动）。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
-          <ReferenceCodeRail class="h-full max-lg:space-y-4">
+          <DemoApiDocsCodeRail class="h-full max-lg:space-y-4">
             <template #top="{ maxHeight }">
               <ApiDocsRequestExample :scenarios="requestScenarios" :max-height="maxHeight" />
             </template>
             <template #bottom="{ maxHeight }">
               <ApiDocsResponseExample :scenarios="responseScenarios" :max-height="maxHeight" />
             </template>
-          </ReferenceCodeRail>
+          </DemoApiDocsCodeRail>
         </div>
       </template>
     </SplitPane>
