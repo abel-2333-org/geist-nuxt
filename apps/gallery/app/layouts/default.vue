@@ -3,47 +3,42 @@ const items = useGalleryNav()
 </script>
 
 <template>
-  <div class="min-h-screen bg-default text-default antialiased flex flex-col">
-    <CompositionAppHeader :items="items">
-      <template #brand>
-        <NuxtLink to="/" class="flex items-center gap-2.5 text-highlighted" aria-label="geist-nuxt 首页">
-          <img src="/favicon.svg" alt="" class="size-6" width="24" height="24" />
-          <span class="font-mono text-sm font-semibold tracking-tight">geist-nuxt</span>
-        </NuxtLink>
-        <UBadge color="neutral" variant="subtle" size="sm" class="font-mono max-sm:hidden">
-          Nuxt · Nuxt UI
-        </UBadge>
-      </template>
-      <template #actions>
-        <UButton
-          label="文档"
-          color="neutral"
-          variant="ghost"
-          trailing-icon="i-lucide-arrow-up-right"
-          to="https://ui.nuxt.com"
-          target="_blank"
-        />
-        <UButton
-          icon="i-simple-icons-github"
-          color="neutral"
-          variant="ghost"
-          aria-label="GitHub 仓库"
-          to="https://github.com/abel-2333-org/geist-nuxt"
-          target="_blank"
-        />
-        <ThemeToggle />
-      </template>
-    </CompositionAppHeader>
+  <CompositionAppShell :items="items">
+    <template #brand="{ collapsed }">
+      <NuxtLink
+        to="/"
+        class="flex items-center gap-2.5 text-highlighted min-w-0"
+        aria-label="geist-nuxt 首页"
+      >
+        <img src="/favicon.svg" alt="" class="size-6 shrink-0" width="24" height="24" />
+        <span v-if="!collapsed" class="font-mono text-sm font-semibold tracking-tight whitespace-nowrap">
+          geist-nuxt
+        </span>
+      </NuxtLink>
+    </template>
 
-    <main class="flex-1">
-      <slot />
-    </main>
+    <template #actions>
+      <ThemeToggle />
+      <UButton
+        icon="i-simple-icons-github"
+        color="neutral"
+        variant="ghost"
+        aria-label="GitHub 仓库"
+        to="https://github.com/abel-2333-org/geist-nuxt"
+        target="_blank"
+      />
+    </template>
 
-    <footer class="border-t border-default">
-      <UContainer class="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-sm text-muted">geist-nuxt · 基于 Nuxt UI 的 Geist 设计语言</p>
-        <p class="text-sm text-muted font-mono">@geist-nuxt/core</p>
-      </UContainer>
-    </footer>
-  </div>
+    <template #footer>
+      <footer class="border-t border-default">
+        <UContainer class="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-sm text-muted">geist-nuxt · 基于 Nuxt UI 的 Geist 设计语言</p>
+          <p class="text-sm text-muted font-mono">@geist-nuxt/core</p>
+        </UContainer>
+      </footer>
+    </template>
+
+    <!-- Page content flows into AppShell's default slot (its <main>). -->
+    <slot />
+  </CompositionAppShell>
 </template>
