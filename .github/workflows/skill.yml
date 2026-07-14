@@ -134,6 +134,21 @@ jobs:
           echo "--- dist-skill contents ---"
           find dist-skill -type f | sort
 
+      - name: Guard against mojibake (U+FFFD) in the distribution
+        run: |
+          # Encoding/writer corruption of multi-byte CJK shows up as the UTF-8
+          # replacement char U+FFFD (bytes EF BF BD). Humans typing Chinese never
+          # produce it; a tool mangling a write does. This is the last gate before
+          # the docs flow into every team member's skill memory area via release,
+          # so any U+FFFD anywhere in dist-skill fails the build.
+          if grep -rlP '\xEF\xBF\xBD' dist-skill; then
+            echo "::error::Found U+FFFD (mojibake) in dist-skill — a multi-byte character was corrupted. Fix the source file before release." >&2
+            echo "--- offending lines ---" >&2
+            grep -rnP '\xEF\xBF\xBD' dist-skill >&2 || true
+            exit 1
+          fi
+          echo "No U+FFFD found — distribution encoding is clean."
+
       - name: Create release with dist-skill asset
         env:
           GH_TOKEN: ${{ github.token }}
