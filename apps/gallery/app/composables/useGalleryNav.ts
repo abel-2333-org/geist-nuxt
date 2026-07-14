@@ -38,11 +38,9 @@ interface Sortable {
  * Adding a `pages/**` file = one more nav item automatically.
  * Hide a page with `definePageMeta({ nav: false })`.
  *
- * Structure: top-level pages ("/", "/components", ...) render inline first;
- * then a "Kits" section label; then one item per `kits/<name>` (single-page
- * kit → a link; multi-page kit → an expandable accordion). The label is a
- * section heading (type: 'label'), not a wrapping accordion, so kits sit at the
- * top nav level and collapse cleanly to icons when the sidebar is collapsed.
+ * Structure: top-level pages ("/", "/components", ...) render inline; every
+ * `kits/<name>/**` page folds into a "Kits" group, one sub-tree per kit
+ * (single-page kit → a link; multi-page kit → an expandable sub-tree).
  */
 export function useGalleryNav() {
   const router = useRouter()
@@ -82,30 +80,29 @@ export function useGalleryNav() {
     const items: (NavigationMenuItem & { order: number })[] = topLevel.sort(byOrderThenLabel)
 
     if (kitPages.size > 0) {
-      // "Kits" section heading (type: 'label' renders as a section label in
-      // vertical orientation, hidden when the sidebar is collapsed).
-      items.push({ label: 'Kits', type: 'label', order: KITS_GROUP_ORDER })
-
-      // One sibling item per kit, kits sorted by name for stability.
-      const kitItems: (NavigationMenuItem & { order: number })[] = [...kitPages.entries()]
+      // One sub-tree per kit, kits sorted by name for stability.
+      const kitChildren: NavigationMenuItem[] = [...kitPages.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([kitName, pages], i) => {
+        .map(([kitName, pages]) => {
           const sorted = pages.sort(byOrderThenLabel)
           const label = titleCase(kitName)
-          const order = KITS_GROUP_ORDER + 1 + i
-          // Single-page kit → plain link; multi-page kit → expandable accordion.
+          // Single-page kit collapses to a plain link; multi-page kit stays expandable.
           if (sorted.length === 1) {
-            return { label, icon: sorted[0]!.icon, to: sorted[0]!.to, order }
+            return { label, icon: sorted[0]!.icon, to: sorted[0]!.to }
           }
           return {
             label,
             icon: sorted[0]?.icon,
             children: sorted.map(({ order: _order, ...page }) => page),
-            order,
           }
         })
 
-      items.push(...kitItems)
+      items.push({
+        label: 'Kits',
+        icon: 'i-lucide-package',
+        children: kitChildren,
+        order: KITS_GROUP_ORDER,
+      })
     }
 
     return items.map(({ order: _order, ...item }) => item)
