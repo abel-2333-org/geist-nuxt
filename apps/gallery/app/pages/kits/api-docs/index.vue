@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ nav: { label: 'API Docs', icon: 'i-lucide-file-code', order: 0 } })
+definePageMeta({ nav: { label: '组件目录', icon: 'i-lucide-file-code', order: 0 } })
 
 // API 文档场景的组合演示（demo/story）——按 geist-nuxt「demo 归 gallery、kit 只 ship
 // 数据无关积木」的分层，这里用内联假 ViewModel 驱动 kit 的数据无关组件：代码块 /
