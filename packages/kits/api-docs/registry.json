@@ -87,6 +87,16 @@
         { "path": "app/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts", "type": "registry:hook" }
       ],
       "meta": { "coreDeps": ["InlineCode", "InlineMarkdown", "useCopy"] }
+    },
+    {
+      "name": "sidebar-nav",
+      "type": "registry:component",
+      "title": "ApiDocsSidebarNav",
+      "description": "Documentation sidebar for a docs/API portal: one menu holds several collapsible sections whose pages differ in nature (guide prose links vs. endpoint links tagged with an HTTP method badge). Multiple sections open at once, each shows a count, and a single top search filters across every section (with a '/' shortcut) so a large section stays reachable. The nav data model (SidebarNavSection, SidebarNavItem) travels inline with the component; endpoint rows render the sibling ApiDocsMethodBadge.",
+      "registryDependencies": ["method-badge"],
+      "files": [
+        { "path": "app/components/api-docs/SidebarNav.vue", "target": "app/components/api-docs/SidebarNav.vue", "type": "registry:component" }
+      ]
     }
   ]
 }
