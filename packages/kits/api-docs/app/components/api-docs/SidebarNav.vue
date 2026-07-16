@@ -15,7 +15,9 @@
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
-// section stays reachable without scrolling.
+// section stays reachable without scrolling. Optional HTTP-method chips sit
+// under the search and narrow to matching endpoints (compose with the query);
+// they only appear when the data actually contains those methods.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
@@ -93,6 +95,10 @@ const props = withDefaults(
     clearLabel?: string
     /** Shown when a query matches nothing. */
     emptyLabel?: string
+    /** Show HTTP-method filter chips (only render when endpoints exist). */
+    methodFilters?: boolean
+    /** Accessible label for the method-filter chip group. */
+    methodFilterLabel?: string
   }>(),
   {
     groups: undefined,
@@ -103,6 +109,8 @@ const props = withDefaults(
     searchShortcut: '/',
     clearLabel: 'Clear search',
     emptyLabel: 'No matching pages',
+    methodFilters: true,
+    methodFilterLabel: 'Filter by method',
   },
 )
 
@@ -122,35 +130,72 @@ const query = ref('')
 const searchRef = ref<{ inputRef?: HTMLInputElement } | null>(null)
 const hasQuery = computed(() => query.value.trim().length > 0)
 
-function matches(item: SidebarNavItem, q: string): boolean {
+// HTTP-method filter chips. Only the methods actually present in the data are
+// offered (canonical order), so a guide-only sidebar shows no chips at all.
+// Filtering by method is inherently an endpoint operation: guide items (no
+// `method`) drop out whenever any chip is active.
+const methodOrder: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+const availableMethods = computed<string[]>(() => {
+  if (!props.methodFilters) return []
+  const seen = new Set<string>()
+  for (const group of normalizedGroups.value)
+    for (const section of group.sections)
+      for (const item of section.items)
+        if (item.method) seen.add(item.method.toUpperCase())
+  return methodOrder.filter(m => seen.has(m))
+})
+const activeMethods = ref<Set<string>>(new Set())
+const hasMethodFilter = computed(() => activeMethods.value.size > 0)
+const hasFilter = computed(() => hasQuery.value || hasMethodFilter.value)
+
+function methodChipColor(m: string) {
+  return methodPreset[m.toUpperCase() as HttpMethod]?.tone ?? 'neutral'
+}
+
+function toggleMethod(m: string) {
+  const next = new Set(activeMethods.value)
+  if (next.has(m)) next.delete(m)
+  else next.add(m)
+  activeMethods.value = next
+}
+
+function matchesText(item: SidebarNavItem, q: string): boolean {
   return (
     item.label.toLowerCase().includes(q)
     || (item.method?.toLowerCase().includes(q) ?? false)
   )
 }
 
-function resolveSection(section: SidebarNavSection, q: string) {
+function resolveSection(section: SidebarNavSection, q: string, methods: Set<string>) {
   const labelHit = q ? section.label.toLowerCase().includes(q) : false
-  const items = q && !labelHit ? section.items.filter(i => matches(i, q)) : section.items
+  let items = section.items
+  // Method chips always narrow, regardless of a section-label text hit.
+  if (methods.size > 0)
+    items = items.filter(i => !!i.method && methods.has(i.method.toUpperCase()))
+  // Text query narrows further, unless the section label itself matched.
+  if (q && !labelHit)
+    items = items.filter(i => matchesText(i, q))
+  const filterActive = !!q || methods.size > 0
   return {
     section,
     id: section.id ?? slug(section.label),
     kind: section.kind ?? 'guide',
     items,
     total: section.items.length,
-    forceOpen: q ? items.length > 0 : false,
+    forceOpen: filterActive ? items.length > 0 : false,
   }
 }
 
 // Each group resolves to its surviving sections; an empty group drops out while
-// a query is active so the boundaries only frame real hits.
+// a filter is active so the boundaries only frame real hits.
 const resolved = computed(() => {
   const q = query.value.trim().toLowerCase()
+  const methods = activeMethods.value
   return normalizedGroups.value
     .map((group, gi) => {
       const sections = group.sections
-        .map(section => resolveSection(section, q))
-        .filter(entry => (hasQuery.value ? entry.items.length > 0 : true))
+        .map(section => resolveSection(section, q, methods))
+        .filter(entry => (hasFilter.value ? entry.items.length > 0 : true))
       return {
         group,
         id: group.id ?? (group.label ? slug(group.label) : `group-${gi}`),
@@ -160,7 +205,7 @@ const resolved = computed(() => {
     .filter(group => group.sections.length > 0)
 })
 
-const empty = computed(() => hasQuery.value && resolved.value.length === 0)
+const empty = computed(() => hasFilter.value && resolved.value.length === 0)
 
 // Global '/' focuses the search; Escape clears + blurs. Ignore the shortcut
 // while the user is already typing in a field or composing via an IME.
@@ -179,6 +224,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 function clear() {
   query.value = ''
+  activeMethods.value = new Set()
   searchRef.value?.inputRef?.blur()
 }
 </script>
@@ -204,7 +250,7 @@ function clear() {
       >
         <template #trailing>
           <UButton
-            v-if="hasQuery"
+            v-if="hasFilter"
             icon="i-lucide-x"
             color="neutral"
             variant="link"
@@ -215,6 +261,28 @@ function clear() {
           <UKbd v-else :value="searchShortcut" aria-hidden="true" class="max-sm:hidden" />
         </template>
       </UInput>
+
+      <!-- Method filter chips: quiet neutral ghosts by default; a toggled chip
+           takes its method colour (subtle) so the active filter is unmistakable
+           without turning the header flashy. -->
+      <div
+        v-if="availableMethods.length"
+        role="group"
+        :aria-label="methodFilterLabel"
+        class="mt-2 flex flex-wrap gap-1"
+      >
+        <UButton
+          v-for="m in availableMethods"
+          :key="m"
+          :label="m"
+          size="xs"
+          :color="activeMethods.has(m) ? methodChipColor(m) : 'neutral'"
+          :variant="activeMethods.has(m) ? 'subtle' : 'ghost'"
+          :aria-pressed="activeMethods.has(m)"
+          class="font-mono tracking-wide tabular-nums"
+          @click="toggleMethod(m)"
+        />
+      </div>
     </div>
 
     <!-- Scroll region: multiple sections can be open at once; overflow scrolls
@@ -272,7 +340,7 @@ function clear() {
                     size="sm"
                     class="shrink-0 font-mono tabular-nums"
                   >
-                    {{ hasQuery ? `${entry.items.length}/${entry.total}` : entry.total }}
+                    {{ hasFilter ? `${entry.items.length}/${entry.total}` : entry.total }}
                   </UBadge>
                 </button>
               </template>

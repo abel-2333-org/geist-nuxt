@@ -159,6 +159,7 @@ const groups: Group[] = [
             search-placeholder="搜索文档"
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
+            method-filter-label="按方法筛选"
           />
         </div>
 
@@ -172,6 +173,10 @@ const groups: Group[] = [
                 <span>在顶部搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，观察板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
+                <UIcon name="i-lucide-filter" class="mt-0.5 size-4 shrink-0 text-dimmed" />
+                <span>点搜索框下方的 <b class="font-mono text-toned">GET</b> / <b class="font-mono text-toned">POST</b> 等方法 chip 只看某类接口（可多选、与关键词叠加）；chip 只在数据里真的出现该方法时才显示。</span>
+              </li>
+              <li class="flex gap-2">
                 <UIcon name="i-lucide-keyboard" class="mt-0.5 size-4 shrink-0 text-dimmed" />
                 <span>把焦点移出输入框后按 <UKbd value="/" /> 可瞬间聚焦搜索；按 <UKbd value="esc" /> 清空并失焦。</span>
               </li>
@@ -181,7 +186,7 @@ const groups: Group[] = [
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 + 紫色调、子项带 method 色标——两类界限分明。</span>
+                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项带 method 色标——两类界限分明，chrome 保持中性、颜色只交给 method 色标与 active 态。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
