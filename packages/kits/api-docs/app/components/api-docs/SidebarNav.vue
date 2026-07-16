@@ -7,10 +7,11 @@
 //      ("Documentation", "API reference"). Each group prints an eyebrow label
 //      and a hairline divider, so the menu reads as two territories, not one
 //      flat pile.
-//   2. Section typing — `kind` drives the header treatment:
+//   2. Section typing — `kind` drives the header treatment, using typography
+//      (not colour) so primary stays reserved for the active state:
 //        · guide     → sentence-case, font-sans, soft; items are icon + label.
-//        · endpoints → UPPER MONO with tracking + a faint primary tint; items
-//                      are tagged with an ApiDocsMethodBadge.
+//        · endpoints → UPPER MONO with tracking; the per-row method badge is
+//                      what carries colour, so the chrome stays neutral.
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
@@ -246,7 +247,6 @@ function clear() {
                 <button
                   type="button"
                   class="group/sec flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  :class="entry.kind === 'endpoints' ? 'border-l-2 border-primary/40' : ''"
                 >
                   <UIcon
                     name="i-lucide-chevron-right"
@@ -256,8 +256,7 @@ function clear() {
                   <UIcon
                     v-if="entry.section.icon"
                     :name="entry.section.icon"
-                    class="size-4 shrink-0"
-                    :class="entry.kind === 'endpoints' ? 'text-primary' : 'text-muted'"
+                    class="size-4 shrink-0 text-muted"
                   />
                   <span
                     class="min-w-0 flex-1 truncate group-hover/sec:text-highlighted"
@@ -268,7 +267,7 @@ function clear() {
                     {{ entry.section.label }}
                   </span>
                   <UBadge
-                    :color="entry.kind === 'endpoints' ? 'primary' : 'neutral'"
+                    color="neutral"
                     variant="subtle"
                     size="sm"
                     class="shrink-0 font-mono tabular-nums"
@@ -279,10 +278,7 @@ function clear() {
               </template>
 
               <template #content>
-                <ul
-                  class="mt-0.5 space-y-px pb-1 ml-3.5 pl-3 border-l"
-                  :class="entry.kind === 'endpoints' ? 'border-primary/20' : 'border-default'"
-                >
+                <ul class="mt-0.5 space-y-px pb-1 ml-3.5 pl-3 border-l border-default">
                   <li v-for="item in entry.items" :key="item.to ?? item.label">
                     <ULink
                       :to="item.to"

@@ -1,6 +1,6 @@
 # ApiDocsSidebarNav `<ApiDocsSidebarNav>`
 
-文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是带 HTTP method 色标的端点链接。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽 + 紫色调竖条。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。
+文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是带 HTTP method 色标的端点链接。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽（mono）。分型只靠排版承载，颜色留给 method 色标与 active 态，避免整列喧闹。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。
 
 > 文件放在 `components/api-docs/SidebarNav.vue`。约定 `pathPrefix: true`，组件名 = 目录名 + 文件名，所以模板名是 `<ApiDocsSidebarNav>`。数据无关：导航数据模型内联随组件走，所有 chrome 文案经 props 注入（i18n-ready）。
 
@@ -13,9 +13,10 @@ nav (landmark, 粘顶 + 自身滚动区)
    └─ group ×M  ── 可选 eyebrow 小标题（mono 大写 tracking，text-dimmed）+ 组间分隔线
       └─ section (UCollapsible) ×N
          ├─ trigger  ── chevron（展开转 90°）· 可选 icon · 板块标题 · 计数 UBadge
-         │              · guide 型：sans 句式、中性图标、neutral 计数
-         │              · endpoints 型：mono 大写 tracking、左侧 primary 竖条、primary 计数
-         └─ content  ── item (ULink) 列表，左侧一条 border 缩进
+         │              · guide 型：sans 句式、中性图标
+         │              · endpoints 型：mono 大写 tracking（chrome 保持中性，颜色交给 method 色标）
+         │              · 计数 UBadge 两型统一为 neutral subtle
+         └─ content  ── item (ULink) 列表，左侧一条中性 border 缩进
             ├─ 指南项：可选 icon + label
             └─ 接口项：ApiDocsMethodBadge（定宽对齐）+ mono label（+ 可选尾部 badge）
 ```
@@ -50,7 +51,7 @@ type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
   id?: string            // 稳定 id，缺省时取 label 的 slug
   label: string          // 板块标题（已本地化）
-  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 + primary 竖条）
+  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 tracking，chrome 中性）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
   defaultOpen?: boolean  // 首次渲染即展开；搜索激活时被忽略
@@ -64,7 +65,7 @@ interface SidebarNavGroup {
 
 ## 关键点
 
-- **界限分明靠两条正交手段**：① **分组层**（`SidebarNavGroup.label`）——板块归入带 eyebrow 小标题的分组，组间加分隔线与上留白，把「指南世界」与「接口世界」框成两块领地；② **板块分型**（`SidebarNavSection.kind`）——`guide` 型板块头是柔和 sans 句式 + 中性图标 + neutral 计数，`endpoints` 型是 mono 大写 tracking + 左侧 primary 竖条 + primary 计数。二者叠加后，即使只扫板块头（不展开）也一眼分得清类型。
+- **界限分明靠两条正交手段**：① **分组层**（`SidebarNavGroup.label`）——板块归入带 eyebrow 小标题的分组，组间加分隔线与上留白，把「指南世界」与「接口世界」框成两块领地；② **板块分型**（`SidebarNavSection.kind`）——`guide` 型板块头是柔和 sans 句式 + 中性图标，`endpoints` 型是 mono 大写 tracking。**分型只用排版区分、不涂色**：计数徽章、缩进线、图标一律中性，颜色只由每行 method 色标与 active 态承载，避免整列 chrome 被紫色装饰喧闹（`primary` 是强调色，应留给选中态）。二者叠加后，即使只扫板块头（不展开）也一眼分得清类型。
 - **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（渲染 `ApiDocsMethodBadge`，方法色标是「色 + 大写动词」双通道，label 用 mono），带/不带 `icon` 的是指南行。方法色标复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
 - **全局搜索是唯一搜索入口**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留、否则只留命中的 item；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。这样「大板块子项多」的检索需求由全局搜索覆盖，无需每块再放一个搜索框。
 - **菜单自身是滚动区**：`nav` 用 `max-h-[calc(100dvh-4rem)]` + 顶部 `search` 粘住、下方 `overflow-y-auto`。多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动。
