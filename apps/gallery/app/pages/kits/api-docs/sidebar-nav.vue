@@ -3,111 +3,134 @@ definePageMeta({ nav: { label: '侧边栏导航', icon: 'i-lucide-panel-left', o
 
 // Demo/story for <ApiDocsSidebarNav> — per the geist-nuxt layering, demos live
 // in gallery and the kit only ships the data-agnostic component. Inline fake
-// ViewModel drives one payments-style docs portal sidebar: a prose "Guide"
-// section, several endpoint sections tagged with method badges, and one
-// deliberately long section (Direct API) so the global search's filter +
-// force-open + in-nav scroll behavior is exercised at real scale.
-type Section = {
-  label: string
-  icon?: string
-  defaultOpen?: boolean
-  items: { label: string; to?: string; method?: string; icon?: string; badge?: string | number; active?: boolean }[]
-}
+// ViewModel drives one payments-style docs portal sidebar, now split into two
+// labelled groups so the guide/endpoints boundary is unmistakable:
+//   · "文档"      — guide-kind sections (prose + SDK), soft sans headers.
+//   · "API 参考"  — endpoints-kind sections, UPPER MONO headers + method badges,
+//                    including one deliberately long section (DIRECT API) that
+//                    exercises the global search filter + force-open + in-nav
+//                    scroll at real scale.
+type Item = { label: string; to?: string; method?: string; icon?: string; badge?: string | number; active?: boolean }
+type Section = { label: string; kind?: 'guide' | 'endpoints'; icon?: string; defaultOpen?: boolean; items: Item[] }
+type Group = { label?: string; sections: Section[] }
 
-const sections: Section[] = [
+const groups: Group[] = [
   {
-    label: '指南',
-    icon: 'i-lucide-book-open',
-    defaultOpen: true,
-    items: [
-      { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
-      { label: '快速开始', to: '#quickstart', icon: 'i-lucide-rocket' },
-      { label: '认证与密钥', to: '#auth', icon: 'i-lucide-key-round' },
-      { label: '测试环境', to: '#sandbox', icon: 'i-lucide-flask-conical' },
-      { label: 'Webhook 通知', to: '#webhooks', icon: 'i-lucide-webhook' },
+    label: '文档',
+    sections: [
+      {
+        label: '指南',
+        kind: 'guide',
+        icon: 'i-lucide-book-open',
+        defaultOpen: true,
+        items: [
+          { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
+          { label: '快速开始', to: '#quickstart', icon: 'i-lucide-rocket' },
+          { label: '认证与密钥', to: '#auth', icon: 'i-lucide-key-round' },
+          { label: '测试环境', to: '#sandbox', icon: 'i-lucide-flask-conical' },
+          { label: 'Webhook 通知', to: '#webhooks', icon: 'i-lucide-webhook' },
+        ],
+      },
+      {
+        label: 'SDK',
+        kind: 'guide',
+        icon: 'i-lucide-package',
+        items: [
+          { label: 'JavaScript', to: '#sdk-js', icon: 'i-simple-icons-javascript' },
+          { label: 'Python', to: '#sdk-py', icon: 'i-simple-icons-python' },
+        ],
+      },
     ],
   },
   {
-    label: 'CHECKOUT',
-    defaultOpen: true,
-    items: [
-      { label: '/checkout/sessions', to: '#checkout-create', method: 'POST', active: true },
-    ],
-  },
-  {
-    label: 'DIRECT API',
-    items: [
-      { label: '/payments', to: '#pay-create', method: 'POST' },
-      { label: '/payments/{id}', to: '#pay-get', method: 'GET' },
-      { label: '/payments/{id}', to: '#pay-update', method: 'PATCH' },
-      { label: '/payments/{id}/capture', to: '#pay-capture', method: 'POST' },
-      { label: '/payments/{id}/cancel', to: '#pay-cancel', method: 'POST' },
-      { label: '/payments/{id}/reverse', to: '#pay-reverse', method: 'POST' },
-      { label: '/authorizations', to: '#auth-create', method: 'POST' },
-      { label: '/authorizations/{id}', to: '#auth-get', method: 'GET' },
-      { label: '/authorizations/{id}', to: '#auth-void', method: 'DELETE' },
-      { label: '/customers', to: '#cust-list', method: 'GET' },
-      { label: '/customers', to: '#cust-create', method: 'POST' },
-      { label: '/customers/{id}', to: '#cust-update', method: 'PUT' },
-      { label: '/mandates/{id}', to: '#mandate-get', method: 'GET' },
-    ],
-  },
-  {
-    label: 'SDK',
-    items: [
-      { label: 'JavaScript', to: '#sdk-js', icon: 'i-simple-icons-javascript' },
-    ],
-  },
-  {
-    label: '卡 TOKEN',
-    items: [
-      { label: '/tokens', to: '#token-create', method: 'POST' },
-      { label: '/tokens/{id}', to: '#token-get', method: 'GET' },
-      { label: '/tokens/{id}', to: '#token-delete', method: 'DELETE' },
-    ],
-  },
-  {
-    label: '支付方式',
-    items: [
-      { label: '/payment-methods', to: '#pm-list', method: 'GET' },
-    ],
-  },
-  {
-    label: '支付查询',
-    items: [
-      { label: '/search/payments', to: '#search-pay', method: 'POST' },
-      { label: '/search/refunds', to: '#search-refund', method: 'POST' },
-    ],
-  },
-  {
-    label: '订阅',
-    items: [
-      { label: '/subscriptions', to: '#sub-create', method: 'POST', badge: 'beta' },
-      { label: '/subscriptions/{id}', to: '#sub-get', method: 'GET' },
-    ],
-  },
-  {
-    label: 'PAYMENT LINK',
-    items: [
-      { label: '/payment-links', to: '#link-create', method: 'POST' },
-      { label: '/payment-links/{id}', to: '#link-get', method: 'GET' },
-      { label: '/payment-links/{id}', to: '#link-expire', method: 'DELETE' },
-    ],
-  },
-  {
-    label: '退款',
-    items: [
-      { label: '/refunds', to: '#refund-create', method: 'POST' },
-    ],
-  },
-  {
-    label: 'ETHOCA',
-    items: [
-      { label: '/ethoca/alerts', to: '#ethoca-list', method: 'GET' },
-      { label: '/ethoca/alerts/{id}', to: '#ethoca-get', method: 'GET' },
-      { label: '/ethoca/alerts/{id}/outcome', to: '#ethoca-outcome', method: 'POST' },
-      { label: '/ethoca/webhooks', to: '#ethoca-hook-create', method: 'POST' },
-      { label: '/ethoca/webhooks/{id}', to: '#ethoca-hook-delete', method: 'DELETE' },
+    label: 'API 参考',
+    sections: [
+      {
+        label: 'CHECKOUT',
+        kind: 'endpoints',
+        defaultOpen: true,
+        items: [
+          { label: '/checkout/sessions', to: '#checkout-create', method: 'POST', active: true },
+        ],
+      },
+      {
+        label: 'DIRECT API',
+        kind: 'endpoints',
+        items: [
+          { label: '/payments', to: '#pay-create', method: 'POST' },
+          { label: '/payments/{id}', to: '#pay-get', method: 'GET' },
+          { label: '/payments/{id}', to: '#pay-update', method: 'PATCH' },
+          { label: '/payments/{id}/capture', to: '#pay-capture', method: 'POST' },
+          { label: '/payments/{id}/cancel', to: '#pay-cancel', method: 'POST' },
+          { label: '/payments/{id}/reverse', to: '#pay-reverse', method: 'POST' },
+          { label: '/authorizations', to: '#auth-create', method: 'POST' },
+          { label: '/authorizations/{id}', to: '#auth-get', method: 'GET' },
+          { label: '/authorizations/{id}', to: '#auth-void', method: 'DELETE' },
+          { label: '/customers', to: '#cust-list', method: 'GET' },
+          { label: '/customers', to: '#cust-create', method: 'POST' },
+          { label: '/customers/{id}', to: '#cust-update', method: 'PUT' },
+          { label: '/mandates/{id}', to: '#mandate-get', method: 'GET' },
+        ],
+      },
+      {
+        label: '卡 TOKEN',
+        kind: 'endpoints',
+        items: [
+          { label: '/tokens', to: '#token-create', method: 'POST' },
+          { label: '/tokens/{id}', to: '#token-get', method: 'GET' },
+          { label: '/tokens/{id}', to: '#token-delete', method: 'DELETE' },
+        ],
+      },
+      {
+        label: '支付方式',
+        kind: 'endpoints',
+        items: [
+          { label: '/payment-methods', to: '#pm-list', method: 'GET' },
+        ],
+      },
+      {
+        label: '支付查询',
+        kind: 'endpoints',
+        items: [
+          { label: '/search/payments', to: '#search-pay', method: 'POST' },
+          { label: '/search/refunds', to: '#search-refund', method: 'POST' },
+        ],
+      },
+      {
+        label: '订阅',
+        kind: 'endpoints',
+        items: [
+          { label: '/subscriptions', to: '#sub-create', method: 'POST', badge: 'beta' },
+          { label: '/subscriptions/{id}', to: '#sub-get', method: 'GET' },
+        ],
+      },
+      {
+        label: 'PAYMENT LINK',
+        kind: 'endpoints',
+        items: [
+          { label: '/payment-links', to: '#link-create', method: 'POST' },
+          { label: '/payment-links/{id}', to: '#link-get', method: 'GET' },
+          { label: '/payment-links/{id}', to: '#link-expire', method: 'DELETE' },
+        ],
+      },
+      {
+        label: '退款',
+        kind: 'endpoints',
+        items: [
+          { label: '/refunds', to: '#refund-create', method: 'POST' },
+        ],
+      },
+      {
+        label: 'ETHOCA',
+        kind: 'endpoints',
+        items: [
+          { label: '/ethoca/alerts', to: '#ethoca-list', method: 'GET' },
+          { label: '/ethoca/alerts/{id}', to: '#ethoca-get', method: 'GET' },
+          { label: '/ethoca/alerts/{id}/outcome', to: '#ethoca-outcome', method: 'POST' },
+          { label: '/ethoca/webhooks', to: '#ethoca-hook-create', method: 'POST' },
+          { label: '/ethoca/webhooks/{id}', to: '#ethoca-hook-delete', method: 'DELETE' },
+        ],
+      },
     ],
   },
 ]
@@ -131,7 +154,7 @@ const sections: Section[] = [
         <!-- The sidebar itself, sticky like a real docs shell. -->
         <div class="lg:sticky lg:top-20 lg:self-start">
           <ApiDocsSidebarNav
-            :sections="sections"
+            :groups="groups"
             aria-label="支付文档"
             search-placeholder="搜索文档"
             clear-label="清除搜索"
@@ -157,8 +180,12 @@ const sections: Section[] = [
                 <span>多个板块可同时展开对照；菜单再长也只在侧栏内部滚动，不推动页面。</span>
               </li>
               <li class="flex gap-2">
+                <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
+                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 + 紫色调、子项带 method 色标——两类界限分明。</span>
+              </li>
+              <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>接口行的 method 色标复用 <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code>；指南行用普通图标链接。当前 <span class="font-mono">/checkout/sessions</span> 为 active 态。</span>
+                <span>接口行的 method 色标复用 <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code>。当前 <span class="font-mono">/checkout/sessions</span> 为 active 态。</span>
               </li>
             </ul>
           </div>

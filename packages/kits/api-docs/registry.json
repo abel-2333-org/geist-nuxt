@@ -92,7 +92,7 @@
       "name": "sidebar-nav",
       "type": "registry:component",
       "title": "ApiDocsSidebarNav",
-      "description": "Documentation sidebar for a docs/API portal: one menu holds several collapsible sections whose pages differ in nature (guide prose links vs. endpoint links tagged with an HTTP method badge). Multiple sections open at once, each shows a count, and a single top search filters across every section (with a '/' shortcut) so a large section stays reachable. The nav data model (SidebarNavSection, SidebarNavItem) travels inline with the component; endpoint rows render the sibling ApiDocsMethodBadge.",
+      "description": "Documentation sidebar for a docs/API portal: one menu holds several collapsible sections whose pages differ in nature (guide prose links vs. endpoint links tagged with an HTTP method badge). Two orthogonal devices keep the two worlds distinct: a grouping layer (SidebarNavGroup with an eyebrow label + divider) frames guides vs. API reference as separate territories, and a per-section `kind` ('guide' | 'endpoints') forks the header treatment (soft sans vs. upper-mono with a primary tint). Multiple sections open at once, each shows a count, and a single top search filters across every section (with a '/' shortcut) so a large section stays reachable. The nav data model (SidebarNavGroup, SidebarNavSection, SidebarNavItem) travels inline with the component; endpoint rows render the sibling ApiDocsMethodBadge.",
       "registryDependencies": ["method-badge"],
       "files": [
         { "path": "app/components/api-docs/SidebarNav.vue", "target": "app/components/api-docs/SidebarNav.vue", "type": "registry:component" }

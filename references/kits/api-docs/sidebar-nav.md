@@ -1,6 +1,6 @@
 # ApiDocsSidebarNav `<ApiDocsSidebarNav>`
 
-文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是带 HTTP method 色标的端点链接。多个板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。
+文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是带 HTTP method 色标的端点链接。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽 + 紫色调竖条。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。
 
 > 文件放在 `components/api-docs/SidebarNav.vue`。约定 `pathPrefix: true`，组件名 = 目录名 + 文件名，所以模板名是 `<ApiDocsSidebarNav>`。数据无关：导航数据模型内联随组件走，所有 chrome 文案经 props 注入（i18n-ready）。
 
@@ -10,20 +10,24 @@
 nav (landmark, 粘顶 + 自身滚动区)
 ├─ search   ── UInput（放大镜图标 + UKbd '/' 提示 / 清除按钮）——全局过滤
 └─ 滚动区
-   └─ section (UCollapsible) ×N
-      ├─ trigger  ── chevron（展开转 90°）· 可选 icon · 板块标题（mono 大写 tracking）· 计数 UBadge
-      └─ content  ── item (ULink) 列表，左侧一条 border 缩进
-         ├─ 指南项：可选 icon + label
-         └─ 接口项：ApiDocsMethodBadge（定宽对齐）+ label（+ 可选尾部 badge）
+   └─ group ×M  ── 可选 eyebrow 小标题（mono 大写 tracking，text-dimmed）+ 组间分隔线
+      └─ section (UCollapsible) ×N
+         ├─ trigger  ── chevron（展开转 90°）· 可选 icon · 板块标题 · 计数 UBadge
+         │              · guide 型：sans 句式、中性图标、neutral 计数
+         │              · endpoints 型：mono 大写 tracking、左侧 primary 竖条、primary 计数
+         └─ content  ── item (ULink) 列表，左侧一条 border 缩进
+            ├─ 指南项：可选 icon + label
+            └─ 接口项：ApiDocsMethodBadge（定宽对齐）+ mono label（+ 可选尾部 badge）
 ```
 
-板块**多开**（各自独立开合，适合边看边对照）；菜单再长也只在 `nav` 内部滚动，不影响页面布局。
+板块**多开**（各自独立开合，适合边看边对照）；菜单再长也只在 `nav` 内部滚动，不影响页面布局。搜索时空分组自动隐藏，边界只框住真实命中。
 
 ## Props
 
 | prop | 类型 | 说明 |
 |---|---|---|
-| `sections` | `SidebarNavSection[]` | 板块数据（见下）。**必填** |
+| `groups` | `SidebarNavGroup[]` | **首选**：带 eyebrow 标题的分组，每组含若干板块。给出即用它 |
+| `sections` | `SidebarNavSection[]` | 向后兼容：扁平板块列表，内部自动包成一个无标题分组。与 `groups` 二选一 |
 | `ariaLabel` | `string` | `<nav>` 地标可访问名，默认 `Documentation` |
 | `searchable` | `boolean` | 是否显示顶部搜索，默认 `true` |
 | `searchPlaceholder` | `string` | 搜索占位符 / aria-label，默认 `Search` |
@@ -42,18 +46,26 @@ interface SidebarNavItem {
   badge?: string | number// 可选尾部 badge（如 "beta"）
   active?: boolean        // 强制 active（demo/手控）；通常由 to 推断
 }
+type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
   id?: string            // 稳定 id，缺省时取 label 的 slug
   label: string          // 板块标题（已本地化）
+  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 + primary 竖条）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
   defaultOpen?: boolean  // 首次渲染即展开；搜索激活时被忽略
+}
+interface SidebarNavGroup {
+  id?: string            // 稳定 id，缺省时取 label 的 slug
+  label?: string         // eyebrow 小标题；省略则为无标题的引导组
+  sections: SidebarNavSection[]
 }
 ```
 
 ## 关键点
 
-- **异构板块靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（渲染 `ApiDocsMethodBadge`，方法色标是「色 + 大写动词」双通道），带/不带 `icon` 的是指南行。方法色标复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
+- **界限分明靠两条正交手段**：① **分组层**（`SidebarNavGroup.label`）——板块归入带 eyebrow 小标题的分组，组间加分隔线与上留白，把「指南世界」与「接口世界」框成两块领地；② **板块分型**（`SidebarNavSection.kind`）——`guide` 型板块头是柔和 sans 句式 + 中性图标 + neutral 计数，`endpoints` 型是 mono 大写 tracking + 左侧 primary 竖条 + primary 计数。二者叠加后，即使只扫板块头（不展开）也一眼分得清类型。
+- **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（渲染 `ApiDocsMethodBadge`，方法色标是「色 + 大写动词」双通道，label 用 mono），带/不带 `icon` 的是指南行。方法色标复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
 - **全局搜索是唯一搜索入口**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留、否则只留命中的 item；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。这样「大板块子项多」的检索需求由全局搜索覆盖，无需每块再放一个搜索框。
 - **菜单自身是滚动区**：`nav` 用 `max-h-[calc(100dvh-4rem)]` + 顶部 `search` 粘住、下方 `overflow-y-auto`。多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动。
 - **接口行方法色标定宽对齐**：method badge 包在 `w-14` 的槽里，使不同方法（GET/DELETE…）后面的 label 起始 x 对齐。
@@ -63,7 +75,7 @@ interface SidebarNavSection {
 
 - 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。
 - item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。
-- 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`）/ no-results（空态文案）。
+- 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。
 
 ## Accessibility（无障碍）
 
@@ -74,21 +86,33 @@ interface SidebarNavSection {
 
 ## 用法
 
+首选 `groups`——用分组把两类板块分明地隔开：
+
 ```vue
 <ApiDocsSidebarNav
-  :sections="[
+  :groups="[
     {
-      label: '指南', icon: 'i-lucide-book-open', defaultOpen: true,
-      items: [
-        { label: '快速开始', to: '/guide/quickstart', icon: 'i-lucide-rocket' },
-        { label: '认证', to: '/guide/auth', icon: 'i-lucide-key' },
+      label: '文档',
+      sections: [
+        {
+          label: '指南', kind: 'guide', icon: 'i-lucide-book-open', defaultOpen: true,
+          items: [
+            { label: '快速开始', to: '/guide/quickstart', icon: 'i-lucide-rocket' },
+            { label: '认证', to: '/guide/auth', icon: 'i-lucide-key' },
+          ],
+        },
       ],
     },
     {
-      label: 'Checkout', defaultOpen: true,
-      items: [
-        { label: '/checkout/sessions', to: '/api/checkout-create', method: 'POST' },
-        { label: '/checkout/sessions/{id}', to: '/api/checkout-get', method: 'GET' },
+      label: 'API 参考',
+      sections: [
+        {
+          label: 'Checkout', kind: 'endpoints', defaultOpen: true,
+          items: [
+            { label: '/checkout/sessions', to: '/api/checkout-create', method: 'POST' },
+            { label: '/checkout/sessions/{id}', to: '/api/checkout-get', method: 'GET' },
+          ],
+        },
       ],
     },
   ]"
@@ -97,6 +121,8 @@ interface SidebarNavSection {
   :empty-label="'没有匹配的页面'"
 />
 ```
+
+> 不需要分组标题时可退回 `:sections="[...]"`（扁平列表，自动包成一个无标题组）；`kind` 仍可逐板块指定。
 
 ## 相关组件
 
