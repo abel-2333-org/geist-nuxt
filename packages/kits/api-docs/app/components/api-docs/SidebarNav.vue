@@ -439,22 +439,33 @@ onMounted(() => {
                         class="size-4 shrink-0 text-dimmed"
                       />
                       <!-- Purpose-named label (prose sans), then the scenarios it
-                           serves as quiet trailing neutral tags. Colour stays
-                           reserved for the active state. -->
-                      <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                           serves as quiet trailing neutral tags. To keep the
+                           label readable in a narrow sidebar, only the first
+                           tag is shown; the rest collapse into a "+N" badge
+                           whose tooltip lists everything (and a sr-only span
+                           carries the full list for screen readers). Colour
+                           stays reserved for the active state. -->
+                      <span class="min-w-16 flex-1 truncate">{{ item.label }}</span>
                       <span
                         v-if="itemScenarios(item).length"
-                        class="flex shrink-0 items-center gap-1"
+                        class="flex min-w-0 shrink items-center gap-1"
                       >
                         <UBadge
-                          v-for="s in itemScenarios(item)"
-                          :key="s"
                           color="neutral"
                           variant="soft"
                           size="sm"
+                          :label="itemScenarios(item)[0]"
+                          class="min-w-0 max-w-28"
+                        />
+                        <UTooltip
+                          v-if="itemScenarios(item).length > 1"
+                          :text="itemScenarios(item).join('、')"
                         >
-                          {{ s }}
-                        </UBadge>
+                          <UBadge color="neutral" variant="soft" size="sm">
+                            {{ `+${itemScenarios(item).length - 1}` }}
+                            <span class="sr-only">{{ itemScenarios(item).slice(1).join('、') }}</span>
+                          </UBadge>
+                        </UTooltip>
                       </span>
                       <UBadge
                         v-if="item.badge !== undefined"
