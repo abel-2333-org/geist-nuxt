@@ -164,6 +164,31 @@ defineShortcuts({ meta_k: onSiteSearch })
         </p>
       </div>
 
+      <!-- Mock docs-shell top bar. Site-wide full-text search (⌘K) belongs in
+           the app's top navbar — a different level from the sidebar's in-tree
+           filter — so the two searches read as distinct, not two look-alike
+           boxes stacked together. Real apps put <UContentSearchButton> here. -->
+      <div class="flex items-center justify-between gap-4 rounded-lg border border-default bg-elevated/40 px-4 py-2.5">
+        <div class="flex items-center gap-2 text-sm font-medium text-highlighted">
+          <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
+          支付 API 文档
+        </div>
+        <UButton
+          color="neutral"
+          variant="outline"
+          size="sm"
+          class="text-muted"
+          @click="onSiteSearch"
+        >
+          <UIcon name="i-lucide-search" class="size-4" />
+          <span class="max-sm:hidden">搜索全部文档</span>
+          <span class="flex items-center gap-0.5">
+            <UKbd value="meta" />
+            <UKbd value="K" />
+          </span>
+        </UButton>
+      </div>
+
       <div class="grid gap-8 lg:grid-cols-[20rem_1fr]">
         <!-- The sidebar itself, sticky like a real docs shell. -->
         <div class="lg:sticky lg:top-20 lg:self-start">
@@ -174,31 +199,7 @@ defineShortcuts({ meta_k: onSiteSearch })
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
             method-filter-label="按方法筛选"
-          >
-            <!-- #header hosts site-wide full-text search. In a real docs app
-                 this is <UContentSearchButton /> wired to @nuxt/content; the
-                 gallery has no content collection, so we stand in a look-alike
-                 ⌘K trigger to demonstrate the slot + the two-search split. -->
-            <template #header>
-              <UButton
-                color="neutral"
-                variant="outline"
-                size="sm"
-                block
-                class="justify-between"
-                @click="onSiteSearch"
-              >
-                <span class="flex items-center gap-2 text-muted">
-                  <UIcon name="i-lucide-search" class="size-4" />
-                  搜索全部文档
-                </span>
-                <span class="flex items-center gap-0.5">
-                  <UKbd value="meta" />
-                  <UKbd value="K" />
-                </span>
-              </UButton>
-            </template>
-          </ApiDocsSidebarNav>
+          />
         </div>
 
         <!-- Explanatory panel: what to try. Not part of the component. -->
@@ -208,15 +209,15 @@ defineShortcuts({ meta_k: onSiteSearch })
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
                 <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>顶部「搜索全部文档」按钮（或按 <UKbd value="meta" /><UKbd value="K" />）是 <code class="font-mono text-[0.8125rem]">#header</code> slot 里的<b class="font-medium text-toned">全站全文搜索</b>入口——真实项目在此接 <code class="font-mono text-[0.8125rem]">UContentSearch</code>（<code class="font-mono text-[0.8125rem]">@nuxt/content</code>）；它与下面的侧栏就地过滤各司其职。此处为演示占位。</span>
+                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）是<b class="font-medium text-toned">全站全文搜索</b>——它属于 app top bar，与侧栏的树内过滤不同层级、不并排。真实项目在此接 <code class="font-mono text-[0.8125rem]">UContentSearch</code>（<code class="font-mono text-[0.8125rem]">@nuxt/content</code>）；此处为演示占位。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>在下方搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
+                <span>在侧栏搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-filter" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>点搜索框下方的 <b class="font-mono text-toned">GET</b> / <b class="font-mono text-toned">POST</b> 等方法 chip 只看某类接口（可多选、与关键词叠加）；chip 只在数据里真的出现该方法时才显示。</span>
+                <span>聚焦侧栏搜索框时，下方才<b class="font-medium text-toned">展开</b> <b class="font-mono text-toned">GET</b> / <b class="font-mono text-toned">POST</b> 等方法 chip（进阶筛选按需出现、静息时不占位）；点选只看某类接口，可多选、与关键词叠加，仅在数据含该方法时显示。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-keyboard" class="mt-0.5 size-4 shrink-0 text-dimmed" />

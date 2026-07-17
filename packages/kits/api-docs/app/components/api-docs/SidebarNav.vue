@@ -154,6 +154,19 @@ const activeMethods = ref<Set<string>>(new Set())
 const hasMethodFilter = computed(() => activeMethods.value.size > 0)
 const hasFilter = computed(() => hasQuery.value || hasMethodFilter.value)
 
+// Method chips are a progressive-disclosure affordance, not permanent chrome:
+// they stay out of the way until the user engages search (focus lands anywhere
+// in the header) or a filter is already active, keeping the resting sidebar
+// quiet. We track focus with focusin/focusout on the header container (they
+// bubble, unlike focus/blur — and UInput only emits blur, not focus), guarding
+// focusout with relatedTarget so moving focus input↔chip doesn't flicker.
+const searchFocused = ref(false)
+function onHeaderFocusOut(e: FocusEvent) {
+  const root = e.currentTarget as HTMLElement
+  if (!root.contains(e.relatedTarget as Node | null)) searchFocused.value = false
+}
+const showChips = computed(() => availableMethods.value.length > 0 && (searchFocused.value || hasFilter.value))
+
 function methodChipColor(m: string) {
   return methodPreset[m.toUpperCase() as HttpMethod]?.tone ?? 'neutral'
 }
@@ -247,6 +260,8 @@ function clear() {
     <div
       v-if="$slots.header || searchable"
       class="shrink-0 border-b border-default p-2"
+      @focusin="searchFocused = true"
+      @focusout="onHeaderFocusOut"
     >
       <div v-if="$slots.header" :class="searchable ? 'mb-2' : ''">
         <slot name="header" />
@@ -279,27 +294,37 @@ function clear() {
         </template>
       </UInput>
 
-      <!-- Method filter chips: quiet neutral ghosts by default; a toggled chip
-           takes its method colour (subtle) so the active filter is unmistakable
-           without turning the header flashy. -->
-      <div
-        v-if="availableMethods.length"
-        role="group"
-        :aria-label="methodFilterLabel"
-        class="mt-2 flex flex-wrap gap-1"
+      <!-- Method filter chips: progressive disclosure — hidden at rest, revealed
+           once search is engaged (focus) or a filter is active, so they never
+           sit as permanent chrome. A toggled chip takes its method colour
+           (subtle); resting chips are quiet neutral ghosts. mousedown.prevent
+           keeps input focus so clicking a chip doesn't collapse the row. -->
+      <Transition
+        enter-active-class="transition-[opacity,transform] duration-150 ease-out"
+        enter-from-class="opacity-0 -translate-y-1"
+        leave-active-class="transition-[opacity] duration-100 ease-in"
+        leave-to-class="opacity-0"
       >
-        <UButton
-          v-for="m in availableMethods"
-          :key="m"
-          :label="m"
-          size="xs"
-          :color="activeMethods.has(m) ? methodChipColor(m) : 'neutral'"
-          :variant="activeMethods.has(m) ? 'subtle' : 'ghost'"
-          :aria-pressed="activeMethods.has(m)"
-          class="font-mono tracking-wide tabular-nums"
-          @click="toggleMethod(m)"
-        />
-      </div>
+        <div
+          v-if="showChips"
+          role="group"
+          :aria-label="methodFilterLabel"
+          class="mt-2 flex flex-wrap gap-1"
+        >
+          <UButton
+            v-for="m in availableMethods"
+            :key="m"
+            :label="m"
+            size="xs"
+            :color="activeMethods.has(m) ? methodChipColor(m) : 'neutral'"
+            :variant="activeMethods.has(m) ? 'subtle' : 'ghost'"
+            :aria-pressed="activeMethods.has(m)"
+            class="font-mono tracking-wide tabular-nums"
+            @mousedown.prevent
+            @click="toggleMethod(m)"
+          />
+        </div>
+      </Transition>
     </div>
 
     <!-- Scroll region: multiple sections can be open at once; overflow scrolls
