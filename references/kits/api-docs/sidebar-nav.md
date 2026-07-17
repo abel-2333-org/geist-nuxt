@@ -163,10 +163,11 @@ interface SidebarNavGroup {
 
 ## 相关组件
 
+- `<ApiDocsMethodBadge>` — 本 kit 的兄弟切片，接口行前置的请求方法色标复用它（`registryDependencies` 声明 `method-badge`，copy-in 时随本切片一起拉入）。
 - `<UCollapsible>` / `<ULink>` / `<UInput>` / `<UBadge>`（场景标签用它）/ `<UKbd>` — Nuxt UI 原语。
 - `<UContentSearch>` / `<UContentSearchButton>` — Nuxt UI 的全站全文搜索（`⌘K` 模态，绑 `@nuxt/content`）。**不在本切片内**，由消费项目经 `#header` slot 接入；接线见 `project-setup.md`。
 
 ## 规格与源码
 
 - 规格模板见 `method/component-spec-template.md`。
-- 源码：`packages/kits/api-docs/app/components/api-docs/SidebarNav.vue`；无兄弟切片依赖（场景标签是纯 `UBadge`）。
+- 源码：`packages/kits/api-docs/app/components/api-docs/SidebarNav.vue`；兄弟切片依赖 `method-badge`（接口行前置的方法色标），场景标签则是纯 `UBadge`、无额外依赖。
