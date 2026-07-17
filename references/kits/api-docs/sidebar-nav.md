@@ -104,7 +104,7 @@ interface SidebarNavGroup {
 - 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签是中性 `UBadge`（非交互），文字（订阅/授权…）本身即可访问名。两者都随 `ULink` 一起被读出，补足接口链接的可访问名。
 - 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。
 - 调宽手柄是 `role="separator"` + `aria-orientation="vertical"` + `aria-label`，并暴露 `aria-valuenow/min/max`（当前/上/下限宽度）；`tabindex="0"` 可聚焦，`←/→/Home/End` 键盘操作，与拖拽等价。
-- 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；所有交互元素 `focus-visible` 显示紫环。
+- 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在边缘各画一条线。
 
 ## 用法
 

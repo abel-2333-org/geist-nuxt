@@ -543,14 +543,16 @@ onMounted(() => {
 
     <!-- Right-edge resize handle. A wide invisible hit area (cursor-ew-resize,
          matching Nuxt UI's own resize handle) wraps a 1px rule that thickens to
-         primary on hover / while dragging; double-click resets. role="separator"
-         + aria-valuenow/min/max + tabindex give it the accessible slider anatomy
-         of UDashboardResizeHandle, but we render the node ourselves because that
-         component (a reka-ui Primitive) does not forward the pointer listeners
-         our drag math needs. Operable by pointer drag (mouse) and keyboard
-         (←/→, Shift for a coarse step, Home/End to the bounds). Colour only
-         appears on interaction / focus, so the resting edge stays as quiet as
-         the rest of the chrome. -->
+         primary on hover / focus / while dragging; double-click resets.
+         role="separator" + aria-valuenow/min/max + tabindex give it the
+         accessible slider anatomy of UDashboardResizeHandle, but we render the
+         node ourselves because that component (a reka-ui Primitive) does not
+         forward the pointer listeners our drag math needs. Operable by pointer
+         drag (mouse) and keyboard (←/→, Shift for a coarse step, Home/End to
+         the bounds). Mouse and keyboard share one focus/interaction indicator —
+         the single rule thickens to primary — so there's never a second stray
+         outline line next to it. Colour only appears on interaction / focus, so
+         the resting edge stays as quiet as the rest of the chrome. -->
     <div
       v-if="resizable"
       role="separator"
@@ -560,13 +562,13 @@ onMounted(() => {
       :aria-valuemin="minWidth"
       :aria-valuemax="maxWidth"
       tabindex="0"
-      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:flex"
+      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end outline-none lg:flex"
       @mousedown="onResizeStart"
       @dblclick="onResizeReset"
       @keydown="onResizeKey"
     >
       <span
-        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary"
+        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary"
         :class="isResizing ? 'w-0.5 bg-primary' : 'bg-transparent'"
       />
     </div>
