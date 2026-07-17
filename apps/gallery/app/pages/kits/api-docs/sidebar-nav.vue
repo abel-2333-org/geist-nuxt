@@ -50,85 +50,74 @@ const groups: Group[] = [
         kind: 'endpoints',
         defaultOpen: true,
         items: [
-          { label: '/checkout/sessions', to: '#checkout-create', method: 'POST', active: true },
+          // Endpoints are named by purpose, not path. One entry can span several
+          // HTTP operations (method: []) since our APIs aren't strictly RESTful.
+          { label: '创建结算会话', to: '#checkout-create', method: 'POST', active: true },
         ],
       },
       {
         label: 'DIRECT API',
         kind: 'endpoints',
         items: [
-          { label: '/payments', to: '#pay-create', method: 'POST' },
-          { label: '/payments/{id}', to: '#pay-get', method: 'GET' },
-          { label: '/payments/{id}', to: '#pay-update', method: 'PATCH' },
-          { label: '/payments/{id}/capture', to: '#pay-capture', method: 'POST' },
-          { label: '/payments/{id}/cancel', to: '#pay-cancel', method: 'POST' },
-          { label: '/payments/{id}/reverse', to: '#pay-reverse', method: 'POST' },
-          { label: '/authorizations', to: '#auth-create', method: 'POST' },
-          { label: '/authorizations/{id}', to: '#auth-get', method: 'GET' },
-          { label: '/authorizations/{id}', to: '#auth-void', method: 'DELETE' },
-          { label: '/customers', to: '#cust-list', method: 'GET' },
-          { label: '/customers', to: '#cust-create', method: 'POST' },
-          { label: '/customers/{id}', to: '#cust-update', method: 'PUT' },
-          { label: '/mandates/{id}', to: '#mandate-get', method: 'GET' },
+          { label: '支付', to: '#pay', method: ['GET', 'POST', 'PATCH'] },
+          { label: '捕获支付', to: '#pay-capture', method: 'POST' },
+          { label: '取消支付', to: '#pay-cancel', method: 'POST' },
+          { label: '冲正支付', to: '#pay-reverse', method: 'POST' },
+          { label: '授权', to: '#auth-op', method: ['GET', 'POST', 'DELETE'] },
+          { label: '客户管理', to: '#customers', method: ['GET', 'POST', 'PUT'] },
+          { label: '支付授权协议', to: '#mandate', method: 'GET' },
         ],
       },
       {
         label: '卡 TOKEN',
         kind: 'endpoints',
         items: [
-          { label: '/tokens', to: '#token-create', method: 'POST' },
-          { label: '/tokens/{id}', to: '#token-get', method: 'GET' },
-          { label: '/tokens/{id}', to: '#token-delete', method: 'DELETE' },
+          { label: '卡令牌', to: '#token', method: ['GET', 'POST', 'DELETE'] },
         ],
       },
       {
         label: '支付方式',
         kind: 'endpoints',
         items: [
-          { label: '/payment-methods', to: '#pm-list', method: 'GET' },
+          { label: '查询支付方式', to: '#pm-list', method: 'GET' },
         ],
       },
       {
         label: '支付查询',
         kind: 'endpoints',
         items: [
-          { label: '/search/payments', to: '#search-pay', method: 'POST' },
-          { label: '/search/refunds', to: '#search-refund', method: 'POST' },
+          { label: '搜索支付', to: '#search-pay', method: 'POST' },
+          { label: '搜索退款', to: '#search-refund', method: 'POST' },
         ],
       },
       {
         label: '订阅',
         kind: 'endpoints',
         items: [
-          { label: '/subscriptions', to: '#sub-create', method: 'POST', badge: 'beta' },
-          { label: '/subscriptions/{id}', to: '#sub-get', method: 'GET' },
+          { label: '订阅', to: '#subscription', method: ['GET', 'POST'], badge: 'beta' },
         ],
       },
       {
         label: 'PAYMENT LINK',
         kind: 'endpoints',
         items: [
-          { label: '/payment-links', to: '#link-create', method: 'POST' },
-          { label: '/payment-links/{id}', to: '#link-get', method: 'GET' },
-          { label: '/payment-links/{id}', to: '#link-expire', method: 'DELETE' },
+          { label: '支付链接', to: '#payment-link', method: ['GET', 'POST', 'DELETE'] },
         ],
       },
       {
         label: '退款',
         kind: 'endpoints',
         items: [
-          { label: '/refunds', to: '#refund-create', method: 'POST' },
+          { label: '创建退款', to: '#refund-create', method: 'POST' },
         ],
       },
       {
         label: 'ETHOCA',
         kind: 'endpoints',
         items: [
-          { label: '/ethoca/alerts', to: '#ethoca-list', method: 'GET' },
-          { label: '/ethoca/alerts/{id}', to: '#ethoca-get', method: 'GET' },
-          { label: '/ethoca/alerts/{id}/outcome', to: '#ethoca-outcome', method: 'POST' },
-          { label: '/ethoca/webhooks', to: '#ethoca-hook-create', method: 'POST' },
-          { label: '/ethoca/webhooks/{id}', to: '#ethoca-hook-delete', method: 'DELETE' },
+          { label: '欺诈告警', to: '#ethoca-alerts', method: 'GET' },
+          { label: '提交告警处理结果', to: '#ethoca-outcome', method: 'POST' },
+          { label: 'Webhook 配置', to: '#ethoca-webhooks', method: ['POST', 'DELETE'] },
         ],
       },
     ],
@@ -213,7 +202,7 @@ defineShortcuts({ meta_k: onSiteSearch })
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>在侧栏搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
+                <span>在侧栏搜索框输入 <code class="font-mono text-[0.8125rem]">支付</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-filter" class="mt-0.5 size-4 shrink-0 text-dimmed" />
@@ -229,11 +218,11 @@ defineShortcuts({ meta_k: onSiteSearch })
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项带 method 色标——两类界限分明，chrome 保持中性、颜色只交给 method 色标与 active 态。</span>
+                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">用途名 + 后置 method 色标</b>——两类界限分明，chrome 保持中性、颜色只交给 method 色标与 active 态。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>接口行的 method 色标复用 <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code>。当前 <span class="font-mono">/checkout/sessions</span> 为 active 态。</span>
+                <span>接口按<b class="font-medium text-toned">用途命名</b>（非路径），一个接口可含<b class="font-medium text-toned">多个 method</b>——如「支付」并排 <b class="font-mono text-toned">GET</b> <b class="font-mono text-toned">POST</b> <b class="font-mono text-toned">PATCH</b> 三个色标（复用 <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code>）。当前「创建结算会话」为 active 态。</span>
               </li>
             </ul>
           </div>

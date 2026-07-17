@@ -10,8 +10,9 @@
 //   2. Section typing — `kind` drives the header treatment, using typography
 //      (not colour) so primary stays reserved for the active state:
 //        · guide     → sentence-case, font-sans, soft; items are icon + label.
-//        · endpoints → UPPER MONO with tracking; the per-row method badge is
-//                      what carries colour, so the chrome stays neutral.
+//        · endpoints → UPPER MONO with tracking; items are a purpose-named
+//                      label with trailing method badge(s) that carry colour,
+//                      so the chrome stays neutral.
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
@@ -35,7 +36,8 @@
 //   group       eyebrow label + divider  (the guide/endpoints boundary)
 //   section     UCollapsible → trigger row (chevron · label · count badge)
 //                              → content (a stack of item rows)
-//   item        ULink — guide (icon + label) or endpoint (method badge + label)
+//   item        ULink — guide (icon + label) or endpoint (purpose label +
+//                       trailing method badge(s))
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -43,14 +45,19 @@
 // registry.json), reached by auto-import across the layer.
 
 /** A single leaf link. Either a guide entry (optional `icon`) or an endpoint
- *  (`method` renders an ApiDocsMethodBadge before the label). */
+ *  whose label is a purpose name (e.g. "Create checkout session"); the
+ *  `method`(s) render as trailing ApiDocsMethodBadge(s). */
 export interface SidebarNavItem {
-  /** Visible label (already localized). */
+  /** Visible label (already localized). For endpoints this is the purpose
+   *  name, NOT the path — our APIs are named by use case and one endpoint may
+   *  cover several HTTP operations, so the path is not a good menu label. */
   label: string
   /** Destination route; rendered with ULink so active state + prefetch work. */
   to?: string
-  /** HTTP method → leading method badge (endpoint sections). */
-  method?: string
+  /** HTTP method(s) → trailing method badge(s). Accepts a single method or an
+   *  array, because one purpose-named endpoint can span several operations
+   *  (e.g. ['GET', 'POST', 'DELETE']). */
+  method?: string | string[]
   /** Leading Iconify icon (guide sections). Ignored when `method` is set. */
   icon?: string
   /** Optional trailing badge text (e.g. "beta"). */
@@ -127,6 +134,14 @@ function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
+// One endpoint can span several operations, so `method` is string | string[].
+// Normalize to an array everywhere (badges, chips, filtering) — an item with no
+// method (a guide) yields [].
+function itemMethods(item: SidebarNavItem): string[] {
+  if (!item.method) return []
+  return Array.isArray(item.method) ? item.method : [item.method]
+}
+
 // Normalize either input into groups. A flat `sections` prop becomes a single
 // unlabelled group so the two call styles share one render path.
 const normalizedGroups = computed<SidebarNavGroup[]>(() => {
@@ -150,7 +165,7 @@ const availableMethods = computed<string[]>(() => {
   for (const group of normalizedGroups.value)
     for (const section of group.sections)
       for (const item of section.items)
-        if (item.method) seen.add(item.method.toUpperCase())
+        for (const m of itemMethods(item)) seen.add(m.toUpperCase())
   return methodOrder.filter(m => seen.has(m))
 })
 const activeMethods = ref<Set<string>>(new Set())
@@ -184,16 +199,17 @@ function toggleMethod(m: string) {
 function matchesText(item: SidebarNavItem, q: string): boolean {
   return (
     item.label.toLowerCase().includes(q)
-    || (item.method?.toLowerCase().includes(q) ?? false)
+    || itemMethods(item).some(m => m.toLowerCase().includes(q))
   )
 }
 
 function resolveSection(section: SidebarNavSection, q: string, methods: Set<string>) {
   const labelHit = q ? section.label.toLowerCase().includes(q) : false
   let items = section.items
-  // Method chips always narrow, regardless of a section-label text hit.
+  // Method chips always narrow, regardless of a section-label text hit. An
+  // endpoint survives if ANY of its methods matches an active chip.
   if (methods.size > 0)
-    items = items.filter(i => !!i.method && methods.has(i.method.toUpperCase()))
+    items = items.filter(i => itemMethods(i).some(m => methods.has(m.toUpperCase())))
   // Text query narrows further, unless the section label itself matched.
   if (q && !labelHit)
     items = items.filter(i => matchesText(i, q))
@@ -400,18 +416,27 @@ function clear() {
                       inactive-class="text-muted hover:text-highlighted hover:bg-elevated"
                       class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      <span v-if="item.method" class="flex w-14 shrink-0 justify-start">
-                        <ApiDocsMethodBadge :method="item.method" size="sm" />
-                      </span>
                       <UIcon
-                        v-else-if="item.icon"
+                        v-if="item.icon && !itemMethods(item).length"
                         :name="item.icon"
                         class="size-4 shrink-0 text-dimmed"
                       />
+                      <!-- Endpoints are named by purpose, not path, so the label
+                           reads as prose (sans), leading. Method badge(s) trail
+                           it — one purpose can span several operations, and
+                           trailing keeps labels aligned regardless of how many. -->
+                      <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                       <span
-                        class="min-w-0 flex-1 truncate"
-                        :class="item.method ? 'font-mono text-[0.8125rem]' : ''"
-                      >{{ item.label }}</span>
+                        v-if="itemMethods(item).length"
+                        class="flex shrink-0 items-center gap-1"
+                      >
+                        <ApiDocsMethodBadge
+                          v-for="m in itemMethods(item)"
+                          :key="m"
+                          :method="m"
+                          size="sm"
+                        />
+                      </span>
                       <UBadge
                         v-if="item.badge !== undefined"
                         color="neutral"

@@ -1,6 +1,6 @@
 # ApiDocsSidebarNav `<ApiDocsSidebarNav>`
 
-文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是带 HTTP method 色标的端点链接。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽（mono）。分型只靠排版承载，颜色留给 method 色标与 active 态，避免整列喧闹。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。**聚焦搜索框时**才在其下方**渐进展开**一排 HTTP method 过滤 chips（GET/POST/…，只在数据里真的出现该方法时才显示），点选后按方法收敛到匹配端点、可与关键词叠加——满足"端点规模大、想只看某类接口"的进阶检索；静息时收起、不占位，保持侧栏安静。至于**全站全文搜索**（`⌘K`）则属于 app 顶栏、与侧栏就地过滤不同层级，不并排堆在侧栏里（见下方「就地过滤 vs 全站搜索」）。
+文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块是**按用途命名**的端点链接（用途名 + 后置 HTTP method 色标，一个接口可含多个动词）。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽（mono）。分型只靠排版承载，颜色留给 method 色标与 active 态，避免整列喧闹。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。**聚焦搜索框时**才在其下方**渐进展开**一排 HTTP method 过滤 chips（GET/POST/…，只在数据里真的出现该方法时才显示），点选后按方法收敛到匹配端点、可与关键词叠加——满足"端点规模大、想只看某类接口"的进阶检索；静息时收起、不占位，保持侧栏安静。至于**全站全文搜索**（`⌘K`）则属于 app 顶栏、与侧栏就地过滤不同层级，不并排堆在侧栏里（见下方「就地过滤 vs 全站搜索」）。
 
 > 文件放在 `components/api-docs/SidebarNav.vue`。约定 `pathPrefix: true`，组件名 = 目录名 + 文件名，所以模板名是 `<ApiDocsSidebarNav>`。数据无关：导航数据模型内联随组件走，所有 chrome 文案经 props 注入（i18n-ready）。
 
@@ -21,7 +21,7 @@ nav (landmark, 粘顶 + 自身滚动区)
          │              · 计数 UBadge 两型统一为 neutral subtle
          └─ content  ── item (ULink) 列表，左侧一条中性 border 缩进
             ├─ 指南项：可选 icon + label
-            └─ 接口项：ApiDocsMethodBadge（定宽对齐）+ mono label（+ 可选尾部 badge）
+            └─ 接口项：用途名 label（sans，前置）+ 后置一或多个 ApiDocsMethodBadge（+ 可选尾部 badge）
 ```
 
 板块**多开**（各自独立开合，适合边看边对照）；菜单再长也只在 `nav` 内部滚动，不影响页面布局。搜索时空分组自动隐藏，边界只框住真实命中。
@@ -51,12 +51,12 @@ nav (landmark, 粘顶 + 自身滚动区)
 
 ```ts
 interface SidebarNavItem {
-  label: string          // 显示文本（已本地化）
-  to?: string            // 路由；用 ULink 渲染，active 态 + 预取自动生效
-  method?: string        // HTTP method → 行首 ApiDocsMethodBadge（接口板块）
-  icon?: string          // 行首 Iconify 图标（指南板块）；method 存在时忽略
-  badge?: string | number// 可选尾部 badge（如 "beta"）
-  active?: boolean        // 强制 active（demo/手控）；通常由 to 推断
+  label: string             // 显示文本（已本地化）。接口行=用途名（非路径）
+  to?: string               // 路由；用 ULink 渲染，active 态 + 预取自动生效
+  method?: string | string[]// HTTP method → 后置 ApiDocsMethodBadge；一个接口可含多个
+  icon?: string             // 行首 Iconify 图标（指南板块）；method 存在时忽略
+  badge?: string | number   // 可选尾部 badge（如 "beta"）
+  active?: boolean          // 强制 active（demo/手控）；通常由 to 推断
 }
 type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
@@ -77,12 +77,13 @@ interface SidebarNavGroup {
 ## 关键点
 
 - **界限分明靠两条正交手段**：① **分组层**（`SidebarNavGroup.label`）——板块归入带 eyebrow 小标题的分组，组间加分隔线与上留白，把「指南世界」与「接口世界」框成两块领地；② **板块分型**（`SidebarNavSection.kind`）——`guide` 型板块头是柔和 sans 句式 + 中性图标，`endpoints` 型是 mono 大写 tracking。**分型只用排版区分、不涂色**：计数徽章、缩进线、图标一律中性，颜色只由每行 method 色标与 active 态承载，避免整列 chrome 被紫色装饰喧闹（`primary` 是强调色，应留给选中态）。二者叠加后，即使只扫板块头（不展开）也一眼分得清类型。
-- **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（渲染 `ApiDocsMethodBadge`，方法色标是「色 + 大写动词」双通道，label 用 mono），带/不带 `icon` 的是指南行。方法色标复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
+- **接口按用途命名、非路径，一个接口可含多个 method**：我们的 API 不严格遵循 REST 语义，一个接口常覆盖多种使用场景，所以**菜单标签用用途名**（如「支付」「客户管理」），**不用路径**。`method` 因此是 `string | string[]`——单个或一组动词都行。接口行的排布是**用途名（sans，主标识，前置）+ 后置并排 method 色标**：用途名承载「读什么」，色标承载「能做哪些操作」，多个动词并排即表达「一接口多场景」。
+- **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（后置一或多个 `ApiDocsMethodBadge`），带/不带 `icon` 的是指南行。方法色标是「色 + 大写动词」双通道、复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
 - **全局搜索是唯一搜索入口**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留、否则只留命中的 item；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。这样「大板块子项多」的检索需求由全局搜索覆盖，无需每块再放一个搜索框。
-- **method 过滤 chips 是全局搜索的补充、渐进披露而非常驻 chrome**：chip 行紧贴搜索框下方，但**静息时隐藏**——只有聚焦搜索框（`focusin` 落在头部容器内）或已有过滤时才展开，避免首屏就堆一排控件、把导航内容挤下去。焦点追踪用会冒泡的 `focusin`/`focusout`（`UInput` 只 emit `blur`、不 emit `focus`，故不能用 `@focus`），`focusout` 用 `relatedTarget` 守卫，配合 chip 上的 `@mousedown.prevent`，让焦点在 input↔chip 之间移动时不闪烁收起。`availableMethods` 只列出数据里真实出现的方法（按 GET→POST→PUT→PATCH→DELETE 规范顺序），纯指南侧栏无 chip。选中 chip 只保留带该 `method` 的端点行——**过滤方法本质是端点操作，指南项（无 `method`）在任一 chip 激活时整体退场**；可多选、与关键词查询**叠加**（先按 method 收窄、再按文字收窄）。默认 chip 是安静的 neutral ghost，选中后取该方法自己的色（subtle）+ `aria-pressed`。清除按钮 / `Esc` 同时清空查询与 method 选择。
+- **method 过滤 chips 是全局搜索的补充、渐进披露而非常驻 chrome**：chip 行紧贴搜索框下方，但**静息时隐藏**——只有聚焦搜索框（`focusin` 落在头部容器内）或已有过滤时才展开，避免首屏就堆一排控件、把导航内容挤下去。焦点追踪用会冒泡的 `focusin`/`focusout`（`UInput` 只 emit `blur`、不 emit `focus`，故不能用 `@focus`），`focusout` 用 `relatedTarget` 守卫，配合 chip 上的 `@mousedown.prevent`，让焦点在 input↔chip 之间移动时不闪烁收起。`availableMethods` 只列出数据里真实出现的方法（按 GET→POST→PUT→PATCH→DELETE 规范顺序），纯指南侧栏无 chip。选中 chip 只保留 method **命中任一**激活项的端点行（因一个接口可含多个动词，如「支付 GET/POST/PATCH」在筛 PATCH 时仍保留）——**过滤方法本质是端点操作，指南项（无 `method`）在任一 chip 激活时整体退场**；可多选、与关键词查询**叠加**（先按 method 收窄、再按文字收窄）。默认 chip 是安静的 neutral ghost，选中后取该方法自己的色（subtle）+ `aria-pressed`。清除按钮 / `Esc` 同时清空查询与 method 选择。
 - **就地过滤 vs 全站搜索是两件正交的事，靠层级区分而非并排堆叠**：本组件只做**导航树内就地过滤**（顶部 `UInput` + method chips，收窄结构化的导航项 label）。**全站全文搜索**（`⌘K` 模态、跨整站文档正文、Fuse/`useSearchCollection`）是另一套交互，由 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>` 承担、**绑死 `@nuxt/content`**，它的正位是 **app 顶栏 / navbar**——和侧栏就地过滤不同层级、不同位置（参考 Nuxt UI / Vercel 文档站）。**切忌把全站搜索按钮塞进侧栏顶部**：两个长得几乎一样的搜索框上下紧贴，只会让用户困惑"这俩有啥区别"，是冗余 chrome。全文检索接线（含把 `UContentSearchButton` 放进顶栏）留给消费项目（见 `project-setup.md`）；**基座保持数据无关、不引 `@nuxt/content`**，也切勿把 `UContentSearch` 焊进本组件。
 - **菜单自身是滚动区**：`nav` 用 `max-h-[calc(100dvh-4rem)]` + 顶部 `search` 粘住、下方 `overflow-y-auto`。多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动。
-- **接口行方法色标定宽对齐**：method badge 包在 `w-14` 的槽里，使不同方法（GET/DELETE…）后面的 label 起始 x 对齐。
+- **method 色标后置、用途名前置对齐**：用途名 leading（`flex-1 truncate`），method 色标 trailing（`shrink-0` + `gap-1` 并排）。后置的好处是不论一个接口挂几个动词，各行用途名的起始 x 都对齐；色标数量在右侧自然伸缩，不挤压标签。
 - **折叠动画走 Nuxt UI `UCollapsible` 默认**：不覆盖 `ui.content`，直接复用主题内建的 `collapsible-down/up` 动画，`prefers-reduced-motion` 由 layer 全局处理。
 
 ## 状态（state model）
@@ -125,8 +126,9 @@ interface SidebarNavGroup {
         {
           label: 'Checkout', kind: 'endpoints', defaultOpen: true,
           items: [
-            { label: '/checkout/sessions', to: '/api/checkout-create', method: 'POST' },
-            { label: '/checkout/sessions/{id}', to: '/api/checkout-get', method: 'GET' },
+            // 用途名（非路径）；一个接口可含多个 method
+            { label: '创建结算会话', to: '/api/checkout-create', method: 'POST' },
+            { label: '结算会话', to: '/api/checkout-session', method: ['GET', 'DELETE'] },
           ],
         },
       ],
