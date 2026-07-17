@@ -19,6 +19,12 @@
 // under the search and narrow to matching endpoints (compose with the query);
 // they only appear when the data actually contains those methods.
 //
+// In-tree search vs. site-wide search are kept orthogonal. This component only
+// does the former (filter the nav tree in place). For the latter — a ⌘K
+// full-text search over @nuxt/content — expose a #header slot: the consuming
+// app drops a <UContentSearchButton> in, so the base never takes a hard
+// @nuxt/content dependency and stays data-agnostic + reusable.
+//
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
 //                       the page); reduced-motion honored globally by the layer
@@ -234,9 +240,20 @@ function clear() {
     :aria-label="ariaLabel"
     class="flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
   >
-    <!-- Sticky search header: the menu body scrolls under it. -->
-    <div v-if="searchable" class="shrink-0 border-b border-default p-2">
+    <!-- Sticky header: the menu body scrolls under it. Holds the optional
+         #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
+         consuming app — the base stays data-agnostic and @nuxt/content-free)
+         above the in-tree filter input + method chips. -->
+    <div
+      v-if="$slots.header || searchable"
+      class="shrink-0 border-b border-default p-2"
+    >
+      <div v-if="$slots.header" :class="searchable ? 'mb-2' : ''">
+        <slot name="header" />
+      </div>
+
       <UInput
+        v-if="searchable"
         ref="searchRef"
         v-model="query"
         :placeholder="searchPlaceholder"

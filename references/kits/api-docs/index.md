@@ -23,7 +23,7 @@
 | `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，长表带筛选+滚动） | — |
 | `api-docs/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填三态/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
-| `api-docs/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 接口链接带 method 色标）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 method 色标与 active 态）让两类界限分明；多板块可同时展开、各带计数，顶部单一全局搜索跨板块过滤（`/` 聚焦）+ 可选 HTTP method 过滤 chips（按方法收敛端点、与关键词叠加，仅在数据含端点时显示）。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `api-docs/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 接口链接带 method 色标）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 method 色标与 active 态）让两类界限分明；多板块可同时展开、各带计数，顶部单一全局搜索跨板块过滤（`/` 聚焦）+ 可选 HTTP method 过滤 chips（按方法收敛端点、与关键词叠加，仅在数据含端点时显示）。另有 `#header` slot 供消费项目挂全站全文搜索（`⌘K` UContentSearch，绑 @nuxt/content、不进基座）——就地过滤与全站搜索组合共存。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -47,7 +47,7 @@
 > | `*em*` / `_em_` | `ProseEm` |
 > | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
 >
-> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，��是刻意的领域样式，不要套 `ProseCode`。
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：���构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，��是刻意的领域样式，不要套 `ProseCode`。
 >
 > **为���么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`��0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
@@ -251,7 +251,7 @@ authoring 输入            适配                 领域输出              渲
 ### 契约规则（跨层，务必遵守）
 
 - **可空性用判别联合，让非法状态不可表达**：`type Nullability = { nullable: false } | { nullable: true, when?: string }`，而非 `value: { empty?, when? }` 这种把布尔与条件糊在一起、能写出「不可空却带为空条件」的矛盾形状。语义锁定「字段结构上恒在、只是值可能为空」（CSV 列 / JSON 键都适用），不要兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数参数收窄到 `nullable: true` 分支，天然防错。
-- **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产生含空格 id 让 `querySelector` 崩、以及与分隔��� `_` 撞车的歧义）。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
+- **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产生含空格 id 让 `querySelector` 崩、以及与分隔��� `_` 撞车的歧义）。每段 slugify（���写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
 
 ### 参考实现真源（copy & adapt，别 drop-in）
 

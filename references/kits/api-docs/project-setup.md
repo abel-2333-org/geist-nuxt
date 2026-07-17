@@ -64,6 +64,7 @@ kit 的 `index.md` 记录过：**starter 刻意不内置 `@nuxt/content`**——
 - **kit 组件是「内容管线无关」的**：`ApiDocsCodeBlock`、`ApiDocsResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。starter 不内置 content 只是分发可靠性考量，真实项目可自行引入。
+- **全站全文搜索也在这一侧**：`@nuxt/content` 就位后，用 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>`（`⌘K` 模态、跨整站文档正文）。它绑 content、属消费项目职责，**不进 kit 切片**。挂进侧栏的方式是 `<ApiDocsSidebarNav>` 的 `#header` slot（见 `sidebar-nav.md`）：侧栏内的「就地过滤搜索 + method chips」与这个「全站全文搜索」各司其职、组合共存，不要把 ContentSearch 焊进导航组件。
 
 ```vue
 <script setup lang="ts">

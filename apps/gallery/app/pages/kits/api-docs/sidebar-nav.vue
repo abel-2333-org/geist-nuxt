@@ -134,6 +134,20 @@ const groups: Group[] = [
     ],
   },
 ]
+
+// The #header slot stand-in. A real docs app would open <UContentSearch> here
+// (⌘K full-text over @nuxt/content); the gallery has no content collection, so
+// we just explain the split. defineShortcuts wires ⌘K so the trigger feels real.
+const toast = useToast()
+function onSiteSearch() {
+  toast.add({
+    title: '全站搜索（演示占位）',
+    description: '真实项目在此处接 UContentSearch（⌘K 全文检索 @nuxt/content）。侧栏内的过滤搜索与它各司其职。',
+    icon: 'i-lucide-search',
+    color: 'neutral',
+  })
+}
+defineShortcuts({ meta_k: onSiteSearch })
 </script>
 
 <template>
@@ -160,7 +174,31 @@ const groups: Group[] = [
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
             method-filter-label="按方法筛选"
-          />
+          >
+            <!-- #header hosts site-wide full-text search. In a real docs app
+                 this is <UContentSearchButton /> wired to @nuxt/content; the
+                 gallery has no content collection, so we stand in a look-alike
+                 ⌘K trigger to demonstrate the slot + the two-search split. -->
+            <template #header>
+              <UButton
+                color="neutral"
+                variant="outline"
+                size="sm"
+                block
+                class="justify-between"
+                @click="onSiteSearch"
+              >
+                <span class="flex items-center gap-2 text-muted">
+                  <UIcon name="i-lucide-search" class="size-4" />
+                  搜索全部文档
+                </span>
+                <span class="flex items-center gap-0.5">
+                  <UKbd value="meta" />
+                  <UKbd value="K" />
+                </span>
+              </UButton>
+            </template>
+          </ApiDocsSidebarNav>
         </div>
 
         <!-- Explanatory panel: what to try. Not part of the component. -->
@@ -169,8 +207,12 @@ const groups: Group[] = [
             <h3 class="mb-3 text-sm font-semibold text-highlighted">试一试</h3>
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
+                <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
+                <span>顶部「搜索全部文档」按钮（或按 <UKbd value="meta" /><UKbd value="K" />）是 <code class="font-mono text-[0.8125rem]">#header</code> slot 里的<b class="font-medium text-toned">全站全文搜索</b>入口——真实项目在此接 <code class="font-mono text-[0.8125rem]">UContentSearch</code>（<code class="font-mono text-[0.8125rem]">@nuxt/content</code>）；它与下面的侧栏就地过滤各司其职。此处为演示占位。</span>
+              </li>
+              <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>在顶部搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，观察板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
+                <span>在下方搜索框输入 <code class="font-mono text-[0.8125rem]">payments</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-filter" class="mt-0.5 size-4 shrink-0 text-dimmed" />

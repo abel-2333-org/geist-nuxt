@@ -8,7 +8,8 @@
 
 ```
 nav (landmark, 粘顶 + 自身滚动区)
-├─ search   ── UInput（放大镜图标 + UKbd '/' 提示 / 清除按钮）——全局过滤
+├─ #header  ── 可选 slot：全站全文搜索入口（消费方放 ⌘K UContentSearchButton）
+├─ search   ── UInput（放大镜图标 + UKbd '/' 提示 / 清除按钮）——导航树内就地过滤
 ├─ chips    ── method 过滤 chip 行（可选；仅当数据含端点时渲染）
 │              · 默认：neutral ghost（安静）· 选中：取该 method 的色（subtle）+ aria-pressed
 └─ 滚动区
@@ -39,6 +40,12 @@ nav (landmark, 粘顶 + 自身滚动区)
 | `emptyLabel` | `string` | 搜索无结果时的文案，默认 `No matching pages` |
 | `methodFilters` | `boolean` | 是否显示 method 过滤 chips，默认 `true`（仅当数据含端点时才真正渲染） |
 | `methodFilterLabel` | `string` | chip 组的 aria-label，默认 `Filter by method` |
+
+## Slots
+
+| slot | 说明 |
+|---|---|
+| `header` | 可选。渲染在粘顶头部**最上方**（就地过滤框之上）。用于放**全站全文搜索**入口，典型是 `⌘K` 的 `<UContentSearchButton>`。给出时头部自动出现；不给则头部只有过滤框/chips。**基座不引 `@nuxt/content`**——全文检索接线是消费项目职责（见下方「就地过滤 vs 全站搜索」）。 |
 
 ### 数据模型（内联，随切片走）
 
@@ -73,6 +80,7 @@ interface SidebarNavGroup {
 - **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method` 的是接口行（渲染 `ApiDocsMethodBadge`，方法色标是「色 + 大写动词」双通道，label 用 mono），带/不带 `icon` 的是指南行。方法色标复用兄弟切片 `ApiDocsMethodBadge`（GET=info/POST=success/…），**不另造色板**。
 - **全局搜索是唯一搜索入口**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留、否则只留命中的 item；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。这样「大板块子项多」的检索需求由全局搜索覆盖，无需每块再放一个搜索框。
 - **method 过滤 chips 是全局搜索的补充、不是第二个搜索框**：chip 行紧贴搜索框下方，`availableMethods` 只列出数据里真实出现的方法（按 GET→POST→PUT→PATCH→DELETE 规范顺序），所以纯指南侧栏不显示任何 chip。选中 chip 只保留带该 `method` 的端点行——**过滤方法本质是端点操作，指南项（无 `method`）在任一 chip 激活时整体退场**；可多选、与关键词查询**叠加**（先按 method 收窄、再按文字收窄）。默认 chip 是安静的 neutral ghost，选中后取该方法自己的色（subtle）+ `aria-pressed`，既醒目又不把 header 弄艳丽。清除按钮 / `Esc` 同时清空查询与 method 选择。
+- **就地过滤 vs 全站搜索是两件正交的事，组合而非合并**：本组件只做**导航树内就地过滤**（顶部 `UInput` + method chips，收窄结构化的导航项 label）。**全站全文搜索**（`⌘K` 模态、跨整站文档正文、Fuse/`useSearchCollection`）是另一套交互，由 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>` 承担，且**绑死 `@nuxt/content`**。要让二者共存，用 `#header` slot 把 `<UContentSearchButton>` 放进侧栏顶部——**基座保持数据无关、不引 `@nuxt/content`**，全文检索接线留给消费项目（见 `project-setup.md`）。切勿把 `UContentSearch` 焊进本组件：那会让它退化成必须配 content 的场景件、破坏可复用性，也违背 skill「`@nuxt/content` 接线不进基座」的约定。
 - **菜单自身是滚动区**：`nav` 用 `max-h-[calc(100dvh-4rem)]` + 顶部 `search` 粘住、下方 `overflow-y-auto`。多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动。
 - **接口行方法色标定宽对齐**：method badge 包在 `w-14` 的槽里，使不同方法（GET/DELETE…）后面的 label 起始 x 对齐。
 - **折叠动画走 Nuxt UI `UCollapsible` 默认**：不覆盖 `ui.content`，直接复用主题内建的 `collapsible-down/up` 动画，`prefers-reduced-motion` 由 layer 全局处理。
@@ -132,10 +140,22 @@ interface SidebarNavGroup {
 
 > 不需要分组标题时可退回 `:sections="[...]"`（扁平列表，自动包成一个无标题组）；`kind` 仍可逐板块指定。method 过滤 chips 默认开启，本地化其 aria-label 用 `:method-filter-label="'按方法筛选'"`；纯指南侧栏无端点、chip 自动不显示，也可显式 `:method-filters="false"` 关掉。
 
+在消费项目里挂上全站全文搜索（`⌘K`）——通过 `#header` slot，基座不感知 `@nuxt/content`：
+
+```vue
+<ApiDocsSidebarNav :groups="groups">
+  <template #header>
+    <!-- 消费项目已接 @nuxt/content：UContentSearchButton 打开 ⌘K 全文检索面板 -->
+    <UContentSearchButton class="w-full" />
+  </template>
+</ApiDocsSidebarNav>
+```
+
 ## 相关组件
 
 - `<ApiDocsMethodBadge>` — HTTP method 色标（接口行复用它；`registryDependencies` 已声明，copy-in 时随本切片一起拷入）。
-- `<UCollapsible>` / `<ULink>` / `<UInput>` / `<UBadge>` / `<UKbd>` — Nuxt UI 原语。
+- `<UCollapsible>` / `<ULink>` / `<UInput>` / `<UBadge>` / `<UKbd>` / `<UButton>` — Nuxt UI 原语。
+- `<UContentSearch>` / `<UContentSearchButton>` — Nuxt UI 的全站全文搜索（`⌘K` 模态，绑 `@nuxt/content`）。**不在本切片内**，由消费项目经 `#header` slot 接入；接线见 `project-setup.md`。
 
 ## 规格与源码
 
