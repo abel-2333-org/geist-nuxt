@@ -34,10 +34,11 @@
 // remains for consumers who genuinely need an entry at the top of the nav; the
 // base never takes a hard @nuxt/content dependency and stays data-agnostic.
 //
-// The nav is width-resizable: a drag handle on the right edge sets the width,
-// clamped to [minWidth, maxWidth] and persisted to localStorage so a reader's
-// preferred width survives reloads. Pointer drag (mouse + touch) with a
-// role="separator" affordance; double-click resets to the default. Opt out
+// The nav is width-resizable (lg+ progressive enhancement): a drag handle on
+// the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
+// to localStorage so a reader's preferred width survives reloads. Mouse drag +
+// keyboard (←/→, Shift, Home/End) on a role="separator" affordance; double-click
+// resets to the default. Below lg the nav takes full container width. Opt out
 // with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
@@ -48,8 +49,8 @@
 //   section     UCollapsible → trigger row (chevron · label · count badge)
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (leading method badge
-//                       + purpose label + trailing scenario tags)
-//   resizer     right-edge separator (pointer drag, dbl-click resets), width → localStorage
+//                       + purpose label + width-adaptive trailing scenario tags)
+//   resizer     right-edge separator, lg+ (mouse + keyboard, dbl-click resets), width → localStorage
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -344,8 +345,8 @@ onMounted(() => {
   <nav
     :aria-label="ariaLabel"
     class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
-    :class="{ 'select-none': isResizing }"
-    :style="resizable ? { width: `${width}px` } : undefined"
+    :class="[{ 'select-none': isResizing }, resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '']"
+    :style="resizable ? { '--api-docs-nav-w': `${width}px` } : undefined"
   >
     <!-- Sticky header: the menu body scrolls under it. Holds the optional
          #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
