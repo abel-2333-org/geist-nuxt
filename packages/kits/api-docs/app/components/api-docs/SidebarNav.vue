@@ -10,17 +10,20 @@
 //   2. Section typing — `kind` drives the header treatment, using typography
 //      (not colour) so primary stays reserved for the active state:
 //        · guide     → sentence-case, font-sans, soft; items are icon + label.
-//        · endpoints → UPPER MONO with tracking; items are a purpose-named
-//                      label with trailing method badge(s) that carry colour,
-//                      so the chrome stays neutral.
+//        · endpoints → UPPER MONO with tracking; items are a PURPOSE-named
+//                      label (not a path) with optional trailing scenario tags.
+//
+// Endpoints are named by use case, not by REST verb/path: our APIs don't map
+// cleanly to a single HTTP method, and one endpoint often serves several
+// business scenarios (subscriptions, authorization, …). So an endpoint appears
+// ONCE, and the scenarios it belongs to ride along as quiet neutral tags — the
+// menu stays about "what this endpoint is for", not "which verb it is".
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
-// section stays reachable without scrolling. HTTP-method chips narrow to
-// matching endpoints (compose with the query), but are progressive disclosure:
-// hidden at rest, revealed only once search is engaged (focus) or a filter is
-// active, so the resting sidebar stays quiet. They only appear when the data
-// actually contains those methods.
+// section stays reachable without scrolling. The query matches both the
+// purpose label and the scenario tags, so typing a scenario name (e.g.
+// "订阅") surfaces every endpoint that serves it.
 //
 // In-tree search vs. site-wide search are kept orthogonal. This component only
 // does the former (filter the nav tree in place). Site-wide ⌘K full-text search
@@ -29,7 +32,7 @@
 // remains for consumers who genuinely need an entry at the top of the nav; the
 // base never takes a hard @nuxt/content dependency and stays data-agnostic.
 //
-// Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
+// Composed from Nuxt UI primitives:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
 //                       the page); reduced-motion honored globally by the layer
 //   search      UInput + UKbd hint  (global filter, '/' focuses, Esc clears)
@@ -37,28 +40,28 @@
 //   section     UCollapsible → trigger row (chevron · label · count badge)
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (purpose label +
-//                       trailing method badge(s))
+//                       trailing scenario tags)
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
-// i18n-ready). The only sibling dependency is ApiDocsMethodBadge (declared in
-// registry.json), reached by auto-import across the layer.
+// i18n-ready). No sibling slice dependency — scenario tags are plain neutral
+// UBadges, so the slice stands alone.
 
 /** A single leaf link. Either a guide entry (optional `icon`) or an endpoint
- *  whose label is a purpose name (e.g. "Create checkout session"); the
- *  `method`(s) render as trailing ApiDocsMethodBadge(s). */
+ *  whose label is a purpose name (e.g. "Create checkout session"), with the
+ *  business scenarios it serves riding along as trailing `scenarios` tags. */
 export interface SidebarNavItem {
   /** Visible label (already localized). For endpoints this is the purpose
-   *  name, NOT the path — our APIs are named by use case and one endpoint may
-   *  cover several HTTP operations, so the path is not a good menu label. */
+   *  name, NOT the path — our APIs are named by use case, so the path is not a
+   *  good menu label. */
   label: string
   /** Destination route; rendered with ULink so active state + prefetch work. */
   to?: string
-  /** HTTP method(s) → trailing method badge(s). Accepts a single method or an
-   *  array, because one purpose-named endpoint can span several operations
-   *  (e.g. ['GET', 'POST', 'DELETE']). */
-  method?: string | string[]
-  /** Leading Iconify icon (guide sections). Ignored when `method` is set. */
+  /** Business scenarios this endpoint serves (e.g. ['订阅', '授权']) → trailing
+   *  neutral tags. One endpoint can belong to several scenarios but still
+   *  appears ONCE in the menu; the tags say which scenarios it covers. */
+  scenarios?: string[]
+  /** Leading Iconify icon (guide sections). Ignored when `scenarios` is set. */
   icon?: string
   /** Optional trailing badge text (e.g. "beta"). */
   badge?: string | number
@@ -67,7 +70,7 @@ export interface SidebarNavItem {
 }
 
 /** How a section presents itself. `guide` = prose pages (soft, sans);
- *  `endpoints` = HTTP operations (mono, tinted, method-badged). */
+ *  `endpoints` = purpose-named API entries (mono header, scenario-tagged). */
 export type SidebarNavKind = 'guide' | 'endpoints'
 
 /** A collapsible section grouping related items. */
@@ -111,10 +114,6 @@ const props = withDefaults(
     clearLabel?: string
     /** Shown when a query matches nothing. */
     emptyLabel?: string
-    /** Show HTTP-method filter chips (only render when endpoints exist). */
-    methodFilters?: boolean
-    /** Accessible label for the method-filter chip group. */
-    methodFilterLabel?: string
   }>(),
   {
     groups: undefined,
@@ -125,8 +124,6 @@ const props = withDefaults(
     searchShortcut: '/',
     clearLabel: 'Clear search',
     emptyLabel: 'No matching pages',
-    methodFilters: true,
-    methodFilterLabel: 'Filter by method',
   },
 )
 
@@ -134,12 +131,9 @@ function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
-// One endpoint can span several operations, so `method` is string | string[].
-// Normalize to an array everywhere (badges, chips, filtering) — an item with no
-// method (a guide) yields [].
-function itemMethods(item: SidebarNavItem): string[] {
-  if (!item.method) return []
-  return Array.isArray(item.method) ? item.method : [item.method]
+// Scenario tags: a guide item yields []; an endpoint yields its scenario list.
+function itemScenarios(item: SidebarNavItem): string[] {
+  return item.scenarios ?? []
 }
 
 // Normalize either input into groups. A flat `sections` prop becomes a single
@@ -153,74 +147,29 @@ const normalizedGroups = computed<SidebarNavGroup[]>(() => {
 const query = ref('')
 const searchRef = ref<{ inputRef?: HTMLInputElement } | null>(null)
 const hasQuery = computed(() => query.value.trim().length > 0)
+const hasFilter = hasQuery
 
-// HTTP-method filter chips. Only the methods actually present in the data are
-// offered (canonical order), so a guide-only sidebar shows no chips at all.
-// Filtering by method is inherently an endpoint operation: guide items (no
-// `method`) drop out whenever any chip is active.
-const methodOrder: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-const availableMethods = computed<string[]>(() => {
-  if (!props.methodFilters) return []
-  const seen = new Set<string>()
-  for (const group of normalizedGroups.value)
-    for (const section of group.sections)
-      for (const item of section.items)
-        for (const m of itemMethods(item)) seen.add(m.toUpperCase())
-  return methodOrder.filter(m => seen.has(m))
-})
-const activeMethods = ref<Set<string>>(new Set())
-const hasMethodFilter = computed(() => activeMethods.value.size > 0)
-const hasFilter = computed(() => hasQuery.value || hasMethodFilter.value)
-
-// Method chips are a progressive-disclosure affordance, not permanent chrome:
-// they stay out of the way until the user engages search (focus lands anywhere
-// in the header) or a filter is already active, keeping the resting sidebar
-// quiet. We track focus with focusin/focusout on the header container (they
-// bubble, unlike focus/blur — and UInput only emits blur, not focus), guarding
-// focusout with relatedTarget so moving focus input↔chip doesn't flicker.
-const searchFocused = ref(false)
-function onHeaderFocusOut(e: FocusEvent) {
-  const root = e.currentTarget as HTMLElement
-  if (!root.contains(e.relatedTarget as Node | null)) searchFocused.value = false
-}
-const showChips = computed(() => availableMethods.value.length > 0 && (searchFocused.value || hasFilter.value))
-
-function methodChipColor(m: string) {
-  return methodPreset[m.toUpperCase() as HttpMethod]?.tone ?? 'neutral'
-}
-
-function toggleMethod(m: string) {
-  const next = new Set(activeMethods.value)
-  if (next.has(m)) next.delete(m)
-  else next.add(m)
-  activeMethods.value = next
-}
-
+// The query matches the purpose label OR any scenario tag, so searching a
+// scenario name ("订阅") surfaces every endpoint that serves it.
 function matchesText(item: SidebarNavItem, q: string): boolean {
   return (
     item.label.toLowerCase().includes(q)
-    || itemMethods(item).some(m => m.toLowerCase().includes(q))
+    || itemScenarios(item).some(s => s.toLowerCase().includes(q))
   )
 }
 
-function resolveSection(section: SidebarNavSection, q: string, methods: Set<string>) {
+function resolveSection(section: SidebarNavSection, q: string) {
   const labelHit = q ? section.label.toLowerCase().includes(q) : false
-  let items = section.items
-  // Method chips always narrow, regardless of a section-label text hit. An
-  // endpoint survives if ANY of its methods matches an active chip.
-  if (methods.size > 0)
-    items = items.filter(i => itemMethods(i).some(m => methods.has(m.toUpperCase())))
-  // Text query narrows further, unless the section label itself matched.
-  if (q && !labelHit)
-    items = items.filter(i => matchesText(i, q))
-  const filterActive = !!q || methods.size > 0
+  // A matching section label keeps the whole section; otherwise narrow to the
+  // items whose label or scenario tags match the query.
+  const items = q && !labelHit ? section.items.filter(i => matchesText(i, q)) : section.items
   return {
     section,
     id: section.id ?? slug(section.label),
     kind: section.kind ?? 'guide',
     items,
     total: section.items.length,
-    forceOpen: filterActive ? items.length > 0 : false,
+    forceOpen: q ? items.length > 0 : false,
   }
 }
 
@@ -228,11 +177,10 @@ function resolveSection(section: SidebarNavSection, q: string, methods: Set<stri
 // a filter is active so the boundaries only frame real hits.
 const resolved = computed(() => {
   const q = query.value.trim().toLowerCase()
-  const methods = activeMethods.value
   return normalizedGroups.value
     .map((group, gi) => {
       const sections = group.sections
-        .map(section => resolveSection(section, q, methods))
+        .map(section => resolveSection(section, q))
         .filter(entry => (hasFilter.value ? entry.items.length > 0 : true))
       return {
         group,
@@ -262,7 +210,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 function clear() {
   query.value = ''
-  activeMethods.value = new Set()
   searchRef.value?.inputRef?.blur()
 }
 </script>
@@ -275,12 +222,10 @@ function clear() {
     <!-- Sticky header: the menu body scrolls under it. Holds the optional
          #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
          consuming app — the base stays data-agnostic and @nuxt/content-free)
-         above the in-tree filter input + method chips. -->
+         above the in-tree filter input. -->
     <div
       v-if="$slots.header || searchable"
       class="shrink-0 border-b border-default p-2"
-      @focusin="searchFocused = true"
-      @focusout="onHeaderFocusOut"
     >
       <div v-if="$slots.header" :class="searchable ? 'mb-2' : ''">
         <slot name="header" />
@@ -312,38 +257,6 @@ function clear() {
           <UKbd v-else :value="searchShortcut" aria-hidden="true" class="max-sm:hidden" />
         </template>
       </UInput>
-
-      <!-- Method filter chips: progressive disclosure — hidden at rest, revealed
-           once search is engaged (focus) or a filter is active, so they never
-           sit as permanent chrome. A toggled chip takes its method colour
-           (subtle); resting chips are quiet neutral ghosts. mousedown.prevent
-           keeps input focus so clicking a chip doesn't collapse the row. -->
-      <Transition
-        enter-active-class="transition-[opacity,transform] duration-150 ease-out"
-        enter-from-class="opacity-0 -translate-y-1"
-        leave-active-class="transition-[opacity] duration-100 ease-in"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-if="showChips"
-          role="group"
-          :aria-label="methodFilterLabel"
-          class="mt-2 flex flex-wrap gap-1"
-        >
-          <UButton
-            v-for="m in availableMethods"
-            :key="m"
-            :label="m"
-            size="xs"
-            :color="activeMethods.has(m) ? methodChipColor(m) : 'neutral'"
-            :variant="activeMethods.has(m) ? 'subtle' : 'ghost'"
-            :aria-pressed="activeMethods.has(m)"
-            class="font-mono tracking-wide tabular-nums"
-            @mousedown.prevent
-            @click="toggleMethod(m)"
-          />
-        </div>
-      </Transition>
     </div>
 
     <!-- Scroll region: multiple sections can be open at once; overflow scrolls
@@ -417,25 +330,29 @@ function clear() {
                       class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       <UIcon
-                        v-if="item.icon && !itemMethods(item).length"
+                        v-if="item.icon && !itemScenarios(item).length"
                         :name="item.icon"
                         class="size-4 shrink-0 text-dimmed"
                       />
                       <!-- Endpoints are named by purpose, not path, so the label
-                           reads as prose (sans), leading. Method badge(s) trail
-                           it — one purpose can span several operations, and
-                           trailing keeps labels aligned regardless of how many. -->
+                           reads as prose (sans), leading. The scenarios an
+                           endpoint serves trail it as quiet neutral tags — the
+                           endpoint still appears once; tags say which scenarios
+                           it covers. Colour stays reserved for the active state. -->
                       <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                       <span
-                        v-if="itemMethods(item).length"
+                        v-if="itemScenarios(item).length"
                         class="flex shrink-0 items-center gap-1"
                       >
-                        <ApiDocsMethodBadge
-                          v-for="m in itemMethods(item)"
-                          :key="m"
-                          :method="m"
+                        <UBadge
+                          v-for="s in itemScenarios(item)"
+                          :key="s"
+                          color="neutral"
+                          variant="soft"
                           size="sm"
-                        />
+                        >
+                          {{ s }}
+                        </UBadge>
                       </span>
                       <UBadge
                         v-if="item.badge !== undefined"

@@ -50,74 +50,75 @@ const groups: Group[] = [
         kind: 'endpoints',
         defaultOpen: true,
         items: [
-          // Endpoints are named by purpose, not path. One entry can span several
-          // HTTP operations (method: []) since our APIs aren't strictly RESTful.
-          { label: '创建结算会话', to: '#checkout-create', method: 'POST', active: true },
+          // Endpoints are named by purpose (not path). One endpoint appears
+          // ONCE; the business scenarios it serves ride along as `scenarios`
+          // tags — our APIs aren't strictly RESTful and one endpoint often
+          // covers several scenarios (订阅 / 授权 / …).
+          { label: '创建结算会话', to: '#checkout-create', scenarios: ['支付', '订阅'], active: true },
         ],
       },
       {
         label: 'DIRECT API',
         kind: 'endpoints',
         items: [
-          { label: '支付', to: '#pay', method: ['GET', 'POST', 'PATCH'] },
-          { label: '捕获支付', to: '#pay-capture', method: 'POST' },
-          { label: '取消支付', to: '#pay-cancel', method: 'POST' },
-          { label: '冲正支付', to: '#pay-reverse', method: 'POST' },
-          { label: '授权', to: '#auth-op', method: ['GET', 'POST', 'DELETE'] },
-          { label: '客户管理', to: '#customers', method: ['GET', 'POST', 'PUT'] },
-          { label: '支付授权协议', to: '#mandate', method: 'GET' },
+          { label: '发起支付', to: '#pay', scenarios: ['支付', '订阅', '授权'] },
+          { label: '捕获支付', to: '#pay-capture', scenarios: ['授权'] },
+          { label: '取消支付', to: '#pay-cancel', scenarios: ['支付', '授权'] },
+          { label: '冲正支付', to: '#pay-reverse', scenarios: ['退款'] },
+          { label: '客户管理', to: '#customers', scenarios: ['订阅', '授权'] },
+          { label: '支付授权协议', to: '#mandate', scenarios: ['订阅', '授权'] },
         ],
       },
       {
         label: '卡 TOKEN',
         kind: 'endpoints',
         items: [
-          { label: '卡令牌', to: '#token', method: ['GET', 'POST', 'DELETE'] },
+          { label: '卡令牌', to: '#token', scenarios: ['支付', '订阅'] },
         ],
       },
       {
         label: '支付方式',
         kind: 'endpoints',
         items: [
-          { label: '查询支付方式', to: '#pm-list', method: 'GET' },
+          { label: '查询支付方式', to: '#pm-list', scenarios: ['支付'] },
         ],
       },
       {
         label: '支付查询',
         kind: 'endpoints',
         items: [
-          { label: '搜索支付', to: '#search-pay', method: 'POST' },
-          { label: '搜索退款', to: '#search-refund', method: 'POST' },
+          { label: '搜索支付', to: '#search-pay', scenarios: ['支付'] },
+          { label: '搜索退款', to: '#search-refund', scenarios: ['退款'] },
         ],
       },
       {
         label: '订阅',
         kind: 'endpoints',
         items: [
-          { label: '订阅', to: '#subscription', method: ['GET', 'POST'], badge: 'beta' },
+          { label: '订阅', to: '#subscription', scenarios: ['订阅'], badge: 'beta' },
         ],
       },
       {
         label: 'PAYMENT LINK',
         kind: 'endpoints',
         items: [
-          { label: '支付链接', to: '#payment-link', method: ['GET', 'POST', 'DELETE'] },
+          { label: '支付链接', to: '#payment-link', scenarios: ['支付', '订阅'] },
         ],
       },
       {
         label: '退款',
         kind: 'endpoints',
         items: [
-          { label: '创建退款', to: '#refund-create', method: 'POST' },
+          { label: '创建退款', to: '#refund-create', scenarios: ['退款'] },
         ],
       },
       {
         label: 'ETHOCA',
         kind: 'endpoints',
         items: [
-          { label: '欺诈告警', to: '#ethoca-alerts', method: 'GET' },
-          { label: '提交告警处理结果', to: '#ethoca-outcome', method: 'POST' },
-          { label: 'Webhook 配置', to: '#ethoca-webhooks', method: ['POST', 'DELETE'] },
+          { label: '欺诈告警', to: '#ethoca-alerts', scenarios: ['风控'] },
+          { label: '提交告警处理结果', to: '#ethoca-outcome', scenarios: ['风控'] },
+          { label: 'Webhook 配置', to: '#ethoca-webhooks', scenarios: ['风控'] },
         ],
       },
     ],
@@ -146,9 +147,10 @@ defineShortcuts({ meta_k: onSiteSearch })
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">侧边栏导航</h2>
         <p class="max-w-2xl text-muted">
           <code class="font-mono text-[0.8125rem]">ApiDocsSidebarNav</code>：一个菜单容纳多个可折叠板块，
-          而各板块指向的页面性质差异很大——「指南」板块是文字链接，接口板块是带
-          <code class="font-mono text-[0.8125rem]">method</code> 色标的端点链接。板块可同时展开、各带计数；
-          顶部单一全局搜索跨所有板块过滤（聚焦时按 <UKbd value="/" /> 快速定位），命中板块自动展开，
+          而各板块指向的页面性质差异很大——「指南」板块是文字链接，接口板块是<b class="font-medium text-toned">按用途命名</b>的端点链接。
+          接口不严格遵循 REST、一个接口常服务多个业务场景，所以它<b class="font-medium text-toned">只出现一次</b>，
+          行内用<b class="font-medium text-toned">场景标签</b>（订阅、授权…）标明它覆盖哪些场景。板块可同时展开、各带计数；
+          顶部单一全局搜索跨所有板块过滤（聚焦时按 <UKbd value="/" /> 快速定位，同时匹配用途名与场景标签），命中板块自动展开，
           让子项很多的大板块（如 <span class="font-mono">DIRECT API</span>）也能被快速检索到。
         </p>
       </div>
@@ -187,7 +189,6 @@ defineShortcuts({ meta_k: onSiteSearch })
             search-placeholder="搜索文档"
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
-            method-filter-label="按方法筛选"
           />
         </div>
 
@@ -202,11 +203,7 @@ defineShortcuts({ meta_k: onSiteSearch })
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>在侧栏搜索框输入 <code class="font-mono text-[0.8125rem]">支付</code> 或 <code class="font-mono text-[0.8125rem]">POST</code>，这是<b class="font-medium text-toned">导航树内就地过滤</b>：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
-              </li>
-              <li class="flex gap-2">
-                <UIcon name="i-lucide-filter" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>聚焦侧栏搜索框时，下方才<b class="font-medium text-toned">展开</b> <b class="font-mono text-toned">GET</b> / <b class="font-mono text-toned">POST</b> 等方法 chip（进阶筛选按需出现、静息时不占位）；点选只看某类接口，可多选、与关键词叠加，仅在数据含该方法时显示。</span>
+                <span>在侧栏搜索框输入用途名 <code class="font-mono text-[0.8125rem]">支付</code>，或直接输入<b class="font-medium text-toned">场景名</b> <code class="font-mono text-[0.8125rem]">订阅</code>——搜索<b class="font-medium text-toned">同时匹配用途名与场景标签</b>，输入「订阅」会浮出所有服务该场景的接口。这是导航树内就地过滤：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-keyboard" class="mt-0.5 size-4 shrink-0 text-dimmed" />
@@ -218,11 +215,11 @@ defineShortcuts({ meta_k: onSiteSearch })
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">用途名 + 后置 method 色标</b>——两类界限分明，chrome 保持中性、颜色只交给 method 色标与 active 态。</span>
+                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">用途名 + 后置场景标签</b>——两类界限分明，chrome 保持中性、颜色只交给 active 态。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>接口按<b class="font-medium text-toned">用途命名</b>（非路径），一个接口可含<b class="font-medium text-toned">多个 method</b>——如「支付」并排 <b class="font-mono text-toned">GET</b> <b class="font-mono text-toned">POST</b> <b class="font-mono text-toned">PATCH</b> 三个色标（复用 <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code>）。当前「创建结算会话」为 active 态。</span>
+                <span>接口按<b class="font-medium text-toned">用途命名</b>（非路径），一个接口可服务<b class="font-medium text-toned">多个业务场景</b>但只出现一次——如「发起支付」并排 <b class="text-toned">支付</b> <b class="text-toned">订阅</b> <b class="text-toned">授权</b> 三个中性场景标签。当前「创建结算会话」为 active 态。</span>
               </li>
             </ul>
           </div>
