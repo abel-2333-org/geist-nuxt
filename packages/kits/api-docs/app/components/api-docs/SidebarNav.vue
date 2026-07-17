@@ -15,15 +15,18 @@
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
-// section stays reachable without scrolling. Optional HTTP-method chips sit
-// under the search and narrow to matching endpoints (compose with the query);
-// they only appear when the data actually contains those methods.
+// section stays reachable without scrolling. HTTP-method chips narrow to
+// matching endpoints (compose with the query), but are progressive disclosure:
+// hidden at rest, revealed only once search is engaged (focus) or a filter is
+// active, so the resting sidebar stays quiet. They only appear when the data
+// actually contains those methods.
 //
 // In-tree search vs. site-wide search are kept orthogonal. This component only
-// does the former (filter the nav tree in place). For the latter — a ⌘K
-// full-text search over @nuxt/content — expose a #header slot: the consuming
-// app drops a <UContentSearchButton> in, so the base never takes a hard
-// @nuxt/content dependency and stays data-agnostic + reusable.
+// does the former (filter the nav tree in place). Site-wide ⌘K full-text search
+// over @nuxt/content belongs in the app's top bar — a different level, not
+// stacked in the sidebar as a second look-alike box. An optional #header slot
+// remains for consumers who genuinely need an entry at the top of the nav; the
+// base never takes a hard @nuxt/content dependency and stays data-agnostic.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
@@ -351,9 +354,9 @@ function clear() {
               :open="entry.forceOpen || undefined"
             >
               <template #default="{ open }">
-                <!-- Section header treatment forks on `kind`: endpoints read as
-                     UPPER MONO with a faint primary tint bar; guides stay soft
-                     sentence-case sans. -->
+                <!-- Section header treatment forks on `kind` via typography
+                     only: endpoints read as UPPER MONO with tracking; guides
+                     stay soft sentence-case sans. Chrome stays neutral. -->
                 <button
                   type="button"
                   class="group/sec flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
