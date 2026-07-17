@@ -36,8 +36,9 @@
 //
 // The nav is width-resizable: a drag handle on the right edge sets the width,
 // clamped to [minWidth, maxWidth] and persisted to localStorage so a reader's
-// preferred width survives reloads. Keyboard-operable (role="separator" +
-// arrow keys), double-click resets to the default. Opt out with :resizable=false.
+// preferred width survives reloads. Pointer drag (mouse + touch) with a
+// role="separator" affordance; double-click resets to the default. Opt out
+// with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
@@ -48,7 +49,7 @@
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (leading method badge
 //                       + purpose label + trailing scenario tags)
-//   resizer     right-edge separator (drag / arrow keys), width → localStorage
+//   resizer     right-edge separator (pointer drag, dbl-click resets), width → localStorage
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -243,12 +244,14 @@ function clear() {
 }
 
 // --- Width resize ----------------------------------------------------------
-// The affordance reuses Nuxt UI's UDashboardResizeHandle (role="separator" +
-// wide hit area) for correct anatomy; the drag→width math is local because
-// Nuxt UI's useResizable composable is tied to its Dashboard SSR context and
-// throws when used standalone here. Kept minimal: pointer drag + touch, clamp,
-// localStorage persistence, double-click reset. SSR-safe — `width` starts at
-// the default (server/client match), persisted value is read after mount.
+// The right-edge affordance mirrors the anatomy of Nuxt UI's own resize handle
+// (role="separator", ew-resize cursor, wide hit area) but is rendered locally:
+// Nuxt UI's UDashboardResizeHandle is a reka-ui Primitive that does not forward
+// the pointer listeners our drag math needs, and its useResizable composable is
+// bound to the Dashboard SSR context. So the drag→width math lives here — kept
+// minimal: mouse drag, clamp, localStorage persistence, double-click reset.
+// SSR-safe: `width` starts at the default (server/client match), the persisted
+// value is read after mount.
 const width = ref(props.defaultWidth)
 const isResizing = ref(false)
 
@@ -266,24 +269,24 @@ function persistWidth() {
 }
 
 // Track the move on window (not the handle) so a fast drag that outruns the
-// handle keeps resizing; works for both mouse and touch via PointerEvents.
-function onResizeStart(e: PointerEvent) {
+// narrow handle keeps resizing until the button is released.
+function onResizeStart(e: MouseEvent) {
   if (!props.resizable) return
   e.preventDefault()
   isResizing.value = true
   const startX = e.clientX
   const startW = width.value
-  const onMove = (ev: PointerEvent) => {
+  const onMove = (ev: MouseEvent) => {
     width.value = clampWidth(startW + (ev.clientX - startX))
   }
   const onUp = () => {
     isResizing.value = false
     persistWidth()
-    window.removeEventListener('pointermove', onMove)
-    window.removeEventListener('pointerup', onUp)
+    window.removeEventListener('mousemove', onMove)
+    window.removeEventListener('mouseup', onUp)
   }
-  window.addEventListener('pointermove', onMove)
-  window.addEventListener('pointerup', onUp)
+  window.addEventListener('mousemove', onMove)
+  window.addEventListener('mouseup', onUp)
 }
 
 // Double-click the handle to reset to the default width.
@@ -476,24 +479,28 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- Right-edge resize handle. Reuse UDashboardResizeHandle for the correct
-         separator anatomy (role="separator" + wide `before` hit area), dressed
-         in Geist chrome: a 1px rule that thickens to primary on hover / while
-         dragging; double-click resets. Colour only appears on interaction, so
-         the resting edge stays as quiet as the rest of the chrome. Pointer drag
-         (mouse + touch) only, no keyboard resize — matching Nuxt UI's own
-         Dashboard, where resize is a progressive enhancement over the default. -->
-    <UDashboardResizeHandle
+    <!-- Right-edge resize handle. A wide invisible hit area (cursor-ew-resize,
+         matching Nuxt UI's own resize handle) wraps a 1px rule that thickens to
+         primary on hover / while dragging; double-click resets. role="separator"
+         gives it the same accessible anatomy as UDashboardResizeHandle, but we
+         render the node ourselves because that component (a reka-ui Primitive)
+         does not forward the pointer listeners our drag math needs. Colour only
+         appears on interaction, so the resting edge stays as quiet as the rest
+         of the chrome. Pointer drag (mouse + touch) only, no keyboard resize —
+         matching Nuxt UI's Dashboard, where resize is progressive enhancement. -->
+    <div
       v-if="resizable"
+      role="separator"
+      aria-orientation="vertical"
       :aria-label="resizeLabel"
-      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 touch-none justify-end"
-      @pointerdown="onResizeStart"
+      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end lg:flex"
+      @mousedown="onResizeStart"
       @dblclick="onResizeReset"
     >
       <span
         class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary"
         :class="isResizing ? 'w-0.5 bg-primary' : 'bg-transparent'"
       />
-    </UDashboardResizeHandle>
+    </div>
   </nav>
 </template>
