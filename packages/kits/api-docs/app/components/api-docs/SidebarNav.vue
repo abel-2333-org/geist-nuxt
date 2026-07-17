@@ -10,14 +10,16 @@
 //   2. Section typing — `kind` drives the header treatment, using typography
 //      (not colour) so primary stays reserved for the active state:
 //        · guide     → sentence-case, font-sans, soft; items are icon + label.
-//        · endpoints → UPPER MONO with tracking; items are a PURPOSE-named
-//                      label (not a path) with optional trailing scenario tags.
+//        · endpoints → UPPER MONO with tracking; items pair a LEADING HTTP
+//                      method badge with a PURPOSE-named label (not a path) and
+//                      optional TRAILING scenario tags.
 //
-// Endpoints are named by use case, not by REST verb/path: our APIs don't map
-// cleanly to a single HTTP method, and one endpoint often serves several
-// business scenarios (subscriptions, authorization, …). So an endpoint appears
-// ONCE, and the scenarios it belongs to ride along as quiet neutral tags — the
-// menu stays about "what this endpoint is for", not "which verb it is".
+// Endpoints are named by use case, not by REST path: our APIs aren't strictly
+// RESTful and one endpoint often serves several business scenarios
+// (subscriptions, authorization, …). So an endpoint appears ONCE. Its single
+// request method rides as a leading method badge ("how you call it"), while the
+// scenarios it serves ride as quiet trailing neutral tags ("what it's for") —
+// the purpose label sits in between.
 //
 // Sections are independently collapsible (multiple open at once), each carries
 // a count, and a single top search filters across every section so a large
@@ -32,24 +34,31 @@
 // remains for consumers who genuinely need an entry at the top of the nav; the
 // base never takes a hard @nuxt/content dependency and stays data-agnostic.
 //
-// Composed from Nuxt UI primitives:
+// The nav is width-resizable: a drag handle on the right edge sets the width,
+// clamped to [minWidth, maxWidth] and persisted to localStorage so a reader's
+// preferred width survives reloads. Keyboard-operable (role="separator" +
+// arrow keys), double-click resets to the default. Opt out with :resizable=false.
+//
+// Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
 //   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
 //                       the page); reduced-motion honored globally by the layer
 //   search      UInput + UKbd hint  (global filter, '/' focuses, Esc clears)
 //   group       eyebrow label + divider  (the guide/endpoints boundary)
 //   section     UCollapsible → trigger row (chevron · label · count badge)
 //                              → content (a stack of item rows)
-//   item        ULink — guide (icon + label) or endpoint (purpose label +
-//                       trailing scenario tags)
+//   item        ULink — guide (icon + label) or endpoint (leading method badge
+//                       + purpose label + trailing scenario tags)
+//   resizer     right-edge separator (drag / arrow keys), width → localStorage
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
-// i18n-ready). No sibling slice dependency — scenario tags are plain neutral
-// UBadges, so the slice stands alone.
+// i18n-ready). The one sibling dependency is ApiDocsMethodBadge (declared in
+// registry.json), reached by auto-import across the layer; scenario tags are
+// plain neutral UBadges.
 
-/** A single leaf link. Either a guide entry (optional `icon`) or an endpoint
- *  whose label is a purpose name (e.g. "Create checkout session"), with the
- *  business scenarios it serves riding along as trailing `scenarios` tags. */
+/** A single leaf link. Either a guide entry (optional `icon`) or an endpoint:
+ *  a leading `method` badge + a purpose-name `label` (e.g. "Create checkout
+ *  session") + the business `scenarios` it serves as trailing tags. */
 export interface SidebarNavItem {
   /** Visible label (already localized). For endpoints this is the purpose
    *  name, NOT the path — our APIs are named by use case, so the path is not a
@@ -57,11 +66,14 @@ export interface SidebarNavItem {
   label: string
   /** Destination route; rendered with ULink so active state + prefetch work. */
   to?: string
+  /** Single HTTP request method (e.g. 'POST') → leading ApiDocsMethodBadge.
+   *  How you call this endpoint; pairs with `scenarios` (what it's for). */
+  method?: string
   /** Business scenarios this endpoint serves (e.g. ['订阅', '授权']) → trailing
    *  neutral tags. One endpoint can belong to several scenarios but still
    *  appears ONCE in the menu; the tags say which scenarios it covers. */
   scenarios?: string[]
-  /** Leading Iconify icon (guide sections). Ignored when `scenarios` is set. */
+  /** Leading Iconify icon (guide sections). Ignored on endpoints. */
   icon?: string
   /** Optional trailing badge text (e.g. "beta"). */
   badge?: string | number
@@ -114,6 +126,16 @@ const props = withDefaults(
     clearLabel?: string
     /** Shown when a query matches nothing. */
     emptyLabel?: string
+    /** Allow drag-resizing the nav width (right-edge handle). */
+    resizable?: boolean
+    /** Width bounds (px) and initial width when nothing is persisted. */
+    minWidth?: number
+    maxWidth?: number
+    defaultWidth?: number
+    /** localStorage key the chosen width persists under. */
+    widthStorageKey?: string
+    /** Accessible label for the resize handle. */
+    resizeLabel?: string
   }>(),
   {
     groups: undefined,
@@ -124,6 +146,12 @@ const props = withDefaults(
     searchShortcut: '/',
     clearLabel: 'Clear search',
     emptyLabel: 'No matching pages',
+    resizable: true,
+    minWidth: 220,
+    maxWidth: 460,
+    defaultWidth: 288,
+    widthStorageKey: 'api-docs-sidebar-width',
+    resizeLabel: 'Resize sidebar',
   },
 )
 
@@ -149,11 +177,12 @@ const searchRef = ref<{ inputRef?: HTMLInputElement } | null>(null)
 const hasQuery = computed(() => query.value.trim().length > 0)
 const hasFilter = hasQuery
 
-// The query matches the purpose label OR any scenario tag, so searching a
-// scenario name ("订阅") surfaces every endpoint that serves it.
+// The query matches the purpose label, the HTTP method, OR any scenario tag —
+// so "订阅" (a scenario) and "POST" (a method) both narrow the tree.
 function matchesText(item: SidebarNavItem, q: string): boolean {
   return (
     item.label.toLowerCase().includes(q)
+    || (item.method?.toLowerCase().includes(q) ?? false)
     || itemScenarios(item).some(s => s.toLowerCase().includes(q))
   )
 }
@@ -212,12 +241,87 @@ function clear() {
   query.value = ''
   searchRef.value?.inputRef?.blur()
 }
+
+// --- Width resize ----------------------------------------------------------
+// SSR-safe: `width` starts at the default (identical on server + client, so no
+// hydration mismatch); the persisted value is read in onMounted, after mount.
+const width = ref(props.defaultWidth)
+const isResizing = ref(false)
+
+function clampWidth(n: number): number {
+  return Math.min(props.maxWidth, Math.max(props.minWidth, Math.round(n)))
+}
+
+function persistWidth() {
+  try {
+    localStorage.setItem(props.widthStorageKey, String(width.value))
+  }
+  catch {
+    // Private mode / disabled storage — width just won't persist.
+  }
+}
+
+// Drag: track the pointer on window (not the handle) so a fast drag that
+// outruns the 6px handle keeps resizing; released on pointerup.
+function onResizePointerDown(e: PointerEvent) {
+  if (!props.resizable) return
+  e.preventDefault()
+  isResizing.value = true
+  const startX = e.clientX
+  const startW = width.value
+  const onMove = (ev: PointerEvent) => {
+    width.value = clampWidth(startW + (ev.clientX - startX))
+  }
+  const onUp = () => {
+    isResizing.value = false
+    persistWidth()
+    window.removeEventListener('pointermove', onMove)
+    window.removeEventListener('pointerup', onUp)
+  }
+  window.addEventListener('pointermove', onMove)
+  window.addEventListener('pointerup', onUp)
+}
+
+// Keyboard: arrows nudge (Shift = coarse), Home/End jump to the bounds.
+function onResizeKeydown(e: KeyboardEvent) {
+  if (!props.resizable) return
+  const step = e.shiftKey ? 32 : 8
+  if (e.key === 'ArrowLeft') width.value = clampWidth(width.value - step)
+  else if (e.key === 'ArrowRight') width.value = clampWidth(width.value + step)
+  else if (e.key === 'Home') width.value = props.minWidth
+  else if (e.key === 'End') width.value = props.maxWidth
+  else return
+  e.preventDefault()
+  persistWidth()
+}
+
+// Double-click the handle to reset to the default width.
+function resetWidth() {
+  width.value = props.defaultWidth
+  persistWidth()
+}
+
+onMounted(() => {
+  if (!props.resizable) return
+  try {
+    const saved = localStorage.getItem(props.widthStorageKey)
+    if (saved !== null) {
+      const n = Number.parseInt(saved, 10)
+      if (Number.isFinite(n)) width.value = clampWidth(n)
+    }
+  }
+  catch {
+    // Ignore storage read failures.
+  }
+})
 </script>
 
 <template>
   <nav
     :aria-label="ariaLabel"
-    class="flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
+    class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
+    :class="{ 'select-none': isResizing }"
+    :style="resizable ? { width: `${width}px` } : undefined"
   >
     <!-- Sticky header: the menu body scrolls under it. Holds the optional
          #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
@@ -329,16 +433,20 @@ function clear() {
                       inactive-class="text-muted hover:text-highlighted hover:bg-elevated"
                       class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
+                      <!-- Leading: an endpoint shows its HTTP method badge in a
+                           fixed-width slot so purpose labels line up regardless
+                           of verb width (GET vs DELETE); a guide shows its icon. -->
+                      <span v-if="item.method" class="flex w-14 shrink-0 justify-start">
+                        <ApiDocsMethodBadge :method="item.method" size="sm" />
+                      </span>
                       <UIcon
-                        v-if="item.icon && !itemScenarios(item).length"
+                        v-else-if="item.icon"
                         :name="item.icon"
                         class="size-4 shrink-0 text-dimmed"
                       />
-                      <!-- Endpoints are named by purpose, not path, so the label
-                           reads as prose (sans), leading. The scenarios an
-                           endpoint serves trail it as quiet neutral tags — the
-                           endpoint still appears once; tags say which scenarios
-                           it covers. Colour stays reserved for the active state. -->
+                      <!-- Purpose-named label (prose sans), then the scenarios it
+                           serves as quiet trailing neutral tags. Colour stays
+                           reserved for the active state. -->
                       <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
                       <span
                         v-if="itemScenarios(item).length"
@@ -375,6 +483,31 @@ function clear() {
       <p v-if="empty" class="px-2.5 py-6 text-center text-sm text-dimmed">
         {{ emptyLabel }}
       </p>
+    </div>
+
+    <!-- Right-edge resize handle. A wide invisible hit area (cursor-col-resize)
+         wraps a 1px rule that thickens to primary on hover / focus / while
+         dragging. role=separator + arrow keys make it keyboard-operable;
+         double-click resets. Colour only appears on interaction, so the resting
+         edge stays as quiet as the rest of the chrome. -->
+    <div
+      v-if="resizable"
+      role="separator"
+      aria-orientation="vertical"
+      :aria-label="resizeLabel"
+      :aria-valuenow="width"
+      :aria-valuemin="minWidth"
+      :aria-valuemax="maxWidth"
+      tabindex="0"
+      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 cursor-col-resize touch-none justify-end focus-visible:outline-none"
+      @pointerdown="onResizePointerDown"
+      @keydown="onResizeKeydown"
+      @dblclick="resetWidth"
+    >
+      <span
+        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary"
+        :class="isResizing ? 'w-0.5 bg-primary' : 'bg-transparent'"
+      />
     </div>
   </nav>
 </template>

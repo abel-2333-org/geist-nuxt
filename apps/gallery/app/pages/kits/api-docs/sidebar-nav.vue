@@ -6,11 +6,12 @@ definePageMeta({ nav: { label: '侧边栏导航', icon: 'i-lucide-panel-left', o
 // ViewModel drives one payments-style docs portal sidebar, now split into two
 // labelled groups so the guide/endpoints boundary is unmistakable:
 //   · "文档"      — guide-kind sections (prose + SDK), soft sans headers.
-//   · "API 参考"  — endpoints-kind sections, UPPER MONO headers + method badges,
-//                    including one deliberately long section (DIRECT API) that
-//                    exercises the global search filter + force-open + in-nav
-//                    scroll at real scale.
-type Item = { label: string; to?: string; method?: string; icon?: string; badge?: string | number; active?: boolean }
+//   · "API 参考"  — endpoints-kind sections, UPPER MONO headers; each endpoint
+//                    pairs a leading method badge (single verb) with trailing
+//                    scenario tags, including one deliberately long section
+//                    (DIRECT API) that exercises the global search filter +
+//                    force-open + in-nav scroll at real scale.
+type Item = { label: string; to?: string; method?: string; scenarios?: string[]; icon?: string; badge?: string | number; active?: boolean }
 type Section = { label: string; kind?: 'guide' | 'endpoints'; icon?: string; defaultOpen?: boolean; items: Item[] }
 type Group = { label?: string; sections: Section[] }
 
@@ -50,75 +51,77 @@ const groups: Group[] = [
         kind: 'endpoints',
         defaultOpen: true,
         items: [
-          // Endpoints are named by purpose (not path). One endpoint appears
-          // ONCE; the business scenarios it serves ride along as `scenarios`
-          // tags — our APIs aren't strictly RESTful and one endpoint often
-          // covers several scenarios (订阅 / 授权 / …).
-          { label: '创建结算会话', to: '#checkout-create', scenarios: ['支付', '订阅'], active: true },
+          // Endpoints are named by purpose (not path). Each appears ONCE, with a
+          // single leading method (how you call it) + trailing scenario tags
+          // (what it's for) — our APIs aren't strictly RESTful and one endpoint
+          // often serves several scenarios (订阅 / 授权 / …).
+          { label: '创建结算会话', to: '#checkout-create', method: 'POST', scenarios: ['支付', '订阅'], active: true },
         ],
       },
       {
         label: 'DIRECT API',
         kind: 'endpoints',
         items: [
-          { label: '发起支付', to: '#pay', scenarios: ['支付', '订阅', '授权'] },
-          { label: '捕获支付', to: '#pay-capture', scenarios: ['授权'] },
-          { label: '取消支付', to: '#pay-cancel', scenarios: ['支付', '授权'] },
-          { label: '冲正支付', to: '#pay-reverse', scenarios: ['退款'] },
-          { label: '客户管理', to: '#customers', scenarios: ['订阅', '授权'] },
-          { label: '支付授权协议', to: '#mandate', scenarios: ['订阅', '授权'] },
+          { label: '发起支付', to: '#pay', method: 'POST', scenarios: ['支付', '订阅', '授权'] },
+          { label: '捕获支付', to: '#pay-capture', method: 'POST', scenarios: ['授权'] },
+          { label: '取消支付', to: '#pay-cancel', method: 'DELETE', scenarios: ['支付', '授权'] },
+          { label: '冲正支付', to: '#pay-reverse', method: 'POST', scenarios: ['退款'] },
+          { label: '客户管理', to: '#customers', method: 'GET', scenarios: ['订阅', '授权'] },
+          { label: '更新客户', to: '#customer-update', method: 'PATCH', scenarios: ['订阅'] },
+          { label: '支付授权协议', to: '#mandate', method: 'GET', scenarios: ['订阅', '授权'] },
+          { label: '替换支付方式', to: '#pm-replace', method: 'PUT', scenarios: ['订阅'] },
         ],
       },
       {
         label: '卡 TOKEN',
         kind: 'endpoints',
         items: [
-          { label: '卡令牌', to: '#token', scenarios: ['支付', '订阅'] },
+          { label: '卡令牌', to: '#token', method: 'POST', scenarios: ['支付', '订阅'] },
         ],
       },
       {
         label: '支付方式',
         kind: 'endpoints',
         items: [
-          { label: '查询支付方式', to: '#pm-list', scenarios: ['支付'] },
+          { label: '查询支付方式', to: '#pm-list', method: 'GET', scenarios: ['支付'] },
         ],
       },
       {
         label: '支付查询',
         kind: 'endpoints',
         items: [
-          { label: '搜索支付', to: '#search-pay', scenarios: ['支付'] },
-          { label: '搜索退款', to: '#search-refund', scenarios: ['退款'] },
+          { label: '搜索支付', to: '#search-pay', method: 'POST', scenarios: ['支付'] },
+          { label: '搜索退款', to: '#search-refund', method: 'POST', scenarios: ['退款'] },
         ],
       },
       {
         label: '订阅',
         kind: 'endpoints',
         items: [
-          { label: '订阅', to: '#subscription', scenarios: ['订阅'], badge: 'beta' },
+          { label: '订阅', to: '#subscription', method: 'POST', scenarios: ['订阅'], badge: 'beta' },
         ],
       },
       {
         label: 'PAYMENT LINK',
         kind: 'endpoints',
         items: [
-          { label: '支付链接', to: '#payment-link', scenarios: ['支付', '订阅'] },
+          { label: '支付链接', to: '#payment-link', method: 'POST', scenarios: ['支付', '订阅'] },
         ],
       },
       {
         label: '退款',
         kind: 'endpoints',
         items: [
-          { label: '创建退款', to: '#refund-create', scenarios: ['退款'] },
+          { label: '创建退款', to: '#refund-create', method: 'POST', scenarios: ['退款'] },
         ],
       },
       {
         label: 'ETHOCA',
         kind: 'endpoints',
         items: [
-          { label: '欺诈告警', to: '#ethoca-alerts', scenarios: ['风控'] },
-          { label: '提交告警处理结果', to: '#ethoca-outcome', scenarios: ['风控'] },
-          { label: 'Webhook 配置', to: '#ethoca-webhooks', scenarios: ['风控'] },
+          { label: '欺诈告警', to: '#ethoca-alerts', method: 'GET', scenarios: ['风控'] },
+          { label: '提交告警处理结果', to: '#ethoca-outcome', method: 'POST', scenarios: ['风控'] },
+          { label: 'Webhook 配置', to: '#ethoca-webhooks', method: 'PUT', scenarios: ['风控'] },
         ],
       },
     ],
@@ -149,9 +152,9 @@ defineShortcuts({ meta_k: onSiteSearch })
           <code class="font-mono text-[0.8125rem]">ApiDocsSidebarNav</code>：一个菜单容纳多个可折叠板块，
           而各板块指向的页面性质差异很大——「指南」板块是文字链接，接口板块是<b class="font-medium text-toned">按用途命名</b>的端点链接。
           接口不严格遵循 REST、一个接口常服务多个业务场景，所以它<b class="font-medium text-toned">只出现一次</b>，
-          行内用<b class="font-medium text-toned">场景标签</b>（订阅、授权…）标明它覆盖哪些场景。板块可同时展开、各带计数；
-          顶部单一全局搜索跨所有板块过滤（聚焦时按 <UKbd value="/" /> 快速定位，同时匹配用途名与场景标签），命中板块自动展开，
-          让子项很多的大板块（如 <span class="font-mono">DIRECT API</span>）也能被快速检索到。
+          行首是<b class="font-medium text-toned">请求方法色标</b>（GET/POST…，「怎么调」）、中间是用途名、行尾是<b class="font-medium text-toned">场景标签</b>（订阅、授权…，「用在哪」）。
+          板块可同时展开、各带计数；顶部单一全局搜索跨所有板块过滤（聚焦时按 <UKbd value="/" /> 快速定位，同时匹配用途名、请求方法与场景标签），命中板块自动展开，
+          让子项很多的大板块（如 <span class="font-mono">DIRECT API</span>）也能被快速检索到。侧栏还可<b class="font-medium text-toned">拖拽右边缘调整宽度</b>，宽度记入 localStorage、刷新仍保留。
         </p>
       </div>
 
@@ -180,7 +183,9 @@ defineShortcuts({ meta_k: onSiteSearch })
         </UButton>
       </div>
 
-      <div class="grid gap-8 lg:grid-cols-[20rem_1fr]">
+      <!-- The sidebar column is `auto` so it follows the nav's own (resizable)
+           width; drag the nav's right edge and this track tracks it. -->
+      <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
         <!-- The sidebar itself, sticky like a real docs shell. -->
         <div class="lg:sticky lg:top-20 lg:self-start">
           <ApiDocsSidebarNav
@@ -189,6 +194,7 @@ defineShortcuts({ meta_k: onSiteSearch })
             search-placeholder="搜索文档"
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
+            resize-label="调整侧栏宽度"
           />
         </div>
 
@@ -215,11 +221,15 @@ defineShortcuts({ meta_k: onSiteSearch })
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">用途名 + 后置场景标签</b>——两类界限分明，chrome 保持中性、颜色只交给 active 态。</span>
+                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">请求方法色标 + 用途名 + 场景标签</b>——两类界限分明，chrome 保持中性、方法色标各自带色、其余颜色只交给 active 态。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>接口按<b class="font-medium text-toned">用途命名</b>（非路径），一个接口可服务<b class="font-medium text-toned">多个业务场景</b>但只出现一次——如「发起支付」并排 <b class="text-toned">支付</b> <b class="text-toned">订阅</b> <b class="text-toned">授权</b> 三个中性场景标签。当前「创建结算会话」为 active 态。</span>
+                <span>接口行首是<b class="font-medium text-toned">请求方法</b>色标（<b class="font-mono text-toned">GET</b>/<b class="font-mono text-toned">POST</b>/<b class="font-mono text-toned">PUT</b>/<b class="font-mono text-toned">PATCH</b>/<b class="font-mono text-toned">DELETE</b> 各自带色，定宽对齐后面的用途名），行尾是<b class="font-medium text-toned">场景标签</b>——如「发起支付」= <b class="font-mono text-toned">POST</b> + 用途名 + <b class="text-toned">支付</b> <b class="text-toned">订阅</b> <b class="text-toned">授权</b>。方法说「怎么调」、场景说「用在哪」，各司其职。当前「创建结算会话」为 active 态。</span>
+              </li>
+              <li class="flex gap-2">
+                <UIcon name="i-lucide-move-horizontal" class="mt-0.5 size-4 shrink-0 text-dimmed" />
+                <span><b class="font-medium text-toned">拖拽侧栏右边缘</b>可调整宽度（悬停边缘变紫、光标变双向箭头）；也可聚焦手柄后用 <UKbd value="←" /><UKbd value="→" /> 微调、双击复位。宽度记入 <code class="font-mono text-[0.8125rem]">localStorage</code>，刷新/重进仍保留。</span>
               </li>
             </ul>
           </div>
