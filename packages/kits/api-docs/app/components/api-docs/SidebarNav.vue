@@ -318,6 +318,7 @@ onMounted(() => {
 
 <template>
   <nav
+    ref="navRef"
     :aria-label="ariaLabel"
     class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
     :class="{ 'select-none': isResizing }"
@@ -392,7 +393,7 @@ onMounted(() => {
                      stay soft sentence-case sans. Chrome stays neutral. -->
                 <button
                   type="button"
-                  class="group/sec flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  class="group/sec flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   <UIcon
                     name="i-lucide-chevron-right"
@@ -431,7 +432,7 @@ onMounted(() => {
                       :active="item.active"
                       active-class="bg-primary/10 text-primary"
                       inactive-class="text-muted hover:text-highlighted hover:bg-elevated"
-                      class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       <!-- Leading: an endpoint shows its HTTP method badge in a
                            fixed-width slot so purpose labels line up regardless
@@ -485,29 +486,24 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- Right-edge resize handle. A wide invisible hit area (cursor-col-resize)
-         wraps a 1px rule that thickens to primary on hover / focus / while
-         dragging. role=separator + arrow keys make it keyboard-operable;
+    <!-- Right-edge resize handle. Reuse UDashboardResizeHandle (role="separator"
+         + wide `before` hit area) wired to useResizable, dressed in Geist
+         chrome: a 1px rule that thickens to primary on hover / while dragging;
          double-click resets. Colour only appears on interaction, so the resting
-         edge stays as quiet as the rest of the chrome. -->
-    <div
+         edge stays as quiet as the rest of the chrome. Drag/touch only (no
+         keyboard resize) — matching Nuxt UI's own Dashboard. -->
+    <UDashboardResizeHandle
       v-if="resizable"
-      role="separator"
-      aria-orientation="vertical"
       :aria-label="resizeLabel"
-      :aria-valuenow="width"
-      :aria-valuemin="minWidth"
-      :aria-valuemax="maxWidth"
-      tabindex="0"
-      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 cursor-col-resize touch-none justify-end focus-visible:outline-none"
-      @pointerdown="onResizePointerDown"
-      @keydown="onResizeKeydown"
-      @dblclick="resetWidth"
+      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 justify-end"
+      @mousedown="onResizeMouseDown"
+      @touchstart="onResizeTouchStart"
+      @dblclick="onResizeReset"
     >
       <span
-        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary"
+        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary"
         :class="isResizing ? 'w-0.5 bg-primary' : 'bg-transparent'"
       />
-    </div>
+    </UDashboardResizeHandle>
   </nav>
 </template>
