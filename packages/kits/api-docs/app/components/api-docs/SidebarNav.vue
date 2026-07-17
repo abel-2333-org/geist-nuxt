@@ -295,6 +295,36 @@ function onResizeReset() {
   persistWidth()
 }
 
+// Keyboard resize on the focused separator: ←/→ nudge, Shift for a coarse
+// step, Home/End jump to the min/max bounds. Mirrors the ARIA slider pattern
+// the separator advertises (aria-valuenow/min/max), so the handle is fully
+// operable without a pointer.
+const RESIZE_STEP = 16
+const RESIZE_STEP_COARSE = 48
+function onResizeKey(e: KeyboardEvent) {
+  if (!props.resizable) return
+  let next: number | null = null
+  switch (e.key) {
+    case 'ArrowLeft':
+      next = width.value - (e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
+      break
+    case 'ArrowRight':
+      next = width.value + (e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
+      break
+    case 'Home':
+      next = props.minWidth
+      break
+    case 'End':
+      next = props.maxWidth
+      break
+    default:
+      return
+  }
+  e.preventDefault()
+  width.value = clampWidth(next)
+  persistWidth()
+}
+
 onMounted(() => {
   if (!props.resizable) return
   try {
@@ -513,20 +543,26 @@ onMounted(() => {
     <!-- Right-edge resize handle. A wide invisible hit area (cursor-ew-resize,
          matching Nuxt UI's own resize handle) wraps a 1px rule that thickens to
          primary on hover / while dragging; double-click resets. role="separator"
-         gives it the same accessible anatomy as UDashboardResizeHandle, but we
-         render the node ourselves because that component (a reka-ui Primitive)
-         does not forward the pointer listeners our drag math needs. Colour only
-         appears on interaction, so the resting edge stays as quiet as the rest
-         of the chrome. Pointer drag (mouse + touch) only, no keyboard resize —
-         matching Nuxt UI's Dashboard, where resize is progressive enhancement. -->
+         + aria-valuenow/min/max + tabindex give it the accessible slider anatomy
+         of UDashboardResizeHandle, but we render the node ourselves because that
+         component (a reka-ui Primitive) does not forward the pointer listeners
+         our drag math needs. Operable by pointer drag (mouse) and keyboard
+         (←/→, Shift for a coarse step, Home/End to the bounds). Colour only
+         appears on interaction / focus, so the resting edge stays as quiet as
+         the rest of the chrome. -->
     <div
       v-if="resizable"
       role="separator"
       aria-orientation="vertical"
       :aria-label="resizeLabel"
-      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end lg:flex"
+      :aria-valuenow="width"
+      :aria-valuemin="minWidth"
+      :aria-valuemax="maxWidth"
+      tabindex="0"
+      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:flex"
       @mousedown="onResizeStart"
       @dblclick="onResizeReset"
+      @keydown="onResizeKey"
     >
       <span
         class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary"
