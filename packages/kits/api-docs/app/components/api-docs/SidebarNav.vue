@@ -243,8 +243,12 @@ function clear() {
 }
 
 // --- Width resize ----------------------------------------------------------
-// SSR-safe: `width` starts at the default (identical on server + client, so no
-// hydration mismatch); the persisted value is read in onMounted, after mount.
+// The affordance reuses Nuxt UI's UDashboardResizeHandle (role="separator" +
+// wide hit area) for correct anatomy; the drag→width math is local because
+// Nuxt UI's useResizable composable is tied to its Dashboard SSR context and
+// throws when used standalone here. Kept minimal: pointer drag + touch, clamp,
+// localStorage persistence, double-click reset. SSR-safe — `width` starts at
+// the default (server/client match), persisted value is read after mount.
 const width = ref(props.defaultWidth)
 const isResizing = ref(false)
 
@@ -261,9 +265,9 @@ function persistWidth() {
   }
 }
 
-// Drag: track the pointer on window (not the handle) so a fast drag that
-// outruns the 6px handle keeps resizing; released on pointerup.
-function onResizePointerDown(e: PointerEvent) {
+// Track the move on window (not the handle) so a fast drag that outruns the
+// handle keeps resizing; works for both mouse and touch via PointerEvents.
+function onResizeStart(e: PointerEvent) {
   if (!props.resizable) return
   e.preventDefault()
   isResizing.value = true
@@ -282,21 +286,8 @@ function onResizePointerDown(e: PointerEvent) {
   window.addEventListener('pointerup', onUp)
 }
 
-// Keyboard: arrows nudge (Shift = coarse), Home/End jump to the bounds.
-function onResizeKeydown(e: KeyboardEvent) {
-  if (!props.resizable) return
-  const step = e.shiftKey ? 32 : 8
-  if (e.key === 'ArrowLeft') width.value = clampWidth(width.value - step)
-  else if (e.key === 'ArrowRight') width.value = clampWidth(width.value + step)
-  else if (e.key === 'Home') width.value = props.minWidth
-  else if (e.key === 'End') width.value = props.maxWidth
-  else return
-  e.preventDefault()
-  persistWidth()
-}
-
 // Double-click the handle to reset to the default width.
-function resetWidth() {
+function onResizeReset() {
   width.value = props.defaultWidth
   persistWidth()
 }
@@ -318,7 +309,6 @@ onMounted(() => {
 
 <template>
   <nav
-    ref="navRef"
     :aria-label="ariaLabel"
     class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
     :class="{ 'select-none': isResizing }"
@@ -486,18 +476,18 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- Right-edge resize handle. Reuse UDashboardResizeHandle (role="separator"
-         + wide `before` hit area) wired to useResizable, dressed in Geist
-         chrome: a 1px rule that thickens to primary on hover / while dragging;
-         double-click resets. Colour only appears on interaction, so the resting
-         edge stays as quiet as the rest of the chrome. Drag/touch only (no
-         keyboard resize) — matching Nuxt UI's own Dashboard. -->
+    <!-- Right-edge resize handle. Reuse UDashboardResizeHandle for the correct
+         separator anatomy (role="separator" + wide `before` hit area), dressed
+         in Geist chrome: a 1px rule that thickens to primary on hover / while
+         dragging; double-click resets. Colour only appears on interaction, so
+         the resting edge stays as quiet as the rest of the chrome. Pointer drag
+         (mouse + touch) only, no keyboard resize — matching Nuxt UI's own
+         Dashboard, where resize is a progressive enhancement over the default. -->
     <UDashboardResizeHandle
       v-if="resizable"
       :aria-label="resizeLabel"
-      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 justify-end"
-      @mousedown="onResizeMouseDown"
-      @touchstart="onResizeTouchStart"
+      class="group/resize absolute inset-y-0 right-0 z-20 flex w-2 touch-none justify-end"
+      @pointerdown="onResizeStart"
       @dblclick="onResizeReset"
     >
       <span
