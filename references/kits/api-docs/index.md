@@ -36,7 +36,7 @@
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
-> **行内富文本：`ProseText` 递归 tokenizer + 委托 Prose 组件，别手写 `<a>` / `<code>`**。spec 作者的字段描述里会带行内 markdown。`ProseText` 是一个**极小、同步、零依赖**的行内 tokenizer（`h()` 递归渲染，不是正则一次性 replace），把字符串切成 token 后分派到设计系统组件：
+> **行内富文本：`ProseText` 递归 tokenizer + 委托 Prose 组件，别手写 `<a>` / `<code>`**。spec 作者的字段描述里会带行内 markdown。`ProseText` 是一个**极小、同步、零依赖**的行内 tokenizer（`h()` 递归渲染，不是正则一次性 replace），把字符串切成 token 后���派到设计系统组件：
 >
 > | 标记 | 渲染为 |
 > |---|---|
@@ -54,7 +54,7 @@
 
 典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。通用基座（starter，不在 kit 里）提供三层，从高到低：
 
-- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针���线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针�����线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
   ```vue
   <SplitPane
@@ -177,6 +177,7 @@ gallery 有**两个 api-docs demo 页，职责互补**：
   - **必填强度轴**：红=REQUIRED（硬必填）、琥珀=`CONDITIONAL`（仅特定情况必填）、无标记=optional。conditional 用琥珀**不是中性**——它和 red 同属"必填强度轴"的一档，若洗成中性会混进旁边 type/format 那些说明性灰字里，读者分不清它是"必填态的一档"还是"又一个类型注记"。
   - **琥珀="有前提/需留意"**：`CONDITIONAL` 标签、条件 callout、成熟度 beta、caution 约束。同一字段 conditional + beta 也不糊，靠**形态区分**：条件是琥珀 callout **块**、summary row 的 CONDITIONAL 是琥珀**文字标签**且指向下方那个块（label → block 同义呼应）、beta 是**徽章**。三种形态各异，不会读成"一片琥珀"。真正要避免的是"两个**无关**含义共用一色"，同一含义的多形态呼应不算过载。
   - 紫=交互（锚点、展开、focus 环）；中性灰阶=类型、format、SINCE 版本号等纯说明性元数据。
+  - **约束注记（`FieldNote.tone`）的使用边界**：普通校验规则（长度、字符集、格式）一律**中性**（省略 tone）——违反它只是校验失败，没有隐藏的坑，和 RANGE 同性质；`caution`（琥珀）只留给**行为性 caveat**——请求不会被拒绝、但不知道就会踩坑的注记（如"值明文存储，勿放秘密""对 preview 部署不生效"）。给格式规则标 caution 属于误用，会稀释琥珀轴。
 
 ### 页面级结构 / 语义（review 沉淀）
 

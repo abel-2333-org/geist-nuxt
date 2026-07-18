@@ -157,8 +157,12 @@ const bodyFields = [
     description: 'Unique project name. Becomes part of the default domain.',
     examples: ['my-app'],
     notes: [
+      // Both are plain validation rules — same nature, same neutral tone.
+      // `caution` is reserved for behavioral caveats (see `meta` below), not
+      // for format rules: violating a rule just fails validation, there is
+      // no hidden surprise to warn about.
       { label: 'Range', text: '1–52 characters.' },
-      { tone: 'caution' as const, label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
+      { label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
     ],
   },
   {
@@ -210,9 +214,14 @@ const bodyFields = [
     name: 'meta',
     type: 'object',
     required: false,
-    lifecycle: { status: 'new' as const, since: 'v2.5' },
-    description: 'Arbitrary key/value metadata attached to the deployment.',
-    children: [
+  lifecycle: { status: 'new' as const, since: 'v2.5' },
+  description: 'Arbitrary key/value metadata attached to the deployment.',
+  // A genuine behavioral caveat — the correct use of `caution`: nothing
+  // rejects the request, but not knowing this can hurt you.
+  notes: [
+    { tone: 'caution' as const, label: 'Caveat', text: 'Values are stored in plain text — do not put secrets here.' },
+  ],
+  children: [
       { path: 'body_meta_key', name: 'key', type: 'string', required: true, notes: [{ label: 'Range', text: 'Up to 64 characters.' }] },
       { path: 'body_meta_value', name: 'value', type: 'string', required: true },
     ],
