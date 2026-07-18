@@ -8,7 +8,7 @@ import {
   planCopy,
   printRegistryError,
   readLock,
-  resolveItems,
+  resolveCopyRequest,
   resolveSourceSha,
   validateRegistry,
 } from './lib/registry.mjs'
@@ -23,17 +23,24 @@ try {
   const registry = await loadRegistry(registryPath)
   await validateRegistry(registry, { repoRoot, checkFiles: true })
 
-  let requested = options.all ? registry.items.map(item => item.name) : options.items
-  if (options.update) {
-    const lock = await readLock(consumerRoot)
-    if (!lock) throw new Error('--update requires an existing geist.lock.json')
-    requested = [...new Set([...(lock.requestedItems ?? []), ...requested])]
-  }
-  const resolution = resolveItems(registry, requested)
+  const requested = options.all ? registry.items.map(item => item.name) : options.items
+  const lock = await readLock(consumerRoot)
+  if (options.update && !lock) throw new Error('--update requires an existing geist.lock.json')
+  const resolution = resolveCopyRequest(registry, requested, { lock, update: options.update })
   const sourceSha = resolveSourceSha(repoRoot, options.sha ?? options.to, {
     allowDirty: process.env.GEIST_REGISTRY_TEST_ALLOW_DIRTY === '1',
   })
-  const plan = await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha, update: options.update })
+  // Any existing lock turns copy into a full reconcile. This keeps a later
+  // "copy one more item" operation from leaving old dependency files or lock
+  // records behind when the current registry changed in the meantime.
+  const plan = await planCopy({
+    registry,
+    resolution,
+    repoRoot,
+    consumerRoot,
+    sourceSha,
+    update: Boolean(lock),
+  })
   const counts = plan.operations.reduce((result, operation) => {
     result[operation.action] = (result[operation.action] ?? 0) + 1
     return result

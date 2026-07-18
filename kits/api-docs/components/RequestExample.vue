@@ -37,6 +37,8 @@ const props = withDefaults(
     maxHeight?: string
     labels?: ApiRequestLabels
     languageLabels?: Record<string, string>
+    /** Pass through CodeBlock's explicit trusted-highlight opt-in. */
+    trustHighlightedHtml?: boolean
   }>(),
   {
     scenarios: () => [],
@@ -44,6 +46,7 @@ const props = withDefaults(
     maxHeight: '24rem',
     labels: () => ({}),
     languageLabels: () => ({}),
+    trustHighlightedHtml: false,
   },
 )
 
@@ -78,6 +81,7 @@ const scenarioItems = computed(() =>
     :max-height="maxHeight"
     :labels="labels"
     :language-labels="languageLabels"
+    :trust-highlighted-html="trustHighlightedHtml"
   >
     <template v-if="scenarioItems.length > 1" #controls>
       <USelect

@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify-source:
@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         with:
@@ -54,8 +56,12 @@ jobs:
     needs: verify-source
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         with:
@@ -68,17 +74,20 @@ jobs:
 
       - name: Assemble runnable root snapshot
         run: |
-          TAG="skill-v$(date -u +%Y%m%d-%H%M)"
-          printf '%s\n' "$TAG" > RELEASE
+          TAG="skill-v$(date -u +%Y%m%d-%H%M%S)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           mkdir -p dist-skill
           rsync -a ./ dist-skill/ \
             --exclude .git \
             --exclude dist-skill \
+            --exclude dist-verify \
             --exclude node_modules \
             --exclude .nuxt \
             --exclude .output \
             --exclude coverage \
             --exclude '*.log'
+          printf '%s\n' "$TAG" > dist-skill/RELEASE
+          printf '{"schemaVersion":1,"sourceSha":"%s"}\n' "$GITHUB_SHA" > dist-skill/.geist-source.json
+          rsync -a dist-skill/ dist-verify/
           echo "tag=$TAG" >> "$GITHUB_ENV"
           echo "--- dist-skill contents ---"
           find dist-skill -type f | sort
@@ -96,22 +105,57 @@ jobs:
           echo "No U+FFFD found — distribution encoding is clean."
 
       - name: Install assembled snapshot
-        working-directory: dist-skill
+        working-directory: dist-verify
         run: pnpm install --frozen-lockfile
 
+      - name: Validate assembled registry contract
+        working-directory: dist-verify
+        run: |
+          pnpm registry:validate
+          pnpm test:registry
+
       - name: Typecheck assembled snapshot
-        working-directory: dist-skill
+        working-directory: dist-verify
         run: pnpm typecheck
 
       - name: Build assembled snapshot
-        working-directory: dist-skill
+        working-directory: dist-verify
         run: pnpm build
 
-      - name: Pack and release snapshot
+      - name: Verify exact-SHA registry flow without Git metadata
+        working-directory: dist-verify
+        run: |
+          CONSUMER_DIR="$(mktemp -d)"
+          cp -R tests/fixtures/consumer/. "$CONSUMER_DIR/"
+          pnpm geist:copy -- geist-foundation \
+            --target "$CONSUMER_DIR" \
+            --to "$GITHUB_SHA"
+          pnpm geist:copy -- geist-foundation \
+            --target "$CONSUMER_DIR" \
+            --to "$GITHUB_SHA" \
+            --write
+          pnpm geist:check -- --target "$CONSUMER_DIR"
+
+      - name: Pack and guard clean snapshot
+        run: |
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs"
+            const stamp = JSON.parse(readFileSync("dist-skill/.geist-source.json", "utf8"))
+            if (stamp.schemaVersion !== 1 || stamp.sourceSha !== process.env.GITHUB_SHA) {
+              throw new Error("Invalid .geist-source.json")
+            }
+          '
+          tar czf dist-skill.tar.gz -C dist-skill .
+          if tar tzf dist-skill.tar.gz | grep -E '(^|/)(\.git|node_modules|\.nuxt|\.output|coverage)(/|$)|\.log$'; then
+            echo "::error::Generated or repository-private files leaked into dist-skill.tar.gz." >&2
+            exit 1
+          fi
+          echo "Archive is source-only and generated-file free."
+
+      - name: Release snapshot
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tar czf dist-skill.tar.gz -C dist-skill .
           gh release create "$TAG" dist-skill.tar.gz \
             --title "$TAG" \
             --notes "Source-first geist-nuxt skill distribution. The asset is a runnable root gallery/v0 snapshot with foundation, kits, registry tools and references. Sync by overwriting the memory-area skill directory wholesale."

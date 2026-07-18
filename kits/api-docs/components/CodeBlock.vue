@@ -3,10 +3,11 @@
 //
 // This is NOT a Markdown code fence or a ProsePre. It renders structured
 // samples that come from an API spec. Per the Geist code aesthetic it is
-// deliberately near-monochrome: NO syntax highlighter, NO content pipeline —
-// just a calm `<pre><code>` on the Geist code surface. The component owns UI,
-// interaction (language switch, wrap), responsive layout, and a11y; copy is
-// delegated to the shared <CopyButton>.
+// deliberately near-monochrome and carries NO runtime syntax highlighter or
+// content pipeline. It can render explicitly trusted, pre-sanitized build-time
+// highlighted HTML; otherwise it escapes the raw code. The component owns UI,
+// interaction (language switch, wrap), responsive layout, and a11y; copy always
+// uses the raw source and is delegated to the shared <CopyButton>.
 //
 // Composed only from Nuxt UI primitives (USelect, UButton, UIcon) + CopyButton
 // + Geist semantic tokens. It is the reusable base that RequestExample and
@@ -27,8 +28,14 @@ export interface CodeVariant {
   language: string
   /** Display label for the language switch. Falls back to a humanized id. */
   label?: string
-  /** Raw source — this is what gets copied and rendered. */
+  /** Raw source — always the clipboard truth and the escaped-render fallback. */
   code: string
+  /**
+   * Optional build-time highlighted markup. It is rendered only when the
+   * CodeBlock explicitly opts into `trustHighlightedHtml`; never pass user or
+   * runtime-authored HTML without sanitizing it upstream.
+   */
+  highlightedHtml?: string
 }
 
 /**
@@ -42,11 +49,17 @@ export interface ApiCodeLabels {
   copied?: string
   /** Object name used in the copy toast, e.g. 'Code' → "Code copied…". */
   copyToast?: string
+  /** Complete localized success/failure toast sentences. */
+  copySuccess?: string
+  copyFailure?: string
   wrapOn?: string
   wrapOff?: string
   emptyTitle?: string
   emptyHint?: string
 }
+
+type ResolvedApiCodeLabels = Required<Omit<ApiCodeLabels, 'copySuccess' | 'copyFailure'>>
+  & Pick<ApiCodeLabels, 'copySuccess' | 'copyFailure'>
 
 const props = withDefaults(
   defineProps<{
@@ -64,6 +77,11 @@ const props = withDefaults(
     labels?: ApiCodeLabels
     /** Override / extend the language id → display label map, e.g. { curl: 'cURL' }. */
     languageLabels?: Record<string, string>
+    /**
+     * Explicitly trust and render variants[].highlightedHtml. Keep false for
+     * untrusted/runtime content; raw `code` remains escaped and copyable.
+     */
+    trustHighlightedHtml?: boolean
   }>(),
   {
     variants: () => [],
@@ -72,11 +90,12 @@ const props = withDefaults(
     maxHeight: '24rem',
     labels: () => ({}),
     languageLabels: () => ({}),
+    trustHighlightedHtml: false,
   },
 )
 
 // Merge caller copy over neutral English defaults. Chrome text only.
-const t = computed<Required<ApiCodeLabels>>(() => ({
+const t = computed<ResolvedApiCodeLabels>(() => ({
   language: 'Language',
   copy: 'Copy code',
   copied: 'Copied to clipboard',
@@ -86,6 +105,10 @@ const t = computed<Required<ApiCodeLabels>>(() => ({
   emptyTitle: 'No example available',
   emptyHint: 'There is no sample here yet. Try another selection.',
   ...props.labels,
+  // Preserve the existing localization surface: a caller that already supplied
+  // `copied` gets the same complete sentence in both aria feedback and toast.
+  copySuccess: props.labels.copySuccess ?? props.labels.copied,
+  copyFailure: props.labels.copyFailure,
 }))
 
 /* ------------------------------------------------------------------ *
@@ -99,6 +122,9 @@ const current = computed<CodeVariant | undefined>(
 )
 
 const hasContent = computed(() => !!current.value?.code)
+const trustedHighlightedHtml = computed(() =>
+  props.trustHighlightedHtml ? current.value?.highlightedHtml : undefined,
+)
 
 // Preserve the chosen language across data changes when it still exists;
 // otherwise fall back to the first available language.
@@ -215,6 +241,8 @@ const wrap = useCodeWrap(props.defaultWrap)
           v-if="hasContent"
           :value="current?.code ?? ''"
           :toast-label="t.copyToast"
+          :success-message="t.copySuccess"
+          :failure-message="t.copyFailure"
           :label="t.copy"
           :copied-label="t.copied"
           size="xs"
@@ -222,14 +250,22 @@ const wrap = useCodeWrap(props.defaultWrap)
       </div>
     </div>
 
-    <!-- Body — near-monochrome, no highlighter (Geist code aesthetic). -->
+    <!-- Body — raw source by default; v-html is behind an explicit trust gate
+         for pre-sanitized build-time output only. Clipboard always uses code. -->
     <div
       v-if="hasContent"
       class="code-surface bg-default"
       :class="{ 'is-wrap': wrap }"
       :style="{ maxHeight }"
     >
-      <pre class="raw-pre"><code class="font-mono text-sm leading-relaxed text-highlighted">{{ current?.code }}</code></pre>
+      <pre class="raw-pre"><code
+        v-if="trustedHighlightedHtml"
+        class="font-mono text-sm leading-relaxed text-highlighted"
+        v-html="trustedHighlightedHtml"
+      /><code
+        v-else
+        class="font-mono text-sm leading-relaxed text-highlighted"
+      >{{ current?.code }}</code></pre>
     </div>
 
     <!-- Empty / unavailable state -->

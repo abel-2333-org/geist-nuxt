@@ -44,13 +44,19 @@ const { t } = useI18n()
 <template>
   <ResponseExample
     :scenarios="scenarios"
-    :request-label="t('api.labels.request')"
-    :response-label="t('api.labels.response')"
+    :labels="{
+      title: t('api.labels.response'),
+      scenario: t('api.labels.scenario'),
+      status: t('api.labels.status'),
+      copy: t('api.labels.copy'),
+      copied: t('api.labels.copied'),
+      copyFailure: t('api.labels.copyFailure'),
+    }"
   />
 </template>
 ```
 
-- **用户内容**（`scenarios` 里的说明、响应体）与**结构标签**（`request-label`/`response-label`）区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。
+- **用户内容**（`scenarios` 里的说明、响应体）与**结构标签**（`labels.title` / `labels.copy` 等）区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。复制失败文案用完整的 `labels.copyFailure` 注入，不跨层拼接。
 - kit 组件（`ResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。

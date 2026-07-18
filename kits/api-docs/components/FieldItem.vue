@@ -117,6 +117,8 @@ export interface FieldItemLabels {
    *  so the whole string is owned here (not concatenated in the composable),
    *  e.g. `(name) => `${name} 的链接已复制``. */
   linkCopied?: (fieldName: string) => string
+  /** Complete failure toast sentence; receives the field name for i18n parity. */
+  linkCopyFailed?: (fieldName: string) => string
 }
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
@@ -148,6 +150,7 @@ const t = computed<Required<FieldItemLabels>>(() => ({
   copyLink: 'Copy link to this field',
   copiedLink: 'Link copied',
   linkCopied: (fieldName: string) => `${fieldName} link copied to clipboard`,
+  linkCopyFailed: () => 'Copy failed. Select the URL and copy it manually',
   ...props.labels,
 }))
 
@@ -164,7 +167,12 @@ function onCopyLink() {
   // Build the *complete* toast sentence here via our own labels, so it flows
   // through the same localization surface as every other chrome string (aria,
   // required, etc.) — no half-sentence concatenation inside the composable.
-  if (props.path) anchor.copyLink(props.path, t.value.linkCopied(props.name))
+  if (props.path) {
+    void anchor.copyLink(props.path, {
+      successMessage: t.value.linkCopied(props.name),
+      failureMessage: t.value.linkCopyFailed(props.name),
+    })
+  }
 }
 
 // Collapsible open state is a real ref (v-model:open) so the user can toggle

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
@@ -13,6 +13,7 @@ import {
   parseArgs,
   planCopy,
   readLock,
+  resolveCopyRequest,
   resolveItems,
   resolveSourceSha,
   sha256,
@@ -98,6 +99,31 @@ test('rejects undeclared files, duplicate targets, cycles, and undeclared relati
     registry.items[1].registryDependencies = []
     await assert.rejects(validateRegistry(registry, { repoRoot }), /without declaring a dependency/)
   })
+
+  await t.test('relative import outside the declared distribution', async () => {
+    const { repoRoot, registry } = await fixture()
+    await writeFile(
+      path.join(repoRoot, 'foundation/components/Feature.vue'),
+      '<script setup>\nimport Outside from \'../../outside.vue\'\n</script>\n<template><Outside /></template>\n',
+    )
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /does not resolve to a declared source file/)
+  })
+
+  await t.test('relative import whose copied targets no longer preserve the source layout', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].files[0].target = 'app/components/nested/Dependency.vue'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /does not resolve.*after copy/)
+  })
+
+  await t.test('dynamic relative import still requires its owning item dependency', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[1].registryDependencies = []
+    await writeFile(
+      path.join(repoRoot, 'foundation/components/Feature.vue'),
+      '<script setup>\nconst Dependency = defineAsyncComponent(() => import(\'./Dependency.vue\'))\n</script>\n<template><Dependency /></template>\n',
+    )
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /without declaring a dependency/)
+  })
 })
 
 test('rejects unsafe paths, protected consumer files, and non-exact SHAs', () => {
@@ -109,6 +135,25 @@ test('rejects unsafe paths, protected consumer files, and non-exact SHAs', () =>
   assert.throws(() => assertSafeTarget('app/assets/css/main.css'), /protected/)
   assert.throws(() => assertExactSha('main'), /exact 40-character Git SHA/)
   assert.equal(assertExactSha(SOURCE_SHA.toUpperCase()), SOURCE_SHA)
+})
+
+test('copy planning rejects a symlink anywhere in the consumer target path', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const outsideRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-outside-'))
+  await mkdir(path.join(consumerRoot, 'app'), { recursive: true })
+  await symlink(outsideRoot, path.join(consumerRoot, 'app/components'), 'dir')
+
+  await assert.rejects(
+    planCopy({
+      registry,
+      resolution: resolveItems(registry, ['feature']),
+      repoRoot,
+      consumerRoot,
+      sourceSha: SOURCE_SHA,
+    }),
+    /contains a symbolic link/,
+  )
+  await assert.rejects(readFile(path.join(outsideRoot, 'Feature.vue')), /ENOENT/)
 })
 
 test('exact-SHA resolution refuses dirty distributable source', async () => {
@@ -129,6 +174,24 @@ test('exact-SHA resolution refuses dirty distributable source', async () => {
   assert.equal(resolveSourceSha(repoRoot, sourceSha, { allowDirty: true }), sourceSha)
 })
 
+test('source SHA falls back to release metadata when the snapshot has no .git', async () => {
+  const repoRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-snapshot-'))
+  await writeFile(path.join(repoRoot, '.geist-source.json'), `${JSON.stringify({
+    schemaVersion: 1,
+    sourceSha: SOURCE_SHA,
+  })}\n`)
+
+  assert.equal(resolveSourceSha(repoRoot), SOURCE_SHA)
+  assert.equal(resolveSourceSha(repoRoot, SOURCE_SHA), SOURCE_SHA)
+  assert.throws(
+    () => resolveSourceSha(repoRoot, 'abcdefabcdefabcdefabcdefabcdefabcdefabcd'),
+    /does not match.*source/i,
+  )
+
+  await writeFile(path.join(repoRoot, '.geist-source.json'), '{"schemaVersion":2,"sourceSha":"bad"}\n')
+  assert.throws(() => resolveSourceSha(repoRoot), /unsupported format/)
+})
+
 test('dry-run planning writes nothing; write records exact SHA and source/target hashes', async () => {
   const { repoRoot, consumerRoot, registry } = await fixture()
   await validateRegistry(registry, { repoRoot })
@@ -147,6 +210,76 @@ test('dry-run planning writes nothing; write records exact SHA and source/target
   assert.equal(record.sourceSha, SOURCE_SHA)
   assert.equal(record.sourceHash, record.targetHash)
   assert.equal(record.targetHash, sha256(await readFile(path.join(consumerRoot, record.target))))
+})
+
+test('copy into an existing lock reconciles the full request set and prunes removed locked items', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const legacySource = 'foundation/components/Legacy.vue'
+  const legacyTarget = 'app/components/Legacy.vue'
+  await writeFile(path.join(repoRoot, legacySource), '<template><span>legacy</span></template>\n')
+  registry.items[0].files.push({ path: legacySource, target: legacyTarget })
+
+  const initialResolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: initialResolution,
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const initialLock = await readLock(consumerRoot)
+
+  const currentRegistry = structuredClone(registry)
+  currentRegistry.items[0].files = currentRegistry.items[0].files.filter(file => file.target !== legacyTarget)
+  const newSource = 'foundation/components/NewFeature.vue'
+  const newTarget = 'app/components/NewFeature.vue'
+  await writeFile(path.join(repoRoot, newSource), '<template><span>new</span></template>\n')
+  currentRegistry.items.push({
+    name: 'new-feature',
+    type: 'registry:component',
+    title: 'New feature',
+    description: 'New feature component.',
+    registryDependencies: ['dependency'],
+    files: [{ path: newSource, target: newTarget }],
+  })
+
+  const expanded = resolveCopyRequest(currentRegistry, ['new-feature'], { lock: initialLock })
+  assert.deepEqual(expanded.requested, ['feature', 'new-feature'])
+  const reconcilePlan = await planCopy({
+    registry: currentRegistry,
+    resolution: expanded,
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+    update: true,
+  })
+  assert.equal(reconcilePlan.operations.find(operation => operation.target === legacyTarget).action, 'delete')
+  const expandedLock = await applyCopyPlan(reconcilePlan)
+  assert.equal(expandedLock.files[legacyTarget], undefined)
+  await assert.rejects(readFile(path.join(consumerRoot, legacyTarget)), /ENOENT/)
+  await checkConsumer({ registry: currentRegistry, repoRoot, consumerRoot })
+
+  const withoutFeature = structuredClone(currentRegistry)
+  withoutFeature.items = withoutFeature.items.filter(item => item.name !== 'feature')
+  const recovered = resolveCopyRequest(withoutFeature, [], { lock: expandedLock, update: true })
+  assert.deepEqual(recovered.requested, ['new-feature'])
+  const recoveryPlan = await planCopy({
+    registry: withoutFeature,
+    resolution: recovered,
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+    update: true,
+  })
+  const recoveredLock = await applyCopyPlan(recoveryPlan)
+  assert.equal(recoveredLock.items.feature, undefined)
+  assert.equal(recoveredLock.files['app/components/Feature.vue'], undefined)
+  await assert.rejects(readFile(path.join(consumerRoot, 'app/components/Feature.vue')), /ENOENT/)
+  await checkConsumer({ registry: withoutFeature, repoRoot, consumerRoot })
+  assert.throws(
+    () => resolveCopyRequest(withoutFeature, ['feature'], { lock: recoveredLock, update: true }),
+    /unknown registry item: feature/,
+  )
 })
 
 test('updates an unmodified managed target and stops the whole batch on conflict', async () => {
@@ -178,6 +311,64 @@ test('consumer check detects target drift', async () => {
   await checkConsumer({ registry, repoRoot, consumerRoot })
   await writeFile(path.join(consumerRoot, 'app/components/Feature.vue'), '<template>drift</template>\n')
   await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /managed target drifted/)
+})
+
+test('consumer check detects registry metadata and dependency-closure drift', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+
+  const metadataChanged = structuredClone(registry)
+  metadataChanged.compatibility.nuxt = '>=4.5.0 <5'
+  await assert.rejects(
+    checkConsumer({ registry: metadataChanged, repoRoot, consumerRoot }),
+    /registry metadata differs/,
+  )
+
+  const closureChanged = structuredClone(registry)
+  closureChanged.items.unshift({
+    name: 'new-dependency',
+    type: 'registry:component',
+    title: 'New dependency',
+    description: 'Newly required component.',
+    files: [{
+      path: 'foundation/components/NewDependency.vue',
+      target: 'app/components/NewDependency.vue',
+    }],
+  })
+  closureChanged.items.find(item => item.name === 'feature').registryDependencies.push('new-dependency')
+  await assert.rejects(
+    checkConsumer({ registry: closureChanged, repoRoot, consumerRoot }),
+    error => (
+      error instanceof RegistryError
+      && /locked item closure differs/.test(error.message)
+      && /locked file closure differs/.test(error.message)
+      && /locked item dependencies differ/.test(error.message)
+    ),
+  )
+})
+
+test('lock reader rejects array-shaped item/file maps', async () => {
+  const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-malformed-lock-'))
+  await writeFile(path.join(consumerRoot, 'geist.lock.json'), `${JSON.stringify({
+    lockVersion: 1,
+    registry: {},
+    requestedItems: [],
+    items: [],
+    files: [],
+  })}\n`)
+  await assert.rejects(readLock(consumerRoot), /unsupported format/)
+})
+
+test('empty reconcile still rejects a symlinked lock target before writing', async () => {
+  const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-lock-symlink-'))
+  const outsideRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-lock-outside-'))
+  const outsideLock = path.join(outsideRoot, 'geist.lock.json')
+  await writeFile(outsideLock, '{}\n')
+  await symlink(outsideLock, path.join(consumerRoot, 'geist.lock.json'))
+
+  await assert.rejects(readLock(consumerRoot), /contains a symbolic link/)
+  assert.equal(await readFile(outsideLock, 'utf8'), '{}\n')
 })
 
 test('update removes stale managed files but refuses to remove locally modified stale files', async () => {

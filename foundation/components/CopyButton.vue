@@ -22,6 +22,10 @@ const props = withDefaults(
     value: string
     /** Object name used in the toast, e.g. 'Endpoint' → "Endpoint copied…". */
     toastLabel?: string
+    /** Complete success toast sentence. Omit to use `<toastLabel> copied…`. */
+    successMessage?: string
+    /** Complete failure toast sentence. Omit to use the foundation default. */
+    failureMessage?: string
     /** Accessible name + tooltip while idle. */
     label?: string
     /** Accessible name + tooltip right after a successful copy. */
@@ -56,6 +60,14 @@ const props = withDefaults(
 )
 
 const { copied, copy } = useCopy()
+
+function onCopy() {
+  void copy(props.value, {
+    label: props.toastLabel,
+    successMessage: props.successMessage,
+    failureMessage: props.failureMessage,
+  })
+}
 </script>
 
 <template>
@@ -67,7 +79,7 @@ const { copied, copy } = useCopy()
       :size="size"
       class="shrink-0"
       :aria-label="copied ? copiedLabel : label"
-      @click="copy(value, toastLabel)"
+      @click="onCopy"
     />
     <span role="status" aria-live="polite" class="sr-only">{{ copied ? copiedLabel : '' }}</span>
   </UTooltip>
@@ -80,7 +92,7 @@ const { copied, copy } = useCopy()
       :size="size"
       class="shrink-0"
       :aria-label="copied ? copiedLabel : label"
-      @click="copy(value, toastLabel)"
+      @click="onCopy"
     />
     <span role="status" aria-live="polite" class="sr-only">{{ copied ? copiedLabel : '' }}</span>
   </template>

@@ -21,6 +21,7 @@
       "Wrap the application in UApp.",
       "Merge app/config/geist-app.ts into the consumer app/app.config.ts.",
       "Merge app/config/geist-nuxt.ts into the consumer nuxt.config.ts.",
+      "Import tailwindcss and @nuxt/ui from the consumer-owned app/assets/css/main.css.",
       "Load app/assets/css/geist.css after the consumer-owned main.css.",
       "Keep Nuxt color mode enabled through @nuxt/ui."
     ]

@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
 :root {
   --consumer-smoke-marker: 1;
 }

@@ -35,13 +35,13 @@ async function protectedHashes(consumerRoot) {
   })))
 }
 
-async function readTreeText(directory) {
+async function readTreeText(directory, extension = '.mjs') {
   const chunks = []
   const visit = async (current) => {
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const target = path.join(current, entry.name)
       if (entry.isDirectory()) await visit(target)
-      else if (entry.isFile() && entry.name.endsWith('.mjs')) chunks.push(await readFile(target, 'utf8'))
+      else if (entry.isFile() && entry.name.endsWith(extension)) chunks.push(await readFile(target, 'utf8'))
     }
   }
   await visit(directory)
@@ -135,6 +135,13 @@ try {
         const builtRuntime = await readTreeText(path.join(consumerRoot, '.output/server/chunks/build'))
         if (!/primary\s*:\s*["']violet["']/.test(builtRuntime) || !/neutral\s*:\s*["']neutral["']/.test(builtRuntime)) {
           throw new Error(`${scenario.label}: built Nuxt app config did not contain Geist primary/neutral colors`)
+        }
+        if (scenario.all && !builtRuntime.includes('data-highlight-token')) {
+          throw new Error(`${scenario.label}: built runtime did not preserve the trusted highlightedHtml branch`)
+        }
+        const builtCss = await readTreeText(path.join(consumerRoot, '.output/public'), '.css')
+        if (!builtCss.includes('.flex{display:flex}')) {
+          throw new Error(`${scenario.label}: built output did not contain Tailwind utility CSS; check main.css imports`)
         }
         console.log(`Consumer closure smoke passed (${scenario.label}): ${consumerRoot}`)
       }

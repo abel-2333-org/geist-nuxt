@@ -50,6 +50,8 @@ const props = withDefaults(
     maxHeight?: string
     labels?: ApiResponseLabels
     languageLabels?: Record<string, string>
+    /** Pass through CodeBlock's explicit trusted-highlight opt-in. */
+    trustHighlightedHtml?: boolean
   }>(),
   {
     scenarios: () => [],
@@ -57,6 +59,7 @@ const props = withDefaults(
     maxHeight: '24rem',
     labels: () => ({}),
     languageLabels: () => ({}),
+    trustHighlightedHtml: false,
   },
 )
 
@@ -123,6 +126,7 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
     :max-height="maxHeight"
     :labels="labels"
     :language-labels="languageLabels"
+    :trust-highlighted-html="trustHighlightedHtml"
   >
     <!-- Status badge next to the title -->
     <template v-if="currentStatus" #leading>

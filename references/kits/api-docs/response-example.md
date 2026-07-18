@@ -13,6 +13,7 @@
 | `title` | `string` | 覆盖标题（默认 `labels.title` / `'Response'`） |
 | `defaultWrap` / `maxHeight` / `languageLabels` | — | 传给 CodeBlock |
 | `labels` | `ApiResponseLabels` | `ApiCodeLabels` + `title` + `scenario` + `status` |
+| `trustHighlightedHtml` | `boolean` | 透传给 CodeBlock；仅可信、预消毒的构建期 HTML 才开启 |
 
 ```ts
 interface ResponseStatus { status: number; statusText?: string; variants: CodeVariant[] }

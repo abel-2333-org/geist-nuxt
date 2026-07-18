@@ -1,10 +1,13 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import { existsSync, readFileSync } from 'node:fs'
 import { lstat, mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 
 export const LOCK_FILE = 'geist.lock.json'
 export const LOCK_VERSION = 1
+export const SOURCE_FILE = '.geist-source.json'
 
 const EXACT_SHA_RE = /^[0-9a-f]{40}$/i
 const ITEM_NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -37,6 +40,25 @@ export function assertExactSha(value, label = 'source SHA') {
 }
 
 export function getCheckoutSha(repoRoot) {
+  const gitMetadata = path.join(repoRoot, '.git')
+  if (!existsSync(gitMetadata)) {
+    const sourcePath = path.join(repoRoot, SOURCE_FILE)
+    let source
+    try {
+      source = JSON.parse(readFileSync(sourcePath, 'utf8'))
+    }
+    catch (error) {
+      if (error?.code === 'ENOENT') {
+        throw new RegistryError(`source SHA is unavailable: neither .git nor ${SOURCE_FILE} exists in ${repoRoot}`)
+      }
+      if (error instanceof SyntaxError) throw new RegistryError(`${SOURCE_FILE} is not valid JSON`)
+      throw error
+    }
+    if (!source || typeof source !== 'object' || Array.isArray(source) || source.schemaVersion !== 1) {
+      throw new RegistryError(`${SOURCE_FILE} has an unsupported format`)
+    }
+    return assertExactSha(source.sourceSha, `${SOURCE_FILE} sourceSha`)
+  }
   const value = execFileSync('git', ['rev-parse', 'HEAD'], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -53,7 +75,7 @@ export function resolveSourceSha(repoRoot, requestedSha, { allowDirty = false } 
       throw new RegistryError(`Requested SHA ${exact} does not match checked-out source ${checkoutSha}`)
     }
   }
-  if (!allowDirty) {
+  if (!allowDirty && existsSync(path.join(repoRoot, '.git'))) {
     const dirty = execFileSync('git', [
       'status',
       '--porcelain=v1',
@@ -147,16 +169,56 @@ function dependencyClosure(itemName, itemsByName) {
 }
 
 function relativeImports(sourceText) {
-  const imports = []
-  const pattern = /(?:from\s*|import\s*)['"](\.{1,2}\/[^'"]+)['"]/g
-  for (const match of sourceText.matchAll(pattern)) imports.push(match[1])
-  return imports
+  const imports = new Set()
+  const patterns = [
+    /\bfrom\s*['"](\.{1,2}\/[^'"]+)['"]/g,
+    /\bimport\s*['"](\.{1,2}\/[^'"]+)['"]/g,
+    /\bimport\s*\(\s*['"](\.{1,2}\/[^'"]+)['"]\s*\)/g,
+  ]
+  for (const pattern of patterns) {
+    for (const match of sourceText.matchAll(pattern)) imports.add(match[1])
+  }
+  return [...imports]
 }
 
-function resolveImportedSource(fromSource, specifier, declaredSources) {
-  const base = path.posix.normalize(path.posix.join(path.posix.dirname(fromSource), specifier))
+function resolveRelativeFile(fromFile, specifier, declaredFiles) {
+  const base = path.posix.normalize(path.posix.join(path.posix.dirname(fromFile), specifier))
   const candidates = [base, `${base}.ts`, `${base}.vue`, `${base}.js`, `${base}.mjs`, `${base}/index.ts`, `${base}/index.js`]
-  return candidates.find(candidate => declaredSources.has(candidate))
+  return candidates.find(candidate => declaredFiles.has(candidate))
+}
+
+function isPlainObject(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === Object.prototype || prototype === null
+}
+
+async function assertNoSymlinkTarget(consumerRoot, target) {
+  const safeTarget = assertSafeTarget(target)
+  const segments = safeTarget.split('/')
+  const candidates = [consumerRoot]
+  let current = consumerRoot
+  for (const segment of segments) {
+    current = path.join(current, segment)
+    candidates.push(current)
+  }
+  for (const [index, candidate] of candidates.entries()) {
+    let info
+    try {
+      info = await lstat(candidate)
+    }
+    catch (error) {
+      if (error?.code === 'ENOENT') break
+      throw error
+    }
+    if (info.isSymbolicLink()) {
+      throw new RegistryError(`consumer target path contains a symbolic link: ${target}`)
+    }
+    if (index < candidates.length - 1 && !info.isDirectory()) {
+      throw new RegistryError(`consumer target ancestor is not a directory: ${target}`)
+    }
+  }
+  return safeTarget
 }
 
 export async function loadRegistry(registryPath) {
@@ -218,6 +280,7 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
 
   const itemsByName = new Map()
   const sourceOwners = new Map()
+  const sourceTargets = new Map()
   const targetOwners = new Map()
   for (const [index, item] of (registry?.items ?? []).entries()) {
     const prefix = `items[${index}]`
@@ -247,7 +310,10 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
         if (!scope) fail(`source must live under foundation/ or kits/<kit>/: ${source}`)
         else scopes.add(scope)
         if (sourceOwners.has(source)) fail(`source file has multiple owners: ${source} (${sourceOwners.get(source)}, ${item.name})`)
-        else sourceOwners.set(source, item.name)
+        else {
+          sourceOwners.set(source, item.name)
+          sourceTargets.set(source, target)
+        }
         if (targetOwners.has(target)) fail(`target path has multiple owners: ${target} (${targetOwners.get(target)}, ${item.name})`)
         else targetOwners.set(target, item.name)
       }
@@ -324,6 +390,8 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
     for (const source of discovered) if (!sourceOwners.has(source)) fail(`source file is not declared by any item: ${source}`)
     for (const source of sourceOwners.keys()) if (!discovered.has(source)) fail(`declared source is outside or missing from sourceRoots: ${source}`)
 
+    const declaredSources = new Set(sourceOwners.keys())
+    const declaredTargets = new Set(targetOwners.keys())
     for (const [source, owner] of sourceOwners) {
       let text
       try {
@@ -335,10 +403,19 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
       const allowedOwners = dependencyClosure(owner, itemsByName)
       allowedOwners.add(owner)
       for (const specifier of relativeImports(text)) {
-        const importedSource = resolveImportedSource(source, specifier, sourceOwners)
-        if (!importedSource) continue
+        const importedSource = resolveRelativeFile(source, specifier, declaredSources)
+        if (!importedSource) {
+          fail(`relative import ${specifier} from ${source} does not resolve to a declared source file`)
+          continue
+        }
         const importedOwner = sourceOwners.get(importedSource)
         if (!allowedOwners.has(importedOwner)) fail(`item ${owner} imports ${importedSource} owned by ${importedOwner} without declaring a dependency`)
+        const sourceTarget = sourceTargets.get(source)
+        const importedTarget = sourceTargets.get(importedSource)
+        const resolvedTarget = resolveRelativeFile(sourceTarget, specifier, declaredTargets)
+        if (resolvedTarget !== importedTarget) {
+          fail(`relative import ${specifier} from ${source} does not resolve to ${importedTarget} after copy from ${sourceTarget}`)
+        }
       }
     }
   }
@@ -365,11 +442,50 @@ export function resolveItems(registry, requestedItems) {
   return { requested, items: ordered, files }
 }
 
+export function resolveCopyRequest(registry, requestedItems, { lock, update = false } = {}) {
+  const requested = [...new Set(requestedItems)]
+  const itemsByName = new Set(registry.items.map(item => item.name))
+  for (const name of requested) {
+    if (!itemsByName.has(name)) throw new RegistryError(`unknown registry item: ${name}`)
+  }
+  if (!update && requested.length === 0) throw new RegistryError('at least one registry item is required')
+
+  const retained = lock
+    ? lock.requestedItems.filter(name => itemsByName.has(name))
+    : []
+  const combined = [...new Set([...retained, ...requested])]
+  if (combined.length === 0) return { requested: [], items: [], files: [] }
+  return resolveItems(registry, combined)
+}
+
 export async function readLock(consumerRoot) {
+  await assertNoSymlinkTarget(consumerRoot, LOCK_FILE)
   const lockPath = path.join(consumerRoot, LOCK_FILE)
   try {
     const lock = JSON.parse(await readFile(lockPath, 'utf8'))
-    if (lock.lockVersion !== LOCK_VERSION || typeof lock.items !== 'object' || typeof lock.files !== 'object') {
+    if (
+      !isPlainObject(lock)
+      || lock.lockVersion !== LOCK_VERSION
+      || !isPlainObject(lock.registry)
+      || !Array.isArray(lock.requestedItems)
+      || lock.requestedItems.some(item => typeof item !== 'string')
+      || new Set(lock.requestedItems).size !== lock.requestedItems.length
+      || !isPlainObject(lock.items)
+      || !Object.values(lock.items).every(record => (
+        isPlainObject(record)
+        && typeof record.sourceSha === 'string'
+        && Array.isArray(record.registryDependencies)
+        && record.registryDependencies.every(dependency => typeof dependency === 'string')
+        && Array.isArray(record.files)
+        && record.files.every(target => typeof target === 'string')
+      ))
+      || !isPlainObject(lock.files)
+      || !Object.values(lock.files).every(record => (
+        isPlainObject(record)
+        && ['item', 'source', 'target', 'sourceSha', 'sourceHash', 'targetHash']
+          .every(key => typeof record[key] === 'string')
+      ))
+    ) {
       throw new RegistryError(`${LOCK_FILE} has an unsupported format`)
     }
     return lock
@@ -399,7 +515,8 @@ export async function planCopy({ registry, resolution, repoRoot, consumerRoot, s
   const operations = []
   for (const file of resolution.files) {
     const sourcePath = path.join(repoRoot, file.path)
-    const targetPath = path.join(consumerRoot, file.target)
+    const safeTarget = await assertNoSymlinkTarget(consumerRoot, file.target)
+    const targetPath = path.join(consumerRoot, safeTarget)
     const sourceState = await fileHash(sourcePath)
     if (!sourceState.exists) throw new RegistryError(`source file is missing: ${file.path}`)
     const targetState = await fileHash(targetPath)
@@ -425,7 +542,8 @@ export async function planCopy({ registry, resolution, repoRoot, consumerRoot, s
   if (update && lock) {
     for (const [target, record] of Object.entries(lock.files)) {
       if (desiredTargets.has(target)) continue
-      const targetPath = path.join(consumerRoot, assertSafeTarget(target))
+      const safeTarget = await assertNoSymlinkTarget(consumerRoot, target)
+      const targetPath = path.join(consumerRoot, safeTarget)
       const targetState = await fileHash(targetPath)
       if (targetState.exists && targetState.hash !== record.targetHash) {
         conflicts.push({ target, expected: record.targetHash, actual: targetState.hash })
@@ -488,6 +606,13 @@ function nextLock(plan) {
 }
 
 export async function applyCopyPlan(plan) {
+  // Re-check the complete batch before the first mutation. Planning may be
+  // separated from applying by user review, and a symlink introduced in that
+  // interval must not redirect a later write or delete outside consumerRoot.
+  await assertNoSymlinkTarget(plan.consumerRoot, LOCK_FILE)
+  for (const operation of plan.operations) {
+    await assertNoSymlinkTarget(plan.consumerRoot, operation.target)
+  }
   for (const operation of plan.operations) {
     if (operation.action === 'delete') {
       await unlink(operation.targetPath)
@@ -512,6 +637,62 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
   const lock = await readLock(consumerRoot)
   if (!lock) throw new RegistryError(`${LOCK_FILE} is missing in ${consumerRoot}`)
   const errors = []
+
+  const expectedRegistry = {
+    name: registry.name,
+    repository: registry.repository,
+    compatibility: registry.compatibility,
+    externalRequirements: registry.externalRequirements,
+  }
+  const { lastSourceSha, ...lockedRegistry } = lock.registry
+  try {
+    assertExactSha(lastSourceSha, 'registry lastSourceSha')
+  }
+  catch (error) {
+    errors.push(error.message)
+  }
+  if (!isDeepStrictEqual(lockedRegistry, expectedRegistry)) {
+    errors.push('lock registry metadata differs from the current registry')
+  }
+
+  let expectedResolution
+  try {
+    expectedResolution = lock.requestedItems.length === 0
+      ? { requested: [], items: [], files: [] }
+      : resolveItems(registry, lock.requestedItems)
+  }
+  catch (error) {
+    errors.push(error.message)
+  }
+  if (expectedResolution) {
+    const expectedItemNames = expectedResolution.items.map(item => item.name).sort()
+    const lockedItemNames = Object.keys(lock.items).sort()
+    if (!isDeepStrictEqual(lockedItemNames, expectedItemNames)) {
+      errors.push('locked item closure differs from the current requestedItems closure')
+    }
+
+    const expectedTargets = expectedResolution.files.map(file => file.target).sort()
+    const lockedTargets = Object.keys(lock.files).sort()
+    if (!isDeepStrictEqual(lockedTargets, expectedTargets)) {
+      errors.push('locked file closure differs from the current requestedItems closure')
+    }
+
+    for (const item of expectedResolution.items) {
+      const itemRecord = lock.items[item.name]
+      if (!itemRecord) continue
+      const expectedDependencies = [...(item.registryDependencies ?? [])].sort()
+      const lockedDependencies = [...itemRecord.registryDependencies].sort()
+      if (!isDeepStrictEqual(lockedDependencies, expectedDependencies)) {
+        errors.push(`locked item dependencies differ from registry: ${item.name}`)
+      }
+      const expectedFiles = item.files.map(file => file.target).sort()
+      const lockedFiles = [...itemRecord.files].sort()
+      if (!isDeepStrictEqual(lockedFiles, expectedFiles)) {
+        errors.push(`locked item files differ from registry: ${item.name}`)
+      }
+    }
+  }
+
   let checkoutSha
   try {
     checkoutSha = getCheckoutSha(repoRoot)
@@ -522,7 +703,7 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
   for (const [target, record] of Object.entries(lock.files)) {
     let safeTarget
     try {
-      safeTarget = assertSafeTarget(target)
+      safeTarget = await assertNoSymlinkTarget(consumerRoot, target)
       assertExactSha(record.sourceSha, `${target} sourceSha`)
     }
     catch (error) {
@@ -534,8 +715,9 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     else if (targetState.hash !== record.targetHash) errors.push(`managed target drifted: ${target}`)
     if (record.target !== target) errors.push(`lock target key does not match record.target: ${target}`)
     const item = registry.items.find(candidate => candidate.name === record.item)
-    if (!item?.files.some(file => file.path === record.source && file.target === target)) errors.push(`managed file no longer exists in registry: ${target}`)
-    if (checkoutSha && record.sourceSha === checkoutSha) {
+    const fileStillExists = item?.files.some(file => file.path === record.source && file.target === target)
+    if (!fileStillExists) errors.push(`managed file no longer exists in registry: ${target}`)
+    if (fileStillExists && checkoutSha && record.sourceSha === checkoutSha) {
       const sourceState = await fileHash(path.join(repoRoot, record.source))
       if (!sourceState.exists) errors.push(`locked source is missing: ${record.source}`)
       else if (sourceState.hash !== record.sourceHash) errors.push(`locked sourceHash does not match checked-out source: ${record.source}`)
@@ -549,7 +731,7 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
       errors.push(error.message)
     }
     if (!registry.items.some(item => item.name === itemName)) errors.push(`locked item no longer exists in registry: ${itemName}`)
-    for (const target of itemRecord.files ?? []) if (!lock.files[target]) errors.push(`locked item ${itemName} references an untracked file: ${target}`)
+    for (const target of itemRecord.files) if (!lock.files[target]) errors.push(`locked item ${itemName} references an untracked file: ${target}`)
   }
   if (errors.length) throw new RegistryError(`consumer check failed with ${errors.length} error(s)\n- ${errors.join('\n- ')}`, errors)
   return lock

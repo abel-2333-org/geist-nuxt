@@ -121,8 +121,8 @@ export default defineNuxtConfig({
   ],
 
   css: [
-    '~/assets/css/main.css',
-    '~/assets/css/geist.css', // 必须在项目 main.css 之后加载。
+    './app/assets/css/main.css',
+    './app/assets/css/geist.css', // 必须在项目 main.css 之后加载。
   ],
 
   colorMode: {
@@ -140,7 +140,17 @@ export default defineNuxtConfig({
 })
 ```
 
-如果项目没有自己的 `app/assets/css/main.css`，删掉示例中的第一条 CSS，只需保证 `geist.css` 排在其它项目级基础样式之后。如果项目已有 `colorMode` / `ui` 配置，在这个消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
+消费项目必须拥有下面这个基础样式入口；`@nuxt/ui` module 只注册 Tailwind transformer，不会替项目注入这两条 CSS import：
+
+```css
+/* app/assets/css/main.css */
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* 消费项目自己的基础样式继续写在这里。 */
+```
+
+如果项目原本没有 `app/assets/css/main.css`，创建它，不要删掉 `nuxt.config.ts` 里的第一条 CSS。`geist.css` 只提供 token / semantic override，不能替代 Tailwind 与 Nuxt UI 的基础样式入口，并且必须排在 `main.css` 之后。如果项目已有 `colorMode` / `ui` 配置，在这个消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
 
 ### `app/app.vue`
 

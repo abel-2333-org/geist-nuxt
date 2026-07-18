@@ -23,6 +23,11 @@ export function useActiveFieldPath() {
 /** Height of the sticky header, so scrolled-to rows clear it (see scroll-mt). */
 const SCROLL_MARGIN_CLASS = 'scroll-mt-24'
 
+export interface FieldAnchorCopyMessages {
+  successMessage?: string
+  failureMessage?: string
+}
+
 export function useFieldAnchor() {
   const active = useActiveFieldPath()
   // `copied` is surfaced so an anchor button can mirror the same transient
@@ -104,19 +109,27 @@ export function useFieldAnchor() {
     })
   }
 
-  /** Copy a field's deep link and focus it. Pass a fully-formed `successMessage`
-   *  to own the whole toast sentence (so the caller can localize it through its
-   *  own labels/i18n, e.g. "`<field>` link copied"); omit it to fall back to
-   *  core's shared English "Link copied to clipboard". We deliberately do NOT
-   *  concatenate a field name onto core's half-sentence here — the caller owns
-   *  the complete string or none of it. Navigation runs regardless of whether
-   *  the clipboard write succeeds (permissions can reject it). */
-  async function copyLink(path: string, successMessage?: string) {
+  /** Copy a field's deep link and focus it. Complete success/failure messages
+   *  keep localization owned by the caller; foundation only supplies generic
+   *  English defaults. A success-message string remains accepted for callers
+   *  copied from the previous API. Navigation still runs when clipboard
+   *  permission fails. */
+  async function copyLink(
+    path: string,
+    messagesOrSuccess: FieldAnchorCopyMessages | string = {},
+  ) {
+    const messages: FieldAnchorCopyMessages = typeof messagesOrSuccess === 'string'
+      ? { successMessage: messagesOrSuccess }
+      : messagesOrSuccess
     // Fire-and-forget: navigation/scroll runs independently of the clipboard
     // write below; we don't want to block the copy on the scroll animation.
     void goTo(path, { updateHash: true })
     try {
-      await copy(urlFor(path), 'Link', successMessage ? { successMessage } : {})
+      await copy(urlFor(path), {
+        label: 'Link',
+        successMessage: messages.successMessage,
+        failureMessage: messages.failureMessage,
+      })
     }
     catch {
       // Clipboard unavailable/denied — the hash is still updated so the user

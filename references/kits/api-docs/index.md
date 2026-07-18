@@ -15,7 +15,7 @@
 
 | 文件 | 组件名 | 职责 | 详细文档 |
 |---|---|---|---|
-| `components/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 近单色多语言代码块基座（USelect 语言 + 复制 + 换行，无高亮器） | `code-sample.md` |
+| `components/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 多语言代码块基座（USelect 语言 + 复制 + 换行；默认 raw code，可选可信构建期 highlighted HTML；无运行时高亮器） | `code-sample.md` |
 | `components/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
 | `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
 | `components/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 foundation `SemanticBadge` | — |
@@ -33,7 +33,7 @@
 
 配套 foundation 依赖（由根 registry 的 `registryDependencies` 自动装入）：
 - `foundation/components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
-- `foundation/composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。签名 `copy(text, label?, { successMessage? })`：默认 `label` 填英文句，调用方可传完整 `successMessage` 独占整句以便本地化（见下「复制 toast 完整消息注入」契约）。依赖 `@vueuse/core`；消费项目必须有该直接依赖。
+- `foundation/composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。推荐签名 `useCopy({ timeout?, failureMessage? })`，推荐动作 `copy(text, { label?, successMessage?, failureMessage? })`；成功/失败都允许调用方传完整句子独占本地化，省略时使用通用英文默认。为保证已 copy-in 消费者可安全升级，legacy positional `useCopy(timeout)` 与 `copy(text, label, { successMessage?, failureMessage? })` 仍兼容，但新代码不要继续扩散 positional 形式。依赖 `@vueuse/core`；消费项目必须有该直接依赖。
 
 配套 composable（随 kit 一起复制）：`composables/useCodeWrap.ts` —— 所有 CodeBlock 共享+持久化的换行状态（`useState` + cookie，SSR 安全）。
 
@@ -167,11 +167,11 @@ gallery 有**两个 api-docs demo 页，职责互补**：
 </template>
 ```
 
-`requestSamples` 形如 `[{ label: 'cURL', language: 'bash', code: '...' }, ...]`。数据一律由消费方（页面 / adapter）注入，不写进 kit。
+`requestSamples` 形如 `[{ label: 'cURL', language: 'bash', code: '...', highlightedHtml?: '...' }, ...]`。`code` 始终是复制真源；HTML 只接受消费项目在构建期生成并预消毒的可信结果，且页面必须显式开启 `trust-highlighted-html`。数据一律由消费方（页面 / adapter）注入，不写进 kit。
 
 ## Accessibility（无障碍）
 
-- CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
+- CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；成功/失败 toast 接受完整本地化消息；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
 - ResponseExample：状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 - **配色按含义分配（跨 FieldItem 全体生效）**：
@@ -201,7 +201,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - 字段深链接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮；消费项目可在自己的全局滚动策略中抑制首次 hash 跳动，但 kit 不覆盖全局 router 配置。
 - 字段锚点必须是可查询、稳定且无歧义的 DOM id；按路径逐段 slugify，再用稳定分隔符连接。字段原名只用于展示，不直接拼进 selector。
 - 复制反馈复用 foundation `useCopy()` 与应用级 toast live region；不要为字段表的每一行再创建 `role="status"`。纯图标锚点按钮提供随状态变化的 `aria-label`。
-- 本地化复制提示时传入完整消息，不在 foundation 与 kit 之间拼接半句；这样 aria 与 toast 文案由同一调用方完整拥有。
+- 本地化复制提示时传入完整成功/失败消息，不在 foundation 与 kit 之间拼接半句；`FieldItemLabels.linkCopied` / `linkCopyFailed` 都接收字段名并返回完整句子。
 
 ## 为什么不用 @nuxt/content 走内容管线？
 
@@ -218,7 +218,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 ## 不要臆造
 
-- 不引入 `@nuxt/content` / Shiki / SQLite 来渲染这些代码块——组件式自包含即可。
+- 不引入 `@nuxt/content` / Shiki runtime / SQLite 来渲染这些代码块；需要语法高亮时由消费项目在构建期产出并预消毒 HTML，组件只负责显式可信渲染。
 - 新增领域组件前，按 `method/component-spec-template.md` 先写 anatomy → states → accessibility 规格。
-- prop 名严格对齐：ApiDocsCodeBlock **只认 `variants`**（`{ language, code, label? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ApiDocsRequestExample/ApiDocsResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
+- prop 名严格对齐：ApiDocsCodeBlock **只认 `variants`**（`{ language, code, label?, highlightedHtml? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ApiDocsRequestExample/ApiDocsResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
 - ApiDocsCodeBlock 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化；复制不要在 ApiDocsCodeBlock 里重写，用共享 `CopyButton`。
