@@ -55,4 +55,4 @@
 ## 规格与源码
 
 - 规格模板见 `method/component-spec-template.md`。
-- 源码：`packages/kits/api-docs/app/components/api-docs/CodeBlock.vue`、`composables/useCodeWrap.ts`；复制依赖 `packages/core/app/components/CopyButton.vue` + `composables/useCopy.ts`。
+- 源码：`kits/api-docs/components/CodeBlock.vue`、`kits/api-docs/composables/useCodeWrap.ts`；复制依赖 `foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`，由根 registry 解析安装。

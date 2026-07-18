@@ -15,7 +15,7 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 </script>
 <template>
   <div class="min-h-screen flex flex-col bg-default text-default antialiased">
-    <CompositionAppHeader :items="items">      <!-- core 提供的响应式头部 -->
+    <CompositionAppHeader :items="items">      <!-- foundation 提供的响应式头部 -->
       <template #brand>…</template>            <!-- logo/wordmark -->
       <template #actions>…<ThemeToggle /></template>
     </CompositionAppHeader>
@@ -25,11 +25,11 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 </template>
 ```
 
-- **粘顶 header 用 core 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
+- **粘顶 header 用 foundation 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
 - **主题切换**默认已内置在 `<CompositionAppHeader>` 的 `#actions`；覆盖该 slot 时需自己带上 `<ThemeToggle />`。
 - **logo/wordmark**用真实资源（见 `brand-assets.md`），不要占位图。
 
-已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`packages/core/app/components/composition/AppHeader.vue`（core 提供的响应式头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
+已验证的应用外壳（Nuxt 4）源码：`app/app.vue`（根组件）、`app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`foundation/compositions/AppHeader.vue`（响应式头部）、`foundation/components/ThemeToggle.vue`（直接 `<ThemeToggle />`）。
 
 ## 根组件（`app/app.vue`）
 
@@ -54,7 +54,7 @@ useHead({
 </template>
 ```
 
-## 明暗切换（`ThemeToggle`，core 提供）
+## 明暗切换（`ThemeToggle`，foundation 提供）
 
 用 Nuxt UI 内置的 `@nuxtjs/color-mode`（随 `@nuxt/ui` 模块自动注册），通过 `useColorMode()` 读写偏好——不要自己写 class 切换或 localStorage 逻辑。`useColorMode` / `computed` 都由 Nuxt 自动导入。用 `<ClientOnly>` 包裹以避免 SSR 水合闪烁。
 
@@ -87,9 +87,9 @@ function toggle() {
 
 `nuxt.config.ts` 里配 `colorMode: { preference: 'system', fallback: 'light' }`——Geist 是浅色优先的画布。
 
-## Header（`<CompositionAppHeader>`，core 提供）
+## Header（`<CompositionAppHeader>`，foundation 提供）
 
-粘顶 + 响应式头部是 core 的 composition 组件（`packages/core/app/components/composition/AppHeader.vue`），
+粘顶 + 响应式头部是 foundation 的 composition 组件（`foundation/compositions/AppHeader.vue`），
 基于 Nuxt UI `UHeader mode="slideover"`：**桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由变化自动收起**——全部内建，不手写 `<header>`、不手写 media query。它**数据无关**：
 
 - **prop `items: NavigationMenuItem[]`** —— 导航数据由消费方传入（如从路由树自动派生，见 `references/gallery.md`「页面组织」）。

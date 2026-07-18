@@ -2,7 +2,7 @@
 
 演示把 `method/component-spec-template.md` 应用到一个真实的组合组件。以 `CodeBlock`（API 文档场景，近单色多语言代码块基座）为例——**先填规格，再实现**。规格是评审依据；实现要能对照规格逐条验收。
 
-> 本范例对应 kit 里已落地的组件，完整实现见 `packages/kits/api-docs/app/components/CodeBlock.vue`（配套 `composables/useCodeWrap.ts`）。下面的实现段是提炼骨架，用来演示"规格 → 代码"的对应关系。复制交互本身**不在 CodeBlock 内实现**，而是委托给通用基座的 `<CopyButton>`（`app/components/CopyButton.vue` + `composables/useCopy.ts`）——这正体现了"先查现成、能复用就不重造"的硬前置。
+> 本范例对应 kit 里已落地的组件，完整实现见 `kits/api-docs/components/CodeBlock.vue`（配套 `kits/api-docs/composables/useCodeWrap.ts`）。下面的实现段是提炼骨架，用来演示"规格 → 代码"的对应关系。复制交互本身**不在 CodeBlock 内实现**，而是委托给 foundation 的 `<CopyButton>`（`foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`）——这正体现了"先查现成、能复用就不重造"的硬前置。
 
 ## 1. 规格（先写，作为评审依据）
 

@@ -20,7 +20,7 @@
 
 ## UToast（useToast）
 
-瞬时通知，通过 composable 触发（`UApp` 已在 starter 挂载 toast 容器）。
+瞬时通知，通过 composable 触发（根 app 与 registry consumer 基础接线都用 `UApp` 挂载 toast 容器）。
 
 ```vue
 <script setup lang="ts">

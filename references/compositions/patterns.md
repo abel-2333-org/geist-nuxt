@@ -69,7 +69,7 @@
 
 ## 反馈（Toast / Alert）
 
-- 瞬时反馈用 toast：`const toast = useToast(); toast.add({ title, color })`（需要 `app.vue` 里有 `<UApp>`，starter 已具备）。
+- 瞬时反馈用 toast：`const toast = useToast(); toast.add({ title, color })`（需要 `app.vue` 里有 `<UApp>`；根 app 与基础 consumer 接线都应具备）。
 - 常驻上下文提示用 `UAlert`（`color` 表意：`success`/`warning`/`error`/`info`）。
 
 ## 无障碍清单（每屏自检）

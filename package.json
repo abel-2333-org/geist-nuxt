@@ -4,18 +4,37 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @geist-nuxt/gallery dev",
-    "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
-    "dev:starter": "pnpm -C starter dev"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "registry:validate": "node scripts/validate-registry.mjs",
+    "geist:copy": "node scripts/copy-registry.mjs",
+    "geist:update": "node scripts/copy-registry.mjs --update",
+    "geist:check": "node scripts/check-registry-consumer.mjs",
+    "test:registry": "node --test tests/registry-tools.test.mjs",
+    "test:consumer": "node scripts/check-registry-consumer.mjs"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.116",
+    "@iconify-json/simple-icons": "^1.2.89",
+    "@nuxt/ui": "^4.9.0",
+    "@vueuse/core": "^14.3.0",
+    "nuxt": "4.4.8",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@nuxt/kit": "4.4.8",
     "tailwindcss": "^4.3.2",
     "typescript": "~5.9.0",
     "vue-tsc": "^3.3.6"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@parcel/watcher",
       "esbuild",
       "vue-demi"
     ]

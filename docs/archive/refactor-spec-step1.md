@@ -1,5 +1,8 @@
 # 第一步：repo 重构规格（方案 B｜可执行蓝图）
 
+> [!WARNING]
+> **已废弃（superseded）**：本文记录旧 workspace / package / starter 架构，仅供历史追溯。现行 Source-first 架构以根 `SKILL.md`、`references/architecture-decisions.md` 与 `references/registry.md` 为准，请勿按本文执行。
+
 > 用途：在真源仓库 `abel-2333-org/geist-nuxt` 的 v0 会话里照此执行重构。
 > 本文件是「怎么改」的操作规格；「为什么这么改」见 `architecture-decisions.md`。
 > 执行位置：**真源 repo 会话**（原地重构，不新开 repo）。改完在 repo 侧 `pnpm install && pnpm build` 验证通过，再按 `maintenance/sync.md` 同步回 skill assets。
@@ -102,3 +105,4 @@ geist-nuxt/                          (原地重构，单一真源)
 - 同步后 SKILL.md「起点」描述要更新：starter 只吃 core；kit 在 `packages/kits/`；gallery 是独立 app。
 - 更新 `architecture-decisions.md` 第 2、9 节的待定项为已决。
 - 进入第二步：定 registry schema 并填 `packages/kits/api-docs/registry.json` 分片。
+> **Superseded（2026-07-18）**：本文记录旧的 workspace / `packages/core` / `apps/gallery` / `starter` 重构历史，仅供追溯。现行架构是独立 Source-first 根应用，权威规则见 `SKILL.md`、`references/architecture-decisions.md` 与 `references/registry.md`。不要按本文执行。

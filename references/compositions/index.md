@@ -10,4 +10,4 @@
 其它去向：
 - 想造「新的领域组件」（不是拼页面）→ `method/`
 - 想查「单个组件的用法/props/a11y」→ `components/`
-- 想要这些组合的**可视版** → 招牌组合见 gallery 的 `<ShowcaseCompositions>`（`core/app/components/composition/*`）；整页活样例就是 starter / gallery 应用本身。
+- 想要这些组合的**可视版** → 招牌组合见根 gallery 的 `<GalleryShowcaseCompositions>`（`app/components/gallery/showcase/Compositions.vue`）；可分发组合真源在 `foundation/compositions/`，整页活样例就是根 app。

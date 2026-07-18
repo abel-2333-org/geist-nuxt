@@ -1,0 +1,298 @@
+/*
+ * geist-nuxt foundations
+ * ----------------------
+ * Visual language: Vercel Geist — monochrome, high contrast, small radius,
+ * generous whitespace. Built on Nuxt UI's semantic token system (`--ui-*`).
+ */
+
+@theme static {
+  /*
+   * Typography — Geist Sans / Geist Mono. @nuxt/fonts (auto-registered by
+   * Nuxt UI) resolves these families by name from Google Fonts and self-hosts
+   * them automatically; no manual <link> or @font-face needed.
+   */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /*
+   * Type scale addition — "Copy 13 Mono" (13px). Geist sits inline code between
+   * Tailwind's text-xs (12) and text-sm (14); neither matches, so the atom used
+   * an arbitrary value. Promoted to a semantic token: `--text-code` generates a
+   * `text-code` utility, making 13px inline code a single source of truth
+   * instead of a magic number scattered across components.
+   */
+  --text-code: 0.8125rem;
+
+  /*
+   * Breakpoints — exact Geist values (vercel.com/design). Overriding Tailwind's
+   * `--breakpoint-*` remaps every `sm:`/`md:`/`lg:`/`xl:`/`2xl:` utility, so all
+   * of Nuxt UI's built-in responsive classes (e.g. container `sm:px-6 lg:px-8`)
+   * follow Geist breakpoints automatically. Names stay standard; only px change.
+   */
+  --breakpoint-sm: 401px;
+  --breakpoint-md: 601px;
+  --breakpoint-lg: 961px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1400px;
+
+  /*
+   * Corner rounding — Geist's 3-tier system (6 / 12 / 16px).
+   * Nuxt UI derives the whole radius scale proportionally from a single
+   * `--ui-radius` (xs .5x / sm 1x / md 1.5x / lg 2x / xl 3x). With base 6px the
+   * control tier (rounded-sm = 6) and panel tier (rounded-lg = 12) already land
+   * on Geist exactly. Only the largest tier deviates (xl would be 18px), so we
+   * pin `--radius-xl` to 16px to break the proportion for full-screen overlays.
+   * `--ui-radius` itself stays 6px (see below) to keep the other tiers coherent.
+   * Semantic mapping: control/input/badge -> rounded-sm (6),
+   * card/panel -> rounded-lg (12), modal/full-screen overlay -> rounded-xl (16).
+   */
+  --radius-xl: 16px;
+
+  /*
+   * Elevation — Geist's subtle 3-tier shadow system. Hierarchy comes from
+   * tonal surfaces + borders first, so shadows stay light. Nuxt UI consumes
+   * Tailwind's `--shadow-*` tokens: cards use `shadow-xs`, and ALL overlays
+   * (popover/menu/select/toast/modal/slideover) use `shadow-lg`. We remap:
+   *   --shadow-xs -> Geist raised card   (per-theme, see :root/.dark below)
+   *   --shadow-lg -> Geist popover/menu  (same in both themes)
+   *   --shadow-xl -> Geist modal/dialog  (same in both themes)
+   * Modal & slideover are pointed at `shadow-xl` via app.config so dialogs get
+   * the heavier tier; popovers/menus keep `shadow-lg`. Tooltips take the
+   * lightest tier (shadow-xs). Popover & modal shadows are identical in light
+   * and dark per Geist, so they live here in @theme.
+   */
+  --shadow-lg: 0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 8px -4px rgba(0, 0, 0, 0.04), 0 16px 24px -8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 1px 1px rgba(0, 0, 0, 0.02), 0 8px 16px -4px rgba(0, 0, 0, 0.04), 0 24px 32px -8px rgba(0, 0, 0, 0.06);
+
+  /*
+   * Motion — Geist's signature spring-like easing. Overriding Tailwind's
+   * default `--ease-out` means `transition`/`duration-*`/`ease-out` utilities
+   * and Nuxt UI's own transitions adopt the Geist curve. Durations follow
+   * Geist guidance: 150ms state changes, 200ms popovers/tooltips, 300ms
+   * overlays/modals — but most interactions should feel instant. Honor
+   * prefers-reduced-motion (handled globally below).
+   */
+  --ease-out: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+/*
+ * Semantic overrides are intentionally UNLAYERED so they win over Nuxt UI's
+ * `@layer theme` defaults regardless of source order.
+ *
+ * Brand primary: a custom violet ramp. We register the full 50–950 scale so
+ * every `primary`-colored component (and the Foundations swatches, which read
+ * `--ui-color-primary-{shade}`) resolves against it. `--ui-primary` follows
+ * Nuxt UI's convention: shade 500 in light, 400 in dark for contrast on the
+ * near-black surface.
+ */
+:root {
+  --ui-color-primary-50: #f6f0ff;
+  --ui-color-primary-100: #eee3ff;
+  --ui-color-primary-200: #dfc7ff;
+  --ui-color-primary-300: #c8a0ff;
+  --ui-color-primary-400: #a96eff;
+  --ui-color-primary-500: #7a3ce2;
+  --ui-color-primary-600: #6b30cf;
+  --ui-color-primary-700: #5925b1;
+  --ui-color-primary-800: #4a2290;
+  --ui-color-primary-900: #3d1d74;
+  --ui-color-primary-950: #261047;
+
+  /*
+   * Functional colors — exact Geist accent scales (geist-colors: green / blue /
+   * amber / red / teal). Geist encodes intent by step (700 = solid fill, high
+   * contrast), so we map Geist 700 -> Tailwind 500 (Nuxt UI's light default
+   * shade) and let dark mode use the lighter 400 step, mirroring the primary
+   * ramp. This replaces Nuxt UI's stock Tailwind palettes so success/info/
+   * warning/error/secondary render in true Geist hues.
+   *   success<-green · info<-blue · warning<-amber · error<-red · secondary<-teal
+   */
+  /* success — Geist green */
+  --ui-color-success-50: #effbef;
+  --ui-color-success-100: #ebfaeb;
+  --ui-color-success-200: #daf6da;
+  --ui-color-success-300: #c6f1c7;
+  --ui-color-success-400: #6cda75;
+  --ui-color-success-500: #45a557;
+  --ui-color-success-600: #398e4a;
+  --ui-color-success-700: #297a3a;
+  --ui-color-success-800: #1b311e;
+  --ui-color-success-900: #142416;
+  --ui-color-success-950: #0e1a10;
+
+  /* info — Geist blue */
+  --ui-color-info-50: #f0f7ff;
+  --ui-color-info-100: #ebf5ff;
+  --ui-color-info-200: #e0f0ff;
+  --ui-color-info-300: #cce6ff;
+  --ui-color-info-400: #52aeff;
+  --ui-color-info-500: #0072f5;
+  --ui-color-info-600: #0062d1;
+  --ui-color-info-700: #0068d6;
+  --ui-color-info-800: #00254d;
+  --ui-color-info-900: #001b38;
+  --ui-color-info-950: #001429;
+
+  /* warning — custom amber scale */
+  --ui-color-warning-50: #fff8e1;
+  --ui-color-warning-100: #fef0c7;
+  --ui-color-warning-200: #fde29a;
+  --ui-color-warning-300: #fbd16b;
+  --ui-color-warning-400: #f4b740;
+  --ui-color-warning-500: #e99b18;
+  --ui-color-warning-600: #c97807;
+  --ui-color-warning-700: #9d5705;
+  --ui-color-warning-800: #7b4207;
+  --ui-color-warning-900: #64350b;
+  --ui-color-warning-950: #3a1b03;
+
+  /* error — Geist red */
+  --ui-color-error-50: #fff0f0;
+  --ui-color-error-100: #ffebeb;
+  --ui-color-error-200: #ffe5e5;
+  --ui-color-error-300: #fdd8d8;
+  --ui-color-error-400: #f87275;
+  --ui-color-error-500: #e5484d;
+  --ui-color-error-600: #da2f35;
+  --ui-color-error-700: #cb2a2f;
+  --ui-color-error-800: #391417;
+  --ui-color-error-900: #2a0e11;
+  --ui-color-error-950: #1e0a0c;
+
+  /* secondary — Geist teal */
+  --ui-color-secondary-50: #eefcf9;
+  --ui-color-secondary-100: #e5faf6;
+  --ui-color-secondary-200: #d4f7f0;
+  --ui-color-secondary-300: #bef4eb;
+  --ui-color-secondary-400: #45dec5;
+  --ui-color-secondary-500: #12a594;
+  --ui-color-secondary-600: #0d8c7d;
+  --ui-color-secondary-700: #067a6e;
+  --ui-color-secondary-800: #073c34;
+  --ui-color-secondary-900: #052924;
+  --ui-color-secondary-950: #04201c;
+}
+
+:root,
+.light {
+  /* Geist material-base radius = 6px */
+  --ui-radius: 0.375rem;
+  /*
+   * Container — full-bleed by default. Layouts (header, page body, footer)
+   * span the whole viewport; UContainer keeps only its responsive horizontal
+   * padding (px-4 sm:px-6 lg:px-8). Reading width is constrained at the
+   * content level instead (e.g. max-w-2xl/3xl on prose blocks).
+   */
+  --ui-container: 100%;
+
+  --ui-primary: var(--ui-color-primary-500);
+
+  /* Functional roles — light picks the solid-fill 500 step (= Geist 700). */
+  --ui-secondary: var(--ui-color-secondary-500);
+  --ui-success: var(--ui-color-success-500);
+  --ui-info: var(--ui-color-info-500);
+  --ui-warning: var(--ui-color-warning-500);
+  --ui-error: var(--ui-color-error-500);
+
+  /*
+   * Neutral gray — exact Geist LIGHT `--ds-gray` scale (hue 0, sat 0: truly
+   * achromatic, matching Geist). Nuxt UI derives every text/bg/border token
+   * from its neutral ramp, but Geist ships independent light/dark values at
+   * each step, so we override the semantic `--ui-*` tokens per mode directly
+   * instead of a single shared ramp. Values sourced from Geist's published
+   * gray tokens; usage follows Geist's own Color 1–10 semantics.
+   *   bg-100 #fff · bg-200 #fafafa · gray-100 #f2f2f2 · gray-200 #ebebeb
+   *   gray-500 #c9c9c9 · gray-600 #a8a8a8 · gray-700 #8f8f8f
+   *   gray-900 #666 (secondary text) · gray-1000 #171717 (primary text)
+   */
+  --ui-bg: #ffffff;             /* Geist Background 1 */
+  --ui-bg-muted: #fafafa;       /* Geist Background 2 */
+  --ui-bg-elevated: #f2f2f2;    /* Geist gray-100 */
+  --ui-bg-accented: #ebebeb;    /* Geist gray-200 */
+
+  --ui-border-muted: #ebebeb;   /* Geist gray-200 */
+  --ui-border: #ebebeb;         /* Geist gray-400 (default border) */
+  --ui-border-accented: #c9c9c9;/* Geist gray-500 (hover border) */
+
+  --ui-text-dimmed: #a8a8a8;    /* Geist gray-600 */
+  --ui-text-muted: #8f8f8f;     /* Geist gray-700 */
+  --ui-text-toned: #666666;     /* Geist gray-900 */
+  --ui-text: #171717;           /* Geist gray-1000 (primary text) */
+  --ui-text-highlighted: #171717;
+
+  /* Raised card / tooltip elevation — Geist light */
+  --shadow-xs: 0 2px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  --ui-primary: var(--ui-color-primary-400);
+
+  /* Functional roles — dark uses the lighter 400 step for contrast on the
+     near-black surface (mirrors primary). */
+  --ui-secondary: var(--ui-color-secondary-400);
+  --ui-success: var(--ui-color-success-400);
+  --ui-info: var(--ui-color-info-400);
+  --ui-warning: var(--ui-color-warning-400);
+  --ui-error: var(--ui-color-error-400);
+
+  /*
+   * Neutral gray — exact Geist DARK `--ds-gray` scale. Root surface is Geist's
+   * near-pure-black Background 1 (#0a0a0a); surfaces/borders/text step up
+   * through Geist's dark gray values so contrast stays Geist-accurate on the
+   * near-black canvas (replaces Nuxt UI's neutral-900 defaults).
+   *   bg-100 #0a0a0a · gray-100 #1a1a1a · gray-200 #1f1f1f · gray-300 #292929
+   *   gray-400 #2e2e2e · gray-500 #454545 · gray-600 #878787 · gray-700 #8f8f8f
+   *   gray-900 #a1a1a1 (secondary text) · gray-1000 #ededed (primary text)
+   */
+  --ui-bg: #0a0a0a;             /* Geist dark Background 1 */
+  --ui-bg-muted: #1a1a1a;       /* Geist dark gray-100 */
+  --ui-bg-elevated: #1f1f1f;    /* Geist dark gray-200 */
+  --ui-bg-accented: #292929;    /* Geist dark gray-300 */
+
+  --ui-border-muted: #1f1f1f;   /* Geist dark gray-200 */
+  --ui-border: #2e2e2e;         /* Geist dark gray-400 (default border) */
+  --ui-border-accented: #454545;/* Geist dark gray-500 (hover border) */
+
+  --ui-text-dimmed: #878787;    /* Geist dark gray-600 */
+  --ui-text-muted: #8f8f8f;     /* Geist dark gray-700 */
+  --ui-text-toned: #a1a1a1;     /* Geist dark gray-900 */
+  --ui-text: #ededed;           /* Geist dark gray-1000 (primary text) */
+  --ui-text-highlighted: #ffffff;
+
+  /* Raised card / tooltip elevation — Geist dark (stronger on near-black) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+html,
+body {
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+}
+
+/*
+ * Bilingual parity — CJK body copy needs more leading than Latin. Geist's
+ * default line-height suits Latin prose but feels cramped in multi-line Han
+ * script, so Chinese/Japanese/Korean paragraph-level text opts up to ~1.7.
+ * Scoped to `:lang(zh|ja|ko)` block-text elements only — headings, controls,
+ * and code keep their tighter leading. Set the lang attribute on <html> (or a
+ * subtree) for this to apply; the rule is unlayered so it wins over utilities.
+ */
+:is(:lang(zh), :lang(ja), :lang(ko)) :is(p, li, dd, blockquote, figcaption) {
+  line-height: 1.7;
+}
+
+/*
+ * Accessibility — honor prefers-reduced-motion (Geist: drop nonessential
+ * motion). Collapses animations/transitions to near-instant for users who
+ * request reduced motion, without removing focus/state feedback.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

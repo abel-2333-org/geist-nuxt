@@ -61,4 +61,4 @@ default/hover/focus-visible(紫色环)/`disabled`(不可聚焦)/`loading`/`inval
 ## 源码参考
 
  - `src/runtime/components/{Form,FormField,Input,Select,Checkbox,Switch}.vue`（reference workspace: nuxt/ui@v4）
- - 组合用法：`packages/core/app/components/composition/SignupForm.vue`（真实表单组合）
+- 组合用法：`foundation/compositions/SignupForm.vue`（真实表单组合）

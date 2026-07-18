@@ -1,99 +1,100 @@
-# core 组件回流规范
+# Source-first 组件晋升规范
 
-当一个通用组件在 v0 会话里做成、并决定让它成为设计系统的一部分时，走这条链把它「回流」进 `@geist-nuxt/core`，发版后所有会话都能通过 extends core 用上它（自动导入），并在 gallery 目录里留下可视条目供人查看。
+候选组件先在根 app 的 `/playground` 完成设计；只有人工确认值得共享后，才晋升到 `foundation/` 或 `kits/`，进入根 `registry.json` 与正式 gallery。
 
-本规范写成 **AI 可执行 checklist**：只有第 0 步（采纳决策）必须由人拍板，第 1–6 步 AI 可主导执行，人只在推送/发版处授权。
+## 0. Playground 生命周期
 
----
-
-## 开发阶段：playground 生命周期（回流前的脚手架）
-
-组件在做成、决定回流之前，先在 gallery 的 **playground 草稿路由**里开发，不弄脏正式页：
-
-| 阶段 | playground 角色 |
+| 阶段 | 位置与职责 |
 |---|---|
-| 开发中 | **主力**。建 `apps/gallery/app/pages/playground.vue`（独立草稿路由，**不碰正式页**），用 chrome + 示例数据摆出在改的组件，预览切 `/playground` 看 HMR 即时刷新。 |
-| 定稿后 | **退场**。有价值的演示提升进正式路由（下面第 3 步 / kit 子树的页面级形态）；纯脚手架部分删除。若想留作调试页，则用 `definePageMeta({ nav: false })` 隐藏（不进导航，见 `references/gallery.md`）。 |
+| 开发中 | 候选源码放 `playground/`，由 `app/pages/playground.vue` 以真实示例数据展示；页面固定 `nav: false`，HMR 直接预览 |
+| 未采纳 | 留在具体消费项目或删除，不进入 foundation / kit / registry |
+| 已采纳 | 移动到正式真源、补 registry 与 gallery；删除或清空对应 playground 草稿 |
 
-- 名字就叫 `playground`，核心是"草稿页 ≠ 正式页，各占各的路由"。
-- 提升是 copy 动作、易忘删 → **"删除/降级 playground"是回流的强制收尾**，并入 push 前清单（见 `maintenance/sync.md`）。多路由下删 `playground.vue` = 导航项自动消失，无残留。
+候选源码不得先放进 foundation / kit 再等人决定，否则未采纳 API 会被误当作正式资产。
 
----
+## 1. 采纳决策
 
-## 第 0 步：采纳决策（人拍板，AI 不替代）
+人工确认：
 
-回流前先确认这组件**值得进 core**。逐条自检，全部为「是」才继续：
+- Nuxt UI 或现有 registry item 没有现成能力，也无法简单组合；
+- API、状态和 a11y 已达到可复用质量；
+- 至少有明确的复用场景；
+- 归属明确：跨场景 → foundation，单领域 → 对应 kit。
 
-- **通用**：它会被多个项目/场景用，而不是当前项目一次性拼装的业务块？
-- **无现成**：`references/components/index.md` 的决策表和 Nuxt UI 原语里没有现成的，也无法用 `UCard`+`UBadge`+… 简单组合出来？
-- **归属 core 而非 kit**：任何 UI 项目都可能用 → core；只服务特定场景（如 API 文档）→ 该走 `kits/<场景>` 而不是本规范。
+## 2. 规格与验证
 
-任一为「否」→ 不回流（留在项目里，或沉淀到对应 kit）。
+交互 / 状态 / 焦点复杂的组件按 `component-spec-template.md` 完成 anatomy → state → accessibility；纯展示原子轻量过 anatomy 与 a11y。
 
-## 第 1 步：搬运源码到 core
+在 `/playground` 至少验证与组件相关的：
 
-- 目标目录：`packages/core/app/components/<场景>/<Name>.vue`（`pathPrefix: true`：子目录名=场景=组件名前缀，文件名精简不重复场景，如 `composition/SignupForm.vue` → `<CompositionSignupForm>`；跨场景公共件才放根目录用裸名，如 `CopyButton`/`ThemeToggle`）。
-- **文案无关化**：会话里可能硬编码了字符串，搬进 core 时一律改成 props/slot 传入，core 组件不含业务文案。
-- 只用 `@nuxt/ui` 原语 + 语义 token，守住硬规则（focus 环、`aria-label`、`UFormField`、无固定宽度）。
-- 若组件带自己的 composable/util，一并搬进 `packages/core/app/composables/` 或 `app/utils/`。
+- default、hover、focus-visible、disabled；
+- loading、empty、error；
+- 长文本、CJK / Latin 宽度、真实密度；
+- light / dark；
+- 390px、960px、1440px；涉及 `lg` 切换时补 960 / 961px 边界；
+- 键盘操作、可访问名、console errors。
 
-## 第 2 步：过规格（有交互才需要）
+只保留有意义的状态，不为纯展示件制造虚假矩阵。
 
-按 `component-spec-template.md`：有交互/状态/焦点管理 → 走 anatomy→state→a11y 三表；纯展示原子 → 口头过 anatomy + a11y 即可。AI 起草规格，人评审。
+## 3. 晋升到正式真源
 
-## 第 3 步：加 gallery catalog 条目
+### Foundation
 
-新组件的可视落点是 **gallery 的逐组件目录**，不是 showcase（showcase 只放基础 + 招牌组合）。在组件所属分组的 section 里加一条 `<GalleryEntry>`（`apps/gallery/app/components/gallery/<Group>.vue`，如 `Forms.vue`/`Overlays.vue`）：
+- component → `foundation/components/<scene>/<Name>.vue`；跨场景裸名组件可放 `foundation/components/` 根。
+- composition → `foundation/compositions/<Name>.vue`。
+- composable → `foundation/composables/`。
+- util → `foundation/utils/`。
+- token / CSS → `foundation/assets/css/`。
+- app / UI config → `foundation/config/`。
 
-```vue
-<GalleryEntry
-  name="NewComponent"
-  description="一句话说明这个组件是干什么的。"
-  usage-href="https://github.com/abel-2333-org/geist-nuxt/blob/main/references/components/<组>.md#newcomponent"
->
-  <GalleryExample label="Variants">
-    <NewComponent title="示例标题" />
-    <!-- 关键变体：尺寸/语义色/状态各摆一个，用真实 token，不写死颜色 -->
-  </GalleryExample>
-</GalleryEntry>
+### Kit
+
+- component → `kits/<kit>/components/<Name>.vue`。
+- composable → `kits/<kit>/composables/`。
+- util → `kits/<kit>/utils/`。
+
+kit 只能依赖 foundation 或同 kit item；禁止 kit → kit。私有 spec、adapter、fixture、demo 数据和页面 recipe 留在根 `app/` 或消费项目。
+
+## 4. 更新根 registry
+
+按 `references/registry.md`：
+
+1. 新建或更新 owning item；
+2. `files[]` 列出全部自有 source / target；
+3. 共享切片通过 `registryDependencies[]` 传递，不重复列文件；
+4. 确认 target 下的 Nuxt 自动导入命名稳定；
+5. 运行 `pnpm registry:validate && pnpm test:registry`。
+
+不存在 `coreDeps`、kit 内 registry 或 npm layer 兜底。
+
+## 5. 加正式 gallery
+
+通用组件加入根 `app/components/gallery/<Group>.vue` 的 `<GalleryEntry>`；kit 组件加入 `app/pages/kits/<kit>/` 对应页面。条目只展示真实渲染和关键 facet，Usage 指回 references，不复制 props 表或源码。
+
+页面级 recipe 留在根 app。例如 API reference 的 `app/components/demo/api-docs/CodeRail.vue` 是 gallery-private：它演示内容优先重分配，但不是 foundation / kit / registry 资产。
+
+## 6. 完整 gate
+
+```bash
+pnpm registry:validate
+pnpm test:registry
+pnpm typecheck
+pnpm build
+pnpm test:consumer
 ```
 
-要求：`usage-href` 指回自家 `references/components/<组>.md` 的标题锚点（不复制源码/props）；按 facet 拆 `<GalleryExample>`，块级组件用 `layout="stack"`；明暗两种模式都要成立（用语义 token，不用原始色值）。同时确保 `references/components/<组>.md` 里该组件有对应说明（catalog 与文档同源）。
+- root gate 证明真源 gallery 可运行；
+- consumer gate 证明选定 registry 切片在独立 Nuxt 项目中可安装并 build；
+- 两者都通过后，才算晋升完成。
 
-## 第 4 步：验证
+## 7. 收尾与授权
 
-- 在 starter 里 `pnpm dev` 跑起来（starter 依赖发布版 core，本地验证可临时用 `pnpm --filter starter add @geist-nuxt/core@link:../packages/core` 或直接在 gallery 里验证，gallery 用 workspace 即时生效）。
-- 明暗模式 + 移动→宽屏都过一遍。gallery 是最快的验证场（`workspace:*`，改完热更）。
+推送前明确列出：正式源码、registry、gallery / fixture、references、playground 处置及验证结果。人工只需决定是否采纳、是否授权 push；CI 负责构建 Source-first dist-skill release，不再发 npm 或 bump starter。
 
-## 第 5 步：bump core 版本（发版闸门，人授权推送）
+## API Docs 示例
 
-- **semver 规则**：新增组件 = **minor** bump（`1.2.0`→`1.3.0`）；仅修 bug = patch；破坏性改（删/改 prop、改行为）= major。
-- 改 `packages/core/package.json` 的 `version`。
-- 提交 + 推送 main → CI 自动发布 `@geist-nuxt/core@<新版>` 到 npm、并出 `dist-skill` release。**推送需人授权。**
-
-## 第 6 步：bump starter 依赖（钉死精确版本）
-
-- 改 `starter/package.json`：`"@geist-nuxt/core": "<新版>"`（**精确版本，不加 `^`**——跨账号字节级一致靠它 + lockfile 双重钉死）。
-- 同一次提交里改；CI 会重新生成 starter 的 `pnpm-lock.yaml` 并跑 boot 验证，boot 不过则视为回流失败，必须修好。
-
----
-
-## 完成后
-
-CI 绿灯后，按 `maintenance/sync.md` 把新 `dist-skill` 整体覆盖到记忆区。此后**所有 v0 账号的新会话**都能通过 extends core 直接用上这个组件（自动导入，无需改 starter 文件——`index.vue` 永远只是 `<GeistShowcase />`）；它的可视样子在 gallery 目录里查看。注意：starter 的默认预览（`<GeistShowcase />`）只展示基础 + 招牌组合，不会逐个列出新组件——那是 gallery catalog 的职责。
-
-## 端到端链路（以一套 API reference 组件为例）
-
-把上面的阶段串成一次真实会话的样子：
-
-1. 「设计一个 API 字段介绍组件」→ 组件建进 kit `packages/kits/api-docs/app/components/api-docs/`（`<ApiDocs*>`）。
-2. gallery 建 `pages/playground.vue`，用 chrome + fixture 摆出来 → 预览 `/playground` 实时调。
-3. 定稿 → 演示提升进 `pages/kits/api-docs/reference.vue`（页面级形态，自动进导航）；playground 临时件删除。
-4. 走 push 前清单（见 `maintenance/sync.md`）：kit 组件 + registry / gallery 的 api-docs 路由 + fixture / 丢弃 playground 临时件——三类分别说明，人审授权。
-5. push → CI 发版 → 同步记忆区（见 `maintenance/sync.md`）。gallery 导航自动从路由树生成，所有组件可见。
-
-> **数据分层铁律**（详见 `references/gallery.md`）：kit 组件只认 ViewModel；`spec.ts` / `adaptSpec` / fixture 全住 gallery app，永不进 kit。原子级 story 用内联假 ViewModel，页面级形态用 fixture + gallery 本地 adapter 演示真实链路。
-
-## 一句话记忆
-
-**人只做「第 0 步：该不该进」和「第 5 步：授权推送」两个决策，其余 AI 一条龙。**
+1. 候选 `FieldItem` 先放 `playground/`，在 `/playground` 摆紧凑、高密度、递归与深链接状态。
+2. 采纳后移动到 `kits/api-docs/components/FieldItem.vue`，配套 composable 放 `kits/api-docs/composables/`。
+3. 更新根 `registry.json` 的 `field-item` item 与依赖闭包。
+4. 将稳定 demo 提升到 `app/pages/kits/api-docs/`；页面私有 fixture / adapter 留在 `app/`。
+5. 清理 playground，运行完整 gate，等待 push 授权。

@@ -2,14 +2,14 @@
 
 ## Logo / Favicon
 
-- **`public/favicon.svg`** — geist-nuxt 的品牌标记，已随 starter 打包。
+- **`public/favicon.svg`** — geist-nuxt 的品牌标记，随根 gallery / v0 snapshot 分发。
   - 在头部/导航用它作为 logo：`<img src="/favicon.svg" alt="" class="size-6" />`（配文字 wordmark `geist-nuxt`）。
   - 也在 `app/app.vue` 的 `useHead({ link: [{ rel: 'icon', ... }] })` 里作为浏览器 favicon 引用。
 - 没有其他 logo 变体时，用文字 wordmark（`font-mono font-semibold`）而不是臆造图形。
 
 ## 图标
 
-图标通过 Iconify 名称字符串使用，格式 `i-<collection>-<name>`。starter 已装两个集合：
+图标通过 Iconify 名称字符串使用，格式 `i-<collection>-<name>`。根项目已装两个集合：
 
 - **UI 图标 → Lucide**：`i-lucide-<name>`（如 `i-lucide-plus`、`i-lucide-settings`、`i-lucide-arrow-right`）。集合：`@iconify-json/lucide`。**默认首选。**
 - **品牌图标 → Simple Icons**：`i-simple-icons-<name>`（如 `i-simple-icons-github`、`i-simple-icons-vercel`）。集合：`@iconify-json/simple-icons`。
