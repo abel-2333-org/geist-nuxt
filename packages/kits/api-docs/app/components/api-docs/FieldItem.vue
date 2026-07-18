@@ -361,8 +361,18 @@ const lifecycleMeta = computed(() => {
           v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
           class="text-sm leading-relaxed text-muted"
         >
-          <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>
-          <template v-if="lifecycle.since">{{ t.since }} {{ lifecycle.since }}<template v-if="lifecycle.description">. </template></template>
+          <!-- Lead-in is SINCE (the version marker), NOT the status word: the
+               summary badge already carries "New/Beta/Deprecated", so repeating
+               it here is noise. SINCE actually explains what the number means,
+               and keeping the badge's tone color on it ties the callout back to
+               the badge without duplicating the word. Label omitted when there's
+               no version (a description-only note stands on its own). -->
+          <span
+            v-if="lifecycle.since"
+            class="mr-2 text-xs font-medium uppercase tracking-wide"
+            :class="lifecycleMeta.cls"
+          >{{ t.since }}</span>
+          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </p>
 
@@ -391,12 +401,28 @@ const lifecycleMeta = computed(() => {
           :default-label="t.default"
         />
 
-        <!-- 3. Constraints — boundaries and caveats grouped into one titled
-             table, echoing the enum table's container so the field has a single
-             consistent tabular language. Two columns: a fit-content label
-             column (tone carried by label color, unsupported = amber) and the
-             value. Rows share hairline dividers instead of per-item boxes. -->
-        <div v-if="notes?.length" class="space-y-2">
+        <!-- 3a. Single constraint — an inline lead-in row (same grammar as
+             Example / Condition), NOT a boxed table. Unlike an enum (rarely a
+             single value), a constraint is often exactly one line; a titled
+             bordered table with a "(1)" counter is disproportionate chrome for
+             one sentence. Downgrading to inline is MORE consistent with the
+             band, whose other single-fact rows are all "LABEL + text". -->
+        <p
+          v-if="notes?.length === 1 && notes[0]"
+          class="text-sm leading-relaxed"
+        >
+          <span
+            class="mr-2 text-xs font-medium uppercase tracking-wide"
+            :class="(notes[0].tone ?? 'info') === 'caution' ? 'text-warning' : 'text-dimmed'"
+          >{{ notes[0].label ?? t.note }}</span>
+          <InlineMarkdown :text="notes[0].text" />
+        </p>
+
+        <!-- 3b. Multiple constraints — NOW the table earns its chrome: column
+             alignment across rows and hairline dividers let you scan them.
+             Two columns: a fit-content label column (tone carried by label
+             color, unsupported = amber) and the value. -->
+        <div v-else-if="notes && notes.length > 1" class="space-y-2">
           <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
             {{ t.constraints }}
             <span class="text-dimmed/70">({{ notes.length }})</span>
@@ -436,8 +462,18 @@ const lifecycleMeta = computed(() => {
           v-if="!isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
           class="text-sm leading-relaxed text-muted"
         >
-          <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>
-          <template v-if="lifecycle.since">{{ t.since }} {{ lifecycle.since }}<template v-if="lifecycle.description">. </template></template>
+          <!-- Lead-in is SINCE (the version marker), NOT the status word: the
+               summary badge already carries "New/Beta/Deprecated", so repeating
+               it here is noise. SINCE actually explains what the number means,
+               and keeping the badge's tone color on it ties the callout back to
+               the badge without duplicating the word. Label omitted when there's
+               no version (a description-only note stands on its own). -->
+          <span
+            v-if="lifecycle.since"
+            class="mr-2 text-xs font-medium uppercase tracking-wide"
+            :class="lifecycleMeta.cls"
+          >{{ t.since }}</span>
+          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </p>
       </div>

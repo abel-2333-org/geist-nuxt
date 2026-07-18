@@ -95,9 +95,11 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
 <template>
   <div class="space-y-2">
     <div class="flex flex-wrap items-center justify-between gap-2">
+      <!-- Count is always shown so this header matches the constraints block's
+           `LABEL (N)` grammar — the two tabular blocks read as one language. -->
       <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
         {{ label }}
-        <span v-if="filterable" class="text-dimmed/70">({{ totalCount }})</span>
+        <span v-if="totalCount" class="text-dimmed/70">({{ totalCount }})</span>
       </p>
       <UInput
         v-if="filterable"
