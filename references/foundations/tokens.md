@@ -125,7 +125,7 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 ## 间距 / 容器 / 头部
 
 - 间距用 Tailwind 4px 基准刻度（`p-2`=8px、`gap-4`=16px、`py-6`=24px…），大留白优先。
- - `--ui-container: 1200px`（Geist 内容列宽），用 `<UContainer>` 承载。
+ - `--ui-container: 100%`（默认全宽），用 `<UContainer>` 承载——它仍提供响应式左右 padding；长文阅读宽度在内容级用 `max-w-2xl`/`max-w-3xl` 约束。
 - 头部高度 `--ui-header-height: 4rem`（64px）。
 
 ## Focus
