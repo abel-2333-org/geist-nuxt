@@ -608,10 +608,15 @@ onMounted(() => anchor.initFromHash())
               </span>
             </UButton>
             <template #content>
-              <!-- 2×2 域卡片面板：每张卡 tile + 域名 + 简介，当前域 primary
-                   色调（border + tint + 打勾）。role=radiogroup/radio 表达
-                   「四选一」语义。 -->
-              <div class="w-[380px] max-w-[calc(100vw-2rem)] p-2" role="radiogroup" aria-label="文档域">
+              <!-- 2×2 域卡片面板，卡内左右结构（Stripe/Vercel 菜单同构）：
+                   tile 在左、与域名行 items-start 对齐；文字两行在右侧成一条
+                   对齐轴线（域名 → 简介），视线按「图标 → 域名 → 简介」单向
+                   扫过；勾收进域名行尾（ml-auto），不再悬空在卡片角落。
+                   当前域 primary 色调（border + tint + 打勾），radiogroup/radio
+                   表达「四选一」语义。 -->
+              <!-- 面板宽度按内容定：让最长简介（12 字）恰好单行，避免 CJK
+                   逐字折行把词拆开（如「退/款」）。 -->
+              <div class="w-[460px] max-w-[calc(100vw-2rem)] p-2" role="radiogroup" aria-label="文档域">
                 <p class="px-2 pb-2 pt-1 text-xs font-medium text-dimmed">切换文档域</p>
                 <div class="grid grid-cols-2 gap-1.5">
                   <button
@@ -620,31 +625,31 @@ onMounted(() => anchor.initFromHash())
                     type="button"
                     role="radio"
                     :aria-checked="d.id === currentDomainId"
-                    class="group flex flex-col items-start gap-2.5 rounded-md border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    class="group flex items-start gap-3 rounded-md border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     :class="d.id === currentDomainId
                       ? 'border-primary/25 bg-primary/5'
                       : 'border-transparent hover:border-default hover:bg-elevated/60'"
                     @click="selectDomain(d.id)"
                   >
-                    <span class="flex w-full items-center justify-between">
-                      <span
-                        class="flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors"
-                        :class="d.id === currentDomainId
-                          ? 'border-primary/25 bg-primary/10 text-primary'
-                          : 'border-default bg-elevated text-muted group-hover:text-toned'"
-                      >
-                        <UIcon :name="d.icon" class="size-4" />
-                      </span>
-                      <UIcon
-                        v-if="d.id === currentDomainId"
-                        name="i-lucide-check"
-                        class="size-4 shrink-0 text-primary"
-                        aria-hidden="true"
-                      />
+                    <span
+                      class="flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors"
+                      :class="d.id === currentDomainId
+                        ? 'border-primary/25 bg-primary/10 text-primary'
+                        : 'border-default bg-elevated text-muted group-hover:text-toned'"
+                    >
+                      <UIcon :name="d.icon" class="size-4" />
                     </span>
-                    <span class="space-y-0.5">
-                      <span class="block text-sm font-medium text-highlighted">{{ d.label }}</span>
-                      <span class="block text-xs leading-relaxed text-muted">{{ d.description }}</span>
+                    <span class="flex min-w-0 flex-col gap-0.5">
+                      <span class="flex items-center gap-1.5 text-sm/5 font-medium text-highlighted">
+                        {{ d.label }}
+                        <UIcon
+                          v-if="d.id === currentDomainId"
+                          name="i-lucide-check"
+                          class="size-3.5 shrink-0 text-primary"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <span class="text-xs leading-relaxed text-muted">{{ d.description }}</span>
                     </span>
                   </button>
                 </div>
