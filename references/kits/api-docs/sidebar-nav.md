@@ -17,9 +17,9 @@ nav (landmark, 粘顶 + 自身滚动区，可拖拽调宽)
 │        │              · guide 型：sans 句式、中性图标
 │        │              · endpoints 型：mono 大写 tracking（chrome 保持中性，颜色只交给 active 态）
 │        │              · 计数 UBadge 两型统一为 neutral subtle
-│        └─ content  ── item (ULink) 列表，左侧一条中性 border 缩进
+│        └─ content  ── item 列表（stretched-link：ULink 覆盖层 + pointer-events-none 内容层为兄弟），左侧一条中性 border 缩进
 │           ├─ 指南项：可选 icon + label
-│           └─ 接口项：前置方法色标（ApiDocsMethodBadge，定宽槽对齐）+ 用途名 label（sans）+ 后置场景标签簇（ApiDocsScenarioTags：测量真溢出，能放几个铺几个、余下折 +N，一个都放不下才收成计数 chip）（+ 可选尾部 badge）
+│           └─ 接口项：前置方法色标（ApiDocsMethodBadge，定宽槽对齐）+ 用途名 label（sans）+ 后置场景标签簇（ApiDocsScenarioTags：测量真溢出，能放几个铺几个、余下折 +N/计数 chip，溢出触发器是浮回可点的 popover button）（+ 可选尾部 badge）
 └─ resizer  ── 右边缘 role="separator" 拖拽手柄（lg+ 显示；悬停/聚焦/拖拽时变紫 1px→2px；鼠标拖拽、键盘 ←→/Home/End、双击复位）
 ```
 
@@ -100,11 +100,12 @@ interface SidebarNavGroup {
 ## Accessibility（无障碍）
 
 - 根节点是 `<nav :aria-label>` 地标；板块用真实 `<button>` 触发（Reka `UCollapsible` 接好 `aria-expanded`/`aria-controls`），可访问名 = 板块标题 + 计数。
-- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`，`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
-- 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签是中性 `UBadge`（非交互），文字（订阅/授权…）本身即可访问名。两者都随 `ULink` 一起被读出，补足接口链接的可访问名。
-- 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。
+- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉末尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
+- **过滤结果用 `aria-live="polite"` 播报**：过滤是静默重写列表，故一个 `role="status"` 的 `sr-only` 区域播报「找到 N 个匹配结果」或「没有与"…"匹配的结果」；空 query 时不播报，闲时浏览保持安静。
+- 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签文字（订阅/授权…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（查看全部 N 个服务场景）。
+- 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
 - 调宽手柄是 `role="separator"` + `aria-orientation="vertical"` + `aria-label`，并暴露 `aria-valuenow/min/max`（当前/上/下限宽度）；`tabindex="0"` 可聚焦，`←/→/Home/End` 键盘操作，与拖拽等价。
-- 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在��缘各画一条线。
+- 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在边缘各画一条线。
 
 ## 用法
 

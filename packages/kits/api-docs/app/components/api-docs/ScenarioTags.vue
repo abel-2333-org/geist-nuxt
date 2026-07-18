@@ -147,10 +147,15 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
         v-if="hasOverflow"
         :content="{ side: 'bottom', align: 'end' }"
       >
+        <!-- `pointer-events-auto` + `relative z-10` lift this trigger back above
+             the row's stretched-link overlay (the row content is
+             pointer-events-none so plain clicks fall through to the nav link),
+             so opening the scenario list never also navigates the row.
+             `touch-manipulation` drops the 300ms tap delay on touch. -->
         <button
           type="button"
           :aria-label="overflowLabel"
-          class="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="pointer-events-auto relative z-10 touch-manipulation rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UBadge
             color="neutral"

@@ -144,7 +144,7 @@ const props = withDefaults(
     sections: undefined,
     ariaLabel: 'Documentation',
     searchable: true,
-    searchPlaceholder: 'Search',
+    searchPlaceholder: 'Search…',
     searchShortcut: '/',
     clearLabel: 'Clear search',
     emptyLabel: 'No matching pages',
@@ -223,6 +223,28 @@ const resolved = computed(() => {
 })
 
 const empty = computed(() => hasFilter.value && resolved.value.length === 0)
+
+// The placeholder carries a trailing ellipsis (a truncated-hint convention),
+// but the accessible name shouldn't — screen readers would read the "…" as
+// "ellipsis". Strip it for the aria-label.
+const searchAriaLabel = computed(() => props.searchPlaceholder.replace(/[.…]+$/, '').trim())
+
+// Live-region text for the filter result. Filtering updates the list silently,
+// so without this a screen-reader user gets no feedback on how many items
+// matched (or that nothing did). Announced politely, only while a query is
+// active, so idle browsing stays quiet.
+const resultCount = computed(() =>
+  resolved.value.reduce(
+    (n, group) => n + group.sections.reduce((m, entry) => m + entry.items.length, 0),
+    0,
+  ),
+)
+const filterAnnouncement = computed(() => {
+  if (!hasFilter.value) return ''
+  return resultCount.value === 0
+    ? `没有与“${query.value.trim()}”匹配的结果`
+    : `找到 ${resultCount.value} 个匹配结果`
+})
 
 // Global '/' focuses the search; Escape clears + blurs. Ignore the shortcut
 // while the user is already typing in a field or composing via an IME.
@@ -364,8 +386,13 @@ onMounted(() => {
         v-if="searchable"
         ref="searchRef"
         v-model="query"
+        type="search"
         :placeholder="searchPlaceholder"
-        :aria-label="searchPlaceholder"
+        :aria-label="searchAriaLabel"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         icon="i-lucide-search"
         size="sm"
         variant="soft"
@@ -386,6 +413,13 @@ onMounted(() => {
           <UKbd v-else :value="searchShortcut" aria-hidden="true" class="max-sm:hidden" />
         </template>
       </UInput>
+
+      <!-- Polite live region: filtering rewrites the list silently, so announce
+           the match count (or "no results") to screen readers. Visually hidden;
+           empty while idle so nothing is announced during normal browsing. -->
+      <p v-if="searchable" class="sr-only" role="status" aria-live="polite">
+        {{ filterAnnouncement }}
+      </p>
     </div>
 
     <!-- Scroll region: multiple sections can be open at once; overflow scrolls
@@ -450,13 +484,31 @@ onMounted(() => {
 
               <template #content>
                 <ul class="mt-0.5 space-y-px pb-1 ml-3.5 pl-3 border-l border-default">
-                  <li v-for="item in entry.items" :key="item.to ?? item.label">
+                  <!-- Stretched-link row: the navigation <a> is an absolutely
+                       positioned overlay covering the whole row (it carries the
+                       click target, focus ring and hover/active background), and
+                       the visible row content is its *sibling* laid on top with
+                       `pointer-events-none`. This keeps the scenario cluster's
+                       "+N" popover trigger (a <button>) out of the <a>: nesting a
+                       button inside an anchor is invalid HTML and made tapping
+                       "+N" also navigate. Only that button opts back into
+                       pointer events (`pointer-events-auto` in ScenarioTags), so
+                       the row navigates but the tag reveal doesn't. Text colour
+                       is driven by `item.active` + `group-hover/row` rather than
+                       the link's own classes, since the link no longer wraps the
+                       text. -->
+                  <li v-for="item in entry.items" :key="item.to ?? item.label" class="group/row relative">
                     <ULink
                       :to="item.to"
                       :active="item.active"
-                      active-class="bg-primary/10 text-primary"
-                      inactive-class="text-muted hover:text-highlighted hover:bg-elevated"
-                      class="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      :aria-label="item.label"
+                      active-class="bg-primary/10"
+                      inactive-class="hover:bg-elevated"
+                      class="absolute inset-0 rounded-md transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    />
+                    <div
+                      class="pointer-events-none relative flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors"
+                      :class="item.active ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
                     >
                       <!-- Leading: an endpoint shows its HTTP method badge in a
                            fixed-width slot so purpose labels line up regardless
@@ -493,7 +545,7 @@ onMounted(() => {
                       >
                         {{ item.badge }}
                       </UBadge>
-                    </ULink>
+                    </div>
                   </li>
                 </ul>
               </template>
