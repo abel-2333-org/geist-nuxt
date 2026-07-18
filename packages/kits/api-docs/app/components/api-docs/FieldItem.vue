@@ -222,8 +222,9 @@ const hasSecondary = computed(
 )
 
 // A deprecated field gets its name struck through so the "on its way out"
-// state reads instantly, even before the badge. The strike is neutral-toned
-// (not red) since deprecation is de-emphasis, not an error.
+// state reads instantly, even before the badge. The strike inherits the
+// dimmed text color (currentColor) — neutral, not red — since deprecation is
+// de-emphasis, not an error.
 const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
 // Field-lifecycle label + tone, rendered as a plain-text metadata row (no
@@ -263,7 +264,7 @@ const lifecycleMeta = computed(() => {
         v-if="path"
         type="button"
         :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
-        class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 outline-primary transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 group-hover/field:opacity-100 lg:block"
+        class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:block"
         :class="{ 'opacity-100': isActive || anchor.copied.value, 'text-primary': anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -281,7 +282,7 @@ const lifecycleMeta = computed(() => {
 
       <code
         class="font-mono text-sm font-medium"
-        :class="isDeprecated ? 'text-dimmed line-through decoration-muted' : 'text-highlighted'"
+        :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
       >{{ name }}</code>
       <!-- Data type (string, integer, object, enum…): plain mono text, no
            surface/border, so it never competes with the method/status badges. -->
@@ -290,7 +291,7 @@ const lifecycleMeta = computed(() => {
       <!-- Serialization hint (e.g. json_string) sits next to the type. -->
       <span
         v-if="format"
-        class="font-mono text-[0.6875rem] text-dimmed"
+        class="font-mono text-xs text-dimmed"
       >{{ format }}</span>
 
       <span
@@ -315,12 +316,13 @@ const lifecycleMeta = computed(() => {
 
       <!-- Anchor affordance (touch) — inline and always visible on small
            screens, where there's no hover or left gutter. Pushed to the row
-           end and sized as a comfortable tap target. -->
+           end; padding grows the tap target to 32px while negative margins
+           keep the visual footprint inside the row's rhythm. -->
       <button
         v-if="path"
         type="button"
         :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
-        class="ms-auto inline-flex shrink-0 items-center rounded-sm p-1 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary lg:hidden"
+        class="ms-auto -my-1 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
         :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
       >

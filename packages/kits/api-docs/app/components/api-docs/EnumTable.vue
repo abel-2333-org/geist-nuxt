@@ -102,7 +102,7 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
         icon="i-lucide-search"
         size="xs"
         variant="soft"
-        class="w-44"
+        class="w-44 max-w-full"
         :ui="{ base: 'rounded-sm' }"
       />
     </div>

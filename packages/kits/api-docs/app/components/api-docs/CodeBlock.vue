@@ -40,6 +40,8 @@ export interface ApiCodeLabels {
   language?: string
   copy?: string
   copied?: string
+  /** Object name used in the copy toast, e.g. 'Code' → "Code copied…". */
+  copyToast?: string
   wrapOn?: string
   wrapOff?: string
   emptyTitle?: string
@@ -78,6 +80,7 @@ const t = computed<Required<ApiCodeLabels>>(() => ({
   language: 'Language',
   copy: 'Copy code',
   copied: 'Copied to clipboard',
+  copyToast: 'Code',
   wrapOn: 'Turn on line wrap',
   wrapOff: 'Turn off line wrap',
   emptyTitle: 'No example available',
@@ -211,7 +214,7 @@ const wrap = useCodeWrap(props.defaultWrap)
         <CopyButton
           v-if="hasContent"
           :value="current?.code ?? ''"
-          toast-label="Code"
+          :toast-label="t.copyToast"
           :label="t.copy"
           :copied-label="t.copied"
           size="xs"
