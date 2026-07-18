@@ -21,6 +21,7 @@ import {
 } from '../scripts/lib/registry.mjs'
 
 const SOURCE_SHA = '1234567890abcdef1234567890abcdef12345678'
+const OTHER_SOURCE_SHA = 'abcdef1234567890abcdef1234567890abcdef12'
 
 test('accepts the pnpm argument separator', () => {
   const options = parseArgs(['--', 'geist-foundation', '--target', '../consumer', '--to', SOURCE_SHA])
@@ -126,13 +127,14 @@ test('rejects undeclared files, duplicate targets, cycles, and undeclared relati
   })
 })
 
-test('rejects unsafe paths, protected consumer files, and non-exact SHAs', () => {
+test('rejects unsafe paths and protected consumer files while allowing the managed foundation main.css', () => {
   assert.throws(() => assertSafeTarget('../outside.vue'), /escapes/)
   assert.throws(() => assertSafeTarget('/tmp/outside.vue'), /relative/)
   assert.throws(() => assertSafeTarget('node_modules/pkg/index.js'), /dependency directory/)
   assert.throws(() => assertSafeTarget('nuxt.config.ts'), /protected/)
   assert.throws(() => assertSafeTarget('app/app.config.ts'), /protected/)
-  assert.throws(() => assertSafeTarget('app/assets/css/main.css'), /protected/)
+  assert.equal(assertSafeTarget('app/assets/css/main.css'), 'app/assets/css/main.css')
+  assert.throws(() => assertSafeTarget('assets/css/main.css'), /protected/)
   assert.throws(() => assertExactSha('main'), /exact 40-character Git SHA/)
   assert.equal(assertExactSha(SOURCE_SHA.toUpperCase()), SOURCE_SHA)
 })
@@ -210,6 +212,58 @@ test('dry-run planning writes nothing; write records exact SHA and source/target
   assert.equal(record.sourceSha, SOURCE_SHA)
   assert.equal(record.sourceHash, record.targetHash)
   assert.equal(record.targetHash, sha256(await readFile(path.join(consumerRoot, record.target))))
+})
+
+test('reconcile rejects a lock issued by another registry before trusting managed hashes', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+  const foreignLock = await readLock(consumerRoot)
+  foreignLock.registry = {
+    ...foreignLock.registry,
+    name: 'foreign-registry',
+    repository: 'https://example.test/foreign.git',
+  }
+
+  assert.throws(
+    () => resolveCopyRequest(registry, ['feature'], { lock: foreignLock, update: true }),
+    /belongs to a different registry/,
+  )
+
+  await writeFile(path.join(consumerRoot, 'geist.lock.json'), `${JSON.stringify(foreignLock, null, 2)}\n`)
+  await assert.rejects(
+    planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA, update: true }),
+    /belongs to a different registry/,
+  )
+})
+
+test('consumer check requires one exact source SHA and matching installed hashes', async (t) => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+  const originalLock = await readLock(consumerRoot)
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+
+  await t.test('item source SHA matches registry source SHA', async () => {
+    const lock = structuredClone(originalLock)
+    lock.items.feature.sourceSha = OTHER_SOURCE_SHA
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /feature sourceSha must match registry lastSourceSha/)
+  })
+
+  await t.test('file source SHA matches registry source SHA', async () => {
+    const lock = structuredClone(originalLock)
+    lock.files['app/components/Feature.vue'].sourceSha = OTHER_SOURCE_SHA
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /Feature\.vue sourceSha must match registry lastSourceSha/)
+  })
+
+  await t.test('source and installed hashes remain identical', async () => {
+    const lock = structuredClone(originalLock)
+    lock.files['app/components/Feature.vue'].sourceHash = sha256('different source')
+    await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /sourceHash must match targetHash/)
+  })
 })
 
 test('copy into an existing lock reconciles the full request set and prunes removed locked items', async () => {

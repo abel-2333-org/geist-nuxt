@@ -21,8 +21,8 @@
       "Wrap the application in UApp.",
       "Merge app/config/geist-app.ts into the consumer app/app.config.ts.",
       "Merge app/config/geist-nuxt.ts into the consumer nuxt.config.ts.",
-      "Import tailwindcss and @nuxt/ui from the consumer-owned app/assets/css/main.css.",
-      "Load app/assets/css/geist.css after the consumer-owned main.css.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and Geist foundation entry.",
+      "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
       "Keep Nuxt color mode enabled through @nuxt/ui."
     ]
   },
@@ -44,7 +44,7 @@
       "title": "Geist foundation runtime",
       "description": "Geist tokens and non-overwriting Nuxt/App config fragments.",
       "files": [
-        { "path": "foundation/assets/css/geist.css", "target": "app/assets/css/geist.css" },
+        { "path": "foundation/assets/css/main.css", "target": "app/assets/css/main.css" },
         { "path": "foundation/config/geist-nuxt.ts", "target": "app/config/geist-nuxt.ts" },
         { "path": "foundation/config/geist-app.ts", "target": "app/config/geist-app.ts" }
       ]

@@ -1,6 +1,6 @@
 /**
  * Geist viewport breakpoints shared by Tailwind CSS and JavaScript behavior.
- * Keep these values aligned with the `--breakpoint-*` tokens in geist.css.
+ * Keep these values aligned with the `--breakpoint-*` tokens in main.css.
  */
 export const GEIST_BREAKPOINTS = {
   sm: 401,

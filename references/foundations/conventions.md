@@ -41,7 +41,7 @@ playground/                      未采纳候选
 ## 主题与颜色
 
 - 语义别名真源：`foundation/config/`。
-- token 真源：`foundation/assets/css/geist.css`。
+- token 真源：`foundation/assets/css/main.css`。
 - 覆盖 token 不放 `@layer`，避免被 Nuxt UI theme layer 覆盖。
 - 明暗切换 UI 优先用 `UColorModeButton`；只有读取或编排主题状态时才用 `useColorMode()`。组件使用语义 token，不写死 neutral 数字阶。
 

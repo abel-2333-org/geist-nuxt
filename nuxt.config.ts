@@ -10,10 +10,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: ['@nuxt/ui'],
-  css: [
-    resolve('./app/assets/css/main.css'),
-    resolve('./foundation/assets/css/geist.css'),
-  ],
+  css: [resolve('./app/assets/css/main.css')],
 
   colorMode: geistNuxtConfig.colorMode,
   ui: geistNuxtConfig.ui,

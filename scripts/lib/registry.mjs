@@ -17,8 +17,8 @@ const PROTECTED_TARGETS = new Set([
   'app.config.ts',
   'app/app.config.ts',
   'app/app.vue',
-  'app/assets/css/main.css',
 ])
+const MANAGED_MAIN_CSS_TARGET = 'app/assets/css/main.css'
 
 export class RegistryError extends Error {
   constructor(message, details = []) {
@@ -123,7 +123,10 @@ export function assertSafeTarget(target) {
   if (segments.some(segment => FORBIDDEN_TARGET_SEGMENTS.has(segment))) {
     throw new RegistryError(`file target enters a generated or dependency directory: ${target}`)
   }
-  if (PROTECTED_TARGETS.has(normalized) || path.posix.basename(normalized) === 'main.css') {
+  if (
+    PROTECTED_TARGETS.has(normalized)
+    || (path.posix.basename(normalized) === 'main.css' && normalized !== MANAGED_MAIN_CSS_TARGET)
+  ) {
     throw new RegistryError(`file target is consumer-owned and protected: ${target}`)
   }
   return normalized
@@ -443,6 +446,7 @@ export function resolveItems(registry, requestedItems) {
 }
 
 export function resolveCopyRequest(registry, requestedItems, { lock, update = false } = {}) {
+  assertLockRegistryIdentity(registry, lock)
   const requested = [...new Set(requestedItems)]
   const itemsByName = new Set(registry.items.map(item => item.name))
   for (const name of requested) {
@@ -456,6 +460,17 @@ export function resolveCopyRequest(registry, requestedItems, { lock, update = fa
   const combined = [...new Set([...retained, ...requested])]
   if (combined.length === 0) return { requested: [], items: [], files: [] }
   return resolveItems(registry, combined)
+}
+
+export function assertLockRegistryIdentity(registry, lock) {
+  if (!lock) return
+  const actualName = lock.registry?.name ?? '<missing>'
+  const actualRepository = lock.registry?.repository ?? '<missing>'
+  if (actualName !== registry.name || actualRepository !== registry.repository) {
+    throw new RegistryError(
+      `${LOCK_FILE} belongs to a different registry: expected ${registry.name} (${registry.repository}), received ${actualName} (${actualRepository})`,
+    )
+  }
 }
 
 export async function readLock(consumerRoot) {
@@ -511,6 +526,7 @@ async function fileHash(filePath) {
 export async function planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha, update = false }) {
   const lock = await readLock(consumerRoot)
   if (update && !lock) throw new RegistryError(`--update requires an existing ${LOCK_FILE}`)
+  assertLockRegistryIdentity(registry, lock)
   const conflicts = []
   const operations = []
   for (const file of resolution.files) {
@@ -645,8 +661,9 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     externalRequirements: registry.externalRequirements,
   }
   const { lastSourceSha, ...lockedRegistry } = lock.registry
+  let lockedSourceSha
   try {
-    assertExactSha(lastSourceSha, 'registry lastSourceSha')
+    lockedSourceSha = assertExactSha(lastSourceSha, 'registry lastSourceSha')
   }
   catch (error) {
     errors.push(error.message)
@@ -704,7 +721,10 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     let safeTarget
     try {
       safeTarget = await assertNoSymlinkTarget(consumerRoot, target)
-      assertExactSha(record.sourceSha, `${target} sourceSha`)
+      const fileSourceSha = assertExactSha(record.sourceSha, `${target} sourceSha`)
+      if (lockedSourceSha && fileSourceSha !== lockedSourceSha) {
+        errors.push(`${target} sourceSha must match registry lastSourceSha`)
+      }
     }
     catch (error) {
       errors.push(error.message)
@@ -713,6 +733,7 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     const targetState = await fileHash(path.join(consumerRoot, safeTarget))
     if (!targetState.exists) errors.push(`managed target is missing: ${target}`)
     else if (targetState.hash !== record.targetHash) errors.push(`managed target drifted: ${target}`)
+    if (record.sourceHash !== record.targetHash) errors.push(`locked sourceHash must match targetHash: ${target}`)
     if (record.target !== target) errors.push(`lock target key does not match record.target: ${target}`)
     const item = registry.items.find(candidate => candidate.name === record.item)
     const fileStillExists = item?.files.some(file => file.path === record.source && file.target === target)
@@ -725,7 +746,10 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
   }
   for (const [itemName, itemRecord] of Object.entries(lock.items)) {
     try {
-      assertExactSha(itemRecord.sourceSha, `${itemName} sourceSha`)
+      const itemSourceSha = assertExactSha(itemRecord.sourceSha, `${itemName} sourceSha`)
+      if (lockedSourceSha && itemSourceSha !== lockedSourceSha) {
+        errors.push(`${itemName} sourceSha must match registry lastSourceSha`)
+      }
     }
     catch (error) {
       errors.push(error.message)

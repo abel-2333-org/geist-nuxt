@@ -58,7 +58,7 @@ try {
   }
   console.log('External packages:')
   for (const [name, range] of Object.entries(registry.externalRequirements.packages)) console.log(`- ${name}@${range}`)
-  console.log('Consumer setup (consumer-owned files are never overwritten):')
+  console.log('Consumer setup (protected entrypoints are never overwritten automatically):')
   for (const instruction of registry.externalRequirements.consumerSetup) console.log(`- ${instruction}`)
 }
 catch (error) {

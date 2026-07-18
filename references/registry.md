@@ -57,7 +57,7 @@ pnpm geist:copy -- geist-foundation <item...> \
   --write
 ```
 
-`geist-foundation` 是基础 item 的稳定名称，提供 Geist CSS 与非覆盖式 app / Nuxt config fragments。请求其它 item 时，工具仍会自动展开其 `registryDependencies`；显式列基础 item 能让初次安装意图清楚。
+`geist-foundation` 是基础 item 的稳定名称，提供可直接运行的 `app/assets/css/main.css` 与非覆盖式 app / Nuxt config fragments。请求其它 item 时，工具仍会自动展开其 `registryDependencies`；显式列基础 item 能让初次安装意图清楚。
 
 `geist:copy` / `geist:update` 默认都是 **dry-run**，不创建文件、不删除文件，也不写 lock。只有显式 `--write` 才应用整个 batch。`--dry-run` 可用于强调只读意图，但不能与 `--write` 同时使用。
 
@@ -83,11 +83,11 @@ pnpm geist:copy -- geist-foundation <item...> \
 - 每个 resolved item 的 `registryDependencies`、source SHA 和目标文件列表；
 - 每个受管文件的 source、target、source SHA、source hash 与 target hash。
 
-lock 是 update / check 的受管状态真源，不是依赖安装器。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/geist-app.ts`；消费项目必须按 `externalRequirements.consumerSetup` 将它显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/geist-nuxt.ts` 合并进根 `nuxt.config.ts`、接入 CSS。不要手改 lock，也不要把 lock 中的兼容范围当成已自动满足的依赖。
+lock 是 update / check 的受管状态真源，不是依赖安装器。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/geist-app.ts`；消费项目必须按 `externalRequirements.consumerSetup` 将它显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/geist-nuxt.ts` 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的兼容范围当成已自动满足的依赖。
 
 ## Nuxt 4 消费项目接线
 
-copy-in 不覆盖消费项目拥有的三个入口。安装 `geist-foundation` 后，按下列方式显式接线。
+copy-in 不覆盖消费项目拥有的 `nuxt.config.ts`、`app/app.config.ts` 和 `app/app.vue`；foundation 的 `main.css` 则作为完整设计系统入口复制到 `app/assets/css/main.css`。安装 `geist-foundation` 后，按下列方式显式接线。
 
 ### `app/app.config.ts`
 
@@ -122,7 +122,6 @@ export default defineNuxtConfig({
 
   css: [
     './app/assets/css/main.css',
-    './app/assets/css/geist.css', // 必须在项目 main.css 之后加载。
   ],
 
   colorMode: {
@@ -140,17 +139,19 @@ export default defineNuxtConfig({
 })
 ```
 
-消费项目必须拥有下面这个基础样式入口；`@nuxt/ui` module 只注册 Tailwind transformer，不会替项目注入这两条 CSS import：
+复制得到的样式入口已经包含 Tailwind、Nuxt UI 和全部 Geist foundation：
 
 ```css
 /* app/assets/css/main.css */
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/* 消费项目自己的基础样式继续写在这里。 */
+/* Geist @theme、semantic tokens、light/dark 与 motion。 */
+
+/* 消费项目自己的 override 放在 foundation 声明之后。 */
 ```
 
-如果项目原本没有 `app/assets/css/main.css`，创建它，不要删掉 `nuxt.config.ts` 里的第一条 CSS。`geist.css` 只提供 token / semantic override，不能替代 Tailwind 与 Nuxt UI 的基础样式入口，并且必须排在 `main.css` 之后。如果项目已有 `colorMode` / `ui` 配置，在这个消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
+如果项目已有 `app/assets/css/main.css` 且内容不同，首次 copy 会停止并报告 conflict，不会覆盖。先人工合并或采用 foundation 入口，再重新执行 copy；复制完成后该文件归消费项目所有，可以继续追加 override，但任何本地修改都会让后续 `geist:update` 停止并要求人工合并。若已有 `colorMode` / `ui` 配置，在消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
 
 ### `app/app.vue`
 
@@ -188,7 +189,7 @@ pnpm geist:check -- --target <consumer-directory>
 - 带 `--write` 更新时，未被本地修改的 stale managed file 会被删除，并从 lock 的 item / file 记录中清理；若 stale file 已被本地修改，则整个 batch 停止且不写入。
 - 现存受管文件也是同一冲突规则：内容仍等于 lock hash 才能更新；有本地修改就停止整个 batch。
 - `geist:check` 只读比较 lock、当前 registry 与目标文件，发现缺失、内容漂移、陈旧受管文件或 manifest 不一致时非零退出。
-- 本地业务改动不要直接写进受管 copy；需要差异时先决定回流真源、解除管理，或在消费项目外层组合。
+- 普通受管组件的本地业务改动优先放在消费项目外层组合；`main.css` 可以按消费项目需要追加 override，但后续更新会把它视为需要人工合并的本地差异。
 
 更新后在消费项目运行其 typecheck / build / focused tests。仓库自己的端到端保证由 `pnpm test:consumer` 提供。
 
