@@ -246,7 +246,7 @@ const bodyFields = [
     defaultValue: 'payment',
     description: '会话模式：一次性支付或订阅。',
     enumValues: [
-      { value: 'payment', description: '���次性支付。' },
+      { value: 'payment', description: '一次性支付。' },
       { value: 'subscription', description: '周期性订阅，需同时提供 `subscription` 对象。' },
     ],
   },
@@ -295,7 +295,7 @@ const responseFields = [
 // --- 其余端点的紧凑 stub（保证侧栏/搜索里的每个锚点都有落点；完整 reference
 //     形态见上方 #checkout-create，真实项目里每个端点都长成那样） ---
 const endpointStubs = [
-  { id: 'pay', method: 'POST', path: '/v1/payments', summary: '发起支付', description: '绕过托管收银台，直接��已保存的支付方式发起一笔支付或订阅扣款。' },
+  { id: 'pay', method: 'POST', path: '/v1/payments', summary: '发起支付', description: '绕过托管收银台，直接对已保存的支付方式发起一笔支付或订阅扣款。' },
   { id: 'pay-cancel', method: 'DELETE', path: '/v1/payments/{id}', summary: '取消支付', description: '取消一笔尚未捕获的支付或预授权，资金原路解冻。' },
   { id: 'customers', method: 'GET', path: '/v1/customers', summary: '客户管理', description: '分页列出客户及其绑定的支付方式与订阅状态。' },
   { id: 'customer-update', method: 'PATCH', path: '/v1/customers/{id}', summary: '更新客户', description: '更新客户资料或替换默认支付方式，变更即时生效于后续扣款。' },
@@ -325,7 +325,7 @@ onMounted(() => anchor.initFromHash())
     </UContainer>
 
     <!-- ===================== 文档站外壳本体（全宽出血） ===================== -->
-    <!-- 出血：外壳本体不放进 UContainer——flush 立柱要贴到窗口左边缘，居中容器
+    <!-- 出血：外壳本体不放进 UContainer——通栏立柱要贴到窗口左边缘，居中容器
          的左右 padding 会在立柱外露出页面背景形成色差。真实项目整页都是外壳时
          同理：外壳直接铺满 body，正文列自己管理内边距。 -->
     <div class="border-y border-default">
@@ -346,17 +346,16 @@ onMounted(() => anchor.initFromHash())
         />
       </div>
 
-      <!-- 两栏：sticky 贴边通栏侧栏（flush）+ 正文。侧栏列宽 auto 跟随其可拖
-           拽宽度。flush 形态下高度归外层容器所有（视口减 sticky 顶距），立柱
-           上接顶栏、下抵视口底、左贴窗口边缘，与菜单项多少无关；菜单太长时在
-           组件内部滚动。两列之间不留 gap——分隔由 flush 的右边框承担。
-           小屏（lg 以下）侧栏顺排在正文上方，flush 需要父级定高，故用
-           max-lg 响应式类回退为卡片观感。 -->
+      <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度。
+           组件本身就是通栏立柱（唯一形态）：高度归外层容器所有（视口减 sticky
+           顶距），上接顶栏、下抵视口底、左贴窗口边缘，与菜单项多少无关；菜单
+           太长时在组件内部滚动。边框归布局：桌面档给右分隔边（两列之间不留
+           gap），小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给下分隔
+           边即可——都是透传的「追加类」，可靠。 -->
       <div class="grid lg:grid-cols-[auto_1fr]">
-        <div class="max-lg:px-4 max-lg:pt-6 lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start">
+        <div class="lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start">
           <ApiDocsSidebarNav
-            flush
-            class="max-lg:h-auto max-lg:rounded-lg max-lg:border"
+            class="border-default max-lg:border-b lg:border-r"
             :groups="navGroups"
             aria-label="支付文档"
             search-placeholder="搜索文档"
@@ -500,7 +499,7 @@ onMounted(() => anchor.initFromHash())
     <UContainer class="py-8">
       <p class="text-sm text-dimmed">
         数据由本页内联假 ViewModel 驱动，不写进 kit。「创建结算会话」展示完整 reference 形态（字段树 + 代码栏），其余端点以紧凑
-        stub 呈现——真实项目里每个端点都长成前者的样子。外壳本体做了左右出血：flush 立柱贴到窗口边缘，不裹进居中容器。
+        stub 呈现——真实项目里每个端点都长成前者的样子。外壳本体做了左右出血：通栏立柱贴到窗口边缘，不裹进居中容器。
       </p>
     </UContainer>
   </div>

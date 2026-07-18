@@ -138,15 +138,6 @@ const props = withDefaults(
     scenarioOverflowLabel?: (total: number) => string
     /** Separator for the scenario screen-reader-only list. */
     scenarioSeparator?: string
-    /**
-     * Column form. `false` (default) renders a floating card: rounded border
-     * on all sides, shrinks to content height, with a viewport max-height cap.
-     * `true` renders a flush column for classic docs shells: no rounding, a
-     * right-hand separator only, filling the parent's height (`h-full`) — the
-     * parent owns the height (e.g. `h-[calc(100dvh-4rem)]` under a 4rem
-     * header) so the column runs header-to-bottom regardless of item count.
-     */
-    flush?: boolean
     /** Allow drag-resizing the nav width (right-edge handle). */
     resizable?: boolean
     /** Width bounds (px) and initial width when nothing is persisted. */
@@ -172,7 +163,6 @@ const props = withDefaults(
     scenariosLabel: 'Scenarios',
     scenarioOverflowLabel: (total: number) => `View all ${total} scenarios`,
     scenarioSeparator: ', ',
-    flush: false,
     resizable: true,
     minWidth: 220,
     maxWidth: 460,
@@ -442,14 +432,16 @@ onMounted(() => {
 <template>
   <nav
     :aria-label="ariaLabel"
-    class="relative flex flex-col overflow-hidden bg-elevated/40"
+    class="relative flex h-full flex-col overflow-hidden bg-elevated/40"
     :class="[
-      // Card (default): floating rounded card, shrinks to content, capped to
-      // the viewport. Flush: edge column with a right separator only; height
-      // belongs to the parent so the column runs header-to-bottom.
-      flush
-        ? 'h-full border-r border-default'
-        : 'max-h-[calc(100dvh-4rem)] rounded-lg border border-default',
+      // Full-height column, no chrome of its own: the component owns structure
+      // and behavior (search, tree, scroll area, resize); borders, rounding and
+      // the actual height belong to the layout. In a docs shell the parent sets
+      // the height (e.g. h-[calc(100dvh-<header>)]) and appends a separator via
+      // class passthrough (additive classes are reliable; conflicting overrides
+      // are not). For inset layouts, wrap in a bordered rounded frame — the
+      // card look is a layout recipe, not a component form. In an auto-height
+      // parent, h-full resolves to auto and the column shrinks to content.
       { 'select-none': isResizing },
       resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '',
     ]"

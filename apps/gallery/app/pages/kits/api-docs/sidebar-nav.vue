@@ -186,8 +186,15 @@ const searchGroups = groups.map((group, i) => ({
       <!-- The sidebar column is `auto` so it follows the nav's own (resizable)
            width; drag the nav's right edge and this track tracks it. -->
       <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
-        <!-- The sidebar itself, sticky like a real docs shell. -->
-        <div class="lg:sticky lg:top-20 lg:self-start">
+        <!-- The sidebar itself, sticky like a real docs shell. The component
+             ships as a chrome-less full-height column (its only form); this
+             demo sits inset in a centered container, so we compose the "card"
+             here in the layout: a bordered rounded frame that owns the height.
+             In a real docs shell you skip the frame and bleed the column to
+             the window edge instead (see the docs-shell demo). -->
+        <div
+          class="overflow-hidden rounded-lg border border-default lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:self-start"
+        >
           <ApiDocsSidebarNav
             :groups="groups"
             aria-label="支付文档"
