@@ -164,15 +164,22 @@ function onCloseAutoFocus(event: Event) {
   const el = document.getElementById(id)
   if (!el) return
   event.preventDefault()
+  // tabindex="-1" is left on the section intentionally: repeat jumps to the
+  // same target skip the setup, and -1 keeps it out of the tab order anyway.
   if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
   el.focus({ preventScroll: true })
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
 }
 
-// Query is held here (v-model into the palette) so it can reset on select —
-// the next open starts clean instead of replaying a stale filter.
+// Query is held here (v-model into the palette) so it resets on EVERY close —
+// select, Esc, overlay click alike. The next open starts clean instead of
+// replaying a stale filter (and stale async results with it).
 const searchTerm = ref('')
+
+watch(open, (isOpen) => {
+  if (!isOpen) searchTerm.value = ''
+})
 
 // Toggle (not just open): the shortcut while the palette is up dismisses it,
 // matching the muscle memory of other ⌘K palettes. usingInput: fire even while
@@ -206,8 +213,7 @@ function toPaletteItem(item: SiteSearchItem): CommandPaletteItem {
     scenarios: item.scenarios,
     onSelect: () => {
       trackHashDestination(item.to)
-      open.value = false
-      searchTerm.value = ''
+      open.value = false // query reset rides on the watch(open) above
     },
   }
 }
@@ -236,13 +242,31 @@ watch(searchTerm, (query) => {
       const results = await props.search!(query)
       if (seq !== searchSeq) return // stale response — drop it
       asyncItems.value = results
-    } catch {
+    } catch (error) {
+      // Fail soft in the UI (empty group), but leave a trail for the consumer
+      // debugging their search backend.
+      if (import.meta.dev) console.warn('[ApiDocsSiteSearch] `search` threw:', error)
       if (seq === searchSeq) asyncItems.value = []
     } finally {
       if (seq === searchSeq) searching.value = false
     }
   }, props.searchDelay)
 })
+
+// A pending debounce must not fire into a dead component (it would call
+// `props.search` and write unmounted refs).
+onBeforeUnmount(() => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  searchSeq++ // invalidate any in-flight response
+})
+
+if (import.meta.dev) {
+  watchEffect(() => {
+    if (props.search && !props.searchGroupLabel) {
+      console.warn('[ApiDocsSiteSearch] `search` is provided without `searchGroupLabel` — the async results group will render with no heading.')
+    }
+  })
+}
 
 // Static index groups + (optional) async results group + extra groups. The
 // async group sets `ignoreFilter`: the palette shows the source's results

@@ -119,10 +119,15 @@ const contentSections: ContentSection[] = [
 async function searchContent(query: string) {
   // 模拟网络往返，展示 loading 态与竞态丢弃（真实项目由后端检索承担）
   await new Promise(resolve => setTimeout(resolve, 250))
-  const q = query.trim().toLowerCase()
-  if (!q) return []
+  // 按空白分词、逐词求交（AND）——对齐静态索引的 token 搜索行为，
+  // 「幂等 去重」也能命中同一切片；真实检索后端通常也是这个语义。
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  if (tokens.length === 0) return []
   return contentSections
-    .filter(s => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q))
+    .filter((s) => {
+      const haystack = `${s.title} ${s.content}`.toLowerCase()
+      return tokens.every(t => haystack.includes(t))
+    })
     .map(s => ({ label: s.title, to: s.to, suffix: s.content, icon: 'i-lucide-text' }))
 }
 
@@ -353,7 +358,9 @@ onMounted(() => anchor.initFromHash())
          同理：外壳直接铺满 body，正文列自己管理内边距。 -->
     <div class="border-y border-default">
       <!-- 顶栏：品牌 + 全站搜索。gallery 自己有全局 header，因此外壳顶栏内嵌
-           在页面里；真实项目把这一条提升为 app 顶栏即可。 -->
+           在页面里、会随页面滚走，侧栏 sticky 对齐的是 gallery 全局 header；
+           真实项目把这一条提升为 app 顶栏（sticky），并把下方 --header-h 改成
+           这条顶栏自己的高度。 -->
       <div class="flex items-center justify-between gap-4 border-b border-default bg-elevated/40 px-4 py-2.5 sm:px-6">
         <div class="flex items-center gap-2 text-sm font-medium text-highlighted">
           <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
@@ -376,9 +383,12 @@ onMounted(() => anchor.initFromHash())
            顶距），上接顶栏、下抵视口底、左贴窗口边缘，与菜单项多少无关；菜单
            太长时在组件内部滚动。边框归布局：桌面档给右分隔边（两列之间不留
            gap），小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给下分隔
-           边即可——都是透传的「追加类」，可靠。 -->
-      <div class="grid lg:grid-cols-[auto_1fr]">
-        <div class="lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start">
+           边即可——都是透传的「追加类」，可靠。
+           sticky 顶距与列高共用 --header-h 单点维护（此处对齐的是 gallery 的
+           全局 header 高 4rem；真实项目顶栏即 app header 时，把它改成你自己
+           顶栏的高度）。 -->
+      <div class="grid [--header-h:4rem] lg:grid-cols-[auto_1fr]">
+        <div class="lg:sticky lg:top-(--header-h) lg:h-[calc(100dvh-var(--header-h))] lg:self-start">
           <ApiDocsSidebarNav
             class="border-default max-lg:border-b lg:border-r"
             :groups="navGroups"

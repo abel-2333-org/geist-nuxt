@@ -34,6 +34,16 @@
 // remains for consumers who genuinely need an entry at the top of the nav; the
 // base never takes a hard @nuxt/content dependency and stays data-agnostic.
 //
+// Column form & chrome ownership: the root is a chrome-less full-height
+// column — no border, no rounding, h-full, tinted surface only. The component
+// owns structure and behavior (search, tree, scroll area, resize); borders,
+// rounding and the actual height belong to the LAYOUT. In a docs shell the
+// parent sets the height (e.g. h-[calc(100dvh-<header>)]) and appends a
+// separator via class passthrough — additive classes are reliable, conflicting
+// overrides are not. For inset layouts, wrap in a bordered rounded frame: the
+// card look is a layout recipe, not a component form. In an auto-height
+// parent, h-full resolves to auto and the column shrinks to content.
+//
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
 // to localStorage so a reader's preferred width survives reloads. Pointer drag
@@ -430,18 +440,12 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Chrome-less full-height column — see "Column form & chrome ownership"
+       in the script header for the design rationale. -->
   <nav
     :aria-label="ariaLabel"
     class="relative flex h-full flex-col overflow-hidden bg-elevated/40"
     :class="[
-      // Full-height column, no chrome of its own: the component owns structure
-      // and behavior (search, tree, scroll area, resize); borders, rounding and
-      // the actual height belong to the layout. In a docs shell the parent sets
-      // the height (e.g. h-[calc(100dvh-<header>)]) and appends a separator via
-      // class passthrough (additive classes are reliable; conflicting overrides
-      // are not). For inset layouts, wrap in a bordered rounded frame — the
-      // card look is a layout recipe, not a component form. In an auto-height
-      // parent, h-full resolves to auto and the column shrinks to content.
       { 'select-none': isResizing },
       resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '',
     ]"
@@ -609,13 +613,13 @@ onMounted(() => {
                            label keeps a readable `min-w-16` floor either way.
                            Colour stays reserved for the active state. -->
                       <span class="min-w-16 shrink truncate">{{ item.label }}</span>
-        <ApiDocsScenarioTags
-          v-if="itemScenarios(item).length"
-          :scenarios="itemScenarios(item)"
-          :scenarios-label="scenariosLabel"
-          :overflow-label="scenarioOverflowLabel"
-          :separator="scenarioSeparator"
-        />
+                      <ApiDocsScenarioTags
+                        v-if="itemScenarios(item).length"
+                        :scenarios="itemScenarios(item)"
+                        :scenarios-label="scenariosLabel"
+                        :overflow-label="scenarioOverflowLabel"
+                        :separator="scenarioSeparator"
+                      />
                       <UBadge
                         v-if="item.badge !== undefined"
                         color="neutral"
