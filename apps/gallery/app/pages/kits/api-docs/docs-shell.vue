@@ -341,10 +341,14 @@ onMounted(() => anchor.initFromHash())
         />
       </div>
 
-      <!-- 两栏：sticky 侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度。 -->
+      <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度。
+           通栏形态：外层容器给确定高度（视口减去 sticky 顶距与底部留白），
+           组件透传 h-full 撑满——内容少时立柱依然贯穿到底，菜单太长时在
+           组件内部滚动。组件默认（不传 h-full）则是收缩到内容高的卡片形态。 -->
       <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
-        <div class="lg:sticky lg:top-20 lg:self-start">
+        <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:self-start">
           <ApiDocsSidebarNav
+            class="lg:h-full"
             :groups="navGroups"
             aria-label="支付文档"
             search-placeholder="搜索文档"
