@@ -40,6 +40,8 @@
 </UTooltip>
 ```
 
+> ⚠️ **触摸端不触发**：底层 reka-ui 对 `pointerType === 'touch'` 直接 early-return，tooltip 只响应鼠标 hover 与键盘 focus。因此 tooltip **绝不能是某信息的唯一入口**——触摸设备上根本打不开。且触发器须本身可聚焦（`UButton` 等），套在纯 `span`/`UBadge` 上连键盘 focus 都进不来。**要让触摸/键盘用户主动获取的内容（如「+N」折叠项、缩略详情），改用 `click` 态 `UPopover`**，它 tap / 点击 / Enter 三端一致。
+
 ## UDropdownMenu
 
 动作菜单：`:items`(分组数组，含 `label`/`icon`/`onSelect`/`kbds`) + 默认 slot(触发器)。键盘可达。
@@ -51,8 +53,8 @@
 
 ## 行为边界（务必区分）
 
-- **tooltip**：仅提示，不放按钮/链接。
-- **popover**：可交互，非模态，点外部关闭。
+- **tooltip**：仅锦上添花的提示，不放按钮/链接；**触摸端不触发**，故不可作为信息的唯一入口。
+- **popover**：可交互、可触摸/键盘打开（`click` 态），非模态、点外部关闭；折叠项 / 需主动获取的信息用它，而非 tooltip。
 - **modal / slideover**：模态，焦点陷阱 + Esc + 遮罩。
 
 ## 源码参考
