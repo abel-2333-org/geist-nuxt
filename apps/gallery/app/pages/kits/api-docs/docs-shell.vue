@@ -124,8 +124,10 @@ const paymentsContentSections: ContentSection[] = [
 // --- 文档域（多产品入口）：支付是完整样板，其余三域紧凑 stub。
 //     每域自带 navGroups / 正文检索切片 / 指南段 / 端点 stub——侧栏、⌘K 索引、
 //     正文检索、正文渲染全部按当前域派生。
-//     图标按资金语义配对：支付/付款 = banknote-arrow-down/up（收进/付出的
-//     方向对），发卡 = credit-card（卡即产品），账户 = wallet（资金归集）。
+//     图标样式遵循 Spectrum 对 workflow icon 的用法：产品级入口的图标不裸露，
+//     由圆角容器（tile）承载、与 label 成对出现——对应本系统「色调表面 +
+//     边框优先」的层级语义（tile = bg-elevated + border，当前域转 primary
+//     着色），Vercel 的 scope 切换器同构。tile 渲染见模板 #domain-leading。
 //     description 是一句话简介（≤12 字），菜单里单行放得下——UDropdownMenu
 //     的 itemDescription 默认 truncate，长句会被截断。 ---
 type GuideSection = { id: string; title: string; body: string }
@@ -145,7 +147,7 @@ const domains: DocsDomain[] = [
   {
     id: 'payments',
     label: '支付',
-    icon: 'i-lucide-banknote-arrow-down',
+    icon: 'i-lucide-credit-card',
     description: '线上收款、订阅与退款',
     navGroups: paymentsNavGroups,
     contentSections: paymentsContentSections,
@@ -155,7 +157,7 @@ const domains: DocsDomain[] = [
   {
     id: 'transfer',
     label: '付款',
-    icon: 'i-lucide-banknote-arrow-up',
+    icon: 'i-lucide-send',
     description: '向收款人单笔或批量付款',
     navGroups: [
       {
@@ -205,7 +207,7 @@ const domains: DocsDomain[] = [
   {
     id: 'issuing',
     label: '发卡',
-    icon: 'i-lucide-credit-card',
+    icon: 'i-lucide-wallet-cards',
     description: '发行与管理虚拟卡、实体卡',
     navGroups: [
       {
@@ -255,7 +257,7 @@ const domains: DocsDomain[] = [
   {
     id: 'account',
     label: '账户',
-    icon: 'i-lucide-wallet',
+    icon: 'i-lucide-landmark',
     description: '余额、对账单与子账户',
     navGroups: [
       {
@@ -310,17 +312,20 @@ const currentDomain = computed(() => domains.find(d => d.id === currentDomainId.
 const navGroups = computed(() => currentDomain.value.navGroups)
 const searchGroups = computed(() => toSearchGroups(navGroups.value))
 
-// 域切换器（UDropdownMenu）：checkbox 项标记当前域，每项带一行域说明（组件
-// 原生 description 字段）；切换时清掉指向旧域锚点的 hash，避免落在不存在的
-// section 上。文案单语：demo 直接写中文，消费项目里 label/description 走
-// i18n 注入。
+// 域切换器（UDropdownMenu）：checkbox 项保留 menuitemcheckbox 语义标记当前域，
+// 视觉上 leading 用 #domain-leading slot 换成 tile（图标不裸露），trailing 打勾。
+// icon 不放 item 顶层（避免原生 leading 双渲染），经 tile 渲染。每项带一行域
+// 说明（组件原生 description 字段）；切换时清掉指向旧域锚点的 hash，避免落在
+// 不存在的 section 上。文案单语：demo 直接写中文，消费项目里 label/description
+// 走 i18n 注入。
 const domainMenuItems = computed(() => [
   domains.map(d => ({
     label: d.label,
-    icon: d.icon,
     description: d.description,
     type: 'checkbox' as const,
     checked: d.id === currentDomainId.value,
+    slot: 'domain' as const,
+    domainIcon: d.icon,
     onSelect: () => {
       if (d.id === currentDomainId.value) return
       currentDomainId.value = d.id
@@ -591,7 +596,7 @@ onMounted(() => anchor.initFromHash())
             <span class="text-sm font-semibold tracking-tight text-highlighted max-sm:sr-only">Onerway</span>
           </a>
           <span class="select-none text-dimmed" aria-hidden="true">/</span>
-          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-64' }">
+          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-64', item: 'gap-2.5' }">
             <UButton
               variant="ghost"
               color="neutral"
@@ -601,10 +606,24 @@ onMounted(() => anchor.initFromHash())
               class="min-w-0"
             >
               <span class="flex min-w-0 items-center gap-2">
-                <UIcon :name="currentDomain.icon" class="size-4 shrink-0 text-muted" />
+                <span class="flex size-5 shrink-0 items-center justify-center rounded border border-default bg-elevated">
+                  <UIcon :name="currentDomain.icon" class="size-3 text-muted" />
+                </span>
                 <span class="truncate text-highlighted">{{ currentDomain.label }}</span>
               </span>
             </UButton>
+            <!-- 图标不裸露：leading 换成 tile（色调表面 + 边框），当前域转
+                 primary 着色；勾选指示由 checkbox 项原生 trailing 提供。 -->
+            <template #domain-leading="{ item }">
+              <span
+                class="flex size-7 shrink-0 items-center justify-center rounded-md border"
+                :class="item.checked
+                  ? 'border-primary/25 bg-primary/10 text-primary'
+                  : 'border-default bg-elevated text-muted'"
+              >
+                <UIcon :name="item.domainIcon" class="size-4" />
+              </span>
+            </template>
           </UDropdownMenu>
         </div>
         <ApiDocsSiteSearch
@@ -679,7 +698,7 @@ onMounted(() => anchor.initFromHash())
             <h3 class="text-xl font-semibold tracking-tight text-highlighted">认证与密钥</h3>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               所有请求通过 <code class="font-mono text-[0.8125rem]">Authorization: Bearer</code> 头携带密钥。测试密钥以
-              <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务���环境变量，切勿写进前端代码。
+              <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务端环境变量，切勿写进前端代码。
             </p>
           </section>
 
