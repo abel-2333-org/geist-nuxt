@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 // Trailing scenario-tag cluster for an endpoint row. It fills the space the
 // purpose label leaves (the label is `shrink`, this cluster is `flex-1`), then
@@ -83,6 +83,20 @@ watch(() => props.scenarios, () => {
   visibleCount.value = 1
   nextTick(recompute)
 })
+
+// Derived view state, unified across the SSR default and the measured phase so
+// the template has no phase-specific branches.
+// Before measuring: deterministic default of one tag (matches SSR).
+const shownCount = computed(() =>
+  measured.value ? visibleCount.value : Math.min(1, props.scenarios.length),
+)
+const visibleTags = computed(() => props.scenarios.slice(0, shownCount.value))
+const hiddenCount = computed(() => props.scenarios.length - shownCount.value)
+const hasOverflow = computed(() => hiddenCount.value > 0)
+// When not a single tag fits, the overflow trigger becomes a count chip
+// (tag icon + total) instead of a "+N".
+const collapsedToCount = computed(() => shownCount.value === 0)
+const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个服务场景`)
 </script>
 
 <template>
@@ -90,59 +104,60 @@ watch(() => props.scenarios, () => {
     ref="rootEl"
     class="relative flex min-w-0 flex-1 items-center justify-end gap-1"
   >
-    <UTooltip :text="scenarios.join('、')">
-      <span class="flex items-center gap-1">
-        <!-- SSR / first paint: deterministic default (first tag + "+N"). -->
-        <template v-if="!measured">
+    <span class="flex items-center gap-1">
+      <!-- Whole tags that fit: plain, non-interactive. -->
+      <UBadge
+        v-for="s in visibleTags"
+        :key="s"
+        color="neutral"
+        variant="soft"
+        size="sm"
+        :label="s"
+        class="max-w-28"
+      />
+
+      <!-- Overflow reveal. A hover tooltip is the wrong tool here: reka-ui
+           ignores touch pointers (`pointerType === 'touch'` early-returns) and
+           a non-interactive trigger is unreachable by keyboard, so the folded
+           scenarios would be invisible to touch and keyboard users. A Popover
+           in its default `click` mode is operable by tap, mouse and Enter/Space
+           alike, so the "+N" / count chip becomes a real, focusable button that
+           opens the full list. -->
+      <UPopover
+        v-if="hasOverflow"
+        :content="{ side: 'bottom', align: 'end' }"
+      >
+        <button
+          type="button"
+          :aria-label="overflowLabel"
+          class="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
           <UBadge
             color="neutral"
             variant="soft"
             size="sm"
-            :label="scenarios[0]"
-            class="max-w-28"
+            :icon="collapsedToCount ? 'i-lucide-tag' : undefined"
+            :label="collapsedToCount ? String(scenarios.length) : `+${hiddenCount}`"
+            class="cursor-pointer tabular-nums transition-colors hover:bg-elevated"
           />
-          <UBadge
-            v-if="scenarios.length > 1"
-            color="neutral"
-            variant="soft"
-            size="sm"
-            :label="`+${scenarios.length - 1}`"
-            class="tabular-nums"
-          />
+        </button>
+        <template #content>
+          <div class="flex max-w-xs flex-col gap-2 p-3">
+            <p class="text-xs font-medium text-muted">服务场景</p>
+            <div class="flex flex-wrap gap-1">
+              <UBadge
+                v-for="s in scenarios"
+                :key="s"
+                color="neutral"
+                variant="soft"
+                size="sm"
+                :label="s"
+              />
+            </div>
+          </div>
         </template>
-        <!-- Measured: as many whole tags as fit, remainder folded into "+N". -->
-        <template v-else-if="visibleCount >= 1">
-          <UBadge
-            v-for="s in scenarios.slice(0, visibleCount)"
-            :key="s"
-            color="neutral"
-            variant="soft"
-            size="sm"
-            :label="s"
-            class="max-w-28"
-          />
-          <UBadge
-            v-if="visibleCount < scenarios.length"
-            color="neutral"
-            variant="soft"
-            size="sm"
-            :label="`+${scenarios.length - visibleCount}`"
-            class="tabular-nums"
-          />
-        </template>
-        <!-- Nothing fits: single count chip (tag icon + total). -->
-        <template v-else>
-          <UBadge
-            color="neutral"
-            variant="soft"
-            size="sm"
-            icon="i-lucide-tag"
-            :label="String(scenarios.length)"
-            class="tabular-nums"
-          />
-        </template>
-      </span>
-    </UTooltip>
+      </UPopover>
+    </span>
 
     <!-- Full list for screen readers, regardless of how many chips render. -->
     <span class="sr-only">{{ scenarios.join('、') }}</span>
