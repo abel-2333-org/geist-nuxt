@@ -87,6 +87,17 @@
         { "path": "app/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts", "type": "registry:hook" }
       ],
       "meta": { "coreDeps": ["InlineCode", "InlineMarkdown", "useCopy"] }
+    },
+    {
+      "name": "sidebar-nav",
+      "type": "registry:component",
+      "title": "ApiDocsSidebarNav",
+      "description": "Documentation sidebar mixing collapsible guide sections and purpose-named endpoint sections (leading HTTP method badge + trailing width-adaptive scenario tags). Grouped bands and typography-only section headers keep the two worlds distinct; a top '/' search filters by label, method, and scenario; the nav is drag/keyboard-resizable with the width persisted to localStorage. Full design rationale lives in sidebar-nav.md.",
+      "registryDependencies": ["method-badge"],
+      "files": [
+        { "path": "app/components/api-docs/SidebarNav.vue", "target": "app/components/api-docs/SidebarNav.vue", "type": "registry:component" },
+        { "path": "app/components/api-docs/ScenarioTags.vue", "target": "app/components/api-docs/ScenarioTags.vue", "type": "registry:component" }
+      ]
     }
   ]
 }
