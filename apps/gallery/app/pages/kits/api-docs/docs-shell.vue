@@ -4,9 +4,16 @@ definePageMeta({ nav: { label: '文档站外壳', icon: 'i-lucide-layout-templat
 // API 文档场景的「文档站外壳」整页 demo（不是可分发切片）——把三块拼成一个
 // 完整可用的文档站骨架，作为下游 copy & adapt 的活样板：
 //
-//   顶栏     品牌 + <ApiDocsSiteSearch>（⌘K 全站搜索，真实可用）
+//   顶栏     Onerway 品牌 / 域切换器 + <ApiDocsSiteSearch>（⌘K 全站搜索）
 //   侧栏     <ApiDocsSidebarNav>（sticky，树内过滤 + 拖宽）
 //   正文     指南锚点 section + reference 式端点页（字段树 + 代码栏）
+//
+// 域切换（多产品文档的入口）：顶栏品牌右侧是一个 UDropdownMenu 作用域切换器
+// （Vercel 式「brand / scope」结构），四个域 = 支付 Payments / 付款 Transfer /
+// 发卡 Issuing / 账户 Account。侧栏 groups、全站搜索索引、正文检索切片、正文
+// 本身全部由当前域派生——仍是「一份数据、多处消费」，只是真源从单份变成按域
+// 分桶。支付域是完整样板，其余三域用紧凑 stub 展示切换的真实效果。
+// 域切换器用现成原语组合（UDropdownMenu checkbox 项标记当前域），不造新组件。
 //
 // 三层搜索/导航各司其职、不互相顶替：
 //   1. 顶栏 ⌘K 全站搜索 —— 「从任何地方去任何页面」（跨指南与端点）；
@@ -26,7 +33,7 @@ type NavItem = { label: string; to?: string; method?: string; scenarios?: string
 type NavSection = { label: string; kind?: 'guide' | 'endpoints'; icon?: string; defaultOpen?: boolean; items: NavItem[] }
 type NavGroup = { label?: string; sections: NavSection[] }
 
-const navGroups: NavGroup[] = [
+const paymentsNavGroups: NavGroup[] = [
   {
     label: '文档',
     sections: [
@@ -101,20 +108,221 @@ function toSearchGroups(groups: NavGroup[]): SearchGroup[] {
   }))
 }
 
-const searchGroups = toSearchGroups(navGroups)
-
-// --- 正文全文检索（SiteSearch 异步引擎 demo）：模拟消费项目的正文切片检索。
-//     真实项目里 searchContent 换成 @nuxt/content 的 useSearchCollection、
-//     自建搜索接口等；组件侧的防抖、竞态丢弃、loading、结果组渲染完全一致。
-//     静态索引（searchGroups）与异步结果并存：条目级导航搜前者，正文片段搜
-//     后者（接法沉淀在 site-search.md「正文检索」）。 ---
+// --- 正文检索切片（payments 域；SiteSearch 异步引擎的数据源之一） ---
 type ContentSection = { title: string; to: string; content: string }
-const contentSections: ContentSection[] = [
+const paymentsContentSections: ContentSection[] = [
   { title: '概览 · 两条收款路径', to: '#overview', content: '托管收银台适合快速上线，Direct API 适合完全自定义支付体验，两条路径共用同一套密钥与 Webhook。' },
   { title: '认证与密钥 · 密钥存放', to: '#auth', content: '生产密钥请存放在服务端环境变量，切勿写进前端代码；测试密钥以 sk_test_ 开头、只操作沙箱数据。' },
   { title: 'Webhook 通知 · 幂等去重', to: '#webhooks', content: '校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。' },
   { title: '取消支付 · 资金解冻', to: '#pay-cancel', content: '取消一笔尚未捕获的支付或预授权，资金原路解冻。' },
 ]
+
+// --- 文档域（多产品入口）：支付是完整样板，其余三域紧凑 stub。
+//     每域自带 navGroups / 正文检索切片 / 指南段 / 端点 stub——侧栏、⌘K 索引、
+//     正文检索、正文渲染全部按当前域派生。 ---
+type GuideSection = { id: string; title: string; body: string }
+type EndpointStub = { id: string; method: string; path: string; summary: string; description: string }
+type DocsDomain = {
+  id: string
+  label: string
+  en: string
+  icon: string
+  description: string
+  navGroups: NavGroup[]
+  contentSections: ContentSection[]
+  guideSections: GuideSection[]
+  stubs: EndpointStub[]
+}
+
+const domains: DocsDomain[] = [
+  {
+    id: 'payments',
+    label: '支付',
+    en: 'Payments',
+    icon: 'i-lucide-credit-card',
+    description: '线上收款：托管收银台与 Direct API 两条路径，覆盖支付、订阅与退款。',
+    navGroups: paymentsNavGroups,
+    contentSections: paymentsContentSections,
+    guideSections: [], // 支付域正文是完整样板，不走 stub 渲染
+    stubs: [],
+  },
+  {
+    id: 'transfer',
+    label: '付款',
+    en: 'Transfer',
+    icon: 'i-lucide-send',
+    description: '向收款人批量或单笔付款：先登记收款人，再发起付款并跟踪到账状态。',
+    navGroups: [
+      {
+        label: '文档',
+        sections: [
+          {
+            label: '指南',
+            kind: 'guide',
+            icon: 'i-lucide-book-open',
+            defaultOpen: true,
+            items: [
+              { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
+              { label: '收款人管理', to: '#beneficiaries', icon: 'i-lucide-users-round' },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'API 参考',
+        sections: [
+          {
+            label: 'PAYOUTS',
+            kind: 'endpoints',
+            defaultOpen: true,
+            items: [
+              { label: '发起付款', to: '#payout-create', method: 'POST', scenarios: ['单笔', '批量'] },
+              { label: '查询付款', to: '#payout-list', method: 'GET', scenarios: ['对账'] },
+              { label: '创建收款人', to: '#beneficiary-create', method: 'POST', scenarios: ['单笔', '批量'] },
+            ],
+          },
+        ],
+      },
+    ],
+    contentSections: [
+      { title: '收款人管理 · 信息校验', to: '#beneficiaries', content: '登记收款人时按币种校验账户要素（IBAN、SWIFT、本地清算号），校验失败的付款不会进入清算。' },
+      { title: '发起付款 · 到账时效', to: '#payout-create', content: '主流币种当日到账，跨境路径按清算网络 T+1 起；用 Webhook 跟踪 payout.settled 事件。' },
+    ],
+    guideSections: [
+      { id: 'beneficiaries', title: '收款人管理', body: '付款前先登记收款人：按币种校验账户要素（IBAN、SWIFT、本地清算号），校验通过后获得可复用的收款人 id。' },
+    ],
+    stubs: [
+      { id: 'payout-create', method: 'POST', path: '/v1/payouts', summary: '发起付款', description: '向已登记的收款人发起一笔付款，支持单笔与批量两种模式。' },
+      { id: 'payout-list', method: 'GET', path: '/v1/payouts', summary: '查询付款', description: '按状态、时间区间或收款人分页检索付款记录，用于对账。' },
+      { id: 'beneficiary-create', method: 'POST', path: '/v1/beneficiaries', summary: '创建收款人', description: '登记收款人账户要素并校验，返回可复用的收款人 id。' },
+    ],
+  },
+  {
+    id: 'issuing',
+    label: '发卡',
+    en: 'Issuing',
+    icon: 'i-lucide-wallet-cards',
+    description: '发行虚拟卡与实体卡：创建卡片、管理生命周期、查询卡交易。',
+    navGroups: [
+      {
+        label: '文档',
+        sections: [
+          {
+            label: '指南',
+            kind: 'guide',
+            icon: 'i-lucide-book-open',
+            defaultOpen: true,
+            items: [
+              { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
+              { label: '卡片生命周期', to: '#lifecycle', icon: 'i-lucide-refresh-cw' },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'API 参考',
+        sections: [
+          {
+            label: 'CARDS',
+            kind: 'endpoints',
+            defaultOpen: true,
+            items: [
+              { label: '创建卡片', to: '#card-create', method: 'POST', scenarios: ['虚拟卡', '实体卡'] },
+              { label: '更新卡片状态', to: '#card-update', method: 'PATCH', scenarios: ['冻结', '注销'] },
+              { label: '查询卡交易', to: '#card-transactions', method: 'GET', scenarios: ['对账'] },
+            ],
+          },
+        ],
+      },
+    ],
+    contentSections: [
+      { title: '卡片生命周期 · 冻结与恢复', to: '#lifecycle', content: '冻结即时生效、可随时恢复；注销不可逆，注销前未清算的交易仍会正常入账。' },
+      { title: '创建卡片 · 虚拟卡即时可用', to: '#card-create', content: '虚拟卡创建后即时可用；实体卡走制卡与邮寄流程，激活前处于 inactive 状态。' },
+    ],
+    guideSections: [
+      { id: 'lifecycle', title: '卡片生命周期', body: '卡片状态在 active、frozen、cancelled 间流转：冻结即时生效、可恢复；注销不可逆，注销前未清算的交易仍会正常入账。' },
+    ],
+    stubs: [
+      { id: 'card-create', method: 'POST', path: '/v1/cards', summary: '创建卡片', description: '为持卡人发行一张虚拟卡或实体卡，虚拟卡即时可用。' },
+      { id: 'card-update', method: 'PATCH', path: '/v1/cards/{id}', summary: '更新卡片状态', description: '冻结、恢复或注销一张卡片，冻结即时生效。' },
+      { id: 'card-transactions', method: 'GET', path: '/v1/cards/{id}/transactions', summary: '查询卡交易', description: '分页查询单卡的授权与清算记录，用于对账。' },
+    ],
+  },
+  {
+    id: 'account',
+    label: '账户',
+    en: 'Account',
+    icon: 'i-lucide-landmark',
+    description: '资金账户：查询余额、下载对账单、按业务线开设子账户。',
+    navGroups: [
+      {
+        label: '文档',
+        sections: [
+          {
+            label: '指南',
+            kind: 'guide',
+            icon: 'i-lucide-book-open',
+            defaultOpen: true,
+            items: [
+              { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
+              { label: '余额与对账', to: '#reconciliation', icon: 'i-lucide-scale' },
+            ],
+          },
+        ],
+      },
+      {
+        label: 'API 参考',
+        sections: [
+          {
+            label: 'ACCOUNT',
+            kind: 'endpoints',
+            defaultOpen: true,
+            items: [
+              { label: '查询余额', to: '#balance-list', method: 'GET', scenarios: ['对账'] },
+              { label: '下载对账单', to: '#statement-download', method: 'GET', scenarios: ['对账'] },
+              { label: '创建子账户', to: '#sub-account-create', method: 'POST', scenarios: ['多业务线'] },
+            ],
+          },
+        ],
+      },
+    ],
+    contentSections: [
+      { title: '余额与对账 · 三类余额', to: '#reconciliation', content: '余额分可用、待结算、冻结三类；对账单按自然日切割，T+1 早晨生成前一日全量流水。' },
+    ],
+    guideSections: [
+      { id: 'reconciliation', title: '余额与对账', body: '余额分可用、待结算、冻结三类；对账单按自然日切割，T+1 早晨生成前一日全量流水，按流水号与业务侧订单一一对齐。' },
+    ],
+    stubs: [
+      { id: 'balance-list', method: 'GET', path: '/v1/balances', summary: '查询余额', description: '按币种返回可用、待结算与冻结三类余额快照。' },
+      { id: 'statement-download', method: 'GET', path: '/v1/statements', summary: '下载对账单', description: '按自然日下载全量资金流水，支持 CSV 与 JSON 两种格式。' },
+      { id: 'sub-account-create', method: 'POST', path: '/v1/sub-accounts', summary: '创建子账户', description: '按业务线或站点开设子账户，资金独立核算、汇总入主账户。' },
+    ],
+  },
+]
+
+const currentDomainId = ref('payments')
+const currentDomain = computed(() => domains.find(d => d.id === currentDomainId.value) ?? domains[0]!)
+
+// 侧栏 / ⌘K 索引 / 正文检索全部按当前域派生
+const navGroups = computed(() => currentDomain.value.navGroups)
+const searchGroups = computed(() => toSearchGroups(navGroups.value))
+
+// 域切换器（UDropdownMenu）：checkbox 项标记当前域；切换时清掉指向旧域锚点的
+// hash，避免落在不存在的 section 上。
+const domainMenuItems = computed(() => [
+  domains.map(d => ({
+    label: `${d.label} ${d.en}`,
+    icon: d.icon,
+    type: 'checkbox' as const,
+    checked: d.id === currentDomainId.value,
+    onSelect: () => {
+      if (d.id === currentDomainId.value) return
+      currentDomainId.value = d.id
+      if (window.location.hash) history.replaceState(history.state, '', window.location.pathname)
+      window.scrollTo({ top: 0 })
+    },
+  })),
+])
 
 async function searchContent(query: string) {
   // 模拟网络往返，展示 loading 态与竞态丢弃（真实项目由后端检索承担）
@@ -123,7 +331,7 @@ async function searchContent(query: string) {
   // 「幂等 去重」也能命中同一切片；真实检索后端通常也是这个语义。
   const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
   if (tokens.length === 0) return []
-  return contentSections
+  return currentDomain.value.contentSections
     .filter((s) => {
       const haystack = `${s.title} ${s.content}`.toLowerCase()
       return tokens.every(t => haystack.includes(t))
@@ -342,7 +550,8 @@ onMounted(() => anchor.initFromHash())
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">文档站外壳</h2>
         <p class="max-w-2xl text-muted">
-          把 kit 的三块拼成一个完整文档站骨架：<b class="font-medium text-toned">顶栏</b>（品牌 +
+          把 kit 的三块拼成一个完整文档站骨架：<b class="font-medium text-toned">顶栏</b>（Onerway 品牌 /
+          <b class="font-medium text-toned">域切换器</b> +
           <code class="font-mono text-[0.8125rem]">ApiDocsSiteSearch</code> 全站搜索）、<b class="font-medium text-toned">侧栏</b>（<code class="font-mono text-[0.8125rem]">ApiDocsSidebarNav</code>）与
           <b class="font-medium text-toned">正文</b>（指南 + reference 式端点页）。三层导航各司其职：顶栏
           <UKbd value="meta" /><UKbd value="K" /> 是<b class="font-medium text-toned">全站搜索</b>（跨指南与端点，同时匹配用途名、请求方法与场景标签），侧栏
@@ -362,9 +571,41 @@ onMounted(() => anchor.initFromHash())
            真实项目把这一条提升为 app 顶栏（sticky），并把下方 --header-h 改成
            这条顶栏自己的高度。 -->
       <div class="flex items-center justify-between gap-4 border-b border-default bg-elevated/40 px-4 py-2.5 sm:px-6">
-        <div class="flex items-center gap-2 text-sm font-medium text-highlighted">
-          <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
-          支付 API 文档
+        <!-- 品牌 / 域切换器（Vercel 式 scope 结构）。logo 源图带不透明白底：
+             light 用 mix-blend-multiply 隐白底，dark 给白色圆角 tile（multiply
+             在 tile 里同样成立），字标用排版文字双模式自适应。 -->
+        <div class="flex min-w-0 items-center gap-1.5">
+          <a
+            href="#"
+            class="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Onerway 文档首页"
+          >
+            <span class="flex size-6 items-center justify-center rounded-md dark:bg-white">
+              <span
+                class="h-5 w-4 bg-no-repeat mix-blend-multiply"
+                style="background-image: url(/demo/onerway-logo.png); background-size: auto 100%; background-position: -1px 0"
+                aria-hidden="true"
+              />
+            </span>
+            <span class="text-sm font-semibold tracking-tight text-highlighted max-sm:sr-only">Onerway</span>
+          </a>
+          <span class="select-none text-dimmed" aria-hidden="true">/</span>
+          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-56' }">
+            <UButton
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              trailing-icon="i-lucide-chevrons-up-down"
+              :aria-label="`切换文档域，当前：${currentDomain.label} ${currentDomain.en}`"
+              class="min-w-0"
+            >
+              <span class="flex min-w-0 items-center gap-2">
+                <UIcon :name="currentDomain.icon" class="size-4 shrink-0 text-muted" />
+                <span class="truncate text-highlighted">{{ currentDomain.label }}</span>
+                <span class="shrink-0 font-normal text-dimmed max-sm:hidden">{{ currentDomain.en }}</span>
+              </span>
+            </UButton>
+          </UDropdownMenu>
         </div>
         <ApiDocsSiteSearch
           :groups="searchGroups"
@@ -392,7 +633,7 @@ onMounted(() => anchor.initFromHash())
           <ApiDocsSidebarNav
             class="border-default max-lg:border-b lg:border-r"
             :groups="navGroups"
-            aria-label="支付文档"
+            :aria-label="`${currentDomain.label}文档`"
             search-placeholder="搜索文档"
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
@@ -407,8 +648,9 @@ onMounted(() => anchor.initFromHash())
         </div>
 
         <!-- 正文：指南锚点 section + 端点 reference。出血布局下由正文列自己
-             管理内边距（不再依赖外层容器）。 -->
-        <div class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+             管理内边距（不再依赖外层容器）。支付域是完整样板；其余域走下方
+             stub 分支，展示域切换后侧栏/搜索/正文同步换源的真实效果。 -->
+        <div v-if="currentDomain.id === 'payments'" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
           <section id="overview" class="scroll-mt-24 space-y-3">
             <h3 class="text-xl font-semibold tracking-tight text-highlighted">概览</h3>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
@@ -528,13 +770,58 @@ onMounted(() => anchor.initFromHash())
             </section>
           </div>
         </div>
+
+        <!-- 其余域（付款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
+             端点 stub，保证该域侧栏与 ⌘K 索引里的每个锚点都有落点。真实项目里
+             每个域都长成支付域那样的完整形态。 -->
+        <div v-else :key="currentDomain.id" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+          <section id="overview" class="scroll-mt-24 space-y-3">
+            <h3 class="text-xl font-semibold tracking-tight text-highlighted">
+              {{ currentDomain.label }}
+              <span class="font-normal text-dimmed">{{ currentDomain.en }}</span>
+            </h3>
+            <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ currentDomain.description }}</p>
+            <p class="max-w-2xl text-sm text-dimmed">
+              本域为入口演示：侧栏、全站搜索索引与正文检索已随域切换换源，完整文档形态见「支付」域。
+            </p>
+          </section>
+
+          <section
+            v-for="guide in currentDomain.guideSections"
+            :id="guide.id"
+            :key="guide.id"
+            class="scroll-mt-24 space-y-3"
+          >
+            <h3 class="text-xl font-semibold tracking-tight text-highlighted">{{ guide.title }}</h3>
+            <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ guide.body }}</p>
+          </section>
+
+          <USeparator />
+
+          <div class="space-y-6">
+            <section
+              v-for="stub in currentDomain.stubs"
+              :id="stub.id"
+              :key="stub.id"
+              class="scroll-mt-24 space-y-2"
+            >
+              <div class="flex flex-wrap items-center gap-2.5">
+                <ApiDocsMethodBadge :method="stub.method" />
+                <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
+              </div>
+              <h3 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h3>
+              <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
+            </section>
+          </div>
+        </div>
       </div>
     </div>
 
     <UContainer class="py-8">
       <p class="text-sm text-dimmed">
-        数据由本页内联假 ViewModel 驱动，不写进 kit。「创建结算会话」展示完整 reference 形态（字段树 + 代码栏），其余端点以紧凑
-        stub 呈现——真实项目里每个端点都长成前者的样子。外壳本体做了左右出血：通栏立柱贴到窗口边缘，不裹进居中容器。
+        数据由本页内联假 ViewModel 驱动，不写进 kit。顶栏的域切换器用 UDropdownMenu 组合（不是 kit 组件）：四个文档域各带自己的导航
+        与检索数据，切换时侧栏、⌘K 索引与正文同步换源。「支付」域的「创建结算会话」展示完整 reference 形态（字段树 + 代码栏），其余端点与域以紧凑
+        stub 呈现——真实项目里都长成前者的样子。外壳本体做了左右出血：通栏立柱贴到窗口边缘，不裹进居中容器。
       </p>
     </UContainer>
   </div>
