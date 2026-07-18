@@ -26,11 +26,18 @@
 //             scenario tags in the suffix; guide pages lead with their icon.
 //
 // State model:
-//   closed → open        trigger click or ⌘K (toggle, so ⌘K also closes)
+//   closed → open        trigger click or the shortcut (toggle — pressing it
+//                        again closes; fires even while typing in another
+//                        input via usingInput, so the sidebar filter can't
+//                        swallow it)
 //   open   → closed      Esc / overlay click (UModal built-ins), or selecting
-//                        an item (onSelect closes, navigation rides on `to`)
-//   searching            fuse matches label + suffix + method + scenarios —
-//                        typing "订阅" or "POST" both surface endpoints
+//                        an item (onSelect closes, navigation rides on `to`;
+//                        the query resets so the next open starts clean)
+//   searching            fuse token-search over label + suffix + method +
+//                        scenarios — "订阅" or "POST" surface endpoints, and
+//                        multi-word queries ("结算 POST") intersect facets;
+//                        matched text is highlighted in results (palette
+//                        built-in), capped at `resultLimit`
 //   no-results           palette's built-in empty state (label via prop)
 //
 // A11y: focus trap + restore-to-trigger come from UModal; the palette input
@@ -91,10 +98,21 @@ const props = withDefaults(
     /** Joins `scenarios` into the item suffix. Matches ApiDocsSidebarNav's
      *  same-named prop so the two levels read consistently. */
     scenarioSeparator?: string
+    /** Shortcut that toggles the palette (defineShortcuts syntax). */
+    shortcut?: string
+    /** Max results shown while searching (keeps long indexes scannable). */
+    resultLimit?: number
+    /** Extra palette groups appended after the docs index (e.g. quick links
+     *  or a theme switcher, mirroring UContentSearch's links/theme groups).
+     *  Labels arrive already localized, per the kit's copy-agnostic rule. */
+    extraGroups?: CommandPaletteGroup<CommandPaletteItem>[]
   }>(),
   {
     ariaLabel: undefined,
     scenarioSeparator: '、',
+    shortcut: 'meta_k',
+    resultLimit: 12,
+    extraGroups: () => [],
   },
 )
 
@@ -128,13 +146,24 @@ function onCloseAutoFocus(event: Event) {
   el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
 }
 
-// Toggle (not just open): ⌘K while the palette is up dismisses it, matching
-// the muscle memory established by other ⌘K palettes.
-defineShortcuts({
-  meta_k: () => {
-    open.value = !open.value
-  },
-})
+// Query is held here (v-model into the palette) so it can reset on select —
+// the next open starts clean instead of replaying a stale filter.
+const searchTerm = ref('')
+
+// Toggle (not just open): the shortcut while the palette is up dismisses it,
+// matching the muscle memory of other ⌘K palettes. usingInput: fire even while
+// the user is typing elsewhere (e.g. the sidebar's in-tree filter) — same as
+// UContentSearch, otherwise the two search levels fight over the shortcut.
+defineShortcuts(
+  computed(() => ({
+    [props.shortcut]: {
+      usingInput: true,
+      handler: () => {
+        open.value = !open.value
+      },
+    },
+  })),
+)
 
 // Map the docs index into palette groups. `method`/`scenarios` ride along as
 // extension keys: fuse searches them (see :fuse below) and #item-leading reads
@@ -156,21 +185,28 @@ const paletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() =>
       onSelect: () => {
         trackHashDestination(item.to)
         open.value = false
+        searchTerm.value = ''
       },
     })),
-  })),
+  })).concat(props.extraGroups),
 )
 
 // Default fuse keys are label/description/suffix; add method + scenarios so
 // "POST" or a scenario name matches — the same dimensions the sidebar's
-// in-tree filter matches on.
-const fuse = {
+// in-tree filter matches on. includeMatches + useTokenSearch mirror
+// UContentSearch's defaults: matched text gets highlighted in results, and
+// multi-word queries token-search (each word must match — "结算 POST"
+// intersects purpose and method). resultLimit keeps long indexes scannable.
+const fuse = computed(() => ({
   fuseOptions: {
     ignoreLocation: true,
+    includeMatches: true,
+    useTokenSearch: true,
     threshold: 0.1,
     keys: ['label', 'suffix', 'method', 'scenarios'],
   },
-}
+  resultLimit: props.resultLimit,
+}))
 </script>
 
 <template>
@@ -192,6 +228,7 @@ const fuse = {
 
     <template #content>
       <UCommandPalette
+        v-model:search-term="searchTerm"
         :groups="paletteGroups"
         :placeholder="props.placeholder"
         :fuse="fuse"

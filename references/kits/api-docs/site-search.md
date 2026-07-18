@@ -33,6 +33,9 @@ trigger  ── UButton（neutral outline sm）
 | `placeholder` | `string` | **必填**。面板输入框占位符 |
 | `emptyLabel` | `string` | **必填**。无结果空态文案 |
 | `scenarioSeparator` | `string` | 场景标签串进 suffix 的分隔符，默认 `、`。与 `ApiDocsSidebarNav` 同名 prop 对称 |
+| `shortcut` | `string` | 切换面板的快捷键（`defineShortcuts` 语法），默认 `meta_k` |
+| `resultLimit` | `number` | 搜索时最多展示的结果数，默认 `12`（同 `UContentSearch`），长索引不刷屏 |
+| `extraGroups` | `CommandPaletteGroup[]` | 追加在文档索引之后的面板组（如快捷链接、主题切换——对位 `UContentSearch` 的 links/theme 组）。组内文案传入时已本地化 |
 
 ### 数据模型（内联，随切片走）
 
@@ -58,9 +61,10 @@ interface SiteSearchGroup {
 
 - **为什么是独立切片而不是塞进 SidebarNav**：`sidebar-nav.md` 已论证——两个长得几乎一样的搜索框上下紧贴是冗余 chrome，全站搜索的正位是 app 顶栏。本切片就是那个「顶栏该放的东西」的基座实现，SidebarNav 的 `#header` slot 维持通用扩展点定位不变。
 - **搜索维度与侧栏过滤对齐**：fuse 键为 `label / suffix / method / scenarios`——输入场景名（「订阅」）或方法名（「POST」）都能命中端点，与侧栏树内过滤的 `matchesText`（label/method/scenarios）维度一致。方法与场景作为扩展 key 挂在面板 item 上：fuse 搜它们，`#item-leading` slot 读 `method` 渲染色标；场景同时串进可见 suffix，facet 既可读又可搜。
+- **检索体验对齐 `UContentSearch` 的默认值**：`useTokenSearch`（多词 query 逐词求交——「结算 POST」同时按用途与方法收窄）、`includeMatches`（命中文本在结果里高亮，面板内建渲染）、`resultLimit: 12`（搜索态结果封顶）。这三件是命令面板体验，与内容管线无关，故基座直接吸收。
 - **条目渲染复用既有语汇**：端点项前置 `ApiDocsMethodBadge`（唯一带色元素，同侧栏），指南项前置其 icon；suffix 承载场景串（+ 可选补充说明，用 ` · ` 连接）。菜单里怎么认，面板里就怎么认。
-- **⌘K 是 toggle**：面板已开时再按 `⌘K` 关闭，符合命令面板的通用肌肉记忆。快捷键经 Nuxt UI `defineShortcuts` 注册于组件内，消费方零接线。**不占用 `/`**——那是侧栏树内过滤的聚焦键，两层快捷键不冲突。
-- **选中即关闭 + 导航**：item 的 `onSelect` 关闭模态，导航由 item 的 `to`（LinkProps）走 NuxtLink——站内路由、锚点、预取都是平台默认行为，组件不自己写跳转逻辑。
+- **⌘K 是 toggle，且在输入框聚焦时也生效**：面板已开时再按 `⌘K` 关闭，符合命令面板的通用肌肉记忆；注册时带 `usingInput: true`（同 `UContentSearch`）——焦点在侧栏过滤框等输入框里时快捷键照样响应，两层搜索不抢键。快捷键经 Nuxt UI `defineShortcuts` 注册于组件内（可用 `shortcut` prop 换键），消费方零接线。**不占用 `/`**——那是侧栏树内过滤的聚焦键。
+- **选中即关闭 + 导航 + 重置**：item 的 `onSelect` 关闭模态并清空 query（下次打开是干净的，不回放旧过滤），导航由 item 的 `to`（LinkProps）走 NuxtLink——站内路由、预取都是平台默认行为。**同页锚点是唯一的例外**：模态开着时 reka-ui 锁滚动、关闭时焦点还原又会把页面拉回 trigger，所以组件拦截 `closeAutoFocus`，把焦点与滚动一并交给目标 section（焦点去用户要去的地方，也是更好的 a11y 结果；尊重 `prefers-reduced-motion`）。
 
 ## 状态（state model）
 
@@ -71,7 +75,7 @@ interface SiteSearchGroup {
 
 ## Accessibility（无障碍）
 
-- 焦点圈闭在模态内、关闭后**焦点还原到 trigger**——`UModal`（reka-ui Dialog）内建，组件不自己管焦点。
+- 焦点圈闭在模态内、关闭后**焦点还原到 trigger**——`UModal`（reka-ui Dialog）内建。唯一例外：选中**同页锚点**时组件拦截还原、把焦点交给目标 section（见「关键点」），其余路径组件不自己管焦点。
 - 模态可访问名：`#content` 模式下 `UModal` 把 `title` prop 渲染为视觉隐藏的 `DialogTitle`，读屏打开时播报 `modalTitle`。
 - trigger 文本 `< sm` 隐藏后由 `aria-label`（`ariaLabel ?? triggerLabel`）兜底；`UKbd` 提示是装饰性的。
 - 结果列表是 listbox 语义（reka-ui Listbox），`↑/↓` 移动高亮、`Enter` 选中——组件零手写键盘逻辑。
