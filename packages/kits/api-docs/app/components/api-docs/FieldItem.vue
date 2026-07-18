@@ -301,16 +301,18 @@ const lifecycleMeta = computed(() => {
 
       <!-- Requirement tag — only for required/conditional; optional rows carry
            no tag (absence is the signal, see requiredState above).
-           Color axes are kept orthogonal: red = required (a hard rule), while
-           conditional is a *neutral toned* tag — it explains WHEN the field is
-           needed, which is not a risk. Amber is reserved exclusively for the
-           risk/maturity axis (beta, caution constraints), so a field that is
-           both conditional AND beta no longer reads as one ambiguous amber
-           wash. -->
+           This is the requirement-strength axis: red = required (a hard rule),
+           amber = conditional (required only in some cases). Conditional keeps
+           amber — NOT neutral — so it stays visibly ON the same axis as red
+           rather than blending into the neutral type/format metadata beside it.
+           The amber here points AT the amber condition callout below (label →
+           block), a same-meaning echo, not the ambiguous cross-axis wash we
+           removed. Beta stays a badge (a different shape), so it never blurs
+           with this text tag even on a conditional + beta field. -->
       <span
         v-if="requiredState"
         class="text-xs font-medium uppercase tracking-wide"
-        :class="requiredState === 'required' ? 'text-error' : 'text-toned'"
+        :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
       >
         {{ requiredLabel }}
       </span>
