@@ -9,11 +9,15 @@ definePageMeta({ nav: { label: '文档站外壳', icon: 'i-lucide-layout-templat
 //   正文     指南锚点 section + reference 式端点页（字段树 + 代码栏）
 //
 // 域切换（多产品文档的入口）：顶栏品牌右侧是一个 UDropdownMenu 作用域切换器
-// （Vercel 式「brand / scope」结构），四个域 = 支付 Payments / 付款 Transfer /
-// 发卡 Issuing / 账户 Account。侧栏 groups、全站搜索索引、正文检索切片、正文
-// 本身全部由当前域派生——仍是「一份数据、多处消费」，只是真源从单份变成按域
-// 分桶。支付域是完整样板，其余三域用紧凑 stub 展示切换的真实效果。
-// 域切换器用现成原语组合（UDropdownMenu checkbox 项标记当前域），不造新组件。
+// （Vercel 式「brand / scope」结构），四个域：支付 / 付款 / 发卡 / 账户
+// （id 用英文 payments / transfer / issuing / account）。侧栏 groups、全站
+// 搜索索引、正文检索切片、正文本身全部由当前域派生——仍是「一份数据、多处
+// 消费」，只是真源从单份变成按域分桶。支付域是完整样板，其余三域用紧凑 stub
+// 展示切换的真实效果。域切换器用现成原语组合（UDropdownMenu checkbox 项标记
+// 当前域 + 原生 description 作域说明），不造新组件。
+// 文案策略：demo 单语（中文）直写；消费项目里域的 label/description 与页面
+// 其余文案一样走 i18n（$t）注入——入口本身天然支持多语言，接线属消费项目
+// 职责（见 project-setup.md）。
 //
 // 三层搜索/导航各司其职、不互相顶替：
 //   1. 顶栏 ⌘K 全站搜索 —— 「从任何地方去任何页面」（跨指南与端点）；
@@ -125,7 +129,6 @@ type EndpointStub = { id: string; method: string; path: string; summary: string;
 type DocsDomain = {
   id: string
   label: string
-  en: string
   icon: string
   description: string
   navGroups: NavGroup[]
@@ -138,7 +141,6 @@ const domains: DocsDomain[] = [
   {
     id: 'payments',
     label: '支付',
-    en: 'Payments',
     icon: 'i-lucide-credit-card',
     description: '线上收款：托管收银台与 Direct API 两条路径，覆盖支付、订阅与退款。',
     navGroups: paymentsNavGroups,
@@ -149,7 +151,6 @@ const domains: DocsDomain[] = [
   {
     id: 'transfer',
     label: '付款',
-    en: 'Transfer',
     icon: 'i-lucide-send',
     description: '向收款人批量或单笔付款：先登记收款人，再发起付款并跟踪到账状态。',
     navGroups: [
@@ -200,7 +201,6 @@ const domains: DocsDomain[] = [
   {
     id: 'issuing',
     label: '发卡',
-    en: 'Issuing',
     icon: 'i-lucide-wallet-cards',
     description: '发行虚拟卡与实体卡：创建卡片、管理生命周期、查询卡交易。',
     navGroups: [
@@ -251,7 +251,6 @@ const domains: DocsDomain[] = [
   {
     id: 'account',
     label: '账户',
-    en: 'Account',
     icon: 'i-lucide-landmark',
     description: '资金账户：查询余额、下载对账单、按业务线开设子账户。',
     navGroups: [
@@ -307,12 +306,15 @@ const currentDomain = computed(() => domains.find(d => d.id === currentDomainId.
 const navGroups = computed(() => currentDomain.value.navGroups)
 const searchGroups = computed(() => toSearchGroups(navGroups.value))
 
-// 域切换器（UDropdownMenu）：checkbox 项标记当前域；切换时清掉指向旧域锚点的
-// hash，避免落在不存在的 section 上。
+// 域切换器（UDropdownMenu）：checkbox 项标记当前域，每项带一行域说明（组件
+// 原生 description 字段）；切换时清掉指向旧域锚点的 hash，避免落在不存在的
+// section 上。文案单语：demo 直接写中文，消费项目里 label/description 走
+// i18n 注入。
 const domainMenuItems = computed(() => [
   domains.map(d => ({
-    label: `${d.label} ${d.en}`,
+    label: d.label,
     icon: d.icon,
+    description: d.description,
     type: 'checkbox' as const,
     checked: d.id === currentDomainId.value,
     onSelect: () => {
@@ -571,38 +573,32 @@ onMounted(() => anchor.initFromHash())
            真实项目把这一条提升为 app 顶栏（sticky），并把下方 --header-h 改成
            这条顶栏自己的高度。 -->
       <div class="flex items-center justify-between gap-4 border-b border-default bg-elevated/40 px-4 py-2.5 sm:px-6">
-        <!-- 品牌 / 域切换器（Vercel 式 scope 结构）。logo 源图带不透明白底：
-             light 用 mix-blend-multiply 隐白底，dark 给白色圆角 tile（multiply
-             在 tile 里同样成立），字标用排版文字双模式自适应。 -->
+        <!-- 品牌 / 域切换器（Vercel 式 scope 结构）。品牌接法与 gallery header
+             一致：透明底图形 mark 直接 <img>（已从原图剥白底裁出），字标用排版
+             文字，明暗两模式免处理。文案为单语（demo 用中文）——消费项目里这些
+             label/描述走 i18n（$t）注入，见 project-setup.md。 -->
         <div class="flex min-w-0 items-center gap-1.5">
           <a
             href="#"
             class="flex shrink-0 items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             aria-label="Onerway 文档首页"
           >
-            <span class="flex size-6 items-center justify-center rounded-md dark:bg-white">
-              <span
-                class="h-5 w-4 bg-no-repeat mix-blend-multiply"
-                style="background-image: url(/demo/onerway-logo.png); background-size: auto 100%; background-position: -1px 0"
-                aria-hidden="true"
-              />
-            </span>
+            <img src="/demo/onerway-mark.png" alt="" class="h-5 w-auto" width="65" height="48" />
             <span class="text-sm font-semibold tracking-tight text-highlighted max-sm:sr-only">Onerway</span>
           </a>
           <span class="select-none text-dimmed" aria-hidden="true">/</span>
-          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-56' }">
+          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-64' }">
             <UButton
               variant="ghost"
               color="neutral"
               size="sm"
               trailing-icon="i-lucide-chevrons-up-down"
-              :aria-label="`切换文档域，当前：${currentDomain.label} ${currentDomain.en}`"
+              :aria-label="`切换文档域，当前：${currentDomain.label}`"
               class="min-w-0"
             >
               <span class="flex min-w-0 items-center gap-2">
                 <UIcon :name="currentDomain.icon" class="size-4 shrink-0 text-muted" />
                 <span class="truncate text-highlighted">{{ currentDomain.label }}</span>
-                <span class="shrink-0 font-normal text-dimmed max-sm:hidden">{{ currentDomain.en }}</span>
               </span>
             </UButton>
           </UDropdownMenu>
@@ -776,10 +772,7 @@ onMounted(() => anchor.initFromHash())
              每个域都长成支付域那样的完整形态。 -->
         <div v-else :key="currentDomain.id" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
           <section id="overview" class="scroll-mt-24 space-y-3">
-            <h3 class="text-xl font-semibold tracking-tight text-highlighted">
-              {{ currentDomain.label }}
-              <span class="font-normal text-dimmed">{{ currentDomain.en }}</span>
-            </h3>
+            <h3 class="text-xl font-semibold tracking-tight text-highlighted">{{ currentDomain.label }}</h3>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ currentDomain.description }}</p>
             <p class="max-w-2xl text-sm text-dimmed">
               本域为入口演示：侧栏、全站搜索索引与正文检索已随域切换换源，完整文档形态见「支付」域。
