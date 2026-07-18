@@ -8,13 +8,14 @@ definePageMeta({ nav: { label: '文档站外壳', icon: 'i-lucide-layout-templat
 //   侧栏     <ApiDocsSidebarNav>（sticky，树内过滤 + 拖宽）
 //   正文     指南锚点 section + reference 式端点页（字段树 + 代码栏）
 //
-// 域切换（多产品文档的入口）：顶栏品牌右侧是一个 UDropdownMenu 作用域切换器
-// （Vercel 式「brand / scope」结构），四个域：支付 / 付款 / 发卡 / 账户
-// （id 用英文 payments / transfer / issuing / account）。侧栏 groups、全站
-// 搜索索引、正文检索切片、正文本身全部由当前域派生——仍是「一份数据、多处
-// 消费」，只是真源从单份变成按域分桶。支付域是完整样板，其余三域用紧凑 stub
-// 展示切换的真实效果。域切换器用现成原语组合（UDropdownMenu checkbox 项标记
-// 当前域 + 原生 description 作域说明），不造新组件。
+// 域切换（多产品文档的入口）：顶栏品牌右侧是一个 UPopover 作用域切换器
+// （Vercel 式「brand / scope」结构），面板是 2×2 域卡片网格（tile 图标 +
+// 域名 + 一句话简介，当前域 primary 色调 + 打勾），四个域：支付 / 付款 /
+// 发卡 / 账户（id 用英文 payments / transfer / issuing / account）。侧栏
+// groups、全站搜索索引、正文检索切片、正文本身全部由当前域派生——仍是
+// 「一份数据、多处消费」，只是真源从单份变成按域分桶。支付域是完整样板，
+// 其余三域用紧凑 stub 展示切换的真实效果。切换器用现成原语组合
+// （UPopover + 原生按钮 radiogroup），不造新组件。
 // 文案策略：demo 单语（中文）直写；消费项目里域的 label/description 与页面
 // 其余文案一样走 i18n（$t）注入——入口本身天然支持多语言，接线属消费项目
 // 职责（见 project-setup.md）。
@@ -312,28 +313,22 @@ const currentDomain = computed(() => domains.find(d => d.id === currentDomainId.
 const navGroups = computed(() => currentDomain.value.navGroups)
 const searchGroups = computed(() => toSearchGroups(navGroups.value))
 
-// 域切换器（UDropdownMenu）：checkbox 项保留 menuitemcheckbox 语义标记当前域，
-// 视觉上 leading 用 #domain-leading slot 换成 tile（图标不裸露），trailing 打勾。
-// icon 不放 item 顶层（避免原生 leading 双渲染），经 tile 渲染。每项带一行域
-// 说明（组件原生 description 字段）；切换时清掉指向旧域锚点的 hash，避免落在
+// 域切换器（UPopover + 2×2 域卡片面板）：产品级入口用「卡片网格」而不是
+// 下拉列表——每张卡 = tile 图标 + 域名 + 一句话简介，当前域转 primary 色调
+// （border + tint + 打勾，不只靠颜色）。这是 Vercel/Stripe 产品切换器的同构
+// 形态；面板宽度固定、与 trigger 左对齐。radiogroup 语义：面板 role=radiogroup，
+// 卡片 role=radio + aria-checked。切换时清掉指向旧域锚点的 hash，避免落在
 // 不存在的 section 上。文案单语：demo 直接写中文，消费项目里 label/description
 // 走 i18n 注入。
-const domainMenuItems = computed(() => [
-  domains.map(d => ({
-    label: d.label,
-    description: d.description,
-    type: 'checkbox' as const,
-    checked: d.id === currentDomainId.value,
-    slot: 'domain' as const,
-    domainIcon: d.icon,
-    onSelect: () => {
-      if (d.id === currentDomainId.value) return
-      currentDomainId.value = d.id
-      if (window.location.hash) history.replaceState(history.state, '', window.location.pathname)
-      window.scrollTo({ top: 0 })
-    },
-  })),
-])
+const domainSwitcherOpen = ref(false)
+
+function selectDomain(id: string) {
+  domainSwitcherOpen.value = false
+  if (id === currentDomainId.value) return
+  currentDomainId.value = id
+  if (window.location.hash) history.replaceState(history.state, '', window.location.pathname)
+  window.scrollTo({ top: 0 })
+}
 
 async function searchContent(query: string) {
   // 模拟网络往返，展示 loading 态与竞态丢弃（真实项目由后端检索承担）
@@ -596,7 +591,7 @@ onMounted(() => anchor.initFromHash())
             <span class="text-sm font-semibold tracking-tight text-highlighted max-sm:sr-only">Onerway</span>
           </a>
           <span class="select-none text-dimmed" aria-hidden="true">/</span>
-          <UDropdownMenu :items="domainMenuItems" :content="{ align: 'start' }" :ui="{ content: 'w-64', item: 'gap-2.5' }">
+          <UPopover v-model:open="domainSwitcherOpen" :content="{ align: 'start', sideOffset: 8 }">
             <UButton
               variant="ghost"
               color="neutral"
@@ -612,19 +607,50 @@ onMounted(() => anchor.initFromHash())
                 <span class="truncate text-highlighted">{{ currentDomain.label }}</span>
               </span>
             </UButton>
-            <!-- 图标不裸露：leading 换成 tile（色调表面 + 边框），当前域转
-                 primary 着色；勾选指示由 checkbox 项原生 trailing 提供。 -->
-            <template #domain-leading="{ item }">
-              <span
-                class="flex size-7 shrink-0 items-center justify-center rounded-md border"
-                :class="item.checked
-                  ? 'border-primary/25 bg-primary/10 text-primary'
-                  : 'border-default bg-elevated text-muted'"
-              >
-                <UIcon :name="item.domainIcon" class="size-4" />
-              </span>
+            <template #content>
+              <!-- 2×2 域卡片面板：每张卡 tile + 域名 + 简介，当前域 primary
+                   色调（border + tint + 打勾）。role=radiogroup/radio 表达
+                   「四选一」语义。 -->
+              <div class="w-[380px] max-w-[calc(100vw-2rem)] p-2" role="radiogroup" aria-label="文档域">
+                <p class="px-2 pb-2 pt-1 text-xs font-medium text-dimmed">切换文档域</p>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button
+                    v-for="d in domains"
+                    :key="d.id"
+                    type="button"
+                    role="radio"
+                    :aria-checked="d.id === currentDomainId"
+                    class="group flex flex-col items-start gap-2.5 rounded-md border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    :class="d.id === currentDomainId
+                      ? 'border-primary/25 bg-primary/5'
+                      : 'border-transparent hover:border-default hover:bg-elevated/60'"
+                    @click="selectDomain(d.id)"
+                  >
+                    <span class="flex w-full items-center justify-between">
+                      <span
+                        class="flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors"
+                        :class="d.id === currentDomainId
+                          ? 'border-primary/25 bg-primary/10 text-primary'
+                          : 'border-default bg-elevated text-muted group-hover:text-toned'"
+                      >
+                        <UIcon :name="d.icon" class="size-4" />
+                      </span>
+                      <UIcon
+                        v-if="d.id === currentDomainId"
+                        name="i-lucide-check"
+                        class="size-4 shrink-0 text-primary"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <span class="space-y-0.5">
+                      <span class="block text-sm font-medium text-highlighted">{{ d.label }}</span>
+                      <span class="block text-xs leading-relaxed text-muted">{{ d.description }}</span>
+                    </span>
+                  </button>
+                </div>
+              </div>
             </template>
-          </UDropdownMenu>
+          </UPopover>
         </div>
         <ApiDocsSiteSearch
           :groups="searchGroups"
