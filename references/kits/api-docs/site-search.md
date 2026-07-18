@@ -2,7 +2,7 @@
 
 文档站 **app 顶栏**里的**全站搜索**：一个触发按钮 + `⌘K` 模态命令面板，检索对象是**文档索引**（指南页 + 按用途命名的端点，端点带请求方法与场景标签两个 facet）。回答的问题是「**从任何地方去任何页面**」——与 `ApiDocsSidebarNav` 顶部的**树内就地过滤**（「在当前菜单里缩小范围」）分属不同层级、不同位置，两者**刻意匹配同样的维度**（用途名 / 请求方法 / 场景标签），读者对「什么可被搜到」的心智模型在两层都成立（分层论证见 `sidebar-nav.md` 的「就地过滤 vs 全站搜索」）。
 
-**数据无关是设计前提**：组件吃一个文档索引数组，**不依赖 `@nuxt/content` 或任何内容管线**——gallery、starter 和任何消费项目无论文档怎么存都能用。这正是不直接用 Nuxt UI `<UContentSearch>` 的原因：它绑死 `@nuxt/content`，而 gallery/starter 刻意不装内容管线（可靠性决策）。**已接 `@nuxt/content` 的消费项目**可以在同一个顶栏位置换成 `UContentSearch`（获得跨正文全文检索），基座不为此背依赖。
+**数据无关是设计前提**：组件吃一个文档索引数组，**不依赖 `@nuxt/content` 或任何内容管线**——gallery、starter 和任何消费项目无论文档怎么存都能用。这正是不直接用 Nuxt UI `<UContentSearch>` 的原因：它绑死 `@nuxt/content`，而 gallery/starter 刻意不装内容管线（可靠性决策）。需要**跨正文全文检索**时也不必换组件：正文切片可以作为静态组喂进索引，或经可选的 `search` prop 接任意异步检索后端（见「正文检索」小节）——数据从哪来始终是消费项目的决定，基座不背依赖。
 
 > 文件放在 `components/api-docs/SiteSearch.vue`。约定 `pathPrefix: true`，组件名 = 目录名 + 文件名，所以模板名是 `<ApiDocsSiteSearch>`。数据无关：索引数据模型内联随组件走，所有 chrome 文案经 props 注入（i18n-ready）。
 
@@ -36,6 +36,9 @@ trigger  ── UButton（neutral outline sm）
 | `shortcut` | `string` | 切换面板的快捷键（`defineShortcuts` 语法），默认 `meta_k` |
 | `resultLimit` | `number` | 搜索时最多展示的结果数，默认 `12`（同 `UContentSearch`），长索引不刷屏 |
 | `extraGroups` | `CommandPaletteGroup[]` | 追加在文档索引之后的面板组（如快捷链接、主题切换——对位 `UContentSearch` 的 links/theme 组）。组内文案传入时已本地化 |
+| `search` | `(query) => Promise<SiteSearchItem[]>` | 可选异步检索引擎（对位 `UContentSearch` 的 `search`）：防抖后以当前 query 调用，结果作为独立组渲染在索引之后。接什么后端由消费项目定（content 的 `useSearchCollection`、自建搜索接口…），静态索引照常并存 |
+| `searchGroupLabel` | `string` | 异步结果组的组标题（给了 `search` 就必给；已本地化） |
+| `searchDelay` | `number` | `search` 触发前的防抖毫秒数，默认 `100`（同 `UContentSearch`） |
 
 ### 数据模型（内联，随切片走）
 
@@ -70,6 +73,7 @@ interface SiteSearchGroup {
 
 - 整体：closed / open。打开 = 点击 trigger 或 `⌘K`（toggle）；关闭 = `Esc` / 点遮罩 / 面板关闭按钮（`UModal` 内建）/ 选中条目 / 再按 `⌘K`。
 - 面板：idle（空 query，全量列出，`matchAllWhenSearchEmpty` 默认）/ searching（fuse 过滤中，命中高亮可键盘上下移动）/ no-results（空态文案）。
+- 异步（仅提供 `search` prop 时）：击键防抖（`searchDelay`）→ 调用异步源（面板 loading 指示在途）→ **序号防竞态**（每次击键递增序号，响应只在序号仍是最新时应用——慢的旧请求永远不会覆盖新结果）→ 结果组以 `ignoreFilter` 渲染（信任检索源的排序，fuse 不二次过滤）。query 清空或选中条目时结果组清空。
 - 每次关闭后重开，输入框清空并重新聚焦（`UModal` 销毁内容 + `UCommandPalette` autofocus 的组合默认行为）。
 - trigger：default / hover / `focus-visible` 紫环 / open（模态在上时按钮不需要额外压态）。
 
@@ -120,14 +124,53 @@ const searchGroups = [
 </template>
 ```
 
-> 索引从哪来由消费项目决定：手写、由侧栏导航数据派生（推荐，见 gallery docs-shell demo 的 `toSearchGroups()`），或构建期从 OpenAPI/路由表生成。已接 `@nuxt/content` 的项目要跨正文全文检索时，可在同一位置换 `<UContentSearch>`；本切片保持零内容管线依赖。
+> 索引从哪来由消费项目决定：手写、由侧栏导航数据派生（推荐，见 gallery docs-shell demo 的 `toSearchGroups()`），或构建期从 OpenAPI/路由表生成。
+
+## 正文检索（可选，两条路径）
+
+端点/指南的条目级导航走上面的静态索引就够了；要「搜正文里的一句话」时按站点规模二选一，**都不用换组件**：
+
+**路径一：正文切片作静态组（中小站，零组件接线）**——接了 `@nuxt/content` 的项目把 `queryCollectionSearchSections()` 的产出映射进 `groups`，形状恰好对上（`title→label`、`id→to`（自带锚点）、`content→suffix`）：
+
+```ts
+const { data: sections } = await useAsyncData('search-sections', () =>
+  queryCollectionSearchSections('docs'))
+
+const searchGroups = computed(() => [
+  ...navDerivedGroups, // 端点/指南索引照旧
+  {
+    id: 'content',
+    label: '正文内容',
+    items: (sections.value ?? []).map(s => ({
+      label: s.title, to: s.id, suffix: s.content, icon: 'i-lucide-text',
+    })),
+  },
+])
+```
+
+正文进 `suffix`：fuse 可搜、结果里可见并高亮，token 搜索/锚点跳转全部复用。这与 `UContentSearch` 静态引擎做的事相同，只是映射放在消费侧而不是焊进组件。**代价**：所有切片随页面载荷下发、纯客户端过滤——几十篇文档没问题，几百篇长文后考虑路径二。
+
+**路径二：异步 `search` prop（大站/服务端检索）**——把检索交给后端，组件负责防抖、竞态丢弃、loading 与结果组渲染：
+
+```vue
+<ApiDocsSiteSearch
+  :groups="searchGroups"
+  :search="query => $fetch('/api/docs/search', { query: { q: query } })"
+  search-group-label="正文内容"
+  ...
+/>
+```
+
+后端随意：content 的 `useSearchCollection`（SQLite 全文检索）、自建搜索接口、外部搜索服务。结果组 `ignoreFilter`（信任服务端排序）。活例：gallery docs-shell demo 用一个模拟延迟的 mock `searchContent` 演示了整条链路。
+
+**什么时候才换 `UContentSearch`**：站点以散文指南为主、且深度绑定 content 生态（导航树、theme 组等全套）时。API 文档站通常不必——本切片的端点语义（method 色标、场景 facet）与同页锚点处理是 `UContentSearch` 没有的。
 
 ## 相关组件
 
 - `<ApiDocsMethodBadge>` — 本 kit 的兄弟切片，端点项前置的方法色标复用它（`registryDependencies` 声明 `method-badge`，copy-in 时随本切片一起拉入）。
 - `<ApiDocsSidebarNav>` — 同一文档站里的另一层搜索（树内就地过滤）；两层的分工论证见 `sidebar-nav.md`。
 - `<UModal>` / `<UCommandPalette>` / `<UButton>` / `<UKbd>` — Nuxt UI 原语。
-- `<UContentSearch>` — Nuxt UI 的全文检索（绑 `@nuxt/content`）；接了内容管线的消费项目可用它替换本组件，接线见 `project-setup.md`。
+- `<UContentSearch>` — Nuxt UI 的全文检索（绑 `@nuxt/content`）；仅当站点以散文指南为主且深度绑定 content 生态时才考虑替换（见「正文检索」小节的取舍），接线见 `project-setup.md`。
 
 ## 规格与源码
 

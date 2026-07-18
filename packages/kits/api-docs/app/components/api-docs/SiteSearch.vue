@@ -38,6 +38,16 @@
 //                        multi-word queries ("结算 POST") intersect facets;
 //                        matched text is highlighted in results (palette
 //                        built-in), capped at `resultLimit`
+//   async-searching      only when the optional `search` prop is provided:
+//                        keystrokes debounce (`searchDelay`), then call the
+//                        async source; a sequence guard drops stale responses
+//                        (a slow old request can never overwrite a newer one);
+//                        results render as their own `ignoreFilter` group
+//                        (server ranking is trusted — fuse doesn't re-filter),
+//                        with the palette's loading indicator while in flight.
+//                        Mirrors UContentSearch's async engine; backend is the
+//                        consumer's choice (content's useSearchCollection, a
+//                        search API, …) — the base still takes no dependency
 //   no-results           palette's built-in empty state (label via prop)
 //
 // A11y: focus trap + restore-to-trigger come from UModal; the palette input
@@ -106,6 +116,17 @@ const props = withDefaults(
      *  or a theme switcher, mirroring UContentSearch's links/theme groups).
      *  Labels arrive already localized, per the kit's copy-agnostic rule. */
     extraGroups?: CommandPaletteGroup<CommandPaletteItem>[]
+    /** Optional async engine (mirrors UContentSearch's `search`): called with
+     *  the debounced query; results render as their own group below the index,
+     *  bypassing fuse (server ranking is trusted). Wire it to whatever backend
+     *  the project has — @nuxt/content's useSearchCollection, a search API…
+     *  The static index keeps working alongside it. */
+    search?: (query: string) => Promise<SiteSearchItem[]> | SiteSearchItem[]
+    /** Group heading for async results (required when `search` is given;
+     *  already localized). */
+    searchGroupLabel?: string
+    /** Debounce (ms) before `search` fires. Same default as UContentSearch. */
+    searchDelay?: number
   }>(),
   {
     ariaLabel: undefined,
@@ -113,6 +134,9 @@ const props = withDefaults(
     shortcut: 'meta_k',
     resultLimit: 12,
     extraGroups: () => [],
+    search: undefined,
+    searchGroupLabel: undefined,
+    searchDelay: 100,
   },
 )
 
@@ -165,31 +189,80 @@ defineShortcuts(
   })),
 )
 
-// Map the docs index into palette groups. `method`/`scenarios` ride along as
-// extension keys: fuse searches them (see :fuse below) and #item-leading reads
-// `method` to render the badge. Scenarios also join into the visible suffix so
-// the facet is readable, not just matchable.
-const paletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() =>
-  props.groups.map(group => ({
+// Shared item mapping (static index and async results render identically).
+// `method`/`scenarios` ride along as extension keys: fuse searches them (see
+// :fuse below) and #item-leading reads `method` to render the badge. Scenarios
+// also join into the visible suffix so the facet is readable, not matchable
+// only.
+function toPaletteItem(item: SiteSearchItem): CommandPaletteItem {
+  return {
+    label: item.label,
+    suffix: [item.suffix, item.scenarios?.join(props.scenarioSeparator)]
+      .filter(Boolean)
+      .join(' · '),
+    to: item.to,
+    icon: item.method ? undefined : item.icon,
+    method: item.method,
+    scenarios: item.scenarios,
+    onSelect: () => {
+      trackHashDestination(item.to)
+      open.value = false
+      searchTerm.value = ''
+    },
+  }
+}
+
+// --- Async engine (only active when the `search` prop is provided) ---
+// Debounce + sequence guard, mirroring UContentSearch: every keystroke bumps
+// `searchSeq`; a response is applied only if its sequence is still current,
+// so a slow old request can never overwrite a newer result set.
+const asyncItems = ref<SiteSearchItem[]>([])
+const searching = ref(false)
+let searchSeq = 0
+let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+watch(searchTerm, (query) => {
+  if (!props.search) return
+  if (debounceTimer) clearTimeout(debounceTimer)
+  const seq = ++searchSeq
+  if (!query) {
+    asyncItems.value = []
+    searching.value = false
+    return
+  }
+  searching.value = true
+  debounceTimer = setTimeout(async () => {
+    try {
+      const results = await props.search!(query)
+      if (seq !== searchSeq) return // stale response — drop it
+      asyncItems.value = results
+    } catch {
+      if (seq === searchSeq) asyncItems.value = []
+    } finally {
+      if (seq === searchSeq) searching.value = false
+    }
+  }, props.searchDelay)
+})
+
+// Static index groups + (optional) async results group + extra groups. The
+// async group sets `ignoreFilter`: the palette shows the source's results
+// as-is instead of fuse re-filtering them — server ranking is trusted.
+const paletteGroups = computed<CommandPaletteGroup<CommandPaletteItem>[]>(() => {
+  const groups: CommandPaletteGroup<CommandPaletteItem>[] = props.groups.map(group => ({
     id: group.id,
     label: group.label,
-    items: group.items.map(item => ({
-      label: item.label,
-      suffix: [item.suffix, item.scenarios?.join(props.scenarioSeparator)]
-        .filter(Boolean)
-        .join(' · '),
-      to: item.to,
-      icon: item.method ? undefined : item.icon,
-      method: item.method,
-      scenarios: item.scenarios,
-      onSelect: () => {
-        trackHashDestination(item.to)
-        open.value = false
-        searchTerm.value = ''
-      },
-    })),
-  })).concat(props.extraGroups),
-)
+    items: group.items.map(toPaletteItem),
+  }))
+  if (props.search && asyncItems.value.length > 0) {
+    groups.push({
+      id: 'site-search-async',
+      label: props.searchGroupLabel,
+      ignoreFilter: true,
+      items: asyncItems.value.map(toPaletteItem),
+    })
+  }
+  return groups.concat(props.extraGroups)
+})
 
 // Default fuse keys are label/description/suffix; add method + scenarios so
 // "POST" or a scenario name matches — the same dimensions the sidebar's
@@ -232,6 +305,7 @@ const fuse = computed(() => ({
         :groups="paletteGroups"
         :placeholder="props.placeholder"
         :fuse="fuse"
+        :loading="searching"
         close
         @update:open="open = $event"
       >

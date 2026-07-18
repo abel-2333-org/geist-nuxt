@@ -103,6 +103,29 @@ function toSearchGroups(groups: NavGroup[]): SearchGroup[] {
 
 const searchGroups = toSearchGroups(navGroups)
 
+// --- 正文全文检索（SiteSearch 异步引擎 demo）：模拟消费项目的正文切片检索。
+//     真实项目里 searchContent 换成 @nuxt/content 的 useSearchCollection、
+//     自建搜索接口等；组件侧的防抖、竞态丢弃、loading、结果组渲染完全一致。
+//     静态索引（searchGroups）与异步结果并存：条目级导航搜前者，正文片段搜
+//     后者（接法沉淀在 site-search.md「正文检索」）。 ---
+type ContentSection = { title: string; to: string; content: string }
+const contentSections: ContentSection[] = [
+  { title: '概览 · 两条收款路径', to: '#overview', content: '托管收银台适合快速上线，Direct API 适合完全自定义支付体验，两条路径共用同一套密钥与 Webhook。' },
+  { title: '认证与密钥 · 密钥存放', to: '#auth', content: '生产密钥请存放在服务端环境变量，切勿写进前端代码；测试密钥以 sk_test_ 开头、只操作沙箱数据。' },
+  { title: 'Webhook 通知 · 幂等去重', to: '#webhooks', content: '校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。' },
+  { title: '取消支付 · 资金解冻', to: '#pay-cancel', content: '取消一笔尚未捕获的支付或预授权，资金原路解冻。' },
+]
+
+async function searchContent(query: string) {
+  // 模拟网络往返，展示 loading 态与竞态丢弃（真实项目由后端检索承担）
+  await new Promise(resolve => setTimeout(resolve, 250))
+  const q = query.trim().toLowerCase()
+  if (!q) return []
+  return contentSections
+    .filter(s => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q))
+    .map(s => ({ label: s.title, to: s.to, suffix: s.content, icon: 'i-lucide-text' }))
+}
+
 // --- 快速开始示例（指南正文里的普通代码块） ---
 const quickstartVariants = [
   {
@@ -338,6 +361,8 @@ onMounted(() => anchor.initFromHash())
         </div>
         <ApiDocsSiteSearch
           :groups="searchGroups"
+          :search="searchContent"
+          search-group-label="正文内容"
           trigger-label="搜索全部文档"
           aria-label="搜索全部文档"
           modal-title="搜索全部文档"

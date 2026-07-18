@@ -64,7 +64,7 @@ kit 的 `index.md` 记录过：**starter 刻意不内置 `@nuxt/content`**——
 - **kit 组件是「内容管线无关」的**：`ApiDocsCodeBlock`、`ApiDocsResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。starter 不内置 content 只是分发可靠性考量，真实项目可自行引入。
-- **全站搜索的基座是 kit 自带的 `<ApiDocsSiteSearch>`**（`⌘K` 命令面板，吃文档索引、零内容管线依赖，见 `site-search.md`）——没装 content 也有完整的全站搜索。`@nuxt/content` 就位后要**跨整站文档正文全文检索**时，可在顶栏同一位置换 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>`（绑 content、属消费项目职责，**不进 kit 切片**）。两者的正确落位都是 **app 顶栏 / navbar**（参考 Nuxt UI / Vercel 文档站），与 `<ApiDocsSidebarNav>` 侧栏内的「就地过滤搜索」分属**不同层级**——各司其职、靠层级区分。**不要**把全站搜索按钮塞进侧栏顶部（会和就地过滤框变成两个雷同搜索框上下紧贴），更不要把任何全站搜索焊进导航组件。
+- **全站搜索的基座是 kit 自带的 `<ApiDocsSiteSearch>`**（`⌘K` 命令面板，吃文档索引、零内容管线依赖，见 `site-search.md`）——没装 content 也有完整的全站搜索。`@nuxt/content` 就位后要**跨正文全文检索**时也不必换组件：正文切片作静态组喂进索引（中小站），或经异步 `search` prop 接 content 的检索/自建接口（大站）——两条路径见 `site-search.md`「正文检索」。仅当站点以散文指南为主、且深度绑定 content 生态（导航树、theme 组等全套）时才考虑换 `<UContentSearch>`（绑 content、属消费项目职责，**不进 kit 切片**）。无论哪种，正确落位都是 **app 顶栏 / navbar**（参考 Nuxt UI / Vercel 文档站），与 `<ApiDocsSidebarNav>` 侧栏内的「就地过滤搜索」分属**不同层级**——各司其职、靠层级区分。**不要**把全站搜索按钮塞进侧栏顶部（会和就地过滤框变成两个雷同搜索框上下紧贴），更不要把任何全站搜索焊进导航组件。
 
 ```vue
 <script setup lang="ts">
