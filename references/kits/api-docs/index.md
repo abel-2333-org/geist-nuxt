@@ -22,7 +22,7 @@
 | `api-docs/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 core `SemanticBadge` | — |
 | `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
 | `api-docs/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
-| `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；deprecated 的迁移提示前置到描述后首位，new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
+| `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；条件（何时必填）前置到**描述之前**，做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；deprecated 的迁移提示前置到描述后首位，new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -173,7 +173,7 @@ gallery 有**两个 api-docs demo 页，职责互补**：
 - CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
 - ResponseExample：状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
-- **配色轴正交（每种色只承载一个含义，跨 FieldItem 全体生效）**：红=必填（REQUIRED）；琥珀=风险/谨慎轴，专属成熟度 beta 与 caution 约束；紫=交互（锚点、展开、focus 环）；中性灰阶=一切说明性元数据——含**条件性（CONDITIONAL 标签 + 条件行图标走 `text-toned`/`text-dimmed`，不是琥珀，因为"何时必填"是逻辑说明不是风险）**、类型、format、SINCE 版本号。避免同一字段（如 conditional + beta）出现两条无关轴共用琥珀而无法区分语义。
+- **配色轴正交（每种色只承载一个含义，跨 FieldItem 全体生效）**：红=必填（REQUIRED）；琥珀=**"有前提/需留意"**轴——成熟度 beta、caution 约束、以及**条件 callout**（仅特定情况才必填）；紫=交互（锚点、展开、focus 环）；中性灰阶=类型、format、SINCE 版本号，以及 **summary row 里的 `CONDITIONAL` 标签**（保持中性让该行克制）。关键手法是**容纳而非去饱和**：条件的琥珀收进一个带边框的 callout 块，与 Beta 徽章成为两个各自独立的琥珀物件，因此同一字段 conditional + beta 时不会糊成"一片琥珀分不清"——琥珀仍只承载单一含义，只是以块为单位出现。
 
 ### 页面级结构 / 语义（review 沉淀）
 
@@ -189,7 +189,7 @@ gallery 有**两个 api-docs demo 页，职责互补**：
 
 > **这一节是「怎么设计」的蓝图，不是可复制的资产。** kit ship 的是一组**数据无关的展示积木**（代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树 `FieldGroup`·`FieldItem`，类型内联或依赖 core、拷贝即用）。而把它们接到**真实数据源**（自定义 spec DSL、OpenAPI 等）所需的 adapter、类型分层、以及页面唯一 `<h1>` 的端点头 `OperationHeader`，是**消费项目自己的一层**——因为每个项目的 spec 形状不同，adapter 必然要改。所以这里**沉淀设计决策与契约，不抄易腐的实现代码**；需要具体实现时看下方「参考实现真源」的指针。
 >
-> **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永远比预建便宜，别过早建目录。
+> **本节按「层」组织，且刻意保持单文件多小节**：API 文档的架构层是稳定的少数几种（输入契约 / 领域模型 / 适配 / 字段渲染）。未来新增一层就在本节加一个 `###` 小节；只有当架构主题真的膨胀到 ~5+ 且彼此正交时，才拆成 `architecture/` 子目录 + index —— 拆分永���比预建便宜，别过早建目录。
 
 ### 分层总览（依赖方向图）
 
@@ -250,7 +250,7 @@ authoring 输入            适配                 领域输出              渲
 
 ### 契约规则（跨层，务必遵守）
 
-- **可空性用判别联合，让非法状态不可表达**：`type Nullability = { nullable: false } | { nullable: true, when?: string }`，而非 `value: { empty?, when? }` 这种把布尔与条件糊在一起、能写出「不可空却带为空条件」的矛盾形状。语义锁定「字段结构上恒在、只是值可能为空」（CSV 列 / JSON 键都适用），不要兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数参数收窄到 `nullable: true` 分支，天然防错。
+- **可空性用判别联合，让非法状态不可表达**：`type Nullability = { nullable: false } | { nullable: true, when?: string }`，而非 `value: { empty?, when? }` 这��把布尔与条件糊在一起、能写出「不可空却带为空条件」的矛盾形状。语义锁定「字段结构上恒在、只是值可能为空」（CSV 列 / JSON 键都适用），不要兼职表达「字段可省略」（���是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数参数收窄到 `nullable: true` 分支，天然防错。
 - **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产���含空格 id 让 `querySelector` 崩、以及与分隔符 `_` 撞车的歧义）。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
 
 ### 参考实现真源（copy & adapt，别 drop-in）

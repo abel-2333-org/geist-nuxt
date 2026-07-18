@@ -18,9 +18,9 @@
 // Anatomy:  summary row  ── anchor · name · type · format · requiredness
 //                           (required/conditional only; optional is unmarked) ·
 //                           default · lifecycle badge
-//           leaf detail  ── description + secondary band (deprecation-first →
-//                           condition → enum → constraints → example →
-//                           new/beta lifecycle callout)
+//           leaf detail  ── condition callout (if any) → description +
+//                           secondary band (deprecation-first → enum →
+//                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
@@ -216,10 +216,11 @@ const requiredLabel = computed(() => (requiredState.value ? t.value[requiredStat
 // Everything below the main description is secondary metadata. Grouping it lets
 // the template pull the description up as the primary content and set the band
 // apart with a larger rhythm gap.
+// The condition is now rendered above the description as its own callout, so
+// it no longer counts toward the secondary band.
 const hasSecondary = computed(
   () =>
-    !!props.condition
-    || hasEnum.value
+    hasEnum.value
     || (props.notes?.length ?? 0) > 0
     || (props.examples?.length ?? 0) > 0
     || hasLifecycleCallout.value,
@@ -347,15 +348,37 @@ const lifecycleMeta = computed(() => {
          Primary description sits closest to the summary row; a larger gap sets
          it apart from the secondary metadata band below. -->
     <div v-if="hasDetail" class="mt-2.5 flex flex-col gap-4">
+      <!-- Condition — the gating rule ("when is this required?") comes BEFORE
+           the description: it answers whether you even need the field, which
+           precedes understanding what it is. Contained in a tinted callout so
+           amber reads as one bounded object (the rule), not a scattered wash —
+           this keeps amber's single meaning ("has strings attached": beta,
+           caution, condition) intact even when a field is conditional + beta.
+           The summary-row CONDITIONAL tag stays neutral to keep that row calm;
+           the accent lives here, where the actual rule is. -->
+      <div
+        v-if="condition"
+        class="flex items-start gap-2 rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
+      >
+        <!-- Icon optically centered on the first line (which often holds a
+             taller inline code pill); items-start keeps it top-aligned when the
+             condition wraps. Amber matches the callout it lives in. -->
+        <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
+          <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
+        </span>
+        <InlineMarkdown :text="condition" />
+      </div>
+
       <p v-if="description" class="text-sm leading-relaxed text-toned">
         <InlineMarkdown :text="description" />
       </p>
 
       <!-- Secondary metadata band, ordered by a developer's call-time flow:
-           when to send it → what values → boundaries → sample → maturity.
-           All rows share one label language: a plain uppercase tag whose color
-           carries tone (neutral = dimmed, caution/warning = amber). No filled
-           boxes, so the band reads as compact structured metadata. -->
+           what values → boundaries → sample → maturity. (The gating condition
+           is hoisted above the description as its own callout.) All rows share
+           one label language: a plain uppercase tag whose color carries tone
+           (neutral = dimmed, caution/warning = amber). No filled boxes, so the
+           band reads as compact structured metadata. -->
       <div v-if="hasSecondary" class="flex flex-col gap-3">
         <!-- 0. Deprecation — FIRST for deprecated fields. "Don't use this,
              use X instead" answers "should I use this field at all?", which
@@ -380,24 +403,6 @@ const lifecycleMeta = computed(() => {
           >{{ t.since }}</span>
           <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
-        </p>
-
-        <!-- 1. Condition — when a conditional field becomes required. The
-             condition text reads as the explanation, so no redundant prefix. -->
-        <p v-if="condition" class="flex items-start gap-1.5 text-sm leading-relaxed text-muted">
-          <!-- Center the icon on the first line rather than pinning it to the
-               top: the condition text usually includes a taller inline code
-               pill (a field value), which grows the first line's box. A flex
-               box sized to that line box keeps the icon optically centered on
-               the pill, and — thanks to items-start on the paragraph — still
-               aligns to the first line when the condition wraps. -->
-          <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
-            <!-- Neutral (dimmed), matching the band's other lead-in labels:
-                 a condition explains WHEN, it is not a risk. Amber is reserved
-                 for the maturity/caution axis so the two never blur together. -->
-            <UIcon name="i-lucide-git-branch" class="size-3.5 text-dimmed" />
-          </span>
-          <InlineMarkdown :text="condition" />
         </p>
 
         <!-- 2. Allowed values — the most actionable metadata. The field's
