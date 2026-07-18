@@ -68,7 +68,7 @@ interface SidebarNavSection {
   kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 tracking，chrome 中性）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
-  defaultOpen?: boolean  // 首次渲染即展开；搜索激活时被忽略
+  defaultOpen?: boolean  // 开合状态的初始种子值；搜索激活时被强制展开覆盖
 }
 interface SidebarNavGroup {
   id?: string            // 稳定 id，缺省时取 label 的 slug
@@ -91,16 +91,16 @@ interface SidebarNavGroup {
 
 ## 状态（state model）
 
-- 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。
+- 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。开合状态**始终受控**（组件自持 `openMap`，`defaultOpen` 只做种子值），避免 UCollapsible 在受控/非受控间切换导致内部状态与用户所见不一致。
 - item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。
-- 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。has-filter 即 has-query。
+- 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
 - 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
 - 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
 
 ## Accessibility（无障碍）
 
 - 根节点是 `<nav :aria-label>` 地标；板块用真实 `<button>` 触发（Reka `UCollapsible` 接好 `aria-expanded`/`aria-controls`），可访问名 = 板块标题 + 计数。
-- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉末尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
+- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉��尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
 - **过滤结果用 `aria-live="polite"` 播报**���过滤是静默重写列表，故一个 `role="status"` 的 `sr-only` 区域播报「找到 N 个匹配结果」或「没有与"…"匹配的结果」；空 query 时不播报，闲时浏览保持安静。
 - 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签文字（订阅/授权…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（查看全部 N 个服务场景）。
 - 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
