@@ -389,11 +389,8 @@ onMounted(() => {
     </div>
 
     <!-- Scroll region: multiple sections can be open at once; overflow scrolls
-         here so the page layout stays put no matter how long the menu grows.
-         `@container` makes this the sizing context for the rows inside, so each
-         endpoint row can adapt its trailing tags to the *sidebar's* live width
-         (which the drag handle changes) rather than the viewport. -->
-    <div class="@container min-h-0 flex-1 overflow-y-auto p-2">
+         here so the page layout stays put no matter how long the menu grows. -->
+    <div class="min-h-0 flex-1 overflow-y-auto p-2">
       <!-- Grouping layer: each band is a labelled territory (guides vs. API
            reference), separated by an eyebrow header + spacing. -->
       <div
@@ -472,52 +469,21 @@ onMounted(() => {
                         :name="item.icon"
                         class="size-4 shrink-0 text-dimmed"
                       />
-                      <!-- Purpose-named label (prose sans), then the scenarios it
-                           serves as quiet trailing neutral tags. The trailing
-                           cluster adapts to the sidebar's live width (via the
-                           @container on the scroll region) so the label always
-                           stays readable and we never render an empty, squeezed
-                           tag pill:
-                             • narrow  → a single count chip (tag icon + total),
-                               tooltip lists every scenario;
-                             • wide    → first tag in full + a "+N" overflow chip.
-                           A sr-only span always carries the complete list so
-                           screen readers get everything regardless of width.
+                      <!-- Purpose-named label (prose sans, `shrink` so it yields
+                           space to the tags rather than hogging it), then the
+                           scenarios it serves as a quiet trailing tag cluster.
+                           ScenarioTags is `flex-1`: it takes the space the label
+                           leaves and reveals as many whole tags as measurably
+                           fit, folding the rest into "+N" (or a lone count chip
+                           when nothing fits). So a wide sidebar spreads every
+                           tag out, a narrow one degrades gracefully, and the
+                           label keeps a readable `min-w-16` floor either way.
                            Colour stays reserved for the active state. -->
-                      <span class="min-w-16 flex-1 truncate">{{ item.label }}</span>
-                      <UTooltip
+                      <span class="min-w-16 shrink truncate">{{ item.label }}</span>
+                      <ApiDocsScenarioTags
                         v-if="itemScenarios(item).length"
-                        :text="itemScenarios(item).join('、')"
-                      >
-                        <span class="flex shrink-0 items-center gap-1">
-                          <!-- Narrow: everything collapses to one count chip. -->
-                          <UBadge
-                            color="neutral"
-                            variant="soft"
-                            size="sm"
-                            icon="i-lucide-tag"
-                            :label="String(itemScenarios(item).length)"
-                            class="tabular-nums @min-[15rem]:hidden"
-                          />
-                          <!-- Wide: first tag in full, rest as a "+N" chip. -->
-                          <UBadge
-                            color="neutral"
-                            variant="soft"
-                            size="sm"
-                            :label="itemScenarios(item)[0]"
-                            class="hidden max-w-28 @min-[15rem]:inline-flex"
-                          />
-                          <UBadge
-                            v-if="itemScenarios(item).length > 1"
-                            color="neutral"
-                            variant="soft"
-                            size="sm"
-                            :label="`+${itemScenarios(item).length - 1}`"
-                            class="hidden tabular-nums @min-[15rem]:inline-flex"
-                          />
-                          <span class="sr-only">{{ itemScenarios(item).join('、') }}</span>
-                        </span>
-                      </UTooltip>
+                        :scenarios="itemScenarios(item)"
+                      />
                       <UBadge
                         v-if="item.badge !== undefined"
                         color="neutral"
