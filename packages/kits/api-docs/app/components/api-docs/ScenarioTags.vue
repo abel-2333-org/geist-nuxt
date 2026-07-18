@@ -187,7 +187,14 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
     <!-- Full list for screen readers, regardless of how many chips render. -->
     <span class="sr-only">{{ scenarios.join('、') }}</span>
 
-    <!-- Hidden measurement layer: intrinsic widths only, never interactive. -->
+    <!-- Hidden measurement layer: intrinsic widths only, never interactive.
+         Note: unlike the visible tags, the measured badges deliberately carry
+         NO `max-w-28`. With the cap, a tag wider than 112px would report a
+         *clamped* offsetWidth, so the fit loop would think an over-long tag
+         fits and lay it out truncated (an ellipsised chip carrying no info)
+         instead of folding it into "+N". Measuring the intrinsic width lets an
+         over-long tag correctly overflow into the "+N"/count chip, where its
+         full text is reachable via the popover (and the sr-only list). -->
     <div
       ref="measureEl"
       aria-hidden="true"
@@ -201,7 +208,6 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
         variant="soft"
         size="sm"
         :label="s"
-        class="max-w-28"
       />
       <UBadge
         data-plus
