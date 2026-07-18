@@ -128,7 +128,7 @@ export function computeSplitBudgets(
 }
 ```
 
-实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**始终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点上只在 `lg+` 启用拖动，`<lg` 回退为堆叠 + 自然高、无把手。`:style` 绑定**��终返回对象（用空串占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
 
   - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟��不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观察了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高����同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，��重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
 
@@ -173,6 +173,7 @@ gallery 有**两个 api-docs demo 页，职责互补**：
 - CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
 - ResponseExample：状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
+- **配色轴正交（每种色只承载一个含义，跨 FieldItem 全体生效）**：红=必填（REQUIRED）；琥珀=风险/谨慎轴，专属成熟度 beta 与 caution 约束；紫=交互（锚点、展开、focus 环）；中性灰阶=一切说明性元数据——含**条件性（CONDITIONAL 标签 + 条件行图标走 `text-toned`/`text-dimmed`，不是琥珀，因为"何时必填"是逻辑说明不是风险）**、类型、format、SINCE 版本号。避免同一字段（如 conditional + beta）出现两条无关轴共用琥珀而无法区分语义。
 
 ### 页面级结构 / 语义（review 沉淀）
 
@@ -250,7 +251,7 @@ authoring 输入            适配                 领域输出              渲
 ### 契约规则（跨层，务必遵守）
 
 - **可空性用判别联合，让非法状态不可表达**：`type Nullability = { nullable: false } | { nullable: true, when?: string }`，而非 `value: { empty?, when? }` 这种把布尔与条件糊在一起、能写出「不可空却带为空条件」的矛盾形状。语义锁定「字段结构上恒在、只是值可能为空」（CSV 列 / JSON 键都适用），不要兼职表达「字段可省略」（那是请求侧 `required` 的活）。判别联合还会在 typecheck 阶段逼你把 note 生成函数参数收窄到 `nullable: true` 分支，天然防错。
-- **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产生含空格 id 让 `querySelector` 崩、以及与分隔符 `_` 撞车的歧义）。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
+- **字段锚点 id 用 slug 分段 + `.` 连接**：真实字段名带空格（`Settlement Date`）或下划线（`Order_Currency`）时别直接拿 `name` 当 DOM id（会产���含空格 id 让 `querySelector` 崩、以及与分隔符 `_` 撞车的歧义）。每段 slugify（小写、非字母数字→`-`）再用 `.` 连父路径（`response-body.csv.batch.settlement-date`），fixture 实测 0 空格 / 0 冲突 / 0 前缀歧义；`name` 只留作展示、保真原始拼写。
 
 ### 参考实现真源（copy & adapt，别 drop-in）
 

@@ -299,11 +299,17 @@ const lifecycleMeta = computed(() => {
       >{{ format }}</span>
 
       <!-- Requirement tag — only for required/conditional; optional rows carry
-           no tag (absence is the signal, see requiredState above). -->
+           no tag (absence is the signal, see requiredState above).
+           Color axes are kept orthogonal: red = required (a hard rule), while
+           conditional is a *neutral toned* tag — it explains WHEN the field is
+           needed, which is not a risk. Amber is reserved exclusively for the
+           risk/maturity axis (beta, caution constraints), so a field that is
+           both conditional AND beta no longer reads as one ambiguous amber
+           wash. -->
       <span
         v-if="requiredState"
         class="text-xs font-medium uppercase tracking-wide"
-        :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+        :class="requiredState === 'required' ? 'text-error' : 'text-toned'"
       >
         {{ requiredLabel }}
       </span>
@@ -386,7 +392,10 @@ const lifecycleMeta = computed(() => {
                the pill, and — thanks to items-start on the paragraph — still
                aligns to the first line when the condition wraps. -->
           <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
-            <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
+            <!-- Neutral (dimmed), matching the band's other lead-in labels:
+                 a condition explains WHEN, it is not a risk. Amber is reserved
+                 for the maturity/caution axis so the two never blur together. -->
+            <UIcon name="i-lucide-git-branch" class="size-3.5 text-dimmed" />
           </span>
           <InlineMarkdown :text="condition" />
         </p>
