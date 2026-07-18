@@ -58,6 +58,25 @@ function recompute() {
 }
 
 let observer: ResizeObserver | null = null
+let rafId = 0
+
+// ResizeObserver callbacks run synchronously; recomputing there mutates the DOM
+// and can resize the observed node again within the same delivery cycle, which
+// the browser reports as "ResizeObserver loop completed with undelivered
+// notifications". Deferring the work to the next animation frame breaks that
+// synchronous feedback loop (the standard fix) and coalesces bursts of resize
+// events into a single recompute.
+function scheduleRecompute() {
+  if (typeof requestAnimationFrame === 'undefined') {
+    recompute()
+    return
+  }
+  if (rafId) cancelAnimationFrame(rafId)
+  rafId = requestAnimationFrame(() => {
+    rafId = 0
+    recompute()
+  })
+}
 
 onMounted(() => {
   // Fonts changing metrics after paint would invalidate our measurements, so
@@ -66,7 +85,7 @@ onMounted(() => {
     document.fonts.ready.then(() => recompute()).catch(() => {})
   }
   if (rootEl.value && typeof ResizeObserver !== 'undefined') {
-    observer = new ResizeObserver(() => recompute())
+    observer = new ResizeObserver(scheduleRecompute)
     observer.observe(rootEl.value)
   }
   nextTick(recompute)
@@ -75,6 +94,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   observer?.disconnect()
   observer = null
+  if (rafId) cancelAnimationFrame(rafId)
 })
 
 // Re-measure when the tag set itself changes.
