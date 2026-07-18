@@ -36,8 +36,8 @@
 //
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
-// to localStorage so a reader's preferred width survives reloads. Mouse drag +
-// keyboard (←/→, Shift, Home/End) on a role="separator" affordance; double-click
+// to localStorage so a reader's preferred width survives reloads. Pointer drag
+// (mouse/touch/pen) + keyboard (←/→, Shift, Home/End) on a role="separator" affordance; double-click
 // resets to the default. Below lg the nav takes full container width. Opt out
 // with :resizable=false.
 //
@@ -50,7 +50,7 @@
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (leading method badge
 //                       + purpose label + width-adaptive trailing scenario tags)
-//   resizer     right-edge separator, lg+ (mouse + keyboard, dbl-click resets), width → localStorage
+//   resizer     right-edge separator, lg+ (pointer + keyboard, dbl-click resets), width → localStorage
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -157,8 +157,13 @@ const props = withDefaults(
   },
 )
 
+// ASCII slugs read nicely in ids, but a fully non-latin label (e.g. "订阅")
+// would slug to '' — colliding every such section on one empty id (duplicate
+// v-for keys, broken collapse state). Fall back to the label itself: it's
+// already required to be unique-enough as a visible heading.
 function slug(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const ascii = s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  return ascii || s
 }
 
 // Scenario tags: a guide item yields []; an endpoint yields its scenario list.
@@ -177,7 +182,6 @@ const normalizedGroups = computed<SidebarNavGroup[]>(() => {
 const query = ref('')
 const searchRef = ref<{ inputRef?: HTMLInputElement } | null>(null)
 const hasQuery = computed(() => query.value.trim().length > 0)
-const hasFilter = hasQuery
 
 // The query matches the purpose label, the HTTP method, OR any scenario tag —
 // so "订阅" (a scenario) and "POST" (a method) both narrow the tree.
@@ -212,7 +216,7 @@ const resolved = computed(() => {
     .map((group, gi) => {
       const sections = group.sections
         .map(section => resolveSection(section, q))
-        .filter(entry => (hasFilter.value ? entry.items.length > 0 : true))
+        .filter(entry => (hasQuery.value ? entry.items.length > 0 : true))
       return {
         group,
         id: group.id ?? (group.label ? slug(group.label) : `group-${gi}`),
@@ -222,7 +226,32 @@ const resolved = computed(() => {
     .filter(group => group.sections.length > 0)
 })
 
-const empty = computed(() => hasFilter.value && resolved.value.length === 0)
+const empty = computed(() => hasQuery.value && resolved.value.length === 0)
+
+// --- Section open state ------------------------------------------------------
+// UCollapsible is kept fully controlled. Passing `:open` only sometimes (e.g.
+// `forceOpen || undefined`) flips the collapsible between controlled and
+// uncontrolled modes, and reka-ui's internal state can then disagree with what
+// the user saw before the switch. Instead we own the state: browsing reads
+// `openMap` (seeded from `defaultOpen`), while a filter is active the sections
+// force open (`forceOpen`) with per-query manual overrides kept in a transient
+// map that resets on every query change — clearing the search restores the
+// exact pre-search open state.
+const openMap = ref<Record<string, boolean>>({})
+const filterOpenMap = ref<Record<string, boolean>>({})
+watch(query, () => {
+  filterOpenMap.value = {}
+})
+
+function isOpen(entry: ReturnType<typeof resolveSection>): boolean {
+  if (hasQuery.value) return filterOpenMap.value[entry.id] ?? entry.forceOpen
+  return openMap.value[entry.id] ?? entry.section.defaultOpen ?? false
+}
+
+function setOpen(id: string, open: boolean) {
+  if (hasQuery.value) filterOpenMap.value[id] = open
+  else openMap.value[id] = open
+}
 
 // The placeholder carries a trailing ellipsis (a truncated-hint convention),
 // but the accessible name shouldn't — screen readers would read the "…" as
@@ -240,7 +269,7 @@ const resultCount = computed(() =>
   ),
 )
 const filterAnnouncement = computed(() => {
-  if (!hasFilter.value) return ''
+  if (!hasQuery.value) return ''
   return resultCount.value === 0
     ? `没有与“${query.value.trim()}”匹配的结果`
     : `找到 ${resultCount.value} 个匹配结果`
@@ -272,7 +301,7 @@ function clear() {
 // Nuxt UI's UDashboardResizeHandle is a reka-ui Primitive that does not forward
 // the pointer listeners our drag math needs, and its useResizable composable is
 // bound to the Dashboard SSR context. So the drag→width math lives here — kept
-// minimal: mouse drag, clamp, localStorage persistence, double-click reset.
+// minimal: pointer drag, clamp, localStorage persistence, double-click reset.
 // SSR-safe: `width` starts at the default (server/client match), the persisted
 // value is read after mount.
 const width = ref(props.defaultWidth)
@@ -291,25 +320,39 @@ function persistWidth() {
   }
 }
 
-// Track the move on window (not the handle) so a fast drag that outruns the
-// narrow handle keeps resizing until the button is released.
-function onResizeStart(e: MouseEvent) {
+// Pointer Events (not mouse*) so the drag also works on touch/pen devices that
+// hit the lg+ breakpoint (e.g. an iPad in landscape). Pointer capture pins the
+// stream to the handle, so a fast drag that outruns the narrow hit area keeps
+// resizing until release; pointercancel (e.g. the browser reclaiming a touch
+// gesture) ends the drag cleanly through the same path.
+function onResizeStart(e: PointerEvent) {
   if (!props.resizable) return
+  if (e.pointerType === 'mouse' && e.button !== 0) return
   e.preventDefault()
+  const handle = e.currentTarget as HTMLElement
   isResizing.value = true
   const startX = e.clientX
   const startW = width.value
-  const onMove = (ev: MouseEvent) => {
+  const onMove = (ev: PointerEvent) => {
     width.value = clampWidth(startW + (ev.clientX - startX))
   }
-  const onUp = () => {
+  const onEnd = () => {
     isResizing.value = false
     persistWidth()
-    window.removeEventListener('mousemove', onMove)
-    window.removeEventListener('mouseup', onUp)
+    handle.removeEventListener('pointermove', onMove)
+    handle.removeEventListener('pointerup', onEnd)
+    handle.removeEventListener('pointercancel', onEnd)
   }
-  window.addEventListener('mousemove', onMove)
-  window.addEventListener('mouseup', onUp)
+  try {
+    handle.setPointerCapture(e.pointerId)
+  }
+  catch {
+    // Capture can fail if the pointer is already gone; the drag just won't
+    // survive leaving the handle, which is a graceful degradation.
+  }
+  handle.addEventListener('pointermove', onMove)
+  handle.addEventListener('pointerup', onEnd)
+  handle.addEventListener('pointercancel', onEnd)
 }
 
 // Double-click the handle to reset to the default width.
@@ -402,7 +445,7 @@ onMounted(() => {
       >
         <template #trailing>
           <UButton
-            v-if="hasFilter"
+            v-if="hasQuery"
             icon="i-lucide-x"
             color="neutral"
             variant="link"
@@ -442,8 +485,8 @@ onMounted(() => {
         <ul class="space-y-0.5">
           <li v-for="entry in group.sections" :key="entry.id">
             <UCollapsible
-              :default-open="entry.section.defaultOpen"
-              :open="entry.forceOpen || undefined"
+              :open="isOpen(entry)"
+              @update:open="setOpen(entry.id, $event)"
             >
               <template #default="{ open }">
                 <!-- Section header treatment forks on `kind` via typography
@@ -456,7 +499,7 @@ onMounted(() => {
                   <UIcon
                     name="i-lucide-chevron-right"
                     class="size-3.5 shrink-0 text-dimmed transition-transform duration-200 group-hover/sec:text-muted"
-                    :class="{ 'rotate-90': open || entry.forceOpen }"
+                    :class="{ 'rotate-90': open }"
                   />
                   <UIcon
                     v-if="entry.section.icon"
@@ -477,7 +520,7 @@ onMounted(() => {
                     size="sm"
                     class="shrink-0 font-mono tabular-nums"
                   >
-                    {{ hasFilter ? `${entry.items.length}/${entry.total}` : entry.total }}
+                    {{ hasQuery ? `${entry.items.length}/${entry.total}` : entry.total }}
                   </UBadge>
                 </button>
               </template>
@@ -566,8 +609,9 @@ onMounted(() => {
          accessible slider anatomy of UDashboardResizeHandle, but we render the
          node ourselves because that component (a reka-ui Primitive) does not
          forward the pointer listeners our drag math needs. Operable by pointer
-         drag (mouse) and keyboard (←/→, Shift for a coarse step, Home/End to
-         the bounds). Mouse and keyboard share one focus/interaction indicator —
+         drag (mouse/touch/pen via Pointer Events) and keyboard (←/→, Shift for
+         a coarse step, Home/End to the bounds). Pointer and keyboard share one
+         focus/interaction indicator —
          the single rule thickens to primary — so there's never a second stray
          outline line next to it. Colour only appears on interaction / focus, so
          the resting edge stays as quiet as the rest of the chrome. -->
@@ -581,7 +625,7 @@ onMounted(() => {
       :aria-valuemax="maxWidth"
       tabindex="0"
       class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end outline-none lg:flex"
-      @mousedown="onResizeStart"
+      @pointerdown="onResizeStart"
       @dblclick="onResizeReset"
       @keydown="onResizeKey"
     >

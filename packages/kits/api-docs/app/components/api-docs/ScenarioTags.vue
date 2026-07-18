@@ -27,7 +27,10 @@ const visibleCount = ref(1)
 // measurement runs in onMounted and thereafter on resize.
 const measured = ref(false)
 
-const GAP = 4 // matches gap-1 (0.25rem)
+// Fallback when the computed style can't be read yet; the live value is read
+// from the measurement layer each recompute, so a class change (gap-1 → gap-2)
+// can never silently desync the fit math.
+const GAP_FALLBACK = 4
 
 function recompute() {
   const root = rootEl.value
@@ -35,6 +38,9 @@ function recompute() {
   if (!root || !measure) return
   const total = props.scenarios.length
   if (total === 0) return
+
+  const gapValue = Number.parseFloat(getComputedStyle(measure).columnGap)
+  const GAP = Number.isFinite(gapValue) ? gapValue : GAP_FALLBACK
 
   const avail = root.clientWidth
   const tagWidths = [...measure.querySelectorAll<HTMLElement>('[data-tag]')].map(el => el.offsetWidth)
@@ -82,7 +88,7 @@ onMounted(() => {
   // Fonts changing metrics after paint would invalidate our measurements, so
   // recompute once they're ready too.
   if (typeof document !== 'undefined' && 'fonts' in document) {
-    document.fonts.ready.then(() => recompute()).catch(() => {})
+    document.fonts.ready.then(() => scheduleRecompute()).catch(() => {})
   }
   if (rootEl.value && typeof ResizeObserver !== 'undefined') {
     observer = new ResizeObserver(scheduleRecompute)
@@ -97,12 +103,14 @@ onBeforeUnmount(() => {
   if (rafId) cancelAnimationFrame(rafId)
 })
 
-// Re-measure when the tag set itself changes.
+// Re-measure when the tag set itself changes. `deep` so an in-place mutation
+// (parent push/splice on the same array) retriggers too, not just a new
+// array reference.
 watch(() => props.scenarios, () => {
   measured.value = false
   visibleCount.value = 1
   nextTick(recompute)
-})
+}, { deep: true })
 
 // Derived view state, unified across the SSR default and the measured phase so
 // the template has no phase-specific branches.
