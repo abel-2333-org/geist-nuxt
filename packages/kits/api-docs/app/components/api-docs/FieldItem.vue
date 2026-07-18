@@ -518,6 +518,11 @@ const lifecycleMeta = computed(() => {
             aria-hidden="true"
           />
           <span>{{ open ? t.hideChildren : t.showChildren }}</span>
+          <!-- Count matches the `(N)` grammar used by the enum/constraints
+               table headers — tells the reader how much is behind the fold
+               before they commit to expanding. Muted so the verb stays the
+               button's voice; count is metadata, not part of the action. -->
+          <span class="font-normal text-dimmed">({{ children?.length }})</span>
         </button>
       </template>
 
