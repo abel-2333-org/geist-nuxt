@@ -123,7 +123,11 @@ const paymentsContentSections: ContentSection[] = [
 
 // --- 文档域（多产品入口）：支付是完整样板，其余三域紧凑 stub。
 //     每域自带 navGroups / 正文检索切片 / 指南段 / 端点 stub——侧栏、⌘K 索引、
-//     正文检索、正文渲染全部按当前域派生。 ---
+//     正文检索、正文渲染全部按当前域派生。
+//     图标按资金语义配对：支付/付款 = banknote-arrow-down/up（收进/付出的
+//     方向对），发卡 = credit-card（卡即产品），账户 = wallet（资金归集）。
+//     description 是一句话简介（≤12 字），菜单里单行放得下——UDropdownMenu
+//     的 itemDescription 默认 truncate，长句会被截断。 ---
 type GuideSection = { id: string; title: string; body: string }
 type EndpointStub = { id: string; method: string; path: string; summary: string; description: string }
 type DocsDomain = {
@@ -141,8 +145,8 @@ const domains: DocsDomain[] = [
   {
     id: 'payments',
     label: '支付',
-    icon: 'i-lucide-credit-card',
-    description: '线上收款：托管收银台与 Direct API 两条路径，覆盖支付、订阅与退款。',
+    icon: 'i-lucide-banknote-arrow-down',
+    description: '线上收款、订阅与退款',
     navGroups: paymentsNavGroups,
     contentSections: paymentsContentSections,
     guideSections: [], // 支付域正文是完整样板，不走 stub 渲染
@@ -151,8 +155,8 @@ const domains: DocsDomain[] = [
   {
     id: 'transfer',
     label: '付款',
-    icon: 'i-lucide-send',
-    description: '向收款人批量或单笔付款：先登记收款人，再发起付款并跟踪到账状态。',
+    icon: 'i-lucide-banknote-arrow-up',
+    description: '向收款人单笔或批量付款',
     navGroups: [
       {
         label: '文档',
@@ -201,8 +205,8 @@ const domains: DocsDomain[] = [
   {
     id: 'issuing',
     label: '发卡',
-    icon: 'i-lucide-wallet-cards',
-    description: '发行虚拟卡与实体卡：创建卡片、管理生命周期、查询卡交易。',
+    icon: 'i-lucide-credit-card',
+    description: '发行与管理虚拟卡、实体卡',
     navGroups: [
       {
         label: '文档',
@@ -251,8 +255,8 @@ const domains: DocsDomain[] = [
   {
     id: 'account',
     label: '账户',
-    icon: 'i-lucide-landmark',
-    description: '资金账户：查询余额、下载对账单、按业务线开设子账户。',
+    icon: 'i-lucide-wallet',
+    description: '余额、对账单与子账户',
     navGroups: [
       {
         label: '文档',
@@ -675,7 +679,7 @@ onMounted(() => anchor.initFromHash())
             <h3 class="text-xl font-semibold tracking-tight text-highlighted">认证与密钥</h3>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               所有请求通过 <code class="font-mono text-[0.8125rem]">Authorization: Bearer</code> 头携带密钥。测试密钥以
-              <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务端环境变量，切勿写进前端代码。
+              <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务���环境变量，切勿写进前端代码。
             </p>
           </section>
 
