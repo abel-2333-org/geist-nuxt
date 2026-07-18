@@ -1,12 +1,57 @@
 <script setup lang="ts">
-definePageMeta({ nav: { label: '参考页组合', icon: 'i-lucide-columns-2', order: 1 } })
+definePageMeta({ nav: { label: '参考页组合', icon: 'i-lucide-columns-3', order: 1 } })
 
 // API 文档场景的「整页级组合」demo（不是可分发切片，也不是通用组件）——
-// 招牌两栏布局：左侧字段树（可滚动文档流），右侧代码栏（Request 在上 / Response
-// 在下，可拖动纵向分栏 + 内容优先重分配）。横向分栏用通用基座的 <SplitPane>，
-// 纵向分栏 + 重分配用 gallery 页私有的 <DemoApiDocsCodeRail>（recipe 留在消费页，
-// 不进 core）。所有代码块 / 请求 / 响应 / 字段树组件来自 api-docs kit，数据一律
-// 由本页内联假 ViewModel 注入。
+// 招牌三栏布局：最左侧栏导航（<ApiDocsSidebarNav>，可调宽、sticky），中间字段树
+//（可滚动文档流），右侧代码栏（Request 在上 / Response 在下，可拖动纵向分栏 +
+// 内容优先重分配）。中右两栏用通用基座的 <SplitPane> 横向分栏，纵向分栏 + 重分
+// 配用 gallery 页私有的 <DemoApiDocsCodeRail>（recipe 留在消费页，不进 core）。
+// 所有组件来自 api-docs kit，数据一律由本页内联假 ViewModel 注入。侧栏交互的
+// 专注演示（搜索过滤/键盘/场景标签溢出）见「侧边栏导航」页；本页展示它在真实
+// 文档站里的岗位。
+
+// --- 侧栏导航：与本页端点（部署 API）同一语境，「创建部署」即当前页为 active ---
+const navGroups = [
+  {
+    label: '文档',
+    sections: [
+      {
+        label: '指南',
+        kind: 'guide' as const,
+        icon: 'i-lucide-book-open',
+        items: [
+          { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
+          { label: '快速开始', to: '#quickstart', icon: 'i-lucide-rocket' },
+          { label: '认证与令牌', to: '#auth', icon: 'i-lucide-key-round' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'API 参考',
+    sections: [
+      {
+        label: 'DEPLOYMENTS',
+        kind: 'endpoints' as const,
+        defaultOpen: true,
+        items: [
+          { label: '创建部署', to: '#', method: 'POST', scenarios: ['Git', '文件'], active: true },
+          { label: '查询部署', to: '#deployment-get', method: 'GET', scenarios: ['Git', '文件'] },
+          { label: '取消部署', to: '#deployment-cancel', method: 'DELETE', scenarios: ['Git'] },
+          { label: '部署事件流', to: '#deployment-events', method: 'GET', scenarios: ['构建'] },
+        ],
+      },
+      {
+        label: 'PROJECTS',
+        kind: 'endpoints' as const,
+        items: [
+          { label: '项目列表', to: '#project-list', method: 'GET', scenarios: ['Git'] },
+          { label: '更新项目配置', to: '#project-update', method: 'PATCH', scenarios: ['构建'] },
+        ],
+      },
+    ],
+  },
+]
 
 // --- 端点头信息（本页唯一 <h1>） ---
 const endpoint = {
@@ -245,7 +290,25 @@ onMounted(() => anchor.initFromHash())
 
 <template>
   <UContainer class="py-10 sm:py-14">
-    <SplitPane
+    <!-- 三栏文档站布局：侧栏列是 `auto`，跟随导航自身的（可拖拽）宽度；
+         中右两栏整体作为 `1fr` 列，内部再由 SplitPane 横向分栏。 -->
+    <div class="lg:grid lg:grid-cols-[auto_1fr] lg:gap-8">
+      <!-- 左：侧栏导航，sticky 满高，与真实文档站一致。<lg 隐藏——真实站在
+           移动端把导航收进 drawer/抽屉（app 层职责，非本组合演示范围）。 -->
+      <aside class="max-lg:hidden lg:sticky lg:top-20 lg:self-start">
+        <ApiDocsSidebarNav
+          :groups="navGroups"
+          aria-label="部署 API 文档"
+          search-placeholder="搜索文档"
+          clear-label="清除搜索"
+          empty-label="没有匹配的页面"
+          resize-label="调整侧栏宽度"
+          width-storage-key="geist-api-reference-nav-width"
+          :default-width="248"
+        />
+      </aside>
+
+      <SplitPane
       direction="row"
       mode="fixed"
       fixed-pane="end"
@@ -300,6 +363,7 @@ onMounted(() => anchor.initFromHash())
           </DemoApiDocsCodeRail>
         </div>
       </template>
-    </SplitPane>
+      </SplitPane>
+    </div>
   </UContainer>
 </template>
