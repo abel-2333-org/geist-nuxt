@@ -216,14 +216,15 @@ const requiredLabel = computed(() => (requiredState.value ? t.value[requiredStat
 // Everything below the main description is secondary metadata. Grouping it lets
 // the template pull the description up as the primary content and set the band
 // apart with a larger rhythm gap.
-// The condition is now rendered above the description as its own callout, so
-// it no longer counts toward the secondary band.
+// The condition and the deprecation note are rendered above the description
+// as gates, so neither counts toward the secondary band; only a new/beta
+// lifecycle callout (rendered at the band's end) does.
 const hasSecondary = computed(
   () =>
     hasEnum.value
     || (props.notes?.length ?? 0) > 0
     || (props.examples?.length ?? 0) > 0
-    || hasLifecycleCallout.value,
+    || (hasLifecycleCallout.value && !isDeprecated.value),
 )
 
 // A deprecated field gets its name struck through so the "on its way out"
@@ -352,12 +353,37 @@ const lifecycleMeta = computed(() => {
          Primary description sits closest to the summary row; a larger gap sets
          it apart from the secondary metadata band below. -->
     <div v-if="hasDetail" class="mt-2.5 flex flex-col gap-4">
-      <!-- Condition — the gating rule ("when is this required?") comes BEFORE
-           the description: it answers whether you even need the field, which
-           precedes understanding what it is. Contained in a tinted callout so
-           amber reads as one bounded object (the rule), not a scattered wash —
-           this keeps amber's single meaning ("has strings attached": beta,
-           caution, condition) intact even when a field is conditional + beta.
+      <!-- Gates come before the description, strongest first:
+           1. Deprecation — "should I use this field at all?" outranks
+              everything; a deprecated field's migration note must be the
+              first thing read.
+           2. Condition — "when is this required?" decides whether you need
+              it on this call.
+           Only then the description ("what is it"). -->
+
+      <!-- 1. Deprecation — migration note for deprecated fields. Plain text
+           (not a tinted callout): the strikethrough + badge already carry the
+           state; the amber callout shape stays reserved for the condition. -->
+      <p
+        v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
+        class="text-sm leading-relaxed text-muted"
+      >
+        <!-- Lead-in is SINCE (the version marker), NOT the status word: the
+             summary badge already carries "Deprecated"; SINCE explains what
+             the number means. Label omitted when there's no version. -->
+        <span
+          v-if="lifecycle.since"
+          class="mr-2 text-xs font-medium uppercase tracking-wide"
+          :class="lifecycleMeta.cls"
+        >{{ t.since }}</span>
+        <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+        <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
+      </p>
+
+      <!-- 2. Condition — contained in a tinted callout so amber reads as one
+           bounded object (the rule), not a scattered wash — this keeps
+           amber's single meaning ("has strings attached": beta, caution,
+           condition) intact even when a field is conditional + beta.
            The summary-row CONDITIONAL tag is amber too — a same-meaning echo
            pointing at this block (label → block). Disambiguation from beta is
            carried by SHAPE (text tag / callout block / badge), not by hue. -->
@@ -385,31 +411,6 @@ const lifecycleMeta = computed(() => {
            (neutral = dimmed, caution/warning = amber). No filled boxes, so the
            band reads as compact structured metadata. -->
       <div v-if="hasSecondary" class="flex flex-col gap-3">
-        <!-- 0. Deprecation — FIRST for deprecated fields. "Don't use this,
-             use X instead" answers "should I use this field at all?", which
-             logically precedes every call-time detail below; buried at the
-             bottom it can sink under a long enum/constraints stack. New/beta
-             callouts stay last (position 5) — they are supplementary context,
-             not a usage gate. -->
-        <p
-          v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
-          class="text-sm leading-relaxed text-muted"
-        >
-          <!-- Lead-in is SINCE (the version marker), NOT the status word: the
-               summary badge already carries "New/Beta/Deprecated", so repeating
-               it here is noise. SINCE actually explains what the number means,
-               and keeping the badge's tone color on it ties the callout back to
-               the badge without duplicating the word. Label omitted when there's
-               no version (a description-only note stands on its own). -->
-          <span
-            v-if="lifecycle.since"
-            class="mr-2 text-xs font-medium uppercase tracking-wide"
-            :class="lifecycleMeta.cls"
-          >{{ t.since }}</span>
-          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
-          <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
-        </p>
-
         <!-- 2. Allowed values — the most actionable metadata. The field's
              default is passed down so its row is marked in the table. -->
         <ApiDocsEnumTable
@@ -432,7 +433,7 @@ const lifecycleMeta = computed(() => {
         >
           <span
             class="mr-2 text-xs font-medium uppercase tracking-wide"
-            :class="(notes[0].tone ?? 'info') === 'caution' ? 'text-warning' : 'text-dimmed'"
+            :class="notes[0].tone === 'caution' ? 'text-warning' : 'text-dimmed'"
           >{{ notes[0].label ?? t.note }}</span>
           <InlineMarkdown :text="notes[0].text" />
         </p>
@@ -457,7 +458,7 @@ const lifecycleMeta = computed(() => {
             >
               <dt
                 class="min-w-0 text-xs font-medium uppercase tracking-wide"
-                :class="(note.tone ?? 'info') === 'caution' ? 'text-warning' : 'text-dimmed'"
+                :class="note.tone === 'caution' ? 'text-warning' : 'text-dimmed'"
               >
                 {{ note.label ?? t.note }}
               </dt>

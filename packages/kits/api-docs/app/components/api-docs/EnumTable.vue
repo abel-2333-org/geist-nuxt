@@ -6,7 +6,10 @@ import type { TabsItem } from '@nuxt/ui'
 // component. Composed from Nuxt UI primitives + core atoms (InlineCode,
 // InlineMarkdown, both auto-imported from @geist-nuxt/core).
 
-/** A single enum member. */
+/** A single enum member.
+ *  `value` is deliberately `string` (not `string | number`): the default-row
+ *  marker relies on strict `===` against `defaultValue`, so widening this
+ *  type would silently break that match. Callers stringify numerics. */
 export interface EnumValue {
   value: string
   description: string
