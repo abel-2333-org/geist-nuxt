@@ -341,14 +341,18 @@ onMounted(() => anchor.initFromHash())
         />
       </div>
 
-      <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度。
-           通栏形态：外层容器给确定高度（视口减去 sticky 顶距与底部留白），
-           组件透传 h-full 撑满——内容少时立柱依然贯穿到底，菜单太长时在
-           组件内部滚动。组件默认（不传 h-full）则是收缩到内容高的卡片形态。 -->
+      <!-- 两栏：sticky 贴边通栏侧栏（flush）+ 正文。侧栏列宽 auto 跟随其可拖
+           拽宽度。flush 形态下高度归外层容器所有（视口减 sticky 顶距），立柱
+           上接顶栏、下抵视口底，与菜单项多少无关；菜单太长时在组件内部滚动。
+           小屏（lg 以下）侧栏顺排在正文上方，flush 需要父级定高，故仅在 lg
+           启用（max-lg:hidden 的外壳由真实项目决定；此处 demo 两档都可见）。
+           真实项目的 app 级贴边接法（左右出血、header 下无缝）见
+           sidebar-nav.md「贴边通栏」。 -->
       <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
-        <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:self-start">
+        <div class="lg:sticky lg:top-16 lg:h-[calc(100dvh-4rem)] lg:self-start">
           <ApiDocsSidebarNav
-            class="lg:h-full"
+            flush
+            class="max-lg:h-auto max-lg:rounded-lg max-lg:border"
             :groups="navGroups"
             aria-label="支付文档"
             search-placeholder="搜索文档"

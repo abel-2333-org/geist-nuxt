@@ -89,7 +89,7 @@ interface SidebarNavGroup {
 - **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method`/`scenarios` 的是接口行（前置方法色标 + 后置中性场景标签），带/不带 `icon` 的是指南行。**方法色标是唯一带色的元素**（复用 `ApiDocsMethodBadge`，GET→info、POST→success、PUT→warning、PATCH→secondary、DELETE→error），因为它是有限受控词表、颜色能有效编码语义；**场景标签是纯 neutral soft `UBadge`、不涂色**（场景是开放词表，涂色会失控、也会与方法色标抢注意力），chrome 其余颜色只留给 active 态。
 - **全局搜索是唯一搜索入口、同时匹配用途名 / 方法 / 场景标签**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留，否则只留 **label、method 或场景标签命中**查询的 item（`matchesText` 同时查 `label`、`method`、`scenarios`）；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。因此**输入场景名（如「订阅」）或方法名（如「POST」）都会浮出对应接口**，跨板块聚合了这个多对多关系；「大板块子项多」的检索需求也由这个全局搜索覆盖，无需每块再放搜索框，也不需要额外的过滤 chips。
 - **就地过滤 vs 全站搜索是两件正交的事，靠层级区分而非并排堆叠**：本组件只做**导航树内就地过滤**（顶部 `UInput`，收窄结构化的导航项 label 与场景标签）。**全站搜索**（`⌘K` 模态、跨指南与端点）是另一套交互，由本 kit 的兄弟切片 `<ApiDocsSiteSearch>` 承担（数据无关、吃文档索引，见 `site-search.md`），它的正位是 **app 顶栏 / navbar**——和侧栏就地过滤不同层级、不同位置（参考 Nuxt UI / Vercel 文档站）。两层刻意匹配同样的维度（用途名 / 请求方法 / 场景标签），心智模型在两层都成立。**切忌把全站搜索按钮塞进侧栏顶部**：两个长得几乎一样的搜索框上下紧贴，只会让用户困惑"这俩有啥区别"，是冗余 chrome。已接 `@nuxt/content` 的消费项目要跨正文全文检索时，可在顶栏同一位置换 Nuxt UI 的 `<UContentSearch>`（绑死 `@nuxt/content`，接线见 `project-setup.md`）；**基座保持数据无关、不引 `@nuxt/content`**，也切勿把任何全站搜索焊进本组件。
-- **菜单自身是滚动区；高度默认收缩、可选通栏**：`nav` 用 `max-h-[calc(100dvh-4rem)]`（只设上限、不设固定高）+ 顶部 `search` 粘住、下方 `overflow-y-auto`。多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动；**菜单项少时卡片收缩到内容高**——组件是圆角边框卡片形态，中途收边下方留白是完整的视觉结果，配合 `sticky` + `self-start` 正好（sticky 本来就要求自身矮于视口）。要**通栏立柱贯穿到底**的经典文档站形态时不必改组件：根节点未关闭属性透传，外部给 `class="h-full"`（或 `lg:h-full`）+ 父容器定高即可撑满，内部滚动区是 `min-h-0 flex-1` 会自动吃掉多余空间（见下方「用法」）。
+- **菜单自身是滚动区；两种列形态由 `flush` prop 切换**：顶部 `search` 粘住、下方 `overflow-y-auto`——多板块同时展开把列表撑长时只在侧栏内部滚动，页面其余部分不动。默认是**浮动卡片**形态（圆角四边框 + `max-h-[calc(100dvh-4rem)]` 只设上限）：**菜单项少时收缩到内容高**，卡片中途收边下方留白是完整的视觉结果，配合 `sticky` + `self-start` 正好（sticky 本来就要求自身矮于视口）。`flush` 切到**贴边通栏**形态（无圆角、仅右侧分隔边、`h-full`）：高度归父级所有，立柱上接 header、下抵视口底，与菜单项多少无关——内部滚动区是 `min-h-0 flex-1`，自动吃掉多余空间（两形态取舍与接法见下方「形态」小节）。形态差异焊在组件内做受控切换，而非靠外部覆盖 class（`rounded-none` 对冲 `rounded-lg` 属同权重冲突类，不可靠）。
 - **方法色标前置定宽、用途名让路、场景标签测量式溢出后置**：方法色标放在 `w-14` 定宽槽里 leading，故不论动词是 `GET` 还是 `DELETE`，各行用途名的起始 x 都对齐；用途名是 `shrink truncate` 且有 `min-w-16` 保底——它**让路**给标签而非独占剩余空间，同时保住可读地板；场景标签簇 `ApiDocsScenarioTags` 是 `flex-1`，接住用途名让出的空间。**标签簇做测量式溢出（responsive overflow），而非按断点猜**：组件内一个 `aria-hidden` 的隐藏测量层渲染全部标签取其真实像素宽，配合 `ResizeObserver` 观察自身分到的宽度，贪心算出「能放几个整标签」——放不下的折 `+N`（预留其宽度），连一个都放不下才收成**计数 chip**（`i-lucide-tag` + 场景总数）。**测量层刻意不设 `max-w-28`**（可见标签才设）：否则超长标签的 `offsetWidth` 会被夹到 112px，贪心以为它「放得下」而平铺成一个截断的省略号标签（信息为零）；测量真实自然宽度后，超长标签会正确溢出进 `+N`/计数 chip，其全名经 popover 与 `sr-only` 仍可达。因此它**与数据无关**：2 个短标签还是 8 个长标签、中文还是拉丁文都精确自适应；侧栏够宽时全部场景平铺，拖窄时逐个让位、绝不出现被 `truncate` 挤成零字符的空标签，和拖拽调宽形成正反馈。**折叠项的揭示用 `click` 态 `UPopover` 而非 tooltip**：`+N` / 计数 chip 是一个可聚焦的 `<button>` 触发器，tap / 点击 / Enter 三端都能打开列出全部场景的浮层（tooltip 在触摸端不触发、且套在非交互 badge 上键盘也够不到，故不合适——见 `components/overlays.md`）；`sr-only` 全量列表再兜底屏幕阅读器。**SSR 安全**：测量前渲染确定性默认（首标签 + `+N`），`onMounted` 后再测量精修，无 hydration 失配。指南行无方法时改由 `icon` 占前置位。
 - **宽度可拖拽、记 localStorage（lg+ 渐进增强）**：右边缘一个 `role="separator"` 手柄，走 **Pointer Events**（鼠标/触控/触控笔统一，lg+ 的 iPad 横屏也能拖），`pointerdown` 后 `setPointerCapture` 把指针流钉在手柄上（快速拖拽甩出命中区也不断开），`pointerup`/`pointercancel` 落定并写入 `localStorage`。宽度经 `clampWidth` 夹在 `[minWidth, maxWidth]`。键盘等价可操作（`←/→` 微调、`Shift` 粗调、`Home/End` 跳到上下限），双击复位。手柄静息透明、仅在 hover/focus/拖拽时显紫，静息边缘和其余 chrome 一样安静。**调宽是桌面(`lg+`)的渐进增强**：手柄 `hidden lg:flex`，宽度也只在 `lg+` 应用——根节点用 `w-full lg:w-[var(--api-docs-nav-w)]`（`width` 经 CSS 变量注入），故小屏侧栏取**满宽跟随父容器、绝不横向溢出**,桌面才吃固定像素宽。**SSR 安全**：`width` 初值 = `defaultWidth`（服务端/客户端一致，无 hydration 失配），持久值在 `onMounted` 后读取。`:resizable="false"` 可整体关闭（不加宽度、不渲染手柄）。
 - **折叠动画走 Nuxt UI `UCollapsible` 默认**：不覆盖 `ui.content`，直接复用主题内建的 `collapsible-down/up` 动画，`prefers-reduced-motion` 由 layer 全局处理。
@@ -153,19 +153,31 @@ interface SidebarNavGroup {
 
 > 不需要分组标题时可退回 `:sections="[...]"`（扁平列表，自动包成一个无标题组）；`kind` 仍可逐板块指定。接口的 `method`、`scenarios` 都是可选的——都不给就退化为纯用途名链接。默认可拖拽调宽，`:resizable="false"` 关闭；调宽区间与持久化键用 `:min-width` / `:max-width` / `:default-width` / `:width-storage-key` 定制（同一 app 多处用到时给不同的 storage key 以免相互覆盖）。
 
-### 高度：收缩卡片（默认） vs 通栏立柱
+### 形态：浮动卡片（默认） vs 贴边通栏（`flush`）
 
-组件默认**收缩到内容高**（根节点只有 `max-h` 上限）——适合侧栏与正文同属一个内容画布的布局。要「立柱贯穿到底」的经典文档站形态时，**父容器定高 + 透传 `h-full`** 即可，不用改组件：
+组件有两种列形态，按布局属于哪种文档站选：
+
+| 形态 | 长相 | 高度 | 适用 |
+|---|---|---|---|
+| **卡片**（默认） | 四边 border + 圆角 + 色调表面 | 收缩到内容高，`max-h` 封顶 | 侧栏与正文同属一个内容画布（居中容器、卡片并排） |
+| **贴边通栏**（`flush`） | 无圆角、仅右侧分隔边、背景铺满整列 | `h-full` 撑满父容器——**高度归父级所有** | 经典文档站外壳：立柱上接 app header、下抵视口底（参考 Vercel / Nuxt 文档站） |
+
+贴边通栏是一个 prop，不靠外部覆盖 class（`rounded-none` 对冲 `rounded-lg` 属同权重冲突类，不可靠）：
 
 ```vue
-<!-- 通栏：外层给确定高度（视口减 sticky 顶距与底部留白），组件 h-full 撑满。
-     菜单项少时立柱依然到底；菜单太长时照旧在组件内部滚动。 -->
-<div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-6rem)] lg:self-start">
-  <ApiDocsSidebarNav class="lg:h-full" :groups="groups" ... />
+<!-- 贴边通栏：header 高 4rem 时，sticky 顶距 = header 高、列高 = 视口减 header。
+     菜单项少时立柱依然贯穿到底；菜单太长时照旧在组件内部滚动。 -->
+<div class="sticky top-16 h-[calc(100dvh-4rem)] self-start">
+  <ApiDocsSidebarNav flush :groups="groups" ... />
 </div>
 ```
 
-加 `lg:` 前缀让小屏保持自然高度（移动端侧栏通常在正文上方顺排，不需要通栏）。活例：gallery 的「文档站外壳」页（`docs-shell.vue`）即通栏形态。
+- **父级必须定高**：`flush` 下组件是 `h-full`，父容器不给高度立柱就塌成内容高。
+- **上接 header 无缝**：sticky 顶距与列高共用同一个 header 高度变量（上例 `4rem`），header 改高只改一处。
+- **小屏回退**：移动端侧栏通常顺排在正文上方、不需要通栏，可用响应式类回退卡片观感（如 `class="max-lg:h-auto max-lg:rounded-lg max-lg:border"`——`max-lg:` 变体对基类是媒体查询级覆盖，与上述冲突类不同，是可靠的）。
+- 活例：gallery 的「文档站外壳」页（`docs-shell.vue`）即 `flush` + 小屏回退。
+
+只要「填满高度但保留卡片观感」（不贴边）时，不用 `flush`：父容器定高 + 透传 `class="h-full"` 即可（属性透传未关闭，追加类不冲突）。
 
 全站搜索（`⌘K`）放在 **app 顶栏**，与侧栏就地过滤分属不同层级——不要塞进侧栏 `#header`：
 
