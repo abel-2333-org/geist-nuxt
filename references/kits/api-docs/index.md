@@ -23,7 +23,8 @@
 | `api-docs/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
 | `api-docs/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `api-docs/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
-| `api-docs/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一全局搜索跨板块过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站全文搜索（`⌘K` UContentSearch）应放 app 顶栏、与侧栏就地过滤分层，不塞进侧栏；`#header` slot 仅作通用扩展点。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `api-docs/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一全局搜索跨板块过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索（`⌘K`，兄弟切片 `ApiDocsSiteSearch`）应放 app 顶栏、与侧栏就地过滤分层，不塞进侧栏；`#header` slot 仅作通用扩展点。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `api-docs/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的全站搜索：触发按钮 + `⌘K` 模态命令面板（`UModal` + `UCommandPalette`），检索文档索引（指南页 + 端点，端点带方法色标与场景 facet，搜索维度与侧栏树内过滤对齐：用途名/方法/场景）。数据无关、零内容管线依赖（不绑 `@nuxt/content`；已装 content 的项目可换 `UContentSearch`）。索引可由侧栏 groups 派生（一份导航数据两处消费）。复用兄弟切片 `ApiDocsMethodBadge` | `site-search.md` |
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -106,7 +107,7 @@
 
 ```ts
 /**
- * 内容优先重分配：给定去掉把手后的固定总高 H 与两栏自然（未封顶）高度，
+ * 内容优先重分配：给定去掉把手后的固定总高 H 与两栏自然（未封顶）���度，
  * 返回各栏高度预算。仅在溢出态（H < natTop + natBottom）调用；两栏都放得下
  * 时按自然高渲染、根本不用它。
  * - 基线按 ratio : 1-ratio 分 H，各栏不低于 minPane。
@@ -147,14 +148,16 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**两个 api-docs demo 页，职责互补**：
+gallery 有**多个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
 | `apps/gallery/app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `apps/gallery/app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ 页面私有 `<DemoApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
+| `apps/gallery/app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **单组件深度 demo** | `ApiDocsSidebarNav` 全能力（分组/分型/树内过滤/场景标签溢出/拖宽），顶栏用真 `ApiDocsSiteSearch` 演示两层搜索分工 |
+| `apps/gallery/app/pages/kits/api-docs/docs-shell.vue` | 文档站外壳 | **文档站整站装配** | 顶栏（品牌 + `ApiDocsSiteSearch` 全站搜索）+ sticky `ApiDocsSidebarNav` + 正文（指南锚点 + reference 式端点页）。含「侧栏 groups → 搜索索引」派生函数，一份导航数据两处消费。是下游搭文档站的活骨架 |
 
-> 两页都用内联假 ViewModel 驱动，数据不写进 kit。**新增单组件的陈列进 `index.vue`；新增整页装配 recipe 进 `reference.vue`**（或另起一页）。
+> 各页都用内联假 ViewModel 驱动，数据不写进 kit。**新增单组件的陈列进 `index.vue`；新增整页装配 recipe 进 `reference.vue` / `docs-shell.vue`**（或另起一页）。
 
 最小拼法（单区块，index.vue 风格）：
 

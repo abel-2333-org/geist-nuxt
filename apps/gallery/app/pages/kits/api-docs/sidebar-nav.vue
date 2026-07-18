@@ -128,19 +128,25 @@ const groups: Group[] = [
   },
 ]
 
-// The #header slot stand-in. A real docs app would open <UContentSearch> here
-// (⌘K full-text over @nuxt/content); the gallery has no content collection, so
-// we just explain the split. defineShortcuts wires ⌘K so the trigger feels real.
-const toast = useToast()
-function onSiteSearch() {
-  toast.add({
-    title: '全站搜索（演示占位）',
-    description: '真实项目在此处接 UContentSearch（⌘K 全文检索 @nuxt/content）。侧栏内的过滤搜索与它各司其职。',
-    icon: 'i-lucide-search',
-    color: 'neutral',
-  })
-}
-defineShortcuts({ meta_k: onSiteSearch })
+// The top-bar site-wide search is the REAL sibling slice <ApiDocsSiteSearch>
+// (⌘K modal command palette; it registers the shortcut itself). Its index is
+// derived from the sidebar's groups — one nav dataset, two consumers. The full
+// docs-shell assembly (top bar + sidebar + reference body) lives in docs-shell.vue.
+const searchGroups = groups.map((group, i) => ({
+  id: `g${i}-${group.label ?? 'group'}`,
+  label: group.label ?? '',
+  items: group.sections.flatMap(section =>
+    section.items
+      .filter((item): item is Item & { to: string } => Boolean(item.to))
+      .map(item => ({
+        label: item.label,
+        to: item.to,
+        method: item.method,
+        scenarios: item.scenarios,
+        icon: item.icon ?? section.icon,
+      })),
+  ),
+}))
 </script>
 
 <template>
@@ -158,29 +164,23 @@ defineShortcuts({ meta_k: onSiteSearch })
         </p>
       </div>
 
-      <!-- Mock docs-shell top bar. Site-wide full-text search (⌘K) belongs in
-           the app's top navbar — a different level from the sidebar's in-tree
-           filter — so the two searches read as distinct, not two look-alike
-           boxes stacked together. Real apps put <UContentSearchButton> here. -->
+      <!-- Mock docs-shell top bar. Site-wide search (⌘K) belongs in the app's
+           top navbar — a different level from the sidebar's in-tree filter —
+           so the two searches read as distinct, not two look-alike boxes
+           stacked together. The button is the real <ApiDocsSiteSearch>. -->
       <div class="flex items-center justify-between gap-4 rounded-lg border border-default bg-elevated/40 px-4 py-2.5">
         <div class="flex items-center gap-2 text-sm font-medium text-highlighted">
           <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
           支付 API 文档
         </div>
-        <UButton
-          color="neutral"
-          variant="outline"
-          size="sm"
-          class="text-muted"
-          @click="onSiteSearch"
-        >
-          <UIcon name="i-lucide-search" class="size-4" />
-          <span class="max-sm:hidden">搜索全部文档</span>
-          <span class="flex items-center gap-0.5">
-            <UKbd value="meta" />
-            <UKbd value="K" />
-          </span>
-        </UButton>
+        <ApiDocsSiteSearch
+          :groups="searchGroups"
+          trigger-label="搜索全部文档"
+          aria-label="搜索全部文档"
+          modal-title="搜索全部文档"
+          placeholder="搜索指南与接口…"
+          empty-label="没有匹配的结果"
+        />
       </div>
 
       <!-- The sidebar column is `auto` so it follows the nav's own (resizable)
@@ -210,7 +210,7 @@ defineShortcuts({ meta_k: onSiteSearch })
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
                 <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）是<b class="font-medium text-toned">全站全文搜索</b>——它属于 app top bar，与侧栏的树内过滤不同层级、不并排。真实项目在此接 <code class="font-mono text-[0.8125rem]">UContentSearch</code>（<code class="font-mono text-[0.8125rem]">@nuxt/content</code>）；此处为演示占位。</span>
+                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）是<b class="font-medium text-toned">全站搜索</b>——兄弟切片 <code class="font-mono text-[0.8125rem]">ApiDocsSiteSearch</code>，真实可用：索引由侧栏导航数据派生，输入场景名或方法名都能命中并跳转。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。完整文档站装配见「文档站外壳」页。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />

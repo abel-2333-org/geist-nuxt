@@ -89,6 +89,16 @@
       "meta": { "coreDeps": ["InlineCode", "InlineMarkdown", "useCopy"] }
     },
     {
+      "name": "site-search",
+      "type": "registry:component",
+      "title": "ApiDocsSiteSearch",
+      "description": "Site-wide docs search for the app's top bar: a trigger button + cmd-K modal command palette over a docs index (guide pages + endpoints with method/scenario facets). Data-agnostic — no @nuxt/content or content-pipeline dependency. Complements sidebar-nav's in-tree filter: same searchable dimensions (label/method/scenario), different level (layering rationale in sidebar-nav.md / site-search.md).",
+      "registryDependencies": ["method-badge"],
+      "files": [
+        { "path": "app/components/api-docs/SiteSearch.vue", "target": "app/components/api-docs/SiteSearch.vue", "type": "registry:component" }
+      ]
+    },
+    {
       "name": "sidebar-nav",
       "type": "registry:component",
       "title": "ApiDocsSidebarNav",
