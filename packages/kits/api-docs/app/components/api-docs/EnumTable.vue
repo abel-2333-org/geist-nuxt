@@ -6,7 +6,10 @@ import type { TabsItem } from '@nuxt/ui'
 // component. Composed from Nuxt UI primitives + core atoms (InlineCode,
 // InlineMarkdown, both auto-imported from @geist-nuxt/core).
 
-/** A single enum member. */
+/** A single enum member.
+ *  `value` is deliberately `string` (not `string | number`): the default-row
+ *  marker relies on strict `===` against `defaultValue`, so widening this
+ *  type would silently break that match. Callers stringify numerics. */
 export interface EnumValue {
   value: string
   description: string
@@ -26,8 +29,12 @@ const props = withDefaults(
     values?: EnumValue[]
     /** Grouped enum: values that vary by condition (e.g. bank lists per market). */
     variants?: EnumVariant[]
+    /** The field's default value — its row gets a trailing marker, tying the
+     *  summary row's DEFAULT pill to the concrete entry in this table. */
+    defaultValue?: string
     /** Structural labels; overridable for i18n. */
     label?: string
+    defaultLabel?: string
     searchPlaceholder?: string
     emptyLabel?: string
     /** Lists at or above this length get a filter box + scroll area. */
@@ -35,6 +42,7 @@ const props = withDefaults(
   }>(),
   {
     label: 'Allowed values',
+    defaultLabel: 'Default',
     searchPlaceholder: 'Filter values',
     emptyLabel: 'No matching values',
     filterThreshold: 30,
@@ -90,9 +98,11 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
 <template>
   <div class="space-y-2">
     <div class="flex flex-wrap items-center justify-between gap-2">
+      <!-- Count is always shown so this header matches the constraints block's
+           `LABEL (N)` grammar — the two tabular blocks read as one language. -->
       <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
         {{ label }}
-        <span v-if="filterable" class="text-dimmed/70">({{ totalCount }})</span>
+        <span v-if="totalCount" class="text-dimmed/70">({{ totalCount }})</span>
       </p>
       <UInput
         v-if="filterable"
@@ -102,7 +112,7 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
         icon="i-lucide-search"
         size="xs"
         variant="soft"
-        class="w-44"
+        class="w-44 max-w-full"
         :ui="{ base: 'rounded-sm' }"
       />
     </div>
@@ -142,6 +152,13 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
         >
           <dt class="min-w-0">
             <InlineCode class="break-all">{{ item.value }}</InlineCode>
+            <!-- Default marker — same uppercase tag language as the field
+                 row's DEFAULT lead-in, so scanning the table answers "which
+                 one do I get if I omit this?" without looking back up. -->
+            <span
+              v-if="defaultValue !== undefined && item.value === defaultValue"
+              class="ms-2 text-xs font-medium uppercase tracking-wide text-dimmed"
+            >{{ defaultLabel }}</span>
           </dt>
           <dd v-if="item.description" class="min-w-0 text-sm leading-relaxed text-muted">
             <InlineMarkdown :text="item.description" />

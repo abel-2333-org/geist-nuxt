@@ -157,8 +157,12 @@ const bodyFields = [
     description: 'Unique project name. Becomes part of the default domain.',
     examples: ['my-app'],
     notes: [
+      // Both are plain validation rules — same nature, same neutral tone.
+      // `caution` is reserved for behavioral caveats (see `meta` below), not
+      // for format rules: violating a rule just fails validation, there is
+      // no hidden surprise to warn about.
       { label: 'Range', text: '1–52 characters.' },
-      { tone: 'caution' as const, label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
+      { label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
     ],
   },
   {
@@ -212,6 +216,11 @@ const bodyFields = [
     required: false,
     lifecycle: { status: 'new' as const, since: 'v2.5' },
     description: 'Arbitrary key/value metadata attached to the deployment.',
+    // A genuine behavioral caveat — the correct use of `caution`: nothing
+    // rejects the request, but not knowing this can hurt you.
+    notes: [
+      { tone: 'caution' as const, label: 'Caveat', text: 'Values are stored in plain text — do not put secrets here.' },
+    ],
     children: [
       { path: 'body_meta_key', name: 'key', type: 'string', required: true, notes: [{ label: 'Range', text: 'Up to 64 characters.' }] },
       { path: 'body_meta_value', name: 'value', type: 'string', required: true },
@@ -266,7 +275,7 @@ onMounted(() => anchor.initFromHash())
               <ApiDocsMethodBadge :method="endpoint.method" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
             </div>
-            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl">
+            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-[2rem] sm:leading-tight">
               {{ endpoint.summary }}
             </h1>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">

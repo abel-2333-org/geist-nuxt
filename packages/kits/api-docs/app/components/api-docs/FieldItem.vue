@@ -15,10 +15,12 @@
 // siblings (ApiDocsEnumTable, ApiDocsLifecycleBadge). Deep linking is handled
 // by the kit's useFieldAnchor composable (auto-imported).
 //
-// Anatomy:  summary row  ── anchor · name · type · format · requiredness ·
+// Anatomy:  summary row  ── anchor · name · type · format · requiredness
+//                           (required/conditional only; optional is unmarked) ·
 //                           default · lifecycle badge
-//           leaf detail  ── description + secondary band (condition → enum →
-//                           constraints → example → lifecycle callout)
+//           leaf detail  ── condition callout (if any) → description +
+//                           secondary band (deprecation-first → enum →
+//                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
@@ -99,7 +101,6 @@ export interface FieldNode {
  */
 export interface FieldItemLabels {
   required?: string
-  optional?: string
   conditional?: string
   default?: string
   example?: string
@@ -136,7 +137,6 @@ const props = withDefaults(
 // Merge caller copy over neutral English defaults. Chrome text only.
 const t = computed<Required<FieldItemLabels>>(() => ({
   required: 'Required',
-  optional: 'Optional',
   conditional: 'Conditional',
   default: 'Default',
   example: 'Example',
@@ -202,34 +202,43 @@ const hasDetail = computed(
     || hasLifecycleCallout.value,
 )
 
-// Which of the three requirement states this row is in.
-const requiredState = computed<'required' | 'conditional' | 'optional'>(() =>
-  props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : 'optional',
+// Requirement marker. Optional is the default state of a field, so it renders
+// nothing — absence of a Required/Conditional tag IS the "optional" signal
+// (industry convention: Stripe, Mintlify). Tagging every optional row would
+// add a non-informative word to the majority of rows and dilute the contrast
+// of the tags that matter.
+const requiredState = computed<'required' | 'conditional' | null>(() =>
+  props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : null,
 )
-// Localized label for the current requirement state (chrome copy).
-const requiredLabel = computed(() => t.value[requiredState.value])
+// Localized label for the rendered requirement states (chrome copy).
+const requiredLabel = computed(() => (requiredState.value ? t.value[requiredState.value] : ''))
 
 // Everything below the main description is secondary metadata. Grouping it lets
 // the template pull the description up as the primary content and set the band
 // apart with a larger rhythm gap.
+// The condition and the deprecation note are rendered above the description
+// as gates, so neither counts toward the secondary band; only a new/beta
+// lifecycle callout (rendered at the band's end) does.
 const hasSecondary = computed(
   () =>
-    !!props.condition
-    || hasEnum.value
+    hasEnum.value
     || (props.notes?.length ?? 0) > 0
     || (props.examples?.length ?? 0) > 0
-    || hasLifecycleCallout.value,
+    || (hasLifecycleCallout.value && !isDeprecated.value),
 )
 
 // A deprecated field gets its name struck through so the "on its way out"
-// state reads instantly, even before the badge. The strike is neutral-toned
-// (not red) since deprecation is de-emphasis, not an error.
+// state reads instantly, even before the badge. The strike inherits the
+// dimmed text color (currentColor) — neutral, not red — since deprecation is
+// de-emphasis, not an error.
 const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
-// Field-lifecycle label + tone, rendered as a plain-text metadata row (no
-// filled box) so it shares one visual language with the constraint rows. Label
-// and tone come from the shared lifecyclePreset (single source of truth with
-// the badge); here we only translate the semantic tone into a text color.
+// Field-lifecycle tone, rendered as a plain-text metadata row (no filled box)
+// so it shares one visual language with the constraint rows. The tone comes
+// from the shared lifecyclePreset (single source of truth with the badge);
+// here we only translate the semantic tone into a text color. The preset's
+// status label is NOT used in the callout — its lead-in is SINCE, and the
+// status word lives exclusively on the badge.
 const TONE_TEXT: Record<BadgeTone, string> = {
   success: 'text-success',
   warning: 'text-warning',
@@ -241,7 +250,7 @@ const TONE_TEXT: Record<BadgeTone, string> = {
 const lifecycleMeta = computed(() => {
   if (!props.lifecycle) return undefined
   const preset = lifecyclePreset[props.lifecycle.status]
-  return { label: preset.label, cls: TONE_TEXT[preset.tone] }
+  return { cls: TONE_TEXT[preset.tone] }
 })
 </script>
 
@@ -263,7 +272,7 @@ const lifecycleMeta = computed(() => {
         v-if="path"
         type="button"
         :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
-        class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 outline-primary transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 group-hover/field:opacity-100 lg:block"
+        class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:block"
         :class="{ 'opacity-100': isActive || anchor.copied.value, 'text-primary': anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -281,7 +290,7 @@ const lifecycleMeta = computed(() => {
 
       <code
         class="font-mono text-sm font-medium"
-        :class="isDeprecated ? 'text-dimmed line-through decoration-muted' : 'text-highlighted'"
+        :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
       >{{ name }}</code>
       <!-- Data type (string, integer, object, enum…): plain mono text, no
            surface/border, so it never competes with the method/status badges. -->
@@ -290,16 +299,23 @@ const lifecycleMeta = computed(() => {
       <!-- Serialization hint (e.g. json_string) sits next to the type. -->
       <span
         v-if="format"
-        class="font-mono text-[0.6875rem] text-dimmed"
+        class="font-mono text-xs text-dimmed"
       >{{ format }}</span>
 
+      <!-- Requirement tag — only for required/conditional; optional rows carry
+           no tag (absence is the signal, see requiredState above).
+           This is the requirement-strength axis: red = required (a hard rule),
+           amber = conditional (required only in some cases). Conditional keeps
+           amber — NOT neutral — so it stays visibly ON the same axis as red
+           rather than blending into the neutral type/format metadata beside it.
+           The amber here points AT the amber condition callout below (label →
+           block), a same-meaning echo, not the ambiguous cross-axis wash we
+           removed. Beta stays a badge (a different shape), so it never blurs
+           with this text tag even on a conditional + beta field. -->
       <span
+        v-if="requiredState"
         class="text-xs font-medium uppercase tracking-wide"
-        :class="{
-          'text-error': requiredState === 'required',
-          'text-warning': requiredState === 'conditional',
-          'text-dimmed': requiredState === 'optional',
-        }"
+        :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
       >
         {{ requiredLabel }}
       </span>
@@ -315,12 +331,13 @@ const lifecycleMeta = computed(() => {
 
       <!-- Anchor affordance (touch) — inline and always visible on small
            screens, where there's no hover or left gutter. Pushed to the row
-           end and sized as a comfortable tap target. -->
+           end; padding grows the tap target to 32px while negative margins
+           keep the visual footprint inside the row's rhythm. -->
       <button
         v-if="path"
         type="button"
         :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
-        class="ms-auto inline-flex shrink-0 items-center rounded-sm p-1 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary lg:hidden"
+        class="ms-auto -my-1 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
         :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -336,44 +353,96 @@ const lifecycleMeta = computed(() => {
          Primary description sits closest to the summary row; a larger gap sets
          it apart from the secondary metadata band below. -->
     <div v-if="hasDetail" class="mt-2.5 flex flex-col gap-4">
+      <!-- Gates come before the description, strongest first:
+           1. Deprecation — "should I use this field at all?" outranks
+              everything; a deprecated field's migration note must be the
+              first thing read.
+           2. Condition — "when is this required?" decides whether you need
+              it on this call.
+           Only then the description ("what is it"). -->
+
+      <!-- 1. Deprecation — migration note for deprecated fields. Plain text
+           (not a tinted callout): the strikethrough + badge already carry the
+           state; the amber callout shape stays reserved for the condition. -->
+      <p
+        v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
+        class="text-sm leading-relaxed text-muted"
+      >
+        <!-- Lead-in is SINCE (the version marker), NOT the status word: the
+             summary badge already carries "Deprecated"; SINCE explains what
+             the number means. Label omitted when there's no version. -->
+        <span
+          v-if="lifecycle.since"
+          class="mr-2 text-xs font-medium uppercase tracking-wide"
+          :class="lifecycleMeta.cls"
+        >{{ t.since }}</span>
+        <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+        <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
+      </p>
+
+      <!-- 2. Condition — contained in a tinted callout so amber reads as one
+           bounded object (the rule), not a scattered wash — this keeps
+           amber's single meaning ("has strings attached": beta, caution,
+           condition) intact even when a field is conditional + beta.
+           The summary-row CONDITIONAL tag is amber too — a same-meaning echo
+           pointing at this block (label → block). Disambiguation from beta is
+           carried by SHAPE (text tag / callout block / badge), not by hue. -->
+      <div
+        v-if="condition"
+        class="flex items-start gap-2 rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
+      >
+        <!-- Icon optically centered on the first line (which often holds a
+             taller inline code pill); items-start keeps it top-aligned when the
+             condition wraps. Amber matches the callout it lives in. -->
+        <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
+          <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
+        </span>
+        <InlineMarkdown :text="condition" />
+      </div>
+
       <p v-if="description" class="text-sm leading-relaxed text-toned">
         <InlineMarkdown :text="description" />
       </p>
 
       <!-- Secondary metadata band, ordered by a developer's call-time flow:
-           when to send it → what values → boundaries → sample → maturity.
-           All rows share one label language: a plain uppercase tag whose color
-           carries tone (neutral = dimmed, caution/warning = amber). No filled
-           boxes, so the band reads as compact structured metadata. -->
+           what values → boundaries → sample → maturity. (The gating condition
+           is hoisted above the description as its own callout.) All rows share
+           one label language: a plain uppercase tag whose color carries tone
+           (neutral = dimmed, caution/warning = amber). No filled boxes, so the
+           band reads as compact structured metadata. -->
       <div v-if="hasSecondary" class="flex flex-col gap-3">
-        <!-- 1. Condition — when a conditional field becomes required. The
-             condition text reads as the explanation, so no redundant prefix. -->
-        <p v-if="condition" class="flex items-start gap-1.5 text-sm leading-relaxed text-muted">
-          <!-- Center the icon on the first line rather than pinning it to the
-               top: the condition text usually includes a taller inline code
-               pill (a field value), which grows the first line's box. A flex
-               box sized to that line box keeps the icon optically centered on
-               the pill, and — thanks to items-start on the paragraph — still
-               aligns to the first line when the condition wraps. -->
-          <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
-            <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
-          </span>
-          <InlineMarkdown :text="condition" />
-        </p>
-
-        <!-- 2. Allowed values — the most actionable metadata. -->
+        <!-- 2. Allowed values — the most actionable metadata. The field's
+             default is passed down so its row is marked in the table. -->
         <ApiDocsEnumTable
           v-if="hasEnum"
           :values="enumValues"
           :variants="enumVariants"
+          :default-value="defaultValue"
+          :default-label="t.default"
         />
 
-        <!-- 3. Constraints — boundaries and caveats grouped into one titled
-             table, echoing the enum table's container so the field has a single
-             consistent tabular language. Two columns: a fit-content label
-             column (tone carried by label color, unsupported = amber) and the
-             value. Rows share hairline dividers instead of per-item boxes. -->
-        <div v-if="notes?.length" class="space-y-2">
+        <!-- 3a. Single constraint — an inline lead-in row (same grammar as
+             Example / Condition), NOT a boxed table. Unlike an enum (rarely a
+             single value), a constraint is often exactly one line; a titled
+             bordered table with a "(1)" counter is disproportionate chrome for
+             one sentence. Downgrading to inline is MORE consistent with the
+             band, whose other single-fact rows are all "LABEL + text". -->
+        <p
+          v-if="notes?.length === 1 && notes[0]"
+          class="text-sm leading-relaxed"
+        >
+          <span
+            class="mr-2 text-xs font-medium uppercase tracking-wide"
+            :class="notes[0].tone === 'caution' ? 'text-warning' : 'text-dimmed'"
+          >{{ notes[0].label ?? t.note }}</span>
+          <InlineMarkdown :text="notes[0].text" />
+        </p>
+
+        <!-- 3b. Multiple constraints — NOW the table earns its chrome: column
+             alignment across rows and hairline dividers let you scan them.
+             Two columns: a fit-content label column (tone carried by label
+             color, unsupported = amber) and the value. -->
+        <div v-else-if="notes && notes.length > 1" class="space-y-2">
           <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
             {{ t.constraints }}
             <span class="text-dimmed/70">({{ notes.length }})</span>
@@ -389,7 +458,7 @@ const lifecycleMeta = computed(() => {
             >
               <dt
                 class="min-w-0 text-xs font-medium uppercase tracking-wide"
-                :class="(note.tone ?? 'info') === 'caution' ? 'text-warning' : 'text-dimmed'"
+                :class="note.tone === 'caution' ? 'text-warning' : 'text-dimmed'"
               >
                 {{ note.label ?? t.note }}
               </dt>
@@ -406,14 +475,25 @@ const lifecycleMeta = computed(() => {
           <InlineCode v-for="(ex, i) in examples" :key="i" :class="i > 0 ? 'ml-2' : ''">{{ ex }}</InlineCode>
         </p>
 
-        <!-- 5. Lifecycle — maturity context, last. Inline lead-in label matching
-             the constraint language; the summary badge carries glance. -->
+        <!-- 5. Lifecycle (new/beta) — maturity context, last. Inline lead-in
+             label matching the constraint language; the summary badge carries
+             glance. Deprecated renders at position 0 instead (see above). -->
         <p
-          v-if="hasLifecycleCallout && lifecycle && lifecycleMeta"
+          v-if="!isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
           class="text-sm leading-relaxed text-muted"
         >
-          <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>
-          <template v-if="lifecycle.since">{{ t.since }} {{ lifecycle.since }}<template v-if="lifecycle.description">. </template></template>
+          <!-- Lead-in is SINCE (the version marker), NOT the status word: the
+               summary badge already carries "New/Beta/Deprecated", so repeating
+               it here is noise. SINCE actually explains what the number means,
+               and keeping the badge's tone color on it ties the callout back to
+               the badge without duplicating the word. Label omitted when there's
+               no version (a description-only note stands on its own). -->
+          <span
+            v-if="lifecycle.since"
+            class="mr-2 text-xs font-medium uppercase tracking-wide"
+            :class="lifecycleMeta.cls"
+          >{{ t.since }}</span>
+          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </p>
       </div>
@@ -438,6 +518,11 @@ const lifecycleMeta = computed(() => {
             aria-hidden="true"
           />
           <span>{{ open ? t.hideChildren : t.showChildren }}</span>
+          <!-- Count matches the `(N)` grammar used by the enum/constraints
+               table headers — tells the reader how much is behind the fold
+               before they commit to expanding. Muted so the verb stays the
+               button's voice; count is metadata, not part of the action. -->
+          <span class="font-normal text-dimmed">({{ children?.length }})</span>
         </button>
       </template>
 
