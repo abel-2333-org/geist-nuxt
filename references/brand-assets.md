@@ -34,7 +34,7 @@
 
 - **尺寸**：用 Tailwind `size-*`（如 `size-4`=16px、`size-5`=20px、`size-6`=24px），不要写死 `width`。
 - **颜色**：图标默认 `currentColor`，用文本颜色类（`text-muted`、`text-primary`…）着色，不要硬编码。
-- **装饰性图标**加 `aria-hidden`；**纯图标按钮**必须有 `aria-label`（见 `ThemeToggle` 的 `:aria-label`）。
+- **装饰性图标**加 `aria-hidden`；**纯图标按钮**必须有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
 
 ### 常见坑
 

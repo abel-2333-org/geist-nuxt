@@ -67,20 +67,23 @@ function packageJson(registry) {
 }
 
 const closureScenarios = [
-  { label: 'all-items', all: true },
+  { label: 'all-items', all: true, cssMarker: 'scroll-mt-24' },
   {
     label: 'foundation-split-pane',
     item: 'foundation-split-pane',
+    cssMarker: 'cursor-col-resize',
     page: `<template>\n  <SplitPane><template #start>Start</template><template #end>End</template></SplitPane>\n</template>\n`,
   },
   {
     label: 'api-docs-field-item',
     item: 'api-docs-field-item',
+    cssMarker: 'scroll-mt-24',
     page: `<template>\n  <ApiDocsFieldItem name="amount" type="string" />\n</template>\n`,
   },
   {
     label: 'api-docs-sidebar-nav',
     item: 'api-docs-sidebar-nav',
+    cssMarker: '100dvh-4rem',
     page: `<script setup lang="ts">\nconst sections = [{ label: 'Resources', kind: 'endpoints' as const, items: [{ label: 'Create resource', method: 'POST', scenarios: ['Batch'] }] }]\n</script>\n<template>\n  <ApiDocsSidebarNav :sections="sections" :resizable="false" />\n</template>\n`,
   },
 ]
@@ -142,6 +145,9 @@ try {
         const builtCss = await readTreeText(path.join(consumerRoot, '.output/public'), '.css')
         if (!builtCss.includes('.flex{display:flex}')) {
           throw new Error(`${scenario.label}: built output did not contain Tailwind utility CSS; check main.css imports`)
+        }
+        if (!builtCss.includes(scenario.cssMarker)) {
+          throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
         }
         console.log(`Consumer closure smoke passed (${scenario.label}): ${consumerRoot}`)
       }

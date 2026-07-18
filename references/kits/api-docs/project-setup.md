@@ -32,9 +32,45 @@ i18n 是**消费项目**的职责，foundation / kit 不含。单语言项目直
 
 在项目里接 `@nuxtjs/i18n` 的典型做法：
 
-1. `pnpm add -D @nuxtjs/i18n`，加进 `nuxt.config.ts` 的 `modules`。
+1. `pnpm add -D @nuxtjs/i18n`，在 `nuxt.config.ts` 中把它放到 `@nuxt/ui` 之后：
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@nuxt/ui', '@nuxtjs/i18n'],
+})
+```
+
 2. 配置 locales 与默认语言，locale 文件放 `i18n/locales/*.json`（如 `en.json` / `zh.json`）。
-3. 在**页面 / 区块**里取翻译，把结果作为 props 传给 kit 组件：
+3. 在根 app shell 把当前 i18n locale 同步给 Nuxt UI，并同步文档的 `lang` / `dir`。如果项目 locale code 与 Nuxt UI export key 不一致，使用显式映射，不要靠字符串猜测：
+
+```vue
+<script setup lang="ts">
+import { en, zh_cn } from '@nuxt/ui/locale'
+
+const { locale } = useI18n()
+const nuxtUiLocales = { en, zh: zh_cn } as const
+const nuxtUiLocale = computed(() =>
+  nuxtUiLocales[locale.value as keyof typeof nuxtUiLocales] ?? en,
+)
+
+useHead({
+  htmlAttrs: {
+    lang: computed(() => nuxtUiLocale.value?.code),
+    dir: computed(() => nuxtUiLocale.value?.dir),
+  },
+})
+</script>
+
+<template>
+  <UApp :locale="nuxtUiLocale">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UApp>
+</template>
+```
+
+4. 在**页面 / 区块**里取翻译，把结果作为 props 传给 kit 组件：
 
 ```vue
 <script setup lang="ts">
@@ -42,7 +78,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <ResponseExample
+  <ApiDocsResponseExample
     :scenarios="scenarios"
     :labels="{
       title: t('api.labels.response'),
@@ -57,7 +93,7 @@ const { t } = useI18n()
 ```
 
 - **用户内容**（`scenarios` 里的说明、响应体）与**结构标签**（`labels.title` / `labels.copy` 等）区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。复制失败文案用完整的 `labels.copyFailure` 注入，不跨层拼接。
-- kit 组件（`ResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
+- kit 组件（`ApiDocsResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
@@ -71,6 +107,22 @@ const { t } = useI18n()
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。根 preview 不内置 content 只是 snapshot 可靠性考量，真实项目可自行引入。
 - **全站全文搜索也在这一侧**：`@nuxt/content` 就位后，用 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>`（`⌘K` 模态、跨整站文档正文）。它绑 content、属消费项目职责，**不进 kit 切片**。正确的落位是 **app 顶栏 / navbar**（参考 Nuxt UI / Vercel 文档站），与 `<ApiDocsSidebarNav>` 侧栏内的「就地过滤搜索」分属**不同层级**——两者各司其职、靠层级区分。**不要**把 `UContentSearchButton` 塞进侧栏顶部（会和就地过滤框变成两个雷同搜索框上下紧贴），更不要把 `UContentSearch` 焊进导航组件。
+
+消费项目自行安装 `@nuxt/content`，并让 `@nuxt/ui` 先于它注册：
+
+```ts
+export default defineNuxtConfig({
+  modules: ['@nuxt/ui', '@nuxt/content'],
+})
+```
+
+如果内容文件不在 `app/` 下，还要从消费项目的 `app/assets/css/main.css` 显式加入 Tailwind source；路径相对该 CSS 文件解析：
+
+```css
+@import "tailwindcss";
+@import "@nuxt/ui";
+@source "../../../content/**/*";
+```
 
 ```vue
 <script setup lang="ts">

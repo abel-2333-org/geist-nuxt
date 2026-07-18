@@ -99,7 +99,7 @@ app/components/demo/api-docs/CodeRail.vue
 
 ## 明暗与响应式
 
-- ThemeToggle 只通过 `useColorMode()` 切换；story 使用语义 token。
+- ThemeToggle 委托 Nuxt UI 的 `UColorModeButton`，可访问名称读取根 `UApp` locale；story 使用语义 token。
 - 移动优先，使用系统断点和 Nuxt UI primitive。
 - 连续、内容相关的溢出不要硬猜断点；使用 `ResizeObserver` + 隐藏测量层，规则见 `foundations/responsiveness.md`。
 

@@ -1,6 +1,6 @@
 # 整页骨架（Page shell）
 
-把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、粘顶 header、主题切换、全宽主体（`UContainer` 只提供响应式左右 padding，`--ui-container` 为 100%）。都只用核心 Nuxt UI 组件 + Geist token，全部由 Nuxt 自动导入，无需手写 `import`。
+把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、粘顶 header、主题切换、全宽主体（`UContainer` 只提供响应式左右 padding，`--ui-container` 为 100%）。都只用核心 Nuxt UI 组件 + Geist token；组件自动导入，locale 从 `@nuxt/ui/locale` 显式导入。
 
 > 想拼**页面内的一块**（区块/卡片网格/表单/空态/反馈）看同目录 `patterns.md`；想查「单个组件用法」看 `components/`。本文件只讲**整页外壳怎么搭**。
 
@@ -37,6 +37,8 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 
 ```vue
 <script setup lang="ts">
+import { zh_cn } from '@nuxt/ui/locale'
+
 useHead({
   title: 'geist-nuxt · Geist visual language on Nuxt UI',
   meta: [
@@ -48,40 +50,21 @@ useHead({
 </script>
 
 <template>
-  <UApp>
-    <NuxtPage />
+  <UApp :locale="zh_cn">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </UApp>
 </template>
 ```
 
 ## 明暗切换（`ThemeToggle`，foundation 提供）
 
-用 Nuxt UI 内置的 `@nuxtjs/color-mode`（随 `@nuxt/ui` 模块自动注册），通过 `useColorMode()` 读写偏好——不要自己写 class 切换或 localStorage 逻辑。`useColorMode` / `computed` 都由 Nuxt 自动导入。用 `<ClientOnly>` 包裹以避免 SSR 水合闪烁。
+`ThemeToggle` 是稳定的 foundation 组件名，内部直接委托 Nuxt UI 的 `<UColorModeButton>`。切换状态、SSR 处理、图标和可访问名称都由 Nuxt UI 维护；可访问名称会读取根 `<UApp :locale="...">` 的 locale。不要在这里重复实现 `useColorMode()`、`ClientOnly`、class 或 localStorage 逻辑。
 
 ```vue
-<script setup lang="ts">
-const colorMode = useColorMode()
-const isDark = computed(() => colorMode.value === 'dark')
-function toggle() {
-  colorMode.preference = isDark.value ? 'light' : 'dark'
-}
-</script>
-
 <template>
-  <ClientOnly>
-    <UTooltip :text="isDark ? '切换到浅色' : '切换到深色'">
-      <UButton
-        :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
-        color="neutral"
-        variant="ghost"
-        :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
-        @click="toggle"
-      />
-    </UTooltip>
-    <template #fallback>
-      <UButton icon="i-lucide-sun" color="neutral" variant="ghost" aria-label="切换颜色模式" />
-    </template>
-  </ClientOnly>
+  <UColorModeButton />
 </template>
 ```
 
@@ -126,4 +109,4 @@ const items = useGalleryNav()
 - 头部观感（`bg-default/75 backdrop-blur`、`border-b border-default`、`sticky top-0`、`h-(--ui-header-height)`）由 `UHeader` 主题内建，不要另写。
 - 图标按钮都带 `aria-label`；logo 图片 `alt=""`（旁边有文字）。
 - `UApp` 只在 `app/app.vue` 挂一次（提供 toast/overlay 上下文），不要重复挂载。
-- 明暗切换只用 `useColorMode()`（封装在 `ThemeToggle`），不要手写 class / localStorage。
+- 明暗切换委托 `UColorModeButton`（封装在 `ThemeToggle`），根 `UApp` 负责 locale；不要手写 class / localStorage。

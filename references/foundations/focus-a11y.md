@@ -31,7 +31,7 @@ Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
 - **对比度**：正文保持 WCAG AA（4.5:1）。用 Nuxt UI 语义 token 排层级：`text-default` 主文字、`text-toned` 次要、`text-muted` 禁用/占位（不要手拼 shade 数字）。
 - **不要只用颜色表达状态** —— 必须搭配图标或文字标签（如成功不只是变绿，要带 ✓ 或"已完成"）。
 - **每个交互元素**在 `:focus-visible` 都要显示 focus 环。
-- **纯图标按钮**必须有 `aria-label`（见 `ThemeToggle` 的 `:aria-label`）。
+- **纯图标按钮**必须有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
 - **键盘可达**：所有可点击元素用真正的 `<button>`/`<a>` 或带 `tabindex`/`role` 的元素；Nuxt UI 组件默认已处理键盘交互（Reka UI 基座）。
 - **表单**：一律用 `UFormField` 包裹，自动关联 label/error/描述与控件（`for`/`aria-describedby`）。
 
