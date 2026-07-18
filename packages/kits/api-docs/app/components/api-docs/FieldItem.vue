@@ -232,10 +232,12 @@ const hasSecondary = computed(
 // de-emphasis, not an error.
 const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
-// Field-lifecycle label + tone, rendered as a plain-text metadata row (no
-// filled box) so it shares one visual language with the constraint rows. Label
-// and tone come from the shared lifecyclePreset (single source of truth with
-// the badge); here we only translate the semantic tone into a text color.
+// Field-lifecycle tone, rendered as a plain-text metadata row (no filled box)
+// so it shares one visual language with the constraint rows. The tone comes
+// from the shared lifecyclePreset (single source of truth with the badge);
+// here we only translate the semantic tone into a text color. The preset's
+// status label is NOT used in the callout — its lead-in is SINCE, and the
+// status word lives exclusively on the badge.
 const TONE_TEXT: Record<BadgeTone, string> = {
   success: 'text-success',
   warning: 'text-warning',
@@ -247,7 +249,7 @@ const TONE_TEXT: Record<BadgeTone, string> = {
 const lifecycleMeta = computed(() => {
   if (!props.lifecycle) return undefined
   const preset = lifecyclePreset[props.lifecycle.status]
-  return { label: preset.label, cls: TONE_TEXT[preset.tone] }
+  return { cls: TONE_TEXT[preset.tone] }
 })
 </script>
 
@@ -356,8 +358,9 @@ const lifecycleMeta = computed(() => {
            amber reads as one bounded object (the rule), not a scattered wash —
            this keeps amber's single meaning ("has strings attached": beta,
            caution, condition) intact even when a field is conditional + beta.
-           The summary-row CONDITIONAL tag stays neutral to keep that row calm;
-           the accent lives here, where the actual rule is. -->
+           The summary-row CONDITIONAL tag is amber too — a same-meaning echo
+           pointing at this block (label → block). Disambiguation from beta is
+           carried by SHAPE (text tag / callout block / badge), not by hue. -->
       <div
         v-if="condition"
         class="flex items-start gap-2 rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
