@@ -128,6 +128,16 @@ const props = withDefaults(
     clearLabel?: string
     /** Shown when a query matches nothing. */
     emptyLabel?: string
+    /** Polite live-region text when a filter yields hits. Receives the count. */
+    resultsAnnouncement?: (count: number) => string
+    /** Polite live-region text when a filter yields nothing. Receives the query. */
+    noResultsAnnouncement?: (query: string) => string
+    /** Popover heading above an endpoint's full scenario list. */
+    scenariosLabel?: string
+    /** Accessible name for the scenario overflow trigger. Receives the total. */
+    scenarioOverflowLabel?: (total: number) => string
+    /** Separator for the scenario screen-reader-only list. */
+    scenarioSeparator?: string
     /** Allow drag-resizing the nav width (right-edge handle). */
     resizable?: boolean
     /** Width bounds (px) and initial width when nothing is persisted. */
@@ -148,6 +158,11 @@ const props = withDefaults(
     searchShortcut: '/',
     clearLabel: 'Clear search',
     emptyLabel: 'No matching pages',
+    resultsAnnouncement: (count: number) => `${count} result${count === 1 ? '' : 's'} found`,
+    noResultsAnnouncement: (q: string) => `No results for “${q}”`,
+    scenariosLabel: 'Scenarios',
+    scenarioOverflowLabel: (total: number) => `View all ${total} scenarios`,
+    scenarioSeparator: ', ',
     resizable: true,
     minWidth: 220,
     maxWidth: 460,
@@ -214,12 +229,16 @@ const resolved = computed(() => {
   const q = query.value.trim().toLowerCase()
   return normalizedGroups.value
     .map((group, gi) => {
+      const gid = group.id ?? (group.label ? slug(group.label) : `group-${gi}`)
       const sections = group.sections
         .map(section => resolveSection(section, q))
         .filter(entry => (hasQuery.value ? entry.items.length > 0 : true))
+        // Open state is keyed per group so two sections that share an id (or
+        // slug) across different groups don't couple their collapse state.
+        .map(entry => ({ ...entry, key: `${gid}::${entry.id}` }))
       return {
         group,
-        id: group.id ?? (group.label ? slug(group.label) : `group-${gi}`),
+        id: gid,
         sections,
       }
     })
@@ -243,14 +262,18 @@ watch(query, () => {
   filterOpenMap.value = {}
 })
 
-function isOpen(entry: ReturnType<typeof resolveSection>): boolean {
-  if (hasQuery.value) return filterOpenMap.value[entry.id] ?? entry.forceOpen
-  return openMap.value[entry.id] ?? entry.section.defaultOpen ?? false
+// `key` is the group-scoped id computed in `resolved`; `forceOpen`/`section`
+// come from resolveSection.
+type ResolvedSection = ReturnType<typeof resolveSection> & { key: string }
+
+function isOpen(entry: ResolvedSection): boolean {
+  if (hasQuery.value) return filterOpenMap.value[entry.key] ?? entry.forceOpen
+  return openMap.value[entry.key] ?? entry.section.defaultOpen ?? false
 }
 
-function setOpen(id: string, open: boolean) {
-  if (hasQuery.value) filterOpenMap.value[id] = open
-  else openMap.value[id] = open
+function setOpen(key: string, open: boolean) {
+  if (hasQuery.value) filterOpenMap.value[key] = open
+  else openMap.value[key] = open
 }
 
 // The placeholder carries a trailing ellipsis (a truncated-hint convention),
@@ -271,8 +294,8 @@ const resultCount = computed(() =>
 const filterAnnouncement = computed(() => {
   if (!hasQuery.value) return ''
   return resultCount.value === 0
-    ? `没有与“${query.value.trim()}”匹配的结果`
-    : `找到 ${resultCount.value} 个匹配结果`
+    ? props.noResultsAnnouncement(query.value.trim())
+    : props.resultsAnnouncement(resultCount.value)
 })
 
 // Global '/' focuses the search; Escape clears + blurs. Ignore the shortcut
@@ -483,10 +506,10 @@ onMounted(() => {
         </p>
 
         <ul class="space-y-0.5">
-          <li v-for="entry in group.sections" :key="entry.id">
+          <li v-for="entry in group.sections" :key="entry.key">
             <UCollapsible
               :open="isOpen(entry)"
-              @update:open="setOpen(entry.id, $event)"
+              @update:open="setOpen(entry.key, $event)"
             >
               <template #default="{ open }">
                 <!-- Section header treatment forks on `kind` via typography
@@ -575,10 +598,13 @@ onMounted(() => {
                            label keeps a readable `min-w-16` floor either way.
                            Colour stays reserved for the active state. -->
                       <span class="min-w-16 shrink truncate">{{ item.label }}</span>
-                      <ApiDocsScenarioTags
-                        v-if="itemScenarios(item).length"
-                        :scenarios="itemScenarios(item)"
-                      />
+        <ApiDocsScenarioTags
+          v-if="itemScenarios(item).length"
+          :scenarios="itemScenarios(item)"
+          :scenarios-label="scenariosLabel"
+          :overflow-label="scenarioOverflowLabel"
+          :separator="scenarioSeparator"
+        />
                       <UBadge
                         v-if="item.badge !== undefined"
                         color="neutral"

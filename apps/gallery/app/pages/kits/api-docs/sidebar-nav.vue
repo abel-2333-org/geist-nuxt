@@ -195,6 +195,11 @@ defineShortcuts({ meta_k: onSiteSearch })
             clear-label="清除搜索"
             empty-label="没有匹配的页面"
             resize-label="调整侧栏宽度"
+            scenarios-label="服务场景"
+            :results-announcement="(count: number) => `找到 ${count} 个匹配结果`"
+            :no-results-announcement="(q: string) => `没有与“${q}”匹配的结果`"
+            :scenario-overflow-label="(total: number) => `查看全部 ${total} 个服务场景`"
+            scenario-separator="、"
           />
         </div>
 

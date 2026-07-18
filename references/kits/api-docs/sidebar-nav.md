@@ -37,6 +37,11 @@ nav (landmark, 粘顶 + 自身滚动区，可拖拽调宽)
 | `searchShortcut` | `string` | 键盘提示 + 聚焦搜索的按键，默认 `/` |
 | `clearLabel` | `string` | 清除按钮的 aria-label，默认 `Clear search` |
 | `emptyLabel` | `string` | 搜索无结果时的文案，默认 `No matching pages` |
+| `resultsAnnouncement` | `(count: number) => string` | 过滤命中时的 polite live-region 播报，默认 `${count} result(s) found` |
+| `noResultsAnnouncement` | `(query: string) => string` | 过滤无命中时的 polite live-region 播报，默认 `No results for “${query}”` |
+| `scenariosLabel` | `string` | 接口场景折叠 popover 的标题，透传给 `ScenarioTags`，默认 `Scenarios` |
+| `scenarioOverflowLabel` | `(total: number) => string` | 场景溢出触发器的 aria-label，默认 `View all ${total} scenarios` |
+| `scenarioSeparator` | `string` | 场景 `sr-only` 全量列表的分隔符，默认 `, ` |
 | `resizable` | `boolean` | 是否允许拖拽右边缘调宽，默认 `true`。为 `false` 时不加宽度、不渲染手柄 |
 | `minWidth` / `maxWidth` | `number` | 宽度上下限（px），默认 `220` / `460`，拖拽与键盘都会 clamp 到此区间 |
 | `defaultWidth` | `number` | 无持久值时的初始宽度（px），默认 `288`；双击手柄复位到它 |
@@ -80,7 +85,7 @@ interface SidebarNavGroup {
 ## 关键点
 
 - **界限分明靠两条正交手段**：① **分组层**（`SidebarNavGroup.label`）——板块归入带 eyebrow 小标题的分组，组间加分隔线与上留白，把「指南世界」与「接口世界」框成两块领地；② **板块分型**（`SidebarNavSection.kind`）——`guide` 型板块头是柔和 sans 句式 + 中性图标，`endpoints` 型是 mono 大写 tracking。**分型只用排版区分、不涂��**：计数徽章、缩进线、图标、场景标签一律中性，颜色只由 active 态承载，避免整列 chrome 被紫色装饰喧闹（`primary` 是强调色，应留给选中态）。二者叠加后，即使只扫板块头（不展开）也一眼分得清类型。
-- **接口按用途命名、非路径；一个接口服务多个场景但只出现一次**：我们的 API 不严格遵循 REST 语义，一个接口常覆盖多种**业务场景**（订阅、授权、支付、退款…），所以**菜单标签用用途名**（如「发起支付」「客户管理」）、**不用路径**，且这个接口在菜单里**只出现一次**——它服务哪些场景由 `scenarios` 里的**场景标签**表达，而不是按场景重复列出。接口行的排布是**前置方法色标 + 用途名（sans，主标识）+ 后置场景标签簇**：`method`（单个 HTTP 动词）承载「这个接口怎么调」，用途名承载「这是什么接口」，场景标签承载「它服务哪些场景」，多个场景即表达「一接口多场景」（如 `POST`「发起支付」带 `支付` `订阅` `授权`）。方法与场景是两个正交维度——一个说调用方式、一个说业务归属，故一前一后分列。**场景标签簇按可用宽度测量真溢出**（`ApiDocsScenarioTags`：能放几个就铺几个、余下折 `+N`，一个都放不下才收成计数 chip；见下方「方法色标前置定宽」），因此侧栏够宽时全部场景平铺、窄时优雅降级，用途名始终不被挤掉。
+- **接口按用途命名、非路径；一个接口服务多个场景但只出现一次**：我们的 API 不严格遵循 REST 语义，一个接口常覆盖多种**业务场景**（订阅、授权、支付、��款…），所以**菜单标签用用途名**（如「发起支付」「客户管理」）、**不用路径**，且这个接口在菜单里**只出现一次**——它服务哪些场景由 `scenarios` 里的**场景标签**表达，而不是按场景重复列出。接口行的排布是**前置方法色标 + 用途名（sans，主标识）+ 后置场景标签簇**：`method`（单个 HTTP 动词）承载「这个接口怎么调」，用途名承载「这是什么接口」，场景标签承载「它服务哪些场景」，多个场景即表达「一接口多场景」（如 `POST`「发起支付」带 `支付` `订阅` `授权`）。方法与场景是两个正交维度——一个说调用方式、一个说业务归属，故一前一后分列。**场景标签簇按可用宽度测量真溢出**（`ApiDocsScenarioTags`：能放几个就铺几个、余下折 `+N`，一个都放不下才收成计数 chip；见下方「方法色标前置定宽」），因此侧栏够宽时全部场景平铺、窄时优雅降级，用途名始终不被挤掉。
 - **异构行靠数据区分，不靠 variant**：同一个 `items` 里，带 `method`/`scenarios` 的是接口行（前置方法色标 + 后置中性场景标签），带/不带 `icon` 的是指南行。**方法色标是唯一带色的元素**（复用 `ApiDocsMethodBadge`，GET→info、POST→success、PUT→warning、PATCH→secondary、DELETE→error），因为它是有限受控词表、颜色能有效编码语义；**场景标签是纯 neutral soft `UBadge`、不涂色**（场景是开放词表，涂色会失控、也会与方法色标抢注意力），chrome 其余颜色只留给 active 态。
 - **全局搜索是唯一搜索入口、同时匹配用途名 / 方法 / 场景标签**：顶部一个 `UInput` 过滤所有板块——板块标题命中则整块保留，否则只留 **label、method 或场景标签命中**查询的 item（`matchesText` 同时查 `label`、`method`、`scenarios`）；有查询时**命中板块强制展开**，让结果始终可见，计数徽章显示 `命中/总数`。因此**输入场景名（如「订阅」）或方法名（如「POST」）都会浮出对应接口**，跨板块聚合了这个多对多关系；「大板块子项多」的检索需求也由这个全局搜索覆盖，无需每块再放搜索框，也不需要额外的过滤 chips。
 - **就地过滤 vs 全站搜索是两件正交的事，靠层级区分而非并排堆叠**：本组件只做**导航树内就地过滤**（顶部 `UInput`，收窄结构化的导航项 label 与场景标签）。**全站全文搜索**（`⌘K` 模态、跨整站文档正文、Fuse/`useSearchCollection`）是另一套交互，由 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>` 承担、**绑死 `@nuxt/content`**，它的正位是 **app 顶栏 / navbar**——和侧栏就地过滤不同层级、不同位置（参考 Nuxt UI / Vercel 文档站）。**切忌把全站搜索按钮塞进侧栏顶部**：两个长得几乎一样的搜索框上下紧贴，只会让用户困惑"这俩有啥区别"，是冗余 chrome。全文检索接线（含把 `UContentSearchButton` 放进顶栏）留给消费项目（见 `project-setup.md`）；**基座保持数据无关、不引 `@nuxt/content`**，也切勿把 `UContentSearch` 焊进本组件。
@@ -91,18 +96,18 @@ interface SidebarNavGroup {
 
 ## 状态（state model）
 
-- 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。开合状态**始终受控**（组件自持 `openMap`，`defaultOpen` 只做种子值），避免 UCollapsible 在受控/非受控间切换导致内部状态与用户所见不一致。
+- 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。开合状态**始终受控**（组件自持 `openMap`，`defaultOpen` 只做种子值），避免 UCollapsible 在受控/非受控间切换导致内部状态与用户所见不一致。开合状态**按 group 命名空间**（key = `group.id::section.id`），故不同 group 下同 id/同 slug 的板块不会互相耦合开合。
 - item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。
 - 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
 - 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
-- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
+- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误��文本。
 
-## Accessibility（无障碍）
+## Accessibility（���障碍）
 
 - 根节点是 `<nav :aria-label>` 地标；板块用真实 `<button>` 触发（Reka `UCollapsible` 接好 `aria-expanded`/`aria-controls`），可访问名 = 板块标题 + 计数。
-- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉��尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
+- chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉结尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
 - **过滤结果用 `aria-live="polite"` 播报**���过滤是静默重写列表，故一个 `role="status"` 的 `sr-only` 区域播报「找到 N 个匹配结果」或「没有与"…"匹配的结果」；空 query 时不播报，闲时浏览保持安静。
-- 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签文字（订阅/授权…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（查看全部 N 个服务场景）。
+- 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签文字（订阅/授权…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（文案由 `scenarioOverflowLabel` 注入，默认 `View all N scenarios`）。
 - 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
 - 调宽手柄是 `role="separator"` + `aria-orientation="vertical"` + `aria-label`，并暴露 `aria-valuenow/min/max`（当前/上/下限宽度）；`tabindex="0"` 可聚焦，`←/→/Home/End` 键盘操作，与拖拽等价。
 - 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在边缘各画一条线。

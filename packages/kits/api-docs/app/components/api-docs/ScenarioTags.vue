@@ -8,9 +8,24 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 // single count chip. This makes the reveal data-agnostic: 2 short tags or 8
 // long ones, CJK or latin, it adapts to the real pixel budget at the row's
 // live width (which the drag-resize handle changes).
-const props = defineProps<{
-  scenarios: string[]
-}>()
+// All copy is injected (content-agnostic / i18n-ready), matching SidebarNav:
+// the component ships English defaults and the consumer localizes via props.
+const props = withDefaults(
+  defineProps<{
+    scenarios: string[]
+    /** Popover heading above the full scenario list. */
+    scenariosLabel?: string
+    /** Accessible name for the overflow trigger. Receives the total count. */
+    overflowLabel?: (total: number) => string
+    /** Separator for the screen-reader-only flattened list. */
+    separator?: string
+  }>(),
+  {
+    scenariosLabel: 'Scenarios',
+    overflowLabel: (total: number) => `View all ${total} scenarios`,
+    separator: ', ',
+  },
+)
 
 // The flex-1 element we measure — its clientWidth is the pixel budget for tags,
 // and it doesn't depend on the visible tag content (grow fills the remainder),
@@ -51,7 +66,7 @@ function recompute() {
   let best = 0
   for (let k = total; k >= 1; k--) {
     let need = 0
-    for (let i = 0; i < k; i++) need += tagWidths[i]
+    for (let i = 0; i < k; i++) need += tagWidths[i] ?? 0
     need += GAP * (k - 1)
     if (k < total) need += GAP + plusW
     if (need <= avail) {
@@ -124,7 +139,7 @@ const hasOverflow = computed(() => hiddenCount.value > 0)
 // When not a single tag fits, the overflow trigger becomes a count chip
 // (tag icon + total) instead of a "+N".
 const collapsedToCount = computed(() => shownCount.value === 0)
-const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个服务场景`)
+const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length))
 </script>
 
 <template>
@@ -135,8 +150,8 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
     <span class="flex items-center gap-1">
       <!-- Whole tags that fit: plain, non-interactive. -->
       <UBadge
-        v-for="s in visibleTags"
-        :key="s"
+        v-for="(s, i) in visibleTags"
+        :key="`${s}-${i}`"
         color="neutral"
         variant="soft"
         size="sm"
@@ -176,11 +191,11 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
         </button>
         <template #content>
           <div class="flex max-w-xs flex-col gap-2 p-3">
-            <p class="text-xs font-medium text-muted">服务场景</p>
+            <p class="text-xs font-medium text-muted">{{ scenariosLabel }}</p>
             <div class="flex flex-wrap gap-1">
               <UBadge
-                v-for="s in scenarios"
-                :key="s"
+                v-for="(s, i) in scenarios"
+                :key="`${s}-${i}`"
                 color="neutral"
                 variant="soft"
                 size="sm"
@@ -193,7 +208,7 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
     </span>
 
     <!-- Full list for screen readers, regardless of how many chips render. -->
-    <span class="sr-only">{{ scenarios.join('、') }}</span>
+    <span class="sr-only">{{ scenarios.join(separator) }}</span>
 
     <!-- Hidden measurement layer: intrinsic widths only, never interactive.
          Note: unlike the visible tags, the measured badges deliberately carry
@@ -209,8 +224,8 @@ const overflowLabel = computed(() => `查看全部 ${props.scenarios.length} 个
       class="pointer-events-none invisible absolute -z-10 flex items-center gap-1 whitespace-nowrap"
     >
       <UBadge
-        v-for="s in scenarios"
-        :key="s"
+        v-for="(s, i) in scenarios"
+        :key="`${s}-${i}`"
         data-tag
         color="neutral"
         variant="soft"
