@@ -15,10 +15,12 @@
 // siblings (ApiDocsEnumTable, ApiDocsLifecycleBadge). Deep linking is handled
 // by the kit's useFieldAnchor composable (auto-imported).
 //
-// Anatomy:  summary row  ── anchor · name · type · format · requiredness ·
+// Anatomy:  summary row  ── anchor · name · type · format · requiredness
+//                           (required/conditional only; optional is unmarked) ·
 //                           default · lifecycle badge
-//           leaf detail  ── description + secondary band (condition → enum →
-//                           constraints → example → lifecycle callout)
+//           leaf detail  ── description + secondary band (deprecation-first →
+//                           condition → enum → constraints → example →
+//                           new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
@@ -99,7 +101,6 @@ export interface FieldNode {
  */
 export interface FieldItemLabels {
   required?: string
-  optional?: string
   conditional?: string
   default?: string
   example?: string
@@ -136,7 +137,6 @@ const props = withDefaults(
 // Merge caller copy over neutral English defaults. Chrome text only.
 const t = computed<Required<FieldItemLabels>>(() => ({
   required: 'Required',
-  optional: 'Optional',
   conditional: 'Conditional',
   default: 'Default',
   example: 'Example',
@@ -202,12 +202,16 @@ const hasDetail = computed(
     || hasLifecycleCallout.value,
 )
 
-// Which of the three requirement states this row is in.
-const requiredState = computed<'required' | 'conditional' | 'optional'>(() =>
-  props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : 'optional',
+// Requirement marker. Optional is the default state of a field, so it renders
+// nothing — absence of a Required/Conditional tag IS the "optional" signal
+// (industry convention: Stripe, Mintlify). Tagging every optional row would
+// add a non-informative word to the majority of rows and dilute the contrast
+// of the tags that matter.
+const requiredState = computed<'required' | 'conditional' | null>(() =>
+  props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : null,
 )
-// Localized label for the current requirement state (chrome copy).
-const requiredLabel = computed(() => t.value[requiredState.value])
+// Localized label for the rendered requirement states (chrome copy).
+const requiredLabel = computed(() => (requiredState.value ? t.value[requiredState.value] : ''))
 
 // Everything below the main description is secondary metadata. Grouping it lets
 // the template pull the description up as the primary content and set the band
@@ -294,13 +298,12 @@ const lifecycleMeta = computed(() => {
         class="font-mono text-xs text-dimmed"
       >{{ format }}</span>
 
+      <!-- Requirement tag — only for required/conditional; optional rows carry
+           no tag (absence is the signal, see requiredState above). -->
       <span
+        v-if="requiredState"
         class="text-xs font-medium uppercase tracking-wide"
-        :class="{
-          'text-error': requiredState === 'required',
-          'text-warning': requiredState === 'conditional',
-          'text-dimmed': requiredState === 'optional',
-        }"
+        :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
       >
         {{ requiredLabel }}
       </span>
@@ -348,6 +351,21 @@ const lifecycleMeta = computed(() => {
            carries tone (neutral = dimmed, caution/warning = amber). No filled
            boxes, so the band reads as compact structured metadata. -->
       <div v-if="hasSecondary" class="flex flex-col gap-3">
+        <!-- 0. Deprecation — FIRST for deprecated fields. "Don't use this,
+             use X instead" answers "should I use this field at all?", which
+             logically precedes every call-time detail below; buried at the
+             bottom it can sink under a long enum/constraints stack. New/beta
+             callouts stay last (position 5) — they are supplementary context,
+             not a usage gate. -->
+        <p
+          v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
+          class="text-sm leading-relaxed text-muted"
+        >
+          <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>
+          <template v-if="lifecycle.since">{{ t.since }} {{ lifecycle.since }}<template v-if="lifecycle.description">. </template></template>
+          <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
+        </p>
+
         <!-- 1. Condition — when a conditional field becomes required. The
              condition text reads as the explanation, so no redundant prefix. -->
         <p v-if="condition" class="flex items-start gap-1.5 text-sm leading-relaxed text-muted">
@@ -363,11 +381,14 @@ const lifecycleMeta = computed(() => {
           <InlineMarkdown :text="condition" />
         </p>
 
-        <!-- 2. Allowed values — the most actionable metadata. -->
+        <!-- 2. Allowed values — the most actionable metadata. The field's
+             default is passed down so its row is marked in the table. -->
         <ApiDocsEnumTable
           v-if="hasEnum"
           :values="enumValues"
           :variants="enumVariants"
+          :default-value="defaultValue"
+          :default-label="t.default"
         />
 
         <!-- 3. Constraints — boundaries and caveats grouped into one titled
@@ -408,10 +429,11 @@ const lifecycleMeta = computed(() => {
           <InlineCode v-for="(ex, i) in examples" :key="i" :class="i > 0 ? 'ml-2' : ''">{{ ex }}</InlineCode>
         </p>
 
-        <!-- 5. Lifecycle — maturity context, last. Inline lead-in label matching
-             the constraint language; the summary badge carries glance. -->
+        <!-- 5. Lifecycle (new/beta) — maturity context, last. Inline lead-in
+             label matching the constraint language; the summary badge carries
+             glance. Deprecated renders at position 0 instead (see above). -->
         <p
-          v-if="hasLifecycleCallout && lifecycle && lifecycleMeta"
+          v-if="!isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
           class="text-sm leading-relaxed text-muted"
         >
           <span class="mr-2 text-xs font-medium uppercase tracking-wide" :class="lifecycleMeta.cls">{{ lifecycleMeta.label }}</span>

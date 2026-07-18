@@ -26,8 +26,12 @@ const props = withDefaults(
     values?: EnumValue[]
     /** Grouped enum: values that vary by condition (e.g. bank lists per market). */
     variants?: EnumVariant[]
+    /** The field's default value — its row gets a trailing marker, tying the
+     *  summary row's DEFAULT pill to the concrete entry in this table. */
+    defaultValue?: string
     /** Structural labels; overridable for i18n. */
     label?: string
+    defaultLabel?: string
     searchPlaceholder?: string
     emptyLabel?: string
     /** Lists at or above this length get a filter box + scroll area. */
@@ -35,6 +39,7 @@ const props = withDefaults(
   }>(),
   {
     label: 'Allowed values',
+    defaultLabel: 'Default',
     searchPlaceholder: 'Filter values',
     emptyLabel: 'No matching values',
     filterThreshold: 30,
@@ -142,6 +147,13 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
         >
           <dt class="min-w-0">
             <InlineCode class="break-all">{{ item.value }}</InlineCode>
+            <!-- Default marker — same uppercase tag language as the field
+                 row's DEFAULT lead-in, so scanning the table answers "which
+                 one do I get if I omit this?" without looking back up. -->
+            <span
+              v-if="defaultValue !== undefined && item.value === defaultValue"
+              class="ms-2 text-xs font-medium uppercase tracking-wide text-dimmed"
+            >{{ defaultLabel }}</span>
           </dt>
           <dd v-if="item.description" class="min-w-0 text-sm leading-relaxed text-muted">
             <InlineMarkdown :text="item.description" />
