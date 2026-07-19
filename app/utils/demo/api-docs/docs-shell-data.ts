@@ -15,6 +15,12 @@
 
 export interface DocsShellNavItem {
   label: string
+  /**
+   * 路由无关的导航目标，由外壳（DocsShell）解析成完整路径：
+   * - `#hash` → 域首页锚点（参考长滚动内定位，如 `#checkout-create`）
+   * - 无 `#` 前缀 → 指南子页 slug（如 `quickstart` → `/[domain]/quickstart`）
+   * 这就是「指南分页、参考长滚动」的数据层体现（见 project-setup.md）。
+   */
   to: string
   method?: string
   scenarios?: string[]
@@ -46,6 +52,19 @@ export interface DocsShellGuideSection {
   id: string
   title: string
   body: string
+}
+
+/**
+ * 指南子页（支付域）：一页一文、线性阅读，页尾 prev/next 串成学习路径——
+ * 与端点参考的「一域长滚动」相对（消费项目对应 @nuxt/content 一个 .md 文件
+ * + UContentSurround）。段落里的 `反引号` 片段渲染为内联代码。
+ */
+export interface DocsShellGuidePage {
+  slug: string
+  title: string
+  description: string
+  paragraphs: string[]
+  code?: { title: string, variants: { label: string, language: string, code: string }[] }
 }
 
 /** 端点紧凑 stub：保证侧栏 / 搜索里的每个锚点在正文都有落点。 */
@@ -96,6 +115,37 @@ export const paymentsQuickstartVariants = [
   body: JSON.stringify({ amount: 4900, currency: "CNY" }),
 })
 const session = await res.json()`,
+  },
+]
+
+/** 支付域指南子页：数组序即阅读序，prev/next 由此推导。 */
+export const paymentsGuidePages: DocsShellGuidePage[] = [
+  {
+    slug: 'quickstart',
+    title: '快速开始',
+    description: '用测试密钥创建第一个结算会话，完成一笔沙箱支付。',
+    paragraphs: [
+      '用测试密钥创建一个结算会话，把返回的 `url` 交给顾客即可完成一笔沙箱支付：',
+    ],
+    code: { title: '创建你的第一个结算会话', variants: paymentsQuickstartVariants },
+  },
+  {
+    slug: 'auth',
+    title: '认证与密钥',
+    description: '密钥的携带方式、测试与生产环境的区分及存放规范。',
+    paragraphs: [
+      '所有请求通过 `Authorization: Bearer` 头携带密钥。测试密钥以 `sk_test_` 开头、只操作沙箱数据；生产密钥请存放在服务端环境变量，切勿写进前端代码。',
+      '密钥泄露时在控制台一键轮换：旧密钥立即失效，正在处理中的请求不受影响。',
+    ],
+  },
+  {
+    slug: 'webhooks',
+    title: 'Webhook 通知',
+    description: '支付结果的异步送达、签名校验与幂等去重。',
+    paragraphs: [
+      '支付结果以 Webhook 异步送达（如 `payment.succeeded`、`refund.completed`）。校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。',
+      '回调端点返回非 2xx 时按指数退避重试 24 小时；对账兜底请以「查询付款」接口的结果为准。',
+    ],
   },
 ]
 
@@ -316,9 +366,9 @@ const paymentsNavGroups: DocsShellNavGroup[] = [
         defaultOpen: true,
         items: [
           { label: '概览', to: '#overview', icon: 'i-lucide-compass' },
-          { label: '快速开始', to: '#quickstart', icon: 'i-lucide-rocket' },
-          { label: '认证与密钥', to: '#auth', icon: 'i-lucide-key-round' },
-          { label: 'Webhook 通知', to: '#webhooks', icon: 'i-lucide-webhook' },
+          { label: '快速开始', to: 'quickstart', icon: 'i-lucide-rocket' },
+          { label: '认证与密钥', to: 'auth', icon: 'i-lucide-key-round' },
+          { label: 'Webhook 通知', to: 'webhooks', icon: 'i-lucide-webhook' },
         ],
       },
     ],
@@ -365,8 +415,8 @@ export const docsShellDomains: DocsShellDomain[] = [
     navGroups: paymentsNavGroups,
     contentSections: [
       { title: '概览 · 两条收款路径', to: '#overview', content: '托管收银台适合快速上线，Direct API 适合完全自定义支付体验，两条路径共用同一套密钥与 Webhook。' },
-      { title: '认证与密钥 · 密钥存放', to: '#auth', content: '生产密钥请存放在服务端环境变量，切勿写进前端代码；测试密钥以 sk_test_ 开头、只操作沙箱数据。' },
-      { title: 'Webhook 通知 · 幂等去重', to: '#webhooks', content: '校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。' },
+      { title: '认证与密钥 · 密钥存放', to: 'auth', content: '生产密钥请存放在服务端环境变量，切勿写进前端代码；测试密钥以 sk_test_ 开头、只操作沙箱数据。' },
+      { title: 'Webhook 通知 · 幂等去重', to: 'webhooks', content: '校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。' },
       { title: '取消支付 · 资金解冻', to: '#pay-cancel', content: '取消一笔尚未捕获的支付或预授权，资金原路解冻。' },
     ],
     guideSections: [], // 支付域正文是完整样板，不走 stub 渲染

@@ -74,15 +74,17 @@ app/components/demo/api-docs/CodeRail.vue
 - 不进入根 `registry.json`；
 - 下游需要时在自己的页面层 copy & adapt，不把它误升为系统组件。
 
-同类的 `DocsShell.vue`、`DocsDomainSwitcher.vue` 与 `DocsShellReference.vue`
-共同组成 `/kits/api-docs/docs-shell/[domain]` 的 gallery-private 文档站 recipe。域 fixture 与
+同类的 `DocsShell.vue`、`DocsDomainSwitcher.vue`、`DocsShellReference.vue`
+与 `DocsShellGuidePage.vue` 共同组成 `/kits/api-docs/docs-shell/[domain]`
+（域首页 = 概览 + 端点参考长滚动）与 `/[domain]/[slug]`（指南一页一文 +
+prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 `nav → site search` adapter 放在 `app/utils/demo/api-docs/docs-shell-data.ts`，不放进
 `app/components/`，避免 Nuxt 把普通 `.ts` 数据文件纳入组件扫描。整套 recipe：
 
 - 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/CodeRail` 如何装配成完整文档站；
 - 不进入 foundation、kit 或 registry；
 - 使用与 sidebar-nav / reference demo 一致的中文支付世界观数据 + 中性假品牌，不携带任何消费项目品牌、路由或 contract（demo 单语中文直写，消费项目文案走 i18n 注入）；
-- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 采用与消费项目同构的路径分段路由（`/docs-shell/[domain]`，域切换器即 NuxtLink），消费项目再把域内锚点展开成 `[...slug]` 子页（见 `references/kits/api-docs/project-setup.md`「多域路由」）。
+- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 采用与消费项目同构的路径分段路由与拆页策略（`/docs-shell/[domain]` 域首页长滚动参考 + `/[domain]/[slug]` 指南子页，域切换器即 NuxtLink；支付域为最小示范，其余域为单页 stub），见 `references/kits/api-docs/project-setup.md`「多域路由」与「域内怎么拆页」。
 
 ## 自动导航与移动端
 

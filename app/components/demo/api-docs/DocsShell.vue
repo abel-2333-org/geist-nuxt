@@ -50,9 +50,18 @@ const switcherItems = computed(() =>
   })),
 )
 
-// 侧栏 active：按 route.hash 计算并显式传入。裸 hash 链接（#overview）会被
-// NuxtLink 当外部链接渲染，不参与 router 的 active 匹配——所以「当前位置」
-// 高亮必须由页面层喂 `active`。
+// 导航目标解析：数据层的 to 是路由无关的（`#hash` = 域首页锚点，裸 slug =
+// 指南子页），外壳统一拼成完整路径——「指南分页、参考长滚动」两类目标混排。
+const domainBase = computed(() => `${DOCS_SHELL_BASE}/${props.domain.id}`)
+
+function resolveTo(to: string) {
+  return to.startsWith('#') ? `${domainBase.value}${to}` : `${domainBase.value}/${to}`
+}
+
+// 侧栏 active 双语义，均显式计算（带 hash 的路径 NuxtLink 只按 path 匹配、
+// 会把域首页所有锚点同时点亮，所以两类都不能交给 ULink 自动判定）：
+// - 指南子页 item：当前 route 的 slug 段等于 to；
+// - 锚点 item：在域首页（无 slug）且 route.hash 等于 to。
 const navGroups = computed(() =>
   props.domain.navGroups.map(group => ({
     ...group,
@@ -60,7 +69,10 @@ const navGroups = computed(() =>
       ...section,
       items: section.items.map(item => ({
         ...item,
-        active: item.to === route.hash,
+        to: resolveTo(item.to),
+        active: item.to.startsWith('#')
+          ? !route.params.slug && item.to === route.hash
+          : route.params.slug === item.to,
       })),
     })),
   })),
@@ -93,11 +105,18 @@ onMounted(() => {
   onUnmounted(() => lgQuery.removeEventListener('change', sync))
 })
 
-// 侧栏 / ⌘K 索引 / 正文检索全部按当前域派生（一份数据、多处消费）
-const searchGroups = computed(() => toSiteSearchGroups(props.domain))
+// 侧栏 / ⌘K 索引 / 正文检索全部按当前域派生（一份数据、多处消费）。
+// ⌘K 结果的 to 同样过 resolveTo——在指南子页上命中锚点结果也能跳回域首页。
+const searchGroups = computed(() =>
+  toSiteSearchGroups(props.domain).map(group => ({
+    ...group,
+    items: group.items.map(item => ({ ...item, to: resolveTo(item.to) })),
+  })),
+)
 
-function searchBody(query: string) {
-  return searchDocsBody(props.domain, query)
+async function searchBody(query: string) {
+  const results = await searchDocsBody(props.domain, query)
+  return results.map(item => ({ ...item, to: resolveTo(item.to) }))
 }
 </script>
 
@@ -214,13 +233,17 @@ function searchBody(query: string) {
         />
       </aside>
 
+      <!-- 正文槽：域首页放参考长滚动（fallback），指南子页由路由页面注入
+           一页一文的正文——外壳（顶栏/侧栏/搜索）在两种形态间保持不变。 -->
       <section
         id="docs-shell-content"
         tabindex="-1"
         aria-label="API 文档正文"
         class="min-w-0 focus:outline-none"
       >
-        <DemoApiDocsShellReference :key="props.domain.id" :domain="props.domain" />
+        <slot>
+          <DemoApiDocsShellReference :key="props.domain.id" :domain="props.domain" />
+        </slot>
       </section>
     </div>
   </div>

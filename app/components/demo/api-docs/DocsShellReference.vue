@@ -3,7 +3,6 @@ import {
   paymentsBodyFields,
   paymentsEndpoint,
   paymentsEndpointStubs,
-  paymentsQuickstartVariants,
   paymentsRequestScenarios,
   paymentsResponseFields,
   paymentsResponseScenarios,
@@ -33,9 +32,10 @@ onMounted(() => anchor.initFromHash())
 </script>
 
 <template>
-  <!-- 支付域：完整样板（指南 + reference 式端点页）。标题层级：页面唯一
-       h1 = 域名（overview 段打头），指南段与端点均为 h2，之下才是 h3——
-       路径路由下每个域就是一个 route，h1 属于 route 级页头。 -->
+  <!-- 支付域首页：概览 + 端点参考长滚动。指南（快速开始/认证/Webhook）已
+       拆成一页一文的子页（[domain]/[slug].vue + DocsShellGuidePage）——
+       「指南分页、参考长滚动」的拆页策略（见 project-setup.md）。标题层级：
+       页面唯一 h1 = 域名（overview 段打头），端点均为 h2，之下才是 h3。 -->
   <div v-if="props.domain.id === 'payments'" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
     <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
       <h1 class="text-2xl font-semibold tracking-tight text-highlighted">{{ props.domain.label }}</h1>
@@ -44,36 +44,9 @@ onMounted(() => anchor.initFromHash())
         Direct API 自行编排授权、捕获与退款。所有接口共用同一套密钥与 Webhook 通知机制。
       </p>
       <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-        左侧菜单里接口按<b class="font-medium text-toned">用途</b>命名，行首的方法色标说「怎么调」、行尾的场景标签说「用在哪」。
+        接入指南在左侧「指南」分组里按篇阅读（从「快速开始」起步）；本页往下是完整的
+        API 参考。左侧菜单里接口按<b class="font-medium text-toned">用途</b>命名，行首的方法色标说「怎么调」、行尾的场景标签说「用在哪」。
         找不到入口时用顶栏的全站搜索（<UKbd value="meta" /><UKbd value="K" />），输入场景名（如「订阅」）或方法名（如「POST」）都能命中。
-      </p>
-    </section>
-
-    <section id="quickstart" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-highlighted">快速开始</h2>
-      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-        用测试密钥创建一个结算会话，把返回的 <code class="font-mono text-[0.8125rem]">url</code> 交给顾客即可完成一笔沙箱支付：
-      </p>
-      <ApiDocsCodeBlock
-        :variants="paymentsQuickstartVariants"
-        title="创建你的第一个结算会话"
-        :labels="{ language: '语言', copy: '复制代码', copied: '已复制到剪贴板', copyToast: '代码' }"
-      />
-    </section>
-
-    <section id="auth" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-highlighted">认证与密钥</h2>
-      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-        所有请求通过 <code class="font-mono text-[0.8125rem]">Authorization: Bearer</code> 头携带密钥。测试密钥以
-        <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务端环境变量，切勿写进前端代码。
-      </p>
-    </section>
-
-    <section id="webhooks" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-highlighted">Webhook 通知</h2>
-      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-        支付结果以 Webhook 异步送达（如 <code class="font-mono text-[0.8125rem]">payment.succeeded</code>、<code class="font-mono text-[0.8125rem]">refund.completed</code>）。
-        校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。
       </p>
     </section>
 
