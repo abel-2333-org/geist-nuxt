@@ -75,7 +75,7 @@ type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
   id?: string            // 稳定 id，缺省时取 label 的 slug
   label: string          // 板块标题（已本地化）
-  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'���endpoints = mono 大写 tracking，chrome 中性）
+  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 tracking，chrome 中性）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
   defaultOpen?: boolean  // 开合状态的初始种子值；搜索激活时被强制展开覆盖
