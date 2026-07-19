@@ -19,7 +19,12 @@
 | `components/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
 | `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
 | `components/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 foundation `SemanticBadge` | — |
+| `components/EventBadge.vue` | `<ApiDocsEventBadge>` | Webhook 身份标：统一词 `EVENT`（neutral+subtle、mono），与 MethodBadge 同形态位——方法色标说「你调平台」，EVENT 标说「平台回调你」；单值词汇，preset 退化为内联常量 | 本页「Operation identity 分层」 |
 | `components/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 foundation `SemanticBadge` | — |
+| `components/LifecycleNotice.vue` | `<ApiDocsLifecycleNotice>` | 生命周期横幅：`UAlert` 薄包装，与 LifecycleBadge 共用 `lifecyclePreset` 词表与色调（徽章标记一行，横幅解释「发生了什么+怎么办」）；置于 OperationHeader 之后、字段区之前；不可 dismiss | — |
+| `components/OperationHeader.vue` | `<ApiDocsOperationHeader>` | 操作身份头（identity/header）：`kind="endpoint"\|"webhook"` 单组件分派到 MethodBadge/EventBadge——identity 行（徽章 + mono 标识 + 右对齐 `#actions` 槽）→ 标题（`heading-level` 定层级，默认 h2；可选 lifecycle 徽章）→ `#description` 槽 → 默认槽收尾部块（OperationTarget 等，正交不内嵌） | 本页「Operation identity 分层」 |
+| `components/OperationTarget.vue` | `<ApiDocsOperationTarget>` | 端点的「往哪调」行（actions/target）：环境 host 切换（`USelect`，单 host 自动省略）+ mono 完整地址 + `CopyButton` 复制；面向 endpoint——webhook 的 target 是消费方自己的回调地址，一句话说明即可 | 本页「Operation identity 分层」 |
+| `components/CodeRail.vue` | `<ApiDocsCodeRail>` | 纵向双例码轨道：上下两栏（典型为 Request/Response）+ 可拖横向把手 + 内容优先重分配；耦合本 kit 代码卡内部 DOM（`.code-surface`/`pre.raw-pre`）量自然高，故归 kit 而非 foundation；`storage-key` prop 让多实例互不串扰 | 本页「可拖动分栏」 |
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
@@ -50,9 +55,9 @@ registry item 为 `api-docs-site-search`，只声明
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
-> **preset 型徽章（MethodBadge / LifecycleBadge）** = 在 foundation 的 `SemanticBadge`（tone 原子）之上，包一层"域词汇 → tone"映射。域词汇 + tone 校准住在 `kits/api-docs/utils/{method,lifecycle}-preset.ts`；对应 kit item 通过根 registry 依赖 foundation semantic-badge item。二者写法对称，改词汇只动 preset、不碰组件。
+> **preset 型徽章（MethodBadge / EventBadge / LifecycleBadge）** = 在 foundation 的 `SemanticBadge`（tone 原子）之上，包一层"域词汇 → tone"映射。域词汇 + tone 校准住在 `kits/api-docs/utils/{method,lifecycle}-preset.ts`；对应 kit item 通过根 registry 依赖 foundation semantic-badge item。二者写法对称，改词汇只动 preset、不碰组件。**单值词汇的退化形态**：EventBadge 的词表只有一个值（`EVENT`），preset 退化为组件内联常量、不建 event-preset.ts——词表长出第二个值时再抽文件。**同词表的多形态**：LifecycleNotice 与 LifecycleBadge 共用 `lifecyclePreset`（badge 标记一行、notice 在正文成块解释），改词汇/色调一处生效两个形态。
 
-> `FieldGroup` 管分组标题，`FieldItem` 管递归字段行与深链接。端点页头由消费项目提供，因为它承载页面唯一 `<h1>` 与项目自己的信息架构；kit 不规定其内部模型或实现。
+> `FieldGroup` 管分组标题，`FieldItem` 管递归字段行与深链接。操作级 header 由 `<ApiDocsOperationHeader>` 承担（见「Operation identity 分层」）；页面唯一 `<h1>` 与站点信息架构仍由消费项目提供——OperationHeader 的 `heading-level` 让它挂进任何层级。
 
 配套 foundation 依赖（由根 registry 的 `registryDependencies` 自动装入）：
 - `foundation/components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
@@ -116,7 +121,7 @@ registry item 为 `api-docs-site-search`，只声明
 
   **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、内容优先重分配）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
-**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
+**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（��字段树文档流 / 右代码栏）+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
 
 > **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：这类只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（如 `demo/api-docs/CodeRail.vue` → `<DemoApiDocsCodeRail>`）。这样 kit 归属编码进目录与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。
 

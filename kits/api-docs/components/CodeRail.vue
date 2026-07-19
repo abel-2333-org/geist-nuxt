@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { geistMinWidthQuery, type GeistBreakpoint } from '../../../../foundation/utils/breakpoints'
+// `geistMinWidthQuery` (value) and `GeistBreakpoint` (type) live in the
+// foundation breakpoints utility and are exposed through Nuxt auto-import.
+// The registry installs it in the consumer's standard app/utils root
+// (`foundation-breakpoints` slice) — same pattern as lifecycle-preset.
 
-// GALLERY-PRIVATE composition recipe (NOT a core/kit component).
-//
-// The vertical Request / Response rail for the API reference page: a top pane
-// and a bottom pane split by a draggable horizontal handle, with the api-docs
+// Domain component (API docs): the vertical dual-example code rail — a top
+// pane and a bottom pane split by a draggable horizontal handle, with the
 // "content-priority reallocation" the design system deliberately keeps OUT of
-// the generic <SplitPane> (it is coupled to how the code cards cap + scroll
-// their body). Per the geist-nuxt kit docs this logic lives in the consuming
-// page, so it stays in the root gallery rather than foundation or the kit.
+// the generic <SplitPane>. It belongs to this KIT (not foundation) because it
+// is coupled to the internal DOM of this kit's code cards (`.code-surface`,
+// `pre.raw-pre`) to measure natural heights — that coupling is a kit-internal
+// affair, invisible to foundation.
 //
 // Data-agnostic: it owns split math only. Content comes through the #top /
 // #bottom slots, and the computed per-pane height budget is handed back via
@@ -28,8 +30,13 @@ const props = withDefaults(defineProps<{
    *  the surrounding horizontal <SplitPane> so the rail never claims a sticky
    *  viewport-height strip while the outer pane is still stacked. */
   enabledFrom?: GeistBreakpoint
+  /** Persistence key for the split ratio. Give each rail INSTANCE its own key
+   *  (e.g. one for the endpoint rail, one for a webhook rail) so two rails on
+   *  the same page never fight over one stored ratio. */
+  storageKey?: string
 }>(), {
   enabledFrom: 'lg',
+  storageKey: 'geist-api-rail-split',
 })
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
@@ -77,7 +84,7 @@ function onBp(e: MediaQueryListEvent | MediaQueryList) {
 
 /* --- ratio state (top pane's fraction of H) --------------------------- */
 const { value: ratio, dragging, startDrag, nudge, reset } = useSplitPane({
-  key: 'geist-api-rail-split',
+  key: props.storageKey,
   default: 0.5,
   min: 0.2,
   max: 0.8,

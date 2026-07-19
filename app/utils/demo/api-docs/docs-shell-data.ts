@@ -74,6 +74,17 @@ export interface DocsShellEndpointStub {
   path: string
   summary: string
   description: string
+  /** 操作级生命周期（deprecated 等），驱动 LifecycleBadge / LifecycleNotice。 */
+  lifecycle?: EndpointLifecycle
+}
+
+/** webhook 紧凑 stub：与端点 stub 同构，identity 是事件名而非 method+path。 */
+export interface DocsShellWebhookStub {
+  id: string
+  /** 事件名，如 `payment.failed`——webhook 的 identity。 */
+  event: string
+  summary: string
+  description: string
 }
 
 export interface DocsShellDomainSummary {
@@ -153,9 +164,16 @@ export const paymentsEndpoint = {
   method: 'POST',
   path: '/v1/checkout/sessions',
   summary: '创建结算会话',
+  lifecycle: 'active' as EndpointLifecycle,
   description:
     '为一次支付或订阅创建托管结算会话。返回会话对象与托管收银台 URL，将顾客重定向到该 URL 完成支付。',
 }
+
+/** OperationTarget 的环境列表：生产 + 沙箱，地址随 host 切换重算。 */
+export const paymentsHosts = [
+  { id: 'production', label: '生产', baseUrl: 'https://api.example.com' },
+  { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
+]
 
 export const paymentsRequestScenarios = [
   {
@@ -350,7 +368,70 @@ export const paymentsEndpointStubs: DocsShellEndpointStub[] = [
   { id: 'customers', method: 'GET', path: '/v1/customers', summary: '客户管理', description: '分页列出客户及其绑定的支付方式与订阅状态。' },
   { id: 'customer-update', method: 'PATCH', path: '/v1/customers/{id}', summary: '更新客户', description: '更新客户资料或替换默认支付方式，变更即时生效于后续扣款。' },
   { id: 'refund-create', method: 'POST', path: '/v1/refunds', summary: '创建退款', description: '对一笔已捕获的支付发起全额或部分退款。' },
-  { id: 'search-refund', method: 'POST', path: '/v1/refunds/search', summary: '搜索退款', description: '按订单号、时间区间或状态检索退款记录。' },
+  { id: 'search-refund', method: 'POST', path: '/v1/refunds/search', summary: '搜索退款', description: '按订单号、时间区间或状态检索退款记录。', lifecycle: 'deprecated' },
+]
+
+/* ===================== 支付域：Webhook 样板数据 ===================== *
+ * webhook 与端点同为 operation（OpenAPI 3.1），identity 换成事件名：正文用
+ * <ApiDocsOperationHeader kind="webhook">（EVENT 徽章 + mono 事件名）渲染。 */
+
+export const paymentsWebhook = {
+  event: 'payment.succeeded',
+  summary: '支付成功',
+  description:
+    '一笔支付被成功捕获后投递。先校验签名头再处理事件，并以事件 id 幂等去重——同一事件可能重复投递；回调返回非 2xx 时按指数退避重试 24 小时。',
+}
+
+/** payload 字段树：形态对齐 paymentsBodyFields（嵌套 children、enumValues）。 */
+export const paymentsWebhookPayloadFields = [
+  { path: 'evt_id', name: 'id', type: 'string', required: true, description: '事件唯一 id，幂等去重的依据。', examples: ['evt_9Xk2mR'] },
+  {
+    path: 'evt_type',
+    name: 'type',
+    type: 'enum',
+    required: true,
+    description: '事件类型。',
+    enumValues: [
+      { value: 'payment.succeeded', description: '支付成功捕获。' },
+      { value: 'payment.failed', description: '支付失败或被拒绝。' },
+      { value: 'refund.completed', description: '退款完成。' },
+    ],
+  },
+  { path: 'evt_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: '事件产生时间（毫秒时间戳）。' },
+  {
+    path: 'evt_data',
+    name: 'data',
+    type: 'object',
+    required: true,
+    description: '事件载荷，内容随 `type` 而异；`payment.succeeded` 时为支付对象。',
+    children: [
+      { path: 'evt_data_paymentId', name: 'paymentId', type: 'string', required: true, description: '支付唯一 id。', examples: ['pay_3Fq8sN'] },
+      { path: 'evt_data_amount', name: 'amount', type: 'integer', required: true, description: '实际捕获金额，以货币最小单位计。' },
+      { path: 'evt_data_currency', name: 'currency', type: 'string', required: true, description: '结算货币。', examples: ['CNY'] },
+      { path: 'evt_data_sessionId', name: 'sessionId', type: 'string', required: false, description: '关联的结算会话 id（托管收银台路径才有）。' },
+    ],
+  },
+]
+
+export const paymentsWebhookPayloadExample = {
+  language: 'json',
+  code: `{
+  "id": "evt_9Xk2mR",
+  "type": "payment.succeeded",
+  "createdAt": 1720003600000,
+  "data": {
+    "paymentId": "pay_3Fq8sN",
+    "amount": 4900,
+    "currency": "CNY",
+    "sessionId": "cs_7Hq3kL"
+  }
+}`,
+}
+
+export const paymentsWebhookStubs: DocsShellWebhookStub[] = [
+  { id: 'webhook-payment-failed', event: 'payment.failed', summary: '支付失败', description: '支付被拒绝或超时后投递，载荷含失败码与可读原因，便于触发挽回流程。' },
+  { id: 'webhook-refund-completed', event: 'refund.completed', summary: '退款完成', description: '退款资金原路退回后投递，对账请以该事件为准而非发起退款的同步响应。' },
+  { id: 'webhook-checkout-expired', event: 'checkout.session.expired', summary: '会话过期', description: '结算会话超时未支付后投递，可据此释放库存或引导顾客重新下单。' },
 ]
 
 /* ===================== 四个文档域 ===================== */
@@ -402,6 +483,19 @@ const paymentsNavGroups: DocsShellNavGroup[] = [
           { label: '搜索退款', to: '#search-refund', method: 'POST', scenarios: ['退款'] },
         ],
       },
+      {
+        // Webhook 一等身份（item.kind 泛化）是后续 scope；这里 `method: 'EVENT'`
+        // 走 MethodBadge 的 fallback（neutral+subtle），渲染效果与 EventBadge
+        // 一致——是数据层 stopgap，不是词汇方案的一部分。
+        label: 'WEBHOOKS',
+        kind: 'endpoints',
+        items: [
+          { label: '支付成功', to: '#webhook-payment-succeeded', method: 'EVENT', scenarios: ['支付', '订阅'] },
+          { label: '支付失败', to: '#webhook-payment-failed', method: 'EVENT', scenarios: ['支付'] },
+          { label: '退款完成', to: '#webhook-refund-completed', method: 'EVENT', scenarios: ['退款'] },
+          { label: '会话过期', to: '#webhook-checkout-expired', method: 'EVENT', scenarios: ['支付'] },
+        ],
+      },
     ],
   },
 ]
@@ -418,6 +512,8 @@ export const docsShellDomains: DocsShellDomain[] = [
       { title: '认证与密钥 · 密钥存放', to: 'auth', content: '生产密钥请存放在服务端环境变量，切勿写进前端代码；测试密钥以 sk_test_ 开头、只操作沙箱数据。' },
       { title: 'Webhook 通知 · 幂等去重', to: 'webhooks', content: '校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。' },
       { title: '取消支付 · 资金解冻', to: '#pay-cancel', content: '取消一笔尚未捕获的支付或预授权，资金原路解冻。' },
+      { title: '支付成功 · payment.succeeded', to: '#webhook-payment-succeeded', content: '一笔支付被成功捕获后投递，先校验签名再以事件 id 幂等去重处理，载荷含支付金额与关联会话。' },
+      { title: '会话过期 · checkout.session.expired', to: '#webhook-checkout-expired', content: '结算会话超时未支付后投递，可据此释放库存或引导顾客重新下单。' },
     ],
     guideSections: [], // 支付域正文是完整样板，不走 stub 渲染
     stubs: [],

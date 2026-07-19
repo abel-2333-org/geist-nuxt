@@ -288,6 +288,56 @@
       ]
     },
     {
+      "name": "api-docs-event-badge",
+      "type": "registry:component",
+      "title": "ApiDocsEventBadge",
+      "description": "Webhook EVENT identity badge, the out-of-band counterpart of MethodBadge.",
+      "registryDependencies": ["foundation-semantic-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/EventBadge.vue", "target": "app/components/api-docs/EventBadge.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-lifecycle-notice",
+      "type": "registry:component",
+      "title": "ApiDocsLifecycleNotice",
+      "description": "Operation lifecycle banner sharing the LifecycleBadge preset vocabulary.",
+      "registryDependencies": ["geist-foundation", "foundation-badge-utils", "api-docs-lifecycle-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/LifecycleNotice.vue", "target": "app/components/api-docs/LifecycleNotice.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-operation-target",
+      "type": "registry:component",
+      "title": "ApiDocsOperationTarget",
+      "description": "Environment host picker, full request address, and copy for an endpoint.",
+      "registryDependencies": ["geist-foundation", "foundation-copy-button"],
+      "files": [
+        { "path": "kits/api-docs/components/OperationTarget.vue", "target": "app/components/api-docs/OperationTarget.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-operation-header",
+      "type": "registry:component",
+      "title": "ApiDocsOperationHeader",
+      "description": "Identity header for endpoint and webhook operations (badge, identifier, summary, lifecycle, actions).",
+      "registryDependencies": ["api-docs-method-badge", "api-docs-event-badge", "api-docs-lifecycle-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/OperationHeader.vue", "target": "app/components/api-docs/OperationHeader.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-code-rail",
+      "type": "registry:component",
+      "title": "ApiDocsCodeRail",
+      "description": "Vertical dual-example code rail with content-priority reallocation.",
+      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-split-pane", "foundation-split-pane-handle"],
+      "files": [
+        { "path": "kits/api-docs/components/CodeRail.vue", "target": "app/components/api-docs/CodeRail.vue" }
+      ]
+    },
+    {
       "name": "api-docs-site-search",
       "type": "registry:component",
       "title": "ApiDocsSiteSearch",

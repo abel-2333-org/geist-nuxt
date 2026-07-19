@@ -262,6 +262,13 @@ const denseFields = [
   },
 ]
 
+// Operation 身份层陈列数据：header（endpoint / webhook 两形态）、target
+// （双环境切换）、lifecycle notice（deprecated 一例）。
+const demoHosts = [
+  { id: 'production', label: '生产', baseUrl: 'https://api.example.com' },
+  { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
+]
+
 // Honor an incoming `#path` hash: navigate + expand + scroll to the field.
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -278,14 +285,20 @@ onMounted(() => anchor.initFromHash())
           请求 / 响应示例
           <code class="font-mono text-[0.8125rem]">ApiDocsRequestExample</code> /
           <code class="font-mono text-[0.8125rem]">ApiDocsResponseExample</code>，
-          以及 method / lifecycle 徽章
+          以及 method / event / lifecycle 徽章
           <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code> /
+          <code class="font-mono text-[0.8125rem]">ApiDocsEventBadge</code> /
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleBadge</code>
           与 enum 值表
           <code class="font-mono text-[0.8125rem]">ApiDocsEnumTable</code>，
           以及字段树
           <code class="font-mono text-[0.8125rem]">ApiDocsFieldGroup</code> /
           <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
+          Operation 身份层由
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境 + 地址 + 复制）与
+          <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
+          双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「参考页组合」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
           <code class="font-mono text-[0.8125rem]">SemanticBadge</code> 之上包一层域词汇。
         </p>
@@ -310,9 +323,88 @@ onMounted(() => anchor.initFromHash())
         </div>
 
         <div>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Event 徽章</h3>
+          <p class="mb-3 max-w-2xl text-sm text-muted">
+            Webhook 的身份标：统一词
+            <code class="font-mono text-[0.8125rem]">EVENT</code>（中性灰，居五个 method 色之外）——
+            方法色标说「你调平台」，EVENT 标说「平台回调你」。事件名走旁边的 mono 代码位。
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="flex items-center gap-2.5">
+              <ApiDocsEventBadge />
+              <code class="font-mono text-sm text-highlighted">payment.succeeded</code>
+            </span>
+            <span class="flex items-center gap-2.5">
+              <ApiDocsEventBadge />
+              <code class="font-mono text-sm text-highlighted">refund.completed</code>
+            </span>
+          </div>
+        </div>
+
+        <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 徽章</h3>
           <div class="flex flex-wrap items-center gap-2">
             <ApiDocsLifecycleBadge v-for="s in lifecycles" :key="s" :status="s" />
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 横幅</h3>
+          <p class="mb-3 max-w-2xl text-sm text-muted">
+            <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>
+            与 Lifecycle 徽章共用同一份 preset 词表与色调：徽章标记一行，横幅在正文里解释
+            「发生了什么 + 怎么办」。置于 Operation Header 之后、字段区之前。
+          </p>
+          <ApiDocsLifecycleNotice
+            status="deprecated"
+            title="已弃用"
+            description="该接口不再接受新接入，存量调用仍可用。请迁移到替代接口。"
+            class="max-w-2xl"
+          />
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">Operation Header / Target</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            操作身份头：一个组件承担端点与 webhook 两形态
+            （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
+            identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
+            端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
+            环境切换 + 完整地址 + 复制；webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
+          </p>
+          <div class="space-y-8">
+            <ApiDocsOperationHeader
+              kind="endpoint"
+              method="POST"
+              path="/v1/checkout/sessions"
+              summary="创建结算会话"
+              lifecycle="active"
+              class="rounded-lg border border-default p-5"
+            >
+              <template #actions>
+                <UButton label="在 Playground 打开" icon="i-lucide-square-play" color="neutral" variant="ghost" size="sm" />
+              </template>
+              <template #description>
+                为一次支付或订阅创建托管结算会话，返回托管收银台 URL。
+              </template>
+              <ApiDocsOperationTarget
+                :hosts="demoHosts"
+                path="/v1/checkout/sessions"
+                select-label="选择环境"
+                copy-toast-label="接口地址"
+              />
+            </ApiDocsOperationHeader>
+
+            <ApiDocsOperationHeader
+              kind="webhook"
+              event="payment.succeeded"
+              summary="支付成功"
+              class="rounded-lg border border-default p-5"
+            >
+              <template #description>
+                一笔支付被成功捕获后投递。先校验签名再处理，并以事件 id 幂等去重。
+              </template>
+            </ApiDocsOperationHeader>
           </div>
         </div>
 
