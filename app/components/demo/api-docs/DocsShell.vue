@@ -175,7 +175,7 @@ async function searchBody(query: string) {
       <div class="flex h-14 min-w-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <!-- 品牌 / 域切换器（Vercel 式「brand / scope」结构）。品牌为中性
              假品牌——真源 demo 不携带消费项目品牌；消费项目在此换成自己的
-             mark 与字标，label/描述��� i18n 注入（见 project-setup.md）。 -->
+             mark 与字标，label/描述走 i18n 注入（见 project-setup.md）。 -->
         <div class="flex min-w-0 items-center gap-1.5">
           <USlideover
             v-model:open="navDrawerOpen"
