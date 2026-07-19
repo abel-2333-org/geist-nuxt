@@ -28,11 +28,9 @@
 // "Batch") surfaces every endpoint that serves it.
 //
 // In-tree search vs. site-wide search are kept orthogonal. This component only
-// does the former (filter the nav tree in place). Site-wide ⌘K full-text search
-// over @nuxt/content belongs in the app's top bar — a different level, not
-// stacked in the sidebar as a second look-alike box. An optional #header slot
-// remains for consumers who genuinely need an entry at the top of the nav; the
-// base never takes a hard @nuxt/content dependency and stays data-agnostic.
+// does the former (filter the nav tree in place). Site-wide ⌘K search belongs
+// in the app's top bar and can use ApiDocsSiteSearch or a consumer-owned content
+// search. An optional #header slot remains for genuinely local controls.
 //
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
@@ -42,8 +40,8 @@
 // with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
-//   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
-//                       the page); reduced-motion comes from foundation CSS
+//   root        <nav> — chrome-less, full-height column; the owning layout sets
+//                       height/border/radius and the menu body owns scrolling
 //   search      UInput + UKbd hint  (global filter, '/' focuses, Esc clears)
 //   group       eyebrow label + divider  (the guide/endpoints boundary)
 //   section     UCollapsible → trigger row (chevron · label · count badge)
@@ -429,16 +427,17 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- The layout owns height, border, and radius. Keeping this column
+       chrome-less lets the same component fill a docs shell or sit inside a
+       framed standalone demo without double borders. -->
   <nav
     :aria-label="ariaLabel"
-    class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
+    class="relative flex h-full min-h-0 flex-col overflow-hidden bg-elevated/40"
     :class="[{ 'select-none': isResizing }, resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '']"
     :style="resizable ? { '--api-docs-nav-w': `${width}px` } : undefined"
   >
-    <!-- Sticky header: the menu body scrolls under it. Holds the optional
-         #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
-         consuming app — the base stays data-agnostic and @nuxt/content-free)
-         above the in-tree filter input. -->
+    <!-- Fixed column header; the menu body scrolls below it. The optional
+         #header slot is for controls local to this navigation column. -->
     <div
       v-if="$slots.header || searchable"
       class="shrink-0 border-b border-default p-2"
