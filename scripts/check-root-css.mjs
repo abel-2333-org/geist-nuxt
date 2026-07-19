@@ -27,7 +27,8 @@ export const requiredMarkers = [
   { marker: '--ui-container:100%', source: 'foundation/assets/css/main.css' },
   { marker: 'max-w-28', source: 'kits/api-docs/components/ScenarioTags.vue' },
   { marker: 'touch-manipulation', source: 'kits/api-docs/components/ScenarioTags.vue' },
-  { marker: '100dvh-4rem', source: 'kits/api-docs/components/SidebarNav.vue' },
+  { marker: '--api-docs-nav-w', source: 'kits/api-docs/components/SidebarNav.vue' },
+  { marker: 'max-sm\\:px-1\\.5', source: 'kits/api-docs/components/SiteSearch.vue' },
   { marker: 'scroll-mt-24', source: 'kits/api-docs/composables/useFieldAnchor.ts' },
 ]
 

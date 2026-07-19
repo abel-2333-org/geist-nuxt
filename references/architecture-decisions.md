@@ -68,7 +68,9 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 
 **状态：已采纳。**
 
-`app/components/demo/api-docs/CodeRail.vue` 只服务 API reference gallery 页，负责 Request / Response 的纵向分配与内容优先重分配。该行为与具体页面 chrome 强耦合，目前没有第二个消费者。
+`app/components/demo/api-docs/CodeRail.vue` 负责 Request / Response 的纵向分配与内容优先重分配，消费者是 API reference gallery 页与 docs-shell recipe 的正文（`DocsShellReference`）——两者都是 gallery-private 页面 recipe，不构成跨项目分发需求。
+
+保持 gallery-private 的理由不是消费者数量，而是：该行为与页面 recipe 的 chrome（sticky 偏移、视口高度长条、断点 gate）强耦合，没有稳定的跨项目分发契约。
 
 因此 CodeRail：
 
@@ -77,7 +79,7 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 - 不进 registry；
 - 作为下游页面 copy & adapt 的活 recipe。
 
-出现第二个真实消费者后再评估抽象，不预先泛化。
+出现 gallery 之外的真实分发需求（且能定义稳定契约）后再评估抽象，不预先泛化。
 
 ## ADR-005：SidebarNav 与测量式溢出保留在 API Docs kit
 
@@ -117,6 +119,30 @@ CI 先验证根 registry、registry 行为、root typecheck/build 与临时 cons
 不再 publish npm 或等待 starter 依赖可见。`v0.json` 的 starter path 为 `.`；memory area 同步采用整体覆盖，顶层 `RELEASE` 是新鲜度 stamp。
 
 分发前必须全量扫描 U+FFFD（UTF-8 `EF BF BD`）。任何源码、JSON 或文档出现 replacement character 都视为编码损坏并阻断 release。
+
+## ADR-009：SiteSearch 进 kit，DocsShell 留 gallery-private
+
+**状态：已采纳，2026-07-19。**
+
+`ApiDocsSiteSearch` 是 API 文档领域组件：它复用 method badge，并围绕指南、端点、
+HTTP method 与 scenario 组织结果，因此进入 `kits/api-docs/` 和根 registry。组件只认
+已解析的 display model；静态 groups 始终可用，可选 `search(query)` 接收消费项目的
+正文索引结果。它不导入 `@nuxt/content`、不认识 OpenAPI 或私有 spec。
+
+完整 `DocsShell` 同时决定品牌、产品域、路由、页面结构、fixture 与正文 adapter，
+这些职责没有稳定的跨项目契约，因此作为 `app/components/demo/api-docs/` 下的
+gallery-private recipe：不进 foundation、kit 或 registry。gallery 使用中性数据展示
+可行装配；消费项目拥有自己的 shell，并按需 copy & adapt recipe。
+
+`SidebarNav` 与 `SiteSearch` 是两个正交层级：前者用 `/` 过滤当前导航树，后者用
+`⌘K` 从全站结果中跳转。`SidebarNav` 只负责全高列与内部滚动，外框、圆角和高度由
+页面 shell 或 standalone demo 的父布局拥有，避免嵌套时出现双边框和双高度约束。
+
+**投入边界**：recipe 只为「错误形态会被照抄」投入实现——形态本身是 recipe 教学
+价值的一部分（如路径分段路由、指南分页 vs 参考长滚动、移动端抽屉），做到最小示范
+即止（一个域示范、其余 stub）；纯属消费端接线知识的（i18n 注入、搜索 excerpt
+策略、内容 adapter），写进 `references/` 就停。给其余域补子页、加 TOC、做真实
+搜索索引等诉求属于消费项目职责，gallery 一律不接。
 
 ## 上下文成本纪律
 

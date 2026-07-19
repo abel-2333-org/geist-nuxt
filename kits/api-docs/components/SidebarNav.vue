@@ -28,11 +28,9 @@
 // "Batch") surfaces every endpoint that serves it.
 //
 // In-tree search vs. site-wide search are kept orthogonal. This component only
-// does the former (filter the nav tree in place). Site-wide ⌘K full-text search
-// over @nuxt/content belongs in the app's top bar — a different level, not
-// stacked in the sidebar as a second look-alike box. An optional #header slot
-// remains for consumers who genuinely need an entry at the top of the nav; the
-// base never takes a hard @nuxt/content dependency and stays data-agnostic.
+// does the former (filter the nav tree in place). Site-wide ⌘K search belongs
+// in the app's top bar and can use ApiDocsSiteSearch or a consumer-owned content
+// search. An optional #header slot remains for genuinely local controls.
 //
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
@@ -42,8 +40,8 @@
 // with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
-//   root        <nav> — sticky, own scroll area (a long menu scrolls here, not
-//                       the page); reduced-motion comes from foundation CSS
+//   root        <nav> — chrome-less, full-height column; the owning layout sets
+//                       height/border/radius and the menu body owns scrolling
 //   search      UInput + UKbd hint  (global filter, '/' focuses, Esc clears)
 //   group       eyebrow label + divider  (the guide/endpoints boundary)
 //   section     UCollapsible → trigger row (chevron · label · count badge)
@@ -78,7 +76,11 @@ export interface SidebarNavItem {
   icon?: string
   /** Optional trailing badge text (e.g. "beta"). */
   badge?: string | number
-  /** Force the active state (demo / manual control); usually inferred from `to`. */
+  /** Current-location state. When set it is the single source of truth for
+   *  background, text colour AND aria-current. When omitted, a plain internal
+   *  path infers from exact `route.path` match; links containing `#` never
+   *  self-infer (path matching ignores the hash, so every same-page anchor
+   *  would light up at once — pass an explicit boolean for those). */
   active?: boolean
 }
 
@@ -183,6 +185,29 @@ function slug(s: string): string {
 // Scenario tags: a guide item yields []; an endpoint yields its scenario list.
 function itemScenarios(item: SidebarNavItem): string[] {
   return item.scenarios ?? []
+}
+
+// Effective active — the ONE source feeding background, text colour and
+// aria-current. Without this, three signals disagree when `item.active` is
+// omitted: ULink infers background from route.path (hash ignored → every
+// same-page anchor lights up), while text/aria-current only read item.active.
+// Rules: explicit boolean wins; anything with `#` never self-infers; a plain
+// internal path infers by comparing ROUTER-RESOLVED paths (not the raw `to`
+// string) so aliases, trailing slashes, query strings and i18n-prefixed paths
+// all normalise before matching — raw string comparison misjudges every one
+// of those as inactive.
+const route = useRoute()
+const router = useRouter()
+function isItemActive(item: SidebarNavItem): boolean {
+  if (item.active !== undefined) return item.active
+  if (!item.to || item.to.includes('#')) return false
+  try {
+    const stripSlash = (p: string) => p.length > 1 ? p.replace(/\/+$/, '') : p
+    return stripSlash(router.resolve(item.to).path) === stripSlash(route.path)
+  }
+  catch {
+    return false
+  }
 }
 
 // Normalize either input into groups. A flat `sections` prop becomes a single
@@ -429,16 +454,17 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- The layout owns height, border, and radius. Keeping this column
+       chrome-less lets the same component fill a docs shell or sit inside a
+       framed standalone demo without double borders. -->
   <nav
     :aria-label="ariaLabel"
-    class="relative flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-lg border border-default bg-elevated/40"
+    class="relative flex h-full min-h-0 flex-col overflow-hidden bg-elevated/40"
     :class="[{ 'select-none': isResizing }, resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '']"
     :style="resizable ? { '--api-docs-nav-w': `${width}px` } : undefined"
   >
-    <!-- Sticky header: the menu body scrolls under it. Holds the optional
-         #header slot (e.g. a ⌘K site-wide UContentSearchButton, wired up by the
-         consuming app — the base stays data-agnostic and @nuxt/content-free)
-         above the in-tree filter input. -->
+    <!-- Fixed column header; the menu body scrolls below it. The optional
+         #header slot is for controls local to this navigation column. -->
     <div
       v-if="$slots.header || searchable"
       class="shrink-0 border-b border-default p-2"
@@ -559,13 +585,20 @@ onMounted(() => {
                        "+N" also navigate. Only that button opts back into
                        pointer events (`pointer-events-auto` in ScenarioTags), so
                        the row navigates but the tag reveal doesn't. Text colour
-                       is driven by `item.active` + `group-hover/row` rather than
+                       is driven by `isItemActive` + `group-hover/row` rather than
                        the link's own classes, since the link no longer wraps the
                        text. -->
+                  <!-- Active comes from ONE source (`isItemActive`): it feeds
+                       ULink's :active (background), the text colour AND
+                       aria-current together, so sighted users and screen
+                       readers always agree on the current location. ULink only
+                       emits aria-current from its own route matching, hence
+                       the explicit binding. -->
                   <li v-for="item in entry.items" :key="item.to ?? item.label" class="group/row relative">
                     <ULink
                       :to="item.to"
-                      :active="item.active"
+                      :active="isItemActive(item)"
+                      :aria-current="isItemActive(item) ? 'page' : undefined"
                       :aria-label="item.label"
                       active-class="bg-primary/10"
                       inactive-class="hover:bg-elevated"
@@ -573,7 +606,7 @@ onMounted(() => {
                     />
                     <div
                       class="pointer-events-none relative flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors"
-                      :class="item.active ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
+                      :class="isItemActive(item) ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
                     >
                       <!-- Leading: an endpoint shows its HTTP method badge in a
                            fixed-width slot so purpose labels line up regardless

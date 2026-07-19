@@ -97,6 +97,32 @@ const { t } = useI18n()
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
+## 多域路由（支付 / 付款 / 对账等多产品线文档）
+
+**用路径分段路由，不要用 query 参数区分域。** 消费项目按 Nuxt 文件路由组织：
+
+```
+app/pages/docs/[domain]/index.vue      → /docs/payments
+app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
+```
+
+- 每个域每篇文档获得独立规范 URL：可独立 SEO 收录、进 sitemap、做 OG 卡片（正好衔接上表的 `@nuxtjs/sitemap` / `nuxt-og-image`）。
+- 可按路由 code-split——但**不是自动的**：动态 `[domain]` 路由本身不会按参数拆 chunk，页面静态 `import` 全部域数据时四个域仍进同一个 bundle（demo 就是这样，fixture 小无所谓）。真按域拆分要把每域数据放独立模块、在页面里 `import()` 动态加载（或走 `@nuxt/content` 按 query 取数），路径分段只是让这件事**成为可能**。
+- 域级差异（主题色、布局、导航树）走 `definePageMeta` / layout，不用条件渲染堆在一个组件里。
+- 域切换器的每个选项就是一个 `NuxtLink`（`to="/docs/payouts"`），语义天然正确，无需手动同步状态。
+- 页内锚点（字段深链接）继续用 hash，与路径分段正交。
+
+> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域。侧栏 active 按双语义显式计算：指南 item 比 `route.params.slug`，锚点 item 在域首页比 `route.hash`（空 hash 归一为 `#overview`，保证刚进域时侧栏有「当前位置」）。消费项目参照该结构，再按下节把域内容拆成 `[...slug]` 子页（demo 未示范的资源参考子页见下节最后一条）。
+
+### 域内怎么拆页：指南分页、参考长滚动
+
+按内容类型拆（Stripe 同款分野——docs 分页指南 + api 长滚动参考）。demo 的支付域是最小示范：快速开始/认证/Webhook 是 `[domain]/[slug].vue` 子页（页尾自组 prev/next 卡片，数据形状与 `UContentSurround` 的 surround prop 同形），域首页保留概览 + 端点参考长滚动；其余域仍是单页 stub、不代表消费形态：
+
+- **指南/教程（快速开始、认证、错误处理）→ 一页一文**：各自是 `[...slug]` 子页，线性阅读、页尾放上一篇/下一篇。用 `@nuxt/content` 时直接上 `UContentSurround`（`queryCollectionItemSurroundings` 供数据）+ `UContentToc`；不用 content 时自组 prev-next 等价实现（demo 的 `DocsShellGuidePage` 即此路——**注意 `UContent*` 系组件只在装了 `@nuxt/content` 时才注册**，未装时该标签会被静默渲染成空的未知元素，不报错、不出内容）。
+- **端点参考（一个资源的端点 + 字段树 + 代码栏）→ 按资源一页长滚动**：`/docs/payments/checkout` 一页装该资源全部端点，保留侧栏锚点 + 字段深链接 + SplitPane/CodeRail 对照式阅读——这是 reference 的使用形态（跳转-对照-复制），拆成一端点一页反而打断 `⌘K` 深链与滚动定位。
+- SidebarNav 的 `to` 混排即可：指南 item 指路径（`/docs/payments/quickstart`），参考 item 指路径+hash（`/docs/payments/checkout#create`）。**所有 active 都要显式计算**：带 hash 的路径 NuxtLink 只按 path 匹配，会把参考页所有锚点同时点亮。
+- **demo 的 resolver 只覆盖两类目标**（域首页锚点 `#hash`、指南子页裸 slug），因为 demo 单域只有一页参考、参考锚点全在域首页。消费项目有多个资源参考页时要自行扩展第三类目标（资源 slug + 锚点，即上面的 `checkout#create`），active 判定相应变为「slug 段相等 且 hash 相等」——demo 的双语义计算是三类形态的子集，思路可迁移，代码不可原样照搬。
+
 ## @nuxt/content 取舍
 
 根 Source-first gallery / v0 preview 刻意不内置 `@nuxt/content`：content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在部分托管 preview 重启后不能稳定 re-seed，不适合作为设计系统 snapshot 的运行前置。
@@ -106,7 +132,8 @@ const { t } = useI18n()
 - **kit 组件是「内容管线无关」的**：`ApiDocsCodeBlock`、`ApiDocsResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。根 preview 不内置 content 只是 snapshot 可靠性考量，真实项目可自行引入。
-- **全站全文搜索也在这一侧**：`@nuxt/content` 就位后，用 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>`（`⌘K` 模态、跨整站文档正文）。它绑 content、属消费项目职责，**不进 kit 切片**。正确的落位是 **app 顶栏 / navbar**（参考 Nuxt UI / Vercel 文档站），与 `<ApiDocsSidebarNav>` 侧栏内的「就地过滤搜索」分属**不同层级**——两者各司其职、靠层级区分。**不要**把 `UContentSearchButton` 塞进侧栏顶部（会和就地过滤框变成两个雷同搜索框上下紧贴），更不要把 `UContentSearch` 焊进导航组件。
+- **全站搜索的 UI 可以直接使用 `ApiDocsSiteSearch`**：静态 `groups` 由导航 ViewModel 派生；正文检索由消费项目把 Content 查询适配为 `search(query) → SiteSearchItem[]`。这样 kit 提供一致的 `⌘K` trigger / modal / method badge 呈现，但仍不导入 Content。消费项目若更偏好 Content 自带的 `<UContentSearch>` / `<UContentSearchButton>` 也可以直接在 app 层使用；它们仍不进入 kit dependency closure。
+- 无论选哪种实现，正位都是 **app 顶栏 / navbar**，与 `<ApiDocsSidebarNav>` 的 `/` 树内过滤分属不同层级。不要把全站搜索塞进侧栏 `#header`，否则会与树内过滤框形成两个雷同入口。
 
 消费项目自行安装 `@nuxt/content`，并让 `@nuxt/ui` 先于它注册：
 

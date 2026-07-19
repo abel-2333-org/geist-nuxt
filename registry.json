@@ -288,6 +288,16 @@
       ]
     },
     {
+      "name": "api-docs-site-search",
+      "type": "registry:component",
+      "title": "ApiDocsSiteSearch",
+      "description": "Data-agnostic site-wide documentation search command palette.",
+      "registryDependencies": ["api-docs-method-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/SiteSearch.vue", "target": "app/components/api-docs/SiteSearch.vue" }
+      ]
+    },
+    {
       "name": "api-docs-sidebar-nav",
       "type": "registry:component",
       "title": "ApiDocsSidebarNav",
