@@ -18,7 +18,9 @@
 // never takes that dependency.
 //
 // Anatomy — composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
-//   trigger   UButton (search icon · label, hidden below sm · ⌘K UKbd hint)
+//   trigger   UButton (search icon · label + ⌘K UKbd hint, both hidden below
+//             sm where the trigger collapses to an icon-only square — the
+//             shortcut is meaningless on touch devices)
 //   modal     UModal (#content mode; `title` renders as a visually-hidden
 //             DialogTitle so the dialog keeps an accessible name)
 //   palette   UCommandPalette — input (autofocus) · grouped results · empty
@@ -308,16 +310,19 @@ const fuse = computed(() => ({
 
 <template>
   <UModal v-model:open="open" :title="props.modalTitle" :content="{ onCloseAutoFocus }">
+    <!-- 窄屏（< sm，多为触屏）trigger 收成图标方按钮：快捷键提示对触屏没有
+         意义、label 已藏——只留搜索图标，square 内边距保住点按目标；可访问名
+         始终由 aria-label 提供，不受视觉收纳影响。 -->
     <UButton
       color="neutral"
       variant="outline"
       size="sm"
-      class="text-muted"
+      class="text-muted max-sm:px-1.5"
       :aria-label="props.ariaLabel ?? props.triggerLabel"
     >
-      <UIcon name="i-lucide-search" class="size-4" />
+      <UIcon name="i-lucide-search" class="size-4 shrink-0" />
       <span class="max-sm:hidden">{{ props.triggerLabel }}</span>
-      <span class="flex items-center gap-0.5">
+      <span class="flex items-center gap-0.5 max-sm:hidden">
         <UKbd value="meta" />
         <UKbd value="K" />
       </span>

@@ -9,10 +9,10 @@
 ## Anatomy（结构）
 
 ```
-trigger  ── UButton（neutral outline sm）
-│           ├─ 放大镜图标
+trigger  ── UButton（neutral outline sm；< sm 收成图标方按钮）
+│           ├─ 放大镜图标（唯一常驻元素）
 │           ├─ 文本 label（< sm 隐藏；ariaLabel 兜底可访问名）
-│           └─ UKbd ⌘ + K 提示
+│           └─ UKbd ⌘ + K 提示（< sm 隐藏——触屏设备快捷键无意义）
 └─ UModal（#content 模式；title prop 渲染为视觉隐藏的 DialogTitle，保住对话框可访问名）
    └─ UCommandPalette
       ├─ input   ── 打开即自动聚焦（组件默认）；带关闭按钮（close prop）
@@ -83,7 +83,7 @@ interface SiteSearchGroup {
 
 - 焦点圈闭在模态内、关闭后**焦点还原到 trigger**——`UModal`（reka-ui Dialog）内建。唯一例外：选中**同页锚点**时组件拦截还原、把焦点交给目标 section（见「关键点」），其余路径组件不自己管焦点。
 - 模态可访问名：`#content` 模式下 `UModal` 把 `title` prop 渲染为视觉隐藏的 `DialogTitle`，读屏打开时播报 `modalTitle`。
-- trigger 文本 `< sm` 隐藏后由 `aria-label`（`ariaLabel ?? triggerLabel`）兜底；`UKbd` 提示是装饰性的。
+- trigger 在 `< sm` 收成图标方按钮（文本与 `UKbd` 提示均隐藏——触屏设备快捷键无意义），可访问名由 `aria-label`（`ariaLabel ?? triggerLabel`）兜底，不受视觉收纳影响。
 - 结果列表是 listbox 语义（reka-ui Listbox），`↑/↓` 移动高亮、`Enter` 选中——组件零手写键盘逻辑。
 - 方法色标文字即动词（GET/POST…），颜色只是强化、非唯一信号；场景串是纯文本 suffix，天然可访问。
 - 输入框打开即聚焦（`UCommandPalette` 默认 `autofocus`），无需用户额外一次 Tab。
