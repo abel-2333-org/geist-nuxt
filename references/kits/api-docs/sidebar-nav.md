@@ -110,7 +110,7 @@ interface SidebarNavGroup {
 - chevron 用 `aria-hidden`；搜索 `UInput` 带 `aria-label`（取自 `searchPlaceholder` 但**剥掉结尾省略号**，避免读屏念出「ellipsis」），并置 `type="search"` + `autocomplete/autocorrect/autocapitalize="off"` + `spellcheck="false"`（过滤框不该触发拼写检查/自动更正）；`UKbd` 提示装饰性 `aria-hidden`，清除按钮有 `aria-label`。
 - **过滤结果用 `aria-live="polite"` 播报**：过滤是静默重写列表，故一个 `role="status"` 的 `sr-only` 区域播报「找到 N 个匹配结果」或「没有与"…"匹配的结果」；空 query 时不播报，闲时浏览保持安静。
 - 方法色标（`ApiDocsMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；场景标签文字（批处理/实时查询…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（文案由 `scenarioOverflowLabel` 注入，默认 `View all N scenarios`）。
-- 站内链接一律 `ULink`（客户端路由 + 预取 + 自动 `aria-current`），**不手写 `<a>`**。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
+- 站内链接一律 `ULink`（客户端路由 + 预取），**不手写 `<a>`**；`aria-current="page"` 不依赖 ULink 自动生成，而是由组件内 `effectiveActive` 显式绑定（与背景、文字同源，见「State model」）。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
 - 调宽手柄是 `role="separator"` + `aria-orientation="vertical"` + `aria-label`，并暴露 `aria-valuenow/min/max`（当前/上/下限宽度）；`tabindex="0"` 可聚焦，`←/→/Home/End` 键盘操作，与拖拽等价。
 - 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在边缘各画一条线。
 
