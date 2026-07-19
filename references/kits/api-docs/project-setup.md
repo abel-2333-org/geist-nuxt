@@ -107,12 +107,12 @@ app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
 ```
 
 - 每个域每篇文档获得独立规范 URL：可独立 SEO 收录、进 sitemap、做 OG 卡片（正好衔接上表的 `@nuxtjs/sitemap` / `nuxt-og-image`）。
-- 按路由 code-split：只加载当前域的导航树与内容，不像单页方案一次性打包全部域数据。
+- 可按路由 code-split——但**不是自动的**：动态 `[domain]` 路由本身不会按参数拆 chunk，页面静态 `import` 全部域数据时四个域仍进同一个 bundle（demo 就是这样，fixture 小无所谓）。真按域拆分要把每域数据放独立模块、在页面里 `import()` 动态加载（或走 `@nuxt/content` 按 query 取数），路径分段只是让这件事**成为可能**。
 - 域级差异（主题色、布局、导航树）走 `definePageMeta` / layout，不用条件渲染堆在一个组件里。
 - 域切换器的每个选项就是一个 `NuxtLink`（`to="/docs/payouts"`），语义天然正确，无需手动同步状态。
 - 页内锚点（字段深链接）继续用 hash，与路径分段正交。
 
-> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域、侧栏 active 按 `route.hash` 显式计算。消费项目参照该结构，再按下节把域内容拆成 `[...slug]` 子页（demo 未示范的资源参考子页见下节最后一条）。
+> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域。侧栏 active 按双语义显式计算：指南 item 比 `route.params.slug`，锚点 item 在域首页比 `route.hash`（空 hash 归一为 `#overview`，保证刚进域时侧栏有「当前位置」）。消费项目参照该结构，再按下节把域内容拆成 `[...slug]` 子页（demo 未示范的资源参考子页见下节最后一条）。
 
 ### 域内怎么拆页：指南分页、参考长滚动
 
