@@ -12,7 +12,11 @@ import type { DocsShellDomainSummary } from '~/utils/demo/api-docs/docs-shell-da
 // 克制 tint 而非重描边）。
 //
 // a11y：面板 role=radiogroup、卡片 role=radio + aria-checked，表达「N 选一」
-// 语义；当前域同时给打勾图标，不只靠颜色。
+// 语义；当前域同时给打勾图标，不只靠颜色。键盘遵循 APG radiogroup 的
+// roving tabindex：Tab 只在组上停一次（落在当前选中项），方向键在卡片间
+// 移焦、Home/End 跳两端。因为「选中 = 切域 + 关面板」是重操作，采用 APG
+// 允许的「selection 不跟随 focus」变体——方向键只移焦，Enter/Space 才选中，
+// 避免第一下方向键就把面板关掉。
 //
 // 面板宽度按内容定：让最长简介（12 字）恰好单行，避免 CJK 逐字折行把词拆开
 // （如「退/款」）。小屏两列每张卡太窄、简介必然折行——降为单列；域只有
@@ -36,6 +40,58 @@ function selectDomain(domainId: string) {
   if (domainId === props.modelValue) return
   emit('update:modelValue', domainId)
 }
+
+// roving tabindex：组内只有 focusedId 对应的卡片 tabindex=0。面板每次打开
+// 重置到当前选中项，Tab 进组即落在选中域上。
+const focusedId = shallowRef(props.modelValue)
+const radioRefs = new Map<string, HTMLButtonElement>()
+
+watch(open, (isOpen) => {
+  if (isOpen) focusedId.value = props.modelValue
+})
+
+function setRadioRef(domainId: string, el: unknown) {
+  if (el instanceof HTMLButtonElement) radioRefs.set(domainId, el)
+  else radioRefs.delete(domainId)
+}
+
+function moveFocus(delta: number) {
+  const ids = props.domains.map(domain => domain.id)
+  const from = ids.indexOf(focusedId.value)
+  const to = (from + delta + ids.length) % ids.length
+  focusToIndex(ids, to)
+}
+
+function focusToIndex(ids: string[], index: number) {
+  const id = ids[index]
+  if (!id) return
+  focusedId.value = id
+  radioRefs.get(id)?.focus()
+}
+
+function onGroupKeydown(event: KeyboardEvent) {
+  const ids = props.domains.map(domain => domain.id)
+  switch (event.key) {
+    case 'ArrowDown':
+    case 'ArrowRight':
+      event.preventDefault()
+      moveFocus(1)
+      break
+    case 'ArrowUp':
+    case 'ArrowLeft':
+      event.preventDefault()
+      moveFocus(-1)
+      break
+    case 'Home':
+      event.preventDefault()
+      focusToIndex(ids, 0)
+      break
+    case 'End':
+      event.preventDefault()
+      focusToIndex(ids, ids.length - 1)
+      break
+  }
+}
 </script>
 
 <template>
@@ -57,15 +113,23 @@ function selectDomain(domainId: string) {
     </UButton>
 
     <template #content>
-      <div class="w-[460px] max-w-[calc(100vw-2rem)] p-2" role="radiogroup" aria-label="文档域">
+      <div
+        class="w-[460px] max-w-[calc(100vw-2rem)] p-2"
+        role="radiogroup"
+        aria-label="文档域"
+        @keydown="onGroupKeydown"
+      >
         <p class="px-2 pb-2 pt-1 text-xs font-medium text-dimmed">切换文档域</p>
         <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
           <button
             v-for="domain in props.domains"
             :key="domain.id"
+            :ref="el => setRadioRef(domain.id, el)"
             type="button"
             role="radio"
             :aria-checked="domain.id === props.modelValue"
+            :tabindex="domain.id === focusedId ? 0 : -1"
+            @focus="focusedId = domain.id"
             class="group flex items-start gap-3 rounded-md border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             :class="domain.id === props.modelValue
               ? 'border-primary/25 bg-primary/5'

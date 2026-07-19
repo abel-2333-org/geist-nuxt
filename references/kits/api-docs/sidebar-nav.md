@@ -25,6 +25,8 @@ nav (landmark, 全高无外框列 + 自身滚动区，可拖拽调宽)
 
 板块**多开**（各自独立开合，适合边看边对照）；菜单再长也只在 `nav` 内部滚动，不影响页面布局。搜索时空分组自动隐藏。组件根只提供 `h-full` 列和内部表面，不拥有外框、圆角或视口高度；standalone demo / docs shell 的父布局负责这些 chrome，避免嵌套时出现双边框。
 
+> **迁移注记（copy-in 升级）**：早期切片的组件根自带 `border rounded-lg max-h-[…]` 外框。若你的项目是从旧版 copy-in 升级到本版，需要在**父布局**补回边框与高度约束（如 `class="border-r border-default"` + 明确高度的 grid/flex track），否则侧栏会失去外框且高度塌陷。registry 切片没有版本语义，升级即整文件覆盖——覆盖前先核对父布局是否已按本节要求供 chrome。
+
 ## Props
 
 | prop | 类型 | 说明 |
@@ -99,7 +101,7 @@ interface SidebarNavGroup {
 - 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。开合状态**始终受控**（组件自持 `openMap`，`defaultOpen` 只做种子值），避免 UCollapsible 在受控/非受控间切换导致内部状态与用户所见不一致。开合状态**按 group 命名空间**（key = `group.id::section.id`），故不同 group 下同 id/同 slug 的板块不会互相耦合开合。
 - item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。
 - 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
-- 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
+- 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）��—方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
 - 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
 
 ## Accessibility（无障碍）

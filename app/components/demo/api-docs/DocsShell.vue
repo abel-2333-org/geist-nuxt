@@ -38,7 +38,9 @@ const router = useRouter()
 const domainIds = new Set(docsShellDomains.map(domain => domain.id))
 
 // <lg 侧栏收进左侧抽屉（文档站移动端惯例：汉堡按钮 + Slideover，而不是
-// 把整个菜单堆在正文上方）。点击抽屉里的导航链接（hash 跳转）后自动收起。
+// 把整个菜单堆在正文上方）。点击抽屉里的导航链接（hash 跳转）后自动收起；
+// 视口越过 lg（转屏/拉宽）时强制收起——否则汉堡已隐藏、抽屉和遮罩却还挂着
+// 且没有可见入口。断点值与 SidebarNav 手柄的 lg 保持一致（Tailwind lg=64rem）。
 const navDrawerOpen = ref(false)
 
 function onDrawerNavClick(event: MouseEvent) {
@@ -46,10 +48,27 @@ function onDrawerNavClick(event: MouseEvent) {
   if (target?.closest('a[href]')) navDrawerOpen.value = false
 }
 
+onMounted(() => {
+  const lgQuery = window.matchMedia('(min-width: 64rem)')
+  const closeOnDesktop = (event: MediaQueryListEvent) => {
+    if (event.matches) navDrawerOpen.value = false
+  }
+  lgQuery.addEventListener('change', closeOnDesktop)
+  onUnmounted(() => lgQuery.removeEventListener('change', closeOnDesktop))
+})
+
 const currentDomainId = computed(() => {
   const requested = typeof route.query.domain === 'string' ? route.query.domain : ''
   return domainIds.has(requested) ? requested : docsShellDomains[0]!.id
 })
+
+// 非法 ?domain= 静默回落首域时同步清掉脏 query，避免分享出去的 URL 与
+// 实际内容漂移。replace 不产生历史记录。
+watch(() => route.query.domain, (requested) => {
+  if (typeof requested !== 'string' || requested === '' || domainIds.has(requested)) return
+  const { domain: _domain, ...rest } = route.query
+  router.replace({ query: rest, hash: route.hash })
+}, { immediate: true })
 
 const currentDomain = computed(() =>
   docsShellDomains.find(domain => domain.id === currentDomainId.value) ?? docsShellDomains[0]!,
