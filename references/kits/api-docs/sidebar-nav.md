@@ -63,6 +63,9 @@ interface SidebarNavItem {
   label: string             // 显示文本（已本地化）。接口行=用途名（非路径）
   to?: string               // 路由；用 ULink 渲染，active 态 + 预取自动生效
   method?: string           // 单个 HTTP 请求方法（如 'POST'）→ 前置 ApiDocsMethodBadge（「怎么调」）
+                            // 过渡约定：webhook 条目暂传 'EVENT'，走 MethodBadge 的 neutral fallback
+                            // （渲染效果与 ApiDocsEventBadge 一致）。item.kind 泛化（一等 webhook
+                            // 身份）是已知后续事项，见 index.md「Operation identity 分层」。
   scenarios?: string[]      // 该接口服务的使用场景（如 ['批处理','实时查询']）→ 后置中性场景标签（「用在哪」）
   icon?: string             // 行首 Iconify 图标（指南板块）；接口行忽略（被方法色标取代）
   badge?: string | number   // 可选尾部 badge（如 "beta"）
@@ -72,7 +75,7 @@ type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
   id?: string            // 稳定 id，缺省时取 label 的 slug
   label: string          // 板块标题（已本地化）
-  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 tracking，chrome 中性）
+  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'���endpoints = mono 大写 tracking，chrome 中性）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
   defaultOpen?: boolean  // 开合状态的初始种子值；搜索激活时被强制展开覆盖

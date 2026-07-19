@@ -36,10 +36,16 @@ const props = defineProps<{
   copyToastLabel?: string
 }>()
 
-const selected = defineModel<string>({ default: undefined })
+const selected = defineModel<string>()
+
+/** Never-undefined id for the select binding; falls back to the first host. */
+const selectedId = computed({
+  get: () => selected.value ?? props.hosts[0]?.id ?? '',
+  set: (v: string) => { selected.value = v },
+})
 
 const activeHost = computed(
-  () => props.hosts.find(h => h.id === selected.value) ?? props.hosts[0],
+  () => props.hosts.find(h => h.id === selectedId.value) ?? props.hosts[0],
 )
 
 const selectItems = computed(() =>
@@ -57,9 +63,8 @@ const fullAddress = computed(() =>
   >
     <USelect
       v-if="props.hosts.length > 1"
-      v-model="selected"
+      v-model="selectedId"
       :items="selectItems"
-      :default-value="props.hosts[0]?.id"
       :aria-label="props.selectLabel ?? 'Environment'"
       size="sm"
       variant="soft"
