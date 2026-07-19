@@ -82,7 +82,7 @@ app/components/demo/api-docs/CodeRail.vue
 - 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/CodeRail` 如何装配成完整文档站；
 - 不进入 foundation、kit 或 registry；
 - 使用与 sidebar-nav / reference demo 一致的中文支付世界观数据 + 中性假品牌，不携带任何消费项目品牌、路由或 contract（demo 单语中文直写，消费项目文案走 i18n 注入）；
-- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。
+- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 用 `?domain=` query 切域是单页展示的权宜之计，消费项目应改用路径分段路由 `/docs/[domain]/[...slug]`（见 `references/kits/api-docs/project-setup.md`「多域路由」）。
 
 ## 自动导航与移动端
 

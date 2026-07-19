@@ -22,6 +22,11 @@ import {
 // 当前域走 ?domain= route query（可分享 URL）；切换时清掉指向旧域锚点的
 // hash 并回到页顶，避免落在不存在的 section 上。
 //
+// ⚠️ query 切域是单页 demo 的权宜之计（demo 不拥有 gallery 的路由空间，
+// 无法注册 [domain]/[slug] 路由树）。消费项目应改用路径分段路由
+// /docs/[domain]/[...slug]，域切换器选项直接用 NuxtLink——
+// 见 references/kits/api-docs/project-setup.md「多域路由」。
+//
 // sticky 单点维护：--docs-shell-toolbar-height 是外壳工具栏高（h-14），
 // --docs-shell-sticky-offset = 全局 header + 工具栏 + 呼吸间距，正文锚点
 // scroll-margin 与代码栏 sticky 顶距都消费它。gallery 自己有全局 header，

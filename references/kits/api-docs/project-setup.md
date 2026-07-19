@@ -97,6 +97,23 @@ const { t } = useI18n()
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
+## 多域路由（支付 / 付款 / 对账等多产品线文档）
+
+**用路径分段路由，不要用 query 参数区分域。** 消费项目按 Nuxt 文件路由组织：
+
+```
+app/pages/docs/[domain]/index.vue      → /docs/payments
+app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
+```
+
+- 每个域每篇文档获得独立规范 URL：可独立 SEO 收录、进 sitemap、做 OG 卡片（正好衔接上表的 `@nuxtjs/sitemap` / `nuxt-og-image`）。
+- 按路由 code-split：只加载当前域的导航树与内容，不像单页方案一次性打包全部域数据。
+- 域级差异（主题色、布局、导航树）走 `definePageMeta` / layout，不用条件渲染堆在一个组件里。
+- 域切换器的每个选项就是一个 `NuxtLink`（`to="/docs/payouts"`），语义天然正确，无需手动同步状态。
+- 页内锚点（字段深链接）继续用 hash，与路径分段正交。
+
+> gallery 的 `/kits/api-docs/docs-shell` demo 用 `?domain=` query 切域，是**单页展示的权宜之计**——demo 不拥有 gallery 的路由空间，无法注册 `[domain]/[slug]` 路由树。这个约束消费项目没有，不要照抄 query 方案。
+
 ## @nuxt/content 取舍
 
 根 Source-first gallery / v0 preview 刻意不内置 `@nuxt/content`：content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在部分托管 preview 重启后不能稳定 re-seed，不适合作为设计系统 snapshot 的运行前置。
