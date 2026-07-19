@@ -116,13 +116,13 @@ registry item 为 `api-docs-site-search`，只声明
 
   **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、内容优先重分配）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
-**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏���+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
+**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
 
 > **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：这类只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（如 `demo/api-docs/CodeRail.vue` → `<DemoApiDocsCodeRail>`）。这样 kit 归属编码进目录与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。
 
 不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
-1. 两栏自然高度之��� ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
+1. 两栏自然高度之和 ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
 2. 溢出时（和 > 可用高度）→ 总高封顶为可用高度，按比例分，且**较短的一栏封顶到自然高度、把富余让给溢出的另一栏**；此时横向把手激活，拖动调比例。
 
 页面私有纯函数 recipe：
