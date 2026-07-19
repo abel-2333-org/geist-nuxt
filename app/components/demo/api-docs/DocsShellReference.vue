@@ -163,7 +163,7 @@ onMounted(() => anchor.initFromHash())
     </div>
   </div>
 
-  <!-- 其余域（���款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
+  <!-- 其余域（付款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
        端点 stub，保证该域侧栏与 ⌘K 索引里的每个锚点都有落点。 -->
   <div v-else class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
     <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">

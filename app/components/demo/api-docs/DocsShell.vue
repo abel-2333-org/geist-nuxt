@@ -56,9 +56,12 @@ const switcherItems = computed(() =>
 const navGroups = computed(() =>
   props.domain.navGroups.map(group => ({
     ...group,
-    items: group.items.map(item => ({
-      ...item,
-      active: item.to != null && item.to === route.hash,
+    sections: group.sections.map(section => ({
+      ...section,
+      items: section.items.map(item => ({
+        ...item,
+        active: item.to === route.hash,
+      })),
     })),
   })),
 )
