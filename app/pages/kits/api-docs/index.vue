@@ -72,6 +72,21 @@ const responseScenarios = [
 // the allowed-values table. Data-agnostic, driven here by inline sample data.
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 const lifecycles = ['new', 'beta', 'active', 'maintenance', 'deprecated', 'sunset'] as const
+
+// 端点头演示：完整形态（divider + #badges 共现 lifecycle 徽章）与紧凑 stub 形态。
+// 目录页的组件标题是 h3，故演示里的端点头降为 h4，保持页面大纲成立。
+const operationHeaderDemo = {
+  method: 'POST',
+  path: '/v1/checkout/sessions',
+  summary: '创建结算会话',
+  description: '为一次支付创建托管收银台会话，返回可跳转的结算 URL。',
+}
+const operationHeaderStubDemo = {
+  method: 'GET',
+  path: '/v1/checkout/sessions/{id}',
+  summary: '查询结算会话',
+  description: '按 ID 拉取会话当前状态与支付结果。',
+}
 const enumValues = [
   { value: 'production', description: 'Live environment served to end users.' },
   { value: 'preview', description: 'Per-branch deploy for review. Supports `?token=` access.' },
@@ -280,7 +295,9 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">ApiDocsResponseExample</code>，
           以及 method / lifecycle 徽章
           <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code> /
-          <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleBadge</code>
+          <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleBadge</code>、
+          端点头
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>
           与 enum 值表
           <code class="font-mono text-[0.8125rem]">ApiDocsEnumTable</code>，
           以及字段树
@@ -313,6 +330,26 @@ onMounted(() => anchor.initFromHash())
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 徽章</h3>
           <div class="flex flex-wrap items-center gap-2">
             <ApiDocsLifecycleBadge v-for="s in lifecycles" :key="s" :status="s" />
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">端点头</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            端点 identity 头：方法色标 + 等宽 path + summary 标题 + 可选描述。
+            <code class="font-mono text-[0.8125rem]">heading-level</code> 按页面大纲定层级
+            （独立参考页 h1 / 长滚动域页 h2）；<code class="font-mono text-[0.8125rem]">divider</code>
+            附带与下方字段树分隔的底部细线；<code class="font-mono text-[0.8125rem]">size="sm"</code>
+            是长滚动里锚点落点的紧凑 stub 形态；<code class="font-mono text-[0.8125rem]">#badges</code>
+            slot 容纳 lifecycle 等共现徽章。
+          </p>
+          <div class="space-y-8">
+            <ApiDocsOperationHeader v-bind="operationHeaderDemo" :heading-level="4" divider>
+              <template #badges>
+                <ApiDocsLifecycleBadge status="beta" />
+              </template>
+            </ApiDocsOperationHeader>
+            <ApiDocsOperationHeader v-bind="operationHeaderStubDemo" :heading-level="4" size="sm" />
           </div>
         </div>
 

@@ -257,6 +257,16 @@
       ]
     },
     {
+      "name": "api-docs-operation-header",
+      "type": "registry:component",
+      "title": "ApiDocsOperationHeader",
+      "description": "Endpoint identity header: method badge, mono path, summary heading, optional description.",
+      "registryDependencies": ["api-docs-method-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/OperationHeader.vue", "target": "app/components/api-docs/OperationHeader.vue" }
+      ]
+    },
+    {
       "name": "api-docs-enum-table",
       "type": "registry:component",
       "title": "ApiDocsEnumTable",

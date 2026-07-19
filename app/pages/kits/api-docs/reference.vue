@@ -270,18 +270,15 @@ onMounted(() => anchor.initFromHash())
       <!-- 左：文档流（端点头 + 字段树），随页面滚动 -->
       <template #start>
         <div class="lg:pe-8">
-          <header class="space-y-4 border-b border-default pb-8">
-            <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsMethodBadge :method="endpoint.method" />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
-            </div>
-            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-[2rem] sm:leading-tight">
-              {{ endpoint.summary }}
-            </h1>
-            <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-              {{ endpoint.description }}
-            </p>
-          </header>
+          <!-- 端点头：kit 切片 ApiDocsOperationHeader。独立参考页由它承载页面唯一 h1。 -->
+          <ApiDocsOperationHeader
+            :method="endpoint.method"
+            :path="endpoint.path"
+            :summary="endpoint.summary"
+            :description="endpoint.description"
+            :heading-level="1"
+            divider
+          />
 
           <div class="mt-8 space-y-10">
             <ApiDocsFieldGroup label="Request Body" :count="bodyFields.length">
@@ -296,7 +293,7 @@ onMounted(() => anchor.initFromHash())
       </template>
 
       <!-- 右：代码栏。lg+ 钉成视口高 sticky 长条，内部 Request/Response 纵向分栏。
-           <lg 回退为普通堆叠（rail 自身按断点降级为各卡片自滚动）。 -->
+           <lg 回退为普通堆叠（rail 本身按断点降级为各卡片自滚动）。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <DemoApiDocsCodeRail class="h-full max-lg:space-y-4">

@@ -76,18 +76,15 @@ onMounted(() => anchor.initFromHash())
       >
         <template #start>
           <div class="lg:pe-8">
-            <header class="space-y-4 border-b border-default pb-8">
-              <div class="flex flex-wrap items-center gap-2.5">
-                <ApiDocsMethodBadge :method="paymentsEndpoint.method" />
-                <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ paymentsEndpoint.path }}</code>
-              </div>
-              <h2 class="text-2xl font-semibold tracking-tight text-highlighted text-balance">
-                {{ paymentsEndpoint.summary }}
-              </h2>
-              <p class="max-w-2xl leading-relaxed text-muted text-pretty">
-                {{ paymentsEndpoint.description }}
-              </p>
-            </header>
+            <!-- 端点头：kit 切片 ApiDocsOperationHeader。长滚动域页里页面 h1
+                 归 overview 段，端点头降为 h2。 -->
+            <ApiDocsOperationHeader
+              :method="paymentsEndpoint.method"
+              :path="paymentsEndpoint.path"
+              :summary="paymentsEndpoint.summary"
+              :description="paymentsEndpoint.description"
+              divider
+            />
 
             <!-- 端点标题是 h2，字段分组归入其下为 h3（FieldGroup 默认 h2
                  是给独立成岛的场景用的） -->
@@ -129,12 +126,13 @@ onMounted(() => anchor.initFromHash())
         :key="stub.id"
         class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
       >
-        <div class="flex flex-wrap items-center gap-2.5">
-          <ApiDocsMethodBadge :method="stub.method" />
-          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
-        </div>
-        <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
-        <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
+        <ApiDocsOperationHeader
+          :method="stub.method"
+          :path="stub.path"
+          :summary="stub.summary"
+          :description="stub.description"
+          size="sm"
+        />
       </section>
     </div>
   </div>
@@ -169,12 +167,13 @@ onMounted(() => anchor.initFromHash())
         :key="stub.id"
         class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
       >
-        <div class="flex flex-wrap items-center gap-2.5">
-          <ApiDocsMethodBadge :method="stub.method" />
-          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
-        </div>
-        <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
-        <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
+        <ApiDocsOperationHeader
+          :method="stub.method"
+          :path="stub.path"
+          :summary="stub.summary"
+          :description="stub.description"
+          size="sm"
+        />
       </section>
     </div>
   </div>
