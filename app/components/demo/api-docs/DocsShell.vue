@@ -5,6 +5,29 @@ import {
   toSiteSearchGroups,
 } from '~/utils/demo/api-docs/docs-shell-data'
 
+// 「文档站外壳」——把 kit 的三块拼成一个完整可用的文档站骨架，作为下游
+// copy & adapt 的活样板：
+//
+//   顶栏     中性品牌 / 域切换器（<DemoApiDocsDomainSwitcher>）+
+//            <ApiDocsSiteSearch>（⌘K 全站搜索）
+//   侧栏     <ApiDocsSidebarNav>（sticky 通栏立柱，树内过滤 + 拖宽持久化）
+//   正文     <DemoApiDocsShellReference>（指南锚点 section + reference 式端点页）
+//
+// 三层搜索/导航各司其职、不互相顶替：
+//   1. 顶栏 ⌘K 全站搜索 —— 「从任何地方去任何页面」（跨指南与端点）；
+//   2. 侧栏 '/' 树内过滤 —— 「在当前菜单里快速缩小范围」；
+//   3. 字段树深链接（useFieldAnchor）—— 「直达端点里的某个字段」。
+// 两级搜索刻意匹配同样的维度（用途名 / 请求方法 / 场景标签）。
+//
+// 当前域走 ?domain= route query（可分享 URL）；切换时清掉指向旧域锚点的
+// hash 并回到页顶，避免落在不存在的 section 上。
+//
+// sticky 单点维护：--docs-shell-toolbar-height 是外壳工具栏高（h-14），
+// --docs-shell-sticky-offset = 全局 header + 工具栏 + 呼吸间距，正文锚点
+// scroll-margin 与代码栏 sticky 顶距都消费它。gallery 自己有全局 header，
+// 外壳工具栏 sticky 在它下方；真实项目把这条工具栏提升为 app 顶栏时，
+// 把 --ui-header-height 换成自己顶栏的高度即可。
+
 const route = useRoute()
 const router = useRouter()
 const domainIds = new Set(docsShellDomains.map(domain => domain.id))
@@ -18,16 +41,19 @@ const currentDomain = computed(() =>
   docsShellDomains.find(domain => domain.id === currentDomainId.value) ?? docsShellDomains[0]!,
 )
 
+// 侧栏 / ⌘K 索引 / 正文检索全部按当前域派生（一份数据、多处消费）
 const searchGroups = computed(() => toSiteSearchGroups(currentDomain.value))
 
 async function selectDomain(domainId: string) {
+  if (domainId === currentDomainId.value) return
   await router.push({
     query: { ...route.query, domain: domainId },
     hash: '',
   })
+  window.scrollTo({ top: 0 })
 }
 
-async function searchBody(query: string) {
+function searchBody(query: string) {
   return searchDocsBody(currentDomain.value, query)
 }
 </script>
@@ -41,29 +67,31 @@ async function searchBody(query: string) {
       href="#docs-shell-content"
       class="sr-only z-50 rounded-md bg-default px-3 py-2 text-sm font-medium text-highlighted shadow-lg focus:fixed focus:start-4 focus:top-4 focus:not-sr-only focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
-      Skip to documentation content
+      跳到文档正文
     </a>
 
     <header class="sticky top-[var(--ui-header-height)] z-40 border-y border-default bg-default/95 backdrop-blur">
       <div class="flex h-14 min-w-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <div class="flex min-w-0 items-center gap-2">
+        <!-- 品牌 / 域切换器（Vercel 式「brand / scope」结构）。品牌为中性
+             假品牌——真源 demo 不携带消费项目品牌；消费项目在此换成自己的
+             mark 与字标，label/描述走 i18n 注入（见 project-setup.md）。 -->
+        <div class="flex min-w-0 items-center gap-1.5">
           <NuxtLink
             to="/kits/api-docs/docs-shell"
-            class="flex shrink-0 items-center gap-2 font-medium text-highlighted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            aria-label="Example Cloud documentation home"
+            class="flex shrink-0 items-center gap-2 rounded-md font-medium text-highlighted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Acme Pay 文档首页"
           >
             <span class="flex size-7 items-center justify-center rounded-sm bg-inverted text-inverted">
-              <UIcon name="i-lucide-cloud" class="size-4" />
+              <UIcon name="i-lucide-zap" class="size-4" />
             </span>
-            <span class="max-sm:hidden">Example Cloud</span>
+            <span class="text-sm font-semibold tracking-tight max-sm:sr-only">Acme Pay</span>
           </NuxtLink>
 
-          <USeparator orientation="vertical" class="h-5" />
+          <span class="select-none text-dimmed" aria-hidden="true">/</span>
 
           <DemoApiDocsDomainSwitcher
             :domains="docsShellDomains"
             :model-value="currentDomainId"
-            aria-label="Switch documentation domain"
             @update:model-value="selectDomain"
           />
         </div>
@@ -72,37 +100,46 @@ async function searchBody(query: string) {
           :key="currentDomain.id"
           :groups="searchGroups"
           :search="searchBody"
-          search-group-label="In this guide"
-          trigger-label="Search docs"
-          aria-label="Search all documentation"
-          modal-title="Search documentation"
-          placeholder="Search guides and endpoints"
-          empty-label="No matching documentation"
+          search-group-label="正文内容"
+          trigger-label="搜索全部文档"
+          aria-label="搜索全部文档"
+          modal-title="搜索全部文档"
+          placeholder="搜索指南与接口…"
+          empty-label="没有匹配的结果"
+          searching-label="正在搜索文档…"
+          search-error-label="搜索暂不可用，请稍后重试。"
         />
       </div>
     </header>
 
+    <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度；
+         lg+ 立柱高度 = 视口减全局 header 与外壳工具栏，菜单太长时在组件
+         内部滚动；小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给
+         底分隔边即可。 -->
     <div class="min-w-0 lg:grid lg:grid-cols-[auto_minmax(0,1fr)]">
-      <aside class="h-[60dvh] border-b border-default lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:border-b-0 lg:border-r">
+      <aside class="lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start">
         <ApiDocsSidebarNav
           :key="currentDomain.id"
+          class="border-default max-lg:border-b lg:border-r"
           :groups="currentDomain.navGroups"
-          :aria-label="`${currentDomain.label} documentation`"
-          search-placeholder="Filter navigation"
-          clear-label="Clear navigation filter"
-          empty-label="No matching pages"
-          resize-label="Resize documentation sidebar"
-          scenarios-label="Scenarios"
-          :results-announcement="count => `${count} matching pages`"
-          :no-results-announcement="query => `No pages match “${query}”`"
-          :scenario-overflow-label="total => `View all ${total} scenarios`"
+          :aria-label="`${currentDomain.label}文档`"
+          search-placeholder="搜索文档"
+          clear-label="清除搜索"
+          empty-label="没有匹配的页面"
+          resize-label="调整侧栏宽度"
+          scenarios-label="服务场景"
+          scenario-separator="、"
+          width-storage-key="docs-shell-sidebar-width"
+          :results-announcement="(count: number) => `找到 ${count} 个匹配结果`"
+          :no-results-announcement="(q: string) => `没有与“${q}”匹配的结果`"
+          :scenario-overflow-label="(total: number) => `查看全部 ${total} 个服务场景`"
         />
       </aside>
 
       <section
         id="docs-shell-content"
         tabindex="-1"
-        aria-label="API documentation content"
+        aria-label="API 文档正文"
         class="min-w-0 focus:outline-none"
       >
         <DemoApiDocsShellReference :key="currentDomain.id" :domain="currentDomain" />

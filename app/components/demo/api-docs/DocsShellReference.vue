@@ -1,100 +1,200 @@
 <script setup lang="ts">
-import type { DocsShellDomain } from '~/utils/demo/api-docs/docs-shell-data'
+import {
+  paymentsBodyFields,
+  paymentsEndpoint,
+  paymentsEndpointStubs,
+  paymentsQuickstartVariants,
+  paymentsRequestScenarios,
+  paymentsResponseFields,
+  paymentsResponseScenarios,
+  type DocsShellDomain,
+} from '~/utils/demo/api-docs/docs-shell-data'
+
+// 文档站外壳的正文列：指南锚点 section + reference 式端点页。出血布局下由
+// 正文列自己管理内边距（不依赖外层容器）。
+//
+// 支付域是完整样板——端点 reference 与 /kits/api-docs/reference 同构：
+// 横向分栏用通用基座的 <SplitPane>（lg+ 可拖拽、独立 storage key 持久化，
+// <lg 自动堆叠），右侧代码栏用 gallery 私有的 <DemoApiDocsCodeRail>
+// （Request 上 / Response 下，纵向高度可拖 + 内容优先重分配）。
+// 其余域走 stub 分支：overview + 指南段 + 端点 stub，保证该域侧栏与 ⌘K
+// 索引里的每个锚点都有落点——真实项目里每个域都长成支付域那样。
+//
+// sticky 顶距与锚点 scroll-margin 统一走外壳的 --docs-shell-sticky-offset
+// （由 DocsShell 定义 = 全局 header + 外壳工具栏 + 呼吸间距），单点维护。
 
 const props = defineProps<{
   domain: DocsShellDomain
 }>()
 
-const requestVariants = computed(() => [{
-  language: 'bash',
-  label: 'cURL',
-  code: props.domain.endpoint.request,
-}])
-
-const responseVariants = computed(() => [{
-  language: 'json',
-  label: 'JSON',
-  code: props.domain.endpoint.response,
-}])
+// 深链接：带 `#path` 进入时自动展开 + 滚动定位到对应字段（三层导航的第三层）。
+const anchor = useFieldAnchor()
+onMounted(() => anchor.initFromHash())
 </script>
 
 <template>
-  <UContainer class="py-8 sm:py-10">
-    <div class="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)]">
-      <article class="min-w-0 space-y-12">
-        <header id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-4">
-          <p class="font-mono text-xs font-medium uppercase tracking-widest text-muted">
-            {{ props.domain.label }}
-          </p>
-          <h1 class="text-3xl font-semibold tracking-tight text-highlighted sm:text-4xl">
-            {{ props.domain.endpoint.title }}
-          </h1>
-          <p class="max-w-3xl text-base leading-7 text-muted">
-            {{ props.domain.overview }}
-          </p>
-        </header>
+  <!-- 支付域：完整样板（指南 + reference 式端点页） -->
+  <div v-if="props.domain.id === 'payments'" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+    <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">概览</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+        支付 API 按业务用途组织：先用「创建结算会话」把顾客送进托管收银台，需要更细控制时改用
+        Direct API 自行编排授权、捕获与退款。所有接口共用同一套密钥与 Webhook 通知机制。
+      </p>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+        左侧菜单里接口按<b class="font-medium text-toned">用途</b>命名，行首的方法色标说「怎么调」、行尾的场景标签说「用在哪」。
+        找不到入口时用顶栏的全站搜索（<UKbd value="meta" /><UKbd value="K" />），输入场景名（如「订阅」）或方法名（如「POST」）都能命中。
+      </p>
+    </section>
 
-        <section id="quickstart" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-          <h2 class="text-xl font-semibold tracking-tight text-highlighted">Quickstart</h2>
-          <p class="max-w-3xl leading-7 text-muted">{{ props.domain.quickstart }}</p>
-        </section>
+    <section id="quickstart" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">快速开始</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+        用测试密钥创建一个结算会话，把返回的 <code class="font-mono text-[0.8125rem]">url</code> 交给顾客即可完成一笔沙箱支付：
+      </p>
+      <ApiDocsCodeBlock
+        :variants="paymentsQuickstartVariants"
+        title="创建你的第一个结算会话"
+        :labels="{ language: '语言', copy: '复制代码', copied: '已复制到剪贴板', copyToast: '代码' }"
+      />
+    </section>
 
-        <section id="authentication" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-          <h2 class="text-xl font-semibold tracking-tight text-highlighted">Authentication</h2>
-          <p class="max-w-3xl leading-7 text-muted">{{ props.domain.authentication }}</p>
-          <UAlert
-            color="info"
-            variant="subtle"
-            icon="i-lucide-shield-check"
-            title="Keep credentials on the server"
-            description="Never expose live bearer tokens in browser bundles or copied examples."
-          />
-        </section>
+    <section id="auth" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">认证与密钥</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+        所有请求通过 <code class="font-mono text-[0.8125rem]">Authorization: Bearer</code> 头携带密钥。测试密钥以
+        <code class="font-mono text-[0.8125rem]">sk_test_</code> 开头、只操作沙箱数据；生产密钥请存放在服务端环境变量，切勿写进前端代码。
+      </p>
+    </section>
 
-        <section :id="props.domain.endpoint.id" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-6">
-          <div class="space-y-3">
-            <div class="flex flex-wrap items-center gap-3">
-              <ApiDocsMethodBadge :method="props.domain.endpoint.method" />
-              <code class="font-mono text-sm text-toned">{{ props.domain.endpoint.path }}</code>
-            </div>
-            <h2 class="text-2xl font-semibold tracking-tight text-highlighted">
-              {{ props.domain.endpoint.title }}
-            </h2>
-            <p class="max-w-3xl leading-7 text-muted">{{ props.domain.endpoint.description }}</p>
-          </div>
+    <section id="webhooks" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">Webhook 通知</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+        支付结果以 Webhook 异步送达（如 <code class="font-mono text-[0.8125rem]">payment.succeeded</code>、<code class="font-mono text-[0.8125rem]">refund.completed</code>）。
+        校验签名头后再处理事件，并以事件 id 幂等去重——同一事件可能重复投递。
+      </p>
+    </section>
 
-          <ApiDocsFieldGroup label="Request body" :count="props.domain.endpoint.fields.length">
-            <ApiDocsFieldItem
-              v-for="field in props.domain.endpoint.fields"
-              :key="field.path"
-              v-bind="field"
-            />
-          </ApiDocsFieldGroup>
-        </section>
+    <USeparator />
 
-        <section class="space-y-4">
-          <h2 class="text-xl font-semibold tracking-tight text-highlighted">Related endpoints</h2>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <section
-              v-for="endpoint in props.domain.secondaryEndpoints"
-              :id="endpoint.id"
-              :key="endpoint.id"
-              class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3 rounded-lg border border-default p-4"
-            >
-              <div class="flex items-center gap-2">
-                <ApiDocsMethodBadge :method="endpoint.method" size="sm" />
-                <h3 class="text-sm font-medium text-highlighted">{{ endpoint.title }}</h3>
+    <!-- 端点 reference：正文里唯一的 <h1>。横向分栏 = <SplitPane>（独立
+         storage key，与 reference demo 的分栏宽度互不串扰）；右栏 lg+ 钉成
+         视口高 sticky 长条，内部 Request/Response 纵向分栏；<lg 回退为普通
+         堆叠（rail 自身按断点降级为各卡片自滚动）。 -->
+    <section id="checkout-create" class="scroll-mt-[var(--docs-shell-sticky-offset)]">
+      <SplitPane
+        direction="row"
+        mode="fixed"
+        fixed-pane="end"
+        sticky
+        sticky-top="var(--docs-shell-sticky-offset)"
+        storage-key="docs-shell-code-rail"
+        :default-size="400"
+        :min-size="340"
+        :max-size="560"
+        :min-opposite="340"
+        label="调整文档与代码面板宽度"
+      >
+        <template #start>
+          <div class="lg:pe-8">
+            <header class="space-y-4 border-b border-default pb-8">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <ApiDocsMethodBadge :method="paymentsEndpoint.method" />
+                <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ paymentsEndpoint.path }}</code>
               </div>
-              <p class="text-sm leading-6 text-muted">{{ endpoint.description }}</p>
-            </section>
-          </div>
-        </section>
-      </article>
+              <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance">
+                {{ paymentsEndpoint.summary }}
+              </h1>
+              <p class="max-w-2xl leading-relaxed text-muted text-pretty">
+                {{ paymentsEndpoint.description }}
+              </p>
+            </header>
 
-      <aside class="min-w-0 space-y-6 lg:sticky lg:top-[var(--docs-shell-sticky-offset)] lg:self-start">
-        <ApiDocsCodeBlock title="Request" :variants="requestVariants" />
-        <ApiDocsCodeBlock title="Response" :variants="responseVariants" default-wrap />
-      </aside>
+            <div class="mt-8 space-y-10">
+              <ApiDocsFieldGroup label="Request Body" :count="paymentsBodyFields.length">
+                <ApiDocsFieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" />
+              </ApiDocsFieldGroup>
+
+              <ApiDocsFieldGroup label="Response Body" :count="paymentsResponseFields.length">
+                <ApiDocsFieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" />
+              </ApiDocsFieldGroup>
+            </div>
+          </div>
+        </template>
+
+        <template #end>
+          <div class="lg:sticky lg:top-[var(--docs-shell-sticky-offset)] lg:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
+            <DemoApiDocsCodeRail class="h-full max-lg:space-y-4">
+              <template #top="{ maxHeight }">
+                <ApiDocsRequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
+              </template>
+              <template #bottom="{ maxHeight }">
+                <ApiDocsResponseExample :scenarios="paymentsResponseScenarios" :max-height="maxHeight" />
+              </template>
+            </DemoApiDocsCodeRail>
+          </div>
+        </template>
+      </SplitPane>
+    </section>
+
+    <USeparator />
+
+    <!-- 其余端点的紧凑 stub：让侧栏与全站搜索里的每个锚点都有落点。
+         真实项目里每个端点都是一个完整的 reference section（同上）。 -->
+    <div class="space-y-6">
+      <section
+        v-for="stub in paymentsEndpointStubs"
+        :id="stub.id"
+        :key="stub.id"
+        class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
+      >
+        <div class="flex flex-wrap items-center gap-2.5">
+          <ApiDocsMethodBadge :method="stub.method" />
+          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
+        </div>
+        <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
+        <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
+      </section>
     </div>
-  </UContainer>
+  </div>
+
+  <!-- 其余域（付款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
+       端点 stub，保证该域侧栏与 ⌘K 索引里的每个锚点都有落点。 -->
+  <div v-else class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+    <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">{{ props.domain.label }}</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ props.domain.description }}</p>
+      <p class="max-w-2xl text-sm text-dimmed">
+        本域为入口演示：侧栏、全站搜索索引与正文检索已随域切换换源，完整文档形态见「支付」域。
+      </p>
+    </section>
+
+    <section
+      v-for="guide in props.domain.guideSections"
+      :id="guide.id"
+      :key="guide.id"
+      class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3"
+    >
+      <h2 class="text-xl font-semibold tracking-tight text-highlighted">{{ guide.title }}</h2>
+      <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ guide.body }}</p>
+    </section>
+
+    <USeparator />
+
+    <div class="space-y-6">
+      <section
+        v-for="stub in props.domain.stubs"
+        :id="stub.id"
+        :key="stub.id"
+        class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
+      >
+        <div class="flex flex-wrap items-center gap-2.5">
+          <ApiDocsMethodBadge :method="stub.method" />
+          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
+        </div>
+        <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
+        <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
+      </section>
+    </div>
+  </div>
 </template>

@@ -79,9 +79,9 @@ app/components/demo/api-docs/CodeRail.vue
 `nav → site search` adapter 放在 `app/utils/demo/api-docs/docs-shell-data.ts`，不放进
 `app/components/`，避免 Nuxt 把普通 `.ts` 数据文件纳入组件扫描。整套 recipe：
 
-- 只用于展示 `SiteSearch + SidebarNav + reference content` 如何装配；
+- 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/CodeRail` 如何装配成完整文档站；
 - 不进入 foundation、kit 或 registry；
-- 使用中性的 Example Cloud 数据，不携带任何消费项目品牌、路由或 contract；
+- 使用与 sidebar-nav / reference demo 一致的中文支付世界观数据 + 中性假品牌，不携带任何消费项目品牌、路由或 contract（demo 单语中文直写，消费项目文案走 i18n 注入）；
 - 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。
 
 ## 自动导航与移动端
