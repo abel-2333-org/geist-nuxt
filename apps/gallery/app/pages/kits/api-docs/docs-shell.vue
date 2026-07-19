@@ -128,9 +128,8 @@ const paymentsContentSections: ContentSection[] = [
 //     图标样式遵循 Spectrum 对 workflow icon 的用法：产品级入口的图标不裸露，
 //     由圆角容器（tile）承载、与 label 成对出现——对应本系统「色调表面 +
 //     边框优先」的层级语义（tile = bg-elevated + border，当前域转 primary
-//     着色），Vercel 的 scope 切换器同构。tile 渲染见模板 #domain-leading。
-//     description 是一句话简介（≤12 字），菜单里单行放得下——UDropdownMenu
-//     的 itemDescription 默认 truncate，长句会被截断。 ---
+//     着色），Vercel 的 scope 切换器同构。tile 渲染见模板域卡片面板。
+//     description 是一句话简介（≤12 字），保证在 sm+ 两列卡片里单行放下。 ---
 type GuideSection = { id: string; title: string; body: string }
 type EndpointStub = { id: string; method: string; path: string; summary: string; description: string }
 type DocsDomain = {
@@ -615,10 +614,12 @@ onMounted(() => anchor.initFromHash())
                    当前域 primary 色调（border + tint + 打勾），radiogroup/radio
                    表达「四选一」语义。 -->
               <!-- 面板宽度按内容定：让最长简介（12 字）恰好单行，避免 CJK
-                   逐字折行把词拆开（如「退/款」）。 -->
+                   逐字折行把词拆开（如「退/款」）。小屏面板被 max-w 压到
+                   ~316px，两列每张卡只剩 ~150px、简介必然折行——降为单列，
+                   卡片恢复完整轴线；只有四项，单列纵向也不长。 -->
               <div class="w-[460px] max-w-[calc(100vw-2rem)] p-2" role="radiogroup" aria-label="文档域">
                 <p class="px-2 pb-2 pt-1 text-xs font-medium text-dimmed">切换文档域</p>
-                <div class="grid grid-cols-2 gap-1.5">
+                <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                   <button
                     v-for="d in domains"
                     :key="d.id"
@@ -675,7 +676,7 @@ onMounted(() => anchor.initFromHash())
            太长时在组件内部滚动。边框归布局：桌面档给右分隔边（两列之间不留
            gap），小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给下分隔
            边即可——都是透传的「追加类」，可靠。
-           sticky 顶距与列高共用 --header-h 单点维护（此处对齐的是 gallery 的
+           sticky 顶距与列高��用 --header-h 单点维护（此处对齐的是 gallery 的
            全局 header 高 4rem；真实项目顶栏即 app header 时，把它改成你自己
            顶栏的高度）。 -->
       <div class="grid [--header-h:4rem] lg:grid-cols-[auto_1fr]">
