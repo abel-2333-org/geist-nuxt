@@ -32,6 +32,15 @@ const route = useRoute()
 const router = useRouter()
 const domainIds = new Set(docsShellDomains.map(domain => domain.id))
 
+// <lg 侧栏收进左侧抽屉（文档站移动端惯例：汉堡按钮 + Slideover，而不是
+// 把整个菜单堆在正文上方）。点击抽屉里的导航链接（hash 跳转）后自动收起。
+const navDrawerOpen = ref(false)
+
+function onDrawerNavClick(event: MouseEvent) {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('a[href]')) navDrawerOpen.value = false
+}
+
 const currentDomainId = computed(() => {
   const requested = typeof route.query.domain === 'string' ? route.query.domain : ''
   return domainIds.has(requested) ? requested : docsShellDomains[0]!.id
@@ -76,6 +85,40 @@ function searchBody(query: string) {
              假品牌——真源 demo 不携带消费项目品牌；消费项目在此换成自己的
              mark 与字标，label/描述走 i18n 注入（见 project-setup.md）。 -->
         <div class="flex min-w-0 items-center gap-1.5">
+          <USlideover
+            v-model:open="navDrawerOpen"
+            side="left"
+            title="文档导航"
+            :ui="{ content: 'max-w-xs', body: 'p-0 sm:p-0' }"
+          >
+            <UButton
+              icon="i-lucide-menu"
+              color="neutral"
+              variant="ghost"
+              class="lg:hidden"
+              aria-label="打开文档导航"
+            />
+
+            <template #body>
+              <div class="h-full min-h-0" @click="onDrawerNavClick">
+                <ApiDocsSidebarNav
+                  :key="`drawer-${currentDomain.id}`"
+                  :groups="currentDomain.navGroups"
+                  :aria-label="`${currentDomain.label}文档`"
+                  :resizable="false"
+                  search-placeholder="搜索文档"
+                  clear-label="清除搜索"
+                  empty-label="没有匹配的页面"
+                  scenarios-label="服务场景"
+                  scenario-separator="、"
+                  :results-announcement="(count: number) => `找到 ${count} 个匹配结果`"
+                  :no-results-announcement="(q: string) => `没有与“${q}”匹配的结果`"
+                  :scenario-overflow-label="(total: number) => `查看全部 ${total} 个服务场景`"
+                />
+              </div>
+            </template>
+          </USlideover>
+
           <NuxtLink
             to="/kits/api-docs/docs-shell"
             class="flex shrink-0 items-center gap-2 rounded-md font-medium text-highlighted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -114,13 +157,12 @@ function searchBody(query: string) {
 
     <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度；
          lg+ 立柱高度 = 视口减全局 header 与外壳工具栏，菜单太长时在组件
-         内部滚动；小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给
-         底分隔边即可。 -->
+         内部滚动；<lg 立柱隐藏，导航收进工具栏汉堡按钮的左侧抽屉。 -->
     <div class="min-w-0 lg:grid lg:grid-cols-[auto_minmax(0,1fr)]">
-      <aside class="lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start">
+      <aside class="max-lg:hidden lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start">
         <ApiDocsSidebarNav
           :key="currentDomain.id"
-          class="border-default max-lg:border-b lg:border-r"
+          class="border-r border-default"
           :groups="currentDomain.navGroups"
           :aria-label="`${currentDomain.label}文档`"
           search-placeholder="搜索文档"
