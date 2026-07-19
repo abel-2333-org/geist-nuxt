@@ -76,7 +76,11 @@ export interface SidebarNavItem {
   icon?: string
   /** Optional trailing badge text (e.g. "beta"). */
   badge?: string | number
-  /** Force the active state (demo / manual control); usually inferred from `to`. */
+  /** Current-location state. When set it is the single source of truth for
+   *  background, text colour AND aria-current. When omitted, a plain internal
+   *  path infers from exact `route.path` match; links containing `#` never
+   *  self-infer (path matching ignores the hash, so every same-page anchor
+   *  would light up at once — pass an explicit boolean for those). */
   active?: boolean
 }
 
@@ -181,6 +185,19 @@ function slug(s: string): string {
 // Scenario tags: a guide item yields []; an endpoint yields its scenario list.
 function itemScenarios(item: SidebarNavItem): string[] {
   return item.scenarios ?? []
+}
+
+// Effective active — the ONE source feeding background, text colour and
+// aria-current. Without this, three signals disagree when `item.active` is
+// omitted: ULink infers background from route.path (hash ignored → every
+// same-page anchor lights up), while text/aria-current only read item.active.
+// Rules: explicit boolean wins; a plain internal path infers from exact
+// route.path match; anything with `#` never self-infers.
+const route = useRoute()
+function isItemActive(item: SidebarNavItem): boolean {
+  if (item.active !== undefined) return item.active
+  if (!item.to || item.to.includes('#')) return false
+  return route.path === item.to
 }
 
 // Normalize either input into groups. A flat `sections` prop becomes a single
@@ -558,21 +575,20 @@ onMounted(() => {
                        "+N" also navigate. Only that button opts back into
                        pointer events (`pointer-events-auto` in ScenarioTags), so
                        the row navigates but the tag reveal doesn't. Text colour
-                       is driven by `item.active` + `group-hover/row` rather than
+                       is driven by `isItemActive` + `group-hover/row` rather than
                        the link's own classes, since the link no longer wraps the
                        text. -->
-                  <!-- Active must come from ONE source: when `item.active` is
-                       provided it drives background (ULink :active), text
-                       colour, AND aria-current together — ULink only emits
-                       aria-current from its own route matching, so a manually
-                       driven active needs the explicit binding or screen
-                       readers lose "current page" while sighted users see the
-                       highlight. -->
+                  <!-- Active comes from ONE source (`isItemActive`): it feeds
+                       ULink's :active (background), the text colour AND
+                       aria-current together, so sighted users and screen
+                       readers always agree on the current location. ULink only
+                       emits aria-current from its own route matching, hence
+                       the explicit binding. -->
                   <li v-for="item in entry.items" :key="item.to ?? item.label" class="group/row relative">
                     <ULink
                       :to="item.to"
-                      :active="item.active"
-                      :aria-current="item.active ? 'page' : undefined"
+                      :active="isItemActive(item)"
+                      :aria-current="isItemActive(item) ? 'page' : undefined"
                       :aria-label="item.label"
                       active-class="bg-primary/10"
                       inactive-class="hover:bg-elevated"
@@ -580,7 +596,7 @@ onMounted(() => {
                     />
                     <div
                       class="pointer-events-none relative flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors"
-                      :class="item.active ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
+                      :class="isItemActive(item) ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
                     >
                       <!-- Leading: an endpoint shows its HTTP method badge in a
                            fixed-width slot so purpose labels line up regardless

@@ -94,28 +94,44 @@ const navGroups = computed(() =>
 const navDrawerOpen = ref(false)
 const isDesktop = ref(true)
 
-// 抽屉内点击导航链接：收起抽屉，并在路由落定后把焦点交给目标——Slideover
-// 退场默认把焦点还给汉堡按钮，读屏用户会「回到」顶栏而不是新内容。目标锚点
-// 优先（section 均可 tabindex 聚焦），找不到时聚焦正文容器 #docs-shell-content。
+// 抽屉内点击导航链接：收起抽屉，记下焦点目标，路由落定后把焦点交给目标
+// ——Slideover 退场默认把焦点还给汉堡按钮，读屏用户会「回到」顶栏而不是
+// 新内容。聚焦时机用事件而非定时器（退场时长可配置、跨路由渲染时序不定，
+// 猜毫秒数必有竞态），且要覆盖两条路径：
+// - 同页锚点导航：DocsShell 不卸载，Slideover 正常退场 → after:leave 聚焦；
+// - 跨页导航（域首页 ↔ 指南子页是不同 page 组件）：DocsShell 整个卸载重建，
+//   旧实例的 after:leave 永不触发 → pending 状态放 useState 跨实例存活，
+//   由新实例 onMounted 接力聚焦。
+// 目标锚点优先，找不到时聚焦正文容器 #docs-shell-content。
+const pendingFocusHash = useState<string | null>('docs-shell-pending-focus', () => null)
+
 function onDrawerNavClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
   const link = target?.closest('a[href]')
   if (!link) return
-  navDrawerOpen.value = false
   const href = link.getAttribute('href') ?? ''
-  const hash = href.includes('#') ? href.slice(href.indexOf('#')) : ''
-  void nextTick(() => {
-    // 等 Slideover 退场动画归还焦点后再抢回来，落到正文
-    setTimeout(() => {
-      const dest = (hash && document.querySelector<HTMLElement>(hash))
-        || document.getElementById('docs-shell-content')
-      if (!dest) return
-      // 锚点 section 本身不可聚焦，补程序化聚焦所需的 tabindex
-      if (!dest.hasAttribute('tabindex')) dest.setAttribute('tabindex', '-1')
-      dest.focus({ preventScroll: true })
-    }, 250)
-  })
+  pendingFocusHash.value = href.includes('#') ? href.slice(href.indexOf('#')) : ''
+  navDrawerOpen.value = false
 }
+
+async function focusPendingTarget() {
+  if (pendingFocusHash.value === null) return
+  const hash = pendingFocusHash.value
+  pendingFocusHash.value = null
+  // 等当前渲染批次落定后再找目标（跨页时目标节点刚挂载）
+  await nextTick()
+  const dest = (hash && document.querySelector<HTMLElement>(hash))
+    || document.getElementById('docs-shell-content')
+  if (!dest) return
+  // 锚点 section 本身不可聚焦，补程序化聚焦所需的 tabindex
+  if (!dest.hasAttribute('tabindex')) dest.setAttribute('tabindex', '-1')
+  dest.focus({ preventScroll: true })
+}
+
+onMounted(() => {
+  // 跨页接力：上一实例来不及处理的焦点目标由新实例完成
+  void focusPendingTarget()
+})
 
 onMounted(() => {
   const lgQuery = window.matchMedia(geistMinWidthQuery('lg'))
@@ -159,13 +175,14 @@ async function searchBody(query: string) {
       <div class="flex h-14 min-w-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <!-- 品牌 / 域切换器（Vercel 式「brand / scope」结构）。品牌为中性
              假品牌——真源 demo 不携带消费项目品牌；消费项目在此换成自己的
-             mark 与字标，label/描述走 i18n 注入（见 project-setup.md）。 -->
+             mark 与字标，label/描述��� i18n 注入（见 project-setup.md）。 -->
         <div class="flex min-w-0 items-center gap-1.5">
           <USlideover
             v-model:open="navDrawerOpen"
             side="left"
             title="文档导航"
             :ui="{ content: 'max-w-xs', body: 'p-0 sm:p-0' }"
+            @after:leave="focusPendingTarget"
           >
             <UButton
               icon="i-lucide-menu"
