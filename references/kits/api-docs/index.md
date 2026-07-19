@@ -23,7 +23,28 @@
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
-| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一全局搜索跨板块过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站全文搜索（`⌘K` UContentSearch）应放 app 顶栏、与侧栏就地过滤分层，不塞进侧栏；`#header` slot 仅作通用扩展点。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `components/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
+| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+
+### SiteSearch 契约
+
+`ApiDocsSiteSearch` 的 anatomy 是 `UButton` trigger → `UModal` →
+`UCommandPalette`。`UModal` 提供 dialog focus trap、Esc 与关闭后焦点恢复；结果选择
+统一关闭面板，查询在每次关闭时清空。同页 hash 结果会把焦点和滚动交给目标 section，
+并遵守 reduced motion。
+
+主要输入：
+
+- `groups: { id, label, items[] }[]`：静态指南/端点索引；item 接受
+  `label / to / method? / scenarios? / icon? / suffix?`；
+- `search(query)` + `searchGroupLabel`：可选异步正文结果，组件负责 debounce 与
+  stale response cleanup，数据源排序不再被 Fuse 重排；
+- `extraGroups`：消费项目自己的快捷入口；
+- `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入。
+
+registry item 为 `api-docs-site-search`，只声明
+`api-docs-method-badge` 依赖；后者的 closure 自动带入 foundation。完整文档站装配看
+`/kits/api-docs/docs-shell`，但该 shell 是 gallery-private recipe，不属于 copy-in 切片。
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -211,9 +232,9 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 - `kits/api-docs/components/{CodeBlock,RequestExample,ResponseExample}.vue`
 - `kits/api-docs/components/{MethodBadge,LifecycleBadge}.vue` + `kits/api-docs/utils/{method,lifecycle}-preset.ts`
-- `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem}.vue`
+- `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SidebarNav,SiteSearch}.vue`
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
-- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`app/pages/kits/api-docs/reference.vue` + `app/components/demo/api-docs/CodeRail.vue`（gallery-private）
+- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`docs-shell.vue`；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/badge.ts`
 
 ## 不要臆造

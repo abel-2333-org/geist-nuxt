@@ -17,6 +17,7 @@ app/pages/
     index.vue                       API Docs 组件目录
     reference.vue                   页面级完整参考页
     sidebar-nav.vue                 SidebarNav 专项响应式样例
+    docs-shell.vue                  多域文档站外壳成熟形态
 ```
 
 - 正式路由只展示已采纳 foundation / kit 资产。
@@ -72,6 +73,16 @@ app/components/demo/api-docs/CodeRail.vue
 - 不进入 `kits/api-docs/`；
 - 不进入根 `registry.json`；
 - 下游需要时在自己的页面层 copy & adapt，不把它误升为系统组件。
+
+同类的 `DocsShell.vue`、`DocsDomainSwitcher.vue` 与 `DocsShellReference.vue`
+共同组成 `/kits/api-docs/docs-shell` 的 gallery-private 文档站 recipe。域 fixture 与
+`nav → site search` adapter 放在 `app/utils/demo/api-docs/docs-shell-data.ts`，不放进
+`app/components/`，避免 Nuxt 把普通 `.ts` 数据文件纳入组件扫描。整套 recipe：
+
+- 只用于展示 `SiteSearch + SidebarNav + reference content` 如何装配；
+- 不进入 foundation、kit 或 registry；
+- 使用中性的 Example Cloud 数据，不携带任何消费项目品牌、路由或 contract；
+- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。
 
 ## 自动导航与移动端
 

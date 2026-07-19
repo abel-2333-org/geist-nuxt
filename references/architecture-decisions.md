@@ -118,6 +118,24 @@ CI 先验证根 registry、registry 行为、root typecheck/build 与临时 cons
 
 分发前必须全量扫描 U+FFFD（UTF-8 `EF BF BD`）。任何源码、JSON 或文档出现 replacement character 都视为编码损坏并阻断 release。
 
+## ADR-009：SiteSearch 进 kit，DocsShell 留 gallery-private
+
+**状态：已采纳，2026-07-19。**
+
+`ApiDocsSiteSearch` 是 API 文档领域组件：它复用 method badge，并围绕指南、端点、
+HTTP method 与 scenario 组织结果，因此进入 `kits/api-docs/` 和根 registry。组件只认
+已解析的 display model；静态 groups 始终可用，可选 `search(query)` 接收消费项目的
+正文索引结果。它不导入 `@nuxt/content`、不认识 OpenAPI 或私有 spec。
+
+完整 `DocsShell` 同时决定品牌、产品域、路由、页面结构、fixture 与正文 adapter，
+这些职责没有稳定的跨项目契约，因此作为 `app/components/demo/api-docs/` 下的
+gallery-private recipe：不进 foundation、kit 或 registry。gallery 使用中性数据展示
+可行装配；消费项目拥有自己的 shell，并按需 copy & adapt recipe。
+
+`SidebarNav` 与 `SiteSearch` 是两个正交层级：前者用 `/` 过滤当前导航树，后者用
+`⌘K` 从全站结果中跳转。`SidebarNav` 只负责全高列与内部滚动，外框、圆角和高度由
+页面 shell 或 standalone demo 的父布局拥有，避免嵌套时出现双边框和双高度约束。
+
 ## 上下文成本纪律
 
 - `SKILL.md` 只保留选择与硬流程，详细契约按需放 `references/`。

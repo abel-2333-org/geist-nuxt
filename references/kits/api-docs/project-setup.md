@@ -106,7 +106,8 @@ const { t } = useI18n()
 - **kit 组件是「内容管线无关」的**：`ApiDocsCodeBlock`、`ApiDocsResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。根 preview 不内置 content 只是 snapshot 可靠性考量，真实项目可自行引入。
-- **全站全文搜索也在这一侧**：`@nuxt/content` 就位后，用 Nuxt UI 的 `<UContentSearch>` / `<UContentSearchButton>`（`⌘K` 模态、跨整站文档正文）。它绑 content、属消费项目职责，**不进 kit 切片**。正确的落位是 **app 顶栏 / navbar**（参考 Nuxt UI / Vercel 文档站），与 `<ApiDocsSidebarNav>` 侧栏内的「就地过滤搜索」分属**不同层级**——两者各司其职、靠层级区分。**不要**把 `UContentSearchButton` 塞进侧栏顶部（会和就地过滤框变成两个雷同搜索框上下紧贴），更不要把 `UContentSearch` 焊进导航组件。
+- **全站搜索的 UI 可以直接使用 `ApiDocsSiteSearch`**：静态 `groups` 由导航 ViewModel 派生；正文检索由消费项目把 Content 查询适配为 `search(query) → SiteSearchItem[]`。这样 kit 提供一致的 `⌘K` trigger / modal / method badge 呈现，但仍不导入 Content。消费项目若更偏好 Content 自带的 `<UContentSearch>` / `<UContentSearchButton>` 也可以直接在 app 层使用；它们仍不进入 kit dependency closure。
+- 无论选哪种实现，正位都是 **app 顶栏 / navbar**，与 `<ApiDocsSidebarNav>` 的 `/` 树内过滤分属不同层级。不要把全站搜索塞进侧栏 `#header`，否则会与树内过滤框形成两个雷同入口。
 
 消费项目自行安装 `@nuxt/content`，并让 `@nuxt/ui` 先于它注册：
 

@@ -128,19 +128,20 @@ const groups: Group[] = [
   },
 ]
 
-// The #header slot stand-in. A real docs app would open <UContentSearch> here
-// (⌘K full-text over @nuxt/content); the gallery has no content collection, so
-// we just explain the split. defineShortcuts wires ⌘K so the trigger feels real.
-const toast = useToast()
-function onSiteSearch() {
-  toast.add({
-    title: '全站搜索（演示占位）',
-    description: '真实项目在此处接 UContentSearch（⌘K 全文检索 @nuxt/content）。侧栏内的过滤搜索与它各司其职。',
-    icon: 'i-lucide-search',
-    color: 'neutral',
-  })
-}
-defineShortcuts({ meta_k: onSiteSearch })
+const siteSearchGroups = groups.map((group, groupIndex) => ({
+  id: `sidebar-demo-${groupIndex}`,
+  label: group.label ?? 'Documentation',
+  items: group.sections.flatMap(section => section.items
+    .filter(item => Boolean(item.to))
+    .map(item => ({
+      label: item.label,
+      to: item.to!,
+      method: item.method,
+      scenarios: item.scenarios,
+      icon: item.icon,
+      suffix: section.label,
+    }))),
+}))
 </script>
 
 <template>
@@ -158,36 +159,31 @@ defineShortcuts({ meta_k: onSiteSearch })
         </p>
       </div>
 
-      <!-- Mock docs-shell top bar. Site-wide full-text search (⌘K) belongs in
+      <!-- Mock docs-shell top bar. Site-wide search (⌘K) belongs in
            the app's top navbar — a different level from the sidebar's in-tree
            filter — so the two searches read as distinct, not two look-alike
-           boxes stacked together. Real apps put <UContentSearchButton> here. -->
+           boxes stacked together. -->
       <div class="flex items-center justify-between gap-4 rounded-lg border border-default bg-elevated/40 px-4 py-2.5">
         <div class="flex items-center gap-2 text-sm font-medium text-highlighted">
           <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
           支付 API 文档
         </div>
-        <UButton
-          color="neutral"
-          variant="outline"
-          size="sm"
-          class="text-muted"
-          @click="onSiteSearch"
-        >
-          <UIcon name="i-lucide-search" class="size-4" />
-          <span class="max-sm:hidden">搜索全部文档</span>
-          <span class="flex items-center gap-0.5">
-            <UKbd value="meta" />
-            <UKbd value="K" />
-          </span>
-        </UButton>
+        <ApiDocsSiteSearch
+          :groups="siteSearchGroups"
+          trigger-label="搜索全部文档"
+          aria-label="搜索全部文档"
+          modal-title="搜索 API 文档"
+          placeholder="搜索指南、接口或场景"
+          empty-label="没有匹配的文档"
+          scenario-separator="、"
+        />
       </div>
 
       <!-- The sidebar column is `auto` so it follows the nav's own (resizable)
            width; drag the nav's right edge and this track tracks it. -->
       <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
         <!-- The sidebar itself, sticky like a real docs shell. -->
-        <div class="lg:sticky lg:top-20 lg:self-start">
+        <div class="h-[32rem] overflow-hidden rounded-lg border border-default lg:sticky lg:top-20 lg:self-start">
           <ApiDocsSidebarNav
             :groups="groups"
             aria-label="支付文档"
@@ -210,7 +206,7 @@ defineShortcuts({ meta_k: onSiteSearch })
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
                 <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）是<b class="font-medium text-toned">全站全文搜索</b>——它属于 app top bar，与侧栏的树内过滤不同层级、不并排。真实项目在此接 <code class="font-mono text-[0.8125rem]">UContentSearch</code>（<code class="font-mono text-[0.8125rem]">@nuxt/content</code>）；此处为演示占位。</span>
+                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）由 <code class="font-mono text-[0.8125rem]">ApiDocsSiteSearch</code> 提供，跨指南与接口导航；消费项目还可通过异步 <code class="font-mono text-[0.8125rem]">search</code> 接入自己的正文索引。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
