@@ -56,8 +56,9 @@ onMounted(() => anchor.initFromHash())
          reference demo 的分栏宽度互不串扰）；右栏钉成视口高 sticky 长条，
          内部 Request/Response 纵向分栏；gate 之下回退为普通堆叠（rail 的
          enabled-from 与之保持同步）。
-         gate 用 xl 而非 lg：外层侧栏可拖到 460px，lg 下限时剩余宽度放不下
-         340 + 12 + 340 的分栏最小值——xl（1200px）起才有余量。 -->
+         gate 用 xl 而非 lg，且外壳把侧栏拖拽上限收到 400（DocsShell）：
+         xl 下限 1200 − 侧栏 400 − padding 80 = 720 ≥ 340 + 12 + 340 = 692，
+         分栏最小值在整个 xl 区间都放得下。 -->
     <section id="checkout-create" class="scroll-mt-[var(--docs-shell-sticky-offset)]">
       <SplitPane
         direction="row"
@@ -88,12 +89,14 @@ onMounted(() => anchor.initFromHash())
               </p>
             </header>
 
+            <!-- 端点标题是 h2，字段分组归入其下为 h3（FieldGroup 默认 h2
+                 是给独立成岛的场景用的） -->
             <div class="mt-8 space-y-10">
-              <ApiDocsFieldGroup label="Request Body" :count="paymentsBodyFields.length">
+              <ApiDocsFieldGroup label="Request Body" :count="paymentsBodyFields.length" :heading-level="3">
                 <ApiDocsFieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" />
               </ApiDocsFieldGroup>
 
-              <ApiDocsFieldGroup label="Response Body" :count="paymentsResponseFields.length">
+              <ApiDocsFieldGroup label="Response Body" :count="paymentsResponseFields.length" :heading-level="3">
                 <ApiDocsFieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" />
               </ApiDocsFieldGroup>
             </div>

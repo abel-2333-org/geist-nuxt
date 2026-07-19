@@ -68,7 +68,9 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 
 **状态：已采纳。**
 
-`app/components/demo/api-docs/CodeRail.vue` 只服务 API reference gallery 页，负责 Request / Response 的纵向分配与内容优先重分配。该行为与具体页面 chrome 强耦合，目前没有第二个消费者。
+`app/components/demo/api-docs/CodeRail.vue` 负责 Request / Response 的纵向分配与内容优先重分配，消费者是 API reference gallery 页与 docs-shell recipe 的正文（`DocsShellReference`）——两者都是 gallery-private 页面 recipe，不构成跨项目分发需求。
+
+保持 gallery-private 的理由不是消费者数量，而是：该行为与页面 recipe 的 chrome（sticky 偏移、视口高度长条、断点 gate）强耦合，没有稳定的跨项目分发契约。
 
 因此 CodeRail：
 
@@ -77,7 +79,7 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 - 不进 registry；
 - 作为下游页面 copy & adapt 的活 recipe。
 
-出现第二个真实消费者后再评估抽象，不预先泛化。
+出现 gallery 之外的真实分发需求（且能定义稳定契约）后再评估抽象，不预先泛化。
 
 ## ADR-005：SidebarNav 与测量式溢出保留在 API Docs kit
 

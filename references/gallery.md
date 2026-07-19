@@ -17,7 +17,10 @@ app/pages/
     index.vue                       API Docs 组件目录
     reference.vue                   页面级完整参考页
     sidebar-nav.vue                 SidebarNav 专项响应式样例
-    docs-shell.vue                  多域文档站外壳成熟形态
+    docs-shell/
+      index.vue                     重定向到默认域
+      [domain]/index.vue            多域文档站外壳（域首页 = 参考长滚动）
+      [domain]/[slug].vue           指南子页（一页一文 + prev/next）
 ```
 
 - 正式路由只展示已采纳 foundation / kit 资产。

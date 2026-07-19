@@ -21,7 +21,7 @@
 | `components/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 foundation `SemanticBadge` | — |
 | `components/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 foundation `SemanticBadge` | — |
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
-| `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`<h2>`）+ 可选计数，包裹一列字段行 | — |
+| `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
 | `components/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
 | `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
@@ -116,13 +116,13 @@ registry item 为 `api-docs-site-search`，只声明
 
   **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、内容优先重分配）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
-**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
+**内容优先重分配（页面 recipe，不在 foundation）**：这是 api-docs 消费页专属的布局逻辑——它与代码卡片的「封顶 + 滚动」强耦合，故**留在页面里**，不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏���+ 页面私有的 `app/components/demo/api-docs/CodeRail.vue`（`<DemoApiDocsCodeRail>`，纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`）。**`CodeRail` 是 gallery-private、数据无关的 recipe 载体，刻意不进 foundation、不进 kit、不进根 registry**——下游消费页照它在自己项目里重建即可。
 
 > **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：这类只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（如 `demo/api-docs/CodeRail.vue` → `<DemoApiDocsCodeRail>`）。这样 kit 归属编码进目录与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。
 
 不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
-1. 两栏自然高度之和 ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
+1. 两栏自然高度之��� ≤ 可用高度（fit 态）→ 两栏各按自然高度渲染，右栏整体收缩贴合内容，横向把手设 `disabled`（不可拖、无 grip）。
 2. 溢出时（和 > 可用高度）→ 总高封顶为可用高度，按比例分，且**较短的一栏封顶到自然高度、把富余让给溢出的另一栏**；此时横向把手激活，拖动调比例。
 
 页面私有纯函数 recipe：
@@ -177,9 +177,9 @@ gallery 有**四个 api-docs demo 页，职责互补**：
 | `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ 页面私有 `<DemoApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
-| `app/pages/kits/api-docs/docs-shell.vue` | 文档站外壳 | **完整文档门户 recipe** | gallery-private 的 header、domain switcher、`ApiDocsSiteSearch`、`ApiDocsSidebarNav` 与 reference-style 正文装配；用于组合验证，不是 registry 切片 |
+| `app/pages/kits/api-docs/docs-shell/`（`index.vue` 重定向、`[domain]/index.vue` 域首页、`[domain]/[slug].vue` 指南子页） | 文档站外壳 | **完整文档门户 recipe** | gallery-private 的 header、domain switcher、`ApiDocsSiteSearch`、`ApiDocsSidebarNav` 与 reference-style 正文装配，路径分段路由 + 指南分页；用于组合验证，不是 registry 切片 |
 
-> 四页都由 gallery 的假 ViewModel 驱动，数据不写进 kit。**新增单组件陈列进 `index.vue`；参考页布局进 `reference.vue`；导航专项进 `sidebar-nav.vue`；整站壳层组合进 `docs-shell.vue`**。
+> 各页都由 gallery 的假 ViewModel 驱动，数据不写进 kit。**新增单组件陈列进 `index.vue`；参考页布局进 `reference.vue`；导航专项进 `sidebar-nav.vue`；整站壳层组合进 `docs-shell/` 路由树**。
 
 最小拼法（单区块，index.vue 风格）：
 
@@ -209,7 +209,7 @@ gallery 有**四个 api-docs demo 页，职责互补**：
 
 装配整页时容易漏掉、但 review 必查的几条：
 
-- **标题层级不跳级**。页面只有一个 `<h1>`（由消费项目的页面 header 提供，并加 `text-balance` 防孤字）；其下的字段分组标题（`FieldGroup`）必须是 `<h2>`，不要图视觉小就写成 `<h3>`/`<h4>` 造成 `h1→h3` 跳跃。**用原生语义标题 `<h1>/<h2>`，不要用 Nuxt UI 的 `ProseH*`**——`ProseH*` 是 markdown 内容管线组件（读 `mdc.headings` 配置决定是否注入 `#` 锚点、排版是长文正文尺度），本 kit 刻意不装 MDC，用它只会退化成带正文尺度的普通标题并引入隐式 MDC 依赖。这些标题是「应用界面结构」而非「渲染出的 markdown 正文」，属不同层。
+- **标题层级不跳级**。页面只有一个 `<h1>`（由消费项目的页面 header 提供，并加 `text-balance` 防孤字）；字段分组标题（`FieldGroup`）用 `heading-level` 接进所在层级——直接挂在 h1 之下用默认 `2`，挂在 `<h2>` 端点标题之下传 `3`。层级由文档结构决定，不要图视觉小而跳级（视觉尺寸是固定的 mono 小字，与层级无关）。**用原生语义标题 `<h1>/<h2>`，不要用 Nuxt UI 的 `ProseH*`**——`ProseH*` 是 markdown 内容管线组件（读 `mdc.headings` 配置决定是否注入 `#` 锚点、排版是长文正文尺度），本 kit 刻意不装 MDC，用它只会退化成带正文尺度的普通标题并引入隐式 MDC 依赖。这些标题是「应用界面结构」而非「渲染出的 markdown 正文」，属不同层。
 - **站内链接一律 `NuxtLink`/`ULink`，页面模板里也不例外**。不止 `ProseText` 内部——页面骨架里的 logo、面包屑、"Learn more" 之类引用链接同样别手写 `<a href="/x">`（会整页刷新、丢预取）。这是基座决策表「单链接用 ULink」的延伸，最易在 header / 摘要被漏掉。
 - **提供 skip link**：`header + main` 结构要在最顶部放一个聚焦前 `sr-only`、`focus:not-sr-only` 的「Skip to content」锚点，`href="#main-content"` 指向 `<main id="main-content">`，让键盘 / AT 用户跳过 header。
 - **`<img>` 显式 `width`/`height`**。即使有 `size-*` 兜底，也要写死内在尺寸防 CLS。
@@ -238,7 +238,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - `kits/api-docs/components/{MethodBadge,LifecycleBadge}.vue` + `kits/api-docs/utils/{method,lifecycle}-preset.ts`
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SidebarNav,SiteSearch}.vue`
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
-- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`docs-shell.vue`；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
+- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/badge.ts`
 
 ## 不要臆造

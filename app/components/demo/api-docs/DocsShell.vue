@@ -61,7 +61,12 @@ function resolveTo(to: string) {
 // 侧栏 active 双语义，均显式计算（带 hash 的路径 NuxtLink 只按 path 匹配、
 // 会把域首页所有锚点同时点亮，所以两类都不能交给 ULink 自动判定）：
 // - 指南子页 item：当前 route 的 slug 段等于 to；
-// - 锚点 item：在域首页（无 slug）且 route.hash 等于 to。
+// - 锚点 item：在域首页（无 slug）且 route.hash 等于 to。刚进域首页时
+//   hash 为空，归一为 #overview——否则整个侧栏没有「当前位置」。
+const effectiveHash = computed(() =>
+  route.params.slug ? route.hash : (route.hash || '#overview'),
+)
+
 const navGroups = computed(() =>
   props.domain.navGroups.map(group => ({
     ...group,
@@ -71,7 +76,7 @@ const navGroups = computed(() =>
         ...item,
         to: resolveTo(item.to),
         active: item.to.startsWith('#')
-          ? !route.params.slug && item.to === route.hash
+          ? !route.params.slug && item.to === effectiveHash.value
           : route.params.slug === item.to,
       })),
     })),
@@ -89,9 +94,27 @@ const navGroups = computed(() =>
 const navDrawerOpen = ref(false)
 const isDesktop = ref(true)
 
+// 抽屉内点击导航链接：收起抽屉，并在路由落定后把焦点交给目标——Slideover
+// 退场默认把焦点还给汉堡按钮，读屏用户会「回到」顶栏而不是新内容。目标锚点
+// 优先（section 均可 tabindex 聚焦），找不到时聚焦正文容器 #docs-shell-content。
 function onDrawerNavClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
-  if (target?.closest('a[href]')) navDrawerOpen.value = false
+  const link = target?.closest('a[href]')
+  if (!link) return
+  navDrawerOpen.value = false
+  const href = link.getAttribute('href') ?? ''
+  const hash = href.includes('#') ? href.slice(href.indexOf('#')) : ''
+  void nextTick(() => {
+    // 等 Slideover 退场动画归还焦点后再抢回来，落到正文
+    setTimeout(() => {
+      const dest = (hash && document.querySelector<HTMLElement>(hash))
+        || document.getElementById('docs-shell-content')
+      if (!dest) return
+      // 锚点 section 本身不可聚焦，补程序化聚焦所需的 tabindex
+      if (!dest.hasAttribute('tabindex')) dest.setAttribute('tabindex', '-1')
+      dest.focus({ preventScroll: true })
+    }, 250)
+  })
 }
 
 onMounted(() => {
@@ -215,10 +238,14 @@ async function searchBody(query: string) {
         v-if="isDesktop"
         class="max-lg:hidden lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start"
       >
+        <!-- max-width 收到 400：xl（1200px）下限时正文分栏还要装下
+             340 + 12 + 340 + 80px padding（见 DocsShellReference 的 gate
+             注释），侧栏上限须 ≤ 1200 − 80 − 692 = 428。 -->
         <ApiDocsSidebarNav
           :key="props.domain.id"
           class="border-r border-default"
           :groups="navGroups"
+          :max-width="400"
           :aria-label="`${props.domain.label}文档`"
           search-placeholder="搜索文档"
           clear-label="清除搜索"

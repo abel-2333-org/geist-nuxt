@@ -561,10 +561,18 @@ onMounted(() => {
                        is driven by `item.active` + `group-hover/row` rather than
                        the link's own classes, since the link no longer wraps the
                        text. -->
+                  <!-- Active must come from ONE source: when `item.active` is
+                       provided it drives background (ULink :active), text
+                       colour, AND aria-current together — ULink only emits
+                       aria-current from its own route matching, so a manually
+                       driven active needs the explicit binding or screen
+                       readers lose "current page" while sighted users see the
+                       highlight. -->
                   <li v-for="item in entry.items" :key="item.to ?? item.label" class="group/row relative">
                     <ULink
                       :to="item.to"
                       :active="item.active"
+                      :aria-current="item.active ? 'page' : undefined"
                       :aria-label="item.label"
                       active-class="bg-primary/10"
                       inactive-class="hover:bg-elevated"

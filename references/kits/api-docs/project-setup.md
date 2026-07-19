@@ -112,7 +112,7 @@ app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
 - 域切换器的每个选项就是一个 `NuxtLink`（`to="/docs/payouts"`），语义天然正确，无需手动同步状态。
 - 页内锚点（字段深链接）继续用 hash，与路径分段正交。
 
-> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域、侧栏 active 按 `route.hash` 显式计算。消费项目照抄该结构，再把域内单页锚点展开成 `[...slug]` 子页即可。
+> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域、侧栏 active 按 `route.hash` 显式计算。消费项目参照该结构，再按下节把域内容拆成 `[...slug]` 子页（demo 未示范的资源参考子页见下节最后一条）。
 
 ### 域内怎么拆页：指南分页、参考长滚动
 
@@ -120,7 +120,8 @@ app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
 
 - **指南/教程（快速开始、认证、错误处理）→ 一页一文**：各自是 `[...slug]` 子页，线性阅读、页尾放上一篇/下一篇。用 `@nuxt/content` 时直接上 `UContentSurround`（`queryCollectionItemSurroundings` 供数据）+ `UContentToc`；不用 content 时自组 prev-next 等价实现（demo 的 `DocsShellGuidePage` 即此路——**注意 `UContent*` 系组件只在装了 `@nuxt/content` 时才注册**，未装时该标签会被静默渲染成空的未知元素，不报错、不出内容）。
 - **端点参考（一个资源的端点 + 字段树 + 代码栏）→ 按资源一页长滚动**：`/docs/payments/checkout` 一页装该资源全部端点，保留侧栏锚点 + 字段深链接 + SplitPane/CodeRail 对照式阅读——这是 reference 的使用形态（跳转-对照-复制），拆成一端点一页反而打断 `⌘K` 深链与滚动定位。
-- SidebarNav 的 `to` 两类混排即可：指南 item 指路径（`/docs/payments/quickstart`），参考 item 指路径+hash（`/docs/payments/checkout#create`）。**两类 active 都要显式计算**：带 hash 的路径 NuxtLink 只按 path 匹配，会把参考页所有锚点同时点亮——demo 的 DocsShell 按「slug 段相等 / 域首页且 hash 相等」双语义计算后传 `item.active`，照抄即可。
+- SidebarNav 的 `to` 混排即可：指南 item 指路径（`/docs/payments/quickstart`），参考 item 指路径+hash（`/docs/payments/checkout#create`）。**所有 active 都要显式计算**：带 hash 的路径 NuxtLink 只按 path 匹配，会把参考页所有锚点同时点亮。
+- **demo 的 resolver 只覆盖两类目标**（域首页锚点 `#hash`、指南子页裸 slug），因为 demo 单域只有一页参考、参考锚点全在域首页。消费项目有多个资源参考页时要自行扩展第三类目标（资源 slug + 锚点，即上面的 `checkout#create`），active 判定相应变为「slug 段相等 且 hash 相等」——demo 的双语义计算是三类形态的子集，思路可迁移，代码不可原样照搬。
 
 ## @nuxt/content 取舍
 
