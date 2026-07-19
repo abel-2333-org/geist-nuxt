@@ -1,6 +1,6 @@
 # 整页骨架（Page shell）
 
-把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、粘顶 header、主题切换、全宽主体（`UContainer` 只提供响应式左右 padding，`--ui-container` 为 100%）。都只用核心 Nuxt UI 组件 + Geist token，全部由 Nuxt 自动导入，无需手写 `import`。
+把一整屏页面搭起来的成品级外壳：根组件（`UApp`）、粘顶 header、主题切换、全宽主体（`UContainer` 只提供响应式左右 padding，`--ui-container` 为 100%）。都只用核心 Nuxt UI 组件 + Geist token；组件自动导入，locale 从 `@nuxt/ui/locale` 显式导入。
 
 > 想拼**页面内的一块**（区块/卡片网格/表单/空态/反馈）看同目录 `patterns.md`；想查「单个组件用法」看 `components/`。本文件只讲**整页外壳怎么搭**。
 
@@ -15,7 +15,7 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 </script>
 <template>
   <div class="min-h-screen flex flex-col bg-default text-default antialiased">
-    <CompositionAppHeader :items="items">      <!-- core 提供的响应式头部 -->
+    <CompositionAppHeader :items="items">      <!-- foundation 提供的响应式头部 -->
       <template #brand>…</template>            <!-- logo/wordmark -->
       <template #actions>…<ThemeToggle /></template>
     </CompositionAppHeader>
@@ -25,11 +25,11 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 </template>
 ```
 
-- **粘顶 header 用 core 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
+- **粘顶 header 用 foundation 的 `<CompositionAppHeader>`**（下详），移动端抽屉、断点、汉堡都内建，不手写。
 - **主题切换**默认已内置在 `<CompositionAppHeader>` 的 `#actions`；覆盖该 slot 时需自己带上 `<ThemeToggle />`。
 - **logo/wordmark**用真实资源（见 `brand-assets.md`），不要占位图。
 
-已验证的应用外壳（Nuxt 4）源码：`starter/app/app.vue`（根组件）、`apps/gallery/app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`packages/core/app/components/composition/AppHeader.vue`（core 提供的响应式头部）、`packages/core/app/components/ThemeToggle.vue`（core 提供，直接 `<ThemeToggle />`）。
+已验证的应用外壳（Nuxt 4）源码：`app/app.vue`（根组件）、`app/layouts/default.vue`（完整外壳活样例：header + 自动导航 + footer）、`foundation/compositions/AppHeader.vue`（响应式头部）、`foundation/components/ThemeToggle.vue`（直接 `<ThemeToggle />`）。
 
 ## 根组件（`app/app.vue`）
 
@@ -37,6 +37,8 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 
 ```vue
 <script setup lang="ts">
+import { zh_cn } from '@nuxt/ui/locale'
+
 useHead({
   title: 'geist-nuxt · Geist visual language on Nuxt UI',
   meta: [
@@ -48,48 +50,29 @@ useHead({
 </script>
 
 <template>
-  <UApp>
-    <NuxtPage />
+  <UApp :locale="zh_cn">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </UApp>
 </template>
 ```
 
-## 明暗切换（`ThemeToggle`，core 提供）
+## 明暗切换（`ThemeToggle`，foundation 提供）
 
-用 Nuxt UI 内置的 `@nuxtjs/color-mode`（随 `@nuxt/ui` 模块自动注册），通过 `useColorMode()` 读写偏好——不要自己写 class 切换或 localStorage 逻辑。`useColorMode` / `computed` 都由 Nuxt 自动导入。用 `<ClientOnly>` 包裹以避免 SSR 水合闪烁。
+`ThemeToggle` 是稳定的 foundation 组件名，内部直接委托 Nuxt UI 的 `<UColorModeButton>`。切换状态、SSR 处理、图标和可访问名称都由 Nuxt UI 维护；可访问名称会读取根 `<UApp :locale="...">` 的 locale。不要在这里重复实现 `useColorMode()`、`ClientOnly`、class 或 localStorage 逻辑。
 
 ```vue
-<script setup lang="ts">
-const colorMode = useColorMode()
-const isDark = computed(() => colorMode.value === 'dark')
-function toggle() {
-  colorMode.preference = isDark.value ? 'light' : 'dark'
-}
-</script>
-
 <template>
-  <ClientOnly>
-    <UTooltip :text="isDark ? '切换到浅色' : '切换到深色'">
-      <UButton
-        :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
-        color="neutral"
-        variant="ghost"
-        :aria-label="isDark ? '切换到浅色模式' : '切换到深色模式'"
-        @click="toggle"
-      />
-    </UTooltip>
-    <template #fallback>
-      <UButton icon="i-lucide-sun" color="neutral" variant="ghost" aria-label="切换颜色模式" />
-    </template>
-  </ClientOnly>
+  <UColorModeButton />
 </template>
 ```
 
 `nuxt.config.ts` 里配 `colorMode: { preference: 'system', fallback: 'light' }`——Geist 是浅色优先的画布。
 
-## Header（`<CompositionAppHeader>`，core 提供）
+## Header（`<CompositionAppHeader>`，foundation 提供）
 
-粘顶 + 响应式头部是 core 的 composition 组件（`packages/core/app/components/composition/AppHeader.vue`），
+粘顶 + 响应式头部是 foundation 的 composition 组件（`foundation/compositions/AppHeader.vue`），
 基于 Nuxt UI `UHeader mode="slideover"`：**桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由变化自动收起**——全部内建，不手写 `<header>`、不手写 media query。它**数据无关**：
 
 - **prop `items: NavigationMenuItem[]`** —— 导航数据由消费方传入（如从路由树自动派生，见 `references/gallery.md`「页面组织」）。
@@ -126,4 +109,4 @@ const items = useGalleryNav()
 - 头部观感（`bg-default/75 backdrop-blur`、`border-b border-default`、`sticky top-0`、`h-(--ui-header-height)`）由 `UHeader` 主题内建，不要另写。
 - 图标按钮都带 `aria-label`；logo 图片 `alt=""`（旁边有文字）。
 - `UApp` 只在 `app/app.vue` 挂一次（提供 toast/overlay 上下文），不要重复挂载。
-- 明暗切换只用 `useColorMode()`（封装在 `ThemeToggle`），不要手写 class / localStorage。
+- 明暗切换委托 `UColorModeButton`（封装在 `ThemeToggle`），根 `UApp` 负责 locale；不要手写 class / localStorage。

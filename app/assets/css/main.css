@@ -1,0 +1,11 @@
+/* Gallery-only compile entry. The distributable foundation entry stays
+   self-contained so copy-in consumers can own app/assets/css/main.css. */
+@import "../../../foundation/assets/css/main.css";
+
+/* The gallery compiles source that intentionally lives outside Nuxt's app/
+   directory. Keep Tailwind's scan boundary aligned with Nuxt's explicit
+   component/import roots in nuxt.config.ts. Copy-in consumers do not need
+   these entries because registry files land under their app/ directory. */
+@source "../../../foundation/**/*";
+@source "../../../kits/**/*";
+@source "../../../playground/**/*";

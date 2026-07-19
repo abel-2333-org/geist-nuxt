@@ -1,44 +1,40 @@
 # AGENTS.md — geist-nuxt 设计系统
 
-> 本文件是 **Codex / 通用 agent** 的入口,只是**指针**——正文全部在 `references/**`,
-> 按需打开对应文件,不要凭记忆臆造组件、token 或 API。
-> 目录结构与架构决策只写在 `references/architecture-decisions.md`,本文件不复述。
+> Codex / 通用 agent 的入口指针。实现任何 UI 前先读 `SKILL.md`，再按任务加载
+> `references/**`；不要凭记忆臆造组件、token、registry item 或 API。
 
-## 权威来源
+## 权威边界
 
-构建**任何 UI**(页面、布局、表单、导航、反馈、覆盖层、主题)时,
-**geist-nuxt 是唯一权威的设计系统来源**。视觉参考 Vercel Geist,
-组件基座为 Nuxt UI v4(Vue,**不用 React**),方法论参考 Adobe Spectrum。
-基座以 npm 公共包 **`@geist-nuxt/core`**(Nuxt layer)分发,项目 `extends: ['@geist-nuxt/core']` 获得全部。
+- 本仓库采用 **Source-first**：根目录本身就是可运行的 Nuxt gallery，也是 v0 的 preview snapshot。
+- 通用资产真源在 `foundation/`；领域资产真源在 `kits/<kit>/`；候选组件只放 `playground/`。
+- `registry.json` 是唯一 copy-in manifest。不要手抄文件、不要维护 kit 内 registry，也不要依赖 npm 包或 Nuxt layer。
+- 根 app 是活的可视镜像；设计规则仍以 `references/**` 为准。
 
-## 路由(用到哪个读哪个)
+## 按任务读取
 
-- **契约与总规则**:`SKILL.md`
-- **基础地基(必读)**:`references/foundations/`
-  - `tokens.md`|`typography.md`|`spacing-layout.md`|`responsiveness.md`
-  - `elevation-motion.md`|`focus-a11y.md`|`conventions.md`|`voice-content.md`
-- **通用组件(任务域分组 + 官方名映射)**:`references/components/index.md`
-  - `buttons.md`|`forms.md`|`feedback.md`|`data-display.md`|`navigation.md`|`overlays.md`
-- **整屏装配(页面外壳、卡片网格、空/加载态、a11y 清单)**:`references/compositions.md`
-- **常驻画廊(看组件真实渲染)**:https://geist-nuxt-gallery.vercel.app —— core 全量 + kit demo,用 agent-browser 打开
-- **品牌资源(logo/favicon/图标)**:`references/brand-assets.md`
-- **方法论(造新组件时才读)**:`references/method/component-spec-template.md`、`references/method/spec-example.md`
-- **领域包(仅当项目属于该场景时加载)**:`references/kits/api-docs/index.md`
-  - 组件源码在真源 `packages/kits/api-docs/`;使用时按该 kit 的 `registry.json` **整切片 copy-in**
-    (条目 `files` 里的组件 + composables 一起拷进项目 `app/`)
+- 契约与总流程：`SKILL.md`
+- registry 安装、更新、漂移检查：`references/registry.md`
+- foundations：`references/foundations/`
+- 通用组件选择：`references/components/index.md`
+- 页面与组合：`references/compositions/index.md`
+- gallery / playground：`references/gallery.md`、`references/method/component-reflow.md`
+- API Docs kit：`references/kits/api-docs/index.md`
+- 品牌资源：`references/brand-assets.md`
+- 已部署画廊：https://geist-nuxt-gallery.vercel.app
 
 ## 硬规则
 
-- 只用 **Nuxt UI (Vue) 原语 + 设计 token**;**不用 React**。
-- 用设计 token,**不硬编码颜色 / 尺寸 / 圆角**。
-- 响应式用系统自己的断点与 primitive(见 `references/foundations/responsiveness.md`),
-  不要用临时 media query 或固定宽度。
-- 用系统资源,不用占位图。
-- 领域组件(如 API 文档那套)默认**不加载**,只有做该场景时才按 registry 切片装入。
-- kit 依赖方向:kit→自身、kit→core;**禁止 kit→kit**。
+- 只用 Nuxt UI v4（Vue）原语 + 语义 token；不用 React。
+- 不硬编码颜色、尺寸或圆角；响应式遵循系统断点和 primitive。
+- foundation 可被任何消费项目安装；kit 只能依赖 foundation 或本 kit，禁止 kit → kit。
+- copy-in 只走 `pnpm geist:copy` / `pnpm geist:update`；两者默认 dry-run，确认 plan 后必须显式加 `--write` 才会修改目标。可复现安装用 `--to <40-char-sha>`，该 SHA 必须等于当前 checkout `HEAD`；改完跑 `pnpm geist:check`。
+- 新组件先在 `/playground` 验证明暗、响应式、键盘和关键状态；人工采纳后才进入 foundation/kit + registry + gallery。
 
 ## 起步
 
-新项目从 `starter/` 起步——自足项目,依赖发布版 `@geist-nuxt/core`,
-provider、全局样式、字体已接好,`pnpm install && pnpm dev` 即跑。
-首页默认渲染 `<GeistShowcase />`,替换 `app/pages/index.vue` 开始做自己的应用,不要重建脚手架。
+```bash
+pnpm install
+pnpm dev
+```
+
+本地 gallery 与 v0 都从根 `.` 启动；`/playground` 是候选设计面，正式组件目录和 kit 页面是采纳后的评审面。

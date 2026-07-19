@@ -1,131 +1,78 @@
 ---
 name: geist-nuxt
-description: geist-nuxt 是一套基于 Nuxt UI v4 (Vue) 的 Geist 风格设计系统，是本项目构建 UI 的唯一权威来源。在这个项目里创建或修改任何界面时都要使用它——页面、布局（落地页、仪表盘、文档、设置、表单）、导航、表格、反馈、覆盖层、主题与品牌。视觉参考 Vercel Geist（Geist Sans/Mono 字体、紫色主色、真中性灰、近黑深色表面、6px 圆角、大留白），组件方法论参考 Adobe Spectrum（anatomy → state model → accessibility 规格化），组件基座为 Nuxt UI (Vue，非 React)。触发词："geist-nuxt"、"Geist"、"Nuxt UI"，或本项目内任何创建/修改 UI 的请求。
-metadata:
-  v0.kind: design-system
+description: geist-nuxt 是基于 Nuxt UI v4（Vue）的 Geist 风格 Source-first 设计系统。用于在本仓库或消费 Nuxt 项目中设计、实现、预览、安装、更新和评审页面、布局、表单、导航、反馈、覆盖层、主题、通用组件与 API Docs 组件；触发词包括 geist-nuxt、Geist、Nuxt UI、registry、copy-in、gallery、playground。视觉参考 Vercel Geist，组件方法论参考 Adobe Spectrum；不用 React。
 ---
 
-# geist-nuxt 设计系统
+# geist-nuxt
 
-geist-nuxt 是本项目 UI 的**唯一权威来源**。它把三层正交定位固化为一套可复用基座：
+## 先判断工作面
 
-- **视觉/品牌 = Vercel Geist**：Geist Sans / Mono 字体、紫色 primary、真中性灰、近黑深色表面、6px 圆角、大留白。
-- **组件方法论 = Adobe Spectrum**：每个组件按 anatomy → state model → accessibility 规范设计与评审，见 `references/method/component-spec-template.md`。
-- **组件基座 = Nuxt UI v4 (Vue)**：所有组件来自公共 npm 包 `@nuxt/ui`，作为 Nuxt 模块（`modules: ['@nuxt/ui']`）接入。**不使用 React。**
+- **设计 / 维护真源**：在本仓库根工作。根目录是可运行 Nuxt gallery，也是 v0 preview。
+- **使用现有资产**：在消费项目通过根 `registry.json` copy-in；不要复制粘贴零散文件。
+- **只看效果**：本地 `pnpm dev`，或打开 https://geist-nuxt-gallery.vercel.app。
 
-## 起点：npm 发布版 core + 自足 starter
+## Source-first 结构
 
-设计系统基座以 **公共 npm 包 `@geist-nuxt/core`** 分发。v0 新会话的项目就是真源 repo 的 `starter/`——一个**自足的独立 Nuxt 项目**（不是 workspace 成员），`pnpm install` 从 npm 拉取 core,零配置可跑。四块职责：
+- `foundation/`：通用 token、配置、components、compositions、composables、utils；所有消费项目的基础切片。
+- `kits/<kit>/`：领域增量；只依赖 foundation 或本 kit，禁止 kit → kit。
+- `playground/`：未采纳候选，不属于分发资产。
+- `app/`：根 gallery / v0 preview；demo、fixture、adapter 和页面私有 recipe 留在这里。
+- `registry.json`：唯一机器可读 manifest，描述 source、target 和依赖闭包。
+- `references/`：AI 读取的设计与操作契约；视觉实现不得反向覆盖文字规则。
 
-- **`@geist-nuxt/core`（npm 公共包，Nuxt layer）** = 基座：token/紫色 ramp/Geist 覆盖的全局 CSS、跨场景公共组件（`CopyButton`、`SplitPane`、`ThemeToggle`）、**自描述展示页 `GeistShowcase`**（含 `ShowcaseHero/Foundations/Compositions` 子件）、composables（`useCopy`、`useSplitPane`）。项目 `extends: ['@geist-nuxt/core']` 即自动获得全部。
-- **starter（当前项目形态）** = 首页只渲染 `<GeistShowcase />`。**做自己的应用时替换 `app/pages/index.vue` 这一行即可**，基座能力（组件/CSS/composables 自动导入）全部保留。不要重建脚手架。
-- **kits（如 api-docs）** = 场景组件，**不发包**。需要时按该 kit 的 `registry.json` **整切片 copy-in**：把条目 `files` 里列的所有文件（组件 + composables）一起拷进项目的 `app/components/` 与 `app/composables/`；`coreDeps` 由 extends core 天然满足。依赖方向只许 kit→自身、kit→core，**禁止 kit→kit**。
-- **gallery** = 真源 repo 内的常驻画廊，core 全量 + 各 kit demo，是评审与跨会话查看组件的公共参照。**唯一权威部署：https://geist-nuxt-gallery.vercel.app**（push main 自动更新；一个 URL 服务所有账号，不要另建平行部署）。要看某组件真实渲染，用 agent-browser 打开这个站。
+不存在 `@geist-nuxt/core` npm 包、Nuxt layer、workspace package 或 starter 分发边界。旧架构仅保留在 `docs/archive/`，已 superseded。
 
-provider（`app/app.vue` 里的 `UApp`）、全局 CSS、字体、明暗切换都已由 core layer 接好。**新增通用组件要回流真源 `packages/core`，并在 gallery 对应 `<Gallery{Group}>` section 加一条 `<GalleryEntry>`**（人工采纳关口）。注意：showcase 只放基础 + 招牌组合，**单组件逐个陈列归 gallery Catalog**，不要塞进 showcase。
+## 新增组件流程
 
-- **组件自动导入**：Nuxt UI 组件（`UButton`、`UCard`、`UInput` 等）与 core/kit/app 各自 `app/components/**` 下的组件都由 Nuxt 自动导入，模板里直接用，无需手写 import。约定开启目录前缀（`components: [{ path: '~/components', pathPrefix: true }]`），组件名 = 子目录名 + 文件名：`composition/SignupForm.vue` → `<CompositionSignupForm>`，根目录文件保持裸名（`GeistShowcase.vue` → `<GeistShowcase>`）。子目录名 = 使用场景，会进入每个调用名，**命名务必精确简洁**（见 `conventions.md`）。layer 下自动导入同样成立。
-- **明暗模式**由 Nuxt UI 内置的 `@nuxtjs/color-mode`（模块自动注册）管理，组合式 API 用 `useColorMode()`；见 `packages/core/app/components/ThemeToggle.vue`。`colorMode.preference: 'system'`。
-- **字体**由 `@nuxt/fonts`（Nuxt UI 自动注册）按名解析 `Geist` / `Geist Mono` 并自托管，无需手写 `<link>` 或 `@font-face`。
-- **图标**用 Iconify：`i-lucide-*`（UI 图标）、`i-simple-icons-*`（品牌）。新增图标集合需 `pnpm add @iconify-json/<collection>`。
+1. 查 `references/components/index.md` 和 Nuxt UI，确认没有现成原语或简单组合。
+2. 交互 / 状态 / 焦点复杂时，按 `references/method/component-spec-template.md` 过 anatomy、state、a11y；纯展示件轻量处理。
+3. 候选源码放 `playground/`，在根 `/playground` 用真实状态数据验证 HMR。
+4. 验证明暗、390px 到宽屏、键盘、focus、loading / empty / error / disabled / 长内容等相关状态。
+5. 人工决定归属：跨场景 → `foundation/`；单领域 → `kits/<kit>/`；未采纳则留在消费项目或删除。
+6. 采纳后同步根 `registry.json` 与正式 gallery；运行 `pnpm registry:validate && pnpm test:registry && pnpm typecheck && pnpm build && pnpm test:consumer`。
+
+完整晋升与 playground 收尾见 `references/method/component-reflow.md`。
+
+## 在消费项目安装 / 更新
+
+只使用仓库公开命令：
+
+```bash
+pnpm geist:copy -- geist-foundation <item...> --target <consumer> --to <checkout-40-char-sha>
+pnpm geist:copy -- geist-foundation <item...> --target <consumer> --to <checkout-40-char-sha> --write
+pnpm geist:update -- --target <consumer> --to <checkout-40-char-sha>
+pnpm geist:update -- --target <consumer> --to <checkout-40-char-sha> --write
+pnpm geist:check -- --target <consumer>
+```
+
+前一条 copy / update 命令都是 dry-run；确认 plan 后才运行带 `--write` 的后一条。`--to` 必须是当前 clean checkout `HEAD` 的精确 40 位 SHA，它只做一致性断言；foundation / kit / registry 未提交时工具会拒绝生成 lock。工具会解析 `registryDependencies`，整切片复制 component + composable + util + config / CSS，并在 `geist.lock.json` 记录来源与依赖闭包。参数和冲突策略见 `references/registry.md`；不要绕过工具手抄。
 
 ## 硬规则
 
-- **只用 Nuxt UI 组件 + 语义 token**，不要手写等价组件，不要用原始 CSS 颜色值（用 `--ui-*` token 或 Tailwind 语义类如 `text-muted`、`bg-elevated`、`border-default`）。
-- **primary 是紫色 ramp**，定义在 `packages/core/app/assets/css/main.css`（完整 50–950），`--ui-primary` 浅色用 500、深色用 400。不要改成别的语义机制。
-- **响应式用 Nuxt UI 的方式**：`UContainer`、`UPage*` 布局原语 + Tailwind 断点（sm/md/lg/xl/2xl），不要写固定宽度或临时 media query。见 `references/foundations/responsiveness.md`。
-- **新增组件先走「新增组件工作流」**（见下节）：唯一硬前置是「先确认 Nuxt UI / 现有组件没有现成的」；规格模板按组件复杂度分级使用，不是每个组件都要写满三张表。
-- **层级用色调表面 + 边框优先，阴影克制**：卡片 `shadow-xs`、浮层 `shadow-lg`、模态 `shadow-xl`（已在 token 里对齐 Geist 三层）。动效只在澄清变化时用、并尊重 `prefers-reduced-motion`（starter 已全局处理）。见 `references/foundations/elevation-motion.md`。
-- **无障碍是硬要求**：交互元素一律 `:focus-visible` 显示 focus 环，绝不 `outline:none` 不给替代；正文对比度 WCAG AA；不要只用颜色表达状态（配图标/文字）；纯图标按钮加 `aria-label`；表单用 `UFormField`。见 `references/foundations/focus-a11y.md`。
-- **文案遵循 Geist Voice**：标签/按钮/标题用 Title Case，正文/toast 用 sentence case；动作用"动词+名词"（不用 `OK`/`Confirm`）；toast 不带句号、不说 "successfully"；错误写"发生了什么+怎么办"。见 `references/foundations/voice-content.md`。
-- 用系统资源，不要用占位图；logo/favicon 见 `references/brand-assets.md`。
-- 不要臆造不存在的 props / variants / token 名——以 references 与 Nuxt UI 源码为准。
+- 只用 Nuxt UI v4（Vue）原语 + 设计 token；不用 React。
+- 配色使用 `--ui-*` 或 Tailwind 语义类；不硬编码颜色、圆角或临时尺寸。
+- 响应式使用 `UContainer` / `UPage*` + 系统 `sm/md/lg/xl/2xl`；测量式溢出按 `references/foundations/responsiveness.md`。
+- 交互元素必须有 `focus-visible`；纯图标按钮有 `aria-label`；表单用 `UFormField`；不只靠颜色传意。
+- 用户内容通过 props / slots；结构 chrome 提供默认文案并允许覆盖。
+- demo 数据、私有 spec、adapter、fixture 和页面 recipe 不进入 foundation / kit。
+- `CodeRail` 是根 gallery 的页面私有 recipe，不进入 registry。
 
-## 新增组件工作流
+## 按需加载 references
 
-要造一个新组件时，按下面走——**目的是用对方法，不是走流程**，请按组件复杂度决定投入，别为一个纯展示原子写满三张规格表。
-
-1. **先查有没有现成的（唯一硬前置，几乎零成本，不许跳过）**：翻 `references/components/index.md` 的决策表和 Nuxt UI 原语。大多数「新组件」其实是**用现有原语组合**（`UCard` + `UBadge` + `UButton` 拼业务块），或现成原语本身就够（要「状态标记」→ 就是 `UBadge`）。确认无现成、也无法简单组合，才真的进入「造新组件」。
-
-2. **按复杂度决定要不要写规格**（`references/method/component-spec-template.md`）：
-   - **需交互 / 状态 / 焦点管理的组件**（可展开、可复制、可切换、带校验等，如 `CodeBlock`、`CopyButton`）→ **走全套**：anatomy → state model → accessibility 三张表都过一遍再实现。这是 geist-nuxt 方法论的核心价值所在。
-   - **纯展示 / 无状态的原子**（只映射 token 的标记、容器）→ **轻量**：口头过一遍 anatomy 与 a11y 要点即可，不必产出三张完整表。
-   - 拿不准就往「全套」靠——规格便宜，返工贵。
-
-3. **实现**：`<script setup lang="ts">`，只用 `@nuxt/ui` 原语 + 语义 token 拼装，守住上面的硬规则（focus 环、aria-label、`UFormField`、无固定宽度）。注意自动导入的子目录前缀（见 `conventions.md`）。**组件文案要「无关化」——通过 props/slot 传入，不硬编码字符串**（多语言接线见下方 i18n 说明）。
-
-4. **验证**：在 starter 里跑起来，明暗两种模式 + 移动到宽屏都过一遍。
-
-5. **归类**：任何项目都可能用的通用组件 → 进 `components/` 分组；只服务特定场景（如 API 文档）→ 沉淀到对应 `kits/<场景>/`，别塞进通用基座。
-
-6. **回流进 core（要让它成为系统组件、进 gallery 目录时才走）**：按 `references/method/component-reflow.md` 的 checklist——搬进 `packages/core` → 在 gallery 对应 `<Gallery{Group}>` 加一条 `<GalleryEntry>`（Usage 指回该组的 `references/components/<组>.md` 锚点）→ bump core minor 版本 → bump starter 精确依赖 → CI 发版。**人只拍「该不该进」和「授权推送」两个决策，其余 AI 一条龙。**
-
-> **多语言（i18n）**：组件本身保持文案无关（props/slot 传文本）；`@nuxtjs/i18n` 的接线、locale 组织、`$t` key 属于**消费项目**职责，不进基座。API 文档场景的接线见 `references/kits/api-docs/project-setup.md`。
-
-## 信息架构（四层 + 新增东西放哪）
-
-skill 分四层，每层都有**唯一的文字家（references，AI 读、进分发物）**和**可视镜像（人看）**。文字是真源，可视是镜像——**永远让镜像对齐文字，不要反过来**。
-
-| 层 | 文字家（references） | 可视镜像 | 进分发物？ |
-|---|---|---|---|
-| 基础 foundations | `foundations/*.md` | `ShowcaseFoundations`（starter + gallery） | ✅ |
-| 通用组件 components | `components/*.md`（按任务分组） | `GalleryCatalog`（仅 gallery，逐组件 1:1） | 文字✅ / 可视❌ |
-| 场景组合 compositions | `compositions/*.md`（按抽象层级分） | 招牌场景→`composition/` 下命名组件（`<CompositionXxx>`），由 `<ShowcaseCompositions>` 陈列；整页→starter/gallery 应用本身 | 文字✅ / 可视❌ |
-| 场景组件 kits | `kits/<场景>/*.md` | 该 kit 的 demo section（仅 gallery） | 文字✅ / 切片 copy-in |
-
-**新增东西放哪（成文约定，照此办，不必再逐次讨论）：**
-
-| 你要新增… | 文字写进 | 可视放进 |
-|---|---|---|
-| 一个通用组件 | 对应 `components/<组>.md`（补进去 + 加锚点），**不新建一组件一文件** | `GalleryCatalog` 加一个 `GalleryEntry`，`usageHref` 带锚点回链该文档 |
-| 一个场景组合 | `compositions/<层级>.md` | 够招牌→抽成 `core/app/components/composition/Xxx.vue`（`<CompositionXxx>`）并加进 `<ShowcaseCompositions>`；整页级→starter/gallery 应用本身，**不强求逐条镜像** |
-| 一个 foundation | `foundations/*.md` | `ShowcaseFoundations` |
-| 一个场景组件（kit） | `kits/<场景>/*.md` | 该 kit 的 demo section |
-
-**粒度原则（拆分只为「AI 按需加载」服务，不为和可视层对称）：**
-- `components/` **保持按任务分组的六文件，不拆成一组件一文件**——决策表（"要阻断式弹窗用 UModal 不用 UPopover"）是跨组件对比知识，拆碎就无处安放；AI 做表单时一次读 `forms.md` 比 open 五个碎文件高效。精确对应用**文件内锚点**实现，不靠拆文件。
-- `compositions` **按抽象层级拆**（局部组合 vs 整页骨架），不按"一场景一文件"——避免几十个碎文件。
-- gallery 是给人看的镜像、不进分发物；**AI 永远读 references，不读 gallery**。
-- **showcase（`<GeistShowcase>` = Hero + Foundations + Compositions）只放「基础 + 招牌组合」，不放单组件展示**——单组件逐个陈列是 gallery `GalleryCatalog` 的职责。语义色板属 Foundations（`ShowcaseFoundations`），成规模的真实组合抽成 `<CompositionXxx>` 由 `<ShowcaseCompositions>` 陈列。
-
-## 路由（按任务读取 references）
-
-- **Token / 主题 / 颜色 / 圆角**：`references/foundations/tokens.md`
-- **排版 / 字阶 / Geist Sans·Mono**：`references/foundations/typography.md`
-- **间距 / 留白 / 容器 / 布局节奏**：`references/foundations/spacing-layout.md`
-- **响应式 / 断点 / 布局原语**：`references/foundations/responsiveness.md`
-- **阴影 / 层级 / 动效（easing·时长·reduced-motion）**：`references/foundations/elevation-motion.md`
-- **focus / 键盘 / 无障碍（对比度、focus 环规格）**：`references/foundations/focus-a11y.md`
-- **文案规范（大小写、按钮、错误、toast、空态）**：`references/foundations/voice-content.md`
-- **工程惯例（自动导入、命名、Nuxt 目录、常见坑）**：`references/foundations/conventions.md`
-- **组件选择决策 + 组件总览与分组索引**：`references/components/index.md`
-  - 按钮：`components/buttons.md`｜表单：`components/forms.md`｜反馈：`components/feedback.md`
-  - 数据展示：`components/data-display.md`｜导航：`components/navigation.md`｜覆盖层：`components/overlays.md`
-- **整屏装配（按抽象层级分）**：`references/compositions/index.md`
-  - 页面内一块（区块、卡片网格、表单、空/加载态、反馈、a11y 清单）：`compositions/patterns.md`
-  - 整页外壳（根组件、粘顶 header、主题切换，含完整外壳示例）：`compositions/page-shell.md`
-- **资源（logo/favicon/图标）**：`references/brand-assets.md`
-- **gallery 展示规范（往画廊加组件条目：GalleryEntry/GalleryExample，瘦身原则）**：`references/gallery.md`
-- **方法论（造新组件时才读，低频）**：
-  - 组件规格模板（设计评审标准）：`references/method/component-spec-template.md`
-  - 规格落地范例：`references/method/spec-example.md`
-  - core 组件回流规范（造好通用组件后如何进 core + 进默认预览 + 发版）：`references/method/component-reflow.md`
-- **领域包 kits（仅当项目属于该场景时加载）**：
-  - API 文档场景（CodeBlock / RequestExample / ResponseExample）：`references/kits/api-docs/index.md`
-    - 该场景的项目配置（推荐模块、i18n 接线、@nuxt/content 取舍）：`references/kits/api-docs/project-setup.md`
-- **维护（仅维护本 skill 时读，非使用者内容）**：skill 分发由真源 `abel-2333-org/geist-nuxt` 的 CI 构建（`skill-v*` release），记忆区同步 = 整体覆盖 dist-skill：`references/maintenance/sync.md`
-  - **维护会话开场自检（怕漏同步的兜底）**：当本会话要**改 skill 真源**（`packages/**`、`references/**`、`SKILL.md` 等）时，开场先做一次记忆区新鲜度自检——读记忆区 `RELEASE` 戳 vs 最新 `skill-v*` release tag，落后（或无 `RELEASE`）就先跑同步。只在维护会话触发，纯用 skill 的会话不做。命令与流程见 `references/maintenance/sync.md`。
-
-### 分层与加载策略
-
-- **通用层（任何 UI 项目必读）**：`foundations/` + `components/` + `compositions/`。这是 Geist 观感 + Nuxt UI 原语 + 整屏装配，对所有项目生效。
-- **方法论层（低频）**：`method/`，仅在需要新造领域组件时读；只放规格模板 + 范例两份，不放具体组件。
-- **领域包层（按需）**：`kits/<场景>/`，只有当项目是该场景（如 API 文档）时才加载，并按该 kit 的 `registry.json` 整切片 copy-in 进消费项目。做别的项目时忽略。
-- **需要新领域组件时**：用 `method/` 的规格模板现造，沉淀到对应 `kits/`。
+- registry 操作：`references/registry.md`
+- token / 排版 / 布局 / 响应式 / a11y / 文案：`references/foundations/`
+- 组件选择与 API：`references/components/index.md`
+- 页面组合：`references/compositions/index.md`
+- gallery 与 story 分层：`references/gallery.md`
+- 品牌资源：`references/brand-assets.md`
+- 新组件规格与晋升：`references/method/`
+- API Docs kit：`references/kits/api-docs/index.md`
+- 分发与 memory 同步：`references/maintenance/sync.md`
 
 ## 最终检查
 
-- 组件全部来自 Nuxt UI，颜色/间距全部走 token。
-- 明暗两种模式都验证过（starter 右上角有切换）。
-- 布局在移动到宽屏都成立（用 `UContainer` / 断点）。
-- 新组件已过一遍规格模板。
+- `registry.json` 可验证，依赖闭包无环、无越界 source / target。
+- 根 app typecheck + build 通过，临时 consumer 可按 registry copy-in 后 build。
+- 明暗、移动到宽屏、键盘与关键状态已真实预览。
+- 正式 gallery 不含 playground 草稿或私有数据。
+- 分发物不存在 U+FFFD replacement character。

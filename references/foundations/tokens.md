@@ -1,12 +1,12 @@
 # Foundations — 设计 token
 
-geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）之上，并用 Geist 品牌值做覆盖。全部覆盖集中在 starter 的 `app/assets/css/main.css`，且**不放进 `@layer`**，因此稳定地胜过 Nuxt UI `@layer theme` 默认值。
+geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）之上，并用 Geist 品牌值做覆盖。全部覆盖集中在 `foundation/assets/css/main.css`，且**不放进 `@layer`**，因此稳定地胜过 Nuxt UI `@layer theme` 默认值。
 
 ## 颜色
 
-### 语义别名 → Tailwind 调色板（`app.config.ts` 的 `ui.colors`）
+### 语义别名 → Tailwind 调色板（`app/app.config.ts` 的 `ui.colors`）
 
-> 每个别名的 `app.config.ts` 值只是「回退调色板名」；**实际色值全部由 `main.css` 用 Geist 值覆盖**（primary 紫 ramp、灰阶、以及 5 条 Geist 功能色阶），因此没有任何角色渲染成 Tailwind 原色。
+> 每个别名的 app config 值只是「回退调色板名」；**实际色值全部由 `main.css` 用 Geist 值覆盖**（primary 紫 ramp、灰阶、以及 5 条 Geist 功能色阶），因此没有任何角色渲染成 Tailwind 原色。
 
 | 别名 | 回退调色板 | Geist 色值覆盖 | 说明 |
 |---|---|---|---|
@@ -80,7 +80,7 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 --ui-text-highlighted: #ffffff（强调文字）
 ```
 
-> `app.config.ts` 里的 `neutral` 别名仍指向 Tailwind `neutral`（用于原始 neutral swatch 展示）；实际 background/text/border 一律走上面的语义覆盖，二者都是无彩色纯灰，不冲突。
+> `app/app.config.ts` 里的 `neutral` 别名仍指向 Tailwind `neutral`（用于原始 neutral swatch 展示）；实际 background/text/border 一律走上面的语义覆盖，二者都是无彩色纯灰，不冲突。
 
 ### 色阶体系：Nuxt UI / Tailwind 50–950（**不是** Geist 的 100–1000）
 
@@ -134,6 +134,6 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 
 ## 源码参考
 
-- token 覆盖：`packages/core/app/assets/css/main.css`
-- 语义别名映射：`packages/core/app.config.ts`
+- token 覆盖：`foundation/assets/css/main.css`
+- 语义别名映射：`foundation/config/`
 - Nuxt UI token 定义：`src/runtime/index.css`、`src/theme/index.ts`（reference workspace: nuxt/ui@v4）

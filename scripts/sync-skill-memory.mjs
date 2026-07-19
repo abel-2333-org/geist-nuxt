@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// sync-skill-memory.mjs — turn a downloaded dist-skill artifact into a deterministic
-// sync plan for the v0 memory area. OFFLINE ONLY: no network, no gh, no git.
+// sync-skill-memory.mjs — turn a downloaded runnable Source-first root snapshot
+// into a deterministic sync plan for the v0 memory area. OFFLINE ONLY: no network,
+// no gh, no git.
 //
 // WHY OFFLINE
 //   Two hard constraints shape this:
@@ -12,10 +13,10 @@
 //      `gh` command (top-level, reliably authed), then hands the artifact here.
 //
 // WHAT IT DOES
-//   Given the downloaded dist-skill.tar.gz (or an already-unpacked dir), it unpacks
-//   (if needed), lists every file, and emits a manifest = the complete desired state
-//   of the memory area. It prints the exact copy/delete plan for the AI to apply
-//   mechanically (wholesale overwrite: copy all listed files, delete anything else).
+//   Given dist-skill.tar.gz (or an already-unpacked dir), it unpacks if needed,
+//   lists every file in the runnable root snapshot, and emits the complete desired
+//   state of the memory area. The AI applies a wholesale overwrite: root app,
+//   foundation, kits, playground, registry tools, configs and references together.
 //
 // USAGE (see references/maintenance/sync.md for the full flow, incl. the gh download)
 //   node scripts/sync-skill-memory.mjs <path-to-dist-skill.tar.gz>

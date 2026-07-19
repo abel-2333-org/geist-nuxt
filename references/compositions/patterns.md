@@ -69,14 +69,14 @@
 
 ## 反馈（Toast / Alert）
 
-- 瞬时反馈用 toast：`const toast = useToast(); toast.add({ title, color })`（需要 `app.vue` 里有 `<UApp>`，starter 已具备）。
+- 瞬时反馈用 toast：`const toast = useToast(); toast.add({ title, color })`（需要 `app.vue` 里有 `<UApp>`；根 app 与基础 consumer 接线都应具备）。
 - 常驻上下文提示用 `UAlert`（`color` 表意：`success`/`warning`/`error`/`info`）。
 
 ## 无障碍清单（每屏自检）
 
 - [ ] 每个页面有唯一 `<h1>`，标题层级不跳级。
 - [ ] 交互元素可键盘聚焦，聚焦环可见（Nuxt UI 默认提供，不要 `outline-none` 去掉）。
-- [ ] 图标按钮有 `aria-label`（见 `ThemeToggle` 的 label）。
+- [ ] 图标按钮有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
 - [ ] 表单字段用 `UFormField` 关联 label / 错误信息。
 - [ ] 颜色不作为唯一信息载体（状态同时用图标/文字）。
 - [ ] 明暗两套都验证对比度（Geist 灰阶已按明暗分别调过，用语义 token 即可继承）。

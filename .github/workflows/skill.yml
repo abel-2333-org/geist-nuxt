@@ -1,33 +1,28 @@
-# skill.yml — the single pipeline that turns this repo into its two products:
-#   1. npm package @geist-nuxt/core (published when its version changes)
-#   2. dist-skill release (the v0 skill distribution: docs + self-contained starter)
+# Source-first verification and skill distribution.
 #
-# Sync flow for v0 memory areas: download the dist-skill asset from the latest
-# `skill-v*` release and overwrite the skill directory wholesale. No per-file
-# reconciliation. See references/maintenance/sync.md.
-#
-# If the publish step fails with 401/403: the NPM_TOKEN secret is missing,
-# expired, or lacks read-write on the @geist-nuxt scope. Generate a new
-# granular token on npmjs.com and update the repo secret.
+# The repository root is both the runnable Nuxt gallery and the v0 preview
+# snapshot. There is no npm publish, registry-visibility wait, workspace package,
+# or standalone starter. A release contains a clean, runnable root snapshot.
 
 name: skill
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish-core:
-    name: Publish @geist-nuxt/core (if version is new)
+  verify-source:
+    name: Verify Source-first root and consumer
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         with:
@@ -36,132 +31,132 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org
+          cache: pnpm
 
-      - name: Read core version
-        id: meta
-        run: echo "version=$(node -p "require('./packages/core/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Publish if version not on npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          V="${{ steps.meta.outputs.version }}"
-          if npm view "@geist-nuxt/core@$V" version >/dev/null 2>&1; then
-            echo "@geist-nuxt/core@$V already published — skipping."
-          else
-            echo "Publishing @geist-nuxt/core@$V ..."
-            cd packages/core
-            # core ships as source (Nuxt layer); skip the `prepare: nuxt prepare`
-            # lifecycle so publish doesn't need the toolchain/deps installed.
-            pnpm publish --access public --no-git-checks --ignore-scripts
-          fi
+      - name: Validate registry contract
+        run: pnpm registry:validate
 
-  verify-starter:
-    name: Starter boot verification (the v0-preview guarantee)
-    needs: publish-core
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      - name: Test registry operations
+        run: pnpm test:registry
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
+      - name: Typecheck root gallery
+        run: pnpm typecheck
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      - name: Build root gallery
+        run: pnpm build
 
-      - name: Wait for core version on npm registry
-        run: |
-          V="${{ needs.publish-core.outputs.version }}"
-          for i in 1 2 3 4 5; do
-            if npm view "@geist-nuxt/core@$V" version >/dev/null 2>&1; then
-              echo "core@$V visible on registry."
-              exit 0
-            fi
-            echo "core@$V not visible yet, retry $i/5 ..."
-            sleep 20
-          done
-          echo "core@$V never appeared on the registry." >&2
-          exit 1
-
-      # starter/ lives inside the repo (which has a root pnpm-workspace.yaml), but
-      # in v0 it is cloned as a STANDALONE project with no parent workspace. We must
-      # reproduce that here with --ignore-workspace, otherwise pnpm hoists deps to the
-      # repo root and the starter's own node_modules stays empty (nuxt: not found).
-      - name: Generate starter lockfile
-        working-directory: starter
-        run: pnpm install --lockfile-only --ignore-workspace
-
-      - name: Real install + build (must succeed or the skill is broken)
-        working-directory: starter
-        run: |
-          pnpm install --frozen-lockfile --ignore-workspace
-          pnpm build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: starter-lockfile
-          path: starter/pnpm-lock.yaml
-          retention-days: 7
+      - name: Build a registry-installed consumer
+        run: pnpm test:consumer
 
   release-skill:
-    name: Assemble dist-skill and tag a release
-    needs: [publish-core, verify-starter]
+    name: Assemble, verify and release Source-first snapshot
+    needs: verify-source
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
         with:
-          name: starter-lockfile
-          path: starter/
+          persist-credentials: false
 
-      - name: Assemble dist-skill
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Assemble runnable root snapshot
         run: |
+          TAG="skill-v$(date -u +%Y%m%d-%H%M%S)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           mkdir -p dist-skill
-          cp SKILL.md README.md AGENTS.md v0.json dist-skill/
-          cp -r references dist-skill/references
-          mkdir -p dist-skill/starter
-          # Starter ships source + CI-generated lockfile only; never node_modules/.nuxt.
-          rsync -a --exclude node_modules --exclude .nuxt --exclude .output starter/ dist-skill/starter/
-          # Kits ship as source for registry-slice copy-in (see packages/kits/*/registry.json).
-          # Kept under packages/kits/ so every docs pointer resolves identically in repo and memory area.
-          mkdir -p dist-skill/packages/kits
-          rsync -a --exclude node_modules --exclude .nuxt --exclude .output packages/kits/ dist-skill/packages/kits/
+          rsync -a ./ dist-skill/ \
+            --exclude .git \
+            --exclude dist-skill \
+            --exclude dist-verify \
+            --exclude node_modules \
+            --exclude .nuxt \
+            --exclude .output \
+            --exclude coverage \
+            --exclude '*.log'
+          printf '%s\n' "$TAG" > dist-skill/RELEASE
+          printf '{"schemaVersion":1,"sourceSha":"%s"}\n' "$GITHUB_SHA" > dist-skill/.geist-source.json
+          rsync -a dist-skill/ dist-verify/
+          echo "tag=$TAG" >> "$GITHUB_ENV"
           echo "--- dist-skill contents ---"
           find dist-skill -type f | sort
 
-      - name: Guard against mojibake (U+FFFD) in the distribution
+      - name: Guard against mojibake (U+FFFD)
         run: |
-          # Encoding/writer corruption of multi-byte CJK shows up as the UTF-8
-          # replacement char U+FFFD (bytes EF BF BD). Humans typing Chinese never
-          # produce it; a tool mangling a write does. This is the last gate before
-          # the docs flow into every team member's skill memory area via release,
-          # so any U+FFFD anywhere in dist-skill fails the build.
-          if grep -rlP '\xEF\xBF\xBD' dist-skill; then
-            echo "::error::Found U+FFFD (mojibake) in dist-skill — a multi-byte character was corrupted. Fix the source file before release." >&2
+          # UTF-8 replacement bytes EF BF BD mean a writer corrupted source text.
+          # The root snapshot feeds every v0 memory area, so fail before release.
+          if LC_ALL=C grep -rlaF $'\xEF\xBF\xBD' dist-skill; then
+            echo "::error::Found U+FFFD (mojibake) in dist-skill. Fix the source before release." >&2
             echo "--- offending lines ---" >&2
-            grep -rnP '\xEF\xBF\xBD' dist-skill >&2 || true
+            LC_ALL=C grep -rnaF $'\xEF\xBF\xBD' dist-skill >&2 || true
             exit 1
           fi
           echo "No U+FFFD found — distribution encoding is clean."
 
-      - name: Create release with dist-skill asset
+      - name: Install assembled snapshot
+        working-directory: dist-verify
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate assembled registry contract
+        working-directory: dist-verify
+        run: |
+          pnpm registry:validate
+          pnpm test:registry
+
+      - name: Typecheck assembled snapshot
+        working-directory: dist-verify
+        run: pnpm typecheck
+
+      - name: Build assembled snapshot
+        working-directory: dist-verify
+        run: pnpm build
+
+      - name: Verify exact-SHA registry flow without Git metadata
+        working-directory: dist-verify
+        run: |
+          CONSUMER_DIR="$(mktemp -d)"
+          cp -R tests/fixtures/consumer/. "$CONSUMER_DIR/"
+          pnpm geist:copy -- geist-foundation \
+            --target "$CONSUMER_DIR" \
+            --to "$GITHUB_SHA"
+          pnpm geist:copy -- geist-foundation \
+            --target "$CONSUMER_DIR" \
+            --to "$GITHUB_SHA" \
+            --write
+          pnpm geist:check -- --target "$CONSUMER_DIR"
+
+      - name: Pack and guard clean snapshot
+        run: |
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs"
+            const stamp = JSON.parse(readFileSync("dist-skill/.geist-source.json", "utf8"))
+            if (stamp.schemaVersion !== 1 || stamp.sourceSha !== process.env.GITHUB_SHA) {
+              throw new Error("Invalid .geist-source.json")
+            }
+          '
+          tar czf dist-skill.tar.gz -C dist-skill .
+          if tar tzf dist-skill.tar.gz | grep -E '(^|/)(\.git|node_modules|\.nuxt|\.output|coverage)(/|$)|\.log$'; then
+            echo "::error::Generated or repository-private files leaked into dist-skill.tar.gz." >&2
+            exit 1
+          fi
+          echo "Archive is source-only and generated-file free."
+
+      - name: Release snapshot
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="skill-v$(date -u +%Y%m%d-%H%M)"
-          CORE_V="${{ needs.publish-core.outputs.version }}"
-          # Bake the release tag into the artifact so the memory area carries a
-          # freshness stamp. The sync script reads it; the maintenance self-check
-          # compares it against the latest release tag. Travels with the dist, so
-          # wholesale overwrite keeps it current with zero exceptions.
-          printf '%s\n' "$TAG" > dist-skill/RELEASE
-          tar czf dist-skill.tar.gz -C dist-skill .
           gh release create "$TAG" dist-skill.tar.gz \
             --title "$TAG" \
-            --notes "v0 skill distribution. Pinned @geist-nuxt/core: $CORE_V. Sync = download dist-skill.tar.gz and overwrite the memory-area skill directory wholesale."
-          echo "Released $TAG (core $CORE_V)"
+            --notes "Source-first geist-nuxt skill distribution. The asset is a runnable root gallery/v0 snapshot with foundation, kits, registry tools and references. Sync by overwriting the memory-area skill directory wholesale."
+          echo "Released $TAG"

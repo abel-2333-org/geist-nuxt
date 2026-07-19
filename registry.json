@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "name": "geist-nuxt",
+  "repository": "https://github.com/abel-2333-org/geist-nuxt.git",
+  "compatibility": {
+    "nuxt": ">=4.4.0 <5",
+    "nuxtUi": ">=4.9.0 <5",
+    "tailwindcss": ">=4.3.0 <5"
+  },
+  "externalRequirements": {
+    "packages": {
+      "@iconify-json/lucide": "^1.2.116",
+      "@nuxt/ui": "^4.9.0",
+      "@vueuse/core": "^14.3.0",
+      "nuxt": "4.4.8",
+      "tailwindcss": "^4.3.2",
+      "vue": "^3.5.39",
+      "vue-router": "^5.1.0"
+    },
+    "consumerSetup": [
+      "Wrap the application in UApp.",
+      "Merge app/config/geist-app.ts into the consumer app/app.config.ts.",
+      "Merge app/config/geist-nuxt.ts into the consumer nuxt.config.ts.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and Geist foundation entry.",
+      "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
+      "Keep Nuxt color mode enabled through @nuxt/ui."
+    ]
+  },
+  "sourceRoots": [
+    "foundation/assets/css",
+    "foundation/components",
+    "foundation/composables",
+    "foundation/compositions",
+    "foundation/config",
+    "foundation/utils",
+    "kits/api-docs/components",
+    "kits/api-docs/composables",
+    "kits/api-docs/utils"
+  ],
+  "items": [
+    {
+      "name": "geist-foundation",
+      "type": "registry:style",
+      "title": "Geist foundation runtime",
+      "description": "Geist tokens and non-overwriting Nuxt/App config fragments.",
+      "files": [
+        { "path": "foundation/assets/css/main.css", "target": "app/assets/css/main.css" },
+        { "path": "foundation/config/geist-nuxt.ts", "target": "app/config/geist-nuxt.ts" },
+        { "path": "foundation/config/geist-app.ts", "target": "app/config/geist-app.ts" }
+      ]
+    },
+    {
+      "name": "foundation-use-copy",
+      "type": "registry:hook",
+      "title": "useCopy",
+      "description": "Clipboard state and accessible feedback.",
+      "files": [
+        { "path": "foundation/composables/useCopy.ts", "target": "app/composables/useCopy.ts" }
+      ]
+    },
+    {
+      "name": "foundation-copy-button",
+      "type": "registry:component",
+      "title": "CopyButton",
+      "description": "Accessible copy-to-clipboard button.",
+      "registryDependencies": ["geist-foundation", "foundation-use-copy"],
+      "files": [
+        { "path": "foundation/components/CopyButton.vue", "target": "app/components/CopyButton.vue" }
+      ]
+    },
+    {
+      "name": "foundation-inline-code",
+      "type": "registry:component",
+      "title": "InlineCode",
+      "description": "Geist inline code atom.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/components/InlineCode.vue", "target": "app/components/InlineCode.vue" }
+      ]
+    },
+    {
+      "name": "foundation-inline-markdown",
+      "type": "registry:component",
+      "title": "InlineMarkdown",
+      "description": "Safe inline markdown subset.",
+      "registryDependencies": ["geist-foundation", "foundation-inline-code"],
+      "files": [
+        { "path": "foundation/components/InlineMarkdown.vue", "target": "app/components/InlineMarkdown.vue" }
+      ]
+    },
+    {
+      "name": "foundation-badge-utils",
+      "type": "registry:lib",
+      "title": "Badge utilities",
+      "description": "Semantic badge tone mapping.",
+      "files": [
+        { "path": "foundation/utils/badge.ts", "target": "app/utils/badge.ts" }
+      ]
+    },
+    {
+      "name": "foundation-semantic-badge",
+      "type": "registry:component",
+      "title": "SemanticBadge",
+      "description": "Content-agnostic semantic status badge.",
+      "registryDependencies": ["geist-foundation", "foundation-badge-utils"],
+      "files": [
+        { "path": "foundation/components/SemanticBadge.vue", "target": "app/components/SemanticBadge.vue" }
+      ]
+    },
+    {
+      "name": "foundation-theme-toggle",
+      "type": "registry:component",
+      "title": "ThemeToggle",
+      "description": "System/light/dark theme toggle.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/components/ThemeToggle.vue", "target": "app/components/ThemeToggle.vue" }
+      ]
+    },
+    {
+      "name": "foundation-breakpoints",
+      "type": "registry:lib",
+      "title": "Geist breakpoints",
+      "description": "Shared responsive breakpoint helpers.",
+      "files": [
+        { "path": "foundation/utils/breakpoints.ts", "target": "app/utils/breakpoints.ts" }
+      ]
+    },
+    {
+      "name": "foundation-use-split-pane",
+      "type": "registry:hook",
+      "title": "useSplitPane",
+      "description": "Split-pane state, persistence, and input handling.",
+      "files": [
+        { "path": "foundation/composables/useSplitPane.ts", "target": "app/composables/useSplitPane.ts" }
+      ]
+    },
+    {
+      "name": "foundation-split-pane-handle",
+      "type": "registry:component",
+      "title": "SplitPaneHandle",
+      "description": "Accessible split-pane separator.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/components/SplitPaneHandle.vue", "target": "app/components/SplitPaneHandle.vue" }
+      ]
+    },
+    {
+      "name": "foundation-split-pane",
+      "type": "registry:component",
+      "title": "SplitPane",
+      "description": "Responsive draggable two-pane layout primitive.",
+      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-split-pane", "foundation-split-pane-handle"],
+      "files": [
+        { "path": "foundation/components/SplitPane.vue", "target": "app/components/SplitPane.vue" }
+      ]
+    },
+    {
+      "name": "foundation-composition-app-header",
+      "type": "registry:block",
+      "title": "CompositionAppHeader",
+      "description": "Responsive application header composition.",
+      "registryDependencies": ["geist-foundation", "foundation-theme-toggle"],
+      "files": [
+        { "path": "foundation/compositions/AppHeader.vue", "target": "app/components/composition/AppHeader.vue" }
+      ]
+    },
+    {
+      "name": "foundation-composition-feedback",
+      "type": "registry:block",
+      "title": "CompositionFeedback",
+      "description": "Feedback-state composition.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/compositions/Feedback.vue", "target": "app/components/composition/Feedback.vue" }
+      ]
+    },
+    {
+      "name": "foundation-composition-navigation",
+      "type": "registry:block",
+      "title": "CompositionNavigation",
+      "description": "Navigation composition.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/compositions/Navigation.vue", "target": "app/components/composition/Navigation.vue" }
+      ]
+    },
+    {
+      "name": "foundation-composition-signup-form",
+      "type": "registry:block",
+      "title": "CompositionSignupForm",
+      "description": "Sign-up form composition.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/compositions/SignupForm.vue", "target": "app/components/composition/SignupForm.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-use-code-wrap",
+      "type": "registry:hook",
+      "title": "useCodeWrap",
+      "description": "Persisted code wrapping preference.",
+      "files": [
+        { "path": "kits/api-docs/composables/useCodeWrap.ts", "target": "app/composables/useCodeWrap.ts" }
+      ]
+    },
+    {
+      "name": "api-docs-code-block",
+      "type": "registry:component",
+      "title": "ApiDocsCodeBlock",
+      "description": "Structured API code sample with language, wrap, and copy controls.",
+      "registryDependencies": ["geist-foundation", "foundation-copy-button", "api-docs-use-code-wrap"],
+      "files": [
+        { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/api-docs/CodeBlock.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-request-example",
+      "type": "registry:component",
+      "title": "ApiDocsRequestExample",
+      "description": "Scenario-aware request example.",
+      "registryDependencies": ["api-docs-code-block"],
+      "files": [
+        { "path": "kits/api-docs/components/RequestExample.vue", "target": "app/components/api-docs/RequestExample.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-response-example",
+      "type": "registry:component",
+      "title": "ApiDocsResponseExample",
+      "description": "Scenario and status-aware response example.",
+      "registryDependencies": ["api-docs-code-block"],
+      "files": [
+        { "path": "kits/api-docs/components/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-lifecycle-badge",
+      "type": "registry:component",
+      "title": "ApiDocsLifecycleBadge",
+      "description": "API lifecycle preset over SemanticBadge.",
+      "registryDependencies": ["foundation-semantic-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/LifecycleBadge.vue", "target": "app/components/api-docs/LifecycleBadge.vue" },
+        { "path": "kits/api-docs/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts" }
+      ]
+    },
+    {
+      "name": "api-docs-method-badge",
+      "type": "registry:component",
+      "title": "ApiDocsMethodBadge",
+      "description": "HTTP method preset over SemanticBadge.",
+      "registryDependencies": ["foundation-semantic-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/MethodBadge.vue", "target": "app/components/api-docs/MethodBadge.vue" },
+        { "path": "kits/api-docs/utils/method-preset.ts", "target": "app/utils/method-preset.ts" }
+      ]
+    },
+    {
+      "name": "api-docs-enum-table",
+      "type": "registry:component",
+      "title": "ApiDocsEnumTable",
+      "description": "Filterable allowed-values table.",
+      "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown"],
+      "files": [
+        { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/api-docs/EnumTable.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-field-group",
+      "type": "registry:component",
+      "title": "ApiDocsFieldGroup",
+      "description": "Semantic field group heading.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "kits/api-docs/components/FieldGroup.vue", "target": "app/components/api-docs/FieldGroup.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-field-item",
+      "type": "registry:component",
+      "title": "ApiDocsFieldItem",
+      "description": "Recursive API schema field row with deep-link handling.",
+      "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-copy", "api-docs-enum-table", "api-docs-lifecycle-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/FieldItem.vue", "target": "app/components/api-docs/FieldItem.vue" },
+        { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" }
+      ]
+    },
+    {
+      "name": "api-docs-sidebar-nav",
+      "type": "registry:component",
+      "title": "ApiDocsSidebarNav",
+      "description": "Searchable, resizable API documentation sidebar with width-aware scenario tags.",
+      "registryDependencies": ["geist-foundation", "api-docs-method-badge"],
+      "files": [
+        { "path": "kits/api-docs/components/SidebarNav.vue", "target": "app/components/api-docs/SidebarNav.vue" },
+        { "path": "kits/api-docs/components/ScenarioTags.vue", "target": "app/components/api-docs/ScenarioTags.vue" }
+      ]
+    }
+  ]
+}

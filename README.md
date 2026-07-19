@@ -1,74 +1,83 @@
 # geist-nuxt
 
-Geist 风格设计系统:视觉参考 Vercel Geist,组件基座 Nuxt UI v4 (Vue),方法论参考 Adobe Spectrum。
-本仓库是**唯一真源**,产出两个分发物,均由 CI 构建,**不靠手抄**:
+Geist 风格的 Source-first Nuxt UI v4（Vue）设计系统。仓库根目录同时是：
 
-1. **npm 公共包 [`@geist-nuxt/core`](https://www.npmjs.com/package/@geist-nuxt/core)** — 基座 Nuxt layer(token、字体、明暗模式、公共组件、GeistShowcase 展示页)
-2. **v0 skill 分发物(`skill-v*` release)** — 文档 + 自足 starter,供 v0 记忆区整体覆盖同步
+- 可直接运行的 gallery；
+- v0 的 preview snapshot；
+- `foundation/` 与 `kits/` 的唯一源码真源；
+- 根 `registry.json` 的 copy-in 分发源。
 
-> 目录结构与决策依据**只写在一处**:`references/architecture-decisions.md`。本文件不复述结构,只讲怎么用。
+不再发布 `@geist-nuxt/core`，不使用 Nuxt layer、workspace package 或独立 starter。旧方案保留在 `docs/archive/`，仅用于追溯。
 
-## 消费方式
-
-### 新项目(从 starter 起步)
+## 本地设计与预览
 
 ```bash
-# starter 是自足项目:依赖发布版 @geist-nuxt/core,不依赖本仓库其他内容
-cp -r starter my-app && cd my-app
 pnpm install
 pnpm dev
 ```
 
-首页默认渲染 `<GeistShowcase />`(设计系统自描述展示页)。做自己的应用时替换 `app/pages/index.vue` 即可。
+- `/`：Foundations / overview
+- `/components`：通用组件目录
+- `/compositions`：组合组件
+- `/kits/api-docs`：API Docs kit
+- `/kits/api-docs/reference`：完整参考页
+- `/playground`：候选组件草稿面，不进入正式导航
 
-### 已有 Nuxt 项目
+设计中源码放 `playground/`；人工采纳后再移动到 `foundation/` 或 `kits/<kit>/`，补根 registry 与正式 gallery。详细流程见 `references/method/component-reflow.md`。
+
+## 目录边界
+
+```text
+app/                         根 gallery / v0 preview；含正式 story、fixture、adapter、页面私有 recipe
+foundation/
+  components/               通用组件
+  compositions/             可复用页面组合
+  composables/              通用 composables
+  utils/                    通用 utils
+  assets/css/               Geist token 与全局样式
+  config/                   可 copy-in 的 Nuxt UI / app 配置
+kits/api-docs/
+  components/               API Docs 领域组件
+  composables/              kit composables
+  utils/                    kit utils
+playground/                  未采纳候选
+registry.json                唯一 copy-in manifest
+references/                  设计与操作契约
+```
+
+依赖方向：kit → foundation、kit → 同 kit；禁止 kit → kit。gallery 私有 demo（例如 API reference 的 `CodeRail`）留在 `app/components/demo/`，不进入 registry。
+
+## Copy-in registry
+
+不要手抄文件，也不要维护 kit 内 registry。所有安装、更新与漂移检查都以根 `registry.json` 为准：
 
 ```bash
-pnpm add @geist-nuxt/core
+pnpm registry:validate
+pnpm geist:copy -- geist-foundation <item...> --target ../my-nuxt-app --to <checkout-40-char-sha>
+pnpm geist:copy -- geist-foundation <item...> --target ../my-nuxt-app --to <checkout-40-char-sha> --write
+pnpm geist:update -- --target ../my-nuxt-app --to <checkout-40-char-sha>
+pnpm geist:update -- --target ../my-nuxt-app --to <checkout-40-char-sha> --write
+pnpm geist:check -- --target ../my-nuxt-app
 ```
 
-```ts
-// nuxt.config.ts
-export default defineNuxtConfig({
-  extends: ['@geist-nuxt/core'],
-  modules: ['@nuxt/ui'],
-})
-```
+`geist:copy` / `geist:update` 默认只打印 dry-run plan；只有显式传 `--write` 才修改目标项目。`--to` 是精确来源断言，必须是当前 clean checkout `HEAD` 的 40 位 Git SHA，并不会替你切换或下载版本；foundation / kit / registry 未提交时会拒绝生成 lock。基础 item 名为 `geist-foundation`；工具会展开 `registryDependencies`，将完整依赖闭包中的 component / composable / util / CSS / config 写入目标项目。完整命令、lock、冲突与更新语义见 `references/registry.md`。
 
-### 场景组件(kits,不发包)
-
-按 kit 的 `packages/kits/<场景>/registry.json` **整切片 copy-in**:把条目 `files` 列的所有文件一起拷进项目。规则见 registry 文件内 description。
-
-## 开发(本仓库内)
+## 维护验证
 
 ```bash
-pnpm install        # workspace: packages/core + packages/kits/* + apps/gallery
-pnpm dev            # 起 gallery(改 core/kit 即时热更,workspace:* 引用)
-pnpm dev:starter    # 起 starter(注意:装的是发布版 core,不反映未发版改动)
-pnpm -r typecheck && pnpm -r build
+pnpm registry:validate
+pnpm test:registry
+pnpm typecheck
+pnpm build
+pnpm test:consumer
 ```
 
-**gallery**(`apps/gallery`)是常驻画廊,唯一权威部署:**https://geist-nuxt-gallery.vercel.app**(Vercel root directory = `apps/gallery`,push main 自动更新)。一个部署服务所有 v0 账号,不要为其它账号另建平行部署——那只会重复消耗构建额度、造成画廊脑裂。
+CI 按同一顺序验证根真源，再组装可运行的 `dist-skill` 根 snapshot，并在分发目录重新 install、typecheck、build。release asset 供 v0 memory area 整体覆盖同步；没有 npm publish 或 registry 可见性等待。
 
-## 发版与分发(CI:`.github/workflows/skill.yml`)
+## 多入口
 
-1. bump `packages/core/package.json` 的 `version` → push main
-2. CI 自动:发包(版本未发布时)→ 生成 starter lockfile → **真实 install + build 验证**(v0 预览必能跑的机械保证)→ 组装 dist-skill → 打 `skill-v*` release
-3. core 发版后 bump `starter/package.json` 里的 `@geist-nuxt/core` 版本
+- **v0**：`v0.json` 的 starter path 是根 `.`，新会话直接运行同一份 Source-first snapshot。
+- **Codex**：读取根 `AGENTS.md` 和 `SKILL.md`；作为上游引入消费项目时，用 registry 工具安装，不复制整套 gallery。
+- **人类评审**：本地 gallery 或 https://geist-nuxt-gallery.vercel.app。
 
-需要 GitHub secret `NPM_TOKEN`(npm granular token,对 `@geist-nuxt` scope 有 read-write)。发包失败报 401/403 = token 过期或权限不足。
-
-## 多入口接线
-
-- **v0**:记忆区 skill 从 `skill-v*` release 整体覆盖同步(流程见 `references/maintenance/sync.md`)
-- **Claude Code**:submodule 或 clone 本仓库后,软链到 `.claude/skills/geist-nuxt/`(SKILL.md 原生被发现)
-- **Codex**:读根 `AGENTS.md`;作为 submodule 时在宿主项目根 AGENTS.md 加指针指向本仓库路径
-
-**铁律:只在本仓库改。** v0 记忆区、消费项目里的拷贝都是下游,绝不反向同步。
-
-## 工程纪律(摘要,详见 SKILL.md 与 ADR)
-
-- 新增**通用**组件 → 进 `packages/core` + 在 `ShowcaseComponents` 加展示条目 → 发版后所有消费端预览自动带上
-- 新增**场景**组件 → 进对应 `packages/kits/<场景>` + 更新其 `registry.json` 切片 + gallery 加 demo
-- 依赖方向:kit→自身、kit→core;**禁止 kit→kit**(共性上提 core)
-- starter 永远依赖**发布版** core,不用 `workspace:*`
+铁律：只在真源仓库修改 foundation / kit / registry / references。消费项目里的 copy-in 文件是受管副本，用 `geist:update` 更新，不反向覆盖真源。

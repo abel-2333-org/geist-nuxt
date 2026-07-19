@@ -1,5 +1,8 @@
 # Refactor Spec — Step 2:发包化与分发链路重构
 
+> [!WARNING]
+> **已废弃（superseded）**：本文记录旧 npm / Nuxt layer / starter 分发方案，仅供历史追溯。现行 Source-first 架构以根 `SKILL.md`、`references/architecture-decisions.md` 与 `references/registry.md` 为准，请勿按本文执行。
+
 > 用途:geist-nuxt 的第二步重构蓝图,在真源 `abel-2333-org/geist-nuxt` 上执行。
 > 前置:step1(workspace 化)已完成并推送 main。本 spec 经 2026-07 与维护者的完整讨论定稿。
 > 状态:**待执行**。执行完成后在文末「进度」打勾,并按第 8 节重写文档、按第 9 节切换同步流程。
@@ -152,3 +155,4 @@ kit 组件常依赖 composable/util(如 `CodeBlock` → `useCodeWrap`),单文件
 - [ ] 步骤 2-4:仓库改造与首发
 - [ ] 步骤 5:文档重写
 - [ ] 步骤 6:记忆区切换
+> **Superseded（2026-07-18）**：本文记录旧的 npm core / Nuxt layer / standalone starter / kit registry 分发历史，仅供追溯。现行架构使用根 gallery + `foundation/` + `kits/` + 根 `registry.json` + 可运行 dist snapshot；权威规则见 `SKILL.md`、`references/architecture-decisions.md` 与 `references/registry.md`。不要按本文执行。
