@@ -76,6 +76,7 @@ interface DomainSeed extends DocsShellDomainSummary {
   resourceLabel: string
   scenarios: string[]
   fields: DocsShellField[]
+  requestPayload: Record<string, unknown>
 }
 
 function createDomain(seed: DomainSeed): DocsShellDomain {
@@ -83,21 +84,23 @@ function createDomain(seed: DomainSeed): DocsShellDomain {
   const listId = `${seed.id}-list`
   const retrieveId = `${seed.id}-retrieve`
   const resourceVariable = seed.resource.replace(/[^a-z0-9]/gi, '_')
+  const resourceName = seed.resource.toLowerCase()
+  const article = /^[aeiou]/i.test(resourceName) ? 'an' : 'a'
 
   return {
     id: seed.id,
     label: seed.label,
     description: seed.description,
     icon: seed.icon,
-    overview: `${seed.label} exposes stable primitives for integrating ${seed.resourceLabel.toLowerCase()} workflows into your application.`,
+    overview: `${seed.label} exposes stable primitives for integrating ${resourceName} workflows into your application.`,
     quickstart: `Create a test credential, send one request to the ${seed.collection} endpoint, and inspect the returned identifier before enabling live traffic.`,
     authentication: 'Send a bearer token in the Authorization header. Keep credentials in server-side runtime configuration and rotate them independently for each environment.',
     endpoint: {
       id: createId,
       method: 'POST',
       path: `/v1/${seed.collection}`,
-      title: `Create a ${seed.resourceLabel.toLowerCase()}`,
-      description: `Creates one ${seed.resourceLabel.toLowerCase()} and returns its initial state. The request accepts an idempotency key for safe retries.`,
+      title: `Create ${article} ${resourceName}`,
+      description: `Creates one ${resourceName} and returns its initial state. The request accepts an idempotency key for safe retries.`,
       scenarios: seed.scenarios,
       fields: seed.fields.map(field => ({
         ...field,
@@ -106,13 +109,9 @@ function createDomain(seed: DomainSeed): DocsShellDomain {
       request: `curl --request POST https://api.example.com/v1/${seed.collection} \\
   --header "Authorization: Bearer $EXAMPLE_TOKEN" \\
   --header "Content-Type: application/json" \\
-  --data '{
-    "reference": "demo-001",
-    "metadata": { "source": "docs-shell" }
-  }'`,
+  --data '${JSON.stringify(seed.requestPayload, null, 2)}'`,
       response: `{
   "id": "${resourceVariable}_01J8W7N9M4",
-  "reference": "demo-001",
   "status": "active",
   "createdAt": "2026-07-19T08:30:00Z"
 }`,
@@ -121,13 +120,13 @@ function createDomain(seed: DomainSeed): DocsShellDomain {
       {
         id: listId,
         method: 'GET',
-        title: `List ${seed.resourceLabel.toLowerCase()} records`,
+        title: `List ${seed.resourceLabel.toLowerCase()}`,
         description: 'Returns a cursor-paginated collection ordered by creation time.',
       },
       {
         id: retrieveId,
         method: 'GET',
-        title: `Retrieve a ${seed.resourceLabel.toLowerCase()}`,
+        title: `Retrieve ${article} ${resourceName}`,
         description: 'Returns the latest state for one resource identifier.',
       },
     ],
@@ -158,9 +157,9 @@ function createDomain(seed: DomainSeed): DocsShellDomain {
             kind: 'endpoints',
             defaultOpen: true,
             items: [
-              { label: `Create a ${seed.resourceLabel.toLowerCase()}`, to: `#${createId}`, method: 'POST', scenarios: seed.scenarios },
-              { label: `List ${seed.resourceLabel.toLowerCase()} records`, to: `#${listId}`, method: 'GET', scenarios: ['Operations'] },
-              { label: `Retrieve a ${seed.resourceLabel.toLowerCase()}`, to: `#${retrieveId}`, method: 'GET', scenarios: ['Operations'] },
+              { label: `Create ${article} ${resourceName}`, to: `#${createId}`, method: 'POST', scenarios: seed.scenarios },
+              { label: `List ${seed.resourceLabel.toLowerCase()}`, to: `#${listId}`, method: 'GET', scenarios: ['Operations'] },
+              { label: `Retrieve ${article} ${resourceName}`, to: `#${retrieveId}`, method: 'GET', scenarios: ['Operations'] },
             ],
           },
         ],
@@ -183,6 +182,10 @@ export const docsShellDomains: DocsShellDomain[] = [
     resource: 'resource',
     resourceLabel: 'Resources',
     scenarios: ['Platform', 'Automation'],
+    requestPayload: {
+      reference: 'demo-001',
+      metadata: { source: 'docs-shell' },
+    },
     fields: [
       { path: 'reference', name: 'reference', type: 'string', required: true, description: 'A unique reference from your system.', examples: ['demo-001'] },
       { path: 'metadata', name: 'metadata', type: 'object', description: 'Structured metadata returned on subsequent reads.' },
@@ -197,6 +200,10 @@ export const docsShellDomains: DocsShellDomain[] = [
     resource: 'invoice',
     resourceLabel: 'Invoices',
     scenarios: ['Billing', 'Reconciliation'],
+    requestPayload: {
+      customerId: 'customer_01J8W7N9M4',
+      currency: 'USD',
+    },
     fields: [
       { path: 'customerId', name: 'customerId', type: 'string', required: true, description: 'The customer that owns the invoice.' },
       { path: 'currency', name: 'currency', type: 'string', required: true, description: 'Three-letter ISO currency code.', examples: ['USD'] },
@@ -211,6 +218,10 @@ export const docsShellDomains: DocsShellDomain[] = [
     resource: 'session',
     resourceLabel: 'Sessions',
     scenarios: ['Authentication', 'Access'],
+    requestPayload: {
+      userId: 'user_01J8W7N9M4',
+      expiresIn: 3600,
+    },
     fields: [
       { path: 'userId', name: 'userId', type: 'string', required: true, description: 'The user that starts the session.' },
       { path: 'expiresIn', name: 'expiresIn', type: 'integer', defaultValue: '3600', description: 'Session lifetime in seconds.' },
@@ -225,6 +236,10 @@ export const docsShellDomains: DocsShellDomain[] = [
     resource: 'subscription',
     resourceLabel: 'Subscriptions',
     scenarios: ['Webhooks', 'Automation'],
+    requestPayload: {
+      url: 'https://example.com/events',
+      events: ['resource.created'],
+    },
     fields: [
       { path: 'url', name: 'url', type: 'string', required: true, description: 'HTTPS destination that receives events.' },
       { path: 'events', name: 'events', type: 'string[]', required: true, description: 'Event types delivered to this subscription.' },

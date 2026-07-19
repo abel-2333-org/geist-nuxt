@@ -139,14 +139,14 @@ const runtimeScenarios = [
     label: 'api-docs-sidebar-nav',
     item: 'api-docs-sidebar-nav',
     build: true,
-    cssMarker: 'h-full{height:100%}',
+    cssMarker: '--api-docs-nav-w',
     page: `<script setup lang="ts">\nconst sections = [{ label: 'Resources', kind: 'endpoints' as const, items: [{ label: 'Create resource', method: 'POST', scenarios: ['Batch'] }] }]\n</script>\n<template>\n  <ApiDocsSidebarNav :sections="sections" :resizable="false" />\n</template>\n`,
   },
   {
     label: 'api-docs-site-search',
     item: 'api-docs-site-search',
     build: true,
-    cssMarker: 'max-sm\\:hidden',
+    cssMarker: 'max-sm\\:px-1\\.5',
     page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" trigger-label="Search docs" modal-title="Search documentation" placeholder="Search documentation" empty-label="No matching pages" />\n</template>\n`,
   },
 ]

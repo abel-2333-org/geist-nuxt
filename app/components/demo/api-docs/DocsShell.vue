@@ -33,8 +33,18 @@ async function searchBody(query: string) {
 </script>
 
 <template>
-  <div class="min-h-[calc(100dvh-var(--ui-header-height))] bg-default">
-    <header class="sticky top-16 z-40 border-y border-default bg-default/95 backdrop-blur">
+  <div
+    class="min-h-[calc(100dvh-var(--ui-header-height))] bg-default"
+    style="--docs-shell-toolbar-height: calc(var(--spacing) * 14)"
+  >
+    <a
+      href="#docs-shell-content"
+      class="sr-only z-50 rounded-md bg-default px-3 py-2 text-sm font-medium text-highlighted shadow-lg focus:fixed focus:start-4 focus:top-4 focus:not-sr-only focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      Skip to documentation content
+    </a>
+
+    <header class="sticky top-[var(--ui-header-height)] z-40 border-y border-default bg-default/95 backdrop-blur">
       <div class="flex h-14 min-w-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <div class="flex min-w-0 items-center gap-2">
           <NuxtLink
@@ -73,7 +83,7 @@ async function searchBody(query: string) {
     </header>
 
     <div class="min-w-0 lg:grid lg:grid-cols-[auto_minmax(0,1fr)]">
-      <aside class="h-[60dvh] border-b border-default lg:sticky lg:top-30 lg:h-[calc(100dvh-7.5rem)] lg:border-b-0 lg:border-r">
+      <aside class="h-[60dvh] border-b border-default lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:border-b-0 lg:border-r">
         <ApiDocsSidebarNav
           :key="currentDomain.id"
           :groups="currentDomain.navGroups"
@@ -89,9 +99,14 @@ async function searchBody(query: string) {
         />
       </aside>
 
-      <main class="min-w-0">
+      <section
+        id="docs-shell-content"
+        tabindex="-1"
+        aria-label="API documentation content"
+        class="min-w-0 focus:outline-none"
+      >
         <DemoApiDocsShellReference :key="currentDomain.id" :domain="currentDomain" />
-      </main>
+      </section>
     </div>
   </div>
 </template>
