@@ -38,9 +38,11 @@
 - `groups: { id, label, items[] }[]`：静态指南/端点索引；item 接受
   `label / to / method? / scenarios? / icon? / suffix?`；
 - `search(query)` + `searchGroupLabel`：可选异步正文结果，组件负责 debounce 与
-  stale response cleanup，数据源排序不再被 Fuse 重排；
+  stale response cleanup，数据源排序不再被 Fuse 重排；异步源失败且没有可用结果时，
+  用 `searchingLabel` / `searchErrorLabel` 区分加载、失败与零结果；
 - `extraGroups`：消费项目自己的快捷入口；
-- `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入。
+- `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入；结构性文案
+  内置英文默认值，消费项目只在需要本地化或改写时覆盖。
 
 registry item 为 `api-docs-site-search`，只声明
 `api-docs-method-badge` 依赖；后者的 closure 自动带入 foundation。完整文档站装配看
@@ -160,7 +162,7 @@ export function computeSplitBudgets(
 
 1. 先运行 `pnpm geist:copy -- geist-foundation <item...> --target <consumer> --to <checkout-40-char-sha>` 查看 dry-run plan；确认后用同一命令追加 `--write`。工具会展开 `registryDependencies`，将 kit 与 foundation 依赖的 component / composable / util / CSS / config 完整写入 target；不带 `--write` 不会复制任何文件。
 2. `CopyButton` / `useCopy` / `SemanticBadge` 等 foundation 能力也是显式 registry item，不存在 layer 隐式依赖。
-3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树），组合示例见 gallery 两个 demo 页：单组件陈列看 `index.vue`、整页两栏参考页装配看 `reference.vue`（含 `<DemoApiDocsCodeRail>` 重分配 recipe），按需在自己项目里照着拼。
+3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树/导航/全站搜索）。组合示例见 gallery 四个互补 demo 页，按需在自己项目里照着拼。
 4. 组件使用 `@nuxt/ui` 与 `@vueuse/core`；消费项目必须显式具备 registry 所声明的外部依赖。**不要**为了代码块安装 Shiki / `@nuxt/content`。
 
 > **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立，也才与消费者自有组件隔离。
@@ -168,14 +170,16 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**两个 api-docs demo 页，职责互补**：
+gallery 有**四个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
 | `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ 页面私有 `<DemoApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
+| `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
+| `app/pages/kits/api-docs/docs-shell.vue` | 文档站外壳 | **完整文档门户 recipe** | gallery-private 的 header、domain switcher、`ApiDocsSiteSearch`、`ApiDocsSidebarNav` 与 reference-style 正文装配；用于组合验证，不是 registry 切片 |
 
-> 两页都用内联假 ViewModel 驱动，数据不写进 kit。**新增单组件的陈列进 `index.vue`；新增整页装配 recipe 进 `reference.vue`**（或另起一页）。
+> 四页都由 gallery 的假 ViewModel 驱动，数据不写进 kit。**新增单组件陈列进 `index.vue`；参考页布局进 `reference.vue`；导航专项进 `sidebar-nav.vue`；整站壳层组合进 `docs-shell.vue`**。
 
 最小拼法（单区块，index.vue 风格）：
 

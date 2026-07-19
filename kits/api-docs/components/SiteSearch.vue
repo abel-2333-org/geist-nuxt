@@ -26,11 +26,13 @@ interface SiteSearchPaletteItem extends CommandPaletteItem {
 const props = withDefaults(
   defineProps<{
     groups: SiteSearchGroup[]
-    triggerLabel: string
+    triggerLabel?: string
     ariaLabel?: string
-    modalTitle: string
-    placeholder: string
-    emptyLabel: string
+    modalTitle?: string
+    placeholder?: string
+    emptyLabel?: string
+    searchingLabel?: string
+    searchErrorLabel?: string
     scenarioSeparator?: string
     shortcut?: string
     resultLimit?: number
@@ -40,7 +42,13 @@ const props = withDefaults(
     searchDelay?: number
   }>(),
   {
+    triggerLabel: 'Search docs',
     ariaLabel: undefined,
+    modalTitle: 'Search documentation',
+    placeholder: 'Search guides and endpoints',
+    emptyLabel: 'No matching documentation',
+    searchingLabel: 'Searching documentation…',
+    searchErrorLabel: 'Search is temporarily unavailable. Try again later.',
     scenarioSeparator: ', ',
     shortcut: 'meta_k',
     resultLimit: 12,
@@ -57,6 +65,7 @@ const open = shallowRef(false)
 const searchTerm = shallowRef('')
 const asyncItems = shallowRef<SiteSearchItem[]>([])
 const searching = shallowRef(false)
+const searchFailed = shallowRef(false)
 const pendingHashId = shallowRef<string | null>(null)
 
 const shortcutKeys = computed(() => props.shortcut
@@ -82,6 +91,7 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
   const normalizedQuery = query.trim()
 
   asyncItems.value = []
+  searchFailed.value = false
   if (!search || !normalizedQuery) {
     searching.value = false
     return
@@ -95,8 +105,11 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
       if (active) asyncItems.value = results
     }
     catch (error) {
-      if (active && import.meta.dev) {
-        console.warn('[ApiDocsSiteSearch] Search source failed:', error)
+      if (active) {
+        searchFailed.value = true
+        if (import.meta.dev) {
+          console.warn('[ApiDocsSiteSearch] Search source failed:', error)
+        }
       }
     }
     finally {
@@ -139,10 +152,12 @@ function onCloseAutoFocus(event: Event) {
   pendingHashId.value = null
   if (!id) return
 
+  const target = document.getElementById(id)
+  if (!target) return
+
   event.preventDefault()
   requestAnimationFrame(() => {
-    const target = document.getElementById(id)
-    if (!target) return
+    if (!target.isConnected) return
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
     target.focus({ preventScroll: true })
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -244,7 +259,7 @@ const fuse = computed(() => ({
 
         <template #empty>
           <div class="py-6 text-center text-sm text-muted">
-            {{ props.emptyLabel }}
+            {{ searching ? props.searchingLabel : searchFailed ? props.searchErrorLabel : props.emptyLabel }}
           </div>
         </template>
       </UCommandPalette>

@@ -35,7 +35,7 @@ async function searchBody(query: string) {
 <template>
   <div
     class="min-h-[calc(100dvh-var(--ui-header-height))] bg-default"
-    style="--docs-shell-toolbar-height: calc(var(--spacing) * 14)"
+    style="--docs-shell-toolbar-height: calc(var(--spacing) * 14); --docs-shell-sticky-offset: calc(var(--ui-header-height) + var(--docs-shell-toolbar-height) + var(--spacing) * 6)"
   >
     <a
       href="#docs-shell-content"

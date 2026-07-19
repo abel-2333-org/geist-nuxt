@@ -22,7 +22,7 @@ const responseVariants = computed(() => [{
   <UContainer class="py-8 sm:py-10">
     <div class="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)]">
       <article class="min-w-0 space-y-12">
-        <header id="overview" class="scroll-mt-36 space-y-4">
+        <header id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-4">
           <p class="font-mono text-xs font-medium uppercase tracking-widest text-muted">
             {{ props.domain.label }}
           </p>
@@ -34,12 +34,12 @@ const responseVariants = computed(() => [{
           </p>
         </header>
 
-        <section id="quickstart" class="scroll-mt-36 space-y-3">
+        <section id="quickstart" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
           <h2 class="text-xl font-semibold tracking-tight text-highlighted">Quickstart</h2>
           <p class="max-w-3xl leading-7 text-muted">{{ props.domain.quickstart }}</p>
         </section>
 
-        <section id="authentication" class="scroll-mt-36 space-y-3">
+        <section id="authentication" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
           <h2 class="text-xl font-semibold tracking-tight text-highlighted">Authentication</h2>
           <p class="max-w-3xl leading-7 text-muted">{{ props.domain.authentication }}</p>
           <UAlert
@@ -51,7 +51,7 @@ const responseVariants = computed(() => [{
           />
         </section>
 
-        <section :id="props.domain.endpoint.id" class="scroll-mt-36 space-y-6">
+        <section :id="props.domain.endpoint.id" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-6">
           <div class="space-y-3">
             <div class="flex flex-wrap items-center gap-3">
               <ApiDocsMethodBadge :method="props.domain.endpoint.method" />
@@ -79,7 +79,7 @@ const responseVariants = computed(() => [{
               v-for="endpoint in props.domain.secondaryEndpoints"
               :id="endpoint.id"
               :key="endpoint.id"
-              class="scroll-mt-36 space-y-3 rounded-lg border border-default p-4"
+              class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3 rounded-lg border border-default p-4"
             >
               <div class="flex items-center gap-2">
                 <ApiDocsMethodBadge :method="endpoint.method" size="sm" />
@@ -91,7 +91,7 @@ const responseVariants = computed(() => [{
         </section>
       </article>
 
-      <aside class="min-w-0 space-y-6 lg:sticky lg:top-36 lg:self-start">
+      <aside class="min-w-0 space-y-6 lg:sticky lg:top-[var(--docs-shell-sticky-offset)] lg:self-start">
         <ApiDocsCodeBlock title="Request" :variants="requestVariants" />
         <ApiDocsCodeBlock title="Response" :variants="responseVariants" default-wrap />
       </aside>

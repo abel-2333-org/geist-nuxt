@@ -147,7 +147,7 @@ const runtimeScenarios = [
     item: 'api-docs-site-search',
     build: true,
     cssMarker: 'max-sm\\:px-1\\.5',
-    page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" trigger-label="Search docs" modal-title="Search documentation" placeholder="Search documentation" empty-label="No matching pages" />\n</template>\n`,
+    page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
   },
 ]
 
