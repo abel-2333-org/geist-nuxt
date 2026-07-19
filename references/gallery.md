@@ -84,7 +84,8 @@ prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 - 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/CodeRail` 如何装配成完整文档站；
 - 不进入 foundation、kit 或 registry；
 - 使用与 sidebar-nav / reference demo 一致的中文支付世界观数据 + 中性假品牌，不携带任何消费项目品牌、路由或 contract（demo 单语中文直写，消费项目文案走 i18n 注入）；
-- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 采用与消费项目同构的路径分段路由与拆页策略（`/docs-shell/[domain]` 域首页长滚动参考 + `/[domain]/[slug]` 指南子页，域切换器即 NuxtLink；支付域为最小示范，其余域为单页 stub），见 `references/kits/api-docs/project-setup.md`「多域路由」与「域内怎么拆页」。
+- 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 采用与消费项目同构的路径分段路由与拆页策略（`/docs-shell/[domain]` 域首页长滚动参考 + `/[domain]/[slug]` 指南子页，域切换器即 NuxtLink；支付域为最小示范，其余域为单页 stub），见 `references/kits/api-docs/project-setup.md`「多域路由」与「域内怎么拆页」；
+- **能力集就此封口**：recipe 只为「错误形态会被照抄」投入实现且最小示范即止，纯消费端接线知识写 references 就停（判断标准与反例见 ADR-009「投入边界」）。
 
 ## 自动导航与移动端
 
