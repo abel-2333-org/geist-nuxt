@@ -676,7 +676,7 @@ onMounted(() => anchor.initFromHash())
            太长时在组件内部滚动。边框归布局：桌面档给右分隔边（两列之间不留
            gap），小屏侧栏顺排在正文上方、父级无定高时立柱自然收缩，给下分隔
            边即可——都是透传的「追加类」，可靠。
-           sticky 顶距与列高��用 --header-h 单点维护（此处对齐的是 gallery 的
+            sticky 顶距与列高共用 --header-h 单点维护（此处对齐的是 gallery 的
            全局 header 高 4rem；真实项目顶栏即 app header 时，把它改成你自己
            顶栏的高度）。 -->
       <div class="grid [--header-h:4rem] lg:grid-cols-[auto_1fr]">
