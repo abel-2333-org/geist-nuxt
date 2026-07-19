@@ -112,7 +112,7 @@ app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
 - 域切换器的每个选项就是一个 `NuxtLink`（`to="/docs/payouts"`），语义天然正确，无需手动同步状态。
 - 页内锚点（字段深链接）继续用 hash，与路径分段正交。
 
-> gallery 的 `/kits/api-docs/docs-shell` demo 用 `?domain=` query 切域，是**单页展示的权宜之计**——demo 不拥有 gallery 的路由空间，无法注册 `[domain]/[slug]` 路由树。这个约束消费项目没有，不要照抄 query 方案。
+> gallery 的 `/kits/api-docs/docs-shell/[domain]` demo 就是这个形态的活样板：每个域一个路径、域切换器是 NuxtLink、非法域 replace 回落默认域、侧栏 active 按 `route.hash` 显式计算。消费项目照抄该结构，再把域内单页锚点展开成 `[...slug]` 子页即可。
 
 ## @nuxt/content 取舍
 

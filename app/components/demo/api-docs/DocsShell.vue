@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { geistMinWidthQuery } from '../../../../foundation/utils/breakpoints'
 import {
   docsShellDomains,
   searchDocsBody,
   toSiteSearchGroups,
+  type DocsShellDomain,
 } from '~/utils/demo/api-docs/docs-shell-data'
 
 // 「文档站外壳」——把 kit 的三块拼成一个完整可用的文档站骨架，作为下游
@@ -19,13 +21,9 @@ import {
 //   3. 字段树深链接（useFieldAnchor）—— 「直达端点里的某个字段」。
 // 两级搜索刻意匹配同样的维度（用途名 / 请求方法 / 场景标签）。
 //
-// 当前域走 ?domain= route query（可分享 URL）；切换时清掉指向旧域锚点的
-// hash 并回到页顶，避免落在不存在的 section 上。
-//
-// ⚠️ query 切域是单页 demo 的权宜之计（demo 不拥有 gallery 的路由空间，
-// 无法注册 [domain]/[slug] 路由树）。消费项目应改用路径分段路由
-// /docs/[domain]/[...slug]，域切换器选项直接用 NuxtLink——
-// 见 references/kits/api-docs/project-setup.md「多域路由」。
+// 路由即 consumer shape：每个域一个路径（/docs-shell/[domain]），当前域由
+// 页面路由决定、经 prop 传入；域切换器就是 NuxtLink。消费项目照此把
+// [domain] 换成自己的 /docs/[domain]/[...slug] 即可。
 //
 // sticky 单点维护：--docs-shell-toolbar-height 是外壳工具栏高（h-14），
 // --docs-shell-sticky-offset = 全局 header + 工具栏 + 呼吸间距，正文锚点
@@ -33,15 +31,48 @@ import {
 // 外壳工具栏 sticky 在它下方；真实项目把这条工具栏提升为 app 顶栏时，
 // 把 --ui-header-height 换成自己顶栏的高度即可。
 
+const props = defineProps<{
+  domain: DocsShellDomain
+}>()
+
 const route = useRoute()
-const router = useRouter()
-const domainIds = new Set(docsShellDomains.map(domain => domain.id))
+
+const DOCS_SHELL_BASE = '/kits/api-docs/docs-shell'
+
+// 域切换器条目：NuxtLink 目标由外壳拼路径——DomainSwitcher 保持路由无关。
+const switcherItems = computed(() =>
+  docsShellDomains.map(domain => ({
+    id: domain.id,
+    label: domain.label,
+    description: domain.description,
+    icon: domain.icon,
+    to: `${DOCS_SHELL_BASE}/${domain.id}`,
+  })),
+)
+
+// 侧栏 active：按 route.hash 计算并显式传入。裸 hash 链接（#overview）会被
+// NuxtLink 当外部链接渲染，不参与 router 的 active 匹配——所以「当前位置」
+// 高亮必须由页面层喂 `active`。
+const navGroups = computed(() =>
+  props.domain.navGroups.map(group => ({
+    ...group,
+    items: group.items.map(item => ({
+      ...item,
+      active: item.to != null && item.to === route.hash,
+    })),
+  })),
+)
 
 // <lg 侧栏收进左侧抽屉（文档站移动端惯例：汉堡按钮 + Slideover，而不是
-// 把整个菜单堆在正文上方）。点击抽屉里的导航链接（hash 跳转）后自动收起；
-// 视口越过 lg（转屏/拉宽）时强制收起——否则汉堡已隐藏、抽屉和遮罩却还挂着
-// 且没有可见入口。断点值与 SidebarNav 手柄的 lg 保持一致（Tailwind lg=64rem）。
+// 把整个菜单堆在正文上方）。点击抽屉里的导航链接（hash 跳转）后自动收起。
+//
+// 单实例约束：SidebarNav 会在 window 上挂 '/' 快捷键 handler，桌面立柱与
+// 抽屉不能同时挂载。桌面立柱按断点 v-if（SSR 先渲染立柱、CSS max-lg:hidden
+// 兜底移动端首帧），抽屉内容由 USlideover 懒挂载（关闭即卸载）——任意时刻
+// 只有一个 SidebarNav 拥有快捷键。断点用 geistMinWidthQuery('lg') 与系统
+// token 单点对齐，越过 lg 时同时强制收起抽屉。
 const navDrawerOpen = ref(false)
+const isDesktop = ref(true)
 
 function onDrawerNavClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
@@ -49,45 +80,21 @@ function onDrawerNavClick(event: MouseEvent) {
 }
 
 onMounted(() => {
-  const lgQuery = window.matchMedia('(min-width: 64rem)')
-  const closeOnDesktop = (event: MediaQueryListEvent) => {
-    if (event.matches) navDrawerOpen.value = false
+  const lgQuery = window.matchMedia(geistMinWidthQuery('lg'))
+  const sync = () => {
+    isDesktop.value = lgQuery.matches
+    if (lgQuery.matches) navDrawerOpen.value = false
   }
-  lgQuery.addEventListener('change', closeOnDesktop)
-  onUnmounted(() => lgQuery.removeEventListener('change', closeOnDesktop))
+  sync()
+  lgQuery.addEventListener('change', sync)
+  onUnmounted(() => lgQuery.removeEventListener('change', sync))
 })
-
-const currentDomainId = computed(() => {
-  const requested = typeof route.query.domain === 'string' ? route.query.domain : ''
-  return domainIds.has(requested) ? requested : docsShellDomains[0]!.id
-})
-
-// 非法 ?domain= 静默回落首域时同步清掉脏 query，避免分享出去的 URL 与
-// 实际内容漂移。replace 不产生历史记录。
-watch(() => route.query.domain, (requested) => {
-  if (typeof requested !== 'string' || requested === '' || domainIds.has(requested)) return
-  const { domain: _domain, ...rest } = route.query
-  router.replace({ query: rest, hash: route.hash })
-}, { immediate: true })
-
-const currentDomain = computed(() =>
-  docsShellDomains.find(domain => domain.id === currentDomainId.value) ?? docsShellDomains[0]!,
-)
 
 // 侧栏 / ⌘K 索引 / 正文检索全部按当前域派生（一份数据、多处消费）
-const searchGroups = computed(() => toSiteSearchGroups(currentDomain.value))
-
-async function selectDomain(domainId: string) {
-  if (domainId === currentDomainId.value) return
-  await router.push({
-    query: { ...route.query, domain: domainId },
-    hash: '',
-  })
-  window.scrollTo({ top: 0 })
-}
+const searchGroups = computed(() => toSiteSearchGroups(props.domain))
 
 function searchBody(query: string) {
-  return searchDocsBody(currentDomain.value, query)
+  return searchDocsBody(props.domain, query)
 }
 </script>
 
@@ -126,9 +133,9 @@ function searchBody(query: string) {
             <template #body>
               <div class="h-full min-h-0" @click="onDrawerNavClick">
                 <ApiDocsSidebarNav
-                  :key="`drawer-${currentDomain.id}`"
-                  :groups="currentDomain.navGroups"
-                  :aria-label="`${currentDomain.label}文档`"
+                  :key="`drawer-${props.domain.id}`"
+                  :groups="navGroups"
+                  :aria-label="`${props.domain.label}文档`"
                   :resizable="false"
                   search-placeholder="搜索文档"
                   clear-label="清除搜索"
@@ -144,7 +151,7 @@ function searchBody(query: string) {
           </USlideover>
 
           <NuxtLink
-            to="/kits/api-docs/docs-shell"
+            :to="DOCS_SHELL_BASE"
             class="flex shrink-0 items-center gap-2 rounded-md font-medium text-highlighted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             aria-label="Acme Pay 文档首页"
           >
@@ -157,14 +164,13 @@ function searchBody(query: string) {
           <span class="select-none text-dimmed" aria-hidden="true">/</span>
 
           <DemoApiDocsDomainSwitcher
-            :domains="docsShellDomains"
-            :model-value="currentDomainId"
-            @update:model-value="selectDomain"
+            :domains="switcherItems"
+            :current-id="props.domain.id"
           />
         </div>
 
         <ApiDocsSiteSearch
-          :key="currentDomain.id"
+          :key="props.domain.id"
           :groups="searchGroups"
           :search="searchBody"
           search-group-label="正文内容"
@@ -181,14 +187,17 @@ function searchBody(query: string) {
 
     <!-- 两栏：sticky 通栏侧栏 + 正文。侧栏列宽 auto 跟随其可拖拽宽度；
          lg+ 立柱高度 = 视口减全局 header 与外壳工具栏，菜单太长时在组件
-         内部滚动；<lg 立柱隐藏，导航收进工具栏汉堡按钮的左侧抽屉。 -->
+         内部滚动；<lg 立柱卸载（v-if），导航收进工具栏汉堡按钮的左侧抽屉。 -->
     <div class="min-w-0 lg:grid lg:grid-cols-[auto_minmax(0,1fr)]">
-      <aside class="max-lg:hidden lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start">
+      <aside
+        v-if="isDesktop"
+        class="max-lg:hidden lg:sticky lg:top-[calc(var(--ui-header-height)+var(--docs-shell-toolbar-height))] lg:h-[calc(100dvh-var(--ui-header-height)-var(--docs-shell-toolbar-height))] lg:self-start"
+      >
         <ApiDocsSidebarNav
-          :key="currentDomain.id"
+          :key="props.domain.id"
           class="border-r border-default"
-          :groups="currentDomain.navGroups"
-          :aria-label="`${currentDomain.label}文档`"
+          :groups="navGroups"
+          :aria-label="`${props.domain.label}文档`"
           search-placeholder="搜索文档"
           clear-label="清除搜索"
           empty-label="没有匹配的页面"
@@ -208,7 +217,7 @@ function searchBody(query: string) {
         aria-label="API 文档正文"
         class="min-w-0 focus:outline-none"
       >
-        <DemoApiDocsShellReference :key="currentDomain.id" :domain="currentDomain" />
+        <DemoApiDocsShellReference :key="props.domain.id" :domain="props.domain" />
       </section>
     </div>
   </div>

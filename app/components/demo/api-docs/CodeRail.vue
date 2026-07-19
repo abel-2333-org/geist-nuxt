@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { geistMinWidthQuery } from '../../../../foundation/utils/breakpoints'
+import { geistMinWidthQuery, type GeistBreakpoint } from '../../../../foundation/utils/breakpoints'
 
 // GALLERY-PRIVATE composition recipe (NOT a core/kit component).
 //
@@ -16,11 +16,21 @@ import { geistMinWidthQuery } from '../../../../foundation/utils/breakpoints'
 // (ApiDocsRequestExample / ApiDocsResponseExample both accept `max-height`).
 //
 // Anatomy:  #top pane · <SplitPaneHandle horizontal> · #bottom pane
-// States:   below `lg` → stacked, no handle, each card self-scrolls (24rem).
+// States:   below `enabledFrom` (default `lg`) → stacked, no handle, each card
+//           self-scrolls (24rem).
 //           fit (natTop + natBottom ≤ H) → both natural, handle inert.
 //           overflow → total capped to H, budgets reallocated, handle active.
 // A11y:     handle carries role=separator + aria-value* + keyboard (via
 //           SplitPaneHandle); disabled in the fit / stacked states.
+
+const props = withDefaults(defineProps<{
+  /** Enable the rail from this breakpoint up; keep in sync with the gate of
+   *  the surrounding horizontal <SplitPane> so the rail never claims a sticky
+   *  viewport-height strip while the outer pane is still stacked. */
+  enabledFrom?: GeistBreakpoint
+}>(), {
+  enabledFrom: 'lg',
+})
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
 const MIN_PANE = 120 // never starve a pane below this in overflow mode
@@ -144,7 +154,7 @@ function syncTargets() {
 }
 
 onMounted(() => {
-  mql = window.matchMedia(geistMinWidthQuery('lg'))
+  mql = window.matchMedia(geistMinWidthQuery(props.enabledFrom))
   enabled.value = mql.matches
   mql.addEventListener('change', onBp)
 

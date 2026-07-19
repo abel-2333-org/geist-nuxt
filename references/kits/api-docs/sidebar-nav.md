@@ -72,7 +72,7 @@ type SidebarNavKind = 'guide' | 'endpoints'  // 板块呈现家族
 interface SidebarNavSection {
   id?: string            // 稳定 id，缺省时取 label 的 slug
   label: string          // 板块标题（已本地化）
-  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'（endpoints = mono 大写 tracking，chrome 中性）
+  kind?: SidebarNavKind  // 呈现家族，缺省 'guide'���endpoints = mono 大写 tracking，chrome 中性）
   icon?: string          // 板块头可选图标
   items: SidebarNavItem[]
   defaultOpen?: boolean  // 开合状态的初始种子值；搜索激活时被强制展开覆盖
@@ -99,9 +99,9 @@ interface SidebarNavGroup {
 ## 状态（state model）
 
 - 板块：collapsed / expanded（多开）、trigger hover、`focus-visible` 紫环。开合状态**始终受控**（组件自持 `openMap`，`defaultOpen` 只做种子值），避免 UCollapsible 在受控/非受控间切换导致内部状态与用户所见不一致。开合状态**按 group 命名空间**（key = `group.id::section.id`），故不同 group 下同 id/同 slug 的板块不会互相耦合开合。
-- item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。
+- item：default / hover / **active（`aria-current="page"`，由 ULink 依 `to` 判定）** / `focus-visible`。**注意：裸 hash 锚点（`to: '#overview'`）会被 NuxtLink 当外部链接渲染，不参与 router active 匹配**——单页锚点导航（docs-shell 形态）必须由页面层按 `route.hash` 计算并显式传 `item.active`，否则侧栏永远没有「当前位置」高亮。
 - 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
-- 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）��—方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
+- 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
 - 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
 
 ## Accessibility（无障碍）

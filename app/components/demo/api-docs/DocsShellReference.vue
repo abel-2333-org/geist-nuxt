@@ -33,10 +33,12 @@ onMounted(() => anchor.initFromHash())
 </script>
 
 <template>
-  <!-- 支付域：完整样板（指南 + reference 式端点页） -->
+  <!-- 支付域：完整样板（指南 + reference 式端点页）。标题层级：页面唯一
+       h1 = 域名（overview 段打头），指南段与端点均为 h2，之下才是 h3——
+       路径路由下每个域就是一个 route，h1 属于 route 级页头。 -->
   <div v-if="props.domain.id === 'payments'" class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
     <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-highlighted">概览</h2>
+      <h1 class="text-2xl font-semibold tracking-tight text-highlighted">{{ props.domain.label }}</h1>
       <p class="max-w-2xl leading-relaxed text-muted text-pretty">
         支付 API 按业务用途组织：先用「创建结算会话」把顾客送进托管收银台，需要更细控制时改用
         Direct API 自行编排授权、捕获与退款。所有接口共用同一套密钥与 Webhook 通知机制。
@@ -77,15 +79,18 @@ onMounted(() => anchor.initFromHash())
 
     <USeparator />
 
-    <!-- 端点 reference：正文里唯一的 <h1>。横向分栏 = <SplitPane>（独立
-         storage key，与 reference demo 的分栏宽度互不串扰）；右栏 lg+ 钉成
-         视口高 sticky 长条，内部 Request/Response 纵向分栏；<lg 回退为普通
-         堆叠（rail 自身按断点降级为各卡片自滚动）。 -->
+    <!-- 端点 reference：横向分栏 = <SplitPane>（独立 storage key，与
+         reference demo 的分栏宽度互不串扰）；右栏钉成视口高 sticky 长条，
+         内部 Request/Response 纵向分栏；gate 之下回退为普通堆叠（rail 的
+         enabled-from 与之保持同步）。
+         gate 用 xl 而非 lg：外层侧栏可拖到 460px，lg 下限时剩余宽度放不下
+         340 + 12 + 340 的分栏最小值——xl（1200px）起才有余量。 -->
     <section id="checkout-create" class="scroll-mt-[var(--docs-shell-sticky-offset)]">
       <SplitPane
         direction="row"
         mode="fixed"
         fixed-pane="end"
+        enabled-from="xl"
         sticky
         sticky-top="var(--docs-shell-sticky-offset)"
         storage-key="docs-shell-code-rail"
@@ -102,9 +107,9 @@ onMounted(() => anchor.initFromHash())
                 <ApiDocsMethodBadge :method="paymentsEndpoint.method" />
                 <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ paymentsEndpoint.path }}</code>
               </div>
-              <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance">
+              <h2 class="text-2xl font-semibold tracking-tight text-highlighted text-balance">
                 {{ paymentsEndpoint.summary }}
-              </h1>
+              </h2>
               <p class="max-w-2xl leading-relaxed text-muted text-pretty">
                 {{ paymentsEndpoint.description }}
               </p>
@@ -123,8 +128,8 @@ onMounted(() => anchor.initFromHash())
         </template>
 
         <template #end>
-          <div class="lg:sticky lg:top-[var(--docs-shell-sticky-offset)] lg:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
-            <DemoApiDocsCodeRail class="h-full max-lg:space-y-4">
+          <div class="xl:sticky xl:top-[var(--docs-shell-sticky-offset)] xl:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
+            <DemoApiDocsCodeRail enabled-from="xl" class="h-full max-xl:space-y-4">
               <template #top="{ maxHeight }">
                 <ApiDocsRequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
               </template>
@@ -158,11 +163,11 @@ onMounted(() => anchor.initFromHash())
     </div>
   </div>
 
-  <!-- 其余域（付款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
+  <!-- 其余域（���款 / 发卡 / 账户）：紧凑 stub 正文——overview + 指南段 +
        端点 stub，保证该域侧栏与 ⌘K 索引里的每个锚点都有落点。 -->
   <div v-else class="min-w-0 space-y-14 px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
     <section id="overview" class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-3">
-      <h2 class="text-xl font-semibold tracking-tight text-highlighted">{{ props.domain.label }}</h2>
+      <h1 class="text-2xl font-semibold tracking-tight text-highlighted">{{ props.domain.label }}</h1>
       <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ props.domain.description }}</p>
       <p class="max-w-2xl text-sm text-dimmed">
         本域为入口演示：侧栏、全站搜索索引与正文检索已随域切换换源，完整文档形态见「支付」域。
