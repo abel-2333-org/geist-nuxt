@@ -191,13 +191,23 @@ function itemScenarios(item: SidebarNavItem): string[] {
 // aria-current. Without this, three signals disagree when `item.active` is
 // omitted: ULink infers background from route.path (hash ignored → every
 // same-page anchor lights up), while text/aria-current only read item.active.
-// Rules: explicit boolean wins; a plain internal path infers from exact
-// route.path match; anything with `#` never self-infers.
+// Rules: explicit boolean wins; anything with `#` never self-infers; a plain
+// internal path infers by comparing ROUTER-RESOLVED paths (not the raw `to`
+// string) so aliases, trailing slashes, query strings and i18n-prefixed paths
+// all normalise before matching — raw string comparison misjudges every one
+// of those as inactive.
 const route = useRoute()
+const router = useRouter()
 function isItemActive(item: SidebarNavItem): boolean {
   if (item.active !== undefined) return item.active
   if (!item.to || item.to.includes('#')) return false
-  return route.path === item.to
+  try {
+    const stripSlash = (p: string) => p.length > 1 ? p.replace(/\/+$/, '') : p
+    return stripSlash(router.resolve(item.to).path) === stripSlash(route.path)
+  }
+  catch {
+    return false
+  }
 }
 
 // Normalize either input into groups. A flat `sections` prop becomes a single

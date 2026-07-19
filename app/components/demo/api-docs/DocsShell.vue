@@ -103,24 +103,34 @@ const isDesktop = ref(true)
 //   旧实例的 after:leave 永不触发 → pending 状态放 useState 跨实例存活，
 //   由新实例 onMounted 接力聚焦。
 // 目标锚点优先，找不到时聚焦正文容器 #docs-shell-content。
-const pendingFocusHash = useState<string | null>('docs-shell-pending-focus', () => null)
+// pending 里同时存目标 path：消费前先校验当前 route 已经到达目标页——
+// 否则跨页导航时旧实例的 after:leave 可能赶在路由完成前触发，把状态清空
+// 并聚焦到即将卸载的旧正文上。没到目标页就保留状态，留给新实例接力。
+const pendingFocus = useState<{ path: string, hash: string } | null>('docs-shell-pending-focus', () => null)
 
 function onDrawerNavClick(event: MouseEvent) {
   const target = event.target as HTMLElement | null
   const link = target?.closest('a[href]')
   if (!link) return
   const href = link.getAttribute('href') ?? ''
-  pendingFocusHash.value = href.includes('#') ? href.slice(href.indexOf('#')) : ''
+  const hashIdx = href.indexOf('#')
+  pendingFocus.value = {
+    path: hashIdx === -1 ? href : href.slice(0, hashIdx),
+    hash: hashIdx === -1 ? '' : decodeURIComponent(href.slice(hashIdx + 1)),
+  }
   navDrawerOpen.value = false
 }
 
 async function focusPendingTarget() {
-  if (pendingFocusHash.value === null) return
-  const hash = pendingFocusHash.value
-  pendingFocusHash.value = null
+  if (!pendingFocus.value) return
+  // 路由还没到目标页：不消费，保留给目标页实例的 onMounted 接力
+  if (pendingFocus.value.path && route.path !== pendingFocus.value.path) return
+  const { hash } = pendingFocus.value
+  pendingFocus.value = null
   // 等当前渲染批次落定后再找目标（跨页时目标节点刚挂载）
   await nextTick()
-  const dest = (hash && document.querySelector<HTMLElement>(hash))
+  // getElementById 而非 querySelector(hash)：hash 含 CSS 特殊字符时后者会抛
+  const dest = (hash && document.getElementById(hash))
     || document.getElementById('docs-shell-content')
   if (!dest) return
   // 锚点 section 本身不可聚焦，补程序化聚焦所需的 tabindex
