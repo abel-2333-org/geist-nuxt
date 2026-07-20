@@ -23,21 +23,27 @@
 //           fit (natTop + natBottom ≤ H) → both natural, handle inert.
 //           overflow → total capped to H, budgets reallocated, handle active.
 // A11y:     handle carries role=separator + aria-value* + keyboard (via
-//           SplitPaneHandle); disabled in the fit / stacked states.
+//           SplitPaneHandle); NOT rendered in the stacked state, disabled in
+//           the fit state. aria values reflect the EFFECTIVE separator
+//           position (post-reallocation), not the raw persisted ratio.
 
 const props = withDefaults(defineProps<{
   /** Enable the rail from this breakpoint up; keep in sync with the gate of
    *  the surrounding horizontal <SplitPane> so the rail never claims a sticky
    *  viewport-height strip while the outer pane is still stacked. */
   enabledFrom?: GeistBreakpoint
-  /** Persistence key for the split ratio. Give each rail INSTANCE its own key
-   *  (e.g. one for the endpoint rail, one for a webhook rail) so two rails on
-   *  the same page never fight over one stored ratio. */
+  /** Persistence key for the split ratio. Defaults to a per-instance
+   *  `useId()` key so two unnamed rails never fight over one stored ratio;
+   *  pass an explicit key when the ratio should survive reloads. */
   storageKey?: string
 }>(), {
   enabledFrom: 'lg',
-  storageKey: 'geist-api-rail-split',
 })
+
+// Per-instance fallback: useId() is SSR-stable within a render, so hydration
+// agrees, but it is NOT stable across reloads — persistence across visits
+// requires an explicit `storageKey` from the caller.
+const storageKey = props.storageKey ?? `geist-api-rail-split-${useId()}`
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
 const MIN_PANE = 120 // never starve a pane below this in overflow mode
@@ -84,7 +90,7 @@ function onBp(e: MediaQueryListEvent | MediaQueryList) {
 
 /* --- ratio state (top pane's fraction of H) --------------------------- */
 const { value: ratio, dragging, startDrag, nudge, reset } = useSplitPane({
-  key: props.storageKey,
+  key: storageKey,
   default: 0.5,
   min: 0.2,
   max: 0.8,
@@ -214,10 +220,34 @@ const botMaxHeight = computed(() => {
 
 /* --- handle wiring (ratio: dragging down grows the top pane) ---------- */
 const handleDisabled = computed(() => !overflow.value)
+
+// The persisted ratio and the REAL separator position can diverge: content-
+// priority reallocation caps a short pane to its natural height, so a stored
+// 50% may effectively sit at 30%. Everything user-facing (aria values) and
+// every interaction start must therefore be derived from the effective
+// budgets, not the stored ratio.
+const effectiveMinPane = computed(() =>
+  H.value > 0 ? Math.min(MIN_PANE, Math.floor(H.value / 2)) : 0,
+)
+const effectiveRatio = computed(() =>
+  overflow.value && H.value > 0 ? budgets.value.top / H.value : ratio.value,
+)
+
+// Re-anchor the stored ratio onto the real separator position before a drag
+// or keyboard nudge, so the interaction moves FROM where the handle visibly
+// is (no dead keypresses while the stored ratio catches up to the cap).
+function alignRatio() {
+  if (overflow.value && H.value > 0) ratio.value = budgets.value.top / H.value
+}
+
 function onDragStart(e: PointerEvent) {
-  if (H.value > 0) startDrag(e, { axis: 'y', scale: 1 / H.value })
+  if (H.value > 0) {
+    alignRatio()
+    startDrag(e, { axis: 'y', scale: 1 / H.value })
+  }
 }
 function onStep(dir: number) {
+  alignRatio()
   nudge(dir, 0.04)
 }
 function onJump(to: 'min' | 'max' | 'reset') {
@@ -225,7 +255,17 @@ function onJump(to: 'min' | 'max' | 'reset') {
   else ratio.value = to === 'min' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
 }
 
-const ariaNow = computed(() => Math.round(ratio.value * 100))
+const ariaNow = computed(() => Math.round(effectiveRatio.value * 100))
+const ariaMin = computed(() =>
+  overflow.value && H.value > 0
+    ? Math.round((effectiveMinPane.value / H.value) * 100)
+    : 20,
+)
+const ariaMax = computed(() =>
+  overflow.value && H.value > 0
+    ? Math.round(((H.value - effectiveMinPane.value) / H.value) * 100)
+    : 80,
+)
 </script>
 
 <template>
@@ -234,13 +274,18 @@ const ariaNow = computed(() => Math.round(ratio.value * 100))
       <slot name="top" :max-height="topMaxHeight" />
     </div>
 
+    <!-- Below the breakpoint gate the rail is stacked ("stacked, no handle"):
+         rendering even a disabled handle would keep its h-3 box in the flow
+         and inflate the stacked card gap, so the handle only exists when the
+         rail is enabled (fit state keeps it as a disabled spacer). -->
     <SplitPaneHandle
+      v-if="enabled"
       orientation="horizontal"
       :active="dragging"
       :disabled="handleDisabled"
       :aria-value-now="ariaNow"
-      :aria-value-min="20"
-      :aria-value-max="80"
+      :aria-value-min="ariaMin"
+      :aria-value-max="ariaMax"
       aria-label="Resize request and response panels"
       @dragstart="onDragStart"
       @step="onStep"

@@ -175,15 +175,21 @@ export const paymentsHosts = [
   { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
 ]
 
-export const paymentsRequestScenarios = [
-  {
-    id: 'pay',
-    label: '一次性支付',
-    variants: [
-      {
-        label: 'cURL',
-        language: 'bash',
-        code: `curl -X POST https://api.example.com/v1/checkout/sessions \\
+/**
+ * 请求示例按选中环境派生：页面持有选中 host（OperationTarget 的 v-model），
+ * 把 baseUrl 传进来生成对应示例——地址栏、复制值与右栏代码永远指向同一环境，
+ * 不再各自硬编码。
+ */
+export function makePaymentsRequestScenarios(baseUrl: string) {
+  return [
+    {
+      id: 'pay',
+      label: '一次性支付',
+      variants: [
+        {
+          label: 'cURL',
+          language: 'bash',
+          code: `curl -X POST ${baseUrl}/v1/checkout/sessions \\
   -H "Authorization: Bearer $API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -191,11 +197,11 @@ export const paymentsRequestScenarios = [
     "currency": "CNY",
     "successUrl": "https://shop.example.com/thanks"
   }'`,
-      },
-      {
-        label: 'JavaScript',
-        language: 'js',
-        code: `const res = await fetch("https://api.example.com/v1/checkout/sessions", {
+        },
+        {
+          label: 'JavaScript',
+          language: 'js',
+          code: `const res = await fetch("${baseUrl}/v1/checkout/sessions", {
   method: "POST",
   headers: {
     Authorization: \`Bearer \${apiKey}\`,
@@ -208,17 +214,17 @@ export const paymentsRequestScenarios = [
   }),
 })
 const session = await res.json()`,
-      },
-    ],
-  },
-  {
-    id: 'subscription',
-    label: '订阅',
-    variants: [
-      {
-        label: 'cURL',
-        language: 'bash',
-        code: `curl -X POST https://api.example.com/v1/checkout/sessions \\
+        },
+      ],
+    },
+    {
+      id: 'subscription',
+      label: '订阅',
+      variants: [
+        {
+          label: 'cURL',
+          language: 'bash',
+          code: `curl -X POST ${baseUrl}/v1/checkout/sessions \\
   -H "Authorization: Bearer $API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -228,10 +234,11 @@ const session = await res.json()`,
     "successUrl": "https://shop.example.com/thanks",
     "subscription": { "planId": "plan_basic", "trialDays": 7 }
   }'`,
-      },
-    ],
-  },
-]
+        },
+      ],
+    },
+  ]
+}
 
 export const paymentsResponseScenarios = [
   {
@@ -386,15 +393,15 @@ export const paymentsWebhook = {
 export const paymentsWebhookPayloadFields = [
   { path: 'evt_id', name: 'id', type: 'string', required: true, description: '事件唯一 id，幂等去重的依据。', examples: ['evt_9Xk2mR'] },
   {
+    // 本页只文档化 payment.succeeded 这一个事件（其他事件各有独立页面/stub），
+    // 所以 type 收窄为单值常量，与页面 identity 和下方 data 结构保持一致。
     path: 'evt_type',
     name: 'type',
     type: 'enum',
     required: true,
-    description: '事件类型。',
+    description: '事件类型。本事件固定为 `payment.succeeded`；其他事件见各自的文档页。',
     enumValues: [
       { value: 'payment.succeeded', description: '支付成功捕获。' },
-      { value: 'payment.failed', description: '支付失败或被拒绝。' },
-      { value: 'refund.completed', description: '退款完成。' },
     ],
   },
   { path: 'evt_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: '事件产生时间（毫秒时间戳）。' },
@@ -403,7 +410,7 @@ export const paymentsWebhookPayloadFields = [
     name: 'data',
     type: 'object',
     required: true,
-    description: '事件载荷，内容随 `type` 而异；`payment.succeeded` 时为支付对象。',
+    description: '事件载荷；`payment.succeeded` 的载荷为支付对象。',
     children: [
       { path: 'evt_data_paymentId', name: 'paymentId', type: 'string', required: true, description: '支付唯一 id。', examples: ['pay_3Fq8sN'] },
       { path: 'evt_data_amount', name: 'amount', type: 'integer', required: true, description: '实际捕获金额，以货币最小单位计。' },
