@@ -24,6 +24,7 @@
 | `components/LifecycleNotice.vue` | `<ApiDocsLifecycleNotice>` | 生命周期横幅：`UAlert` 薄包装，与 LifecycleBadge 共用 `lifecyclePreset` 词表与色调（徽章标记一行，横幅解释「发生了什么+怎么办」）；置于 OperationHeader 之后、字段区之前；不可 dismiss | — |
 | `components/OperationHeader.vue` | `<ApiDocsOperationHeader>` | 操作身份头（identity/header）：`kind="endpoint"\|"webhook"` 单组件分派到 MethodBadge/EventBadge——identity 行（徽章 + mono 标识 + 右对齐 `#actions` 槽）→ 标题（`heading-level` 定层级，默认 h2；可选 lifecycle 徽章）→ `#description` 槽 → 默认槽收尾部块（OperationTarget 等，正交不内嵌） | 本页「Operation identity 分层」 |
 | `components/OperationTarget.vue` | `<ApiDocsOperationTarget>` | 端点的「往哪调」行（actions/target）：环境 host 切换（`USelect`，单 host 自动省略）+ mono 完整地址 + `CopyButton` 复制；面向 endpoint——webhook 的 target 是消费方自己的回调地址，一句话说明即可 | 本页「Operation identity 分层」 |
+| `components/WebhookProtocol.vue` | `<ApiDocsWebhookProtocol>` | webhook 三段协议事实（Verification / Acknowledgement / Delivery），OperationHeader（kind="webhook"）的正文伙伴：FieldGroup 段头 + `<dl>` 事实行；三段各自独立省略（没写进契约的段整段不出现）；ACK body 三语义由数据形状表达（literal → CodeBlock example、echo / intentional empty → facts 行文字）；重试节奏总结句为可访问真源、chips 纯视觉且长序列折叠可展开。折叠派生纯函数在 `utils/webhook-schedule.ts`（有 node --test 覆盖） | `webhook-protocol.md` |
 | `components/CodeRail.vue` | `<ApiDocsCodeRail>` | 纵向双例码轨道：上下两栏（典型为 Request/Response）+ 可拖横向把手 + 内容优先重分配；耦合本 kit 代码卡内部 DOM（`.code-surface`/`pre.raw-pre`）量自然高，故归 kit 而非 foundation；`storage-key` prop 让多实例互不串扰；把手 aria-label 经 `resize-label` prop 可本地化（同 `SidebarNav` 惯例） | 本页「可拖动分栏」 |
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线） | — |
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
@@ -51,7 +52,7 @@
 
 registry item 为 `api-docs-site-search`，只声明
 `api-docs-method-badge` 依赖；后者的 closure 自动带入 foundation。完整文档站装配看
-`/kits/api-docs/docs-shell`，但该 shell 是 gallery-private recipe，不属于 copy-in 切片。
+`/kits/api-docs/docs-shell`，但该 shell 是 gallery-private recipe，��属于 copy-in 切片。
 
 > **组件名 = 目录名 + 文件名**：约定 `components: [{ path: '~/components', pathPrefix: true }]`，所以 `app/components/api-docs/CodeBlock.vue` 的模板名是 `<ApiDocsCodeBlock>`。`api-docs/` 目录前缀既表达 kit 归属，也让这些组件与消费者自己的组件天然隔离、不撞名。
 
@@ -100,7 +101,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 
 ### 可拖动分栏（分割原语在 foundation；重分配在本 kit 的 CodeRail）
 
-典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。空间分割与拖动由 foundation 提供三层原语（从高到低），内容优先重分配则由本 kit 的 `<ApiDocsCodeRail>` 承载（见下）：
+典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。空间分割��拖动由 foundation 提供三层原语（从高到低），内容优先重分配则由本 kit 的 `<ApiDocsCodeRail>` 承载（见下）：
 
 - **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
@@ -176,7 +177,7 @@ export function computeSplitBudgets(
 }
 ```
 
-实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点 gate 走 `enabled-from` prop（默认 `lg`），gate 之下回退为堆叠 + 自然高、无把手——**必须与外围 SplitPane 的 gate 保持同一断点**（docs-shell 因外层侧栏挤占宽度而统一用 `xl`），内外层断点不同步会出现「分栏启用但放不下最小宽」或反之的错位。`:style` 绑定**始终返回对象（无值时用空对象 `{}` 占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已���持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点 gate 走 `enabled-from` prop（默认 `lg`），gate 之下回退为堆叠 + 自然高、无把手——**必须与外围 SplitPane 的 gate 保持同一断点**（docs-shell 因外层侧栏挤占宽度而统一用 `xl`），内外层断点不同步会出现「分栏启用但放不下最小宽」或反之的错位。`:style` 绑定**始终返回对象（无值时用空对象 `{}` 占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
 
   - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟，不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观察了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高度→同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，且重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
 
@@ -194,13 +195,14 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**四个 api-docs demo 页，职责互补**：
+gallery 有**五个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
 | `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `app/pages/kits/api-docs/reference.vue` | 参考页组合 | **整页级场景组合** | 招牌两栏参考页：横向 `SplitPane`（左字段树 / 右代码栏）+ kit 的 `<ApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。是下游消费页 copy & adapt 的活骨架 |
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
+| `app/pages/kits/api-docs/webhook-protocol.vue` | Webhook 协议 | **协议事实专项** | 三段齐全主 fixture（复用 docs-shell 演示数据源 `paymentsWebhookProtocol`）+ 变体区：section 省略规则、ACK 三语义（literal/echo/intentional empty）、无 steps schedule |
 | `app/pages/kits/api-docs/docs-shell/`（`index.vue` 重定向、`[domain]/index.vue` 域首页、`[domain]/[slug].vue` 指南子页） | 文档站外壳 | **文档门户外壳 recipe（最小示范）** | gallery-private 的 header、domain switcher、`ApiDocsSiteSearch`、`ApiDocsSidebarNav` 与 reference-style 正文装配，路径分段路由 + 指南分页；**未覆盖多资源参考子页**（见 `project-setup.md`「域内怎么拆页」与 ADR-009 投入边界）；用于组合验证，不是 registry 切片 |
 
 > 各页都由 gallery 的假 ViewModel 驱动，数据不写进 kit。**新增单组件陈列进 `index.vue`；参考页布局进 `reference.vue`；导航专项进 `sidebar-nav.vue`；整站壳层组合进 `docs-shell/` 路由树**。
@@ -261,9 +263,10 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - `kits/api-docs/components/{CodeBlock,RequestExample,ResponseExample}.vue`
 - `kits/api-docs/components/{MethodBadge,EventBadge,LifecycleBadge,LifecycleNotice}.vue` + `kits/api-docs/utils/{method,lifecycle}-preset.ts`
 - `kits/api-docs/components/{OperationHeader,OperationTarget,CodeRail}.vue`
+- `kits/api-docs/components/WebhookProtocol.vue` + `kits/api-docs/utils/webhook-schedule.ts`
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SidebarNav,SiteSearch}.vue`
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
-- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
+- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/{badge,breakpoints}.ts`
 
 ## 不要臆造

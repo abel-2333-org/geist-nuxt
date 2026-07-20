@@ -435,6 +435,50 @@ export const paymentsWebhookPayloadExample = {
 }`,
 }
 
+/** protocol facts：<ApiDocsWebhookProtocol> 的三段协议事实（已本地化的展示数据）。 */
+export const paymentsWebhookProtocol = {
+  verification: {
+    label: 'VERIFICATION',
+    description: '每次投递都携带签名头。用密钥重新计算并比对签名，再处理事件。',
+    facts: [
+      { term: '签名头', value: 'X-Pay-Signature', code: true },
+      { term: '算法', value: 'HMAC-SHA256', code: true, note: '对原始请求体计算，编码为十六进制小写。' },
+      { term: '密钥来源', value: '控制台 Webhook 设置页生成的 signing secret。' },
+      { term: '时效', value: '签名含时间戳，偏差超过 5 分钟应拒绝，防止重放。' },
+    ],
+  },
+  acknowledgement: {
+    label: 'ACKNOWLEDGEMENT',
+    description: '返回下列响应即视为确认成功；其它响应触发重试。',
+    facts: [
+      { term: 'HTTP status', value: '200', code: true },
+      { term: 'Media type', value: 'application/json', code: true },
+      { term: '响应体', value: '固定 JSON 字面量，字段与示例完全一致。' },
+    ],
+    example: {
+      code: '{\n  "received": true\n}',
+      language: 'json',
+      title: '确认响应体',
+    },
+  },
+  delivery: {
+    label: 'DELIVERY',
+    description: '未收到成功确认时按退避序列重试，共约 24 小时。',
+    facts: [
+      { term: '总次数', value: '首次投递 + 最多 8 次重试。' },
+      { term: '超时', value: '每次请求 10 秒未响应即视为失败。' },
+      { term: '成功条件', value: '任意一次收到上述确认响应即停止重试。' },
+    ],
+    schedule: {
+      term: '重试节奏',
+      summary: '从 1 分钟起逐步退避到 12 小时，共 8 次。',
+      steps: ['1 分钟', '5 分钟', '30 分钟', '1 小时', '2 小时', '4 小时', '8 小时', '12 小时'],
+      expandLabel: (hidden: number) => `展开其余 ${hidden} 档`,
+      collapseLabel: '收起',
+    },
+  },
+}
+
 export const paymentsWebhookStubs: DocsShellWebhookStub[] = [
   { id: 'webhook-payment-failed', event: 'payment.failed', summary: '支付失败', description: '支付被拒绝或超时后投递，载荷含失败码与可读原因，便于触发挽回流程。' },
   { id: 'webhook-refund-completed', event: 'refund.completed', summary: '退款完成', description: '退款资金原路退回后投递，对账请以该事件为准而非发起退款的同步响应。' },

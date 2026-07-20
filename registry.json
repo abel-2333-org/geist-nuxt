@@ -348,6 +348,17 @@
       ]
     },
     {
+      "name": "api-docs-webhook-protocol",
+      "type": "registry:component",
+      "title": "ApiDocsWebhookProtocol",
+      "description": "Webhook verification, acknowledgement, and delivery protocol facts.",
+      "registryDependencies": ["geist-foundation", "foundation-inline-code", "api-docs-field-group", "api-docs-code-block"],
+      "files": [
+        { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/api-docs/WebhookProtocol.vue" },
+        { "path": "kits/api-docs/utils/webhook-schedule.ts", "target": "app/utils/webhook-schedule.ts" }
+      ]
+    },
+    {
       "name": "api-docs-sidebar-nav",
       "type": "registry:component",
       "title": "ApiDocsSidebarNav",
