@@ -51,18 +51,39 @@ type State = 'idle' | 'loading' | 'ready' | 'error'
 const state = ref<State>('idle')
 const preview = ref<DocPreview | null>(null)
 
+// Guards a reused instance (e.g. this component recycled for a different
+// `to`): a bumped token orphans any in-flight load so a late response can
+// never overwrite the newer document's preview.
+let requestToken = 0
+
 async function fetchPreview() {
+  const token = ++requestToken
   state.value = 'loading'
   try {
-    preview.value = await props.load()
+    const result = await props.load()
+    if (token !== requestToken) return
+    preview.value = result
     state.value = 'ready'
   }
   catch {
+    if (token !== requestToken) return
     state.value = 'error'
   }
 }
 
-function onFirstOpen() {
+// The cache is only valid for the document it was loaded for. When the target
+// changes, drop it; if a load already happened (the popover has been opened,
+// possibly is open right now), refetch immediately so an open panel never
+// shows the previous document.
+watch(() => [props.to, props.load] as const, () => {
+  requestToken++
+  const hadLoaded = state.value !== 'idle'
+  preview.value = null
+  state.value = 'idle'
+  if (hadLoaded) void fetchPreview()
+})
+
+function onOpen() {
   if (state.value === 'idle') void fetchPreview()
 }
 </script>
@@ -75,7 +96,7 @@ function onFirstOpen() {
     :loading="state === 'idle' || state === 'loading'"
     :error="state === 'error' ? t.error : false"
     :labels="labels"
-    @open="onFirstOpen"
+    @open="onOpen"
     @retry="fetchPreview"
   >
     <slot />

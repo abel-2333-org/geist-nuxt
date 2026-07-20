@@ -70,7 +70,9 @@ const canJump = computed(() => !crossPageTo.value && Boolean(node.value?.path))
 
 function jump(close: () => void) {
   close()
-  if (node.value?.path) void anchor.goTo(node.value.path)
+  // Focus lands on the target row: on long pages the popover trigger scrolls
+  // out of view, and keyboard users should continue from where they arrived.
+  if (node.value?.path) void anchor.goTo(node.value.path, { focus: true })
 }
 </script>
 

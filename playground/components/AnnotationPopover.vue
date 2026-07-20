@@ -42,7 +42,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  /** First time the popover opens — annotation forms lazy-load here. */
+  /** Every time the popover opens — annotation forms decide whether to load. */
   open: []
   /** Retry pressed in the error state. */
   retry: []
@@ -55,12 +55,28 @@ const t = computed<Required<AnnotationPopoverLabels>>(() => ({
 }))
 
 const open = ref(false)
-const openedOnce = ref(false)
-watch(open, (value) => {
-  if (value && !openedOnce.value) {
-    openedOnce.value = true
-    emit('open')
-  }
+const triggerEl = ref<HTMLButtonElement>()
+const panelEl = ref<HTMLElement>()
+
+// The popover panel is portaled, so it never sits after the trigger in DOM
+// order — a keyboard user who opened with Enter could otherwise Tab straight
+// past the panel's actions to the next annotation. When the open came from
+// the keyboard (trigger still :focus-visible), move focus to the panel's
+// first action (or the panel itself, so Escape keeps working and the content
+// is announced). Pointer opens stay focus-neutral so hovering never steals
+// focus mid-typing. Escape/close returns focus to the trigger (reka default).
+watch(open, async (value) => {
+  if (!value) return
+  emit('open')
+  const keyboard = triggerEl.value?.matches(':focus-visible') ?? false
+  if (!keyboard) return
+  await nextTick()
+  const panel = panelEl.value
+  if (!panel) return
+  const first = panel.querySelector<HTMLElement>(
+    'button, [href], [tabindex]:not([tabindex="-1"])',
+  )
+  ;(first ?? panel).focus()
 })
 
 // Mouse-only hover enhancement. Short open delay avoids popovers firing while
@@ -80,9 +96,18 @@ function onTriggerEnter(event: PointerEvent) {
   if (event.pointerType !== 'mouse' || props.disabled) return
   clearTimers()
   openTimer = setTimeout(() => {
-    open.value = true
+    // Re-check: `disabled` may have flipped during the delay.
+    if (!props.disabled) open.value = true
   }, OPEN_DELAY)
 }
+
+// Disabling mid-interaction cancels pending hover timers and closes an
+// already-open panel, so a disabled annotation is never left interactive.
+watch(() => props.disabled, (disabled) => {
+  if (!disabled) return
+  clearTimers()
+  open.value = false
+})
 
 function scheduleClose(event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
@@ -103,6 +128,7 @@ onBeforeUnmount(clearTimers)
 <template>
   <UPopover v-model:open="open" mode="click">
     <button
+      ref="triggerEl"
       type="button"
       :disabled="disabled"
       class="-mx-0.5 box-decoration-clone inline cursor-pointer touch-manipulation rounded-xs px-0.5 text-left underline decoration-dashed decoration-1 underline-offset-3 transition-colors hover:bg-elevated hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
@@ -116,7 +142,9 @@ onBeforeUnmount(clearTimers)
 
     <template #content="{ close }">
       <div
-        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm sm:w-80"
+        ref="panelEl"
+        tabindex="-1"
+        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm outline-none sm:w-80"
         :aria-busy="loading || undefined"
         @pointerenter="cancelClose"
         @pointerleave="scheduleClose"

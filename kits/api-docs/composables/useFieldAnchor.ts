@@ -48,7 +48,7 @@ export function useFieldAnchor() {
    * flashing it. `getElementById` avoids any need to escape the id for a
    * CSS/querySelector selector.
    */
-  async function goTo(path: string, opts: { updateHash?: boolean } = {}) {
+  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
     if (opts.updateHash !== false && import.meta.client) {
       history.replaceState(history.state, '', `#${path}`)
@@ -70,6 +70,13 @@ export function useFieldAnchor() {
     // first scroll, nudging the row off its scroll-margin anchor. Re-run the
     // scroll on the next frame so we settle on the final, correct position.
     requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }))
+    // Optionally move keyboard focus to the row (deep links, annotation jumps)
+    // so Tab continues from the target instead of wherever the journey began.
+    // `preventScroll` keeps the settled scroll position authoritative.
+    if (opts.focus) {
+      if (!el.hasAttribute('tabindex')) el.tabIndex = -1
+      el.focus({ preventScroll: true })
+    }
     // Brief highlight so the eye lands on the right row. Uses the Web Animations
     // API (no persistent class to clean up) and respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -137,11 +144,26 @@ export function useFieldAnchor() {
     }
   }
 
-  /** On mount, honor an incoming `#path` hash by navigating to it. */
+  /**
+   * Honor an incoming `#path` hash by navigating to it, now and on later
+   * hash-only route changes. The watcher covers reused page instances (e.g.
+   * dynamic `[slug]` routes navigated slug-to-slug, or a cross-page field
+   * link targeting the page you are already on) where onMounted never re-runs.
+   * Focus moves to the row so keyboard users continue from the target.
+   * Registered inside the caller's lifecycle (setup/onMounted), the watcher
+   * is disposed with the page component.
+   */
   function initFromHash() {
     if (!import.meta.client) return
-    const hash = decodeURIComponent(location.hash.replace(/^#/, ''))
-    if (hash) goTo(hash, { updateHash: false })
+    const apply = (raw: string) => {
+      const path = decodeURIComponent(raw.replace(/^#/, ''))
+      if (path) goTo(path, { updateHash: false, focus: true })
+    }
+    apply(location.hash)
+    const route = useRoute()
+    watch(() => route.hash, (hash) => {
+      if (hash) apply(hash)
+    })
   }
 
   return { active, copied, goTo, copyLink, urlFor, initFromHash, SCROLL_MARGIN_CLASS }
