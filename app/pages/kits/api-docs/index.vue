@@ -373,17 +373,16 @@ onMounted(() => anchor.initFromHash())
             环境切换 + 完整地址 + 复制；webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
           </p>
           <div class="space-y-8">
+            <!-- story 标题是 h3，头部标题传 4 归入其下，保持 outline 不跳级 -->
             <ApiDocsOperationHeader
               kind="endpoint"
               method="POST"
               path="/v1/checkout/sessions"
               summary="创建结算会话"
               lifecycle="active"
+              :heading-level="4"
               class="rounded-lg border border-default p-5"
             >
-              <template #actions>
-                <UButton label="在 Playground 打开" icon="i-lucide-square-play" color="neutral" variant="ghost" size="sm" />
-              </template>
               <template #description>
                 为一次支付或订阅创建托管结算会话，返回托管收银台 URL。
               </template>
@@ -399,6 +398,7 @@ onMounted(() => anchor.initFromHash())
               kind="webhook"
               event="payment.succeeded"
               summary="支付成功"
+              :heading-level="4"
               class="rounded-lg border border-default p-5"
             >
               <template #description>

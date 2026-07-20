@@ -55,7 +55,6 @@ pnpm geist:check -- --target <consumer>
 - 交互元素必须有 `focus-visible`；纯图标按钮有 `aria-label`；表单用 `UFormField`；不只靠颜色传意。
 - 用户内容通过 props / slots；结构 chrome 提供默认文案并允许覆盖。
 - demo 数据、私有 spec、adapter、fixture 和页面 recipe 不进入 foundation / kit。
-- `CodeRail` 是根 gallery 的页面私有 recipe，不进入 registry。
 
 ## 按需加载 references
 

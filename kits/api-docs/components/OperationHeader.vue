@@ -22,24 +22,42 @@
 //           identifier is real text (selectable, SR-readable); lifecycle badge
 //           carries icon + text, never color alone.
 
-const props = withDefaults(
-  defineProps<{
-    kind: 'endpoint' | 'webhook'
-    /** Endpoint identity: HTTP method (e.g. "POST"). */
-    method?: string
-    /** Endpoint identity: URL path (e.g. "/v1/checkout/sessions"). */
-    path?: string
-    /** Webhook identity: event name (e.g. "payment.succeeded"). */
-    event?: string
-    /** Human title of the operation. */
-    summary: string
-    /** Operation-level lifecycle, rendered as a badge next to the heading. */
-    lifecycle?: EndpointLifecycle
-    /** Heading level for the summary; slots into the page outline. */
-    headingLevel?: 2 | 3 | 4
-  }>(),
-  { headingLevel: 2 },
-)
+// Identity is a discriminated union on `kind`: an endpoint MUST carry
+// method + path, a webhook MUST carry event. This makes "endpoint without a
+// method" a type error at the call site instead of silently rendering a fake
+// GET badge over an empty path.
+interface EndpointIdentity {
+  kind: 'endpoint'
+  /** Endpoint identity: HTTP method (e.g. "POST"). */
+  method: string
+  /** Endpoint identity: URL path (e.g. "/v1/checkout/sessions"). */
+  path: string
+  /** Webhook identity: not applicable to endpoints. */
+  event?: never
+}
+
+interface WebhookIdentity {
+  kind: 'webhook'
+  /** Webhook identity: event name (e.g. "payment.succeeded"). */
+  event: string
+  /** Endpoint identity: not applicable to webhooks. */
+  method?: never
+  /** Endpoint identity: not applicable to webhooks. */
+  path?: never
+}
+
+type OperationHeaderProps = (EndpointIdentity | WebhookIdentity) & {
+  /** Human title of the operation. */
+  summary: string
+  /** Operation-level lifecycle, rendered as a badge next to the heading. */
+  lifecycle?: EndpointLifecycle
+  /** Heading level for the summary; slots into the page outline. */
+  headingLevel?: 2 | 3 | 4
+}
+
+const props = withDefaults(defineProps<OperationHeaderProps>(), {
+  headingLevel: 2,
+})
 
 const identifier = computed(() =>
   props.kind === 'endpoint' ? props.path : props.event,
@@ -49,7 +67,7 @@ const identifier = computed(() =>
 <template>
   <header class="flex flex-col gap-3">
     <div class="flex min-w-0 items-center gap-3">
-      <ApiDocsMethodBadge v-if="props.kind === 'endpoint'" :method="props.method ?? 'GET'" />
+      <ApiDocsMethodBadge v-if="props.kind === 'endpoint'" :method="props.method" />
       <ApiDocsEventBadge v-else />
 
       <code class="min-w-0 truncate font-mono text-sm text-highlighted">

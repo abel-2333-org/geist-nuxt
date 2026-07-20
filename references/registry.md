@@ -28,7 +28,7 @@
 4. 依赖图必须存在、无环、稳定排序。
 5. kit item 可依赖 foundation 或同 kit item；禁止跨 kit 依赖。
 6. foundation item 不依赖 kit。
-7. demo、fixture、adapter、页面私有 recipe（如 `CodeRail`）不得进入 registry。
+7. demo、fixture、adapter、页面私有 recipe（如 `DocsShell` 系列）不得进入 registry。
 
 ## 验证 registry
 

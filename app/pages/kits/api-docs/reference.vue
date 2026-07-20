@@ -299,7 +299,7 @@ onMounted(() => anchor.initFromHash())
            <lg 回退为普通堆叠（rail 自身按断点降级为各卡片自滚动）。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
-          <ApiDocsCodeRail class="h-full max-lg:space-y-4">
+          <ApiDocsCodeRail storage-key="api-docs-reference-rail-split" class="h-full max-lg:space-y-4">
             <template #top="{ maxHeight }">
               <ApiDocsRequestExample :scenarios="requestScenarios" :max-height="maxHeight" />
             </template>

@@ -45,7 +45,7 @@ registry.json                唯一 copy-in manifest
 references/                  设计与操作契约
 ```
 
-依赖方向：kit → foundation、kit → 同 kit；禁止 kit → kit。gallery 私有 demo（例如 API reference 的 `CodeRail`）留在 `app/components/demo/`，不进入 registry。
+依赖方向：kit → foundation、kit → 同 kit；禁止 kit → kit。gallery 私有 demo（例如 docs-shell 的 `DocsShell` 系列）留在 `app/components/demo/`，不进入 registry。
 
 ## Copy-in registry
 

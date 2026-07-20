@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {
+  makePaymentsRequestScenarios,
   paymentsBodyFields,
   paymentsEndpoint,
   paymentsEndpointStubs,
   paymentsHosts,
-  paymentsRequestScenarios,
   paymentsResponseFields,
   paymentsResponseScenarios,
   paymentsWebhook,
@@ -33,6 +33,16 @@ import {
 const props = defineProps<{
   domain: DocsShellDomain
 }>()
+
+// 选中环境提升到本层持有：OperationTarget（地址栏 + 复制）与右栏请求示例
+// 从同一个 host 派生，切环境时两处同步更新，不再各自硬编码。
+const selectedHostId = ref(paymentsHosts[0]!.id)
+const selectedHost = computed(
+  () => paymentsHosts.find(h => h.id === selectedHostId.value) ?? paymentsHosts[0]!,
+)
+const paymentsRequestScenarios = computed(
+  () => makePaymentsRequestScenarios(selectedHost.value.baseUrl),
+)
 
 // 深链接：带 `#path` 进入时自动展开 + 滚动定位到对应字段（三层导航的第三层）。
 const anchor = useFieldAnchor()
@@ -96,19 +106,13 @@ onMounted(() => anchor.initFromHash())
               :lifecycle="paymentsEndpoint.lifecycle"
               class="border-b border-default pb-8"
             >
-              <template #actions>
-                <UButton
-                  label="在 Playground 打开"
-                  icon="i-lucide-square-play"
-                  color="neutral"
-                  variant="ghost"
-                  size="sm"
-                />
-              </template>
               <template #description>
                 {{ paymentsEndpoint.description }}
               </template>
+              <!-- 选中环境由本组件持有（v-model）：地址栏、复制值与右栏
+                   请求示例都从同一个 host 派生，切环境三处同步。 -->
               <ApiDocsOperationTarget
+                v-model="selectedHostId"
                 :hosts="paymentsHosts"
                 :path="paymentsEndpoint.path"
                 select-label="选择环境"
@@ -132,7 +136,7 @@ onMounted(() => anchor.initFromHash())
 
         <template #end>
           <div class="xl:sticky xl:top-[var(--docs-shell-sticky-offset)] xl:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
-            <ApiDocsCodeRail enabled-from="xl" class="h-full max-xl:space-y-4">
+            <ApiDocsCodeRail enabled-from="xl" storage-key="docs-shell-rail-split" class="h-full max-xl:space-y-4">
               <template #top="{ maxHeight }">
                 <ApiDocsRequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
               </template>
