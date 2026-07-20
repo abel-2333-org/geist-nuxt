@@ -228,7 +228,7 @@
       "name": "api-docs-response-example",
       "type": "registry:component",
       "title": "ApiDocsResponseExample",
-      "description": "Scenario and status-aware response example.",
+      "description": "Scenario and status-aware response example with explicit body semantics (code, empty, unavailable, file).",
       "registryDependencies": ["api-docs-code-block"],
       "files": [
         { "path": "kits/api-docs/components/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue" }

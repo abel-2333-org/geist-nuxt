@@ -15,9 +15,9 @@
 
 | 文件 | 组件名 | 职责 | 详细文档 |
 |---|---|---|---|
-| `components/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 多语言代码块基座（USelect 语言 + 复制 + 换行；默认 raw code，可选可信构建期 highlighted HTML；无运行时高亮器） | `code-sample.md` |
+| `components/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 多语言代码块基座（USelect 语言 + 复制 + 换行；默认 raw code，可选可信构建期 highlighted HTML；无运行时高亮器；`#notice`/`#body` 槽供包装组件注入语义面板） | `code-sample.md` |
 | `components/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
-| `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
+| `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换 + body 语义显式建模（code/empty/unavailable/file、多 media type、`'default'` 状态；委托 ApiDocsCodeBlock） | `response-example.md` |
 | `components/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 foundation `SemanticBadge` | — |
 | `components/EventBadge.vue` | `<ApiDocsEventBadge>` | Webhook 身份标：统一词 `EVENT`（neutral+subtle、mono），与 MethodBadge 同形态位——方法色标说「你调平台」，EVENT 标说「平台回调你」；单值词汇，preset 退化为内联常量 | 本页「Operation identity 分层」 |
 | `components/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 foundation `SemanticBadge` | — |
