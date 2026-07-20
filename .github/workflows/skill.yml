@@ -24,6 +24,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Guard against mojibake (U+FFFD)
+        run: |
+          # Same gate as release-skill, but here it runs on every PR so the
+          # corruption is caught at review time instead of at release time
+          # (release-skill is skipped for pull_request events).
+          if LC_ALL=C grep -rlaF $'\xEF\xBF\xBD' . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.nuxt --exclude-dir=.output --exclude-dir=coverage; then
+            echo "::error::Found U+FFFD (mojibake) in the source tree. Fix before merge." >&2
+            echo "--- offending lines ---" >&2
+            LC_ALL=C grep -rnaF $'\xEF\xBF\xBD' . --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.nuxt --exclude-dir=.output --exclude-dir=coverage >&2 || true
+            exit 1
+          fi
+          echo "No U+FFFD found — source encoding is clean."
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10

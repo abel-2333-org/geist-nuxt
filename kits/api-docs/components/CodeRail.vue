@@ -47,6 +47,8 @@ const storageKey = props.storageKey ?? `geist-api-rail-split-${useId()}`
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
 const MIN_PANE = 120 // never starve a pane below this in overflow mode
+const RATIO_MIN = 0.2 // useSplitPane clamp — also drives the aria bounds
+const RATIO_MAX = 0.8
 
 /**
  * Content-priority reallocation (pure). Given the fixed total height H (already
@@ -92,8 +94,8 @@ function onBp(e: MediaQueryListEvent | MediaQueryList) {
 const { value: ratio, dragging, startDrag, nudge, reset } = useSplitPane({
   key: storageKey,
   default: 0.5,
-  min: 0.2,
-  max: 0.8,
+  min: RATIO_MIN,
+  max: RATIO_MAX,
 })
 
 /* --- measured layout (written in rAF, never synchronously in the RO) --- *
@@ -226,12 +228,20 @@ const handleDisabled = computed(() => !overflow.value)
 // 50% may effectively sit at 30%. Everything user-facing (aria values) and
 // every interaction start must therefore be derived from the effective
 // budgets, not the stored ratio.
-const effectiveMinPane = computed(() =>
-  H.value > 0 ? Math.min(MIN_PANE, Math.floor(H.value / 2)) : 0,
-)
 const effectiveRatio = computed(() =>
   overflow.value && H.value > 0 ? budgets.value.top / H.value : ratio.value,
 )
+
+// The REAL reachable bounds of the separator: run the same reallocation with
+// the ratio pinned to its clamp ends (0.2 / 0.8). This accounts for BOTH the
+// useSplitPane clamp and natural-height capping — e.g. with a short top pane
+// the true max may be 25%, not 80% and certainly not `H - MIN_PANE`.
+const effectiveBounds = computed(() => {
+  if (!overflow.value || H.value <= 0) return { min: RATIO_MIN, max: RATIO_MAX }
+  const lo = computeSplitBudgets(H.value, natTop.value, natBottom.value, RATIO_MIN, MIN_PANE)
+  const hi = computeSplitBudgets(H.value, natTop.value, natBottom.value, RATIO_MAX, MIN_PANE)
+  return { min: lo.top / H.value, max: hi.top / H.value }
+})
 
 // Re-anchor the stored ratio onto the real separator position before a drag
 // or keyboard nudge, so the interaction moves FROM where the handle visibly
@@ -256,16 +266,8 @@ function onJump(to: 'min' | 'max' | 'reset') {
 }
 
 const ariaNow = computed(() => Math.round(effectiveRatio.value * 100))
-const ariaMin = computed(() =>
-  overflow.value && H.value > 0
-    ? Math.round((effectiveMinPane.value / H.value) * 100)
-    : 20,
-)
-const ariaMax = computed(() =>
-  overflow.value && H.value > 0
-    ? Math.round(((H.value - effectiveMinPane.value) / H.value) * 100)
-    : 80,
-)
+const ariaMin = computed(() => Math.round(effectiveBounds.value.min * 100))
+const ariaMax = computed(() => Math.round(effectiveBounds.value.max * 100))
 </script>
 
 <template>

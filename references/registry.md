@@ -151,7 +151,7 @@ export default defineNuxtConfig({
 /* 消费项目自己的 override 放在 foundation 声明之后。 */
 ```
 
-如果项目已有 `app/assets/css/main.css` 且内容不同，首次 copy 会停止并报告 conflict，不会覆盖。先人工合并或采用 foundation 入口，再重新执行 copy；复制完成���该文件归消费项目所有，可以继续追加 override，但任何本地修改都会让后续 `geist:update` 停止并要求人工合并。若已有 `colorMode` / `ui` 配置，在消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
+如果项目已有 `app/assets/css/main.css` 且内容不同，首次 copy 会停止并报告 conflict，不会覆盖。先人工合并或采用 foundation 入口，再重新执行 copy；复制完成后该文件归消费项目所有，可以继续追加 override，但任何本地修改都会让后续 `geist:update` 停止并要求人工合并。若已有 `colorMode` / `ui` 配置，在消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
 
 ### `app/app.vue`
 
