@@ -55,29 +55,57 @@ const t = computed<Required<AnnotationPopoverLabels>>(() => ({
 }))
 
 const open = ref(false)
-const triggerEl = ref<HTMLButtonElement>()
 const panelEl = ref<HTMLElement>()
 
-// The popover panel is portaled, so it never sits after the trigger in DOM
-// order — a keyboard user who opened with Enter could otherwise Tab straight
-// past the panel's actions to the next annotation. When the open came from
-// the keyboard (trigger still :focus-visible), move focus to the panel's
-// first action (or the panel itself, so Escape keeps working and the content
-// is announced). Pointer opens stay focus-neutral so hovering never steals
-// focus mid-typing. Escape/close returns focus to the trigger (reka default).
-watch(open, async (value) => {
-  if (!value) return
-  emit('open')
-  const keyboard = triggerEl.value?.matches(':focus-visible') ?? false
-  if (!keyboard) return
-  await nextTick()
+watch(open, (value) => {
+  if (value) emit('open')
+})
+
+// ── Focus management ────────────────────────────────────────────────────────
+// The panel is portaled (never after the trigger in DOM order), so keyboard
+// opens must move focus into it or its actions are unreachable by Tab. But
+// reka's FocusScope auto-focuses the panel on EVERY open, which would let a
+// mere mouse hover yank focus from wherever the user is typing. `:focus-visible`
+// on the trigger cannot distinguish the two either (Tab to the trigger, then
+// hover: still :focus-visible). So the trigger's own events record how this
+// open was initiated, and the content's auto-focus hooks act on it:
+//  - keyboard (Enter/Space keydown) → focus the panel's first action, or the
+//    panel itself (tabindex="-1") so Escape keeps working;
+//  - pointer / hover → prevent auto-focus entirely, stay focus-neutral.
+// On close, reka would likewise auto-return focus to the trigger; that is only
+// right when focus actually lives inside the panel (keyboard journey). After a
+// hover graze focus never entered, and stealing it back would interrupt typing.
+type OpenSource = 'keyboard' | 'pointer' | 'hover'
+let openSource: OpenSource = 'pointer'
+
+function onTriggerKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter' || event.key === ' ') openSource = 'keyboard'
+}
+
+function onTriggerPointerdown() {
+  openSource = 'pointer'
+}
+
+function focusPanel() {
   const panel = panelEl.value
   if (!panel) return
   const first = panel.querySelector<HTMLElement>(
     'button, [href], [tabindex]:not([tabindex="-1"])',
   )
   ;(first ?? panel).focus()
-})
+}
+
+const contentProps = {
+  onOpenAutoFocus(event: Event) {
+    event.preventDefault()
+    if (openSource === 'keyboard') nextTick(focusPanel)
+  },
+  onCloseAutoFocus(event: Event) {
+    const panel = panelEl.value
+    const inPanel = Boolean(panel && panel.contains(document.activeElement))
+    if (!inPanel && openSource !== 'keyboard') event.preventDefault()
+  },
+}
 
 // Mouse-only hover enhancement. Short open delay avoids popovers firing while
 // the pointer merely sweeps across a paragraph; the close delay leaves room to
@@ -97,7 +125,9 @@ function onTriggerEnter(event: PointerEvent) {
   clearTimers()
   openTimer = setTimeout(() => {
     // Re-check: `disabled` may have flipped during the delay.
-    if (!props.disabled) open.value = true
+    if (props.disabled) return
+    openSource = 'hover'
+    open.value = true
   }, OPEN_DELAY)
 }
 
@@ -126,13 +156,14 @@ onBeforeUnmount(clearTimers)
 </script>
 
 <template>
-  <UPopover v-model:open="open" mode="click">
+  <UPopover v-model:open="open" mode="click" :content="contentProps">
     <button
-      ref="triggerEl"
       type="button"
       :disabled="disabled"
       class="-mx-0.5 box-decoration-clone inline cursor-pointer touch-manipulation rounded-xs px-0.5 text-left underline decoration-dashed decoration-1 underline-offset-3 transition-colors hover:bg-elevated hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
       :class="triggerClass"
+      @keydown="onTriggerKeydown"
+      @pointerdown="onTriggerPointerdown"
       @pointerenter="onTriggerEnter"
       @pointerleave="scheduleClose"
       @click="clearTimers"

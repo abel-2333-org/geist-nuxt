@@ -113,6 +113,8 @@ function jump(close: () => void) {
       >
         {{ t.viewField }}
       </UButton>
+      <!-- Close before navigating: a dynamic route can reuse this page
+           instance, and an open popover would otherwise survive the trip. -->
       <UButton
         v-else
         :to="crossPageTo"
@@ -120,6 +122,7 @@ function jump(close: () => void) {
         variant="ghost"
         size="xs"
         trailing-icon="i-lucide-arrow-right"
+        @click="close()"
       >
         {{ t.viewField }}
       </UButton>

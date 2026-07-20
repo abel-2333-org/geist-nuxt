@@ -23,6 +23,11 @@ export function useActiveFieldPath() {
 /** Height of the sticky header, so scrolled-to rows clear it (see scroll-mt). */
 const SCROLL_MARGIN_CLASS = 'scroll-mt-24'
 
+// Client-global navigation token: each goTo invalidates the previous one, so
+// a stale in-flight positioning (e.g. waiting for an async field tree that
+// mounted late) can never scroll/flash after the user already moved on.
+let navigationToken = 0
+
 export interface FieldAnchorCopyMessages {
   successMessage?: string
   failureMessage?: string
@@ -55,15 +60,22 @@ export function useFieldAnchor() {
     }
 
     if (!import.meta.client) return
+    const token = ++navigationToken
     await nextTick()
+
+    // The row may not exist yet: hash arrival can precede an async field tree
+    // (data still loading on a fresh navigation). Poll for the element within
+    // a bounded window instead of failing on the first miss; the token drops
+    // this positioning if a newer navigation started meanwhile.
+    const el = await waitForElement(path)
+    if (!el || token !== navigationToken) return
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
     // may also try a native scroll to the hash. Both shift layout, so scrolling
-    // on a fixed delay is racy. Instead wait until the document height is stable
+    // on a fixed delay is racy. Instead wait until the element's layout is stable
     // across two frames (expansion settled), then do a single scroll + flash.
-    const el = document.getElementById(path)
-    if (!el) return
     await waitForElementStable(el)
+    if (token !== navigationToken) return
 
     el.scrollIntoView({ block: 'start' })
     // Content above the target (images, code blocks) can still reflow after the
@@ -89,6 +101,24 @@ export function useFieldAnchor() {
         { duration: 1600, easing: 'ease-out' },
       )
     }
+  }
+
+  /**
+   * Resolve the target row's element, retrying per frame within a bounded
+   * window so async field trees that mount shortly after the hash arrives are
+   * still found. Resolves null once the window closes.
+   */
+  function waitForElement(id: string, maxMs = 2000): Promise<HTMLElement | null> {
+    return new Promise((resolve) => {
+      const start = performance.now()
+      const tick = () => {
+        const el = document.getElementById(id)
+        if (el) return resolve(el)
+        if (performance.now() - start > maxMs) return resolve(null)
+        requestAnimationFrame(tick)
+      }
+      tick()
+    })
   }
 
   /**
@@ -145,10 +175,12 @@ export function useFieldAnchor() {
   }
 
   /**
-   * Honor an incoming `#path` hash by navigating to it, now and on later
-   * hash-only route changes. The watcher covers reused page instances (e.g.
-   * dynamic `[slug]` routes navigated slug-to-slug, or a cross-page field
-   * link targeting the page you are already on) where onMounted never re-runs.
+   * Honor an incoming `#path` hash by navigating to it, now and on later route
+   * changes. Watching `[path, hash]` covers every reused-instance case where
+   * onMounted never re-runs: hash-only changes on the same page, and dynamic
+   * `[slug]` navigations where the hash text stays identical but the page
+   * changed (`/a#amount` → `/b#amount`). An empty hash clears the active field
+   * so the shared useState never carries a stale highlight onto a new page.
    * Focus moves to the row so keyboard users continue from the target.
    * Registered inside the caller's lifecycle (setup/onMounted), the watcher
    * is disposed with the page component.
@@ -158,11 +190,12 @@ export function useFieldAnchor() {
     const apply = (raw: string) => {
       const path = decodeURIComponent(raw.replace(/^#/, ''))
       if (path) goTo(path, { updateHash: false, focus: true })
+      else active.value = ''
     }
     apply(location.hash)
     const route = useRoute()
-    watch(() => route.hash, (hash) => {
-      if (hash) apply(hash)
+    watch(() => [route.path, route.hash] as const, ([, hash]) => {
+      apply(hash)
     })
   }
 
