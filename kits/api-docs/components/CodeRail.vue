@@ -36,8 +36,12 @@ const props = withDefaults(defineProps<{
    *  `useId()` key so two unnamed rails never fight over one stored ratio;
    *  pass an explicit key when the ratio should survive reloads. */
   storageKey?: string
+  /** Accessible label for the drag handle (localizable — same convention as
+   *  SidebarNav's `resizeLabel`). */
+  resizeLabel?: string
 }>(), {
   enabledFrom: 'lg',
+  resizeLabel: 'Resize request and response panels',
 })
 
 // Per-instance fallback: useId() is SSR-stable within a render, so hydration
@@ -290,7 +294,7 @@ const ariaMax = computed(() => Math.round(effectiveBounds.value.max * 100))
       :aria-value-now="ariaNow"
       :aria-value-min="ariaMin"
       :aria-value-max="ariaMax"
-      aria-label="Resize request and response panels"
+      :aria-label="props.resizeLabel"
       @dragstart="onDragStart"
       @step="onStep"
       @jump="onJump"
