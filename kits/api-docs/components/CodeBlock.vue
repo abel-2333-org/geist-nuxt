@@ -16,7 +16,10 @@
 // Anatomy:  header/toolbar
 //             ├─ left:  icon · title · #leading slot (e.g. status badge)
 //             └─ right: #controls slot (scenario/status) · language · wrap · copy
-//           body: scrollable, max-height near-mono code surface
+//           notice: optional #notice slot strip below the toolbar (wrapper context)
+//           body: scrollable, max-height near-mono code surface; with no code,
+//                 an optional #body slot lets wrappers render a semantic panel
+//                 (empty body / missing example / file) inside the same frame
 // States:   active language, wrap on/off, empty / unavailable. (Copied state
 //           lives in CopyButton.)
 // A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
@@ -250,6 +253,16 @@ const wrap = useCodeWrap(props.defaultWrap)
       </div>
     </div>
 
+    <!-- Notice strip — optional wrapper-provided context (e.g. a response
+         status description) rendered between the toolbar and the body so it
+         shares the block's chrome. Non-breaking: absent slot renders nothing. -->
+    <div
+      v-if="$slots.notice"
+      class="border-b border-default bg-muted/40 px-4 py-2 text-sm text-muted"
+    >
+      <slot name="notice" />
+    </div>
+
     <!-- Body — raw source by default; v-html is behind an explicit trust gate
          for pre-sanitized build-time output only. Clipboard always uses code. -->
     <div
@@ -266,6 +279,13 @@ const wrap = useCodeWrap(props.defaultWrap)
         v-else
         class="font-mono text-sm leading-relaxed text-highlighted"
       >{{ current?.code }}</code></pre>
+    </div>
+
+    <!-- Wrapper-owned body panel — when there is no code but a wrapper supplies
+         a semantic body state (empty body, missing example, binary file), it
+         renders here instead of the generic empty state, inside the same frame. -->
+    <div v-else-if="$slots.body" class="bg-default">
+      <slot name="body" />
     </div>
 
     <!-- Empty / unavailable state -->

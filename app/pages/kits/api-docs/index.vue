@@ -42,6 +42,9 @@ deployment = res.json()`,
   },
 ]
 
+// 响应示例：覆盖 body 语义全形态——numeric / 'default' 状态、code（多 media
+// type：JSON + CSV）、empty（204 有意空正文）、unavailable（有正文缺示例）、
+// file（二进制：metadata + 可选下载）。旧 `variants` 简写仍兼容（见「导出部署列表」）。
 const responseScenarios = [
   {
     id: 'created',
@@ -49,11 +52,16 @@ const responseScenarios = [
     statuses: [
       {
         status: 200,
-        statusText: '部署已创建。',
-        variants: [
+        statusText: '已创建',
+        description: '部署已创建，返回存储后的完整记录。',
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "id": "dpl_8Kx2fQ",
   "name": "my-app",
   "target": "production",
@@ -61,6 +69,87 @@ const responseScenarios = [
   "url": "https://my-app.example.app",
   "createdAt": 1720000000000
 }`,
+              },
+            ],
+          },
+          {
+            kind: 'code' as const,
+            mediaType: 'text/csv',
+            variants: [
+              {
+                language: 'csv',
+                label: 'CSV',
+                code: 'id,name,target,state\ndpl_8Kx2fQ,my-app,production,READY',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        status: 204,
+        statusText: '无内容',
+        bodies: [{ kind: 'empty' as const, note: '删除成功，协议约定不返回正文。' }],
+      },
+      {
+        status: 409,
+        statusText: '冲突',
+        description: '同名部署已存在。',
+        bodies: [{ kind: 'unavailable' as const, mediaType: 'application/json' }],
+      },
+      {
+        status: 'default' as const,
+        statusText: '未预期错误',
+        bodies: [
+          {
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
+  "error": { "code": "internal", "message": "Unexpected error." }
+}`,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'export',
+    label: '导出构建产物',
+    statuses: [
+      {
+        status: 200,
+        statusText: '成功',
+        description: '返回构建产物压缩包。',
+        bodies: [
+          {
+            kind: 'file' as const,
+            mediaType: 'application/zip',
+            filename: 'my-app-build.zip',
+            size: '2.4 MB',
+            downloadUrl: 'https://example.com/artifacts/my-app-build.zip',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    // 旧模型兼容：仅 `variants` 的调用零改动。
+    id: 'list',
+    label: '导出部署列表',
+    statuses: [
+      {
+        status: 200,
+        statusText: '成功',
+        variants: [
+          {
+            language: 'json',
+            code: `[
+  { "id": "dpl_8Kx2fQ", "name": "my-app", "state": "READY" }
+]`,
           },
         ],
       },
@@ -312,6 +401,13 @@ onMounted(() => anchor.initFromHash())
 
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
+          <p class="mb-3 max-w-2xl text-sm text-muted">
+            body 语义显式建模：<code class="font-mono text-[0.8125rem]">code</code>（多 media type 出选择器）/
+            <code class="font-mono text-[0.8125rem]">empty</code>（有意空正文，如 204）/
+            <code class="font-mono text-[0.8125rem]">unavailable</code>（有正文缺示例）/
+            <code class="font-mono text-[0.8125rem]">file</code>（二进制 metadata + 可选下载）；
+            状态支持数字码与 <code class="font-mono text-[0.8125rem]">'default'</code>，可带 status 级描述。
+          </p>
           <ApiDocsResponseExample :scenarios="responseScenarios" />
         </div>
 
