@@ -5,7 +5,7 @@
 // truth), and async doc-preview loaders (one succeeding, one failing).
 
 import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
-import type { DocPreview } from './LinkAnnotation.vue'
+import type { DocPreview } from './DocAnnotation.vue'
 
 provideGlossary({
   'idempotency-key': {
@@ -100,13 +100,13 @@ function loadBrokenDoc(): Promise<DocPreview> {
         (跨页字段:跳转到 Reference 页并自动展开高亮)。支付结果通过
         <PlaygroundTermAnnotation id="webhook" :labels="termLabels" />
         异步通知。退款的完整流程参见
-        <PlaygroundLinkAnnotation to="/kits/api-docs/reference" :load="loadRefundGuide" :labels="docLabels">
+        <PlaygroundDocAnnotation to="/kits/api-docs/reference" :load="loadRefundGuide" :labels="docLabels">
           退款指南
-        </PlaygroundLinkAnnotation>
+        </PlaygroundDocAnnotation>
         ;历史文档链接可能失效,例如
-        <PlaygroundLinkAnnotation to="/kits/api-docs" :load="loadBrokenDoc" :labels="docLabels">
+        <PlaygroundDocAnnotation to="/kits/api-docs" :load="loadBrokenDoc" :labels="docLabels">
           旧版对账说明
-        </PlaygroundLinkAnnotation>
+        </PlaygroundDocAnnotation>
         (演示 error + 重试 + 兜底跳转)。另有一个
         <PlaygroundTermAnnotation id="missing-id" :labels="termLabels">
           未登记术语

@@ -20,7 +20,7 @@ export interface DocPreview {
   description?: string
 }
 
-export interface LinkAnnotationLabels extends AnnotationPopoverLabels {
+export interface DocAnnotationLabels extends AnnotationPopoverLabels {
   /** Eyebrow caption of the popover. */
   category?: string
   /** Caption of the navigate action. */
@@ -35,12 +35,12 @@ const props = withDefaults(
     to: string
     /** Async preview loader (adapter-owned; e.g. queryCollection by path). */
     load: () => Promise<DocPreview>
-    labels?: LinkAnnotationLabels
+    labels?: DocAnnotationLabels
   }>(),
   { labels: () => ({}) },
 )
 
-const t = computed<Required<Pick<LinkAnnotationLabels, 'category' | 'open' | 'error'>>>(() => ({
+const t = computed<Required<Pick<DocAnnotationLabels, 'category' | 'open' | 'error'>>>(() => ({
   category: 'Preview',
   open: 'Open page',
   error: 'Preview failed to load. Retry or open the page.',
