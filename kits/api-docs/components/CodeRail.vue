@@ -220,9 +220,6 @@ const botMaxHeight = computed(() => {
   return `${Math.max(60, budgets.value.bottom - chromeBottom.value)}px`
 })
 
-/* --- handle wiring (ratio: dragging down grows the top pane) ---------- */
-const handleDisabled = computed(() => !overflow.value)
-
 // The persisted ratio and the REAL separator position can diverge: content-
 // priority reallocation caps a short pane to its natural height, so a stored
 // 50% may effectively sit at 30%. Everything user-facing (aria values) and
@@ -242,6 +239,11 @@ const effectiveBounds = computed(() => {
   const hi = computeSplitBudgets(H.value, natTop.value, natBottom.value, RATIO_MAX, MIN_PANE)
   return { min: lo.top / H.value, max: hi.top / H.value }
 })
+
+/* --- handle wiring (ratio: dragging down grows the top pane) ---------- */
+const handleDisabled = computed(
+  () => !overflow.value || effectiveBounds.value.min >= effectiveBounds.value.max,
+)
 
 // Re-anchor the stored ratio onto the real separator position before a drag
 // or keyboard nudge, so the interaction moves FROM where the handle visibly
