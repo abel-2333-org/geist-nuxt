@@ -91,8 +91,10 @@ prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 
 - 过滤动态路由与 `nav: false`；
 - 顶层页面直接显示；
-- `kits/<name>/**` 折成 kit 子树；
+- `kits/<name>/**` 折成一个顶层 kit 条目（单页 kit 为链接，多页 kit 为下拉）；
 - `meta.nav.order` 决定稳定排序。
+
+导航最多两层：水平 `UNavigationMenu` 只渲染一层 dropdown，更深的嵌套在头部不可见，所以 kit 直接置顶层而不额外包一层分组。
 
 `UHeader mode="slideover"` 使用同一 items 数据渲染桌面 `UNavigationMenu` 与移动端纵向菜单；不要另写移动抽屉或 media query。
 
