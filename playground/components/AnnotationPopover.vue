@@ -73,8 +73,10 @@ watch(open, (value) => {
 //    panel itself (tabindex="-1") so Escape keeps working;
 //  - pointer / hover → prevent auto-focus entirely, stay focus-neutral.
 // On close, reka would likewise auto-return focus to the trigger; that is only
-// right when focus actually lives inside the panel (keyboard journey). After a
-// hover graze focus never entered, and stealing it back would interrupt typing.
+// right when focus actually lives inside the panel — the keyboard journeys
+// (Enter → panel → Escape) all satisfy it. When focus is already elsewhere
+// (hover graze, or an outside click that legitimately moved focus), stealing
+// it back to the trigger would interrupt whatever the user is doing.
 type OpenSource = 'keyboard' | 'pointer' | 'hover'
 let openSource: OpenSource = 'pointer'
 
@@ -98,7 +100,7 @@ function focusPanel() {
   const panel = panelEl.value
   if (!panel) return
   const first = panel.querySelector<HTMLElement>(
-    'button, [href], [tabindex]:not([tabindex="-1"])',
+    'button:not(:disabled), [href], [tabindex]:not([tabindex="-1"])',
   )
   ;(first ?? panel).focus()
 }
@@ -111,7 +113,7 @@ const contentProps = {
   onCloseAutoFocus(event: Event) {
     const panel = panelEl.value
     const inPanel = Boolean(panel && panel.contains(document.activeElement))
-    if (!inPanel && openSource !== 'keyboard') event.preventDefault()
+    if (!inPanel) event.preventDefault()
   },
 }
 

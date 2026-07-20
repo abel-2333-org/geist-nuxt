@@ -8,7 +8,7 @@ import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
  * fields its narrative wants to reference — including fields documented on
  * OTHER pages — and markdown only ever references ids:
  *
- *   :field-annotation[repoId]{field-ref="create-deployment.gitSource.repoId"}
+ *   :field[repoId]{field-ref="create-deployment.gitSource.repoId"}
  *
  * Same-page entries omit `page`; the annotation deep-links via useFieldAnchor
  * (scroll + expand + flash on this page). Cross-page entries set `page` to the

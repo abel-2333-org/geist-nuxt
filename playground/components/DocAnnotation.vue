@@ -74,8 +74,11 @@ async function fetchPreview() {
 // The cache is only valid for the document it was loaded for. When the target
 // changes, drop it; if a load already happened (the popover has been opened,
 // possibly is open right now), refetch immediately so an open panel never
-// shows the previous document.
-watch(() => [props.to, props.load] as const, () => {
+// shows the previous document. Keyed on `to` alone: `load` is often an inline
+// closure whose identity changes on every parent render, and watching it
+// would reset the cache spuriously. `to` names the document; a changed loader
+// for the same document returns the same preview.
+watch(() => props.to, () => {
   requestToken++
   const hadLoaded = state.value !== 'idle'
   preview.value = null

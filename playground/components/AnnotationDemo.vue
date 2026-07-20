@@ -108,6 +108,8 @@ function loadBrokenDoc(): Promise<DocPreview> {
           旧版对账说明
         </PlaygroundDocAnnotation>
         (演示 error + 重试 + 兜底跳转)。另有一个
+        <!-- 故意未登记的 id:dev console 的 [TermAnnotation] warn 是本演示的
+             预期输出,不算验证清单里的"console 错误"。 -->
         <PlaygroundTermAnnotation id="missing-id" :labels="termLabels">
           未登记术语
         </PlaygroundTermAnnotation>

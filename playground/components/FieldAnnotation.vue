@@ -8,7 +8,7 @@
 //     the endpoint's field tree for <ApiDocsFieldItem>).
 //  2. `field-ref` prop — resolved against the page-provided field source
 //     (useFieldSource), which is what narrative markdown uses:
-//       :field-annotation[amount]{field-ref="create-payment.amount"}
+//       :field[amount]{field-ref="create-payment.amount"}
 //     Cross-page references work the same way: the source entry carries the
 //     documenting page's route, and the action becomes a `{page}#{path}` link;
 //     the target page's initFromHash() expands + scrolls + flashes on arrival.
@@ -56,11 +56,16 @@ const node = computed<FieldNode | undefined>(() => props.field ?? entry.value?.f
 const route = useRoute()
 const anchor = useFieldAnchor()
 
+/** Strip trailing slashes so `/docs/` and `/docs` compare as the same page. */
+function normalizePath(path: string) {
+  return path.replace(/\/+$/, '') || '/'
+}
+
 /** Cross-page when the source entry names a different documenting page. */
 const crossPageTo = computed(() => {
   if (props.to) return props.to
   const page = entry.value?.page
-  if (!page || page === route.path) return undefined
+  if (!page || normalizePath(page) === normalizePath(route.path)) return undefined
   // Without an anchor path the link still navigates to the documenting page.
   return node.value?.path ? `${page}#${node.value.path}` : page
 })
