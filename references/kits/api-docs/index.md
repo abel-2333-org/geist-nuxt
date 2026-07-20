@@ -98,11 +98,11 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 - **surface（整块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<ApiDocsCodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付。
 - **侧栏 / ⌘K 的 webhook 身份是过渡态**——`SidebarNav` 条目暂以 `method: 'EVENT'` 走 MethodBadge 的 fallback（neutral+subtle，渲染效果与 EventBadge 一致）。这是数据层 stopgap；`item.kind` 泛化（一等 webhook 条目）是已知后续事项，见 `sidebar-nav.md`。
 
-### 可拖动分栏（foundation，非本 kit 独有）
+### 可拖动分栏（分割原语在 foundation；重分配在本 kit 的 CodeRail）
 
-典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。foundation 提供三层，从高到低：
+典型 API 参考页是「左文档 / 右代码栏」两栏，右栏再纵向分成 Request / Response。空间分割与拖动由 foundation 提供三层原语（从高到低），内容优先重分配则由本 kit 的 `<ApiDocsCodeRail>` 承载（见下）：
 
-- **`components/SplitPane.vue`（`<SplitPane>`）—— 首��入口，声明式的自包含分栏容器**。内部自��持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
+- **`components/SplitPane.vue`（`<SplitPane>`）—— 首选入口，声明式的自包含分栏容器**。内部自己持有 `useSplitPane` + `<SplitPaneHandle>`，把断点门控、SSR 安全 sizing、min/max 钳制、键盘 + 指针接线、cookie 持久化全部封装掉。消费方只用**原始值 prop** + `#start`/`#end` 两个具名 slot：
 
   ```vue
   <SplitPane
@@ -176,7 +176,7 @@ export function computeSplitBudgets(
 }
 ```
 
-实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点 gate 走 `enabled-from` prop（默认 `lg`），gate 之下回退为堆叠 + 自然高、无把手——**必须与外围 SplitPane 的 gate 保持同一断点**（docs-shell 因外层侧栏挤占宽度而统一用 `xl`），内外层断点不同步会出现「分栏启用但放不下最小宽」或反之的错位���`:style` 绑定**始终返回对象（无值时用空对象 `{}` 占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
+实现要点：用 ResizeObserver 量两栏内部 `<pre>` 的自然高度（滚动容器封顶时 `<pre>` 仍报告完整内容高）；`RequestExample`/`ResponseExample` 已支持接收 `maxHeight` 预算，非 fill 态下 CodeBlock 先长到内容高再封顶滚动。断点 gate 走 `enabled-from` prop（默认 `lg`），gate 之下回退为堆叠 + 自然高、无把手——**必须与外围 SplitPane 的 gate 保持同一断点**（docs-shell 因外层侧栏挤占宽度而统一用 `xl`），内外层断点不同步会出现「分栏启用但放不下最小宽」或反之的错位。`:style` 绑定**始终返回对象（无值时用空对象 `{}` 占位），绝不 `undefined`**——否则 SSR 水合时 `undefined→对象` 的过渡会被 Vue 跳过、宽/高静默不生效。断点判断用手写 `matchMedia` 监听（`onMounted` 建立），别用 VueUse `useMediaQuery`（此处水合后同步不可靠）。
 
   - **坑（务必）：RO 回调里的 `measure()` 必须 `requestAnimationFrame` 延迟，不能同步调用**。虽然 `<pre>` 的内容高不受 budget 影响，但 RO 同时也观察了 pane **包裹层**，而包裹层高度正是 `measure()` 通过 `budgets`→`reqStyle/resStyle` 写入的——同步重测就构成「写高度→同帧再触发观察」的闭环，浏览器会抛 `ResizeObserver loop completed with undelivered notifications`。把回调合并进单个 rAF（并 `cancelAnimationFrame` 去抖、`onBeforeUnmount` 清理）即可打断同步投递链，且重分配仍在下一帧内完成、视觉无感。同理，`SplitPane` 内部量容器宽算 `max` 时也必须 rAF 延迟写入——注意**别用 VueUse 的 `useElementSize`**：它在自己的 RO 回调里同步写 ref，在这种「量尺寸→改 flex→再触发」的场景里照样闭环。直接用 `useResizeObserver` 拿 `contentRect`、在 rAF 里写自己的 `mainSize` ref 才安全。
 
@@ -187,7 +187,7 @@ export function computeSplitBudgets(
 1. 先运行 `pnpm geist:copy -- geist-foundation <item...> --target <consumer> --to <checkout-40-char-sha>` 查看 dry-run plan；确认后用同一命令追加 `--write`。工具会展开 `registryDependencies`，将 kit 与 foundation 依赖的 component / composable / util / CSS / config 完整写入 target；不带 `--write` 不会复制任何文件。
 2. `CopyButton` / `useCopy` / `SemanticBadge` 等 foundation 能力也是显式 registry item，不存在 layer 隐式依赖。
 3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树/导航/全站搜索）。组合示例见 gallery 四个互补 demo 页，按需在自己项目里照着拼。
-4. ���件使用 `@nuxt/ui` 与 `@vueuse/core`；消费项目必须显式具备 registry 所声明的外部依赖。**不要**为了代码块安装 Shiki / `@nuxt/content`。
+4. 组件使用 `@nuxt/ui` 与 `@vueuse/core`；消费项目必须显式具备 registry 所声明的外部依赖。**不要**为了代码块安装 Shiki / `@nuxt/content`。
 
 > **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立，也才与消费者自有组件隔离。
 

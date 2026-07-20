@@ -91,7 +91,7 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 - 桌面 gutter 锚点按钮与触屏 inline 常显按钮保留两份 markup。二者定位、显隐和触控职责不同，当前合并会增加条件 class，收益不足。第三处锚点或按钮逻辑显著复杂时再收敛。
 - `FieldNode` 继续使用宽松的扁平 ViewModel；当前按存在性降级无运行时 bug。只有真实 adapter 频繁产生无意义组合，或 object / enum / scalar 形态稳定分化后，再评估 discriminated union。
 - 深链接 composable 与 FieldItem 同一 registry slice；消费页负责 mount 时初始化 hash。可选 router scroll polish 属 app 级行为，不焊进 kit。
-- 复制 toast 接受完整 `successMessage` 注入，避免 foundation 拥���半句、kit 再拼半句导致混语。
+- 复制 toast 接受完整 `successMessage` 注入，避免 foundation 拥有半句、kit 再拼半句导致混语。
 
 ## ADR-007：国际化和私有 spec 留消费项目
 
