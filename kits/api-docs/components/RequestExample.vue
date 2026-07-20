@@ -7,7 +7,8 @@
 // everything stays on one aligned row.
 //
 // Anatomy:  <CodeBlock> with a scenario select injected into its toolbar
-// State:    active scenario; language/copy/wrap live in CodeBlock.
+// State:    active scenario — optionally controlled via `v-model:scenario`
+//           (uncontrolled by default); language/copy/wrap live in CodeBlock.
 // A11y:     scenario select is labelled; the rest is inherited.
 
 import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
@@ -57,15 +58,23 @@ const t = computed(() => ({
 }))
 
 const scenarios = computed(() => props.scenarios ?? [])
-const activeId = ref<string | undefined>(scenarios.value[0]?.id)
 
+// Optional controlled seam: bind `v-model:scenario` to drive the selection
+// from the parent (e.g. linked request/response). When unbound, defineModel
+// falls back to local state and behavior is unchanged (uncontrolled).
+const scenarioModel = defineModel<string>('scenario')
+
+// The effective scenario is fully DERIVED: an unknown/missing id converges to
+// the first scenario without writing back or emitting — no update loops, no
+// duplicate events, SSR-safe (fallback is never persisted into the model).
 const current = computed<RequestScenario | undefined>(
-  () => scenarios.value.find(s => s.id === activeId.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenarioModel.value) ?? scenarios.value[0],
 )
 
-// Keep selection valid if the scenario list changes.
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === activeId.value)) activeId.value = list[0]?.id
+// The select shows the CONVERGED id but only writes user choices to the model.
+const selected = computed<string | undefined>({
+  get: () => current.value?.id,
+  set: (id) => { scenarioModel.value = id },
 })
 
 const scenarioItems = computed(() =>
@@ -85,7 +94,7 @@ const scenarioItems = computed(() =>
   >
     <template v-if="scenarioItems.length > 1" #controls>
       <USelect
-        v-model="activeId"
+        v-model="selected"
         :items="scenarioItems"
         icon="i-lucide-layers"
         size="xs"

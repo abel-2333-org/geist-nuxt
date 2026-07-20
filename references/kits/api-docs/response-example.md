@@ -14,6 +14,7 @@
 | `defaultWrap` / `maxHeight` / `languageLabels` | — | 传给 CodeBlock |
 | `labels` | `ApiResponseLabels` | `ApiCodeLabels` + `title` + `scenario` + `status` |
 | `trustHighlightedHtml` | `boolean` | 透传给 CodeBlock；仅可信、预消毒的构建期 HTML 才开启 |
+| `v-model:scenario` | `string` | 可选受控口：当前场景 id；用户切换时发 `update:scenario` |
 
 ```ts
 interface ResponseStatus { status: number; statusText?: string; variants: CodeVariant[] }
@@ -24,6 +25,13 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 - 数字码在彩色 badge（`#leading`）里，状态选择器只带 `statusText`，合起来读作 "200 · OK" 不重复。
 - 切场景时状态自动收敛到该场景的第一个可用状态。
 - 场景/状态各自 ≤1 时不渲染对应选择器。
+
+## 受控选择
+
+与 `<ApiDocsRequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。差异点：
+
+- **status 不在受控口内**：始终内部状态；场景变化（用户切换 / 父级更新 / fallback 收敛）时自动 snap 到该场景第一个可用状态。
+- 绑定值指向本组件缺失的场景 id 时（如联动中响应侧缺某场景），展示收敛到第一个场景，选择器显示收敛后的值。
 
 ## 用法
 

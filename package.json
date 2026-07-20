@@ -16,6 +16,7 @@
     "geist:update": "node scripts/copy-registry.mjs --update",
     "geist:check": "node scripts/check-registry-consumer.mjs",
     "test:registry": "node --test tests/gallery-nav.test.mjs tests/registry-tools.test.mjs tests/check-root-css.test.mjs tests/webhook-protocol.test.mjs",
+    "test:component": "vitest run",
     "test:consumer": "node scripts/check-registry-consumer.mjs"
   },
   "dependencies": {
@@ -29,10 +30,14 @@
   },
   "devDependencies": {
     "@nuxt/kit": "4.4.8",
+    "@nuxt/test-utils": "^4.0.3",
     "@vue/compiler-dom": "^3.5.39",
     "@vue/compiler-sfc": "^3.5.39",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.11.0",
     "tailwindcss": "^4.3.2",
     "typescript": "~5.9.0",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.6"
   },
   "pnpm": {

@@ -16,8 +16,8 @@
 | 文件 | 组件名 | 职责 | 详细文档 |
 |---|---|---|---|
 | `components/CodeBlock.vue` | `<ApiDocsCodeBlock>` | 多语言代码块基座（USelect 语言 + 复制 + 换行；默认 raw code，可选可信构建期 highlighted HTML；无运行时高亮器） | `code-sample.md` |
-| `components/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock） | `request-example.md` |
-| `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock） | `response-example.md` |
+| `components/RequestExample.vue` | `<ApiDocsRequestExample>` | 按业务场景切换的请求示例（委托 ApiDocsCodeBlock）；场景可选经 `v-model:scenario` 受控 | `request-example.md` |
+| `components/ResponseExample.vue` | `<ApiDocsResponseExample>` | 响应示例：场景+状态切换，也覆盖单一固定响应（委托 ApiDocsCodeBlock）；场景可选经 `v-model:scenario` 受控，status 保持内部 | `response-example.md` |
 | `components/MethodBadge.vue` | `<ApiDocsMethodBadge>` | HTTP method 色标（GET/POST/PUT/PATCH/DELETE），mono 字体；preset 包装 foundation `SemanticBadge` | — |
 | `components/EventBadge.vue` | `<ApiDocsEventBadge>` | Webhook 身份标：统一词 `EVENT`（neutral+subtle、mono），与 MethodBadge 同形态位——方法色标说「你调平台」，EVENT 标说「平台回调你」；单值词汇，preset 退化为内联常量 | 本页「Operation identity 分层」 |
 | `components/LifecycleBadge.vue` | `<ApiDocsLifecycleBadge>` | 生命周期色标（new/beta/active/maintenance/deprecated/sunset）；preset 包装 foundation `SemanticBadge` | — |
@@ -30,7 +30,7 @@
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
 | `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位；深链接由 `useFieldAnchor` 驱动。数据模型 `FieldNode`/`FieldNote` 内联，`EnumValue`/`EnumVariant`/`FieldLifecycle` 从兄弟切片 enum-table/lifecycle-badge 导入 | — |
 | `components/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
-| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块��指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复���兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
 
 ### SiteSearch 契约
 

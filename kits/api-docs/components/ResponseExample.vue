@@ -10,7 +10,9 @@
 // + body (delegated to <CodeBlock>).
 //
 // Anatomy:  <CodeBlock> + status badge (#leading) + scenario/status (#controls)
-// State:    active scenario, active status; language/copy/wrap in CodeBlock.
+// State:    active scenario — optionally controlled via `v-model:scenario`
+//           (uncontrolled by default); active status stays internal and snaps
+//           when the scenario changes; language/copy/wrap in CodeBlock.
 // A11y:     status uses a numeric badge (text + color, never color alone);
 //           selects are labelled; the rest is inherited.
 
@@ -71,12 +73,27 @@ const t = computed(() => ({
 }))
 
 const scenarios = computed(() => props.scenarios ?? [])
-const activeScenarioId = ref<string | undefined>(scenarios.value[0]?.id)
-const activeStatus = ref<number | undefined>(scenarios.value[0]?.statuses?.[0]?.status)
 
+// Optional controlled seam: bind `v-model:scenario` to drive the selection
+// from the parent (e.g. linked request/response). When unbound, defineModel
+// falls back to local state and behavior is unchanged (uncontrolled).
+const scenarioModel = defineModel<string>('scenario')
+
+// The effective scenario is fully DERIVED: an unknown/missing id converges to
+// the first scenario without writing back or emitting — no update loops, no
+// duplicate events, SSR-safe (fallback is never persisted into the model).
 const currentScenario = computed<ResponseScenario | undefined>(
-  () => scenarios.value.find(s => s.id === activeScenarioId.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenarioModel.value) ?? scenarios.value[0],
 )
+
+// The select shows the CONVERGED id but only writes user choices to the model.
+const selectedScenario = computed<string | undefined>({
+  get: () => currentScenario.value?.id,
+  set: (id) => { scenarioModel.value = id },
+})
+
+// Status stays INTERNAL state (out of the controlled seam by design).
+const activeStatus = ref<number | undefined>(scenarios.value[0]?.statuses?.[0]?.status)
 
 const statuses = computed<ResponseStatus[]>(() => currentScenario.value?.statuses ?? [])
 
@@ -84,14 +101,12 @@ const currentStatus = computed<ResponseStatus | undefined>(
   () => statuses.value.find(s => s.status === activeStatus.value) ?? statuses.value[0],
 )
 
-// When the scenario changes, snap the status back into range.
-watch(activeScenarioId, () => {
+// When the CONVERGED scenario changes (user pick, parent update, or list
+// change), snap the status back into range.
+watch(() => currentScenario.value?.id, () => {
   if (!statuses.value.some(s => s.status === activeStatus.value)) {
     activeStatus.value = statuses.value[0]?.status
   }
-})
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === activeScenarioId.value)) activeScenarioId.value = list[0]?.id
 })
 
 const scenarioItems = computed(() =>
@@ -144,7 +159,7 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
     <template #controls>
       <USelect
         v-if="scenarioItems.length > 1"
-        v-model="activeScenarioId"
+        v-model="selectedScenario"
         :items="scenarioItems"
         icon="i-lucide-layers"
         size="xs"
