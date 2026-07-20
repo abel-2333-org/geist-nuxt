@@ -80,6 +80,14 @@ let openSource: OpenSource = 'pointer'
 
 function onTriggerKeydown(event: KeyboardEvent) {
   if (event.key === 'Enter' || event.key === ' ') openSource = 'keyboard'
+  // A hover-open can leave the panel open while the trigger still holds focus
+  // (Tab to trigger, then mouse hover). Forward Tab would then skip the
+  // portaled panel entirely; redirect it into the panel instead. Shift+Tab
+  // keeps its natural backward behavior.
+  if (event.key === 'Tab' && !event.shiftKey && open.value) {
+    event.preventDefault()
+    focusPanel()
+  }
 }
 
 function onTriggerPointerdown() {

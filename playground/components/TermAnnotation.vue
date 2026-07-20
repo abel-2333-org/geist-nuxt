@@ -66,13 +66,16 @@ if (import.meta.dev) {
       </p>
     </template>
 
-    <template v-if="resolved.to" #actions>
+    <!-- Close before navigating: a dynamic route can reuse this page
+         instance, and an open popover would otherwise survive the trip. -->
+    <template v-if="resolved.to" #actions="{ close }">
       <UButton
         :to="resolved.to"
         color="neutral"
         variant="ghost"
         size="xs"
         trailing-icon="i-lucide-arrow-right"
+        @click="close()"
       >
         {{ t.learnMore }}
       </UButton>

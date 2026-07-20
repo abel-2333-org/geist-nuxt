@@ -110,13 +110,16 @@ function onOpen() {
       </template>
     </template>
 
-    <template #actions>
+    <!-- Close before navigating: a dynamic route can reuse this page
+         instance, and an open popover would otherwise survive the trip. -->
+    <template #actions="{ close }">
       <UButton
         :to="to"
         color="neutral"
         variant="ghost"
         size="xs"
         trailing-icon="i-lucide-arrow-right"
+        @click="close()"
       >
         {{ t.open }}
       </UButton>

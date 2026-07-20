@@ -67,7 +67,7 @@ export function useFieldAnchor() {
     // (data still loading on a fresh navigation). Poll for the element within
     // a bounded window instead of failing on the first miss; the token drops
     // this positioning if a newer navigation started meanwhile.
-    const el = await waitForElement(path)
+    const el = await waitForElement(path, token)
     if (!el || token !== navigationToken) return
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
@@ -81,7 +81,12 @@ export function useFieldAnchor() {
     // Content above the target (images, code blocks) can still reflow after the
     // first scroll, nudging the row off its scroll-margin anchor. Re-run the
     // scroll on the next frame so we settle on the final, correct position.
-    requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }))
+    // Re-check inside the callback: a newer navigation (or unmount) can happen
+    // before this frame fires, and a stale target must not drag scroll back.
+    requestAnimationFrame(() => {
+      if (token !== navigationToken || !el.isConnected) return
+      el.scrollIntoView({ block: 'start' })
+    })
     // Optionally move keyboard focus to the row (deep links, annotation jumps)
     // so Tab continues from the target instead of wherever the journey began.
     // `preventScroll` keeps the settled scroll position authoritative.
@@ -106,12 +111,14 @@ export function useFieldAnchor() {
   /**
    * Resolve the target row's element, retrying per frame within a bounded
    * window so async field trees that mount shortly after the hash arrives are
-   * still found. Resolves null once the window closes.
+   * still found. Bails out early (resolves null) when a newer navigation
+   * superseded this one, so an orphaned poll never keeps spinning.
    */
-  function waitForElement(id: string, maxMs = 2000): Promise<HTMLElement | null> {
+  function waitForElement(id: string, token: number, maxMs = 2000): Promise<HTMLElement | null> {
     return new Promise((resolve) => {
       const start = performance.now()
       const tick = () => {
+        if (token !== navigationToken) return resolve(null)
         const el = document.getElementById(id)
         if (el) return resolve(el)
         if (performance.now() - start > maxMs) return resolve(null)
@@ -176,11 +183,13 @@ export function useFieldAnchor() {
 
   /**
    * Honor an incoming `#path` hash by navigating to it, now and on later route
-   * changes. Watching `[path, hash]` covers every reused-instance case where
-   * onMounted never re-runs: hash-only changes on the same page, and dynamic
+   * changes. Watching `fullPath` covers every reused-instance case where
+   * onMounted never re-runs: hash-only changes on the same page, dynamic
    * `[slug]` navigations where the hash text stays identical but the page
-   * changed (`/a#amount` → `/b#amount`). An empty hash clears the active field
-   * so the shared useState never carries a stale highlight onto a new page.
+   * changed (`/a#amount` → `/b#amount`), and query-only changes
+   * (`/docs?v=1#amount` → `/docs?v=2#amount`). An empty hash clears the active
+   * field AND invalidates any in-flight goTo still waiting for its target DOM,
+   * so a stale positioning can never scroll or focus on the new page.
    * Focus moves to the row so keyboard users continue from the target.
    * Registered inside the caller's lifecycle (setup/onMounted), the watcher
    * is disposed with the page component.
@@ -189,13 +198,18 @@ export function useFieldAnchor() {
     if (!import.meta.client) return
     const apply = (raw: string) => {
       const path = decodeURIComponent(raw.replace(/^#/, ''))
-      if (path) goTo(path, { updateHash: false, focus: true })
-      else active.value = ''
+      if (path) {
+        void goTo(path, { updateHash: false, focus: true })
+      }
+      else {
+        navigationToken++
+        active.value = ''
+      }
     }
     apply(location.hash)
     const route = useRoute()
-    watch(() => [route.path, route.hash] as const, ([, hash]) => {
-      apply(hash)
+    watch(() => route.fullPath, () => {
+      apply(route.hash)
     })
   }
 
