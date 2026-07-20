@@ -125,5 +125,5 @@ function jump(close: () => void) {
   </PlaygroundAnnotationPopover>
 
   <!-- Unresolvable ref: degrade to plain text, never a broken control. -->
-  <span v-else><slot>{{ fieldRef }}</slot></span>
+  <slot v-else>{{ fieldRef }}</slot>
 </template>

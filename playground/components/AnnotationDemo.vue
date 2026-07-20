@@ -57,13 +57,13 @@ provideFieldSource({
 })
 
 const zhLabels = {
-  loading: '正在加载预览',
+  loading: '正在加载预览…',
   retry: '重试',
 }
 
 const termLabels = { ...zhLabels, category: '术语', learnMore: '查看详情' }
 const fieldLabels = { ...zhLabels, category: '字段', required: '必填', conditional: '条件必填', viewField: '查看字段详情' }
-const docLabels = { ...zhLabels, category: '文档预览', open: '打开页面', error: '预览加载失败。' }
+const docLabels = { ...zhLabels, category: '文档预览', open: '打开页面', error: '预览加载失败。可重试,或直接打开页面。' }
 
 function loadRefundGuide(): Promise<DocPreview> {
   return new Promise((resolve) => {

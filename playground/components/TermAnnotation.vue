@@ -31,7 +31,7 @@ const props = withDefaults(
 
 const t = computed<Required<Pick<TermAnnotationLabels, 'category' | 'learnMore'>>>(() => ({
   category: 'Term',
-  learnMore: 'Learn more',
+  learnMore: 'View definition',
   ...props.labels,
 }))
 

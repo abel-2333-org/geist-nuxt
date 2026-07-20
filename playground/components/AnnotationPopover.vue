@@ -105,7 +105,7 @@ onBeforeUnmount(clearTimers)
     <button
       type="button"
       :disabled="disabled"
-      class="-mx-0.5 box-decoration-clone inline cursor-pointer rounded-xs px-0.5 text-left underline decoration-dashed decoration-1 underline-offset-3 transition-colors hover:bg-elevated hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
+      class="-mx-0.5 box-decoration-clone inline cursor-pointer touch-manipulation rounded-xs px-0.5 text-left underline decoration-dashed decoration-1 underline-offset-3 transition-colors hover:bg-elevated hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
       :class="triggerClass"
       @pointerenter="onTriggerEnter"
       @pointerleave="scheduleClose"
@@ -139,7 +139,7 @@ onBeforeUnmount(clearTimers)
         </template>
 
         <template v-else-if="error">
-          <p class="leading-relaxed text-muted">{{ error }}</p>
+          <p class="leading-relaxed text-muted" role="status" aria-live="polite">{{ error }}</p>
           <div class="flex items-center gap-2">
             <UButton
               color="neutral"
