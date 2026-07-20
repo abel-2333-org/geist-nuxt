@@ -101,7 +101,7 @@ jobs:
           printf '%s\n' "$TAG" > dist-skill/RELEASE
           printf '{"schemaVersion":1,"sourceSha":"%s"}\n' "$GITHUB_SHA" > dist-skill/.geist-source.json
           rsync -a dist-skill/ dist-verify/
-          echo "tag=$TAG" >> "$GITHUB_ENV"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
           echo "--- dist-skill contents ---"
           find dist-skill -type f | sort
 
@@ -169,6 +169,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          : "${TAG:?TAG is required}"
           gh release create "$TAG" dist-skill.tar.gz \
             --title "$TAG" \
             --notes "Source-first geist-nuxt skill distribution. The asset is a runnable root gallery/v0 snapshot with foundation, kits, registry tools and references. Sync by overwriting the memory-area skill directory wholesale."
