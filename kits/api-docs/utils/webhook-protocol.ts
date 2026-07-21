@@ -1,4 +1,5 @@
-// Webhook delivery schedule 的视觉序列折叠（WebhookProtocol 的可测纯函数）。
+// WebhookProtocol 的可测纯函数：section 正文判定 + delivery schedule 的
+// 视觉序列折叠。二者同属组件的派生逻辑，随 registry 切片整体分发。
 // steps 是调用方已本地化的间隔短文本（如 '5 分钟'）；可访问文本真源始终是
 // 调用方的总结句，这里只决定视觉层铺几个 chip、折叠几个。
 
@@ -13,7 +14,7 @@ export interface WebhookProtocolContent {
   description?: string
   facts?: readonly unknown[]
   example?: { code?: string }
-  schedule?: unknown
+  schedule?: { summary?: string }
 }
 
 /** label 只是段标题；至少有一项正文数据时，这一段才应进入文档大纲。 */
@@ -24,7 +25,7 @@ export function hasWebhookProtocolContent<T extends WebhookProtocolContent>(
     section.description?.trim()
     || section.facts?.length
     || section.example?.code
-    || section.schedule
+    || section.schedule?.summary?.trim()
   )
 }
 

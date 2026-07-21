@@ -355,7 +355,7 @@
       "registryDependencies": ["geist-foundation", "foundation-inline-code", "api-docs-field-group", "api-docs-code-block"],
       "files": [
         { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/api-docs/WebhookProtocol.vue" },
-        { "path": "kits/api-docs/utils/webhook-schedule.ts", "target": "app/utils/webhook-schedule.ts" }
+        { "path": "kits/api-docs/utils/webhook-protocol.ts", "target": "app/utils/webhook-protocol.ts" }
       ]
     },
     {

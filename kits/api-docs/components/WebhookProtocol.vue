@@ -4,8 +4,9 @@ import type { ApiCodeLabels } from './CodeBlock.vue'
 // Domain component (API docs): webhook protocol facts —— 连贯呈现一个 webhook
 // 的 Verification / Acknowledgement / Delivery 三段协议事实。它是 OperationHeader
 // (kind="webhook") 的正文伙伴：header 管 identity（事件名），本件管「怎么验证、
-// 怎么确认、怎么投递重试」。数据无关、locale-ready：所有 label、term、value、
-// 总结句由调用方以已本地化文本注入；组件只负责 information architecture、
+// 怎么确认、怎么投递重试」。数据无关、locale-ready：label、term、value、
+// 总结句由调用方以已本地化文本注入（展开/收起按钮提供可覆盖的英文默认文案，
+// 结构 chrome 惯例）；组件只负责 information architecture、
 // 视觉层级、省略规则与 a11y，不解析 Contract、不实现协议逻辑。
 //
 // Anatomy:
@@ -30,7 +31,8 @@ import type { ApiCodeLabels } from './CodeBlock.vue'
 //   - facts 用 <dl>/<dt>/<dd> 语义；
 //   - schedule chips / 箭头逐个 aria-hidden（视觉冗余，真源是总结句）；
 //     展开按钮可聚焦，故 aria-hidden 不落在容器上；
-//   - 展开按钮 aria-expanded + 调用方注入的可访问名；不用纯颜色传意。
+//   - 展开按钮 aria-expanded + 可访问名；展开时 <dd> 内追加 sr-only 全序列
+//     文本，保证状态切换对 SR 有可感知变化；不用纯颜色传意。
 
 export interface WebhookProtocolFact {
   /** 事实名（已本地化），如 '签名头' */
@@ -100,7 +102,7 @@ const sections = computed(() => {
   )
 })
 
-/* schedule chips 折叠（视觉层；派生逻辑在 utils/webhook-schedule.ts，可测） */
+/* schedule chips 折叠（视觉层；派生逻辑在 utils/webhook-protocol.ts，可测） */
 const scheduleExpanded = ref(false)
 const schedule = computed(() => props.delivery?.schedule)
 const collapsed = computed(() =>
@@ -195,6 +197,10 @@ function toggleSchedule() {
                   </UButton>
                 </template>
               </div>
+              <!-- 展开时给 SR 一段可感知的全序列文本（chips 本身 aria-hidden） -->
+              <span v-if="scheduleExpanded && schedule.steps?.length" class="sr-only">
+                {{ schedule.steps.join(' → ') }}
+              </span>
             </dd>
           </div>
         </dl>

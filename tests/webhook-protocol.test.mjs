@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import {
   collapseScheduleSteps,
   hasWebhookProtocolContent,
-} from '../kits/api-docs/utils/webhook-schedule.ts'
+} from '../kits/api-docs/utils/webhook-protocol.ts'
 
 const steps = n => Array.from({ length: n }, (_, i) => `${i + 1} 分钟`)
 
@@ -29,9 +29,10 @@ test('阈值为 1 时不铺 chip，全部 steps 由展开按钮揭示', () => {
 })
 
 test('折叠时 overflow 至少为 2（不存在 +1 换 1 的无谓折叠）', () => {
-  const result = collapseScheduleSteps(steps(7), 6)
-  assert.equal(result.visible.length, 5)
-  assert.equal(result.overflow, 2)
+  for (const total of [7, 8, 12, 30]) {
+    const { overflow } = collapseScheduleSteps(steps(total), 6)
+    assert.ok(overflow >= 2, `total=${total} 时 overflow=${overflow}，应 >= 2`)
+  }
 })
 
 test('visible 数量 + overflow 恒等于总数', () => {
@@ -51,6 +52,8 @@ test('只传标题或空 facts 的 section 不进入文档大纲', () => {
   assert.equal(hasWebhookProtocolContent(undefined), false)
   assert.equal(hasWebhookProtocolContent({}), false)
   assert.equal(hasWebhookProtocolContent({ facts: [] }), false)
+  assert.equal(hasWebhookProtocolContent({ schedule: {} }), false)
+  assert.equal(hasWebhookProtocolContent({ schedule: { summary: '  ' } }), false)
 })
 
 test('description、facts、ACK example 或 delivery schedule 均算真实内容', () => {

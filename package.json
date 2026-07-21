@@ -15,7 +15,7 @@
     "geist:copy": "node scripts/copy-registry.mjs",
     "geist:update": "node scripts/copy-registry.mjs --update",
     "geist:check": "node scripts/check-registry-consumer.mjs",
-    "test:registry": "node --test tests/gallery-nav.test.mjs tests/registry-tools.test.mjs tests/check-root-css.test.mjs tests/webhook-schedule.test.mjs",
+    "test:registry": "node --test tests/gallery-nav.test.mjs tests/registry-tools.test.mjs tests/check-root-css.test.mjs tests/webhook-protocol.test.mjs",
     "test:consumer": "node scripts/check-registry-consumer.mjs"
   },
   "dependencies": {
