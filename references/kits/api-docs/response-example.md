@@ -1,6 +1,6 @@
 # ApiDocsResponseExample `<ApiDocsResponseExample>`
 
-按**业务场景 + HTTP 状态 + body 形态（media type）**三级切换的响应示例，带彩色状态 badge 与 status 级描述条；代码展示 + 语言 + 复制 + 换行委托给 `<ApiDocsCodeBlock>`。场景/状态/media 选择器注入 `#controls`，状态 badge 注入 `#leading`，描述注入 `#notice`，非代码 body 面板注入 `#body`。
+按**业务场景 + HTTP 状态 + body 形态（media type）**三级切换的响应示例，带彩色状态 badge 与 status 级描述条；代码展示 + 语言 + 复制 + 换行委托给 `<ApiDocsCodeBlock>`。场景/状态/media 选择器注入 `#controls`：宽容器内联显示，窄容器折成一个显示「当前场景 · media type」的摘要按钮，点击后在 popover 中显示完整 labelled controls。状态 badge 注入 `#leading`，描述注入 `#notice`，非代码 body 面板注入 `#body`。
 
 > 覆盖响应的所有形态：多场景/多状态/多 media 交互切换，也包括**单一固定响应**——各维度 ≤1 时对应选择器自动隐藏，只剩状态 badge + body。
 > 展示模型由消费方提供且已本地化，组件**不解析 OpenAPI**。
@@ -11,7 +11,8 @@
 ```text
 <ApiDocsCodeBlock>（统一框架）
 ├─ toolbar：icon · title · 状态 badge（#leading）
-│           场景 / 状态 / media 选择器（#controls）· 语言 · 换行 · 复制
+│           宽：场景 / 状态 / media 选择器（#controls）· 语言 · 换行 · 复制
+│           窄：场景 · media 摘要 popover（#controls）· 语言 · 换行 · 复制
 ├─ notice：status 级 description（#notice，可选）
 └─ body：code → CodeBlock 代码面；empty / unavailable / file → #body 语义面板
 ```
@@ -53,7 +54,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 | `trustHighlightedHtml` | `boolean` | 透传给 CodeBlock；仅可信、预消毒的构建期 HTML 才开启 |
 
 `ApiResponseLabels` = `ApiCodeLabels` + chrome 文案键（均有英文默认值，可整体本地化）：
-`title` · `scenario` · `status` · `mediaType`（media 选择器 aria-label）· `emptyBodyTitle` / `emptyBodyHint` · `unavailableTitle` / `unavailableHint` · `fileTitle`（无文件名时的兜底标题）· `download`（下载链接文本）。`note` 字段逐条覆盖对应 hint。
+`title` · `scenario` · `status` · `mediaType`（media 选择器 aria-label）· `responseOptions`（窄容器摘要按钮的可访问名前缀 / 极端空标签时的视觉兜底）· `emptyBodyTitle` / `emptyBodyHint` · `unavailableTitle` / `unavailableHint` · `fileTitle`（无文件名时的兜底标题）· `download`（下载链接文本）。`note` 字段逐条覆盖对应 hint。
 
 ## State
 
@@ -61,13 +62,14 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 - 状态色：2xx `success` · 3xx `info` · 4xx `warning` · 5xx `error` · `'default'` `neutral`（**文本+颜色双通道**，不单靠颜色）。`'default'` badge 直接显示等宽 `default` 文本。
 - 状态码在彩色 badge（`#leading`）里，状态选择器只带 `statusText`，合起来读作 "200 · OK" 不重复。
 - media 选择器标签用 `mediaType`；未提供时回退到对应 kind 的面板标题。各维度 ≤1 时不渲染对应选择器。
+- 组件根以命名 container 观测自身宽度：`@xl/response` 以上保持三个 inline selects；更窄时改为单个摘要按钮，不按页面 viewport 猜测卡片可用宽度。摘要优先展示当前场景与 media type，状态码继续由相邻 badge 承担；若只有 status 可切换，则摘要显示 `statusText`。
 - 语言/换行/复制仅在 `code` 形态出现（内容绑定控件随 CodeBlock 隐藏）。
 
 ## A11y
 
 - 非代码面板为静态文本描述（图标 `aria-hidden`），容器 `role="status"` + `aria-live="polite"`，切换时播报。
 - 下载控件是真实链接（`UButton :to` + `download`），可访问名包含文件名。
-- 三个选择器均带 `aria-label`（`scenario` / `status` / `mediaType` labels 键）；键盘路径与 focus-visible 继承 Nuxt UI 原语。
+- 三个选择器均带 `aria-label`（`scenario` / `status` / `mediaType` labels 键）；窄容器摘要按钮的 `aria-label` 串起当前场景、状态和 media type，popover 内用 `UFormField` 提供可见 label。点击、tap、Enter、Esc 与 focus-visible 继承 Nuxt UI / Reka UI 原语。
 
 ## 用法
 

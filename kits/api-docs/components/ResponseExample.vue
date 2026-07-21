@@ -3,7 +3,9 @@
 // between business scenarios, HTTP statuses (200 / 400 / 'default' …) and body
 // forms (media types), showing a color-coded status badge, and delegating code
 // display + language + copy + wrap to <CodeBlock>. Scenario / status / media
-// selects are injected into CodeBlock's unified toolbar via #controls; the
+// selects are injected into CodeBlock's unified toolbar via #controls. Wide
+// containers show the three selects inline; narrow containers collapse them
+// into one summary trigger whose popover keeps the full labelled controls. The
 // status badge goes into #leading; the status description into #notice; the
 // non-code body panels (empty / unavailable / file) into #body.
 //
@@ -18,8 +20,9 @@
 // scenario, one status, one body and every select hides, leaving just the
 // status badge + body.
 //
-// Anatomy:  <CodeBlock> + status badge (#leading) + scenario/status/media
-//           (#controls) + status description (#notice) + body panel (#body)
+// Anatomy:  <CodeBlock> + status badge (#leading) + responsive
+//           scenario/status/media controls (#controls) + status description
+//           (#notice) + body panel (#body)
 // State:    active scenario, active status, active body; language/copy/wrap
 //           live in CodeBlock; the non-code panels are static + role="status".
 // A11y:     status uses a text badge (text + color, never color alone);
@@ -95,6 +98,8 @@ export interface ApiResponseLabels extends ApiCodeLabels {
   status?: string
   /** aria-label of the media type select. */
   mediaType?: string
+  /** Accessible name and fallback copy for the narrow response-options trigger. */
+  responseOptions?: string
   /** Intentional empty body panel (e.g. 204). */
   emptyBodyTitle?: string
   emptyBodyHint?: string
@@ -133,6 +138,7 @@ const t = computed(() => ({
   scenario: 'Scenario',
   status: 'Status',
   mediaType: 'Media type',
+  responseOptions: 'Response options',
   emptyBodyTitle: 'No response body',
   emptyBodyHint: 'This response intentionally returns an empty body.',
   unavailableTitle: 'Example not available',
@@ -217,6 +223,85 @@ const bodyItems = computed(() =>
   })),
 )
 
+const hasResponseControls = computed(() =>
+  scenarioItems.value.length > 1
+  || statusItems.value.length > 1
+  || bodyItems.value.length > 1,
+)
+
+const currentBodyLabel = computed(() =>
+  bodyItems.value[activeBodyIndex.value]?.label ?? bodyItems.value[0]?.label,
+)
+
+/**
+ * Narrow trigger copy: status stays visible in the leading badge, so preserve
+ * the two values that would otherwise disappear entirely. If status is the
+ * only selectable dimension, use its human label instead of a generic title.
+ */
+const compactControlLabel = computed(() => {
+  const parts: string[] = []
+  if (scenarioItems.value.length > 1 && currentScenario.value?.label) {
+    parts.push(currentScenario.value.label)
+  }
+  if (bodyItems.value.length > 1 && currentBodyLabel.value) {
+    parts.push(currentBodyLabel.value)
+  }
+  if (!parts.length && statusItems.value.length > 1) {
+    parts.push(currentStatus.value?.statusText ?? String(currentStatus.value?.status ?? ''))
+  }
+  return parts.join(' · ') || t.value.responseOptions
+})
+
+const compactControlAriaLabel = computed(() => {
+  const parts = [t.value.responseOptions]
+  if (currentScenario.value?.label) {
+    parts.push(`${t.value.scenario}: ${currentScenario.value.label}`)
+  }
+  if (currentStatus.value) {
+    const text = currentStatus.value.statusText
+      ? ` ${currentStatus.value.statusText}`
+      : ''
+    parts.push(`${t.value.status}: ${currentStatus.value.status}${text}`)
+  }
+  if (currentBodyLabel.value) {
+    parts.push(`${t.value.mediaType}: ${currentBodyLabel.value}`)
+  }
+  return parts.join('. ')
+})
+
+const responseRoot = ref<HTMLElement | null>(null)
+const responseOptionsOpen = ref(false)
+let responseResizeObserver: ResizeObserver | undefined
+
+watch(hasResponseControls, (hasControls) => {
+  if (!hasControls) responseOptionsOpen.value = false
+})
+
+/**
+ * The compact trigger is hidden by a container query, while the popover is
+ * portalled outside that container. Close it as soon as the trigger is no
+ * longer rendered, so resizing a code rail cannot leave an unanchored overlay.
+ */
+function syncResponseOptionsVisibility() {
+  if (!responseOptionsOpen.value) return
+  const trigger = responseRoot.value?.querySelector<HTMLElement>(
+    '[data-response-compact-trigger]',
+  )
+  if (trigger && getComputedStyle(trigger).display === 'none') {
+    responseOptionsOpen.value = false
+  }
+}
+
+onMounted(() => {
+  if (typeof ResizeObserver === 'undefined') return
+  responseResizeObserver = new ResizeObserver(syncResponseOptionsVisibility)
+  if (responseRoot.value) responseResizeObserver.observe(responseRoot.value)
+})
+
+onBeforeUnmount(() => {
+  responseResizeObserver?.disconnect()
+})
+
 // 2xx success · 3xx info · 4xx warning · 5xx error · 'default' neutral
 // (text + color, not color alone).
 const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral'>(() => {
@@ -242,16 +327,17 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
 </script>
 
 <template>
-  <ApiDocsCodeBlock
-    :variants="codeVariants"
-    :title="title ?? t.title"
-    icon="i-lucide-file-json-2"
-    :default-wrap="defaultWrap"
-    :max-height="maxHeight"
-    :labels="labels"
-    :language-labels="languageLabels"
-    :trust-highlighted-html="trustHighlightedHtml"
-  >
+  <div ref="responseRoot" class="@container/response">
+    <ApiDocsCodeBlock
+      :variants="codeVariants"
+      :title="title ?? t.title"
+      icon="i-lucide-file-json-2"
+      :default-wrap="defaultWrap"
+      :max-height="maxHeight"
+      :labels="labels"
+      :language-labels="languageLabels"
+      :trust-highlighted-html="trustHighlightedHtml"
+    >
     <!-- Status badge next to the title -->
     <template v-if="currentStatus" #leading>
       <UBadge
@@ -264,44 +350,106 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
       </UBadge>
     </template>
 
-    <!-- Scenario + status + media selects, injected into the unified toolbar -->
+    <!-- Wide: three inline selects. Narrow: one compact summary trigger opens
+         the same v-model-backed controls in a labelled popover. -->
     <template #controls>
-      <USelect
-        v-if="scenarioItems.length > 1"
-        v-model="activeScenarioId"
-        :items="scenarioItems"
-        icon="i-lucide-layers"
-        size="xs"
-        color="neutral"
-        variant="subtle"
-        :aria-label="t.scenario"
-        class="min-w-0 max-w-full"
-        :ui="{ content: 'min-w-fit' }"
-      />
-      <USelect
-        v-if="statusItems.length > 1"
-        v-model="activeStatus"
-        :items="statusItems"
-        icon="i-lucide-activity"
-        size="xs"
-        color="neutral"
-        variant="subtle"
-        :aria-label="t.status"
-        class="min-w-0 max-w-full"
-        :ui="{ content: 'min-w-fit' }"
-      />
-      <USelect
-        v-if="bodyItems.length > 1"
-        v-model="activeBodyIndex"
-        :items="bodyItems"
-        icon="i-lucide-file-type"
-        size="xs"
-        color="neutral"
-        variant="subtle"
-        :aria-label="t.mediaType"
-        class="min-w-0 max-w-full"
-        :ui="{ content: 'min-w-fit' }"
-      />
+      <div
+        v-if="hasResponseControls"
+        class="hidden min-w-0 items-center gap-1.5 @xl/response:flex"
+      >
+        <USelect
+          v-if="scenarioItems.length > 1"
+          v-model="activeScenarioId"
+          :items="scenarioItems"
+          icon="i-lucide-layers"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          :aria-label="t.scenario"
+          class="min-w-0 max-w-full"
+          :ui="{ content: 'min-w-fit' }"
+        />
+        <USelect
+          v-if="statusItems.length > 1"
+          v-model="activeStatus"
+          :items="statusItems"
+          icon="i-lucide-activity"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          :aria-label="t.status"
+          class="min-w-0 max-w-full"
+          :ui="{ content: 'min-w-fit' }"
+        />
+        <USelect
+          v-if="bodyItems.length > 1"
+          v-model="activeBodyIndex"
+          :items="bodyItems"
+          icon="i-lucide-file-type"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          :aria-label="t.mediaType"
+          class="min-w-0 max-w-full"
+          :ui="{ content: 'min-w-fit' }"
+        />
+      </div>
+
+      <UPopover
+        v-if="hasResponseControls"
+        v-model:open="responseOptionsOpen"
+        :content="{ align: 'end', side: 'bottom', sideOffset: 8 }"
+      >
+        <UButton
+          data-response-compact-trigger
+          :label="compactControlLabel"
+          trailing-icon="i-lucide-chevron-down"
+          size="xs"
+          color="neutral"
+          variant="subtle"
+          :aria-label="compactControlAriaLabel"
+          class="min-w-0 max-w-36 @xl/response:hidden"
+          :ui="{ label: 'truncate' }"
+        />
+
+        <template #content>
+          <div class="w-72 max-w-[calc(100vw-2rem)] space-y-3 p-3">
+            <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
+              <USelect
+                v-model="activeScenarioId"
+                :items="scenarioItems"
+                icon="i-lucide-layers"
+                color="neutral"
+                variant="subtle"
+                :aria-label="t.scenario"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField v-if="statusItems.length > 1" :label="t.status" size="xs">
+              <USelect
+                v-model="activeStatus"
+                :items="statusItems"
+                icon="i-lucide-activity"
+                color="neutral"
+                variant="subtle"
+                :aria-label="t.status"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField v-if="bodyItems.length > 1" :label="t.mediaType" size="xs">
+              <USelect
+                v-model="activeBodyIndex"
+                :items="bodyItems"
+                icon="i-lucide-file-type"
+                color="neutral"
+                variant="subtle"
+                :aria-label="t.mediaType"
+                class="w-full"
+              />
+            </UFormField>
+          </div>
+        </template>
+      </UPopover>
     </template>
 
     <!-- Status-level description, inside the block's chrome, above the body -->
@@ -364,5 +512,6 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
         </div>
       </div>
     </template>
-  </ApiDocsCodeBlock>
+    </ApiDocsCodeBlock>
+  </div>
 </template>
