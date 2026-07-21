@@ -149,6 +149,62 @@ const runtimeScenarios = [
     cssMarker: 'max-sm\\:px-1\\.5',
     page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
   },
+  {
+    label: 'api-docs-webhook-protocol',
+    item: 'api-docs-webhook-protocol',
+    build: true,
+    cssMarker: 'sm\\:w-36',
+    page: `<script setup lang="ts">
+const verification = {
+  label: 'VERIFICATION',
+  description: 'Verify the signature before processing the event.',
+  facts: [{ term: 'Header', value: 'X-Example-Signature', code: true }],
+}
+const acknowledgement = {
+  label: 'ACKNOWLEDGEMENT',
+  facts: [{ term: 'HTTP status', value: '200', code: true }],
+  example: {
+    code: '{\\n  "received": true\\n}',
+    language: 'json',
+    title: 'Acknowledgement body',
+    labels: {
+      language: 'Language',
+      copy: 'Copy acknowledgement',
+      copied: 'Acknowledgement copied',
+      copyToast: 'Acknowledgement',
+      wrapOn: 'Wrap acknowledgement',
+      wrapOff: 'Do not wrap acknowledgement',
+      emptyTitle: 'No acknowledgement',
+      emptyHint: 'No literal body is required.',
+    },
+  },
+}
+const delivery = {
+  label: 'DELIVERY',
+  facts: [
+    { term: 'Attempts', value: 'Initial delivery plus 3 retries.' },
+    { term: 'Timeout', value: '10 seconds.' },
+  ],
+  schedule: {
+    term: 'Retry schedule',
+    summary: 'Retry after 1 minute, 5 minutes, then 30 minutes.',
+    steps: ['1 minute', '5 minutes', '30 minutes'],
+    expandLabel: (hidden: number) => \`Show \${hidden} retry intervals\`,
+    collapseLabel: 'Hide retry intervals',
+  },
+}
+</script>
+<template>
+  <ApiDocsWebhookProtocol
+    :verification="verification"
+    :acknowledgement="acknowledgement"
+    :delivery="delivery"
+    :heading-level="3"
+    :max-schedule-steps="1"
+  />
+</template>
+`,
+  },
 ]
 
 function componentName(item) {

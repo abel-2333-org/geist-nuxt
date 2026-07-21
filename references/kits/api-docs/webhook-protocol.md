@@ -21,7 +21,7 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
 
 ## 三条核心呈现规则
 
-1. **section 省略**：三段各自独立出现或省略。契约没写的段**整段不出现**，绝不渲染空卡片、占位符或 "none" 行——没写就是没约定，画出空段反而暗示「这里本该有内容」。
+1. **section 省略**：三段各自独立出现或省略。契约没写的段**整段不出现**，绝不渲染空卡片、占位符或 "none" 行——只传 `label` 或空 `facts` 也不算正文；至少要有 description、fact、ACK example 或 delivery schedule 才进入文档大纲。
 2. **ACK body 三语义**由数据形状表达，不靠额外的 mode 枚举：
    - **literal**（固定字面 body）→ 传 `example`，用 CodeBlock 展示精确文本；
    - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`code: true` 呈现被回显的参数名；
@@ -36,7 +36,7 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
 | `acknowledgement` | `WebhookProtocolSectionData & { example?: WebhookProtocolAckExample }` | 确认段；`example` 仅 literal 语义时提供 |
 | `delivery` | `WebhookProtocolSectionData & { schedule?: WebhookProtocolSchedule }` | 投递段；`schedule` 行渲染在 facts 之后 |
 | `headingLevel` | `2 \| 3 \| 4` | 段头接入文档大纲；默认 `2`（standalone），嵌在 h2 操作标题下传 `3` |
-| `maxScheduleSteps` | `number` | schedule chips 折叠阈值，默认 `6`：超过则铺前 5 个 + 展开按钮 |
+| `maxScheduleSteps` | `number` | schedule chips 正整数折叠阈值，默认 `6`：超过则铺前 5 个 + 展开按钮；传 `1` 时初始不铺 chip，仍保留展开按钮；非法值安全退化为不折叠 |
 
 ### 数据模型（内联，随切片走）
 
@@ -56,6 +56,7 @@ interface WebhookProtocolAckExample {
   code: string       // ACK 文本 body 字面值
   language?: string  // 默认 'json'
   title?: string     // CodeBlock 工具栏标题（已本地化）
+  labels?: ApiCodeLabels // 内嵌 CodeBlock 的按钮、反馈与空态文案（已本地化）
 }
 interface WebhookProtocolSchedule {
   term: string                        // 行名（已本地化），如 '重试节奏'
@@ -85,9 +86,9 @@ interface WebhookProtocolSchedule {
 ## Registry
 
 ```bash
-pnpm geist:copy -- api-docs-webhook-protocol --target <consumer> --to <sha>
+pnpm geist:copy -- geist-foundation api-docs-webhook-protocol --target <consumer> --to <checkout-40-char-sha>
 ```
 
 切片含组件 + `webhook-schedule.ts`（折叠派生纯函数，`tests/webhook-schedule.test.mjs` 覆盖）。依赖闭包：`geist-foundation`、`foundation-inline-code`、`api-docs-field-group`、`api-docs-code-block`。
 
-Demo：`/kits/api-docs/webhook-protocol`（主 fixture 复用 docs-shell 演示数据源 `paymentsWebhookProtocol`；变体演示省略规则与 ACK 三语义）。
+Demo：`/kits/api-docs/webhook-protocol`（本页内联中性 fixture；变体演示省略规则、ACK 三语义与 schedule 边界）。

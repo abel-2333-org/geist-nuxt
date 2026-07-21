@@ -9,13 +9,32 @@ export interface CollapsedScheduleSteps {
   overflow: number
 }
 
+export interface WebhookProtocolContent {
+  description?: string
+  facts?: readonly unknown[]
+  example?: { code?: string }
+  schedule?: unknown
+}
+
+/** label 只是段标题；至少有一项正文数据时，这一段才应进入文档大纲。 */
+export function hasWebhookProtocolContent<T extends WebhookProtocolContent>(
+  section: T | undefined,
+): section is T {
+  return !!section && !!(
+    section.description?.trim()
+    || section.facts?.length
+    || section.example?.code
+    || section.schedule
+  )
+}
+
 /**
  * 折叠规则：steps 总数 ≤ max 时全铺；超过时铺前 max-1 个，其余折为 overflow
  * （+N 与被折的 chip 一起占满 max 个视觉槽位，不会出现 +1 换 1 的无谓折叠……
  * 除非 total = max + 1，此时 +2 起步仍成立：overflow = total - (max-1) ≥ 2）。
  */
 export function collapseScheduleSteps(steps: string[], max: number): CollapsedScheduleSteps {
-  if (max < 1 || steps.length <= max) {
+  if (!Number.isInteger(max) || max < 1 || steps.length <= max) {
     return { visible: steps, overflow: 0 }
   }
   const visibleCount = max - 1

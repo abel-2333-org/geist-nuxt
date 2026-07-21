@@ -1,11 +1,62 @@
 <script setup lang="ts">
 definePageMeta({ nav: { label: 'Webhook 协议', icon: 'i-lucide-webhook', order: 3 } })
 
-// Demo/story for <ApiDocsWebhookProtocol> — 按 geist-nuxt 分层，demo 数据
-// 与讲解归 gallery，kit 只分发数据无关组件。主 fixture 复用 docs-shell 演示
-// 数据源（paymentsWebhookProtocol），下方变体区用内联 fixture 演示省略规则
-// 与 ACK 三种 body 语义（literal / echo / intentional empty）。
-import { paymentsWebhookProtocol } from '~/utils/demo/api-docs/docs-shell-data'
+// Demo/story for <ApiDocsWebhookProtocol> — 按 geist-nuxt 分层，组件 story
+// 使用本页内联的中性假 ViewModel；kit 只分发数据无关组件。
+const webhookProtocol = {
+  verification: {
+    label: 'VERIFICATION',
+    description: '每次投递都携带签名头。用密钥重新计算并比对签名，再处理事件。',
+    facts: [
+      { term: '签名头', value: 'X-Example-Signature', code: true },
+      { term: '算法', value: 'HMAC-SHA256', code: true, note: '对原始请求体计算，编码为十六进制小写。' },
+      { term: '密钥来源', value: 'Webhook 设置页生成的 signing secret。' },
+      { term: '时效', value: '签名含时间戳，偏差超过 5 分钟应拒绝，防止重放。' },
+    ],
+  },
+  acknowledgement: {
+    label: 'ACKNOWLEDGEMENT',
+    description: '返回下列响应即视为确认成功；其它响应触发重试。',
+    facts: [
+      { term: 'HTTP status', value: '200', code: true },
+      { term: 'Media type', value: 'application/json', code: true },
+      { term: '响应体', value: '固定 JSON 字面量，字段与示例完全一致。' },
+    ],
+    example: {
+      code: '{\n  "received": true\n}',
+      language: 'json',
+      title: '确认响应体',
+      labels: {
+        language: '语言',
+        copy: '复制代码',
+        copied: '已复制到剪贴板',
+        copyToast: '确认响应体',
+        copySuccess: '确认响应体已复制。',
+        copyFailure: '复制失败，请重试。',
+        wrapOn: '启用自动换行',
+        wrapOff: '关闭自动换行',
+        emptyTitle: '暂无示例',
+        emptyHint: '当前没有确认响应体示例。',
+      },
+    },
+  },
+  delivery: {
+    label: 'DELIVERY',
+    description: '未收到成功确认时按退避序列重试，共约 24 小时。',
+    facts: [
+      { term: '总次数', value: '首次投递 + 最多 8 次重试。' },
+      { term: '超时', value: '每次请求 10 秒未响应即视为失败。' },
+      { term: '成功条件', value: '任意一次收到上述确认响应即停止重试。' },
+    ],
+    schedule: {
+      term: '重试节奏',
+      summary: '从 1 分钟起逐步退避到 12 小时，共 8 次。',
+      steps: ['1 分钟', '5 分钟', '30 分钟', '1 小时', '2 小时', '4 小时', '8 小时', '12 小时'],
+      expandLabel: (hidden: number) => `展开其余 ${hidden} 档`,
+      collapseLabel: '收起',
+    },
+  },
+}
 
 // 变体 1：echo 语义 —— ACK body 是回显请求参数，不是字面值，用 facts 行表达。
 const echoAck = {
@@ -17,6 +68,9 @@ const echoAck = {
     { term: '回显参数', value: 'challenge', code: true },
   ],
 }
+
+// label 本身不是正文；即使调用方保留了空壳对象，也应整段省略。
+const omittedVerification = { label: '不应出现', facts: [] }
 
 // 变体 2：intentional empty —— 约定就是空 body，明说而不是留白。
 const emptyAck = {
@@ -56,12 +110,13 @@ const uniformDelivery = {
         </p>
       </div>
 
-      <!-- 主 fixture：三段齐全（复用 docs-shell 演示数据源） -->
+      <!-- 主 fixture：三段齐全（本页内联中性假 ViewModel） -->
       <div class="rounded-lg border border-default p-6 sm:p-8">
         <ApiDocsWebhookProtocol
-          :verification="paymentsWebhookProtocol.verification"
-          :acknowledgement="paymentsWebhookProtocol.acknowledgement"
-          :delivery="paymentsWebhookProtocol.delivery"
+          :verification="webhookProtocol.verification"
+          :acknowledgement="webhookProtocol.acknowledgement"
+          :delivery="webhookProtocol.delivery"
+          :heading-level="3"
         />
       </div>
 
@@ -73,7 +128,11 @@ const uniformDelivery = {
             <figcaption class="text-sm font-medium text-toned">
               ACK 为回显语义（echo）—— 没有 example，用 facts 行说明回显哪个参数
             </figcaption>
-            <ApiDocsWebhookProtocol :acknowledgement="echoAck" :heading-level="4" />
+            <ApiDocsWebhookProtocol
+              :verification="omittedVerification"
+              :acknowledgement="echoAck"
+              :heading-level="4"
+            />
           </figure>
           <figure class="space-y-3 rounded-lg border border-default p-6">
             <figcaption class="text-sm font-medium text-toned">
@@ -81,17 +140,27 @@ const uniformDelivery = {
             </figcaption>
             <ApiDocsWebhookProtocol :acknowledgement="emptyAck" :heading-level="4" />
           </figure>
-          <figure class="space-y-3 rounded-lg border border-default p-6 lg:col-span-2">
+          <figure class="space-y-3 rounded-lg border border-default p-6">
             <figcaption class="text-sm font-medium text-toned">
               只提供 Delivery、schedule 无 steps —— 其余两段整段省略，节奏只显示总结句
             </figcaption>
             <ApiDocsWebhookProtocol :delivery="uniformDelivery" :heading-level="4" />
           </figure>
+          <figure class="space-y-3 rounded-lg border border-default p-6">
+            <figcaption class="text-sm font-medium text-toned">
+              折叠阈值为 1 —— 初始不铺 chip，但展开按钮仍然可用
+            </figcaption>
+            <ApiDocsWebhookProtocol
+              :delivery="webhookProtocol.delivery"
+              :heading-level="4"
+              :max-schedule-steps="1"
+            />
+          </figure>
         </div>
       </div>
 
       <p class="text-sm text-dimmed">
-        主 fixture 来自 docs-shell 演示数据源；变体数据由本页内联，不写进 kit。
+        所有 fixture 均由本页内联，不写进 kit；正式组件仍保持数据无关。
       </p>
     </section>
   </UContainer>

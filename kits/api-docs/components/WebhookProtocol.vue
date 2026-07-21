@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ApiCodeLabels } from './CodeBlock.vue'
+
 // Domain component (API docs): webhook protocol facts —— 连贯呈现一个 webhook
 // 的 Verification / Acknowledgement / Delivery 三段协议事实。它是 OperationHeader
 // (kind="webhook") 的正文伙伴：header 管 identity（事件名），本件管「怎么验证、
@@ -56,6 +58,8 @@ export interface WebhookProtocolAckExample {
   language?: string
   /** CodeBlock 工具栏标题（已本地化） */
   title?: string
+  /** CodeBlock 按钮、反馈与空态文案（已本地化） */
+  labels?: ApiCodeLabels
 }
 
 export interface WebhookProtocolSchedule {
@@ -77,18 +81,24 @@ const props = withDefaults(defineProps<{
   delivery?: WebhookProtocolSectionData & { schedule?: WebhookProtocolSchedule }
   /** 接入文档大纲；默认 2（standalone），嵌在 h2 操作标题下时传 3 */
   headingLevel?: 2 | 3 | 4
-  /** schedule chips 折叠阈值：超过则铺前 maxScheduleSteps-1 个 + 展开按钮 */
+  /** schedule chips 正整数折叠阈值：超过则铺前 maxScheduleSteps-1 个 + 展开按钮 */
   maxScheduleSteps?: number
 }>(), {
   headingLevel: 2,
   maxScheduleSteps: 6,
 })
 
-const sections = computed(() => [
-  { key: 'verification', data: props.verification },
-  { key: 'acknowledgement', data: props.acknowledgement },
-  { key: 'delivery', data: props.delivery },
-].filter((s): s is { key: string; data: WebhookProtocolSectionData } => !!s.data))
+const sections = computed(() => {
+  const candidates: { key: string; data?: WebhookProtocolSectionData }[] = [
+    { key: 'verification', data: props.verification },
+    { key: 'acknowledgement', data: props.acknowledgement },
+    { key: 'delivery', data: props.delivery },
+  ]
+  return candidates.filter(
+    (section): section is { key: string; data: WebhookProtocolSectionData } =>
+      hasWebhookProtocolContent(section.data),
+  )
+})
 
 /* schedule chips 折叠（视觉层；派生逻辑在 utils/webhook-schedule.ts，可测） */
 const scheduleExpanded = ref(false)
@@ -99,6 +109,9 @@ const collapsed = computed(() =>
 const visibleSteps = computed(() =>
   scheduleExpanded.value ? (schedule.value?.steps ?? []) : collapsed.value.visible,
 )
+function toggleSchedule() {
+  scheduleExpanded.value = !scheduleExpanded.value
+}
 </script>
 
 <template>
@@ -140,7 +153,10 @@ const visibleSteps = computed(() =>
             <dd class="min-w-0 space-y-2">
               <p class="text-sm text-highlighted">{{ schedule.summary }}</p>
               <!-- 展开按钮可聚焦，故 aria-hidden 只落在纯视觉的 chip/箭头上 -->
-              <div v-if="visibleSteps.length" class="flex flex-wrap items-center gap-1.5">
+              <div
+                v-if="visibleSteps.length || collapsed.overflow > 0"
+                class="flex flex-wrap items-center gap-1.5"
+              >
                 <template v-for="(step, i) in visibleSteps" :key="i">
                   <UIcon
                     v-if="i > 0"
@@ -159,7 +175,7 @@ const visibleSteps = computed(() =>
                 </template>
                 <template v-if="collapsed.overflow > 0">
                   <UIcon
-                    v-if="!scheduleExpanded"
+                    v-if="!scheduleExpanded && visibleSteps.length > 0"
                     name="i-lucide-arrow-right"
                     class="size-3 shrink-0 text-dimmed"
                     aria-hidden="true"
@@ -173,7 +189,7 @@ const visibleSteps = computed(() =>
                     :aria-label="scheduleExpanded
                       ? (schedule.collapseLabel ?? 'Collapse')
                       : (schedule.expandLabel?.(collapsed.overflow) ?? `+${collapsed.overflow}`)"
-                    @click="() => { scheduleExpanded = !scheduleExpanded }"
+                    @click="toggleSchedule"
                   >
                     {{ scheduleExpanded ? (schedule.collapseLabel ?? '−') : `+${collapsed.overflow}` }}
                   </UButton>
@@ -187,6 +203,7 @@ const visibleSteps = computed(() =>
         <ApiDocsCodeBlock
           v-if="section.key === 'acknowledgement' && acknowledgement?.example"
           :title="acknowledgement.example.title"
+          :labels="acknowledgement.example.labels"
           :variants="[{
             language: acknowledgement.example.language ?? 'json',
             code: acknowledgement.example.code,
