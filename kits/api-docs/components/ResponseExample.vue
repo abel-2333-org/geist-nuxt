@@ -5,7 +5,8 @@
 // display + language + copy + wrap to <CodeBlock>. Scenario / status / media
 // selects are injected into CodeBlock's unified toolbar via #controls. Wide
 // containers show the three selects inline; narrow containers collapse them
-// into one summary trigger whose popover keeps the full labelled controls. The
+// into one scenario-named trigger whose popover flattens every dimension into
+// labelled radio groups (one click per change, no nested dropdowns). The
 // status badge goes into #leading; the status description into #notice; the
 // non-code body panels (empty / unavailable / file) into #body.
 //
@@ -248,22 +249,23 @@ const currentBodyLabel = computed(() =>
 )
 
 /**
- * Narrow trigger copy: status stays visible in the leading badge, so preserve
- * the two values that would otherwise disappear entirely. If status is the
- * only selectable dimension, use its human label instead of a generic title.
+ * Narrow trigger copy: the scenario name only — the highest-signal value.
+ * Status stays visible in the leading badge and the media type is one click
+ * away inside the popover, so concatenating them here only produced a long,
+ * truncated label. Fall back through the other selectable dimensions when
+ * scenarios aren't selectable; the aria-label still carries all three values.
  */
 const compactControlLabel = computed(() => {
-  const parts: string[] = []
   if (scenarioItems.value.length > 1 && currentScenario.value?.label) {
-    parts.push(currentScenario.value.label)
+    return currentScenario.value.label
   }
   if (bodyItems.value.length > 1 && currentBodyLabel.value) {
-    parts.push(currentBodyLabel.value)
+    return currentBodyLabel.value
   }
-  if (!parts.length && statusItems.value.length > 1) {
-    parts.push(currentStatus.value?.statusText ?? String(currentStatus.value?.status ?? ''))
+  if (statusItems.value.length > 1) {
+    return currentStatus.value?.statusText ?? String(currentStatus.value?.status ?? '')
   }
-  return parts.join(' · ') || t.value.responseOptions
+  return t.value.responseOptions
 })
 
 const compactControlAriaLabel = computed(() => {
@@ -372,8 +374,8 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
         </UBadge>
       </template>
 
-      <!-- Wide: three inline selects. Narrow: one compact summary trigger opens
-           the same v-model-backed controls in a labelled popover. -->
+      <!-- Wide: three inline selects. Narrow: a scenario-named trigger opens a
+           popover of flat, labelled radio groups over the same v-model state. -->
       <template #controls>
         <div
           v-if="hasResponseControls"
@@ -434,41 +436,41 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
             :ui="{ label: 'truncate' }"
           />
 
+          <!-- Flat radio groups instead of nested selects: every option is one
+               click away and there is no select menu stacking on the popover.
+               URadioGroup brings radiogroup semantics + arrow-key navigation. -->
           <template #content>
-            <div class="w-72 max-w-[calc(100vw-2rem)] space-y-3 p-3">
-              <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
-                <USelect
-                  v-model="activeScenarioId"
-                  :items="scenarioItems"
-                  icon="i-lucide-layers"
-                  color="neutral"
-                  variant="subtle"
-                  :aria-label="t.scenario"
-                  class="w-full"
-                />
-              </UFormField>
-              <UFormField v-if="statusItems.length > 1" :label="t.status" size="xs">
-                <USelect
-                  v-model="activeStatus"
-                  :items="statusItems"
-                  icon="i-lucide-activity"
-                  color="neutral"
-                  variant="subtle"
-                  :aria-label="t.status"
-                  class="w-full"
-                />
-              </UFormField>
-              <UFormField v-if="bodyItems.length > 1" :label="t.mediaType" size="xs">
-                <USelect
-                  v-model="activeBodyIndex"
-                  :items="bodyItems"
-                  icon="i-lucide-file-type"
-                  color="neutral"
-                  variant="subtle"
-                  :aria-label="t.mediaType"
-                  class="w-full"
-                />
-              </UFormField>
+            <div class="w-64 max-w-[calc(100vw-2rem)] space-y-4 p-3">
+              <URadioGroup
+                v-if="scenarioItems.length > 1"
+                v-model="activeScenarioId"
+                :items="scenarioItems"
+                :legend="t.scenario"
+                size="xs"
+                color="neutral"
+                variant="list"
+                :ui="{ legend: 'text-xs text-muted' }"
+              />
+              <URadioGroup
+                v-if="statusItems.length > 1"
+                v-model="activeStatus"
+                :items="statusItems"
+                :legend="t.status"
+                size="xs"
+                color="neutral"
+                variant="list"
+                :ui="{ legend: 'text-xs text-muted' }"
+              />
+              <URadioGroup
+                v-if="bodyItems.length > 1"
+                v-model="activeBodyIndex"
+                :items="bodyItems"
+                :legend="t.mediaType"
+                size="xs"
+                color="neutral"
+                variant="list"
+                :ui="{ legend: 'text-xs text-muted' }"
+              />
             </div>
           </template>
         </UPopover>

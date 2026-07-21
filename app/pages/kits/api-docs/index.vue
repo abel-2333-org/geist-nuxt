@@ -168,6 +168,22 @@ const responseScenarios = [
   },
 ]
 
+// demo 页全中文，覆盖 ResponseExample 的英文默认文案（含窄容器 popover 的表单 label）。
+const responseLabels = {
+  title: '响应',
+  scenario: '场景',
+  status: '状态',
+  mediaType: '媒体类型',
+  responseOptions: '响应选项',
+  codeBodyTitle: '代码示例',
+  emptyBodyTitle: '无响应正文',
+  emptyBodyHint: '该响应有意返回空正文。',
+  unavailableTitle: '暂无示例',
+  unavailableHint: '该响应有正文，但尚未提供示例。',
+  fileTitle: '文件响应',
+  download: '下载',
+}
+
 // Domain badges + enum table — preset wrappers over core's SemanticBadge, plus
 // the allowed-values table. Data-agnostic, driven here by inline sample data.
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
@@ -419,11 +435,11 @@ onMounted(() => anchor.initFromHash())
             <code class="font-mono text-[0.8125rem]">file</code>（二进制 metadata + 可选下载）；
             状态支持数字码与 <code class="font-mono text-[0.8125rem]">'default'</code>，可带 status 级描述。
           </p>
-          <ApiDocsResponseExample :scenarios="responseScenarios" />
+          <ApiDocsResponseExample :scenarios="responseScenarios" :labels="responseLabels" />
         </div>
 
         <div>
-          <h3 class="mb-3 text-sm font-semibold text-highlighted">Method ���章</h3>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Method 徽章</h3>
           <div class="flex flex-wrap items-center gap-2">
             <ApiDocsMethodBadge v-for="m in methods" :key="m" :method="m" />
           </div>
