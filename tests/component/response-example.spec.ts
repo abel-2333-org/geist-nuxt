@@ -287,6 +287,25 @@ describe('ApiDocsResponseExample scenario selection', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate body id "json" within status 200'))
   })
 
+  it('warns once per duplicate key even when reactive data re-triggers the check', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const makeScenarios = (label: string) => [
+      { id: 'duplicate', label, statuses: [{ status: 200 as const, bodies: [] }] },
+      { id: 'duplicate', label, statuses: [{ status: 200 as const, bodies: [] }] },
+    ]
+
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: { scenarios: makeScenarios('One') },
+    })
+    const callsAfterMount = warn.mock.calls.length
+    expect(callsAfterMount).toBeGreaterThan(0)
+
+    // New array identity with the same duplicate key re-runs the watchEffect.
+    await wrapper.setProps({ scenarios: makeScenarios('Two') })
+    await wrapper.vm.$nextTick()
+    expect(warn.mock.calls.length).toBe(callsAfterMount)
+  })
+
   it('hides the scenario selector when there is at most one scenario', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: scenarios.slice(1) },
