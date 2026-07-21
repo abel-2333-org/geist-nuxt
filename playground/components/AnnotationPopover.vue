@@ -103,7 +103,7 @@ function focusPanel() {
   const panel = panelEl.value
   if (!panel) return
   const first = panel.querySelector<HTMLElement>(
-    'button:not(:disabled), [href], [tabindex]:not([tabindex="-1"])',
+    'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )
   ;(first ?? panel).focus()
 }
@@ -114,17 +114,24 @@ const contentProps = {
     if (openSource === 'keyboard') nextTick(focusPanel)
   },
   onCloseAutoFocus(event: Event) {
+    // `inPanel` must be sampled now — the portaled panel detaches right after
+    // this hook, so by nextTick the containment answer is gone.
     const panel = panelEl.value
-    const active = document.activeElement
-    const inPanel = Boolean(panel && panel.contains(active))
-    const focusLost = !active || active === document.body || !active.isConnected
-    const shouldRestore = inPanel || (openSource === 'keyboard' && focusLost)
+    const inPanel = Boolean(panel && panel.contains(document.activeElement))
     // Own the close path explicitly: by the time reka dispatches this hook,
     // portaled content may already be detached and its default restore target
-    // is not reliable for a hover → keyboard takeover. A real outside-click
-    // target stays focused because it is connected and outside the panel.
+    // is not reliable for a hover → keyboard takeover.
     event.preventDefault()
-    if (shouldRestore) nextTick(() => triggerEl.value?.focus())
+    if (!inPanel && openSource !== 'keyboard') return
+    // Whether focus is truly lost is only knowable after the browser settles:
+    // an outside click's default focus can land between this hook and nextTick
+    // (at hook time activeElement may still be body). Verify at focus time so
+    // a real outside-click target never gets its focus yanked to the trigger.
+    nextTick(() => {
+      const active = document.activeElement
+      const focusLost = !active || active === document.body || !active.isConnected
+      if (focusLost) triggerEl.value?.focus()
+    })
   },
 }
 
