@@ -14,7 +14,7 @@
 | `defaultWrap` | `boolean` | 首次访问的换行初值（之后走共享+持久化） |
 | `maxHeight` | `string` | 代码区最大高度，默认 `24rem` |
 | `labels` | `ApiCodeLabels` | 可本地化的 chrome 文案（见下） |
-| `languageLabels` | `Record<string,string>` | 覆盖/扩展 语言 id → 显示名 |
+| `languageLabels` | `Record<string,string>` | 覆盖/扩展 语言 id → 显示名（默认表在 `utils/lang-preset.ts`，与 ResponseExample 的 media 标签共用） |
 | `trustHighlightedHtml` | `boolean` | 默认 `false`；显式确认 `highlightedHtml` 来自可信、预消毒的构建期管线后才开启 |
 
 ### `ApiCodeLabels`（chrome 文案，用于 i18n）
@@ -30,6 +30,7 @@
 - **换行状态共享+持久化**：所有 CodeBlock 共用 `useCodeWrap`（同一 `useState` key + cookie），切一个全联动，SSR 安全、无 localStorage。
 - **工具栏恒为单行**：左 icon·title·`#leading`（如状态 badge）；右 `#controls`（场景/状态选择器）·语言·换行·复制。标题优先截断，图标按钮不收缩。
 - **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；只有内容相关控件（语言/换行/复制）在无 code 时隐藏。
+- **`#notice` / `#body` 供包装组件注入语义面板**：`#notice` 在工具栏下渲染上下文条（如 status 级描述）；无 code 时 `#body` 替代通用空态，承载包装组件自有的语义面板（有意空正文 / 缺示例 / 文件 metadata，见 `ApiDocsResponseExample`）。两个 slot 缺省不渲染任何东西，均非破坏性。CodeBlock 只提供框架 chrome，不理解这些语义。
 - **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报；`useCopy` 内部把写入交给 VueUse `useClipboard({ legacy: true })`，天然覆盖 iframe/insecure-context 的 execCommand 兜底 + toast。成功/失败 toast 均可通过完整消息注入，本地化不拼半句。
 
 ## 用法
@@ -68,4 +69,4 @@
 ## 规格与源码
 
 - 规格模板见 `method/component-spec-template.md`。
-- 源码：`kits/api-docs/components/CodeBlock.vue`、`kits/api-docs/composables/useCodeWrap.ts`；复制依赖 `foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`，由根 registry 解析安装。
+- 源码：`kits/api-docs/components/CodeBlock.vue`、`kits/api-docs/composables/useCodeWrap.ts`、`kits/api-docs/utils/lang-preset.ts`；复制依赖 `foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`，由根 registry 解析安装。

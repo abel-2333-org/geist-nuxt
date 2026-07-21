@@ -16,7 +16,10 @@
 // Anatomy:  header/toolbar
 //             ├─ left:  icon · title · #leading slot (e.g. status badge)
 //             └─ right: #controls slot (scenario/status) · language · wrap · copy
-//           body: scrollable, max-height near-mono code surface
+//           notice: optional #notice slot strip below the toolbar (wrapper context)
+//           body: scrollable, max-height near-mono code surface; with no code,
+//                 an optional #body slot lets wrappers render a semantic panel
+//                 (empty body / missing example / file) inside the same frame
 // States:   active language, wrap on/off, empty / unavailable. (Copied state
 //           lives in CopyButton.)
 // A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
@@ -142,32 +145,13 @@ watch(
  * Language items
  * ------------------------------------------------------------------ */
 // Fallback display label for a language id, used only when a variant doesn't
-// carry its own `label`. Caller overrides (`languageLabels`) win over defaults.
-const DEFAULT_LANG_LABELS: Record<string, string> = {
-  curl: 'cURL',
-  json: 'JSON',
-  node: 'Node',
-  nodejs: 'Node',
-  javascript: 'JavaScript',
-  js: 'JavaScript',
-  python: 'Python',
-  py: 'Python',
-  go: 'Go',
-  http: 'HTTP',
-  bash: 'Shell',
-  shell: 'Shell',
-}
-function humanize(id: string) {
-  const key = id.toLowerCase()
-  return (
-    props.languageLabels[key]
-    ?? DEFAULT_LANG_LABELS[key]
-    ?? id.charAt(0).toUpperCase() + id.slice(1)
-  )
-}
-
+// carry its own `label`. `langLabel` (kit utils/lang-preset.ts, auto-imported)
+// resolves caller overrides (`languageLabels`) → preset → capitalized id.
 const languageItems = computed(() =>
-  variants.value.map(v => ({ label: v.label ?? humanize(v.language), value: v.language })),
+  variants.value.map(v => ({
+    label: v.label ?? langLabel(v.language, props.languageLabels),
+    value: v.language,
+  })),
 )
 
 /* ------------------------------------------------------------------ *
@@ -250,6 +234,16 @@ const wrap = useCodeWrap(props.defaultWrap)
       </div>
     </div>
 
+    <!-- Notice strip — optional wrapper-provided context (e.g. a response
+         status description) rendered between the toolbar and the body so it
+         shares the block's chrome. Non-breaking: absent slot renders nothing. -->
+    <div
+      v-if="$slots.notice"
+      class="border-b border-default bg-muted/40 px-4 py-2 text-sm text-muted"
+    >
+      <slot name="notice" />
+    </div>
+
     <!-- Body — raw source by default; v-html is behind an explicit trust gate
          for pre-sanitized build-time output only. Clipboard always uses code. -->
     <div
@@ -266,6 +260,13 @@ const wrap = useCodeWrap(props.defaultWrap)
         v-else
         class="font-mono text-sm leading-relaxed text-highlighted"
       >{{ current?.code }}</code></pre>
+    </div>
+
+    <!-- Wrapper-owned body panel — when there is no code but a wrapper supplies
+         a semantic body state (empty body, missing example, binary file), it
+         renders here instead of the generic empty state, inside the same frame. -->
+    <div v-else-if="$slots.body" class="bg-default">
+      <slot name="body" />
     </div>
 
     <!-- Empty / unavailable state -->

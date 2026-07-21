@@ -137,6 +137,12 @@ const responseScenarios = [
           },
         ],
       },
+      {
+        // 新 body 语义：有意空正文（区别于「缺示例」），见组件目录页全形态演示。
+        status: 204,
+        statusText: 'No Content',
+        bodies: [{ id: 'empty', kind: 'empty' as const }],
+      },
     ],
   },
 ]
