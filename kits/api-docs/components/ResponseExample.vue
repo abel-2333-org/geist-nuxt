@@ -100,6 +100,8 @@ export interface ApiResponseLabels extends ApiCodeLabels {
   mediaType?: string
   /** Accessible name and fallback copy for the narrow response-options trigger. */
   responseOptions?: string
+  /** Final fallback media label for a code body without a usable variant label. */
+  codeBodyTitle?: string
   /** Intentional empty body panel (e.g. 204). */
   emptyBodyTitle?: string
   emptyBodyHint?: string
@@ -139,6 +141,7 @@ const t = computed(() => ({
   status: 'Status',
   mediaType: 'Media type',
   responseOptions: 'Response options',
+  codeBodyTitle: 'Code example',
   emptyBodyTitle: 'No response body',
   emptyBodyHint: 'This response intentionally returns an empty body.',
   unavailableTitle: 'Example not available',
@@ -152,11 +155,11 @@ const t = computed(() => ({
  * Selection state — scenario → status → body
  * ------------------------------------------------------------------ */
 const scenarios = computed(() => props.scenarios ?? [])
-const activeScenarioId = ref<string | undefined>(scenarios.value[0]?.id)
-const activeStatus = ref<number | 'default' | undefined>(
+const activeScenarioId = shallowRef<string | undefined>(scenarios.value[0]?.id)
+const activeStatus = shallowRef<number | 'default' | undefined>(
   scenarios.value[0]?.statuses?.[0]?.status,
 )
-const activeBodyIndex = ref(0)
+const activeBodyIndex = shallowRef(0)
 
 const currentScenario = computed<ResponseScenario | undefined>(
   () => scenarios.value.find(s => s.id === activeScenarioId.value) ?? scenarios.value[0],
@@ -172,7 +175,7 @@ const currentStatus = computed<ResponseStatus | undefined>(
 const bodies = computed<ResponseBody[]>(() => {
   const s = currentStatus.value
   if (!s) return []
-  if (s.bodies?.length) return s.bodies
+  if (s.bodies !== undefined) return s.bodies
   if (s.variants) return [{ kind: 'code', variants: s.variants }]
   return []
 })
@@ -181,11 +184,11 @@ const currentBody = computed<ResponseBody | undefined>(
   () => bodies.value[activeBodyIndex.value] ?? bodies.value[0],
 )
 
-// When the scenario changes, snap the status back into range.
+// A scenario is a fresh response context: always select its first status and
+// body, even when the previous scenario happened to use the same status code.
 watch(activeScenarioId, () => {
-  if (!statuses.value.some(s => s.status === activeStatus.value)) {
-    activeStatus.value = statuses.value[0]?.status
-  }
+  activeStatus.value = statuses.value[0]?.status
+  activeBodyIndex.value = 0
 })
 watch(scenarios, (list) => {
   if (!list.some(s => s.id === activeScenarioId.value)) activeScenarioId.value = list[0]?.id
@@ -208,17 +211,28 @@ const statusItems = computed(() =>
   statuses.value.map(s => ({ label: s.statusText ?? String(s.status), value: s.status })),
 )
 
-// Media select labels: mediaType when given, otherwise a readable fallback so
-// unlabeled non-code bodies still get a sensible entry.
+function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
+  const variant = body.variants[0]
+  if (!variant) return t.value.codeBodyTitle
+  return variant.label
+    ?? props.languageLabels[variant.language.toLowerCase()]
+    ?? variant.language.toUpperCase()
+}
+
+// Media select labels: mediaType when given, otherwise a kind-specific label.
+// Code bodies use their first variant metadata and never fall through to the
+// file-response copy.
 const bodyItems = computed(() =>
   bodies.value.map((b, index) => ({
     label:
       b.mediaType
-      ?? (b.kind === 'empty'
-        ? t.value.emptyBodyTitle
-        : b.kind === 'unavailable'
-          ? t.value.unavailableTitle
-          : t.value.fileTitle),
+      ?? (b.kind === 'code'
+        ? codeBodyLabel(b)
+        : b.kind === 'empty'
+          ? t.value.emptyBodyTitle
+          : b.kind === 'unavailable'
+            ? t.value.unavailableTitle
+            : t.value.fileTitle),
     value: index,
   })),
 )
@@ -269,8 +283,8 @@ const compactControlAriaLabel = computed(() => {
   return parts.join('. ')
 })
 
-const responseRoot = ref<HTMLElement | null>(null)
-const responseOptionsOpen = ref(false)
+const responseRoot = useTemplateRef<HTMLElement>('responseRoot')
+const responseOptionsOpen = shallowRef(false)
 let responseResizeObserver: ResizeObserver | undefined
 
 watch(hasResponseControls, (hasControls) => {
@@ -315,6 +329,10 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
   return 'neutral'
 })
 
+const showStatusTextInBadge = computed(() =>
+  statusItems.value.length === 1 && !!currentStatus.value?.statusText,
+)
+
 const codeVariants = computed<CodeVariant[]>(() =>
   currentBody.value?.kind === 'code' ? currentBody.value.variants : [],
 )
@@ -344,9 +362,13 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
         :color="statusColor"
         variant="subtle"
         size="sm"
-        class="font-mono font-semibold"
+        class="font-semibold"
       >
-        {{ currentStatus.status }}
+        <span class="sr-only">{{ t.status }}:</span>
+        <span class="font-mono">{{ currentStatus.status }}</span>
+        <span v-if="showStatusTextInBadge" class="font-sans font-medium">
+          {{ currentStatus.statusText }}
+        </span>
       </UBadge>
     </template>
 

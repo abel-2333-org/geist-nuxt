@@ -43,7 +43,7 @@ deployment = res.json()`,
 ]
 
 // 响应示例：覆盖 body 语义全形态——numeric / 'default' 状态、code（多 media
-// type：JSON + CSV）、empty（204 有意空正文）、unavailable（有正文缺示例）、
+// type：JSON + text/plain + CSV）、empty（204 有意空正文）、unavailable（有正文缺示例）、
 // file（二进制：metadata + 可选下载）。旧 `variants` 简写仍兼容（见「导出部署列表」）。
 const responseScenarios = [
   {
@@ -69,6 +69,17 @@ const responseScenarios = [
   "url": "https://my-app.example.app",
   "createdAt": 1720000000000
 }`,
+              },
+            ],
+          },
+          {
+            kind: 'code' as const,
+            mediaType: 'text/plain',
+            variants: [
+              {
+                language: 'text',
+                label: 'Plain text',
+                code: 'dpl_8Kx2fQ READY https://my-app.example.app',
               },
             ],
           },
@@ -402,7 +413,7 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
           <p class="mb-3 max-w-2xl text-sm text-muted">
-            body 语义显式建模：<code class="font-mono text-[0.8125rem]">code</code>（多 media type 出选择器）/
+            body 语义显式建模：<code class="font-mono text-[0.8125rem]">code</code>（JSON / text/plain / CSV 等多 media type 出选择器）/
             <code class="font-mono text-[0.8125rem]">empty</code>（有意空正文，如 204）/
             <code class="font-mono text-[0.8125rem]">unavailable</code>（有正文缺示例）/
             <code class="font-mono text-[0.8125rem]">file</code>（二进制 metadata + 可选下载）；
