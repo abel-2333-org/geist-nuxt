@@ -28,7 +28,7 @@ interface RequestScenario { id: string; label: string; variants: CodeVariant[] }
 ## 受控选择
 
 - **默认 uncontrolled**：不绑定 `v-model:scenario` 时组件持有本地状态，默认第一个场景，行为与旧版一致。
-- **受控**：绑定后场景由父级驱动；父级更新 → 可预测切换，用户切换 → 发一次 `update:scenario`。
+- **受控**：绑定后场景由父级驱动；父级更新 → 可预测切换，用户切换 → 发一次 `update:scenario`。受控与否在挂载时按 prop 是否传入一次性判定（React 风格），运行时在受控/非受控之间切换不受支持。
 - **fallback 只派生不回写**：绑定值为未知 id、场景列表变化后失配时，展示确定性收敛到第一个场景，但不修改绑定值、不发事件——无更新循环，SSR 安全。
 - **linked 联动**：请求 / 响应共用稳定场景 id 时，父级一个 ref 同时绑两侧即可联动，两个选择器互为镜像；scenario 间的 mapping 归 consumer，kit 不做。
 

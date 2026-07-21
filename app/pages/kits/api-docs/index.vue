@@ -155,7 +155,7 @@ const responseScenarios = [
   {
     // 旧模型兼容：仅 `variants` 的调用零改动。
     id: 'list',
-    label: '导出部署列表',
+    label: '部署列表',
     statuses: [
       {
         status: 200,

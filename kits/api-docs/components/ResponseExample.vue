@@ -225,6 +225,27 @@ const bodies = computed<ResponseBody[]>(() => {
   return []
 })
 
+// Ids are selection identity keys; duplicates silently resolve to the first
+// match. Surface consumer data bugs in dev instead of debugging "stuck" selects.
+if (import.meta.dev) {
+  watchEffect(() => {
+    const seen = new Set<string>()
+    for (const s of scenarios.value) {
+      if (seen.has(s.id)) {
+        console.warn(`[ApiDocsResponseExample] duplicate scenario id "${s.id}" — selection resolves to the first match.`)
+      }
+      seen.add(s.id)
+    }
+    const bodyIds = new Set<string>()
+    for (const b of bodies.value) {
+      if (bodyIds.has(b.id)) {
+        console.warn(`[ApiDocsResponseExample] duplicate body id "${b.id}" within status ${currentStatus.value?.status} — selection resolves to the first match.`)
+      }
+      bodyIds.add(b.id)
+    }
+  })
+}
+
 const localBodyId = shallowRef<string | undefined>()
 
 const currentBody = computed<ResponseBody | undefined>(
@@ -468,6 +489,9 @@ const panelAnnouncement = computed(() => {
             class="min-w-0 max-w-full"
             :ui="{ content: 'min-w-fit' }"
           />
+          <!-- Closed trigger shows statusText only — the adjacent badge already
+               carries the code. Menu options keep `code + text` so duplicate
+               texts (e.g. two "Success") stay distinguishable. -->
           <USelect
             v-if="statusItems.length > 1"
             v-model="selectedStatus"
@@ -479,7 +503,9 @@ const panelAnnouncement = computed(() => {
             :aria-label="t.status"
             class="min-w-0 max-w-full"
             :ui="{ content: 'min-w-fit' }"
-          />
+          >
+            {{ currentStatus?.statusText ?? currentStatus?.status }}
+          </USelect>
           <USelect
             v-if="bodyItems.length > 1"
             v-model="selectedBody"
