@@ -55,6 +55,9 @@ jobs:
       - name: Test registry operations
         run: pnpm test:registry
 
+      - name: Test API Docs components
+        run: pnpm test:component
+
       - name: Typecheck root gallery
         run: pnpm typecheck
 
@@ -126,6 +129,10 @@ jobs:
         run: |
           pnpm registry:validate
           pnpm test:registry
+
+      - name: Test assembled API Docs components
+        working-directory: dist-verify
+        run: pnpm test:component
 
       - name: Typecheck assembled snapshot
         working-directory: dist-verify

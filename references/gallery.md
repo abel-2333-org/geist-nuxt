@@ -17,6 +17,7 @@ app/pages/
     index.vue                       API Docs 组件目录
     reference.vue                   页面级完整参考页
     sidebar-nav.vue                 SidebarNav 专项响应式样例
+    webhook-protocol.vue            Webhook 协议事实专项
     docs-shell/
       index.vue                     重定向到默认域
       [domain]/index.vue            多域文档站外壳（域首页 = 参考长滚动）
@@ -90,9 +91,12 @@ prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 根 app 的 `useGalleryNav()` 从 `useRouter().getRoutes()` 取路由：
 
 - 过滤动态路由与 `nav: false`；
-- 顶层页面直接显示；
-- `kits/<name>/**` 折成 kit 子树；
-- `meta.nav.order` 决定稳定排序。
+- 顶层页面直接显示，并按 `meta.nav.order`、label 依次排序；
+- `kits/<name>/**` 折成一个顶层 kit 条目（单页 kit 为链接，多页 kit 为下拉）；
+- kit 条目固定排在普通顶层页之后，kit 之间按目录名排序，kit 内页面按 `meta.nav.order`、label 排序；
+- 当前路由按路径段边界匹配最长静态页面：父 kit 标记 active，移动端 accordion 默认展开；若存在匹配，至多标记一个 active 子项。
+
+导航最多两层：水平 `UNavigationMenu` 只渲染一层 dropdown，更深的嵌套在头部不可见，所以 kit 直接置顶层而不额外包一层分组。
 
 `UHeader mode="slideover"` 使用同一 items 数据渲染桌面 `UNavigationMenu` 与移动端纵向菜单；不要另写移动抽屉或 media query。
 

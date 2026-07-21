@@ -56,6 +56,7 @@ const responseScenarios = [
         description: '部署已创建，返回存储后的完整记录。',
         bodies: [
           {
+            id: 'json',
             kind: 'code' as const,
             mediaType: 'application/json',
             variants: [
@@ -73,6 +74,7 @@ const responseScenarios = [
             ],
           },
           {
+            id: 'text',
             kind: 'code' as const,
             mediaType: 'text/plain',
             variants: [
@@ -84,6 +86,7 @@ const responseScenarios = [
             ],
           },
           {
+            id: 'csv',
             kind: 'code' as const,
             mediaType: 'text/csv',
             variants: [
@@ -99,19 +102,20 @@ const responseScenarios = [
       {
         status: 204,
         statusText: '无内容',
-        bodies: [{ kind: 'empty' as const, note: '操作已受理，协议约定不返回正文。' }],
+        bodies: [{ id: 'empty', kind: 'empty' as const, note: '操作已受理，协议约定不返回正文。' }],
       },
       {
         status: 409,
         statusText: '冲突',
         description: '同名部署已存在。',
-        bodies: [{ kind: 'unavailable' as const, mediaType: 'application/json' }],
+        bodies: [{ id: 'json', kind: 'unavailable' as const, mediaType: 'application/json' }],
       },
       {
         status: 'default' as const,
         statusText: '未预期错误',
         bodies: [
           {
+            id: 'json',
             kind: 'code' as const,
             mediaType: 'application/json',
             variants: [
@@ -137,6 +141,7 @@ const responseScenarios = [
         description: '返回构建产物压缩包。',
         bodies: [
           {
+            id: 'zip',
             kind: 'file' as const,
             mediaType: 'application/zip',
             filename: 'my-app-build.zip',
@@ -378,6 +383,87 @@ const denseFields = [
   },
 ]
 
+// 场景受控选择 story 数据：请求 / 响应两侧共用稳定场景 id（single / batch /
+// dry-run）；响应侧刻意缺 `batch`，现场演示缺侧 fallback——Request 切到 batch 时
+// Response 确定性收敛到第一项，不回写、不发事件、不抖动。scenario ↔ scenario 的
+// mapping 归 consumer（这里的页面级 ref）持有，kit 组件零 mapping。
+const linkedRequestScenarios = [
+  {
+    id: 'single',
+    label: '创建单个部署',
+    variants: [
+      {
+        language: 'bash',
+        label: 'cURL',
+        code: `curl -X POST https://api.example.com/v1/deployments \\
+  -d '{ "name": "my-app", "target": "production" }'`,
+      },
+    ],
+  },
+  {
+    id: 'batch',
+    label: '批量创建',
+    variants: [
+      {
+        language: 'bash',
+        label: 'cURL',
+        code: `curl -X POST https://api.example.com/v1/deployments/batch \\
+  -d '{ "items": [{ "name": "my-app" }, { "name": "my-docs" }] }'`,
+      },
+    ],
+  },
+  {
+    id: 'dry-run',
+    label: '仅校验',
+    variants: [
+      {
+        language: 'bash',
+        label: 'cURL',
+        code: `curl -X POST "https://api.example.com/v1/deployments?dryRun=1" \\
+  -d '{ "name": "my-app", "target": "production" }'`,
+      },
+    ],
+  },
+]
+
+const linkedResponseScenarios = [
+  {
+    id: 'single',
+    label: '创建单个部署',
+    statuses: [
+      {
+        status: 200,
+        statusText: 'OK',
+        variants: [
+          {
+            language: 'json',
+            code: `{ "id": "dpl_8Kx2fQ", "name": "my-app", "state": "READY" }`,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dry-run',
+    label: '仅校验',
+    statuses: [
+      {
+        status: 200,
+        statusText: 'OK',
+        variants: [
+          {
+            language: 'json',
+            code: `{ "valid": true, "warnings": [] }`,
+          },
+        ],
+      },
+    ],
+  },
+]
+
+// linked 形态：页面级一个 ref 同时绑两侧 v-model:scenario，两个选择器互为镜像。
+const linkedScenario = ref('single')
+
 // Operation 身份层陈列数据：header（endpoint / webhook 两形态）、target
 // （双环境切换）、lifecycle notice（deprecated 一例）。
 const demoHosts = [
@@ -436,6 +522,28 @@ onMounted(() => anchor.initFromHash())
             状态支持数字码与 <code class="font-mono text-[0.8125rem]">'default'</code>，可带 status 级描述。
           </p>
           <ApiDocsResponseExample :scenarios="responseScenarios" :labels="responseLabels" />
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">场景受控选择</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            请求 / 响应示例的场景选择默认各自独立（uncontrolled，无需任何绑定）；绑定
+            <code class="font-mono text-[0.8125rem]">v-model:scenario</code>
+            即转为受控，两侧可用一个页面级 ref 联动（linked），选择器互为镜像。
+            scenario 间的对应关系由 consumer 持有，kit 不做 mapping。下例响应侧刻意
+            缺「批量创建」：请求切到该场景时，响应确定性收敛到第一项——fallback 只派生
+            不回写、不发事件，因此无更新循环，也不会抖动。
+          </p>
+          <div class="space-y-4">
+            <ApiDocsRequestExample
+              v-model:scenario="linkedScenario"
+              :scenarios="linkedRequestScenarios"
+            />
+            <ApiDocsResponseExample
+              v-model:scenario="linkedScenario"
+              :scenarios="linkedResponseScenarios"
+            />
+          </div>
         </div>
 
         <div>

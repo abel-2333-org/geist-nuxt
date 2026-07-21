@@ -5,10 +5,10 @@
 // display + language + copy + wrap to <CodeBlock>. Scenario / status / media
 // selects are injected into CodeBlock's unified toolbar via #controls. Wide
 // containers show the three selects inline; narrow containers collapse them
-// into one scenario-named trigger whose popover flattens every dimension into
-// labelled radio groups (one click per change, no nested dropdowns). The
-// status badge goes into #leading; the status description into #notice; the
-// non-code body panels (empty / unavailable / file) into #body.
+// into one scenario-named trigger whose popover keeps the unbounded scenario
+// dimension in a select and flattens status/media into labelled radio groups.
+// The status badge goes into #leading; the status description into #notice;
+// non-code body panels (empty / unavailable / file) go into #body.
 //
 // The display model is provided by the consumer, already localized; the
 // component never parses OpenAPI. Body semantics are explicit:
@@ -24,37 +24,41 @@
 // Anatomy:  <CodeBlock> + status badge (#leading) + responsive
 //           scenario/status/media controls (#controls) + status description
 //           (#notice) + body panel (#body)
-// State:    active scenario, active status, active body; language/copy/wrap
-//           live in CodeBlock; the non-code panels are static + role="status".
+// State:    scenario is optionally controlled via `v-model:scenario`; status
+//           and body stay internal and converge by stable ids; language/copy/
+//           wrap live in CodeBlock.
 // A11y:     status uses a text badge (text + color, never color alone);
-//           selects are labelled; panels describe themselves in text; the
-//           download control is a real link with the filename in its name.
+//           selects are labelled; a persistent live region announces semantic
+//           body panels; downloads are real links named with the filename.
 
 import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
 
-/** One body form under a status. `mediaType` is a display label only. */
+type ResponseBodyBase = {
+  /** Stable and unique within one status; survives data replacement/reordering. */
+  id: string
+  /** Display label for the media select, e.g. 'application/json'. */
+  mediaType?: string
+}
+
+/** One body form under a status. */
 export type ResponseBody =
-  | {
+  | ResponseBodyBase & {
       /** Renderable example(s) — JSON, plain text, CSV … all CodeVariants. */
       kind: 'code'
-      /** Display label for the media select, e.g. 'application/json'. */
-      mediaType?: string
       variants: CodeVariant[]
     }
-  | {
+  | ResponseBodyBase & {
       /** Protocol-defined empty body (e.g. 204). Never shown as "no example". */
       kind: 'empty'
-      mediaType?: string
       /** Optional localized note overriding the default hint. */
       note?: string
     }
-  | {
+  | ResponseBodyBase & {
       /** A body exists per the schema but no example is available. */
       kind: 'unavailable'
-      mediaType?: string
       note?: string
     }
-  | {
+  | ResponseBodyBase & {
       /** Binary/file response — metadata + optional download, never fake code. */
       kind: 'file'
       mediaType: string
@@ -77,7 +81,8 @@ export interface ResponseStatus {
   bodies?: ResponseBody[]
   /**
    * Legacy shorthand for a single code body. Kept for compatibility and
-   * normalized internally to `[{ kind: 'code', variants }]`; `bodies` wins
+   * normalized internally to `[{ id: 'legacy', kind: 'code', variants }]`;
+   * `bodies` wins
    * when both are present.
    */
   variants?: CodeVariant[]
@@ -114,10 +119,16 @@ export interface ApiResponseLabels extends ApiCodeLabels {
   download?: string
 }
 
+const emit = defineEmits<{
+  'update:scenario': [id: string]
+}>()
+
 const props = withDefaults(
   defineProps<{
     /** One or more business scenarios, each with one or more statuses. */
     scenarios?: ResponseScenario[]
+    /** Controlled scenario id for `v-model:scenario`. */
+    scenario?: string
     title?: string
     defaultWrap?: boolean
     maxHeight?: string
@@ -156,60 +167,107 @@ const t = computed(() => ({
  * Selection state — scenario → status → body
  * ------------------------------------------------------------------ */
 const scenarios = computed(() => props.scenarios ?? [])
-const activeScenarioId = shallowRef<string | undefined>(scenarios.value[0]?.id)
-const activeStatus = shallowRef<number | 'default' | undefined>(
-  scenarios.value[0]?.statuses?.[0]?.status,
-)
-const activeBodyIndex = shallowRef(0)
 
+// Prop presence distinguishes controlled usage from standalone usage, including
+// an explicitly bound undefined value. Decided once at mount (React-style):
+// switching between controlled and uncontrolled at runtime is not supported.
+// Uncontrolled state keeps the selected id stable across list reordering and
+// only resets when that id disappears.
+const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
+const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
+const scenario = computed(() => controlled ? props.scenario : localScenario.value)
+
+// The effective scenario is fully DERIVED: an unknown/missing id converges to
+// the first scenario without writing back or emitting — no update loops, no
+// duplicate events, SSR-safe (fallback is never persisted into the model).
 const currentScenario = computed<ResponseScenario | undefined>(
-  () => scenarios.value.find(s => s.id === activeScenarioId.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenario.value) ?? scenarios.value[0],
 )
+
+// The select shows the CONVERGED id but only emits explicit user choices.
+const selectedScenario = computed<string | undefined>({
+  get: () => currentScenario.value?.id,
+  set: (id) => {
+    if (id === undefined) return
+    if (!controlled) localScenario.value = id
+    emit('update:scenario', id)
+  },
+})
+
+// Status stays INTERNAL state (out of the controlled seam by design) and is
+// DERIVED the same way as the scenario: localStatus records the last explicit
+// user pick, and a pick missing from the current scenario converges to the
+// first status without writing back — no normalization watcher, SSR-safe,
+// correct on first render even for a controlled non-first initial scenario.
+const localStatus = shallowRef<ResponseStatus['status'] | undefined>()
 
 const statuses = computed<ResponseStatus[]>(() => currentScenario.value?.statuses ?? [])
 
 const currentStatus = computed<ResponseStatus | undefined>(
-  () => statuses.value.find(s => s.status === activeStatus.value) ?? statuses.value[0],
+  () => statuses.value.find(s => s.status === localStatus.value) ?? statuses.value[0],
 )
+
+// The select shows the CONVERGED status but only persists explicit user picks.
+const selectedStatus = computed<ResponseStatus['status'] | undefined>({
+  get: () => currentStatus.value?.status,
+  set: (status) => {
+    if (status === undefined) return
+    localStatus.value = status
+  },
+})
 
 /** Normalized body list: `bodies` wins; legacy `variants` maps to one code body. */
 const bodies = computed<ResponseBody[]>(() => {
   const s = currentStatus.value
   if (!s) return []
   if (s.bodies !== undefined) return s.bodies
-  if (s.variants) return [{ kind: 'code', variants: s.variants }]
+  if (s.variants) return [{ id: 'legacy', kind: 'code', variants: s.variants }]
   return []
 })
 
+const localBodyId = shallowRef<string | undefined>()
+
 const currentBody = computed<ResponseBody | undefined>(
-  () => bodies.value[activeBodyIndex.value] ?? bodies.value[0],
+  () => bodies.value.find(b => b.id === localBodyId.value) ?? bodies.value[0],
 )
 
-// A scenario is a fresh response context: always select its first status and
-// body, even when the previous scenario happened to use the same status code.
-watch(activeScenarioId, () => {
-  activeStatus.value = statuses.value[0]?.status
-  activeBodyIndex.value = 0
+const selectedBody = computed<string | undefined>({
+  get: () => currentBody.value?.id,
+  set: (id) => {
+    if (id === undefined) return
+    localBodyId.value = id
+  },
 })
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === activeScenarioId.value)) activeScenarioId.value = list[0]?.id
-})
-// When the status (or its data) changes, snap the body back into range.
-watch(bodies, (list) => {
-  if (activeBodyIndex.value >= list.length) activeBodyIndex.value = 0
-})
-watch(activeStatus, () => {
-  activeBodyIndex.value = 0
-})
+
+// Body selection belongs to one effective scenario/status context. Data refreshes
+// within that context preserve a still-valid body id; context changes start at
+// the first body even when two contexts reuse the same id.
+watch(
+  [() => currentScenario.value?.id, () => currentStatus.value?.status],
+  () => { localBodyId.value = undefined },
+  { flush: 'sync' },
+)
+
+// Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+if (!controlled) {
+  watch(scenarios, (list) => {
+    if (!list.some(s => s.id === localScenario.value)) {
+      localScenario.value = list[0]?.id
+    }
+  })
+}
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),
 )
 
-// The status code lives in the colored badge (#leading), so the selector only
-// carries the status TEXT — together they read "200 · OK" without repeating.
+// Every option is self-contained. The toolbar badge may repeat the active code,
+// but dropdown/radio choices remain distinguishable when labels are identical.
 const statusItems = computed(() =>
-  statuses.value.map(s => ({ label: s.statusText ?? String(s.status), value: s.status })),
+  statuses.value.map(s => ({
+    label: s.statusText ? `${s.status} ${s.statusText}` : String(s.status),
+    value: s.status,
+  })),
 )
 
 // Shares `langLabel` (kit utils/lang-preset.ts) with CodeBlock's language
@@ -224,7 +282,7 @@ function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
 // Code bodies use their first variant metadata and never fall through to the
 // file-response copy.
 const bodyItems = computed(() =>
-  bodies.value.map((b, index) => ({
+  bodies.value.map(b => ({
     label:
       b.mediaType
       ?? (b.kind === 'code'
@@ -234,7 +292,7 @@ const bodyItems = computed(() =>
           : b.kind === 'unavailable'
             ? t.value.unavailableTitle
             : t.value.fileTitle),
-    value: index,
+    value: b.id,
   })),
 )
 
@@ -245,7 +303,7 @@ const hasResponseControls = computed(() =>
 )
 
 const currentBodyLabel = computed(() =>
-  bodyItems.value[activeBodyIndex.value]?.label ?? bodyItems.value[0]?.label,
+  bodyItems.value.find(item => item.value === selectedBody.value)?.label,
 )
 
 /**
@@ -344,10 +402,27 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
   const b = currentBody.value
   return b && b.kind !== 'code' ? b : undefined
 })
+
+const panelAnnouncement = computed(() => {
+  const b = panel.value
+  if (!b) return ''
+  if (b.kind === 'empty') {
+    return `${t.value.emptyBodyTitle}. ${b.note ?? t.value.emptyBodyHint}`
+  }
+  if (b.kind === 'unavailable') {
+    return `${t.value.unavailableTitle}. ${b.note ?? t.value.unavailableHint}`
+  }
+  return [b.filename ?? t.value.fileTitle, b.mediaType, b.size, b.note]
+    .filter(Boolean)
+    .join('. ')
+})
 </script>
 
 <template>
   <div ref="responseRoot" class="@container/response">
+    <p data-response-announcement class="sr-only" role="status" aria-atomic="true">
+      {{ panelAnnouncement }}
+    </p>
     <ApiDocsCodeBlock
       :variants="codeVariants"
       :title="title ?? t.title"
@@ -375,7 +450,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
       </template>
 
       <!-- Wide: three inline selects. Narrow: a scenario-named trigger opens a
-           popover of flat, labelled radio groups over the same v-model state. -->
+           hybrid select/radio popover over the same converged state. -->
       <template #controls>
         <div
           v-if="hasResponseControls"
@@ -383,7 +458,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
         >
           <USelect
             v-if="scenarioItems.length > 1"
-            v-model="activeScenarioId"
+            v-model="selectedScenario"
             :items="scenarioItems"
             icon="i-lucide-layers"
             size="xs"
@@ -395,7 +470,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
           />
           <USelect
             v-if="statusItems.length > 1"
-            v-model="activeStatus"
+            v-model="selectedStatus"
             :items="statusItems"
             icon="i-lucide-activity"
             size="xs"
@@ -407,7 +482,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
           />
           <USelect
             v-if="bodyItems.length > 1"
-            v-model="activeBodyIndex"
+            v-model="selectedBody"
             :items="bodyItems"
             icon="i-lucide-file-type"
             size="xs"
@@ -442,10 +517,12 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
                (1-3 items) and flatten into radio groups — one click away, no
                nested dropdown for the dimensions where flat wins. -->
           <template #content>
-            <div class="w-64 max-w-[calc(100vw-2rem)] space-y-4 p-3">
+            <div
+              class="max-h-[var(--reka-popover-content-available-height)] w-64 max-w-[calc(100vw-2rem)] space-y-4 overflow-y-auto overscroll-contain p-3"
+            >
               <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
                 <USelect
-                  v-model="activeScenarioId"
+                  v-model="selectedScenario"
                   :items="scenarioItems"
                   icon="i-lucide-layers"
                   size="xs"
@@ -457,7 +534,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
               </UFormField>
               <URadioGroup
                 v-if="statusItems.length > 1"
-                v-model="activeStatus"
+                v-model="selectedStatus"
                 :items="statusItems"
                 :legend="t.status"
                 size="xs"
@@ -467,7 +544,7 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
               />
               <URadioGroup
                 v-if="bodyItems.length > 1"
-                v-model="activeBodyIndex"
+                v-model="selectedBody"
                 :items="bodyItems"
                 :legend="t.mediaType"
                 size="xs"
@@ -485,10 +562,9 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
         <p class="text-pretty">{{ currentStatus.description }}</p>
       </template>
 
-      <!-- Non-code body panels — empty / unavailable / file. Announced on switch. -->
+      <!-- Non-code body panels — empty / unavailable / file. -->
       <template v-if="panel" #body>
-        <!-- role="status" implies aria-live="polite" -->
-        <div role="status">
+        <div>
           <!-- Intentional empty body (e.g. 204) -->
           <div
             v-if="panel.kind === 'empty'"

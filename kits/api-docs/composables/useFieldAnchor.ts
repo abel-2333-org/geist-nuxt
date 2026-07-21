@@ -23,6 +23,11 @@ export function useActiveFieldPath() {
 /** Height of the sticky header, so scrolled-to rows clear it (see scroll-mt). */
 const SCROLL_MARGIN_CLASS = 'scroll-mt-24'
 
+// Client-global navigation token: each goTo invalidates the previous one, so
+// a stale in-flight positioning (e.g. waiting for an async field tree that
+// mounted late) can never scroll/flash after the user already moved on.
+let navigationToken = 0
+
 export interface FieldAnchorCopyMessages {
   successMessage?: string
   failureMessage?: string
@@ -39,7 +44,7 @@ export function useFieldAnchor() {
   /** Full shareable URL for a field path. */
   function urlFor(path: string) {
     if (!import.meta.client) return `#${path}`
-    return `${location.origin}${location.pathname}#${path}`
+    return `${location.origin}${location.pathname}${location.search}#${path}`
   }
 
   /**
@@ -48,28 +53,47 @@ export function useFieldAnchor() {
    * flashing it. `getElementById` avoids any need to escape the id for a
    * CSS/querySelector selector.
    */
-  async function goTo(path: string, opts: { updateHash?: boolean } = {}) {
+  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
     if (opts.updateHash !== false && import.meta.client) {
       history.replaceState(history.state, '', `#${path}`)
     }
 
     if (!import.meta.client) return
+    const token = ++navigationToken
     await nextTick()
+
+    // The row may not exist yet: hash arrival can precede an async field tree
+    // (data still loading on a fresh navigation). Poll for the element within
+    // a bounded window instead of failing on the first miss; the token drops
+    // this positioning if a newer navigation started meanwhile.
+    const el = await waitForElement(path, token)
+    if (!el || token !== navigationToken) return
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
     // may also try a native scroll to the hash. Both shift layout, so scrolling
-    // on a fixed delay is racy. Instead wait until the document height is stable
+    // on a fixed delay is racy. Instead wait until the element's layout is stable
     // across two frames (expansion settled), then do a single scroll + flash.
-    const el = document.getElementById(path)
-    if (!el) return
     await waitForElementStable(el)
+    if (token !== navigationToken) return
 
     el.scrollIntoView({ block: 'start' })
     // Content above the target (images, code blocks) can still reflow after the
     // first scroll, nudging the row off its scroll-margin anchor. Re-run the
     // scroll on the next frame so we settle on the final, correct position.
-    requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }))
+    // Re-check inside the callback: a newer navigation (or unmount) can happen
+    // before this frame fires, and a stale target must not drag scroll back.
+    requestAnimationFrame(() => {
+      if (token !== navigationToken || !el.isConnected) return
+      el.scrollIntoView({ block: 'start' })
+    })
+    // Optionally move keyboard focus to the row (deep links, annotation jumps)
+    // so Tab continues from the target instead of wherever the journey began.
+    // `preventScroll` keeps the settled scroll position authoritative.
+    if (opts.focus) {
+      if (!el.hasAttribute('tabindex')) el.tabIndex = -1
+      el.focus({ preventScroll: true })
+    }
     // Brief highlight so the eye lands on the right row. Uses the Web Animations
     // API (no persistent class to clean up) and respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -82,6 +106,26 @@ export function useFieldAnchor() {
         { duration: 1600, easing: 'ease-out' },
       )
     }
+  }
+
+  /**
+   * Resolve the target row's element, retrying per frame within a bounded
+   * window so async field trees that mount shortly after the hash arrives are
+   * still found. Bails out early (resolves null) when a newer navigation
+   * superseded this one, so an orphaned poll never keeps spinning.
+   */
+  function waitForElement(id: string, token: number, maxMs = 2000): Promise<HTMLElement | null> {
+    return new Promise((resolve) => {
+      const start = performance.now()
+      const tick = () => {
+        if (token !== navigationToken) return resolve(null)
+        const el = document.getElementById(id)
+        if (el) return resolve(el)
+        if (performance.now() - start > maxMs) return resolve(null)
+        requestAnimationFrame(tick)
+      }
+      tick()
+    })
   }
 
   /**
@@ -137,11 +181,45 @@ export function useFieldAnchor() {
     }
   }
 
-  /** On mount, honor an incoming `#path` hash by navigating to it. */
+  /**
+   * Honor an incoming `#path` hash by navigating to it, now and on later route
+   * changes. Watching `fullPath` covers every reused-instance case where
+   * onMounted never re-runs: hash-only changes on the same page, dynamic
+   * `[slug]` navigations where the hash text stays identical but the page
+   * changed (`/a#amount` → `/b#amount`), and query-only changes
+   * (`/docs?v=1#amount` → `/docs?v=2#amount`). An empty hash clears the active
+   * field AND invalidates any in-flight goTo still waiting for its target DOM,
+   * so a stale positioning can never scroll or focus on the new page.
+   * Focus moves to the row so keyboard users continue from the target.
+   * Registered inside the caller's lifecycle (setup/onMounted), the watcher
+   * is disposed with the page component.
+   */
   function initFromHash() {
     if (!import.meta.client) return
-    const hash = decodeURIComponent(location.hash.replace(/^#/, ''))
-    if (hash) goTo(hash, { updateHash: false })
+    const apply = (path: string) => {
+      if (path) {
+        void goTo(path, { updateHash: false, focus: true })
+      }
+      else {
+        navigationToken++
+        active.value = ''
+      }
+    }
+    const rawPath = location.hash.replace(/^#/, '')
+    try {
+      apply(decodeURIComponent(rawPath))
+    }
+    catch {
+      // A malformed raw escape must not abort anchor initialization. Leaving
+      // it encoded simply means no field row matches the invalid fragment.
+      apply(rawPath)
+    }
+    const route = useRoute()
+    watch(() => route.fullPath, () => {
+      // Vue Router exposes a normalized, already-decoded hash. Decoding it a
+      // second time would throw for valid literal-percent paths such as `%`.
+      apply(route.hash.replace(/^#/, ''))
+    })
   }
 
   return { active, copied, goTo, copyLink, urlFor, initFromHash, SCROLL_MARGIN_CLASS }
