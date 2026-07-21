@@ -21,6 +21,7 @@ const scenarios = [
     label: 'Batch',
     statuses: [
       { status: 404, statusText: 'Not Found', variants: [{ language: 'json', code: 'BATCH-404' }] },
+      { status: 422, statusText: 'Unprocessable Entity', variants: [{ language: 'json', code: 'BATCH-422' }] },
     ],
   },
 ]
@@ -39,10 +40,26 @@ describe('ApiDocsResponseExample scenario selection', () => {
     expect(wrapper.text()).toContain('200')
   })
 
+  it('uncontrolled: preserves scenario and status when scenarios are reordered', async () => {
+    const wrapper = await mountSuspended(ResponseExample, { props: { scenarios } })
+    const statusSelect = selectByIcon(wrapper, 'i-lucide-activity')
+    expect(statusSelect).toBeDefined()
+
+    statusSelect!.vm.$emit('update:modelValue', 400)
+    await wrapper.vm.$nextTick()
+    await wrapper.setProps({ scenarios: [...scenarios].reverse() })
+
+    expect(selectByIcon(wrapper, 'i-lucide-layers')?.props('modelValue')).toBe('basic')
+    expect(selectByIcon(wrapper, 'i-lucide-activity')?.props('modelValue')).toBe(400)
+    expect(wrapper.text()).toContain('BASIC-400')
+    expect(wrapper.text()).not.toContain('BATCH-404')
+  })
+
   it('controlled: renders the bound scenario and follows parent updates', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
-      props: { scenarios, scenario: 'batch' },
+      props: { scenarios, scenario: 'batch', 'onUpdate:scenario': () => {} },
     })
+    expect(selectByIcon(wrapper, 'i-lucide-activity')?.props('modelValue')).toBe(404)
     expect(wrapper.text()).toContain('BATCH-404')
 
     await wrapper.setProps({ scenario: 'basic' })

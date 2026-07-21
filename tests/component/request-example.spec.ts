@@ -26,9 +26,19 @@ describe('ApiDocsRequestExample scenario selection', () => {
     expect(wrapper.text()).not.toContain('CODE-BATCH')
   })
 
+  it('uncontrolled: preserves the selected id when scenarios are reordered', async () => {
+    const wrapper = await mountSuspended(RequestExample, { props: { scenarios } })
+
+    await wrapper.setProps({ scenarios: [...scenarios].reverse() })
+
+    expect(scenarioSelect(wrapper)?.props('modelValue')).toBe('basic')
+    expect(wrapper.text()).toContain('CODE-BASIC')
+    expect(wrapper.text()).not.toContain('CODE-BATCH')
+  })
+
   it('controlled: renders the bound scenario and follows parent updates', async () => {
     const wrapper = await mountSuspended(RequestExample, {
-      props: { scenarios, scenario: 'batch' },
+      props: { scenarios, scenario: 'batch', 'onUpdate:scenario': () => {} },
     })
     expect(wrapper.text()).toContain('CODE-BATCH')
 

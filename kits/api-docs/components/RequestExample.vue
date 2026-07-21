@@ -28,10 +28,16 @@ export interface ApiRequestLabels extends ApiCodeLabels {
   scenario?: string
 }
 
+const emit = defineEmits<{
+  'update:scenario': [id: string]
+}>()
+
 const props = withDefaults(
   defineProps<{
     /** One or more business scenarios. */
     scenarios?: RequestScenario[]
+    /** Controlled scenario id for `v-model:scenario`. */
+    scenario?: string
     /** Override the toolbar title (defaults to labels.title / 'Request'). */
     title?: string
     defaultWrap?: boolean
@@ -59,22 +65,34 @@ const t = computed(() => ({
 
 const scenarios = computed(() => props.scenarios ?? [])
 
-// Optional controlled seam: bind `v-model:scenario` to drive the selection
-// from the parent (e.g. linked request/response). When unbound, defineModel
-// falls back to local state and behavior is unchanged (uncontrolled).
-const scenarioModel = defineModel<string>('scenario')
+// Prop presence distinguishes controlled usage from standalone usage, including
+// an explicitly bound undefined value. Uncontrolled state keeps the selected id
+// stable across list reordering and only resets when that id disappears.
+const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
+const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
+const scenario = computed(() => controlled ? props.scenario : localScenario.value)
 
 // The effective scenario is fully DERIVED: an unknown/missing id converges to
 // the first scenario without writing back or emitting — no update loops, no
 // duplicate events, SSR-safe (fallback is never persisted into the model).
 const current = computed<RequestScenario | undefined>(
-  () => scenarios.value.find(s => s.id === scenarioModel.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenario.value) ?? scenarios.value[0],
 )
 
-// The select shows the CONVERGED id but only writes user choices to the model.
+// The select shows the CONVERGED id but only emits explicit user choices.
 const selected = computed<string | undefined>({
   get: () => current.value?.id,
-  set: (id) => { scenarioModel.value = id },
+  set: (id) => {
+    if (id === undefined) return
+    if (!controlled) localScenario.value = id
+    emit('update:scenario', id)
+  },
+})
+
+watch(scenarios, (list) => {
+  if (!list.some(s => s.id === localScenario.value)) {
+    localScenario.value = list[0]?.id
+  }
 })
 
 const scenarioItems = computed(() =>

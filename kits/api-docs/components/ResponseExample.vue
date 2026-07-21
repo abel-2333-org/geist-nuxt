@@ -43,10 +43,16 @@ export interface ApiResponseLabels extends ApiCodeLabels {
   status?: string
 }
 
+const emit = defineEmits<{
+  'update:scenario': [id: string]
+}>()
+
 const props = withDefaults(
   defineProps<{
     /** One or more business scenarios, each with one or more statuses. */
     scenarios?: ResponseScenario[]
+    /** Controlled scenario id for `v-model:scenario`. */
+    scenario?: string
     title?: string
     defaultWrap?: boolean
     maxHeight?: string
@@ -74,26 +80,32 @@ const t = computed(() => ({
 
 const scenarios = computed(() => props.scenarios ?? [])
 
-// Optional controlled seam: bind `v-model:scenario` to drive the selection
-// from the parent (e.g. linked request/response). When unbound, defineModel
-// falls back to local state and behavior is unchanged (uncontrolled).
-const scenarioModel = defineModel<string>('scenario')
+// Prop presence distinguishes controlled usage from standalone usage, including
+// an explicitly bound undefined value. Uncontrolled state keeps the selected id
+// stable across list reordering and only resets when that id disappears.
+const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
+const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
+const scenario = computed(() => controlled ? props.scenario : localScenario.value)
 
 // The effective scenario is fully DERIVED: an unknown/missing id converges to
 // the first scenario without writing back or emitting — no update loops, no
 // duplicate events, SSR-safe (fallback is never persisted into the model).
 const currentScenario = computed<ResponseScenario | undefined>(
-  () => scenarios.value.find(s => s.id === scenarioModel.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenario.value) ?? scenarios.value[0],
 )
 
-// The select shows the CONVERGED id but only writes user choices to the model.
+// The select shows the CONVERGED id but only emits explicit user choices.
 const selectedScenario = computed<string | undefined>({
   get: () => currentScenario.value?.id,
-  set: (id) => { scenarioModel.value = id },
+  set: (id) => {
+    if (id === undefined) return
+    if (!controlled) localScenario.value = id
+    emit('update:scenario', id)
+  },
 })
 
 // Status stays INTERNAL state (out of the controlled seam by design).
-const activeStatus = ref<number | undefined>(scenarios.value[0]?.statuses?.[0]?.status)
+const activeStatus = shallowRef<number | undefined>()
 
 const statuses = computed<ResponseStatus[]>(() => currentScenario.value?.statuses ?? [])
 
@@ -101,13 +113,23 @@ const currentStatus = computed<ResponseStatus | undefined>(
   () => statuses.value.find(s => s.status === activeStatus.value) ?? statuses.value[0],
 )
 
-// When the CONVERGED scenario changes (user pick, parent update, or list
-// change), snap the status back into range.
-watch(() => currentScenario.value?.id, () => {
-  if (!statuses.value.some(s => s.status === activeStatus.value)) {
-    activeStatus.value = statuses.value[0]?.status
+watch(scenarios, (list) => {
+  if (!list.some(s => s.id === localScenario.value)) {
+    localScenario.value = list[0]?.id
   }
 })
+
+// Normalize before the first render and whenever the current status list
+// changes, including a controlled initial scenario that is not the first item.
+watch(
+  () => statuses.value.map(s => s.status),
+  (ids) => {
+    if (!ids.includes(activeStatus.value as number)) {
+      activeStatus.value = ids[0]
+    }
+  },
+  { immediate: true },
+)
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),
