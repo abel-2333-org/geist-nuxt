@@ -7,7 +7,8 @@
 // everything stays on one aligned row.
 //
 // Anatomy:  <CodeBlock> with a scenario select injected into its toolbar
-// State:    active scenario; language/copy/wrap live in CodeBlock.
+// State:    active scenario — optionally controlled via `v-model:scenario`
+//           (uncontrolled by default); language/copy/wrap live in CodeBlock.
 // A11y:     scenario select is labelled; the rest is inherited.
 
 import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
@@ -27,10 +28,16 @@ export interface ApiRequestLabels extends ApiCodeLabels {
   scenario?: string
 }
 
+const emit = defineEmits<{
+  'update:scenario': [id: string]
+}>()
+
 const props = withDefaults(
   defineProps<{
     /** One or more business scenarios. */
     scenarios?: RequestScenario[]
+    /** Controlled scenario id for `v-model:scenario`. */
+    scenario?: string
     /** Override the toolbar title (defaults to labels.title / 'Request'). */
     title?: string
     defaultWrap?: boolean
@@ -57,16 +64,41 @@ const t = computed(() => ({
 }))
 
 const scenarios = computed(() => props.scenarios ?? [])
-const activeId = ref<string | undefined>(scenarios.value[0]?.id)
 
+// Prop presence distinguishes controlled usage from standalone usage, including
+// an explicitly bound undefined value. Decided once at mount (React-style):
+// switching between controlled and uncontrolled at runtime is not supported.
+// Uncontrolled state keeps the selected id stable across list reordering and
+// only resets when that id disappears.
+const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
+const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
+const scenario = computed(() => controlled ? props.scenario : localScenario.value)
+
+// The effective scenario is fully DERIVED: an unknown/missing id converges to
+// the first scenario without writing back or emitting — no update loops, no
+// duplicate events, SSR-safe (fallback is never persisted into the model).
 const current = computed<RequestScenario | undefined>(
-  () => scenarios.value.find(s => s.id === activeId.value) ?? scenarios.value[0],
+  () => scenarios.value.find(s => s.id === scenario.value) ?? scenarios.value[0],
 )
 
-// Keep selection valid if the scenario list changes.
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === activeId.value)) activeId.value = list[0]?.id
+// The select shows the CONVERGED id but only emits explicit user choices.
+const selected = computed<string | undefined>({
+  get: () => current.value?.id,
+  set: (id) => {
+    if (id === undefined) return
+    if (!controlled) localScenario.value = id
+    emit('update:scenario', id)
+  },
 })
+
+// Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+if (!controlled) {
+  watch(scenarios, (list) => {
+    if (!list.some(s => s.id === localScenario.value)) {
+      localScenario.value = list[0]?.id
+    }
+  })
+}
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),
@@ -85,7 +117,7 @@ const scenarioItems = computed(() =>
   >
     <template v-if="scenarioItems.length > 1" #controls>
       <USelect
-        v-model="activeId"
+        v-model="selected"
         :items="scenarioItems"
         icon="i-lucide-layers"
         size="xs"

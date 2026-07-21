@@ -247,6 +247,12 @@ const responseFields = [
   { path: 'res_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: 'Creation timestamp in milliseconds.' },
 ]
 
+// --- 场景联动（linked）：页面级一个 ref 同时绑 Request / Response 的
+// v-model:scenario。响应侧只有 git 场景（缺 inline）——请求切到「文件部署」时，
+// 响应确定性收敛到第一项（fallback 只派生不回写），正好演示缺侧行为。
+// scenario 间的 mapping 归本页（consumer）持有，kit 组件零 mapping。
+const activeScenario = ref('git')
+
 // 深链接：带 `#path` 进入时自动展开 + 滚动定位到对应字段。
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -301,10 +307,18 @@ onMounted(() => anchor.initFromHash())
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <ApiDocsCodeRail storage-key="api-docs-reference-rail-split" class="h-full max-lg:space-y-4">
             <template #top="{ maxHeight }">
-              <ApiDocsRequestExample :scenarios="requestScenarios" :max-height="maxHeight" />
+              <ApiDocsRequestExample
+                v-model:scenario="activeScenario"
+                :scenarios="requestScenarios"
+                :max-height="maxHeight"
+              />
             </template>
             <template #bottom="{ maxHeight }">
-              <ApiDocsResponseExample :scenarios="responseScenarios" :max-height="maxHeight" />
+              <ApiDocsResponseExample
+                v-model:scenario="activeScenario"
+                :scenarios="responseScenarios"
+                :max-height="maxHeight"
+              />
             </template>
           </ApiDocsCodeRail>
         </div>
