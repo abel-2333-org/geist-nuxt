@@ -436,21 +436,25 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
             :ui="{ label: 'truncate' }"
           />
 
-          <!-- Flat radio groups instead of nested selects: every option is one
-               click away and there is no select menu stacking on the popover.
-               URadioGroup brings radiogroup semantics + arrow-key navigation. -->
+          <!-- Hybrid controls matched to real cardinality: scenarios can grow
+               unbounded, so they stay a select (scrollable menu instead of a
+               popover-stretching radio list); status and media type are small
+               (1-3 items) and flatten into radio groups — one click away, no
+               nested dropdown for the dimensions where flat wins. -->
           <template #content>
             <div class="w-64 max-w-[calc(100vw-2rem)] space-y-4 p-3">
-              <URadioGroup
-                v-if="scenarioItems.length > 1"
-                v-model="activeScenarioId"
-                :items="scenarioItems"
-                :legend="t.scenario"
-                size="xs"
-                color="neutral"
-                variant="list"
-                :ui="{ legend: 'text-xs text-muted' }"
-              />
+              <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
+                <USelect
+                  v-model="activeScenarioId"
+                  :items="scenarioItems"
+                  icon="i-lucide-layers"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :aria-label="t.scenario"
+                  class="w-full"
+                />
+              </UFormField>
               <URadioGroup
                 v-if="statusItems.length > 1"
                 v-model="activeStatus"
