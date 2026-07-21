@@ -55,6 +55,7 @@ const t = computed<Required<AnnotationPopoverLabels>>(() => ({
 }))
 
 const open = ref(false)
+const triggerEl = ref<HTMLButtonElement>()
 const panelEl = ref<HTMLElement>()
 
 watch(open, (value) => {
@@ -88,6 +89,8 @@ function onTriggerKeydown(event: KeyboardEvent) {
   // keeps its natural backward behavior.
   if (event.key === 'Tab' && !event.shiftKey && open.value) {
     event.preventDefault()
+    clearTimers()
+    openSource = 'keyboard'
     focusPanel()
   }
 }
@@ -112,8 +115,16 @@ const contentProps = {
   },
   onCloseAutoFocus(event: Event) {
     const panel = panelEl.value
-    const inPanel = Boolean(panel && panel.contains(document.activeElement))
-    if (!inPanel) event.preventDefault()
+    const active = document.activeElement
+    const inPanel = Boolean(panel && panel.contains(active))
+    const focusLost = !active || active === document.body || !active.isConnected
+    const shouldRestore = inPanel || (openSource === 'keyboard' && focusLost)
+    // Own the close path explicitly: by the time reka dispatches this hook,
+    // portaled content may already be detached and its default restore target
+    // is not reliable for a hover → keyboard takeover. A real outside-click
+    // target stays focused because it is connected and outside the panel.
+    event.preventDefault()
+    if (shouldRestore) nextTick(() => triggerEl.value?.focus())
   },
 }
 
@@ -132,6 +143,9 @@ function clearTimers() {
 
 function onTriggerEnter(event: PointerEvent) {
   if (event.pointerType !== 'mouse' || props.disabled) return
+  // A click/keyboard-owned open session must stay under that input's control;
+  // merely crossing the trigger with a mouse must not reclassify it as hover.
+  if (open.value && openSource !== 'hover') return
   clearTimers()
   openTimer = setTimeout(() => {
     // Re-check: `disabled` may have flipped during the delay.
@@ -153,6 +167,10 @@ function scheduleClose(event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
   clearTimeout(openTimer)
   closeTimer = setTimeout(() => {
+    const panel = panelEl.value
+    // Hover timers only own hover-open sessions. Once keyboard focus enters
+    // the panel, pointer movement must not dismiss the user's active journey.
+    if (openSource !== 'hover' || panel?.contains(document.activeElement)) return
     open.value = false
   }, CLOSE_DELAY)
 }
@@ -168,6 +186,7 @@ onBeforeUnmount(clearTimers)
 <template>
   <UPopover v-model:open="open" mode="click" :content="contentProps">
     <button
+      ref="triggerEl"
       type="button"
       :disabled="disabled"
       class="-mx-0.5 box-decoration-clone inline cursor-pointer touch-manipulation rounded-xs px-0.5 text-left underline decoration-dashed decoration-1 underline-offset-3 transition-colors hover:bg-elevated hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"

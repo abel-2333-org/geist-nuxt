@@ -44,7 +44,7 @@ export function useFieldAnchor() {
   /** Full shareable URL for a field path. */
   function urlFor(path: string) {
     if (!import.meta.client) return `#${path}`
-    return `${location.origin}${location.pathname}#${path}`
+    return `${location.origin}${location.pathname}${location.search}#${path}`
   }
 
   /**
@@ -196,8 +196,7 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
-    const apply = (raw: string) => {
-      const path = decodeURIComponent(raw.replace(/^#/, ''))
+    const apply = (path: string) => {
       if (path) {
         void goTo(path, { updateHash: false, focus: true })
       }
@@ -206,10 +205,20 @@ export function useFieldAnchor() {
         active.value = ''
       }
     }
-    apply(location.hash)
+    const rawPath = location.hash.replace(/^#/, '')
+    try {
+      apply(decodeURIComponent(rawPath))
+    }
+    catch {
+      // A malformed raw escape must not abort anchor initialization. Leaving
+      // it encoded simply means no field row matches the invalid fragment.
+      apply(rawPath)
+    }
     const route = useRoute()
     watch(() => route.fullPath, () => {
-      apply(route.hash)
+      // Vue Router exposes a normalized, already-decoded hash. Decoding it a
+      // second time would throw for valid literal-percent paths such as `%`.
+      apply(route.hash.replace(/^#/, ''))
     })
   }
 
