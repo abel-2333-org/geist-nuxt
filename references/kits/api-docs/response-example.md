@@ -61,13 +61,13 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 - 三级选择：场景 → 状态 → body；切场景时**始终**回到新场景的首个 status 与首个 body，即使两个场景共享相同 status code；切状态时 body 归位到第一个。
 - 状态色：2xx `success` · 3xx `info` · 4xx `warning` · 5xx `error` · `'default'` `neutral`（**文本+颜色双通道**，不单靠颜色）。`'default'` badge 直接显示等宽 `default` 文本。
 - 状态码在彩色 badge（`#leading`）里；多 status 时选择器只带 `statusText`，合起来读作 "200 · OK" 不重复；固定 status 没有选择器时，badge 自身同时显示 code 与 `statusText`。
-- media 选择器标签优先用 `mediaType`；未提供时，code body 回退到首个 variant 的 label / language / `codeBodyTitle`，其他 kind 回退到各自面板标题。显式 `bodies: []` 保持空列表且不会复活 legacy `variants`。各维度 ≤1 时不渲染对应选择器。
+- media 选择器标签优先用 `mediaType`；未提供时，code body 回退到首个 variant 的 label / 语言显示名 / `codeBodyTitle`——语言显示名与 CodeBlock 语言选择器共用 `langLabel`（`utils/lang-preset.ts`，`languageLabels` 覆盖优先），同一语言 id 两处渲染一致；其他 kind 回退到各自面板标题。显式 `bodies: []` 保持空列表且不会复活 legacy `variants`。各维度 ≤1 时不渲染对应选择器。
 - 组件根以命名 container 观测自身宽度：`@xl/response` 以上保持三个 inline selects；更窄时改为单个摘要按钮，不按页面 viewport 猜测卡片可用宽度。摘要优先展示当前场景与 media type，状态码继续由相邻 badge 承担；若只有 status 可切换，则摘要显示 `statusText`。
 - 语言/换行/复制仅在 `code` 形态出现（内容绑定控件随 CodeBlock 隐藏）。
 
 ## A11y
 
-- 非代码面板为静态文本描述（图标 `aria-hidden`），容器 `role="status"` + `aria-live="polite"`，切换时播报。
+- 非代码面板为静态文本描述（图标 `aria-hidden`），容器 `role="status"`（自带 polite live region，不重复写 `aria-live`），切换时播报。
 - 下载控件是真实链接（`UButton :to` + `download`），可访问名包含文件名。
 - 固定 status 的 badge 同时包含 code 与 `statusText`，确保没有 status selector 时仍能视觉呈现并被读屏读取。
 - 三个选择器均带 `aria-label`（`scenario` / `status` / `mediaType` labels 键）；窄容器摘要按钮的 `aria-label` 串起当前场景、状态和 media type，popover 内用 `UFormField` 提供可见 label。点击、tap、Enter、Esc 与 focus-visible 继承 Nuxt UI / Reka UI 原语。
@@ -107,4 +107,4 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## 源码
 
-- `kits/api-docs/components/ResponseExample.vue`（依赖同目录 `CodeBlock.vue` + `kits/api-docs/composables/useCodeWrap.ts`，由根 registry 展开）。
+- `kits/api-docs/components/ResponseExample.vue`（依赖同目录 `CodeBlock.vue` + `kits/api-docs/composables/useCodeWrap.ts` + `kits/api-docs/utils/lang-preset.ts`，由根 registry 展开）。

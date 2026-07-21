@@ -211,7 +211,8 @@
       "description": "Structured API code sample with language, wrap, and copy controls.",
       "registryDependencies": ["geist-foundation", "foundation-copy-button", "api-docs-use-code-wrap"],
       "files": [
-        { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/api-docs/CodeBlock.vue" }
+        { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/api-docs/CodeBlock.vue" },
+        { "path": "kits/api-docs/utils/lang-preset.ts", "target": "app/utils/lang-preset.ts" }
       ]
     },
     {

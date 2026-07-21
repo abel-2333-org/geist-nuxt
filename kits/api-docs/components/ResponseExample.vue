@@ -211,12 +211,12 @@ const statusItems = computed(() =>
   statuses.value.map(s => ({ label: s.statusText ?? String(s.status), value: s.status })),
 )
 
+// Shares `langLabel` (kit utils/lang-preset.ts) with CodeBlock's language
+// select, so the same language id renders the same label in both controls.
 function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
   const variant = body.variants[0]
   if (!variant) return t.value.codeBodyTitle
-  return variant.label
-    ?? props.languageLabels[variant.language.toLowerCase()]
-    ?? variant.language.toUpperCase()
+  return variant.label ?? langLabel(variant.language, props.languageLabels)
 }
 
 // Media select labels: mediaType when given, otherwise a kind-specific label.
@@ -356,184 +356,185 @@ const panel = computed<Exclude<ResponseBody, { kind: 'code' }> | undefined>(() =
       :language-labels="languageLabels"
       :trust-highlighted-html="trustHighlightedHtml"
     >
-    <!-- Status badge next to the title -->
-    <template v-if="currentStatus" #leading>
-      <UBadge
-        :color="statusColor"
-        variant="subtle"
-        size="sm"
-        class="font-semibold"
-      >
-        <span class="sr-only">{{ t.status }}:</span>
-        <span class="font-mono">{{ currentStatus.status }}</span>
-        <span v-if="showStatusTextInBadge" class="font-sans font-medium">
-          {{ currentStatus.statusText }}
-        </span>
-      </UBadge>
-    </template>
-
-    <!-- Wide: three inline selects. Narrow: one compact summary trigger opens
-         the same v-model-backed controls in a labelled popover. -->
-    <template #controls>
-      <div
-        v-if="hasResponseControls"
-        class="hidden min-w-0 items-center gap-1.5 @xl/response:flex"
-      >
-        <USelect
-          v-if="scenarioItems.length > 1"
-          v-model="activeScenarioId"
-          :items="scenarioItems"
-          icon="i-lucide-layers"
-          size="xs"
-          color="neutral"
+      <!-- Status badge next to the title -->
+      <template v-if="currentStatus" #leading>
+        <UBadge
+          :color="statusColor"
           variant="subtle"
-          :aria-label="t.scenario"
-          class="min-w-0 max-w-full"
-          :ui="{ content: 'min-w-fit' }"
-        />
-        <USelect
-          v-if="statusItems.length > 1"
-          v-model="activeStatus"
-          :items="statusItems"
-          icon="i-lucide-activity"
-          size="xs"
-          color="neutral"
-          variant="subtle"
-          :aria-label="t.status"
-          class="min-w-0 max-w-full"
-          :ui="{ content: 'min-w-fit' }"
-        />
-        <USelect
-          v-if="bodyItems.length > 1"
-          v-model="activeBodyIndex"
-          :items="bodyItems"
-          icon="i-lucide-file-type"
-          size="xs"
-          color="neutral"
-          variant="subtle"
-          :aria-label="t.mediaType"
-          class="min-w-0 max-w-full"
-          :ui="{ content: 'min-w-fit' }"
-        />
-      </div>
-
-      <UPopover
-        v-if="hasResponseControls"
-        v-model:open="responseOptionsOpen"
-        :content="{ align: 'end', side: 'bottom', sideOffset: 8 }"
-      >
-        <UButton
-          data-response-compact-trigger
-          :label="compactControlLabel"
-          trailing-icon="i-lucide-chevron-down"
-          size="xs"
-          color="neutral"
-          variant="subtle"
-          :aria-label="compactControlAriaLabel"
-          class="min-w-0 max-w-36 @xl/response:hidden"
-          :ui="{ label: 'truncate' }"
-        />
-
-        <template #content>
-          <div class="w-72 max-w-[calc(100vw-2rem)] space-y-3 p-3">
-            <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
-              <USelect
-                v-model="activeScenarioId"
-                :items="scenarioItems"
-                icon="i-lucide-layers"
-                color="neutral"
-                variant="subtle"
-                :aria-label="t.scenario"
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField v-if="statusItems.length > 1" :label="t.status" size="xs">
-              <USelect
-                v-model="activeStatus"
-                :items="statusItems"
-                icon="i-lucide-activity"
-                color="neutral"
-                variant="subtle"
-                :aria-label="t.status"
-                class="w-full"
-              />
-            </UFormField>
-            <UFormField v-if="bodyItems.length > 1" :label="t.mediaType" size="xs">
-              <USelect
-                v-model="activeBodyIndex"
-                :items="bodyItems"
-                icon="i-lucide-file-type"
-                color="neutral"
-                variant="subtle"
-                :aria-label="t.mediaType"
-                class="w-full"
-              />
-            </UFormField>
-          </div>
-        </template>
-      </UPopover>
-    </template>
-
-    <!-- Status-level description, inside the block's chrome, above the body -->
-    <template v-if="currentStatus?.description" #notice>
-      <p class="text-pretty">{{ currentStatus.description }}</p>
-    </template>
-
-    <!-- Non-code body panels — empty / unavailable / file. Announced on switch. -->
-    <template v-if="panel" #body>
-      <div role="status" aria-live="polite">
-        <!-- Intentional empty body (e.g. 204) -->
-        <div
-          v-if="panel.kind === 'empty'"
-          class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center"
+          size="sm"
+          class="font-semibold"
         >
-          <UIcon name="i-lucide-circle-slash" class="size-8 text-dimmed" aria-hidden="true" />
-          <p class="text-sm font-medium text-highlighted">{{ t.emptyBodyTitle }}</p>
-          <p class="max-w-xs text-sm text-muted">{{ panel.note ?? t.emptyBodyHint }}</p>
-        </div>
+          <span class="sr-only">{{ t.status }}:</span>
+          <span class="font-mono">{{ currentStatus.status }}</span>
+          <span v-if="showStatusTextInBadge" class="font-sans font-medium">
+            {{ currentStatus.statusText }}
+          </span>
+        </UBadge>
+      </template>
 
-        <!-- Body exists, example missing -->
+      <!-- Wide: three inline selects. Narrow: one compact summary trigger opens
+           the same v-model-backed controls in a labelled popover. -->
+      <template #controls>
         <div
-          v-else-if="panel.kind === 'unavailable'"
-          class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center"
+          v-if="hasResponseControls"
+          class="hidden min-w-0 items-center gap-1.5 @xl/response:flex"
         >
-          <UIcon name="i-lucide-file-question" class="size-8 text-dimmed" aria-hidden="true" />
-          <p class="text-sm font-medium text-highlighted">{{ t.unavailableTitle }}</p>
-          <p class="max-w-xs text-sm text-muted">{{ panel.note ?? t.unavailableHint }}</p>
-        </div>
-
-        <!-- Binary/file — metadata card + optional real download link -->
-        <div
-          v-else
-          class="flex flex-col items-center justify-center gap-3 px-6 py-10 text-center"
-        >
-          <UIcon name="i-lucide-file-archive" class="size-8 text-dimmed" aria-hidden="true" />
-          <div class="flex min-w-0 max-w-full flex-col items-center gap-1">
-            <p class="max-w-full truncate font-mono text-sm font-medium text-highlighted">
-              {{ panel.filename ?? t.fileTitle }}
-            </p>
-            <p class="max-w-xs text-sm text-muted">
-              <span class="font-mono">{{ panel.mediaType }}</span>
-              <template v-if="panel.size"> · {{ panel.size }}</template>
-            </p>
-            <p v-if="panel.note" class="max-w-xs text-sm text-muted">{{ panel.note }}</p>
-          </div>
-          <UButton
-            v-if="panel.downloadUrl"
-            :to="panel.downloadUrl"
-            external
-            download
-            icon="i-lucide-download"
+          <USelect
+            v-if="scenarioItems.length > 1"
+            v-model="activeScenarioId"
+            :items="scenarioItems"
+            icon="i-lucide-layers"
+            size="xs"
             color="neutral"
             variant="subtle"
+            :aria-label="t.scenario"
+            class="min-w-0 max-w-full"
+            :ui="{ content: 'min-w-fit' }"
+          />
+          <USelect
+            v-if="statusItems.length > 1"
+            v-model="activeStatus"
+            :items="statusItems"
+            icon="i-lucide-activity"
             size="xs"
-            :aria-label="`${t.download} ${panel.filename ?? t.fileTitle}`"
-          >
-            {{ t.download }}
-          </UButton>
+            color="neutral"
+            variant="subtle"
+            :aria-label="t.status"
+            class="min-w-0 max-w-full"
+            :ui="{ content: 'min-w-fit' }"
+          />
+          <USelect
+            v-if="bodyItems.length > 1"
+            v-model="activeBodyIndex"
+            :items="bodyItems"
+            icon="i-lucide-file-type"
+            size="xs"
+            color="neutral"
+            variant="subtle"
+            :aria-label="t.mediaType"
+            class="min-w-0 max-w-full"
+            :ui="{ content: 'min-w-fit' }"
+          />
         </div>
-      </div>
-    </template>
+
+        <UPopover
+          v-if="hasResponseControls"
+          v-model:open="responseOptionsOpen"
+          :content="{ align: 'end', side: 'bottom', sideOffset: 8 }"
+        >
+          <UButton
+            data-response-compact-trigger
+            :label="compactControlLabel"
+            trailing-icon="i-lucide-chevron-down"
+            size="xs"
+            color="neutral"
+            variant="subtle"
+            :aria-label="compactControlAriaLabel"
+            class="min-w-0 max-w-36 @xl/response:hidden"
+            :ui="{ label: 'truncate' }"
+          />
+
+          <template #content>
+            <div class="w-72 max-w-[calc(100vw-2rem)] space-y-3 p-3">
+              <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
+                <USelect
+                  v-model="activeScenarioId"
+                  :items="scenarioItems"
+                  icon="i-lucide-layers"
+                  color="neutral"
+                  variant="subtle"
+                  :aria-label="t.scenario"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField v-if="statusItems.length > 1" :label="t.status" size="xs">
+                <USelect
+                  v-model="activeStatus"
+                  :items="statusItems"
+                  icon="i-lucide-activity"
+                  color="neutral"
+                  variant="subtle"
+                  :aria-label="t.status"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField v-if="bodyItems.length > 1" :label="t.mediaType" size="xs">
+                <USelect
+                  v-model="activeBodyIndex"
+                  :items="bodyItems"
+                  icon="i-lucide-file-type"
+                  color="neutral"
+                  variant="subtle"
+                  :aria-label="t.mediaType"
+                  class="w-full"
+                />
+              </UFormField>
+            </div>
+          </template>
+        </UPopover>
+      </template>
+
+      <!-- Status-level description, inside the block's chrome, above the body -->
+      <template v-if="currentStatus?.description" #notice>
+        <p class="text-pretty">{{ currentStatus.description }}</p>
+      </template>
+
+      <!-- Non-code body panels — empty / unavailable / file. Announced on switch. -->
+      <template v-if="panel" #body>
+        <!-- role="status" implies aria-live="polite" -->
+        <div role="status">
+          <!-- Intentional empty body (e.g. 204) -->
+          <div
+            v-if="panel.kind === 'empty'"
+            class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center"
+          >
+            <UIcon name="i-lucide-circle-slash" class="size-8 text-dimmed" aria-hidden="true" />
+            <p class="text-sm font-medium text-highlighted">{{ t.emptyBodyTitle }}</p>
+            <p class="max-w-xs text-sm text-muted">{{ panel.note ?? t.emptyBodyHint }}</p>
+          </div>
+
+          <!-- Body exists, example missing -->
+          <div
+            v-else-if="panel.kind === 'unavailable'"
+            class="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center"
+          >
+            <UIcon name="i-lucide-file-question" class="size-8 text-dimmed" aria-hidden="true" />
+            <p class="text-sm font-medium text-highlighted">{{ t.unavailableTitle }}</p>
+            <p class="max-w-xs text-sm text-muted">{{ panel.note ?? t.unavailableHint }}</p>
+          </div>
+
+          <!-- Binary/file — metadata card + optional real download link -->
+          <div
+            v-else
+            class="flex flex-col items-center justify-center gap-3 px-6 py-10 text-center"
+          >
+            <UIcon name="i-lucide-file-archive" class="size-8 text-dimmed" aria-hidden="true" />
+            <div class="flex min-w-0 max-w-full flex-col items-center gap-1">
+              <p class="max-w-full truncate font-mono text-sm font-medium text-highlighted">
+                {{ panel.filename ?? t.fileTitle }}
+              </p>
+              <p class="max-w-xs text-sm text-muted">
+                <span class="font-mono">{{ panel.mediaType }}</span>
+                <template v-if="panel.size"> · {{ panel.size }}</template>
+              </p>
+              <p v-if="panel.note" class="max-w-xs text-sm text-muted">{{ panel.note }}</p>
+            </div>
+            <UButton
+              v-if="panel.downloadUrl"
+              :to="panel.downloadUrl"
+              external
+              download
+              icon="i-lucide-download"
+              color="neutral"
+              variant="subtle"
+              size="xs"
+              :aria-label="`${t.download} ${panel.filename ?? t.fileTitle}`"
+            >
+              {{ t.download }}
+            </UButton>
+          </div>
+        </div>
+      </template>
     </ApiDocsCodeBlock>
   </div>
 </template>

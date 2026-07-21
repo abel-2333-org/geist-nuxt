@@ -14,7 +14,7 @@
 | `defaultWrap` | `boolean` | 首次访问的换行初值（之后走共享+持久化） |
 | `maxHeight` | `string` | 代码区最大高度，默认 `24rem` |
 | `labels` | `ApiCodeLabels` | 可本地化的 chrome 文案（见下） |
-| `languageLabels` | `Record<string,string>` | 覆盖/扩展 语言 id → 显示名 |
+| `languageLabels` | `Record<string,string>` | 覆盖/扩展 语言 id → 显示名（默认表在 `utils/lang-preset.ts`，与 ResponseExample 的 media 标签共用） |
 | `trustHighlightedHtml` | `boolean` | 默认 `false`；显式确认 `highlightedHtml` 来自可信、预消毒的构建期管线后才开启 |
 
 ### `ApiCodeLabels`（chrome 文案，用于 i18n）
@@ -69,4 +69,4 @@
 ## 规格与源码
 
 - 规格模板见 `method/component-spec-template.md`。
-- 源码：`kits/api-docs/components/CodeBlock.vue`、`kits/api-docs/composables/useCodeWrap.ts`；复制依赖 `foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`，由根 registry 解析安装。
+- 源码：`kits/api-docs/components/CodeBlock.vue`、`kits/api-docs/composables/useCodeWrap.ts`、`kits/api-docs/utils/lang-preset.ts`；复制依赖 `foundation/components/CopyButton.vue` + `foundation/composables/useCopy.ts`，由根 registry 解析安装。

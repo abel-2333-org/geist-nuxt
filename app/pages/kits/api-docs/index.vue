@@ -99,7 +99,7 @@ const responseScenarios = [
       {
         status: 204,
         statusText: '无内容',
-        bodies: [{ kind: 'empty' as const, note: '删除成功，协议约定不返回正文。' }],
+        bodies: [{ kind: 'empty' as const, note: '操作已受理，协议约定不返回正文。' }],
       },
       {
         status: 409,
@@ -423,7 +423,7 @@ onMounted(() => anchor.initFromHash())
         </div>
 
         <div>
-          <h3 class="mb-3 text-sm font-semibold text-highlighted">Method 徽章</h3>
+          <h3 class="mb-3 text-sm font-semibold text-highlighted">Method ���章</h3>
           <div class="flex flex-wrap items-center gap-2">
             <ApiDocsMethodBadge v-for="m in methods" :key="m" :method="m" />
           </div>

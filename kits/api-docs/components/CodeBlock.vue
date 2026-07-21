@@ -145,32 +145,13 @@ watch(
  * Language items
  * ------------------------------------------------------------------ */
 // Fallback display label for a language id, used only when a variant doesn't
-// carry its own `label`. Caller overrides (`languageLabels`) win over defaults.
-const DEFAULT_LANG_LABELS: Record<string, string> = {
-  curl: 'cURL',
-  json: 'JSON',
-  node: 'Node',
-  nodejs: 'Node',
-  javascript: 'JavaScript',
-  js: 'JavaScript',
-  python: 'Python',
-  py: 'Python',
-  go: 'Go',
-  http: 'HTTP',
-  bash: 'Shell',
-  shell: 'Shell',
-}
-function humanize(id: string) {
-  const key = id.toLowerCase()
-  return (
-    props.languageLabels[key]
-    ?? DEFAULT_LANG_LABELS[key]
-    ?? id.charAt(0).toUpperCase() + id.slice(1)
-  )
-}
-
+// carry its own `label`. `langLabel` (kit utils/lang-preset.ts, auto-imported)
+// resolves caller overrides (`languageLabels`) → preset → capitalized id.
 const languageItems = computed(() =>
-  variants.value.map(v => ({ label: v.label ?? humanize(v.language), value: v.language })),
+  variants.value.map(v => ({
+    label: v.label ?? langLabel(v.language, props.languageLabels),
+    value: v.language,
+  })),
 )
 
 /* ------------------------------------------------------------------ *
