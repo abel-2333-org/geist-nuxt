@@ -66,8 +66,10 @@ const t = computed(() => ({
 const scenarios = computed(() => props.scenarios ?? [])
 
 // Prop presence distinguishes controlled usage from standalone usage, including
-// an explicitly bound undefined value. Uncontrolled state keeps the selected id
-// stable across list reordering and only resets when that id disappears.
+// an explicitly bound undefined value. Decided once at mount (React-style):
+// switching between controlled and uncontrolled at runtime is not supported.
+// Uncontrolled state keeps the selected id stable across list reordering and
+// only resets when that id disappears.
 const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
 const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
 const scenario = computed(() => controlled ? props.scenario : localScenario.value)
@@ -89,11 +91,14 @@ const selected = computed<string | undefined>({
   },
 })
 
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === localScenario.value)) {
-    localScenario.value = list[0]?.id
-  }
-})
+// Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+if (!controlled) {
+  watch(scenarios, (list) => {
+    if (!list.some(s => s.id === localScenario.value)) {
+      localScenario.value = list[0]?.id
+    }
+  })
+}
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),

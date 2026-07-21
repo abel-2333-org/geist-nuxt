@@ -11,8 +11,8 @@
 //
 // Anatomy:  <CodeBlock> + status badge (#leading) + scenario/status (#controls)
 // State:    active scenario — optionally controlled via `v-model:scenario`
-//           (uncontrolled by default); active status stays internal and snaps
-//           when the scenario changes; language/copy/wrap in CodeBlock.
+//           (uncontrolled by default); active status stays internal and
+//           converges per scenario; language/copy/wrap in CodeBlock.
 // A11y:     status uses a numeric badge (text + color, never color alone);
 //           selects are labelled; the rest is inherited.
 
@@ -81,8 +81,10 @@ const t = computed(() => ({
 const scenarios = computed(() => props.scenarios ?? [])
 
 // Prop presence distinguishes controlled usage from standalone usage, including
-// an explicitly bound undefined value. Uncontrolled state keeps the selected id
-// stable across list reordering and only resets when that id disappears.
+// an explicitly bound undefined value. Decided once at mount (React-style):
+// switching between controlled and uncontrolled at runtime is not supported.
+// Uncontrolled state keeps the selected id stable across list reordering and
+// only resets when that id disappears.
 const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
 const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
 const scenario = computed(() => controlled ? props.scenario : localScenario.value)
@@ -104,32 +106,36 @@ const selectedScenario = computed<string | undefined>({
   },
 })
 
-// Status stays INTERNAL state (out of the controlled seam by design).
-const activeStatus = shallowRef<number | undefined>()
+// Status stays INTERNAL state (out of the controlled seam by design) and is
+// DERIVED the same way as the scenario: localStatus records the last explicit
+// user pick, and a pick missing from the current scenario converges to the
+// first status without writing back — no normalization watcher, SSR-safe,
+// correct on first render even for a controlled non-first initial scenario.
+const localStatus = shallowRef<number | undefined>()
 
 const statuses = computed<ResponseStatus[]>(() => currentScenario.value?.statuses ?? [])
 
 const currentStatus = computed<ResponseStatus | undefined>(
-  () => statuses.value.find(s => s.status === activeStatus.value) ?? statuses.value[0],
+  () => statuses.value.find(s => s.status === localStatus.value) ?? statuses.value[0],
 )
 
-watch(scenarios, (list) => {
-  if (!list.some(s => s.id === localScenario.value)) {
-    localScenario.value = list[0]?.id
-  }
+// The select shows the CONVERGED status but only persists explicit user picks.
+const selectedStatus = computed<number | undefined>({
+  get: () => currentStatus.value?.status,
+  set: (status) => {
+    if (status === undefined) return
+    localStatus.value = status
+  },
 })
 
-// Normalize before the first render and whenever the current status list
-// changes, including a controlled initial scenario that is not the first item.
-watch(
-  () => statuses.value.map(s => s.status),
-  (ids) => {
-    if (!ids.includes(activeStatus.value as number)) {
-      activeStatus.value = ids[0]
+// Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+if (!controlled) {
+  watch(scenarios, (list) => {
+    if (!list.some(s => s.id === localScenario.value)) {
+      localScenario.value = list[0]?.id
     }
-  },
-  { immediate: true },
-)
+  })
+}
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),
@@ -193,7 +199,7 @@ const statusColor = computed<'success' | 'info' | 'warning' | 'error' | 'neutral
       />
       <USelect
         v-if="statusItems.length > 1"
-        v-model="activeStatus"
+        v-model="selectedStatus"
         :items="statusItems"
         icon="i-lucide-activity"
         size="xs"

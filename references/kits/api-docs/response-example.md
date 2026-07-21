@@ -30,7 +30,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 与 `<ApiDocsRequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。差异点：
 
-- **status 不在受控口内**：始终内部状态；场景变化（用户切换 / 父级更新 / fallback 收敛）时自动 snap 到该场景第一个可用状态。
+- **status 不在受控口内**：始终内部状态，与 scenario 同为派生收敛——记住用户最近一次显式选择，当前场景不含该 status 时展示收敛到第一个可用状态（不回写）。
 - 绑定值指向本组件缺失的场景 id 时（如联动中响应侧缺某场景），展示收敛到第一个场景，选择器显示收敛后的值。
 
 ## 用法
