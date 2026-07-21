@@ -19,7 +19,7 @@
 
 ## Body 语义（`ResponseBody` 联合类型）
 
-每个 body 的 `id` 必须在同一 status 内稳定且唯一；它是选择状态的身份键，不应使用可能重复的展示文案代替。
+每个 body 的 `id` 必须在同一 status 内稳定且唯一；它是选择状态的身份键，不应使用可能重复的展示文案代替。重复 id（场景级或 body 级）会静默解析到第一个匹配项，dev 模式下组件对此发出 `console.warn`。
 
 | kind | 含义 | 展示 |
 |---|---|---|
@@ -63,7 +63,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 - 三级选择：场景 → 状态 → body。scenario 与 body 都按稳定 `id` 收敛；切换场景时，当前 status 若在新场景仍有效则保留，否则回退首项。有效场景/status 上下文变化时 body 回到首项；同一上下文的数据替换或重排会保留仍有效的 body `id`。
 - 状态色：2xx `success` · 3xx `info` · 4xx `warning` · 5xx `error` · `'default'` `neutral`（**文本+颜色双通道**，不单靠颜色）。`'default'` badge 直接显示等宽 `default` 文本。
-- 状态码在彩色 badge（`#leading`）里；多 status 时每个选项都显示 `status + statusText`，即使多个状态共享同一文案也能独立辨认；固定 status 没有选择器时，badge 自身同时显示 code 与 `statusText`。
+- 状态码在彩色 badge（`#leading`）里；多 status 时下拉**选项**显示 `status + statusText`（多个状态共享同一文案也能独立辨认），而闭合触发器只显示 `statusText`——code 已由相邻 badge 承担，不重复；固定 status 没有选择器时，badge 自身同时显示 code 与 `statusText`。
 - media 选择器标签优先用 `mediaType`；未提供时，code body 回退到首个 variant 的 label / 语言显示名 / `codeBodyTitle`——语言显示名与 CodeBlock 语言选择器共用 `langLabel`（`utils/lang-preset.ts`，`languageLabels` 覆盖优先），同一语言 id 两处渲染一致；其他 kind 回退到各自面板标题。显式 `bodies: []` 保持空列表且不会复活 legacy `variants`。各维度 ≤1 时不渲染对应选择器。
 - 组件根以命名 container 观测自身宽度：`@xl/response` 以上保持三个 inline selects；更窄时改为单个触发按钮，不按页面 viewport 猜测卡片可用宽度。触发器只显示当前场景名（信息量最高的一项）——状态码由相邻 badge 承担，media type 点开即见；场景不可切换时依次回退到 media 标签 / `statusText`。popover 内按基数分型：场景基数无上界，用带可见 label 的 select（菜单滚动）；状态与 media 基数小（通常 1-3），平铺为 radio group 一步可点。popover 受 Reka 可用高度变量约束，超出视口时在内容区滚动。
 - 语言/换行/复制仅在 `code` 形态出现（内容绑定控件随 CodeBlock 隐藏）。
@@ -77,7 +77,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## 受控选择
 
-与 `<ApiDocsRequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。差异点：
+与 `<ApiDocsRequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。受控与否在挂载时按 prop 是否传入一次性判定（React 风格），运行时在受控/非受控之间切换不受支持。差异点：
 
 - **status 不在受控口内**：始终内部状态，与 scenario 同为派生收敛——记住用户最近一次显式选择，当前场景不含该 status 时展示收敛到第一个可用状态（不回写）。
 - 绑定值指向本组件缺失的场景 id 时（如联动中响应侧缺某场景），展示收敛到第一个场景，选择器显示收敛后的值。
