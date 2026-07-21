@@ -225,9 +225,10 @@ const bodies = computed<ResponseBody[]>(() => {
   return []
 })
 
-// Ids are selection identity keys; duplicates silently resolve to the first
-// match. Surface consumer data bugs in dev instead of debugging "stuck" selects.
-if (import.meta.dev) {
+// Scenario ids, status codes, and body ids are selection identity keys;
+// duplicates silently resolve to the first match. Surface consumer data bugs
+// in dev instead of debugging "stuck" selects.
+if (import.meta.dev || import.meta.test) {
   watchEffect(() => {
     const seen = new Set<string>()
     for (const s of scenarios.value) {
@@ -235,6 +236,14 @@ if (import.meta.dev) {
         console.warn(`[ApiDocsResponseExample] duplicate scenario id "${s.id}" — selection resolves to the first match.`)
       }
       seen.add(s.id)
+
+      const statusCodes = new Set<ResponseStatus['status']>()
+      for (const status of s.statuses) {
+        if (statusCodes.has(status.status)) {
+          console.warn(`[ApiDocsResponseExample] duplicate status "${status.status}" within scenario "${s.id}" — selection resolves to the first match.`)
+        }
+        statusCodes.add(status.status)
+      }
     }
     const bodyIds = new Set<string>()
     for (const b of bodies.value) {
@@ -260,22 +269,38 @@ const selectedBody = computed<string | undefined>({
   },
 })
 
+// Discard an invalid body identity instead of only deriving a visual fallback;
+// otherwise removing and later re-adding the id would revive a stale selection.
+watch(
+  () => bodies.value.map(body => body.id),
+  (ids) => {
+    if (localBodyId.value === undefined || !ids.includes(localBodyId.value)) {
+      localBodyId.value = ids[0]
+    }
+  },
+  { flush: 'sync', immediate: true },
+)
+
 // Body selection belongs to one effective scenario/status context. Data refreshes
 // within that context preserve a still-valid body id; context changes start at
 // the first body even when two contexts reuse the same id.
 watch(
   [() => currentScenario.value?.id, () => currentStatus.value?.status],
-  () => { localBodyId.value = undefined },
+  () => { localBodyId.value = bodies.value[0]?.id },
   { flush: 'sync' },
 )
 
 // Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
 if (!controlled) {
-  watch(scenarios, (list) => {
-    if (!list.some(s => s.id === localScenario.value)) {
-      localScenario.value = list[0]?.id
-    }
-  })
+  watch(
+    () => scenarios.value.map(s => s.id),
+    (ids) => {
+      if (localScenario.value === undefined || !ids.includes(localScenario.value)) {
+        localScenario.value = ids[0]
+      }
+    },
+    { flush: 'sync' },
+  )
 }
 
 const scenarioItems = computed(() =>
@@ -327,6 +352,11 @@ const currentBodyLabel = computed(() =>
   bodyItems.value.find(item => item.value === selectedBody.value)?.label,
 )
 
+const currentStatusLabel = computed(() => {
+  const text = currentStatus.value?.statusText
+  return text?.trim() ? text : String(currentStatus.value?.status ?? '')
+})
+
 /**
  * Narrow trigger copy: the scenario name only — the highest-signal value.
  * Status stays visible in the leading badge and the media type is one click
@@ -342,7 +372,7 @@ const compactControlLabel = computed(() => {
     return currentBodyLabel.value
   }
   if (statusItems.value.length > 1) {
-    return currentStatus.value?.statusText ?? String(currentStatus.value?.status ?? '')
+    return currentStatusLabel.value
   }
   return t.value.responseOptions
 })
@@ -489,9 +519,10 @@ const panelAnnouncement = computed(() => {
             class="min-w-0 max-w-full"
             :ui="{ content: 'min-w-fit' }"
           />
-          <!-- Closed trigger shows statusText only — the adjacent badge already
-               carries the code. Menu options keep `code + text` so duplicate
-               texts (e.g. two "Success") stay distinguishable. -->
+          <!-- Closed trigger prefers statusText — the adjacent badge already
+               carries the code — and falls back to the code for blank text.
+               Menu options keep `code + text` so duplicate texts (e.g. two
+               "Success") stay distinguishable. -->
           <USelect
             v-if="statusItems.length > 1"
             v-model="selectedStatus"
@@ -504,7 +535,7 @@ const panelAnnouncement = computed(() => {
             class="min-w-0 max-w-full"
             :ui="{ content: 'min-w-fit' }"
           >
-            {{ currentStatus?.statusText ?? currentStatus?.status }}
+            {{ currentStatusLabel }}
           </USelect>
           <USelect
             v-if="bodyItems.length > 1"

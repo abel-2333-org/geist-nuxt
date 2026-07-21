@@ -2,7 +2,8 @@
 // Same seam as RequestExample, plus the status dimension which stays INTERNAL
 // and preserves a still-valid status across scenario changes, falling back only
 // when the previous status is unavailable.
-import { describe, it, expect } from 'vitest'
+import { defineComponent, reactive } from 'vue'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import ResponseExample from '../../kits/api-docs/components/ResponseExample.vue'
@@ -102,6 +103,10 @@ function selectByIcon(wrapper: VueWrapper<InstanceType<typeof ResponseExample>>,
     .find(c => c.props('icon') === icon)
 }
 
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 describe('ApiDocsResponseExample scenario selection', () => {
   it('uncontrolled: renders the first scenario and its first status by default', async () => {
     const wrapper = await mountSuspended(ResponseExample, { props: { scenarios } })
@@ -122,6 +127,31 @@ describe('ApiDocsResponseExample scenario selection', () => {
     expect(selectByIcon(wrapper, 'i-lucide-activity')?.props('modelValue')).toBe(400)
     expect(wrapper.text()).toContain('BASIC-400')
     expect(wrapper.text()).not.toContain('BATCH-404')
+  })
+
+  it('uncontrolled: discards a scenario id removed by an in-place update', async () => {
+    const liveScenarios = reactive(scenarios.map(s => ({ ...s, statuses: [...s.statuses] })))
+    const Host = defineComponent({
+      components: { ResponseExample },
+      setup: () => ({ liveScenarios }),
+      template: '<ResponseExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const response = wrapper.getComponent(ResponseExample) as VueWrapper<InstanceType<typeof ResponseExample>>
+    const scenarioSelect = selectByIcon(response, 'i-lucide-layers')
+
+    scenarioSelect!.vm.$emit('update:modelValue', 'batch')
+    await wrapper.vm.$nextTick()
+    expect(response.text()).toContain('BATCH-404')
+
+    liveScenarios.splice(1, 1)
+    await wrapper.vm.$nextTick()
+    expect(response.text()).toContain('BASIC-200')
+
+    liveScenarios.push({ ...scenarios[1]!, statuses: [...scenarios[1]!.statuses] })
+    await wrapper.vm.$nextTick()
+    expect(selectByIcon(response, 'i-lucide-layers')?.props('modelValue')).toBe('basic')
+    expect(response.text()).toContain('BASIC-200')
   })
 
   it('controlled: renders the bound scenario and follows parent updates', async () => {
@@ -207,6 +237,56 @@ describe('ApiDocsResponseExample scenario selection', () => {
     ])
   })
 
+  it('falls back to the status code when statusText is empty or whitespace-only', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'empty-label',
+          label: 'Empty label',
+          statuses: [
+            { status: 200, statusText: '   ', variants: [{ language: 'json', code: '200' }] },
+            { status: 201, statusText: '', variants: [{ language: 'json', code: '201' }] },
+          ],
+        }],
+      },
+    })
+
+    const statusSelect = selectByIcon(wrapper, 'i-lucide-activity')
+    expect(statusSelect?.text()).toContain('200')
+    expect(wrapper.get('[data-response-compact-trigger]').text()).toContain('200')
+
+    statusSelect!.vm.$emit('update:modelValue', 201)
+    await wrapper.vm.$nextTick()
+    expect(statusSelect?.text()).toContain('201')
+    expect(wrapper.get('[data-response-compact-trigger]').text()).toContain('201')
+  })
+
+  it('warns about duplicate scenario, status, and body identity keys in dev', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const duplicateScenario = {
+      id: 'duplicate',
+      label: 'Duplicate',
+      statuses: [
+        {
+          status: 200,
+          bodies: [
+            { id: 'json', kind: 'empty' as const },
+            { id: 'json', kind: 'empty' as const },
+          ],
+        },
+        { status: 200, bodies: [] },
+      ],
+    }
+
+    await mountSuspended(ResponseExample, {
+      props: { scenarios: [duplicateScenario, { ...duplicateScenario }] },
+    })
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate scenario id "duplicate"'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate status "200" within scenario "duplicate"'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate body id "json" within status 200'))
+  })
+
   it('hides the scenario selector when there is at most one scenario', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: scenarios.slice(1) },
@@ -217,6 +297,26 @@ describe('ApiDocsResponseExample scenario selection', () => {
 })
 
 describe('ApiDocsResponseExample body selection', () => {
+  it('preserves the default body by id across same-context reorder', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: { scenarios: bodyScenarios },
+    })
+    const status = bodyScenarios[0]!.statuses[0]!
+
+    await wrapper.setProps({
+      scenarios: [{
+        ...bodyScenarios[0]!,
+        statuses: [
+          { ...status, bodies: [...status.bodies].reverse() },
+          ...bodyScenarios[0]!.statuses.slice(1),
+        ],
+      }],
+    })
+
+    expect(selectByIcon(wrapper, 'i-lucide-file-type')?.props('modelValue')).toBe('json')
+    expect(wrapper.text()).toContain('BODY-JSON')
+  })
+
   it('preserves a body by id across same-context reorder and converges when removed', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: bodyScenarios },
@@ -248,6 +348,10 @@ describe('ApiDocsResponseExample body selection', () => {
         ],
       }],
     })
+    expect(bodySelect?.props('modelValue')).toBe('json')
+    expect(wrapper.text()).toContain('BODY-JSON')
+
+    await wrapper.setProps({ scenarios: bodyScenarios })
     expect(bodySelect?.props('modelValue')).toBe('json')
     expect(wrapper.text()).toContain('BODY-JSON')
   })
