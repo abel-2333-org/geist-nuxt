@@ -222,7 +222,7 @@ function isolatedPage(item) {
   return `<script setup lang="ts">\nconst props = {} as any\n</script>\n<template>\n  <${name} v-bind="props" />\n</template>\n`
 }
 
-function closureScenarios(registry, selectedLabel) {
+function closureScenarios(registry, { selectedLabel, group } = {}) {
   const isolatedRenderingItems = registry.items
     .filter(item => ['registry:component', 'registry:block'].includes(item.type))
     .map(item => ({
@@ -230,10 +230,21 @@ function closureScenarios(registry, selectedLabel) {
       item: item.name,
       page: isolatedPage(item),
     }))
-  const scenarios = [...runtimeScenarios, ...isolatedRenderingItems]
+  const groups = {
+    runtime: runtimeScenarios,
+    isolated: isolatedRenderingItems,
+  }
+  if (group && !Object.hasOwn(groups, group)) {
+    throw new Error(`unknown consumer smoke group: ${group}`)
+  }
+  const allScenarios = [...runtimeScenarios, ...isolatedRenderingItems]
+  const scenarios = group ? groups[group] : allScenarios
   if (!selectedLabel) return scenarios
-  const selected = scenarios.find(scenario => scenario.label === selectedLabel)
+  const selected = allScenarios.find(scenario => scenario.label === selectedLabel)
   if (!selected) throw new Error(`unknown consumer smoke scenario: ${selectedLabel}`)
+  if (!scenarios.includes(selected)) {
+    throw new Error(`consumer smoke scenario ${selectedLabel} is not in group ${group}`)
+  }
   return [selected]
 }
 
@@ -250,6 +261,10 @@ try {
   }
   else {
     const sourceSha = resolveSourceSha(repoRoot, options.sha ?? options.to, { allowDirty: true })
+    const scenarios = closureScenarios(registry, {
+      selectedLabel: options.scenario,
+      group: options.group,
+    })
     const kept = []
     const dependencyRoot = options.skip_install
       ? undefined
@@ -263,7 +278,7 @@ try {
         run('pnpm', ['install', '--ignore-workspace', '--ignore-scripts'], dependencyRoot)
       }
 
-      for (const scenario of closureScenarios(registry, options.scenario)) {
+      for (const scenario of scenarios) {
         const consumerRoot = await mkdtemp(path.join(tmpdir(), `geist-consumer-${scenario.label}-`))
         try {
           await cp(fixtureRoot, consumerRoot, { recursive: true })
