@@ -15,9 +15,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: skill-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  verify-source:
-    name: Verify Source-first root and consumer
+  verify-root:
+    name: Verify Source-first root
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,12 +68,36 @@ jobs:
       - name: Build root gallery
         run: pnpm build
 
-      - name: Build a registry-installed consumer
-        run: pnpm test:consumer
+  verify-consumer:
+    name: Verify consumer (${{ matrix.group }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [runtime, isolated]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test registry consumer (${{ matrix.group }})
+        run: pnpm test:consumer -- --group ${{ matrix.group }}
 
   release-skill:
     name: Assemble, verify and release Source-first snapshot
-    needs: verify-source
+    needs: [verify-root, verify-consumer]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
