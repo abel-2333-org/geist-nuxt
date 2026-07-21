@@ -19,7 +19,7 @@
 
 ## Body 语义（`ResponseBody` 联合类型）
 
-每个 scenario `id`、同一 scenario 内的 `status` 值、以及同一 status 内的 body `id` 都必须稳定且唯一；它们是选择状态的身份键，不应使用可能重复的展示文案代替。重复键会静默解析到第一个匹配项，dev 模式下组件对此发出 `console.warn`。
+每个 scenario `id`、同一 scenario 内的 `status` 值、以及同一 status 内的 body `id` 都必须稳定且唯一；它们是选择状态的身份键，不应使用可能重复的展示文案代替。重复键会静默解析到第一个匹配项，dev 模式下组件对此发出 `console.warn`（同一实例内按消息去重，数据变化重跑检查不重复告警）。
 
 | kind | 含义 | 展示 |
 |---|---|---|

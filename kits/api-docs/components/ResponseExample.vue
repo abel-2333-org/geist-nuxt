@@ -227,20 +227,28 @@ const bodies = computed<ResponseBody[]>(() => {
 
 // Scenario ids, status codes, and body ids are selection identity keys;
 // duplicates silently resolve to the first match. Surface consumer data bugs
-// in dev instead of debugging "stuck" selects.
+// in dev instead of debugging "stuck" selects. Warnings dedupe per instance:
+// watchEffect re-runs on every data change and would otherwise repeat the
+// same message each time.
 if (import.meta.dev || import.meta.test) {
+  const warned = new Set<string>()
+  const warnOnce = (message: string) => {
+    if (warned.has(message)) return
+    warned.add(message)
+    console.warn(`[ApiDocsResponseExample] ${message}`)
+  }
   watchEffect(() => {
     const seen = new Set<string>()
     for (const s of scenarios.value) {
       if (seen.has(s.id)) {
-        console.warn(`[ApiDocsResponseExample] duplicate scenario id "${s.id}" — selection resolves to the first match.`)
+        warnOnce(`duplicate scenario id "${s.id}" — selection resolves to the first match.`)
       }
       seen.add(s.id)
 
       const statusCodes = new Set<ResponseStatus['status']>()
       for (const status of s.statuses) {
         if (statusCodes.has(status.status)) {
-          console.warn(`[ApiDocsResponseExample] duplicate status "${status.status}" within scenario "${s.id}" — selection resolves to the first match.`)
+          warnOnce(`duplicate status "${status.status}" within scenario "${s.id}" — selection resolves to the first match.`)
         }
         statusCodes.add(status.status)
       }
@@ -248,7 +256,7 @@ if (import.meta.dev || import.meta.test) {
     const bodyIds = new Set<string>()
     for (const b of bodies.value) {
       if (bodyIds.has(b.id)) {
-        console.warn(`[ApiDocsResponseExample] duplicate body id "${b.id}" within status ${currentStatus.value?.status} — selection resolves to the first match.`)
+        warnOnce(`duplicate body id "${b.id}" within status ${currentStatus.value?.status} — selection resolves to the first match.`)
       }
       bodyIds.add(b.id)
     }
