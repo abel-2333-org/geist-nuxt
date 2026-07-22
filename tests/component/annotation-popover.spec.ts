@@ -88,9 +88,12 @@ async function openByKeyboard(w: VueWrapper) {
   const el = trigger(w).element as HTMLButtonElement
   el.focus()
   el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
-  await openByClick(w)
-  // onOpenAutoFocus defers to nextTick before moving focus.
-  await nextTick()
+  // Keep keydown and the activation click in the same task, matching the
+  // browser's first Enter activation before lazy popover content exists.
+  el.click()
+  await vi.waitFor(() => {
+    if (!panel()) throw new Error('panel did not open')
+  })
 }
 
 /** Hover-opens the panel under fake timers (which stay active afterwards). */
@@ -137,7 +140,7 @@ describe('AnnotationPopover trigger & click skeleton', () => {
 })
 
 describe('AnnotationPopover keyboard journey', () => {
-  it('keyboard open moves focus to the first panel action', async () => {
+  it('first keyboard open moves focus to the first panel action', async () => {
     const w = await mount({ actions: true })
     await openByKeyboard(w)
     const action = panel()!.querySelector<HTMLElement>('[data-test="action"]')

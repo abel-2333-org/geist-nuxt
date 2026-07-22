@@ -103,16 +103,25 @@ function onTriggerPointerdown() {
 function focusPanel() {
   const panel = panelEl.value
   if (!panel) return
+  if (panel.contains(document.activeElement)) return
   const first = panel.querySelector<HTMLElement>(
     'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )
   ;(first ?? panel).focus()
 }
 
+// UPopover lazily mounts its portaled content. On the first open, reka's
+// open-auto-focus hook can run before the slot's template ref is assigned, so
+// a deferred focus attempt may still see no panel and silently stop. Let the
+// ref becoming available own keyboard focus instead; pointer and hover opens
+// remain focus-neutral because their source never passes this guard.
+watch([open, panelEl], ([isOpen, panel]) => {
+  if (isOpen && panel && openSource === 'keyboard') focusPanel()
+}, { flush: 'post' })
+
 const contentProps = {
   onOpenAutoFocus(event: Event) {
     event.preventDefault()
-    if (openSource === 'keyboard') nextTick(focusPanel)
   },
   onCloseAutoFocus(event: Event) {
     // `inPanel` must be sampled now — the portaled panel detaches right after
