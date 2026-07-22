@@ -212,7 +212,7 @@ onBeforeUnmount(clearTimers)
       <div
         ref="panelEl"
         tabindex="-1"
-        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm outline-none sm:w-80"
+        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-80"
         :aria-busy="loading || undefined"
         @pointerenter="cancelClose"
         @pointerleave="scheduleClose"

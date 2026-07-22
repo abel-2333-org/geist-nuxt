@@ -62,13 +62,13 @@ function trigger(w: VueWrapper) {
   return w.get('button[type="button"]')
 }
 
-function pointerEvent(type: string, pointerType = 'mouse') {
+function pointerEvent(type: string, pointerType = 'mouse', bubbles = false) {
   let event: Event
   try {
-    event = new PointerEvent(type, { bubbles: false, cancelable: true })
+    event = new PointerEvent(type, { bubbles, cancelable: true })
   }
   catch {
-    event = new Event(type, { cancelable: true })
+    event = new Event(type, { bubbles, cancelable: true })
   }
   if ((event as PointerEvent).pointerType !== pointerType) {
     Object.defineProperty(event, 'pointerType', { value: pointerType })
@@ -149,6 +149,9 @@ describe('AnnotationPopover keyboard journey', () => {
     const w = await mount()
     await openByKeyboard(w)
     expect(document.activeElement).toBe(panel())
+    expect(panel()!.classList).toContain('focus-visible:outline-2')
+    expect(panel()!.classList).toContain('focus-visible:outline-offset-2')
+    expect(panel()!.classList).toContain('focus-visible:outline-primary')
   })
 
   it('Escape closes a keyboard session and restores focus to the trigger', async () => {
@@ -166,7 +169,7 @@ describe('AnnotationPopover keyboard journey', () => {
     expect(document.activeElement).toBe(trigger(w).element)
   })
 
-  it('pointer session close does not steal focus from an outside element', async () => {
+  it('outside click closes a pointer session without stealing focus', async () => {
     const w = await mount()
     const outside = document.createElement('input')
     document.body.appendChild(outside)
@@ -175,7 +178,8 @@ describe('AnnotationPopover keyboard journey', () => {
     await openByClick(w)
 
     outside.focus()
-    await trigger(w).trigger('click')
+    outside.dispatchEvent(pointerEvent('pointerdown', 'mouse', true))
+    outside.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
     await vi.waitFor(() => {
       if (panel()) throw new Error('panel did not close')
     })
