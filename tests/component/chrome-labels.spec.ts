@@ -77,10 +77,18 @@ describe('FieldItem lifecycle badge labels', () => {
 describe('FieldItem → EnumTable structural label passthrough', () => {
   it('flat enum: localizes heading, filter placeholder and empty state', async () => {
     const wrapper = await mountSuspended(FieldItem, {
-      props: { name: 'status', type: 'string', enumValues: manyValues, labels: zhLabels },
+      props: {
+        name: 'status',
+        type: 'string',
+        enumValues: manyValues,
+        defaultValue: 'value_0',
+        labels: zhLabels,
+      },
     })
     expect(wrapper.text()).toContain('允许值')
     expect(wrapper.text()).not.toContain('Allowed values')
+    expect(wrapper.text()).toContain('默认值')
+    expect(wrapper.text()).not.toContain('Default')
 
     const filter = wrapper.findComponent({ name: 'UInput' })
     expect(filter.props('placeholder')).toBe('筛选值')

@@ -96,7 +96,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 - **MethodBadge / EventBadge 是平行原子，不合并成 `OperationBadge kind=…`**——两者词表来源不同（HTTP 动词封闭集 vs 事件标识开放集），合并会让 props 类型变糊。EVENT 用统一词 + neutral tone：方法五色说「你调平台」，中性 EVENT 说「平台回调你」，方向差异用色彩系统区隔，对齐 Stripe 等主流范式。**不按事件动词尾段（succeeded/failed…）着色**——词表开放、映射难穷尽。
 - **OperationHeader 是单组件双形态**——两形态结构 90% 同构（identity 行 → 标题 → 描述 → 尾部块），拆成两个组件会重复。`kind` 只切换 identity 行的徽章与标识字段（`method`+`path` vs `event`）。
 - **OperationTarget 与 OperationHeader 正交**——target 放 header 的默认槽而非内嵌 prop，因为不是每个 endpoint 都要地址栏（stub 就没有），webhook 则根本没有。
-- **surface（���块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<ApiDocsCodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付。
+- **surface（整块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<ApiDocsCodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付。
 - **侧栏 / ⌘K 的 webhook 身份是过渡态**——`SidebarNav` 条目暂以 `method: 'EVENT'` 走 MethodBadge 的 fallback（neutral+subtle，渲染效果与 EventBadge 一致）。这是数据层 stopgap；`item.kind` 泛化（一等 webhook 条目）是已知后续事项，见 `sidebar-nav.md`。
 
 ### 可拖动分栏（分割原语在 foundation；重分配在本 kit 的 CodeRail）
@@ -227,7 +227,7 @@ gallery 有**五个 api-docs demo 页，职责互补**：
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 - **配色按含义分配（跨 FieldItem 全体生效）**：
   - **必填强度轴**：红=REQUIRED（硬必填）、琥珀=`CONDITIONAL`（仅特定情况必填）、无标记=optional。conditional 用琥珀**不是中性**——它和 red 同属"必填强度轴"的一档，若洗成中性会混进旁边 type/format 那些说明性灰字里，读者分不清它是"必填态的一档"还是"又一个类型注记"。
-  - **琥珀="有前提/需留意"**：`CONDITIONAL` 标签、条件 callout、成熟度 beta、caution 约束。同一字段 conditional + beta 也不糊，靠**形态区���**：条件是琥珀 callout **块**、summary row 的 CONDITIONAL 是琥珀**文字标签**且指向下方那个块（label → block 同义呼应）、beta 是**徽章**。三种形态各异，不会读成"一片琥珀"。真正要避免的是"两个**无关**含义共用一色"，同一含义的多形态呼应不算过载。
+  - **琥珀="有前提/需留意"**：`CONDITIONAL` 标签、条件 callout、成熟度 beta、caution 约束。同一字段 conditional + beta 也不糊，靠**形态区分**：条件是琥珀 callout **块**、summary row 的 CONDITIONAL 是琥珀**文字标签**且指向下方那个块（label → block 同义呼应）、beta 是**徽章**。三种形态各异，不会读成"一片琥珀"。真正要避免的是"两个**无关**含义共用一色"，同一含义的多形态呼应不算过载。
   - 紫=交互（锚点、展开、focus 环）；中性灰阶=类型、format、SINCE 版本号等纯说明性元数据。
   - **约束注记（`FieldNote.tone`）的使用边界**：普通校验规则（长度、字符集、格式）一律**中性**（省略 tone）——违反它只是校验失败，没有隐藏的坑，和 RANGE 同性质；`caution`（琥珀）只留给**行为性 caveat**——请求不会被拒绝、但不知道就会踩坑的注记（如"值明文存储，勿放秘密""对 preview 部署不生效"）。给格式规则标 caution 属于误用，会稀释琥珀轴。
 
