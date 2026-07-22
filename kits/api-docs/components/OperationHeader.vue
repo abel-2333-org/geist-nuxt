@@ -51,6 +51,8 @@ type OperationHeaderProps = (EndpointIdentity | WebhookIdentity) & {
   summary: string
   /** Operation-level lifecycle, rendered as a badge next to the heading. */
   lifecycle?: EndpointLifecycle
+  /** Override the lifecycle badge's preset label (e.g. for i18n). */
+  lifecycleLabel?: string
   /** Heading level for the summary; slots into the page outline. */
   headingLevel?: 2 | 3 | 4
 }
@@ -86,7 +88,11 @@ const identifier = computed(() =>
       >
         {{ props.summary }}
       </component>
-      <ApiDocsLifecycleBadge v-if="props.lifecycle" :status="props.lifecycle" />
+      <ApiDocsLifecycleBadge
+        v-if="props.lifecycle"
+        :status="props.lifecycle"
+        :label="props.lifecycleLabel"
+      />
     </div>
 
     <div v-if="$slots.description" class="max-w-prose text-pretty text-muted">

@@ -5,14 +5,16 @@ import type { BadgeProps } from '@nuxt/ui'
 /**
  * Two orthogonal lifecycle dimensions rendered by the same SemanticBadge:
  *  - FieldLifecycle    — applies to an individual parameter (new/beta/deprecated).
- *  - EndpointLifecycle — applies to the whole operation (active/maintenance/
- *                        deprecated/sunset), shown in the operation header.
- * `deprecated` is the only value common to both. Kept here (the preset that
- * "knows" the lifecycle vocabulary) so the slice is self-contained: the domain
- * type and its tone calibration travel together.
+ *  - EndpointLifecycle — applies to the whole operation (beta/active/maintenance/
+ *                        deprecated/sunset), shown in the operation header and
+ *                        the LifecycleNotice banner (same vocabulary by type).
+ * `beta` and `deprecated` are the values common to both dimensions: a whole
+ * operation can ship as beta just like a single field can. Kept here (the
+ * preset that "knows" the lifecycle vocabulary) so the slice is self-contained:
+ * the domain type and its tone calibration travel together.
  */
 export type FieldLifecycle = 'new' | 'beta' | 'deprecated'
-export type EndpointLifecycle = 'active' | 'maintenance' | 'deprecated' | 'sunset'
+export type EndpointLifecycle = 'beta' | 'active' | 'maintenance' | 'deprecated' | 'sunset'
 export type LifecycleStatus = FieldLifecycle | EndpointLifecycle
 
 /**
@@ -46,6 +48,7 @@ export interface LifecyclePresetEntry {
 export const lifecyclePreset: Record<LifecycleStatus, LifecyclePresetEntry> = {
   // Field dimension
   new: { tone: 'success', variant: 'subtle', icon: 'i-lucide-sparkles', label: 'New' },
+  // Shared: a field or a whole operation can be beta
   beta: { tone: 'warning', variant: 'subtle', icon: 'i-lucide-flask-conical', label: 'Beta' },
   // Endpoint dimension
   active: { tone: 'success', variant: 'subtle', icon: 'i-lucide-circle-check', label: 'Active' },

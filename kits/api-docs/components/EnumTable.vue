@@ -37,6 +37,9 @@ const props = withDefaults(
     defaultLabel?: string
     searchPlaceholder?: string
     emptyLabel?: string
+    /** Fallback tab label for an unnamed variant; receives the 0-based index
+     *  so the whole string is owned by the caller (e.g. `i => `选项 ${i + 1}``). */
+    variantLabel?: (index: number) => string
     /** Lists at or above this length get a filter box + scroll area. */
     filterThreshold?: number
   }>(),
@@ -45,6 +48,7 @@ const props = withDefaults(
     defaultLabel: 'Default',
     searchPlaceholder: 'Filter values',
     emptyLabel: 'No matching values',
+    variantLabel: (index: number) => `Option ${index + 1}`,
     filterThreshold: 30,
   },
 )
@@ -69,7 +73,7 @@ function filterValues(values: EnumValue[]): EnumValue[] {
 // which variant holds the matches even while you're viewing another tab.
 const variantTabs = computed<TabsItem[]>(() =>
   (props.variants ?? []).map((v, i) => ({
-    label: v.title ?? `Option ${i + 1}`,
+    label: v.title ?? props.variantLabel(i),
     value: String(i),
     badge: String(filterValues(v.values).length),
   })),
