@@ -27,14 +27,9 @@ const paymentMethod: CompositionNode = {
       id: 'card',
       label: 'Card payment',
       description: 'Charge a tokenized card. The token comes from the client-side SDK and is single-use.',
+      // No hand-written `type` row: the component synthesizes the
+      // discriminator field from the mapping (canonical usage).
       fields: [
-        {
-          path: 'request-body_card_type',
-          name: 'type',
-          type: 'string',
-          required: true,
-          description: 'Always `card` for this variant.',
-        },
         {
           path: 'request-body_card_token',
           name: 'token',
@@ -57,13 +52,6 @@ const paymentMethod: CompositionNode = {
       label: 'Wallet payment',
       description: 'Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).',
       fields: [
-        {
-          path: 'request-body_wallet_type',
-          name: 'type',
-          type: 'string',
-          required: true,
-          description: 'Always `wallet` for this variant.',
-        },
         {
           path: 'request-body_wallet_wallet-id',
           name: 'wallet_id',

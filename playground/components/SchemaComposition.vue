@@ -4,9 +4,9 @@
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
 //   anyOf  → non-exclusive options    → stacked collapsible sections
 //   allOf  → conjunction              → fully expanded sections, no selector
-// plus the optional discriminator, folded into a single head sentence
-// ("… applies. `type` selects the variant.") with the wire value shown once
-// per variant — one vocabulary, no separate mapping table.
+// plus the optional discriminator, rendered as the first real field row of
+// each mapped variant ("provider · string · required · Always `google_pay`.")
+// — one vocabulary (the field list), no caption labels, no mapping table.
 //
 // Input is a presentation-neutral display model (CompositionNode) — the
 // component never parses an OpenAPI document and never depends on a
@@ -63,9 +63,9 @@ export interface SchemaCompositionLabels {
   oneOfHint?: string
   anyOfHint?: string
   allOfHint?: string
-  /** Continuation after the discriminator property code chip, completing the
-   *  hint sentence: "… applies. `type` selects the variant." */
-  discriminatorHint?: string
+  /** Description factory for the synthesized discriminator field row,
+   *  e.g. `` value => `Always \`${value}\`.` `` (markdown, per InlineMarkdown). */
+  discriminatorDescription?: (value: string) => string
   showFields?: string
   hideFields?: string
   empty?: string
@@ -99,7 +99,7 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
   oneOfHint: 'Exactly one of the following applies.',
   anyOfHint: 'One or more of the following may apply.',
   allOfHint: 'All of the following apply.',
-  discriminatorHint: 'selects the variant.',
+  discriminatorDescription: (value: string) => `Always \`${value}\`.`,
   showFields: 'Show Fields',
   hideFields: 'Hide Fields',
   empty: 'No variants documented',
@@ -174,13 +174,29 @@ onMounted(() => reveal(anchor.active.value))
 watch(anchor.active, reveal)
 
 // ---------------------------------------------------------------------------
-// Discriminator helpers.
+// Discriminator → a real field row. The discriminator IS a payload property,
+// so it renders as the first FieldItem of each mapped variant (`provider`
+// string · required · "Always `google_pay`.") — same language as every other
+// field, no dedicated caption vocabulary. No `path`: the row repeats across
+// variants, so it is not individually deep-linkable.
 // ---------------------------------------------------------------------------
 const variantById = computed(() => new Map(props.variants.map(v => [v.id, v])))
 
-/** Reverse lookup: this variant's wire value under the discriminator. */
-function wireValueFor(variantId: string): string | undefined {
-  return props.discriminator?.mapping.find(m => m.variantId === variantId)?.value
+function fieldsFor(variant: CompositionVariant): FieldNode[] {
+  const value = props.discriminator?.mapping.find(m => m.variantId === variant.id)?.value
+  if (!value) return variant.fields
+  // Caller already documented the property as a regular field — trust their
+  // richer row (anchor, examples) instead of synthesizing a duplicate.
+  if (variant.fields.some(f => f.name === props.discriminator!.propertyName)) return variant.fields
+  return [
+    {
+      name: props.discriminator!.propertyName,
+      type: 'string',
+      required: true,
+      description: t.value.discriminatorDescription(value),
+    },
+    ...variant.fields,
+  ]
 }
 
 const headingTag = computed(() => `h${props.headingLevel}`)
@@ -197,16 +213,10 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
         {{ t[kind] }}
         <span class="text-dimmed">({{ variants.length }})</span>
       </p>
-      <!-- One sentence carries the whole rule, discriminator included:
-           "Exactly one of the following applies. `type` selects the variant."
-           No separate mapping table — the variant selector below already
-           enumerates every alternative with its wire value. -->
+      <!-- One short plain-language sentence; discriminator details live in
+           the field list, not up here. -->
       <p class="text-sm leading-relaxed text-muted">
         {{ hint }}
-        <template v-if="discriminator">
-          <InlineCode>{{ discriminator.propertyName }}</InlineCode>
-          {{ t.discriminatorHint }}
-        </template>
       </p>
     </div>
 
@@ -236,19 +246,14 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
           class="flex flex-col gap-3"
         >
           <template v-for="v in [variantById.get(String(item.value))!]" :key="v.id">
-            <!-- The active variant's wire form. The head sentence already
-                 introduced the discriminator property, so a bare code chip is
-                 enough — no extra caption vocabulary. Identity (`v.id`) never
-                 renders; only the real payload shape. -->
-            <p v-if="discriminator && wireValueFor(v.id)" class="text-sm leading-relaxed">
-              <InlineCode>{{ discriminator.propertyName }} = "{{ wireValueFor(v.id) }}"</InlineCode>
-            </p>
             <p v-if="v.description" class="text-sm leading-relaxed text-toned">
               <InlineMarkdown :text="v.description" />
             </p>
-            <div v-if="v.fields.length">
+            <!-- The discriminator renders as the first real field row
+                 (synthesized in fieldsFor), not as a caption. -->
+            <div v-if="fieldsFor(v).length">
               <ApiDocsFieldItem
-                v-for="field in v.fields"
+                v-for="field in fieldsFor(v)"
                 :key="field.path ?? field.name"
                 v-bind="field"
                 :labels="fieldLabels"
@@ -292,11 +297,8 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
                 aria-hidden="true"
               />
               <span class="text-sm font-medium text-highlighted">{{ v.label }}</span>
-              <InlineCode v-if="discriminator && wireValueFor(v.id)" class="text-xs">
-                {{ discriminator.propertyName }} = "{{ wireValueFor(v.id) }}"
-              </InlineCode>
               <!-- `(N)` count grammar: how much is behind the fold. -->
-              <span class="text-sm font-normal text-dimmed">({{ v.fields.length }})</span>
+              <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
               <span class="sr-only">{{ isOpen ? t.hideFields : t.showFields }}</span>
             </button>
           </component>
@@ -306,9 +308,9 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
             <p v-if="v.description" class="text-sm leading-relaxed text-toned">
               <InlineMarkdown :text="v.description" />
             </p>
-            <div v-if="v.fields.length">
+            <div v-if="fieldsFor(v).length">
               <ApiDocsFieldItem
-                v-for="field in v.fields"
+                v-for="field in fieldsFor(v)"
                 :key="field.path ?? field.name"
                 v-bind="field"
                 :labels="fieldLabels"
@@ -335,14 +337,14 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
           class="flex flex-wrap items-baseline gap-x-2 border-b border-default pb-1.5 text-sm font-medium text-highlighted"
         >
           {{ v.label }}
-          <span class="text-sm font-normal text-dimmed">({{ v.fields.length }})</span>
+          <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
         </component>
         <p v-if="v.description" class="text-sm leading-relaxed text-toned">
           <InlineMarkdown :text="v.description" />
         </p>
-        <div v-if="v.fields.length">
+        <div v-if="fieldsFor(v).length">
           <ApiDocsFieldItem
-            v-for="field in v.fields"
+            v-for="field in fieldsFor(v)"
             :key="field.path ?? field.name"
             v-bind="field"
             :labels="fieldLabels"
