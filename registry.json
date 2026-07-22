@@ -118,6 +118,16 @@
       ]
     },
     {
+      "name": "foundation-annotation-popover",
+      "type": "registry:component",
+      "title": "AnnotationPopover",
+      "description": "Inline annotation trigger anchored to a non-modal popover with hover enhancement and loading/error chrome.",
+      "registryDependencies": ["geist-foundation"],
+      "files": [
+        { "path": "foundation/components/AnnotationPopover.vue", "target": "app/components/AnnotationPopover.vue" }
+      ]
+    },
+    {
       "name": "foundation-breakpoints",
       "type": "registry:lib",
       "title": "Geist breakpoints",

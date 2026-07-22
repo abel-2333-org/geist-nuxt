@@ -129,6 +129,13 @@ const runtimeScenarios = [
     page: `<template>\n  <SplitPane><template #start>Start</template><template #end>End</template></SplitPane>\n</template>\n`,
   },
   {
+    label: 'foundation-annotation-popover',
+    item: 'foundation-annotation-popover',
+    build: true,
+    cssMarker: 'decoration-dashed',
+    page: `<template>\n  <p>Rate limits use a <AnnotationPopover label="Term">sliding window<template #content>A rolling time span for counting requests.</template></AnnotationPopover> algorithm.</p>\n</template>\n`,
+  },
+  {
     label: 'api-docs-field-item',
     item: 'api-docs-field-item',
     build: true,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Playground candidate → foundation. Interaction shell of the Annotation
-// family: an inline, focusable trigger anchored to a non-modal popover.
+// Interaction shell of the Annotation family: an inline, focusable trigger
+// anchored to a non-modal popover.
 //
 // Why click mode + manual hover: UPopover mode="hover" rides reka HoverCard,
 // which touch and keyboard users cannot operate when the card holds actions
@@ -13,7 +13,8 @@
 //          eyebrow (icon + label) → body (default #content from the concrete
 //          annotation) → #actions row. Loading (skeleton + aria-busy) and
 //          error (message + retry emit) are shell chrome so every annotation
-//          form shares the same async states. Full spec: ../annotation.spec.md
+//          form shares the same async states.
+//          Contract: references/components/overlays.md
 
 export interface AnnotationPopoverLabels {
   /** sr-only announcement while `loading`. */
