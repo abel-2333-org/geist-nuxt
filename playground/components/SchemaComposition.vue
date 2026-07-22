@@ -47,12 +47,25 @@ export interface CompositionDiscriminator {
   mapping: Array<{ value: string, variantId: string }>
 }
 
-export interface CompositionNode {
-  kind: CompositionKind
+interface CompositionNodeBase {
   /** Order preserved, ids stable. */
   variants: CompositionVariant[]
-  discriminator?: CompositionDiscriminator
 }
+
+/** A discriminator selects alternatives; it cannot describe an allOf
+ * conjunction. The union keeps that invalid state out of typed callers while
+ * fieldsFor still guards JavaScript/runtime input defensively. */
+export type CompositionNode =
+  | (CompositionNodeBase & {
+    kind: 'oneOf' | 'anyOf'
+    discriminator?: CompositionDiscriminator
+  })
+  | (CompositionNodeBase & {
+    kind: 'allOf'
+    discriminator?: never
+  })
+
+export type HeadingLevel = 3 | 4 | 5 | 6
 
 /** Component-owned chrome copy, overridable for i18n (FieldItem convention). */
 export interface SchemaCompositionLabels {
@@ -63,9 +76,9 @@ export interface SchemaCompositionLabels {
   oneOfHint?: string
   anyOfHint?: string
   allOfHint?: string
-  /** Description factory for the synthesized discriminator field row,
-   *  e.g. `` value => `Always \`${value}\`.` `` (markdown, per InlineMarkdown). */
-  discriminatorDescription?: (value: string) => string
+  /** Description factory for the synthesized discriminator field row. A
+   *  variant may accept multiple wire values, including the empty string. */
+  discriminatorDescription?: (values: readonly string[]) => string
   showFields?: string
   hideFields?: string
   empty?: string
@@ -75,15 +88,17 @@ export interface SchemaCompositionLabels {
 // ApiDocsSchemaComposition on promotion).
 defineOptions({ name: 'PlaygroundSchemaComposition' })
 
+type SchemaCompositionProps = CompositionNode & {
+  labels?: SchemaCompositionLabels
+  /** Passed through to the ApiDocsFieldItem rows. */
+  fieldLabels?: FieldItemLabels
+  /** Outline level of variant section headings (anyOf/allOf); nested
+   *  compositions render one level deeper, capped at 6. */
+  headingLevel?: HeadingLevel
+}
+
 const props = withDefaults(
-  defineProps<CompositionNode & {
-    labels?: SchemaCompositionLabels
-    /** Passed through to the ApiDocsFieldItem rows. */
-    fieldLabels?: FieldItemLabels
-    /** Outline level of variant section headings (anyOf/allOf); nested
-     *  compositions render one level deeper, capped at 6. */
-    headingLevel?: 3 | 4 | 5
-  }>(),
+  defineProps<SchemaCompositionProps>(),
   {
     labels: () => ({}),
     headingLevel: 4,
@@ -92,6 +107,10 @@ const props = withDefaults(
 
 // Merge caller copy over neutral English defaults. Chrome text only —
 // variant labels/descriptions are data and render verbatim.
+function discriminatorValue(value: string) {
+  return value === '' ? '`""`' : `\`${value}\``
+}
+
 const t = computed<Required<SchemaCompositionLabels>>(() => ({
   oneOf: 'One of',
   anyOf: 'Any of',
@@ -99,7 +118,9 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
   oneOfHint: 'Exactly one of the following applies.',
   anyOfHint: 'One or more of the following may apply.',
   allOfHint: 'All of the following apply.',
-  discriminatorDescription: (value: string) => `Always \`${value}\`.`,
+  discriminatorDescription: (values: readonly string[]) => values.length === 1
+    ? `Always ${discriminatorValue(values[0]!)}.`
+    : `One of ${values.map(discriminatorValue).join(', ')}.`,
   showFields: 'Show Fields',
   hideFields: 'Hide Fields',
   empty: 'No variants documented',
@@ -134,9 +155,20 @@ const variantPaths = computed(() =>
 
 function containingVariantId(active: string): string | undefined {
   if (!active) return undefined
-  return variantPaths.value.find(({ paths }) =>
-    paths.some(p => active === p || active.startsWith(`${p}_`)),
-  )?.id
+  const exact = variantPaths.value.find(({ paths }) => paths.includes(active))
+  if (exact) return exact.id
+
+  // Prefixes may overlap (`item` and `item_detail`). Prefer the most specific
+  // path globally; ties preserve variant/path order.
+  let match: { id: string, length: number } | undefined
+  for (const variant of variantPaths.value) {
+    for (const path of variant.paths) {
+      if (active.startsWith(`${path}_`) && (!match || path.length > match.length)) {
+        match = { id: variant.id, length: path.length }
+      }
+    }
+  }
+  return match?.id
 }
 
 const anchor = useFieldAnchor()
@@ -147,7 +179,9 @@ const anchor = useFieldAnchor()
 // find rows inside unselected variants; switching the tab reactively makes
 // the target visible before the composable's stable-layout scroll runs.
 // ---------------------------------------------------------------------------
-const activeTab = ref(props.variants[0]?.id ?? '')
+const activeTab = shallowRef('')
+
+const variantIds = computed(() => props.variants.map(v => v.id))
 
 const tabItems = computed<TabsItem[]>(() =>
   props.variants.map(v => ({ label: v.label, value: v.id })),
@@ -159,9 +193,17 @@ const tabItems = computed<TabsItem[]>(() =>
 // descendant-active pattern: a real mutation on/after mount, not a computed
 // getter, so SSR renders closed and hydration animates reliably.
 // ---------------------------------------------------------------------------
-const open = reactive<Record<string, boolean>>(
-  Object.fromEntries(props.variants.map(v => [v.id, false])),
-)
+const open = reactive<Record<string, boolean>>({})
+
+function syncOpen(ids: string[]) {
+  const current = new Set(ids)
+  for (const id of Object.keys(open)) {
+    if (!current.has(id)) delete open[id]
+  }
+  for (const id of ids) {
+    if (!(id in open)) open[id] = false
+  }
+}
 
 function reveal(active: string) {
   const id = containingVariantId(active)
@@ -170,8 +212,17 @@ function reveal(active: string) {
   else if (props.kind === 'anyOf') open[id] = true
 }
 
-onMounted(() => reveal(anchor.active.value))
-watch(anchor.active, reveal)
+watch(
+  [() => props.kind, variantIds, variantPaths, anchor.active],
+  ([kind, ids, _paths, active]) => {
+    syncOpen(ids)
+    if (kind === 'oneOf' && !ids.includes(activeTab.value)) {
+      activeTab.value = ids[0] ?? ''
+    }
+    reveal(active)
+  },
+  { immediate: true },
+)
 
 // ---------------------------------------------------------------------------
 // Discriminator → a real field row. The discriminator IS a payload property,
@@ -183,24 +234,45 @@ watch(anchor.active, reveal)
 const variantById = computed(() => new Map(props.variants.map(v => [v.id, v])))
 
 function fieldsFor(variant: CompositionVariant): FieldNode[] {
-  const value = props.discriminator?.mapping.find(m => m.variantId === variant.id)?.value
-  if (!value) return variant.fields
-  // Caller already documented the property as a regular field — trust their
-  // richer row (anchor, examples) instead of synthesizing a duplicate.
-  if (variant.fields.some(f => f.name === props.discriminator!.propertyName)) return variant.fields
-  return [
-    {
-      name: props.discriminator!.propertyName,
-      type: 'string',
-      required: true,
-      description: t.value.discriminatorDescription(value),
-    },
-    ...variant.fields,
-  ]
+  if (props.kind === 'allOf' || !props.discriminator) return variant.fields
+
+  const values = props.discriminator.mapping
+    .filter(mapping => mapping.variantId === variant.id)
+    .map(mapping => mapping.value)
+  if (!values.length) return variant.fields
+
+  const index = variant.fields.findIndex(field => field.name === props.discriminator!.propertyName)
+  const current = index >= 0 ? variant.fields[index] : undefined
+  const mappingDescription = t.value.discriminatorDescription(values)
+  const discriminator: FieldNode = current
+    ? {
+        ...current,
+        required: current.required ?? true,
+        description: current.description
+          ? `${mappingDescription} ${current.description}`
+          : mappingDescription,
+      }
+    : {
+        name: props.discriminator.propertyName,
+        type: 'string',
+        required: true,
+        description: mappingDescription,
+      }
+
+  return [discriminator, ...variant.fields.filter((_, fieldIndex) => fieldIndex !== index)]
 }
 
 const headingTag = computed(() => `h${props.headingLevel}`)
-const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as 3 | 4 | 5)
+const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 6) as HeadingLevel)
+const contentIdBase = useId()
+
+function contentId(variantId: string) {
+  return `${contentIdBase}-composition-${encodeURIComponent(variantId)}`
+}
+
+function toggleVariant(variantId: string) {
+  open[variantId] = !open[variantId]
+}
 </script>
 
 <template>
@@ -278,54 +350,61 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
       v-else-if="kind === 'anyOf'"
       class="divide-y divide-default overflow-hidden rounded-lg border border-default"
     >
-      <UCollapsible
+      <section
         v-for="v in variants"
         :key="v.id"
-        v-model:open="open[v.id]"
-        :unmount-on-hide="false"
       >
-        <template #default="{ open: isOpen }">
-          <component :is="headingTag">
-            <button
-              type="button"
-              class="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+        <component :is="headingTag">
+          <button
+            type="button"
+            class="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            :aria-expanded="open[v.id] ?? false"
+            :aria-controls="contentId(v.id)"
+            @click="toggleVariant(v.id)"
+          >
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="size-4 shrink-0 text-dimmed transition-transform duration-200"
+              :class="{ 'rotate-90': open[v.id] }"
+              aria-hidden="true"
+            />
+            <span class="text-sm font-medium text-highlighted">{{ v.label }}</span>
+            <!-- `(N)` count grammar: how much is behind the fold. -->
+            <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
+            <span class="sr-only">{{ open[v.id] ? t.hideFields : t.showFields }}</span>
+          </button>
+        </component>
+        <UCollapsible
+          v-model:open="open[v.id]"
+          :unmount-on-hide="false"
+        >
+          <template #content>
+            <div
+              :id="contentId(v.id)"
+              class="flex flex-col gap-3 px-3 pb-3 ps-9"
             >
-              <UIcon
-                name="i-lucide-chevron-right"
-                class="size-4 shrink-0 text-dimmed transition-transform duration-200"
-                :class="{ 'rotate-90': isOpen }"
-                aria-hidden="true"
-              />
-              <span class="text-sm font-medium text-highlighted">{{ v.label }}</span>
-              <!-- `(N)` count grammar: how much is behind the fold. -->
-              <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
-              <span class="sr-only">{{ isOpen ? t.hideFields : t.showFields }}</span>
-            </button>
-          </component>
-        </template>
-        <template #content>
-          <div class="flex flex-col gap-3 px-3 pb-3 ps-9">
-            <p v-if="v.description" class="text-sm leading-relaxed text-toned">
-              <InlineMarkdown :text="v.description" />
-            </p>
-            <div v-if="fieldsFor(v).length">
-              <ApiDocsFieldItem
-                v-for="field in fieldsFor(v)"
-                :key="field.path ?? field.name"
-                v-bind="field"
-                :labels="fieldLabels"
+              <p v-if="v.description" class="text-sm leading-relaxed text-toned">
+                <InlineMarkdown :text="v.description" />
+              </p>
+              <div v-if="fieldsFor(v).length">
+                <ApiDocsFieldItem
+                  v-for="field in fieldsFor(v)"
+                  :key="field.path ?? field.name"
+                  v-bind="field"
+                  :labels="fieldLabels"
+                />
+              </div>
+              <PlaygroundSchemaComposition
+                v-if="v.composition"
+                v-bind="v.composition"
+                :labels="labels"
+                :field-labels="fieldLabels"
+                :heading-level="nestedHeadingLevel"
               />
             </div>
-            <PlaygroundSchemaComposition
-              v-if="v.composition"
-              v-bind="v.composition"
-              :labels="labels"
-              :field-labels="fieldLabels"
-              :heading-level="nestedHeadingLevel"
-            />
-          </div>
-        </template>
-      </UCollapsible>
+          </template>
+        </UCollapsible>
+      </section>
     </div>
 
     <!-- allOf: conjunction → every part fully expanded in order. Never tabs,

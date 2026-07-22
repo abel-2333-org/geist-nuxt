@@ -19,6 +19,7 @@ const paymentMethod: CompositionNode = {
     propertyName: 'type',
     mapping: [
       { value: 'card', variantId: 'card' },
+      { value: 'saved_card', variantId: 'card' },
       { value: 'wallet', variantId: 'wallet' },
     ],
   },
@@ -58,6 +59,13 @@ const paymentMethod: CompositionNode = {
           type: 'string',
           required: true,
           description: 'Identifier of the shopper wallet to charge.',
+        },
+        {
+          path: 'request-body_wallet_type',
+          name: 'type',
+          type: 'string',
+          required: true,
+          description: 'Selects the wallet payment shape.',
         },
       ],
       composition: {
@@ -224,7 +232,7 @@ const deepLinks = [
           variant="subtle"
           size="xs"
           icon="i-lucide-link-2"
-          @click="anchor.goTo(link.path)"
+          @click="anchor.goTo(link.path, { focus: true })"
         >
           {{ link.label }}
         </UButton>
