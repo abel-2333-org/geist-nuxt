@@ -4,7 +4,9 @@
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
 //   anyOf  → non-exclusive options    → stacked collapsible sections
 //   allOf  → conjunction              → fully expanded sections, no selector
-// plus the optional discriminator (property + complete wire-value mapping).
+// plus the optional discriminator, folded into a single head sentence
+// ("… applies. `type` selects the variant.") with the wire value shown once
+// per variant — one vocabulary, no separate mapping table.
 //
 // Input is a presentation-neutral display model (CompositionNode) — the
 // component never parses an OpenAPI document and never depends on a
@@ -61,15 +63,12 @@ export interface SchemaCompositionLabels {
   oneOfHint?: string
   anyOfHint?: string
   allOfHint?: string
-  /** Lead-in before the discriminator property. */
-  discriminatedBy?: string
-  /** Lead-in before a variant's wire form, e.g. `type = "card"`. */
-  sentAs?: string
+  /** Continuation after the discriminator property code chip, completing the
+   *  hint sentence: "… applies. `type` selects the variant." */
+  discriminatorHint?: string
   showFields?: string
   hideFields?: string
   empty?: string
-  /** aria-label factory for a mapping row (full sentence, caller-owned). */
-  goToVariant?: (variantLabel: string) => string
 }
 
 // Recursive self-reference name (playground prefix; becomes
@@ -100,12 +99,10 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
   oneOfHint: 'Exactly one of the following applies.',
   anyOfHint: 'One or more of the following may apply.',
   allOfHint: 'All of the following apply.',
-  discriminatedBy: 'Discriminated by',
-  sentAs: 'Sent as',
+  discriminatorHint: 'selects the variant.',
   showFields: 'Show Fields',
   hideFields: 'Hide Fields',
   empty: 'No variants documented',
-  goToVariant: (variantLabel: string) => `Go to variant ${variantLabel}`,
   ...props.labels,
 }))
 
@@ -186,13 +183,6 @@ function wireValueFor(variantId: string): string | undefined {
   return props.discriminator?.mapping.find(m => m.variantId === variantId)?.value
 }
 
-// A mapping row is a shortcut, not the semantics: it switches/expands the
-// variant the wire value points at. Never navigates or scrolls on its own.
-function focusVariant(variantId: string) {
-  if (props.kind === 'oneOf') activeTab.value = variantId
-  else open[variantId] = true
-}
-
 const headingTag = computed(() => `h${props.headingLevel}`)
 const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as 3 | 4 | 5)
 </script>
@@ -207,41 +197,17 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
         {{ t[kind] }}
         <span class="text-dimmed">({{ variants.length }})</span>
       </p>
+      <!-- One sentence carries the whole rule, discriminator included:
+           "Exactly one of the following applies. `type` selects the variant."
+           No separate mapping table — the variant selector below already
+           enumerates every alternative with its wire value. -->
       <p class="text-sm leading-relaxed text-muted">
         {{ hint }}
+        <template v-if="discriminator">
+          <InlineCode>{{ discriminator.propertyName }}</InlineCode>
+          {{ t.discriminatorHint }}
+        </template>
       </p>
-    </div>
-
-    <!-- Discriminator: property lead-in + complete wire-value mapping. Rows
-         are real buttons that reveal the mapped variant. Copy stays neutral —
-         the discriminator hints at the concrete schema, it does not validate. -->
-    <div v-if="discriminator" class="space-y-2">
-      <p class="text-sm leading-relaxed">
-        <span class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.discriminatedBy }}</span>
-        <InlineCode>{{ discriminator.propertyName }}</InlineCode>
-      </p>
-      <!-- One shared grid (subgrid rows) so every variant label starts at the
-           same x — same table language as EnumTable/constraints. -->
-      <div class="grid grid-cols-[fit-content(12rem)_1fr_auto] divide-y divide-default overflow-hidden rounded-lg border border-default">
-        <button
-          v-for="row in discriminator.mapping"
-          :key="row.value"
-          type="button"
-          :aria-label="t.goToVariant(variantById.get(row.variantId)?.label ?? row.variantId)"
-          class="col-span-3 grid grid-cols-subgrid items-baseline gap-x-4 bg-muted/40 px-3 py-2.5 text-start transition-colors hover:bg-muted/70 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-          @click="focusVariant(row.variantId)"
-        >
-          <InlineCode class="break-all">{{ row.value }}</InlineCode>
-          <span class="min-w-0 text-sm leading-relaxed text-muted">
-            {{ variantById.get(row.variantId)?.label ?? row.variantId }}
-          </span>
-          <UIcon
-            name="i-lucide-corner-down-right"
-            class="size-3.5 self-center text-dimmed"
-            aria-hidden="true"
-          />
-        </button>
-      </div>
     </div>
 
     <!-- Empty state -->
@@ -270,10 +236,11 @@ const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 5) as
           class="flex flex-col gap-3"
         >
           <template v-for="v in [variantById.get(String(item.value))!]" :key="v.id">
-            <!-- Wire form marker ties the tab back to the discriminator table.
-                 Identity (`v.id`) never renders; only the real payload shape. -->
+            <!-- The active variant's wire form. The head sentence already
+                 introduced the discriminator property, so a bare code chip is
+                 enough — no extra caption vocabulary. Identity (`v.id`) never
+                 renders; only the real payload shape. -->
             <p v-if="discriminator && wireValueFor(v.id)" class="text-sm leading-relaxed">
-              <span class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.sentAs }}</span>
               <InlineCode>{{ discriminator.propertyName }} = "{{ wireValueFor(v.id) }}"</InlineCode>
             </p>
             <p v-if="v.description" class="text-sm leading-relaxed text-toned">

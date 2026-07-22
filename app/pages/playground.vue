@@ -13,7 +13,7 @@ definePageMeta({ nav: false })
 
     <PlaygroundStage
       title="Composition schema 候选"
-      description="OpenAPI / JSON Schema composition 呈现:oneOf 用 tabs、anyOf 用可折叠分区、allOf 全展开,discriminator mapping 可读可点,deep link 自动揭示隐藏 variant。spec 见 playground/composition.spec.md。"
+      description="OpenAPI / JSON Schema composition 呈现:oneOf 用 tabs、anyOf 用可折叠分区、allOf 全展开,discriminator 并入语义头一句话,deep link 自动揭示隐藏 variant。spec 见 playground/composition.spec.md。"
     >
       <PlaygroundCompositionDemo />
     </PlaygroundStage>

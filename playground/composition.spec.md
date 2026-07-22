@@ -66,9 +66,10 @@ interface CompositionNode {
 
 ## Discriminator（仅 oneOf/anyOf 会出现）
 
-- 头部一行 `DISCRIMINATED BY` + InlineCode property。
-- 完整 wire-value mapping 渲染为双列表（value → variant label，subgrid 对齐，与 EnumTable/constraints 同语言）；每行是真实 button，点击切换（oneOf）/展开（anyOf）对应 variant。
-- variant panel 内标注其 wire 形态：`SENT AS` + InlineCode `type = "card"`。
+- **单一词汇原则**（评审修订）：初版曾用 `DISCRIMINATED BY` 头 + wire-value mapping 表 + variant panel 内 `SENT AS` 三层标注，与 `ONE OF` eyebrow 并存四套词汇；mapping 表枚举的 variant 与 tabs 完全重复，点击行为也相同。收敛为：
+  - discriminator 并入 assistive 句成一句话："Exactly one of the following applies. `type` selects the variant."（`discriminatorHint` label 可覆盖后半句）。
+  - **不再渲染独立 mapping 表**——variant 选择器（tabs / 分区）本身就是完整枚举。
+  - variant 的 wire 形态保留为无标签 code chip：oneOf panel 首行 `type = "card"`，anyOf 分区标题内联同款 chip。头部句已建立 `type` 的语境，chip 无需再引入 `SENT AS` 词汇。
 - 文案不得暗示 discriminator 决定校验——它只是提示，验证语义仍由 kind 表达。
 
 ## Anchor / deep-link 策略
@@ -85,12 +86,12 @@ interface CompositionNode {
 | container | 是 | `<section>` 纵向堆叠：语义头 → discriminator → variants |
 | label | 是 | kind eyebrow（mono uppercase + count）+ assistive 句 |
 | value | 是 | variant panel：wire 标注 → description → `ApiDocsFieldItem` 列表 → 嵌套 composition（递归） |
-| icon | 可选 | anyOf 分区 chevron、mapping 行跳转箭头，装饰性 `aria-hidden` |
-| action | 可选 | mapping 行（button，切换/展开）、anyOf 分区开关 |
-| helper text | 是 | assistive 句（labels 可覆盖） |
+| icon | 可选 | anyOf 分区 chevron，装饰性 `aria-hidden` |
+| action | 可选 | anyOf 分区开关 |
+| helper text | 是 | assistive 句（含 discriminator 后半句，labels 可覆盖） |
 | error text | — | 无网络/异步，不需要 |
-| affordance | 是 | tabs pill 选中态；anyOf chevron 旋转；mapping 行 hover 底色 |
-| focus target | 是 | 真实 button（tab / 分区开关 / mapping 行），`focus-visible` 环 |
+| affordance | 是 | tabs pill 选中态；anyOf chevron 旋转 |
+| focus target | 是 | 真实 button（tab / 分区开关），`focus-visible` 环 |
 
 ## State model
 
@@ -108,18 +109,17 @@ interface CompositionNode {
 
 - oneOf 用 UTabs 完整语义（tablist/tab/tabpanel、方向键、`aria-selected`）——确认 reka 内置而非重写。
 - anyOf/allOf 分区标题经 `headingLevel` 进文档 outline（默认 4，嵌套自动 +1，封顶 6），与 FieldGroup 的 headingLevel 惯例一致。
-- mapping 行是真实 `<button type="button">`，Tab 可达、`focus-visible` 环；跳转箭头图标 `aria-hidden`。
-- assistive 句为可见文本，屏幕阅读器按阅读顺序自然读到 kind 语义。
-- reading order：语义头 → discriminator → variants；deep link `goTo(path, { focus: true })` 把焦点落到目标行（composable 现有行为）。
+- assistive 句为可见文本，屏幕阅读器按阅读顺序自然读到 kind 语义与 discriminator。
+- reading order：语义头（含 discriminator 句）→ variants；deep link `goTo(path, { focus: true })` 把焦点落到目标行（composable 现有行为）。
 
 ## 晋升注意事项
 
 - **必做**：`CompositionNode` 等类型与组件一起晋升时，同步把 `FieldNode` 抽到 `kits/api-docs/utils/field.ts`（annotation.spec.md 已记录同一要求，合并处理）；`FieldNode` 增加 `composition?: CompositionNode`，FieldItem 在 children collapsible 之后委托 `ApiDocsSchemaComposition` 渲染字段级 composition。
 - registry 新切片 `api-docs-schema-composition`：registryDependencies 含 field-item（及其闭环 enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）。
-- component tests 覆盖：full（oneOf + discriminator + nested）/ partial（无 discriminator、无 description、空 variants）/ anyOf 非互斥（两分区可同开）/ allOf 无选择器 / mapping 行切换 / deep link 进隐藏 variant / anchor 唯一性。
+- component tests 覆盖：full（oneOf + discriminator + nested）/ partial（无 discriminator、无 description、空 variants）/ anyOf 非互斥（两分区可同开）/ allOf 无选择器 / discriminator 句与 wire chip 渲染 / deep link 进隐藏 variant / anchor 唯一性。
 - isolated consumer fixture（payment-method）只经 display model 接入，不 import 任何 OpenAPI 解析物。
 - oneOf panel 目前依赖 UTabs `unmount-on-hide=false`；晋升时确认 Nuxt UI 版本升级不回归（panel DOM 必须常驻，否则 deep link 失效）。
 
 ## Playground 验证清单（component-reflow §2）
 
-三 kind 语义互不混淆 / discriminator mapping 可读可点 / deep link 进隐藏 tab 与收起分区（切换 + 滚动 + 高亮）/ 嵌套 composition 递归 / 空 variants 空态 / light / dark / 390 / 960 / 1440 / 键盘（tabs 方向键、分区 Enter/Space、mapping 行 Tab 可达）/ reduced-motion 不闪 / console 无错误。
+三 kind 语义互不混淆 / discriminator 句 + wire chip 可读 / deep link 进隐藏 tab 与收起分区（切换 + 滚动 + 高亮）/ 嵌套 composition 递归 / 空 variants 空态 / light / dark / 390 / 960 / 1440 / 键盘（tabs 方向键、分区 Enter/Space）/ reduced-motion 不闪 / console 无错误。
