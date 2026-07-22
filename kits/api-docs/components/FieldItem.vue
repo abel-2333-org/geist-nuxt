@@ -119,6 +119,24 @@ export interface FieldItemLabels {
   linkCopied?: (fieldName: string) => string
   /** Complete failure toast sentence; receives the field name for i18n parity. */
   linkCopyFailed?: (fieldName: string) => string
+
+  // Passthrough labels for nested chrome. These have NO defaults here — when
+  // omitted they stay `undefined` and the child component's own English
+  // default applies, so the default string lives in exactly one place (the
+  // child) and cannot drift. They flow to recursive child rows via `labels`.
+
+  /** Per-status override for the lifecycle badge label (e.g. for i18n),
+   *  keyed by status so one map covers every row a labels object reaches. */
+  lifecycle?: Partial<Record<FieldLifecycle, string>>
+  /** EnumTable heading (default `Allowed values`). */
+  enumLabel?: string
+  /** EnumTable filter placeholder + aria-label (default `Filter values`). */
+  enumFilter?: string
+  /** EnumTable empty state after filtering (default `No matching values`). */
+  enumEmpty?: string
+  /** EnumTable fallback tab label for an unnamed variant; receives the
+   *  0-based index (default `` i => `Option ${i + 1}` ``). */
+  enumVariant?: (index: number) => string
 }
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
@@ -137,7 +155,10 @@ const props = withDefaults(
 )
 
 // Merge caller copy over neutral English defaults. Chrome text only.
-const t = computed<Required<FieldItemLabels>>(() => ({
+// Passthrough labels (lifecycle / enum*) are excluded: they have no defaults
+// here and are read straight from `props.labels` at the passing site.
+type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant'
+const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
   conditional: 'Conditional',
   default: 'Default',
@@ -335,7 +356,11 @@ const lifecycleMeta = computed(() => {
         <InlineCode>{{ defaultValue }}</InlineCode>
       </span>
 
-      <ApiDocsLifecycleBadge v-if="lifecycle" :status="lifecycle.status" />
+      <ApiDocsLifecycleBadge
+        v-if="lifecycle"
+        :status="lifecycle.status"
+        :label="labels?.lifecycle?.[lifecycle.status]"
+      />
 
       <!-- Anchor affordance (touch) — inline and always visible on small
            screens, where there's no hover or left gutter. Pushed to the row
@@ -421,12 +446,18 @@ const lifecycleMeta = computed(() => {
       <div v-if="hasSecondary" class="flex flex-col gap-3">
         <!-- 2. Allowed values — the most actionable metadata. The field's
              default is passed down so its row is marked in the table. -->
+        <!-- Structural chrome flows through: `undefined` lets the table's own
+             English defaults apply, so those strings live in one place. -->
         <ApiDocsEnumTable
           v-if="hasEnum"
           :values="enumValues"
           :variants="enumVariants"
           :default-value="defaultValue"
           :default-label="t.default"
+          :label="labels?.enumLabel"
+          :search-placeholder="labels?.enumFilter"
+          :empty-label="labels?.enumEmpty"
+          :variant-label="labels?.enumVariant"
         />
 
         <!-- 3a. Single constraint — an inline lead-in row (same grammar as
