@@ -248,10 +248,15 @@ export const paymentsResponseScenarios = [
       {
         status: 200,
         statusText: 'OK',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "id": "cs_7Hq3kL",
   "amount": 4900,
   "currency": "CNY",
@@ -259,33 +264,49 @@ export const paymentsResponseScenarios = [
   "url": "https://pay.example.com/cs_7Hq3kL",
   "expiresAt": 1720003600000
 }`,
+              },
+            ],
           },
         ],
       },
       {
         status: 400,
         statusText: 'Bad Request',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "error": {
     "code": "invalid_amount",
     "message": "Amount must be a positive integer in the smallest currency unit."
   }
 }`,
+              },
+            ],
           },
         ],
       },
       {
         status: 401,
         statusText: 'Unauthorized',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "error": { "code": "forbidden", "message": "Missing or invalid token." }
 }`,
+              },
+            ],
           },
         ],
       },

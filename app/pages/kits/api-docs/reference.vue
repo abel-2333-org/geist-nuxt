@@ -95,10 +95,15 @@ const responseScenarios = [
       {
         status: 200,
         statusText: 'OK',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "id": "dpl_8Kx2fQ",
   "name": "my-app",
   "target": "production",
@@ -107,33 +112,49 @@ const responseScenarios = [
   "gitSource": { "repoId": "ghr_9f2a", "ref": "main" },
   "createdAt": 1720000000000
 }`,
+              },
+            ],
           },
         ],
       },
       {
         status: 400,
         statusText: 'Bad Request',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "error": {
     "code": "invalid_name",
     "message": "Project name must be lowercase letters, digits and dashes."
   }
 }`,
+              },
+            ],
           },
         ],
       },
       {
         status: 401,
         statusText: 'Unauthorized',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
   "error": { "code": "forbidden", "message": "Missing or invalid token." }
 }`,
+              },
+            ],
           },
         ],
       },

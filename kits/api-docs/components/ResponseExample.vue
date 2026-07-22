@@ -79,13 +79,6 @@ export interface ResponseStatus {
   description?: string
   /** One or more body forms; more than one shows a media select. */
   bodies?: ResponseBody[]
-  /**
-   * Legacy shorthand for a single code body. Kept for compatibility and
-   * normalized internally to `[{ id: 'legacy', kind: 'code', variants }]`;
-   * `bodies` wins
-   * when both are present.
-   */
-  variants?: CodeVariant[]
 }
 
 export interface ResponseScenario {
@@ -216,14 +209,8 @@ const selectedStatus = computed<ResponseStatus['status'] | undefined>({
   },
 })
 
-/** Normalized body list: `bodies` wins; legacy `variants` maps to one code body. */
-const bodies = computed<ResponseBody[]>(() => {
-  const s = currentStatus.value
-  if (!s) return []
-  if (s.bodies !== undefined) return s.bodies
-  if (s.variants) return [{ id: 'legacy', kind: 'code', variants: s.variants }]
-  return []
-})
+/** Body list of the current status; `bodies` is the only response-body contract. */
+const bodies = computed<ResponseBody[]>(() => currentStatus.value?.bodies ?? [])
 
 // Scenario ids, status codes, and body ids are selection identity keys;
 // duplicates silently resolve to the first match. Surface consumer data bugs
