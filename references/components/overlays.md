@@ -31,6 +31,29 @@
 </UPopover>
 ```
 
+## AnnotationPopover
+
+foundation 组件（非 Nuxt UI 原语）：narrative 文本中的**行内注释壳**——真实 `<button>` 触发器（dashed underline）+ 锚定非模态浮层 + hover 增强 + loading / error 铬件。registry item：`foundation-annotation-popover`。
+
+**props**：`label`（eyebrow 类别名，如 "Term"）`icon`（eyebrow 前导图标，装饰性）`loading` `error`（truthy 切换错误态）`disabled` `triggerClass`（形态组件设置强调色）`labels`（chrome 文案本地化）。**slots**：默认（行内触发文本）`#content`（浮层正文）`#actions`（跳转 / 动作按钮）。**emits**：`open`（每次打开，调用方决定是否加载）`retry`。
+
+```vue
+限流采用 <AnnotationPopover label="Term" icon="i-lucide-book-open">
+  滑动窗口
+  <template #content><p>按滚动时间跨度统计请求数……</p></template>
+  <template #actions><UButton size="xs" variant="link">查看正文</UButton></template>
+</AnnotationPopover> 算法。
+```
+
+关键行为（实现契约，改动须过 `tests/component/annotation-popover.spec.ts`）：
+
+- **click 为骨架、hover 为增强**：底层 `UPopover mode="click"` 受控 `v-model:open`；鼠标（`pointerType === 'mouse'`）`pointerenter/leave` 经 150ms 开 / 250ms 关定时器实现 hover 提前开合，浮层本体可进入。tap / 点击 / Enter 三端行为一致——这是不用 `mode="hover"`（HoverCard）的根因，见下方行为边界。
+- **焦点按打开来源（OpenSource）管理**：触发器的 keydown / pointerdown / hover 定时器显式记录本次打开来源。keyboard 打开 → 焦点移入面板首个动作（无动作则面板本体 `tabindex="-1"`）；pointer / hover 打开 → 阻止 reka 自动聚焦，保持 focus-neutral。关闭时仅当焦点确实在面板内（或 keyboard 会话）才归还触发器，且在 nextTick 验证"焦点已丢失"后才动手；外部点击落到可聚焦目标时不抢回。hover 已开且触发器持焦时，forward Tab 被引导进面板并把所有权切为 keyboard。
+- **异步铬件**：`loading` → `USkeleton` 三行 + `aria-busy` + sr-only 播报；`error` → 错误文案 + Retry 按钮（emit `retry`）；长内容浮层宽度受限（`w-72 sm:w-80`，且不超视口），完整内容须经 `#actions` 跳转可达（永不死路）。
+- **disabled**：降透明度、不可聚焦触发，卸载时清理在途 hover 定时器。
+
+> 形态组件（TermAnnotation / DocAnnotation / FieldAnnotation）是 playground 候选，spec 见 `playground/annotation.spec.md`；壳的本节即正式契约。
+
 ## UTooltip
 
 纯辅助提示，**不承载交互**。`text` + 默认 slot(触发器)。

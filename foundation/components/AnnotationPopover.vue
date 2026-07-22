@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Playground candidate → foundation. Interaction shell of the Annotation
-// family: an inline, focusable trigger anchored to a non-modal popover.
+// Interaction shell of the Annotation family: an inline, focusable trigger
+// anchored to a non-modal popover.
 //
 // Why click mode + manual hover: UPopover mode="hover" rides reka HoverCard,
 // which touch and keyboard users cannot operate when the card holds actions
@@ -13,7 +13,8 @@
 //          eyebrow (icon + label) → body (default #content from the concrete
 //          annotation) → #actions row. Loading (skeleton + aria-busy) and
 //          error (message + retry emit) are shell chrome so every annotation
-//          form shares the same async states. Full spec: ../annotation.spec.md
+//          form shares the same async states.
+//          Contract: references/components/overlays.md
 
 export interface AnnotationPopoverLabels {
   /** sr-only announcement while `loading`. */
@@ -102,16 +103,25 @@ function onTriggerPointerdown() {
 function focusPanel() {
   const panel = panelEl.value
   if (!panel) return
+  if (panel.contains(document.activeElement)) return
   const first = panel.querySelector<HTMLElement>(
     'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
   )
   ;(first ?? panel).focus()
 }
 
+// UPopover lazily mounts its portaled content. On the first open, reka's
+// open-auto-focus hook can run before the slot's template ref is assigned, so
+// a deferred focus attempt may still see no panel and silently stop. Let the
+// ref becoming available own keyboard focus instead; pointer and hover opens
+// remain focus-neutral because their source never passes this guard.
+watch([open, panelEl], ([isOpen, panel]) => {
+  if (isOpen && panel && openSource === 'keyboard') focusPanel()
+}, { flush: 'post' })
+
 const contentProps = {
   onOpenAutoFocus(event: Event) {
     event.preventDefault()
-    if (openSource === 'keyboard') nextTick(focusPanel)
   },
   onCloseAutoFocus(event: Event) {
     // `inPanel` must be sampled now — the portaled panel detaches right after
@@ -211,7 +221,7 @@ onBeforeUnmount(clearTimers)
       <div
         ref="panelEl"
         tabindex="-1"
-        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm outline-none sm:w-80"
+        class="flex w-72 max-w-[calc(100vw-2rem)] flex-col gap-2 p-4 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-80"
         :aria-busy="loading || undefined"
         @pointerenter="cancelClose"
         @pointerleave="scheduleClose"

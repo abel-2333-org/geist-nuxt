@@ -12,7 +12,7 @@
 // The error state never dead-ends: the "open page" action stays available, so
 // a failed preview still navigates.
 
-import type { AnnotationPopoverLabels } from './AnnotationPopover.vue'
+import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
 
 export interface DocPreview {
   title: string
@@ -92,7 +92,7 @@ function onOpen() {
 </script>
 
 <template>
-  <PlaygroundAnnotationPopover
+  <AnnotationPopover
     :label="t.category"
     icon="i-lucide-file-text"
     trigger-class="text-primary decoration-(--ui-primary)/50 hover:decoration-(--ui-primary)"
@@ -127,5 +127,5 @@ function onOpen() {
         {{ t.open }}
       </UButton>
     </template>
-  </PlaygroundAnnotationPopover>
+  </AnnotationPopover>
 </template>

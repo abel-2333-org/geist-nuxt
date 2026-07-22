@@ -122,9 +122,9 @@ function loadBrokenDoc(): Promise<DocPreview> {
       <h2 class="text-sm font-semibold text-highlighted">壳状态:disabled</h2>
       <p class="max-w-prose leading-relaxed text-toned">
         草稿态文档里的注释可以整体禁用:
-        <PlaygroundAnnotationPopover disabled label="术语" :labels="zhLabels">
+        <AnnotationPopover disabled label="术语" :labels="zhLabels">
           被禁用的注释
-        </PlaygroundAnnotationPopover>
+        </AnnotationPopover>
         (不可聚焦、不可打开)。
       </p>
     </section>

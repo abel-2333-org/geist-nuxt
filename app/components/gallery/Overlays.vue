@@ -67,6 +67,51 @@ const menuItems = [
     </GalleryEntry>
 
     <GalleryEntry
+      name="AnnotationPopover"
+      description="Inline annotation trigger anchored to a non-modal popover, with hover enhancement and async chrome."
+      :usage-href="`${DOC}#annotationpopover`"
+    >
+      <GalleryExample label="Inline term">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          Rate limits use a
+          <AnnotationPopover label="Term" icon="i-lucide-book-open">
+            sliding window
+            <template #content>
+              <p class="text-sm leading-relaxed text-default">
+                A rolling time span for counting requests, re-evaluated on every call instead of at fixed interval boundaries.
+              </p>
+            </template>
+          </AnnotationPopover>
+          algorithm to smooth out bursts.
+        </p>
+      </GalleryExample>
+      <GalleryExample label="Loading">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          The
+          <AnnotationPopover label="Term" icon="i-lucide-book-open" loading>
+            token bucket
+            <template #content>
+              <p class="text-sm text-default">Never shown while loading.</p>
+            </template>
+          </AnnotationPopover>
+          variant refills at a constant rate.
+        </p>
+      </GalleryExample>
+      <GalleryExample label="Error">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          A
+          <AnnotationPopover label="Term" icon="i-lucide-book-open" error="Could not load the definition.">
+            leaky bucket
+            <template #content>
+              <p class="text-sm text-default">Never shown while in error.</p>
+            </template>
+          </AnnotationPopover>
+          drains requests at a fixed pace.
+        </p>
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
       name="UTooltip"
       description="Assistive hint only — never place buttons or links inside."
       :usage-href="`${DOC}#utooltip`"

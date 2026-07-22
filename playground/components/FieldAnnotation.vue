@@ -16,7 +16,7 @@
 // Unresolvable `field-ref` degrades to plain text (same policy as
 // TermAnnotation) so stale ids never break the narrative.
 
-import type { AnnotationPopoverLabels } from './AnnotationPopover.vue'
+import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
 import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
 
 export interface FieldAnnotationLabels extends AnnotationPopoverLabels {
@@ -82,7 +82,7 @@ function jump(close: () => void) {
 </script>
 
 <template>
-  <PlaygroundAnnotationPopover
+  <AnnotationPopover
     v-if="node"
     :label="t.category"
     icon="i-lucide-braces"
@@ -132,7 +132,7 @@ function jump(close: () => void) {
         {{ t.viewField }}
       </UButton>
     </template>
-  </PlaygroundAnnotationPopover>
+  </AnnotationPopover>
 
   <!-- Unresolvable ref: degrade to plain text, never a broken control. -->
   <slot v-else>{{ fieldRef }}</slot>

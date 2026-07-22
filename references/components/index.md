@@ -26,6 +26,7 @@ geist-nuxt 的组件全部来自 Nuxt UI v4（公共包 `@nuxt/ui`，共 122 个
 | 侧边滑出面板（详情/筛选） | `USlideover` | `UModal` |
 | 锚定小浮层（选择器/迷你表单） | `UPopover` | `UTooltip`（仅提示） |
 | 悬停/聚焦纯文字提示 | `UTooltip` | `UPopover` |
+| narrative 文本行内注释（术语/字段/文档预览） | `AnnotationPopover`（foundation，见 `overlays.md`） | `UTooltip`（触摸端不触发且不承载动作） |
 | 点击触发的动作菜单 | `UDropdownMenu` | `USelect`（表单取值用） |
 
 ### 输入 / 取值

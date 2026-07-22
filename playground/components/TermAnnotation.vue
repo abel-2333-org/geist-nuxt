@@ -8,7 +8,7 @@
 // Unknown ids degrade gracefully to plain text so stale markdown never breaks
 // a page — the annotation simply disappears.
 
-import type { AnnotationPopoverLabels } from './AnnotationPopover.vue'
+import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
 import type { GlossaryEntry } from '../composables/useGlossary'
 
 export interface TermAnnotationLabels extends AnnotationPopoverLabels {
@@ -50,7 +50,7 @@ if (import.meta.dev) {
 </script>
 
 <template>
-  <PlaygroundAnnotationPopover
+  <AnnotationPopover
     v-if="resolved"
     :label="t.category"
     icon="i-lucide-book-open"
@@ -80,7 +80,7 @@ if (import.meta.dev) {
         {{ t.learnMore }}
       </UButton>
     </template>
-  </PlaygroundAnnotationPopover>
+  </AnnotationPopover>
 
   <slot v-else>{{ id }}</slot>
 </template>
