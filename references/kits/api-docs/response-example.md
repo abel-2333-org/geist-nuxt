@@ -39,7 +39,7 @@ interface ResponseStatus {
   status: number | 'default'   // 数字码或 OpenAPI 的 'default'
   statusText?: string
   description?: string         // status 级描述，显示在 body 面板上方（#notice）
-  bodies?: ResponseBody[]      // 一到多个 body 形态；>1 时出 media 选择器。唯一的 response-body 输入口
+  bodies: ResponseBody[]       // 显式 body 列表；>1 时出 media 选择器。唯一的 response-body 输入口
 }
 interface ResponseScenario { id: string; label: string; statuses: ResponseStatus[] }
 ```

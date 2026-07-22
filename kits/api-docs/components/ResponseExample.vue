@@ -77,8 +77,8 @@ export interface ResponseStatus {
   statusText?: string
   /** Status-level description, already localized; shown above the body. */
   description?: string
-  /** One or more body forms; more than one shows a media select. */
-  bodies?: ResponseBody[]
+  /** Explicit body forms; more than one shows a media select. */
+  bodies: ResponseBody[]
 }
 
 export interface ResponseScenario {
