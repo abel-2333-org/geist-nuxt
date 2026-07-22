@@ -44,7 +44,7 @@ deployment = res.json()`,
 
 // 响应示例：覆盖 body 语义全形态——numeric / 'default' 状态、code（多 media
 // type：JSON + text/plain + CSV）、empty（204 有意空正文）、unavailable（有正文缺示例）、
-// file（二进制：metadata + 可选下载）。旧 `variants` 简写仍兼容（见「导出部署列表」）。
+// file（二进制：metadata + 可选下载）。所有状态一律使用显式 `bodies`。
 const responseScenarios = [
   {
     id: 'created',
@@ -153,19 +153,25 @@ const responseScenarios = [
     ],
   },
   {
-    // 旧模型兼容：仅 `variants` 的调用零改动。
     id: 'list',
     label: '部署列表',
     statuses: [
       {
         status: 200,
         statusText: '成功',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `[
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `[
   { "id": "dpl_8Kx2fQ", "name": "my-app", "state": "READY" }
 ]`,
+              },
+            ],
           },
         ],
       },
@@ -434,10 +440,17 @@ const linkedResponseScenarios = [
       {
         status: 200,
         statusText: 'OK',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{ "id": "dpl_8Kx2fQ", "name": "my-app", "state": "READY" }`,
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{ "id": "dpl_8Kx2fQ", "name": "my-app", "state": "READY" }`,
+              },
+            ],
           },
         ],
       },
@@ -450,10 +463,17 @@ const linkedResponseScenarios = [
       {
         status: 200,
         statusText: 'OK',
-        variants: [
+        bodies: [
           {
-            language: 'json',
-            code: `{ "valid": true, "warnings": [] }`,
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{ "valid": true, "warnings": [] }`,
+              },
+            ],
           },
         ],
       },

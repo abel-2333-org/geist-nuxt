@@ -8,21 +8,26 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import ResponseExample from '../../kits/api-docs/components/ResponseExample.vue'
 
+/** Single explicit JSON code body with a stable id (not derived from display copy). */
+function jsonBody(code: string) {
+  return [{ id: 'json', kind: 'code' as const, variants: [{ language: 'json', code }] }]
+}
+
 const scenarios = [
   {
     id: 'basic',
     label: 'Basic',
     statuses: [
-      { status: 200, statusText: 'OK', variants: [{ language: 'json', code: 'BASIC-200' }] },
-      { status: 400, statusText: 'Bad Request', variants: [{ language: 'json', code: 'BASIC-400' }] },
+      { status: 200, statusText: 'OK', bodies: jsonBody('BASIC-200') },
+      { status: 400, statusText: 'Bad Request', bodies: jsonBody('BASIC-400') },
     ],
   },
   {
     id: 'batch',
     label: 'Batch',
     statuses: [
-      { status: 404, statusText: 'Not Found', variants: [{ language: 'json', code: 'BATCH-404' }] },
-      { status: 422, statusText: 'Unprocessable Entity', variants: [{ language: 'json', code: 'BATCH-422' }] },
+      { status: 404, statusText: 'Not Found', bodies: jsonBody('BATCH-404') },
+      { status: 422, statusText: 'Unprocessable Entity', bodies: jsonBody('BATCH-422') },
     ],
   },
 ]
@@ -32,16 +37,16 @@ const sharedStatusScenarios = [
     id: 'single',
     label: 'Single',
     statuses: [
-      { status: 200, statusText: 'OK', variants: [{ language: 'json', code: 'SINGLE-200' }] },
-      { status: 400, statusText: 'Bad Request', variants: [{ language: 'json', code: 'SINGLE-400' }] },
+      { status: 200, statusText: 'OK', bodies: jsonBody('SINGLE-200') },
+      { status: 400, statusText: 'Bad Request', bodies: jsonBody('SINGLE-400') },
     ],
   },
   {
     id: 'bulk',
     label: 'Bulk',
     statuses: [
-      { status: 201, statusText: 'Created', variants: [{ language: 'json', code: 'BULK-201' }] },
-      { status: 400, statusText: 'Bad Request', variants: [{ language: 'json', code: 'BULK-400' }] },
+      { status: 201, statusText: 'Created', bodies: jsonBody('BULK-201') },
+      { status: 400, statusText: 'Bad Request', bodies: jsonBody('BULK-400') },
     ],
   },
 ]
@@ -223,8 +228,8 @@ describe('ApiDocsResponseExample scenario selection', () => {
       id: 'same-label',
       label: 'Same label',
       statuses: [
-        { status: 200, statusText: 'Success', variants: [{ language: 'json', code: '200' }] },
-        { status: 201, statusText: 'Success', variants: [{ language: 'json', code: '201' }] },
+        { status: 200, statusText: 'Success', bodies: jsonBody('200') },
+        { status: 201, statusText: 'Success', bodies: jsonBody('201') },
       ],
     }]
     const wrapper = await mountSuspended(ResponseExample, {
@@ -244,8 +249,8 @@ describe('ApiDocsResponseExample scenario selection', () => {
           id: 'empty-label',
           label: 'Empty label',
           statuses: [
-            { status: 200, statusText: '   ', variants: [{ language: 'json', code: '200' }] },
-            { status: 201, statusText: '', variants: [{ language: 'json', code: '201' }] },
+            { status: 200, statusText: '   ', bodies: jsonBody('200') },
+            { status: 201, statusText: '', bodies: jsonBody('201') },
           ],
         }],
       },
