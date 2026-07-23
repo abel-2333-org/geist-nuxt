@@ -33,6 +33,17 @@
 // ApiDocsFieldItem); declared explicitly so the template's recursion resolves.
 defineOptions({ name: 'ApiDocsFieldItem' })
 
+// Field-level composition is delegated to ApiDocsSchemaComposition — a
+// HIGHER-level slice that itself depends on FieldItem. A static
+// <ApiDocsSchemaComposition> tag here would either force a dependency cycle
+// (if declared) or leave FieldItem un-installable on its own (if not). So the
+// component is resolved dynamically: when api-docs-schema-composition is also
+// installed it resolves and the field's `composition` renders; otherwise
+// resolveComponent returns the raw name string and the block is skipped. This
+// keeps the dependency edge one-way (schema-composition → field-item).
+const resolvedComposition = resolveComponent('ApiDocsSchemaComposition')
+const schemaComposition = typeof resolvedComposition === 'string' ? null : resolvedComposition
+
 const props = withDefaults(
   defineProps<FieldNode & {
     /** Overridable UI copy for localization. See FieldItemLabels. */
@@ -470,11 +481,12 @@ const lifecycleMeta = computed(() => {
     <!-- Field-level composition — this field's value is itself a
          oneOf/anyOf/allOf. Delegated to ApiDocsSchemaComposition (not flattened
          into rows) so the alternative shape keeps its own semantics, rendered
-         after any concrete subfields. Chrome copy that FieldItem localizes
-         (required/example/enum…) flows on via `field-labels`; the composition's
-         own eyebrow/hint copy uses ApiDocsSchemaComposition defaults. -->
-    <div v-if="composition" class="mt-3 border-s border-default ps-4">
-      <ApiDocsSchemaComposition v-bind="composition" :field-labels="labels" />
+         after any concrete subfields. Rendered via a dynamically resolved
+         component (see script) so FieldItem installs standalone without a
+         dependency cycle; the block only appears when that slice is present.
+         Chrome copy FieldItem localizes flows on via `field-labels`. -->
+    <div v-if="composition && schemaComposition" class="mt-3 border-s border-default ps-4">
+      <component :is="schemaComposition" v-bind="composition" :field-labels="labels" />
     </div>
   </div>
 </template>

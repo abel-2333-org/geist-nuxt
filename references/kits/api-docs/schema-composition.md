@@ -137,7 +137,7 @@ const destination: FieldNode = {
 
 ## 相关组件
 
-- `<ApiDocsFieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行、并通过 `FieldNode.composition` 委托本组件做字段级组合。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。
+- `<ApiDocsFieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。依赖是**单向**的:本组件依赖 FieldItem,FieldItem **不**依赖本组件。字段级组合(`FieldNode.composition`)是可选增强——FieldItem 用 `resolveComponent('ApiDocsSchemaComposition')` 动态解析并 `<component :is>` 渲染,装了本切片才生效,故 FieldItem 可独立安装且无依赖环。
 - `<ApiDocsFieldGroup>` — 顶层组合的容器（mono 大写组标题 + 计数）。
 - `useFieldAnchor` — 深链接 composable（`active` + `revision` 事件驱动的重新揭示）。
 - `<UTabs>` / `<UCollapsible>` — Nuxt UI 原语（oneOf tabs / anyOf 分区）。
