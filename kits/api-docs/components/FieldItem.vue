@@ -178,9 +178,11 @@ function onCopyLink() {
 // Collapsible open state is a real ref (v-model:open) so the user can toggle
 // it. It is also forced open when a descendant is the active anchor so deep
 // links resolve. We push the auto-open as an actual mutation (not a computed
-// getter): the initial render matches SSR (closed), and the open happens after
-// hydration, which Reka's controlled Collapsible reliably animates — a
-// getter-driven `open` left the SSR-closed state stuck after hydration.
+// getter): `active` is always empty during SSR, so the immediate watch is a
+// no-op on the server and the initial render matches SSR (closed); the open
+// mutation then lands client-side, which Reka's controlled Collapsible
+// reliably animates — a getter-driven `open` left the SSR-closed state stuck
+// after hydration.
 const open = shallowRef(false)
 
 // Re-run on every navigation event as well as path changes. This matters when
