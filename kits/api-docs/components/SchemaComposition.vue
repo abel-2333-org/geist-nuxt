@@ -24,70 +24,11 @@
 
 import type { TabsItem } from '@nuxt/ui'
 // The composition + field display model lives in the co-slice util
-// `utils/field.ts` so it resolves through `#imports` in both the source repo
-// and a copied-in consumer (see that file). Re-exported here for callers that
-// import the composition model from this component (mirrors FieldItem).
-import type {
-  CompositionDiscriminator,
-  CompositionKind,
-  CompositionNode,
-  CompositionVariant,
-  FieldItemLabels,
-  FieldNode,
-  HeadingLevel,
-  SchemaCompositionLabels,
-} from '#imports'
-
-export type {
-  CompositionDiscriminator,
-  CompositionKind,
-  CompositionNode,
-  CompositionVariant,
-  HeadingLevel,
-  SchemaCompositionLabels,
-}
-
-export interface CompositionDiscriminator {
-  /** The discriminating payload property, e.g. `type`. */
-  propertyName: string
-  /** Complete wire value → variant id mapping, order preserved. */
-  mapping: Array<{ value: string, variantId: string }>
-}
-
-interface CompositionNodeBase {
-  /** Order preserved, ids stable. */
-  variants: CompositionVariant[]
-}
-
-/** A discriminator selects alternatives; it cannot describe an allOf
- * conjunction. The union keeps that invalid state out of typed callers while
- * field derivation still guards JavaScript/runtime input defensively. */
-export type CompositionNode =
-  | (CompositionNodeBase & {
-    kind: 'oneOf' | 'anyOf'
-    discriminator?: CompositionDiscriminator
-  })
-  | (CompositionNodeBase & {
-    kind: 'allOf'
-    discriminator?: never
-  })
-
-export type HeadingLevel = 3 | 4 | 5 | 6
-
-/** Component-owned chrome copy, overridable for i18n (FieldItem convention). */
-export interface SchemaCompositionLabels {
-  oneOf?: string
-  anyOf?: string
-  allOf?: string
-  /** Assistive sentence under the kind eyebrow. Visible text, not color-only. */
-  oneOfHint?: string
-  anyOfHint?: string
-  allOfHint?: string
-  /** Description factory for the synthesized discriminator field row. A
-   *  variant may accept multiple wire values, including the empty string. */
-  discriminatorDescription?: (values: readonly string[]) => string
-  empty?: string
-}
+// `utils/field.ts`. Nuxt auto-imports this kit's `utils/` dir, so the types
+// (CompositionNode, CompositionVariant, CompositionDiscriminator,
+// SchemaCompositionLabels, HeadingLevel, FieldNode, FieldItemLabels) are
+// referenced bare here with no import statement — same pattern as the
+// lifecycle/method preset types. Callers import the model from `~/utils/field`.
 
 // Recursive self-reference name (kit uses pathPrefix: false, so the global
 // component name is ApiDocsSchemaComposition); declared explicitly so the

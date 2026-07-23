@@ -2,15 +2,16 @@ import { defineComponent, shallowRef } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
-import SchemaComposition from '../../playground/components/SchemaComposition.vue'
-import type { CompositionNode } from '../../playground/components/SchemaComposition.vue'
+import SchemaComposition from '../../kits/api-docs/components/SchemaComposition.vue'
+import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
+import type { CompositionNode, FieldNode } from '../../kits/api-docs/utils/field'
 import { useActiveFieldPath, useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 
 function tabs(wrapper: VueWrapper) {
   return wrapper.findComponent({ name: 'UTabs' })
 }
 
-describe('PlaygroundSchemaComposition', () => {
+describe('ApiDocsSchemaComposition', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
   })
@@ -290,5 +291,125 @@ describe('PlaygroundSchemaComposition', () => {
     })
     expect(headingWrapper.findAll('h6')).toHaveLength(2)
     expect(headingWrapper.find('h7').exists()).toBe(false)
+  })
+
+  it('renders the empty state box with the default and overridable label', async () => {
+    const emptyProps = { kind: 'oneOf' as const, variants: [] }
+    const wrapper = await mountSuspended(SchemaComposition, { props: emptyProps })
+
+    // No tabs / disclosure chrome when there is nothing to show.
+    expect(tabs(wrapper).exists()).toBe(false)
+    expect(wrapper.findAll('h4')).toHaveLength(0)
+    expect(wrapper.text()).toContain('No variants documented')
+
+    const overridden = await mountSuspended(SchemaComposition, {
+      props: { ...emptyProps, labels: { empty: '暂无可选形态' } },
+    })
+    expect(overridden.text()).toContain('暂无可选形态')
+    expect(overridden.text()).not.toContain('No variants documented')
+  })
+
+  it('renders full and partial oneOf variants without inventing fields between them', async () => {
+    // "full" variant carries every optional detail; "partial" carries only a
+    // name — the row must not borrow the full variant's metadata.
+    const node: CompositionNode = {
+      kind: 'oneOf',
+      variants: [
+        {
+          id: 'full',
+          label: 'Full',
+          description: 'Everything present.',
+          fields: [{
+            path: 'full_amount',
+            name: 'amount',
+            type: 'integer',
+            required: true,
+            defaultValue: '0',
+            examples: ['1099'],
+            enumValues: [{ value: '1099', description: 'Sample' }],
+          }],
+        },
+        {
+          id: 'partial',
+          label: 'Partial',
+          fields: [{ path: 'partial_ref', name: 'ref', type: 'string' }],
+        },
+      ],
+    }
+    const wrapper = await mountSuspended(SchemaComposition, { props: node })
+
+    // Default tab shows the full variant with its own metadata.
+    expect(wrapper.find('#full_amount').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Everything present.')
+    expect(wrapper.text()).toContain('Required')
+
+    // Switch to the partial variant: its lone field must stay bare.
+    tabs(wrapper).vm.$emit('update:modelValue', 'partial')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('#partial_ref').exists()).toBe(true)
+    const partialText = wrapper.find('#partial_ref').text()
+    expect(partialText).toContain('ref')
+    expect(partialText).not.toContain('Required')
+    expect(partialText).not.toContain('1099')
+  })
+
+  it('namespaces identically-named fields per variant so anchor ids stay unique', async () => {
+    // Same wire field name (`token`) in two variants; the display model gives
+    // each a variant-namespaced path, so the DOM ids never collide.
+    const node: CompositionNode = {
+      kind: 'oneOf',
+      variants: [
+        { id: 'card', label: 'Card', fields: [{ path: 'body_card_token', name: 'token', type: 'string' }] },
+        { id: 'wallet', label: 'Wallet', fields: [{ path: 'body_wallet_token', name: 'token', type: 'string' }] },
+      ],
+    }
+    const wrapper = await mountSuspended(SchemaComposition, { props: node })
+
+    // unmount-on-hide=false keeps both panels in the DOM, so both ids exist.
+    const ids = wrapper.findAll('[id]').map(el => el.attributes('id'))
+    const tokenIds = ids.filter(id => id?.endsWith('_token'))
+    expect(tokenIds).toContain('body_card_token')
+    expect(tokenIds).toContain('body_wallet_token')
+    expect(new Set(tokenIds).size).toBe(tokenIds.length)
+  })
+
+  it('FieldItem delegates a field-level composition to ApiDocsSchemaComposition after its children', async () => {
+    const field: FieldNode = {
+      path: 'destination',
+      name: 'destination',
+      type: 'object',
+      description: 'Where the money goes.',
+      children: [{ path: 'destination_id', name: 'id', type: 'string' }],
+      composition: {
+        kind: 'oneOf',
+        variants: [
+          { id: 'bank', label: 'Bank', fields: [{ path: 'destination_bank_iban', name: 'iban', type: 'string' }] },
+          { id: 'card', label: 'Card', fields: [{ path: 'destination_card_last4', name: 'last4', type: 'string' }] },
+        ],
+      },
+    }
+    const wrapper = await mountSuspended(FieldItem, { props: field })
+    const composition = wrapper.findComponent(SchemaComposition)
+
+    // The field row hosts exactly one delegated composition block.
+    expect(composition.exists()).toBe(true)
+    expect(wrapper.findAllComponents(SchemaComposition)).toHaveLength(1)
+    expect(composition.props('kind')).toBe('oneOf')
+
+    // The composition renders after the concrete child subtree, not instead of it.
+    const html = wrapper.html()
+    expect(html.indexOf('destination_id')).toBeLessThan(html.indexOf('destination_bank_iban'))
+    expect(wrapper.find('#destination_bank_iban').exists()).toBe(true)
+  })
+
+  it('FieldItem renders no composition block when the field omits one', async () => {
+    const field: FieldNode = {
+      path: 'plain',
+      name: 'plain',
+      type: 'string',
+      description: 'A leaf field.',
+    }
+    const wrapper = await mountSuspended(FieldItem, { props: field })
+    expect(wrapper.findComponent(SchemaComposition).exists()).toBe(false)
   })
 })

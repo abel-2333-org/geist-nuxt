@@ -3,17 +3,18 @@
 // This is the data contract shared by the recursive field renderer
 // (ApiDocsFieldItem) and the schema-composition renderer
 // (ApiDocsSchemaComposition). It lives in a util — not inside a component — so
-// every slice references one canonical, compiler-enforced definition through
-// Nuxt's `#imports` surface in BOTH the source repo and a copied-in consumer
-// (where utils land in `app/utils/` and components in `app/components/api-docs/`;
-// a util→component relative import would not resolve identically across those
-// two topologies). FieldItem.vue re-exports these names so callers that still
-// import them from the component keep compiling unchanged.
+// every slice references one canonical, compiler-enforced definition. Nuxt
+// auto-imports this kit's `utils/` dir, so components reference these types
+// bare (no import), exactly like the lifecycle/method preset types.
 //
-// Cross-slice types are pulled from `#imports` for the same topology-safe
-// reason: FieldLifecycle from the lifecycle-badge slice's `lifecycle-preset`
-// util, EnumValue/EnumVariant from the enum-table slice's `enum` util.
-import type { EnumValue, EnumVariant, FieldLifecycle } from '#imports'
+// Cross-slice types come from sibling utils by relative path. Both this file
+// and its dependencies live under `utils/`, so the relative specifier is
+// identical in the source repo and after copy-in (everything flattens to
+// `app/utils/`): FieldLifecycle from the lifecycle-badge slice's
+// `lifecycle-preset`, EnumValue/EnumVariant from the enum-table slice's `enum`.
+// Both owner slices are declared in api-docs-field-item's registryDependencies.
+import type { EnumValue, EnumVariant } from './enum'
+import type { FieldLifecycle } from './lifecycle-preset'
 
 /** `true` / `false`(absent) / `'conditional'` (required only in certain cases). */
 export type RequiredState = boolean | 'conditional'

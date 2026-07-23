@@ -1,5 +1,5 @@
 import type { InjectionKey } from 'vue'
-import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
+import type { FieldNode } from '../../kits/api-docs/utils/field'
 
 /**
  * Playground candidate → kits/api-docs (travels with FieldAnnotation).

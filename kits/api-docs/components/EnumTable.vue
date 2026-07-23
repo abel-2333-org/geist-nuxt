@@ -5,15 +5,11 @@ import type { TabsItem } from '@nuxt/ui'
 // Nuxt UI primitives + core atoms (InlineCode, InlineMarkdown, both supplied by
 // the foundation dependency closure).
 //
-// The enum display model (EnumValue/EnumVariant) now lives in the co-slice util
-// `utils/enum.ts` so it resolves through `#imports` in both the source repo and
-// a copied-in consumer (see that file). It is re-exported here so existing
-// callers that import `{ EnumValue, EnumVariant } from './EnumTable.vue'`
-// keep compiling unchanged.
-import type { EnumValue, EnumVariant } from '#imports'
-
-export type { EnumValue, EnumVariant }
-
+// The enum display model (EnumValue/EnumVariant) lives in the co-slice util
+// `utils/enum.ts` and is referenced bare here — Nuxt auto-imports this kit's
+// `utils/` dir, so no import statement is needed (same pattern as the
+// lifecycle/method preset types). Callers that need the types import them from
+// `~/utils/enum` (or the auto-import surface), not from this component.
 const props = withDefaults(
   defineProps<{
     /** Flat enum: a single list of allowed values. */

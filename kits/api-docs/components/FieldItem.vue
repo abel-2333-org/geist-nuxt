@@ -3,17 +3,18 @@
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
 // constraints, example, lifecycle), and recursive object/array subfields.
 //
-// Self-contained per the kit slice convention: the field data model (FieldNode
-// and friends) travels inline with the component, mirroring how EnumTable/
-// CodeBlock carry their own display types. The types it shares with the sibling
-// slices it already depends on — EnumValue/EnumVariant (enum-table) and
-// FieldLifecycle (lifecycle-badge) — are imported from those slices rather than
-// re-declared, so the shared contract is compiler-enforced (see imports below).
+// The field data model (FieldNode, FieldItemLabels and friends) lives in the
+// co-slice util `utils/field.ts`. Nuxt auto-imports this kit's `utils/` dir,
+// so those types — and the composition model on `FieldNode.composition` — are
+// referenced bare here with no import statement (same pattern as the lifecycle/
+// method preset types). Callers that need the model import it from
+// `~/utils/field`, the single canonical home.
 //
 // Composed from Nuxt UI primitives (UIcon, UCollapsible) + core atoms
-// (InlineCode and InlineMarkdown from foundation) + kit
-// siblings (ApiDocsEnumTable, ApiDocsLifecycleBadge). Deep linking is handled
-// by the kit's useFieldAnchor composable (auto-imported).
+// (InlineCode and InlineMarkdown from foundation) + kit siblings
+// (ApiDocsEnumTable, ApiDocsLifecycleBadge, and ApiDocsSchemaComposition for
+// field-level composition). Deep linking is handled by the kit's useFieldAnchor
+// composable (auto-imported).
 //
 // Anatomy:  summary row  ── anchor · name · type · format · requiredness
 //                           (required/conditional only; optional is unmarked) ·
@@ -22,36 +23,11 @@
 //                           secondary band (deprecation-first → enum →
 //                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
+//           composition  ── field-level oneOf/anyOf/allOf delegated to
+//                           <ApiDocsSchemaComposition> after the children
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
 //           carry dynamic aria-labels; copied state announced politely.
-
-// The field data model (FieldNode and friends) now lives in the co-slice util
-// `utils/field.ts` so it resolves through `#imports` in both the source repo
-// and a copied-in consumer (see that file for the topology rationale). Every
-// name is re-exported here so callers that still import the model from this
-// component — including sibling slices — keep compiling unchanged.
-import type {
-  FieldItemLabels,
-  FieldLifecycleInfo,
-  FieldNode,
-  FieldNote,
-  RequiredState,
-} from '#imports'
-// EnumValue/EnumVariant (enum-table slice) and FieldLifecycle (lifecycle-badge
-// slice) are re-exported for the same backward-compatibility reason.
-import type { EnumValue, EnumVariant, FieldLifecycle } from '#imports'
-
-export type {
-  EnumValue,
-  EnumVariant,
-  FieldItemLabels,
-  FieldLifecycle,
-  FieldLifecycleInfo,
-  FieldNode,
-  FieldNote,
-  RequiredState,
-}
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
 // ApiDocsFieldItem); declared explicitly so the template's recursion resolves.
