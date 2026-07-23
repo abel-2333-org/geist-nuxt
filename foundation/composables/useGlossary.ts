@@ -1,7 +1,7 @@
 import type { InjectionKey } from 'vue'
 
 /**
- * Playground candidate → foundation (travels with TermAnnotation).
+ * Glossary provide/inject for TermAnnotation (foundation).
  *
  * A glossary is page-scoped data: the page (or layout) provides a map of
  * term ids → entries once, and every `:term[…]{id="…"}` annotation in the

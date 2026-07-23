@@ -1,18 +1,20 @@
 <script setup lang="ts">
-// Playground candidate → foundation. Doc-preview form of the Annotation
-// family: an internal link whose popover lazily loads the target document's
-// title + summary the first time it opens.
+// Doc-preview form of the Annotation family (foundation): an internal link
+// whose popover lazily loads the target document's title + summary the first
+// time it opens.
 //
 // Pipeline-agnostic on purpose: this component only receives an async `load`
 // function. A @nuxt/content consumer wraps it in a thin local adapter whose
 // `load` runs `queryCollection(...)` for `to` (function props cannot travel
-// through MDC attributes — see ../annotation.spec.md). Results are cached per
-// component instance, so re-hovering the same link reopens instantly.
+// through MDC attributes). Results are cached per component instance, so
+// re-hovering the same link reopens instantly.
 //
 // The error state never dead-ends: the "open page" action stays available, so
 // a failed preview still navigates.
-
-import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
+//
+// AnnotationPopoverLabels (utils/annotation) is a Nuxt auto-import, referenced
+// bare. DocPreview is exported below for consumer adapters that type their
+// `load` (co-located in app/components after copy-in).
 
 export interface DocPreview {
   title: string

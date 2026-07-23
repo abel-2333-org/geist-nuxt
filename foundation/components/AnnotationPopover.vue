@@ -1,3 +1,11 @@
+<script lang="ts">
+// Bridge the label model for copy-in projects that import it directly from
+// this component. The canonical home is the auto-imported `utils/annotation`,
+// which `<script setup>` below references bare (same pattern as FieldItem's
+// type re-export from `utils/field`).
+export type { AnnotationPopoverLabels } from '#imports'
+</script>
+
 <script setup lang="ts">
 // Interaction shell of the Annotation family: an inline, focusable trigger
 // anchored to a non-modal popover.
@@ -15,13 +23,10 @@
 //          error (message + retry emit) are shell chrome so every annotation
 //          form shares the same async states.
 //          Contract: references/components/overlays.md
-
-export interface AnnotationPopoverLabels {
-  /** sr-only announcement while `loading`. */
-  loading?: string
-  /** Retry button caption in the error state. */
-  retry?: string
-}
+//
+// AnnotationPopoverLabels is auto-imported from `utils/annotation` (referenced
+// bare, no import) so the label model is reachable from both foundation forms
+// and the kit's field form across the copy-in topology boundary.
 
 const props = withDefaults(
   defineProps<{

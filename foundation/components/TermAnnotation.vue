@@ -1,15 +1,15 @@
 <script setup lang="ts">
-// Playground candidate → foundation. Concept form of the Annotation family:
-// resolves a term id against the page-provided glossary (useGlossary) and
-// shows the definition in the shared AnnotationPopover shell.
+// Concept form of the Annotation family (foundation): resolves a term id
+// against the page-provided glossary (useGlossary) and shows the definition in
+// the shared AnnotationPopover shell.
 //
 // MDC usage in narrative markdown:  :term[幂等键]{id="idempotency-key"}
 // The default slot is the visible phrase; `id` looks up the glossary entry.
 // Unknown ids degrade gracefully to plain text so stale markdown never breaks
 // a page — the annotation simply disappears.
-
-import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
-import type { GlossaryEntry } from '../composables/useGlossary'
+//
+// AnnotationPopoverLabels (utils/annotation) and GlossaryEntry
+// (composables/useGlossary) are Nuxt auto-imports, referenced bare.
 
 export interface TermAnnotationLabels extends AnnotationPopoverLabels {
   /** Eyebrow caption of the popover. */
