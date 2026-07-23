@@ -52,7 +52,31 @@ foundation 组件（非 Nuxt UI 原语）：narrative 文本中的**行内注释
 - **异步铬件**：`loading` → `USkeleton` 三行 + `aria-busy` + sr-only 播报；`error` → 错误文案 + Retry 按钮（emit `retry`）；长内容浮层宽度受限（`w-72 sm:w-80`，且不超视口），完整内容须经 `#actions` 跳转可达（永不死路）。
 - **disabled**：降透明度、不可聚焦触发，卸载时清理在途 hover 定时器。
 
-> 形态组件（TermAnnotation / DocAnnotation / FieldAnnotation）是 playground 候选，spec 见 `playground/annotation.spec.md`；壳的本节即正式契约。
+共享 `labels` 类型 `AnnotationPopoverLabels` 定义在自动导入的 `utils/annotation`（**非**壳 SFC），形态组件的 labels 接口直接 `extends` 它——这样类型能跨 copy-in 拓扑边界被 foundation 形态与 kit 形态同时裸引用（与 `FieldNode` 落在 `utils/field` 同因）。
+
+## TermAnnotation
+
+foundation 组件，Annotation 家族的**概念形态**：把 glossary 术语 id 解析成行内定义浮层，未命中时**优雅降级为纯文本**（stale markdown 永不破页）。registry item：`foundation-term-annotation`（依赖 `foundation-annotation-popover` `foundation-inline-markdown` `foundation-use-glossary`）。
+
+**props**：`id`（glossary 键）`labels`（继承 `AnnotationPopoverLabels`，含 `category`/`learnMore`）。默认 slot 可覆盖可见短语（缺省用 glossary `term`）。术语库经 `useGlossary` 的 `provideGlossary()` 由页面/布局按需注入，组件侧 `injectGlossary()` 读取。
+
+```vue
+限流采用 <TermAnnotation id="sliding-window" /> 算法。
+```
+
+## DocAnnotation
+
+foundation 组件，Annotation 家族的**站内文档预览形态**：内链触发器，浮层首次打开时**惰性加载**目标文档标题 + 摘要。registry item：`foundation-doc-annotation`（依赖 `foundation-annotation-popover` `foundation-inline-markdown`）。
+
+**管线无关**是刻意设计：组件只接收 async `load` 函数（函数 prop 无法经 MDC 属性传递），`@nuxt/content` 消费方用薄本地 adapter 包 `queryCollection(...)`。结果按实例缓存，重开即时。**error 态不死路**：加载失败仍保留「打开页面」动作。
+
+**props**：`to`（目标路由）`load`（`() => Promise<DocPreview>`）`labels`（继承，含 `open`/`error`）。
+
+```vue
+详见 <DocAnnotation to="/guide/rate-limit" :load="loadGuide">限流指南</DocAnnotation>。
+```
+
+> Annotation 家族第三形态 **FieldAnnotation** 绑定 API 字段领域（`FieldNode` + `useFieldAnchor`），归属 `kits/api-docs`（`<ApiDocsFieldAnnotation>`），契约见 `references/kits/api-docs/`。壳与三形态的完整形态矩阵 spec 亦在该处。
 
 ## UTooltip
 

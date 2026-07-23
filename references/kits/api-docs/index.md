@@ -28,10 +28,11 @@
 | `components/CodeRail.vue` | `<ApiDocsCodeRail>` | 纵向双例码轨道：上下两栏（典型为 Request/Response）+ 可拖横向把手 + 内容优先重分配；耦合本 kit 代码卡内部 DOM（`.code-surface`/`pre.raw-pre`）量自然高，故归 kit 而非 foundation；`storage-key` prop 让多实例互不串扰；把手 aria-label 经 `resize-label` prop 可本地化（同 `SidebarNav` 惯例） | 本页「可拖动分栏」 |
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线）；结构文案 `label`/`default-label`/`search-placeholder`/`empty-label` 与未命名 variant 兜底 `variant-label`（函数，收 0 基 index，默认 `Option N`）均可覆盖（i18n） | — |
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
-| `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀色容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位;深链接由 `useFieldAnchor` 驱动。字段值本身是 oneOf/anyOf/allOf 时,`composition` prop 在子字段之后委托 `<ApiDocsSchemaComposition>` 渲染，`FieldItemLabels.composition` 注入其 chrome。数据模型 `FieldNode`/`FieldNote`/`FieldItemLabels` 及 composition 类型族全部下沉到 `utils/field.ts`(kit auto-import,组件裸引用),`EnumValue`/`EnumVariant` 来自 `utils/enum.ts`、`FieldLifecycle` 来自 `utils/lifecycle-preset.ts`;全部 chrome(含内部 LifecycleBadge / EnumTable / SchemaComposition 与递归子行)经单个 `labels` 对象本地化,见「Display-model seam → FieldItem 的通用交互约束」 | — |
+| `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀��容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位;深链接由 `useFieldAnchor` 驱动。字段值本身是 oneOf/anyOf/allOf 时,`composition` prop 在子字段之后委托 `<ApiDocsSchemaComposition>` 渲染，`FieldItemLabels.composition` 注入其 chrome。数据模型 `FieldNode`/`FieldNote`/`FieldItemLabels` 及 composition 类型族全部下沉到 `utils/field.ts`(kit auto-import,组件裸引用),`EnumValue`/`EnumVariant` 来自 `utils/enum.ts`、`FieldLifecycle` 来自 `utils/lifecycle-preset.ts`;全部 chrome(含内部 LifecycleBadge / EnumTable / SchemaComposition 与递归子行)经单个 `labels` 对象本地化,见「Display-model seam → FieldItem 的通用交互约束」 | — |
 | `components/SchemaComposition.vue` | `<ApiDocsSchemaComposition>` | 忠实呈现 OpenAPI / JSON Schema 的 `oneOf`/`anyOf`/`allOf`:oneOf 用 `UTabs`(`unmount-on-hide=false` 保留隐藏 panel DOM,深链接可揭示)、anyOf 用可折叠分区、allOf 全展开;discriminator 合成为每个 variant 的**首行真实字段**(而非扁平化丢失语义);variant 递归(variant 内可再嵌 composition),`heading-level` 定标题层级;chrome 文案(kind 眉标 / hint / discriminator 描述工厂 / 空态)经 `labels` 本地化,`field-labels` 透传给内部字段行。字段行渲染委托 `ApiDocsFieldItem`,故切片依赖它 | `schema-composition.md` |
+| `components/FieldAnnotation.vue` | `<ApiDocsFieldAnnotation>` | Annotation 家族的**字段形态**(壳在 foundation `AnnotationPopover`,与概念形态 `TermAnnotation` / 文档形态 `DocAnnotation` 同族;字段形态因绑 `FieldNode`+`useFieldAnchor` 落本 kit):把字段引用嵌进叙事文本,hover/click 预览字段摘要(名/类型/必填/描述),动作深链接到字段行。两种绑定——`field` 直传 `FieldNode`,或 `field-ref` 经 `useFieldSource`(随切片分发的 provide/inject)解析(叙事 markdown 只引 id);同页 ref 省略 `page`,委托 `useFieldAnchor` 滚动+展开祖先+高亮;跨页 ref 声明 `page`,渲染为 `{page}#{path}` 链接,目标页 `initFromHash()` 接管。未命中 ref **降级为纯文本**(同 TermAnnotation 策略),chrome 文案经 `labels`(继承 `AnnotationPopoverLabels`)本地化。依赖 `api-docs-field-item`(带入 `FieldNode`+`useFieldAnchor` 闭包)+ 三个 foundation item | 本页「Display-model seam」 |
 | `components/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
-| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
+| `components/SidebarNav.vue` | `<ApiDocsSidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳���个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `ApiDocsSiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `ApiDocsMethodBadge` | `sidebar-nav.md` |
 
 ### SiteSearch 契约
 
@@ -89,7 +90,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 |---|---|---|---|
 | **identity 原子** | 怎么调 / 什么方向 | `<ApiDocsMethodBadge>`（五色方法标）+ mono path | `<ApiDocsEventBadge>`（统一 `EVENT` 中性标）+ mono 事件名 |
 | **identity/header** | 这是哪个操作 | `<ApiDocsOperationHeader kind="endpoint">` | `<ApiDocsOperationHeader kind="webhook">` |
-| **actions/target** | 往哪调 / 页面级操作 | `<ApiDocsOperationTarget>`（host 切换 + 地址 + 复制）+ header 的 `#actions` 槽 | 无 target 组件——订阅目标是消费方自己的回调地址，一句话说明即可；`#actions` 槽仍可用 |
+| **actions/target** | 往哪调 / 页面级操作 | `<ApiDocsOperationTarget>`（host 切换 + 地址 + 复制）+ header 的 `#actions` 槽 | 无 target 组件——订阅目标是消费方自己的回调地址，一句话说明���可；`#actions` 槽仍可用 |
 | **lifecycle presentation** | 现在还能用吗 | `<ApiDocsLifecycleBadge>`（标记一行）+ `<ApiDocsLifecycleNotice>`（正文成块解释） | 同 endpoint |
 
 设计决策（造新表面前先读，避免重新发明）：
@@ -97,7 +98,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 - **MethodBadge / EventBadge 是平行原子，不合并成 `OperationBadge kind=…`**——两者词表来源不同（HTTP 动词封闭集 vs 事件标识开放集），合并会让 props 类型变糊。EVENT 用统一词 + neutral tone：方法五色说「你调平台」，中性 EVENT 说「平台回调你」，方向差异用色彩系统区隔，对齐 Stripe 等主流范式。**不按事件动词尾段（succeeded/failed…）着色**——词表开放、映射难穷尽。
 - **OperationHeader 是单组件双形态**——两形态结构 90% 同构（identity 行 → 标题 → 描述 → 尾部块），拆成两个组件会重复。`kind` 只切换 identity 行的徽章与标识字段（`method`+`path` vs `event`）。
 - **OperationTarget 与 OperationHeader 正交**——target 放 header 的默认槽而非内嵌 prop，因为不是每个 endpoint 都要地址栏（stub 就没有），webhook 则根本没有。
-- **surface（整块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<ApiDocsCodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付。
+- **surface（整块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<ApiDocsCodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付��
 - **侧栏 / ⌘K 的 webhook 身份是过渡态**——`SidebarNav` 条目暂以 `method: 'EVENT'` 走 MethodBadge 的 fallback（neutral+subtle，渲染效果与 EventBadge 一致）。这是数据层 stopgap；`item.kind` 泛化（一等 webhook 条目）是已知后续事项，见 `sidebar-nav.md`。
 
 ### 可拖动分栏（分割原语在 foundation；重分配在本 kit 的 CodeRail）
@@ -144,7 +145,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 
 **内容优先重分配（kit 的 `<ApiDocsCodeRail>` 承载，不在 foundation）**：这是与代码卡片「封顶 + 滚动」强耦合的布局逻辑，故不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。它由 kit 的 `kits/api-docs/components/CodeRail.vue`（`<ApiDocsCodeRail>`）承载：纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`。**归 kit 而非 foundation 的理由**：它量自然高时耦合本 kit 代码卡的内部 DOM（`.code-surface`、`pre.raw-pre`），这种耦合是 kit 内部事务，foundation 不应知晓。根 gallery 的 `app/pages/kits/api-docs/reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ `<ApiDocsCodeRail>`。多实例（如端点轨道 + webhook 轨道同页）各传独立 `storage-key`，避免比例互相覆盖。
 
-> **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（调用名 `<Demo{Kit}{Name}>`）。这样 kit 归属编码进目录与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。（`CodeRail` 曾是此类，后因下游要重建同等逻辑成本过高而提升进 kit——「demo 私有 → kit 切片」的提升以此为准：当组件承载的不是页面装配而是可复用的领域行为时就该提升。）
+> **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（调用名 `<Demo{Kit}{Name}>`）。这样 kit 归属编码进目���与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。（`CodeRail` 曾是此类，后因下游要重建同等逻辑成本过高而提升进 kit——「demo 私有 → kit 切片」的提升以此为准：当组件承载的不是页面装配而是可复用的领域行为时就该提升。）
 
 不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
@@ -257,6 +258,12 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - 本地化复制提示时传入完整成功/失败消息，不在 foundation 与 kit 之间拼接半句；`FieldItemLabels.linkCopied` / `linkCopyFailed` 都接收字段名并返回完整句子。
 - **nested chrome 本地化走同一个 `labels` 对象，不 fork 组件**：`FieldItemLabels` 除自身 chrome 键外还有一组**透传键**——`lifecycle`（按 status 覆盖徽章文案的映射）、`enumLabel` / `enumFilter` / `enumEmpty` / `enumVariant`（内部 EnumTable 的标题 / 筛选 placeholder / 空态 / 未命名 variant 兜底函数），以及 `composition`（字段级 SchemaComposition 的 kind / hint / discriminator / 空态文案）。透传键在 FieldItem **不设默认值**：省略时保持 `undefined`，由子组件自己的英文默认接管，英文默认字符串只存在一处、不会漂移；递归子行经同一 `labels` 对象获得同一套文案。操作级同理：`OperationHeader.lifecycle-label` 与 `LifecycleNotice.title` 覆盖对应徽章 / 横幅文案，二者共用 `EndpointLifecycle` 词表（含 beta）。
 
+### FieldAnnotation 的字段引用约束
+
+- `field-ref` 走 `useFieldSource` 的 provide/inject，与 `useGlossary`（foundation，服务 TermAnnotation）同构：页面/布局用 `provideFieldSource()` 注册 `id → { field, page? }`，叙事文本只引 id，不内联 `FieldNode`。同一份 `FieldNode` 应与下方字段树（`ApiDocsFieldItem`）共享单一真源。
+- 跳转委托兄弟 `useFieldAnchor`，**不渲染** `<ApiDocsFieldItem>`——故与 field-item 只有 composable 依赖、无组件环。同页深链接目标即页面自身的字段树；跨页时 `page` 拼成 `{page}#{path}`，落地由目标页 `initFromHash()` 处理。
+- registry item `api-docs-field-annotation` 经 `registryDependencies` 引入 `api-docs-field-item`（带来 `field.ts` 与 `useFieldAnchor`）与三个 foundation item；`useFieldSource` 随本组件切片分发，**不**在 `files[]` 重列已由依赖闭包传入的共享文件。
+
 ## 为什么不用 @nuxt/content 走内容管线？
 
 试过——content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在部分托管 preview 中重启后不能稳定 re-seed（`decompressSQLDump ... Received undefined` / `no such table`），会让 Source-first v0 snapshot 时好时坏。根 gallery 因此保持纯组件 preview；真实消费项目仍可按需引入 content 作为数据源。
@@ -268,6 +275,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - `kits/api-docs/components/{OperationHeader,OperationTarget,CodeRail}.vue`
 - `kits/api-docs/components/WebhookProtocol.vue` + `kits/api-docs/utils/webhook-protocol.ts`
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition 显示模型,kit auto-import）
+- `kits/api-docs/components/FieldAnnotation.vue` + `kits/api-docs/composables/useFieldSource.ts`（Annotation 家族字段形态；壳复用 foundation `AnnotationPopover`）
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
 - 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/{badge,breakpoints}.ts`

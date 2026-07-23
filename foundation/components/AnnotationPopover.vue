@@ -1,11 +1,3 @@
-<script lang="ts">
-// Bridge the label model for copy-in projects that import it directly from
-// this component. The canonical home is the auto-imported `utils/annotation`,
-// which `<script setup>` below references bare (same pattern as FieldItem's
-// type re-export from `utils/field`).
-export type { AnnotationPopoverLabels } from '#imports'
-</script>
-
 <script setup lang="ts">
 // Interaction shell of the Annotation family: an inline, focusable trigger
 // anchored to a non-modal popover.
