@@ -67,36 +67,38 @@ async function renderBuiltPage(consumerRoot) {
   child.stderr.on('data', record)
 
   try {
-    await new Promise((resolve, reject) => {
-      let settled = false
-      const finish = (callback, value) => {
-        if (settled) return
-        settled = true
-        clearTimeout(timer)
-        callback(value)
-      }
-      const timer = setTimeout(
-        () => finish(reject, new Error(`consumer runtime did not start at ${url}\n${logs.join('')}`)),
-        10_000,
-      )
-      const onData = () => {
-        if (logs.join('').includes(`Listening on ${url.slice(0, -1)}`)) finish(resolve)
-      }
-      child.stdout.on('data', onData)
-      child.stderr.on('data', onData)
-      child.once('error', error => finish(reject, error))
-      child.once('exit', code => finish(
-        reject,
-        new Error(`consumer runtime exited before listening (status ${code})\n${logs.join('')}`),
-      ))
-    })
+    // Readiness is probed by polling the port, not by scraping Nitro's startup
+    // banner — the log text is an implementation detail that has changed across
+    // Nitro versions and would make this silently time out. We still fail fast
+    // if the child errors or exits before it can serve.
+    const deadline = Date.now() + 10_000
+    let exited = null
+    child.once('error', error => { exited = { error } })
+    child.once('exit', code => { exited ??= { code } })
 
-    const response = await fetch(url)
+    let response
+    while (true) {
+      if (exited) {
+        if (exited.error) throw exited.error
+        throw new Error(`consumer runtime exited before listening (status ${exited.code})\n${logs.join('')}`)
+      }
+      if (Date.now() > deadline) {
+        throw new Error(`consumer runtime did not start at ${url}\n${logs.join('')}`)
+      }
+      try {
+        response = await fetch(url, { signal: AbortSignal.timeout(1_000) })
+        break
+      }
+      catch {
+        // Connection refused / aborted while the server is still booting.
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+    }
+
     const html = await response.text()
     if (!response.ok) {
       throw new Error(`consumer runtime returned HTTP ${response.status}\n${html}\n${logs.join('')}`)
     }
-    await new Promise(resolve => setImmediate(resolve))
     return { html, output: logs.join('') }
   }
   finally {
