@@ -74,22 +74,26 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
 
 const hint = computed(() => t.value[`${props.kind}Hint` as const])
 
+// FieldItem has one labels object for its own chrome and every nested slice.
+// Merge this component's labels into that object so a field-level composition
+// nested anywhere below inherits the same localized schema vocabulary.
+const itemLabels = computed<FieldItemLabels>(() => ({
+  ...props.fieldLabels,
+  composition: {
+    ...props.fieldLabels?.composition,
+    ...props.labels,
+  },
+}))
+
 // ---------------------------------------------------------------------------
 // Anchor containment. A variant "contains" the active anchor when the anchor
 // equals or descends from any real field path inside it — including paths in
 // nested compositions, so an inner deep link also reveals the outer variant.
 // ---------------------------------------------------------------------------
 function collectPaths(variant: CompositionVariant): string[] {
-  const out: string[] = []
-  const walkFields = (fields: FieldNode[]) => {
-    for (const f of fields) {
-      if (f.path) out.push(f.path)
-      if (f.children?.length) walkFields(f.children)
-    }
-  }
-  walkFields(variant.fields)
+  const out = collectFieldPaths(variant.fields)
   if (variant.composition) {
-    for (const nested of variant.composition.variants) out.push(...collectPaths(nested))
+    out.push(...collectCompositionPaths(variant.composition))
   }
   return out
 }
@@ -293,7 +297,7 @@ function toggleVariant(variantId: string) {
               v-for="field in item.view.fields"
               :key="field.path ?? field.name"
               v-bind="field"
-              :labels="fieldLabels"
+              :labels="itemLabels"
             />
           </div>
           <ApiDocsSchemaComposition
@@ -354,7 +358,7 @@ function toggleVariant(variantId: string) {
                   v-for="field in view.fields"
                   :key="field.path ?? field.name"
                   v-bind="field"
-                  :labels="fieldLabels"
+                  :labels="itemLabels"
                 />
               </div>
               <ApiDocsSchemaComposition
@@ -389,7 +393,7 @@ function toggleVariant(variantId: string) {
             v-for="field in view.fields"
             :key="field.path ?? field.name"
             v-bind="field"
-            :labels="fieldLabels"
+            :labels="itemLabels"
           />
         </div>
         <ApiDocsSchemaComposition

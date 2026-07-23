@@ -175,6 +175,71 @@ describe('ApiDocsSchemaComposition', () => {
     expect(buttons[1]?.attributes('aria-expanded')).toBe('true')
   })
 
+  it('reveals a field-level composition without opening unrelated concrete children', async () => {
+    vi.stubGlobal('requestAnimationFrame', vi.fn(() => 0))
+
+    const node: CompositionNode = {
+      kind: 'oneOf',
+      variants: [
+        { id: 'first', label: 'First', fields: [] },
+        {
+          id: 'second',
+          label: 'Second',
+          fields: [{
+            path: 'destination',
+            name: 'destination',
+            type: 'object',
+            children: [{
+              path: 'destination_card',
+              name: 'card',
+              type: 'string',
+            }],
+            composition: {
+              kind: 'oneOf',
+              variants: [{
+                id: 'card',
+                label: 'Card',
+                fields: [{
+                  path: 'destination_card_last4',
+                  name: 'last4',
+                  type: 'string',
+                }],
+              }],
+            },
+          }],
+        },
+      ],
+    }
+    const Host = defineComponent({
+      components: { SchemaComposition },
+      setup() {
+        const anchor = useFieldAnchor()
+        anchor.active.value = ''
+        return {
+          node,
+          go: () => { void anchor.goTo('destination_card_last4', { updateHash: false }) },
+        }
+      },
+      template: `
+        <button data-testid="go" @click="go">Go</button>
+        <SchemaComposition v-bind="node" />
+      `,
+    })
+    const wrapper = await mountSuspended(Host)
+    const composition = wrapper.findComponent(SchemaComposition)
+    const childButton = () => composition.findAll('button')
+      .find(button => /Child Parameters/.test(button.text()))
+
+    expect(tabs(composition).props('modelValue')).toBe('first')
+    expect(childButton()?.text()).toContain('Show Child Parameters')
+
+    await wrapper.find('[data-testid="go"]').trigger('click')
+
+    expect(tabs(composition).props('modelValue')).toBe('second')
+    expect(composition.find('#destination_card_last4').exists()).toBe(true)
+    expect(childButton()?.text()).toContain('Show Child Parameters')
+  })
+
   it('counts a nested composition as content and hides zero counts', async () => {
     const wrapper = await mountSuspended(SchemaComposition, {
       props: {

@@ -1,3 +1,19 @@
+<script lang="ts">
+// Keep the pre-util public type surface for existing consumers. New code should
+// import from `~/utils/field`, while these type-only exports bridge copy-in
+// projects that still import directly from FieldItem.vue.
+export type {
+  EnumValue,
+  EnumVariant,
+  FieldItemLabels,
+  FieldLifecycle,
+  FieldLifecycleInfo,
+  FieldNode,
+  FieldNote,
+  RequiredState,
+} from '#imports'
+</script>
+
 <script setup lang="ts">
 // Domain component (API docs): renders one field row of an endpoint's schema —
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
@@ -36,29 +52,29 @@ defineOptions({ name: 'ApiDocsFieldItem' })
 // Field-level composition is delegated to ApiDocsSchemaComposition — a
 // HIGHER-level slice that itself depends on FieldItem. A static
 // <ApiDocsSchemaComposition> tag here would either force a dependency cycle
-// (if declared) or leave FieldItem un-installable on its own (if not). So the
-// component is resolved dynamically: when api-docs-schema-composition is also
-// installed it resolves and the field's `composition` renders; otherwise
-// resolveComponent returns the raw name string and the block is skipped. This
-// keeps the dependency edge one-way (schema-composition → field-item).
-const resolvedComposition = resolveComponent('ApiDocsSchemaComposition')
-const schemaComposition = typeof resolvedComposition === 'string' ? null : resolvedComposition
-
+// (if declared) or leave FieldItem un-installable on its own (if not). The
+// optional lookup below preserves that one-way dependency.
 const props = withDefaults(
-  defineProps<FieldNode & {
-    /** Overridable UI copy for localization. See FieldItemLabels. */
-    labels?: FieldItemLabels
-  }>(),
+  defineProps<FieldItemProps>(),
   {
     required: false,
     labels: () => ({}),
   },
 )
 
+// Resolve the higher-level slice only when this field actually needs it. Plain
+// standalone FieldItem installs never attempt the optional lookup, while a
+// composition-bearing field still gets Nuxt's normal component auto-import.
+const schemaComposition = computed(() => {
+  if (!props.composition) return null
+  const resolved = resolveComponent('ApiDocsSchemaComposition')
+  return typeof resolved === 'string' ? null : resolved
+})
+
 // Merge caller copy over neutral English defaults. Chrome text only.
-// Passthrough labels (lifecycle / enum*) are excluded: they have no defaults
-// here and are read straight from `props.labels` at the passing site.
-type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant'
+// Passthrough labels (lifecycle / enum* / composition) are excluded: they have
+// no defaults here and are read straight from `props.labels` at the passing site.
+type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant' | 'composition'
 const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
   conditional: 'Conditional',
@@ -81,9 +97,8 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
 // into a collapsed subfield reveals itself.
 const anchor = useFieldAnchor()
 const isActive = computed(() => !!props.path && anchor.active.value === props.path)
-const descendantActive = computed(
-  () => !!props.path && anchor.active.value.startsWith(`${props.path}_`),
-)
+const childPaths = computed(() => collectFieldPaths(props.children ?? []))
+const descendantActive = computed(() => childPaths.value.includes(anchor.active.value))
 
 function onCopyLink() {
   // Build the *complete* toast sentence here via our own labels, so it flows
@@ -484,9 +499,14 @@ const lifecycleMeta = computed(() => {
          after any concrete subfields. Rendered via a dynamically resolved
          component (see script) so FieldItem installs standalone without a
          dependency cycle; the block only appears when that slice is present.
-         Chrome copy FieldItem localizes flows on via `field-labels`. -->
+         FieldItem passes both its own chrome and `labels.composition` through. -->
     <div v-if="composition && schemaComposition" class="mt-3 border-s border-default ps-4">
-      <component :is="schemaComposition" v-bind="composition" :field-labels="labels" />
+      <component
+        :is="schemaComposition"
+        v-bind="composition"
+        :labels="labels.composition"
+        :field-labels="labels"
+      />
     </div>
   </div>
 </template>

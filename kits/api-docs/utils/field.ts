@@ -125,6 +125,14 @@ export interface FieldItemLabels {
   /** EnumTable fallback tab label for an unnamed variant; receives the
    *  0-based index (default `` i => `Option ${i + 1}` ``). */
   enumVariant?: (index: number) => string
+  /** Chrome labels for a field-level ApiDocsSchemaComposition block. */
+  composition?: SchemaCompositionLabels
+}
+
+/** Public props contract for ApiDocsFieldItem. Kept outside the SFC so its
+ *  legacy type re-exports remain separate from Vue's prop-type extraction. */
+export interface FieldItemProps extends FieldNode {
+  labels?: FieldItemLabels
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +182,30 @@ export type CompositionNode =
     kind: 'allOf'
     discriminator?: never
   })
+
+/** Collect every real field anchor reachable through children and field-level
+ *  compositions. Order follows the display model and duplicate paths remain
+ *  visible to callers that need to diagnose invalid input. */
+export function collectFieldPaths(fields: readonly FieldNode[]): string[] {
+  const paths: string[] = []
+  for (const field of fields) {
+    if (field.path) paths.push(field.path)
+    if (field.children?.length) paths.push(...collectFieldPaths(field.children))
+    if (field.composition) paths.push(...collectCompositionPaths(field.composition))
+  }
+  return paths
+}
+
+/** Collect every field anchor reachable through a composition graph, including
+ *  both variant-level and FieldNode-level nested compositions. */
+export function collectCompositionPaths(composition: CompositionNode): string[] {
+  const paths: string[] = []
+  for (const variant of composition.variants) {
+    paths.push(...collectFieldPaths(variant.fields))
+    if (variant.composition) paths.push(...collectCompositionPaths(variant.composition))
+  }
+  return paths
+}
 
 /** Outline level of variant section headings. Nested compositions render one
  *  level deeper, capped at 6. */

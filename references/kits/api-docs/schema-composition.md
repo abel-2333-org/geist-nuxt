@@ -41,7 +41,7 @@
 
 - **不虚构 wire path**：UI 里字段名与层级只体现真实 payload 结构（`type`、`token`），任何位置不显示 `card.token` 拼接路径。
 - **anchor id 是 identity 层、不是展示层**：唯一性由显示模型的 `path` 保证，约定以 variant id 做命名空间段（`request-body_card_token` vs `request-body_wallet_token`）。
-- **deep link 进隐藏 variant**：`useFieldAnchor` 同时维护目标 `active` 与导航事件 `revision`，每次 `goTo(path)` 递增 revision，故同一路径在用户手动切走 tab / 收起分区后再次触发仍会重新揭示。组件 watch 两者，用 variant 全量 path 集合（含嵌套 composition）判断落点：先匹配 `active === path`（精确），再选最长 `active.startsWith(path + '_')` 前缀（避免短前缀抢占更具体的 anchor）→ oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 的 waitForElement / waitForElementStable 完成滚动 + 高亮。
+- **deep link 进隐藏 variant**：`useFieldAnchor` 同时维护目标 `active` 与导航事件 `revision`，每次 `goTo(path)` 递增 revision，故同一路径在用户手动切走 tab / 收起分区后再次触发仍会重新揭示。组件 watch 两者，用 variant 全量 path 集合（同时递归 `children`、`FieldNode.composition` 与 `CompositionVariant.composition`）判断落点：先匹配 `active === path`（精确），再选最长 `active.startsWith(path + '_')` 前缀（避免短前缀抢占更具体的 anchor）→ oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 的 waitForElement / waitForElementStable 完成滚动 + 高亮。FieldItem 的 children disclosure 只按真实 `children` 子图判断，不会因同字段下的 composition anchor 而误展开。
 - oneOf panel 靠 `unmount-on-hide=false` 常驻 DOM，hash 轮询能找到隐藏元素；切 tab 后元素可见、layout 稳定即滚动。**升级 Nuxt UI 时必须确认 panel DOM 仍常驻**，否则 deep link 失效。
 
 ## 显示模型（`~/utils/field`）
@@ -77,7 +77,7 @@ type CompositionNode =
 |---|---|---|
 | （展开 `CompositionNode`） | `kind` + `variants` + `discriminator?` | 组合显示模型，直接 `v-bind` 一个 `CompositionNode` |
 | `labels` | `SchemaCompositionLabels` | chrome 文案覆盖（英文默认，对齐 FieldItem 惯例）：`oneOf`/`anyOf`/`allOf` eyebrow、`oneOfHint`/`anyOfHint`/`allOfHint` assistive 句、`discriminatorDescription(values)`、`empty` |
-| `fieldLabels` | `FieldItemLabels` | 透传给内部 `ApiDocsFieldItem` 行的本地化文案 |
+| `fieldLabels` | `FieldItemLabels` | 透传给内部 `ApiDocsFieldItem` 行的本地化文案；字段级 composition 继续通过 `FieldItemLabels.composition` 继承本组件的 `labels` |
 | `headingLevel` | `3 \| 4 \| 5 \| 6` | anyOf / allOf 分区小标题的 outline 层级，默认 `4`；嵌套自动 +1、封顶 6 |
 
 ## Accessibility
@@ -137,7 +137,7 @@ const destination: FieldNode = {
 
 ## 相关组件
 
-- `<ApiDocsFieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。依赖是**单向**的:本组件依赖 FieldItem,FieldItem **不**依赖本组件。字段级组合(`FieldNode.composition`)是可选增强——FieldItem 用 `resolveComponent('ApiDocsSchemaComposition')` 动态解析并 `<component :is>` 渲染,装了本切片才生效,故 FieldItem 可独立安装且无依赖环。
+- `<ApiDocsFieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。依赖是**单向**的：本组件依赖 FieldItem，FieldItem **不**依赖本组件。字段级组合（`FieldNode.composition`）是可选增强——FieldItem 只有收到 composition 数据时才用 `resolveComponent('ApiDocsSchemaComposition')` 动态解析并 `<component :is>` 渲染；普通 standalone FieldItem 不查找高层组件，装了本切片后字段级增强才生效，故无依赖环也无无关 missing-component warning。
 - `<ApiDocsFieldGroup>` — 顶层组合的容器（mono 大写组标题 + 计数）。
 - `useFieldAnchor` — 深链接 composable（`active` + `revision` 事件驱动的重新揭示）。
 - `<UTabs>` / `<UCollapsible>` — Nuxt UI 原语（oneOf tabs / anyOf 分区）。

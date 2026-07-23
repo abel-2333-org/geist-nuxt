@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { cp, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +35,80 @@ const BUILT_IN_COMPONENTS = new Set([
 function run(command, args, cwd, env = process.env) {
   console.log(`> ${command} ${args.join(' ')}`)
   execFileSync(command, args, { cwd, stdio: 'inherit', env })
+}
+
+async function openPort() {
+  const server = createServer()
+  await new Promise((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+  const address = server.address()
+  if (!address || typeof address === 'string') throw new Error('failed to allocate consumer runtime port')
+  await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
+  return address.port
+}
+
+async function renderBuiltPage(consumerRoot) {
+  const port = await openPort()
+  const url = `http://127.0.0.1:${port}/`
+  const child = spawn(process.execPath, ['.output/server/index.mjs'], {
+    cwd: consumerRoot,
+    env: {
+      ...process.env,
+      NITRO_HOST: '127.0.0.1',
+      NITRO_PORT: String(port),
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  const logs = []
+  const record = chunk => logs.push(chunk.toString())
+  child.stdout.on('data', record)
+  child.stderr.on('data', record)
+
+  try {
+    await new Promise((resolve, reject) => {
+      let settled = false
+      const finish = (callback, value) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timer)
+        callback(value)
+      }
+      const timer = setTimeout(
+        () => finish(reject, new Error(`consumer runtime did not start at ${url}\n${logs.join('')}`)),
+        10_000,
+      )
+      const onData = () => {
+        if (logs.join('').includes(`Listening on ${url.slice(0, -1)}`)) finish(resolve)
+      }
+      child.stdout.on('data', onData)
+      child.stderr.on('data', onData)
+      child.once('error', error => finish(reject, error))
+      child.once('exit', code => finish(
+        reject,
+        new Error(`consumer runtime exited before listening (status ${code})\n${logs.join('')}`),
+      ))
+    })
+
+    const response = await fetch(url)
+    const html = await response.text()
+    if (!response.ok) {
+      throw new Error(`consumer runtime returned HTTP ${response.status}\n${html}\n${logs.join('')}`)
+    }
+    await new Promise(resolve => setImmediate(resolve))
+    return { html, output: logs.join('') }
+  }
+  finally {
+    if (child.exitCode === null) {
+      child.kill('SIGTERM')
+      await Promise.race([
+        new Promise(resolve => child.once('exit', resolve)),
+        new Promise(resolve => setTimeout(resolve, 2_000)),
+      ])
+      if (child.exitCode === null) child.kill('SIGKILL')
+    }
+  }
 }
 
 async function protectedHashes(consumerRoot) {
@@ -140,6 +215,8 @@ const runtimeScenarios = [
     item: 'api-docs-field-item',
     build: true,
     cssMarker: 'scroll-mt-24',
+    renderedMarkers: ['amount', 'string'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
     page: `<template>\n  <ApiDocsFieldItem name="amount" type="string" />\n</template>\n`,
   },
   {
@@ -157,49 +234,55 @@ const runtimeScenarios = [
     page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
   },
   {
-    // Real consumer wiring of ApiDocsSchemaComposition through a display model:
-    // a payment_method discriminated by `type` (card | wallet), proving a
-    // downstream Nuxt project can drive oneOf + discriminator + field-level
-    // composition delegation purely via props.
+    // Render SchemaComposition only through FieldItem's optional field-level
+    // delegation. The page never references ApiDocsSchemaComposition directly,
+    // so this covers dynamic resolution after registry copy-in.
     label: 'api-docs-schema-composition',
     item: 'api-docs-schema-composition',
     build: true,
     // ps-9 is the discriminator row's indent — unique to this component's
     // template, so its presence proves the SchemaComposition source was copied.
     cssMarker: 'ps-9',
+    renderedMarkers: ['One of', 'Card', 'brand'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
     page: `<script setup lang="ts">
-const composition = {
-  kind: 'oneOf' as const,
-  discriminator: {
-    propertyName: 'type',
-    mapping: [
-      { value: 'card', variantId: 'card' },
-      { value: 'wallet', variantId: 'wallet' },
+const field = {
+  path: 'payment_method',
+  name: 'payment_method',
+  type: 'object',
+  composition: {
+    kind: 'oneOf' as const,
+    discriminator: {
+      propertyName: 'type',
+      mapping: [
+        { value: 'card', variantId: 'card' },
+        { value: 'wallet', variantId: 'wallet' },
+      ],
+    },
+    variants: [
+      {
+        id: 'card',
+        label: 'Card',
+        description: 'A tokenized payment card.',
+        fields: [
+          { path: 'payment_method_card_brand', name: 'brand', type: 'string', required: true },
+          { path: 'payment_method_card_last4', name: 'last4', type: 'string', required: true },
+        ],
+      },
+      {
+        id: 'wallet',
+        label: 'Wallet',
+        description: 'A hosted wallet balance.',
+        fields: [
+          { path: 'payment_method_wallet_provider', name: 'provider', type: 'string', required: true },
+        ],
+      },
     ],
   },
-  variants: [
-    {
-      id: 'card',
-      label: 'Card',
-      description: 'A tokenized payment card.',
-      fields: [
-        { path: 'payment_method_card_brand', name: 'brand', type: 'string', required: true },
-        { path: 'payment_method_card_last4', name: 'last4', type: 'string', required: true },
-      ],
-    },
-    {
-      id: 'wallet',
-      label: 'Wallet',
-      description: 'A hosted wallet balance.',
-      fields: [
-        { path: 'payment_method_wallet_provider', name: 'provider', type: 'string', required: true },
-      ],
-    },
-  ],
 }
 </script>
 <template>
-  <ApiDocsSchemaComposition v-bind="composition" :heading-level="3" />
+  <ApiDocsFieldItem v-bind="field" />
 </template>
 `,
   },
@@ -379,6 +462,20 @@ try {
             }
             if (scenario.cssMarker && !builtCss.includes(scenario.cssMarker)) {
               throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
+            }
+            if (scenario.renderedMarkers || scenario.forbiddenRuntimeOutput) {
+              const runtime = await renderBuiltPage(consumerRoot)
+              const rendered = runtime.html
+              for (const marker of scenario.renderedMarkers ?? []) {
+                if (!rendered.includes(marker)) {
+                  throw new Error(`${scenario.label}: rendered HTML did not contain ${marker}`)
+                }
+              }
+              for (const pattern of scenario.forbiddenRuntimeOutput ?? []) {
+                if (runtime.output.includes(pattern)) {
+                  throw new Error(`${scenario.label}: runtime output contained ${pattern}`)
+                }
+              }
             }
           }
           console.log(`Consumer closure smoke passed (${scenario.label}): ${consumerRoot}`)

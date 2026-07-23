@@ -26,3 +26,19 @@ export interface EnumVariant {
   when?: string
   values: EnumValue[]
 }
+
+/** Public props contract for ApiDocsEnumTable. Kept outside the SFC so its
+ *  legacy type re-exports do not interfere with Vue's runtime-prop extraction. */
+export interface EnumTableProps {
+  /** Flat enum: a single list of allowed values. */
+  values?: EnumValue[]
+  /** Grouped enum: values that vary by condition. */
+  variants?: EnumVariant[]
+  defaultValue?: string
+  label?: string
+  defaultLabel?: string
+  searchPlaceholder?: string
+  emptyLabel?: string
+  variantLabel?: (index: number) => string
+  filterThreshold?: number
+}

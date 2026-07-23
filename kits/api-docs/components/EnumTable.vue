@@ -1,3 +1,8 @@
+<script lang="ts">
+// Preserve the component's pre-util type import surface.
+export type { EnumValue, EnumVariant } from '#imports'
+</script>
+
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
 
@@ -8,28 +13,10 @@ import type { TabsItem } from '@nuxt/ui'
 // The enum display model (EnumValue/EnumVariant) lives in the co-slice util
 // `utils/enum.ts` and is referenced bare here — Nuxt auto-imports this kit's
 // `utils/` dir, so no import statement is needed (same pattern as the
-// lifecycle/method preset types). Callers that need the types import them from
-// `~/utils/enum` (or the auto-import surface), not from this component.
+// lifecycle/method preset types). New callers import from `~/utils/enum`; the
+// module script above preserves the previous component import surface.
 const props = withDefaults(
-  defineProps<{
-    /** Flat enum: a single list of allowed values. */
-    values?: EnumValue[]
-    /** Grouped enum: values that vary by condition (e.g. bank lists per market). */
-    variants?: EnumVariant[]
-    /** The field's default value — its row gets a trailing marker, tying the
-     *  summary row's DEFAULT pill to the concrete entry in this table. */
-    defaultValue?: string
-    /** Structural labels; overridable for i18n. */
-    label?: string
-    defaultLabel?: string
-    searchPlaceholder?: string
-    emptyLabel?: string
-    /** Fallback tab label for an unnamed variant; receives the 0-based index
-     *  so the whole string is owned by the caller (e.g. `i => `选项 ${i + 1}``). */
-    variantLabel?: (index: number) => string
-    /** Lists at or above this length get a filter box + scroll area. */
-    filterThreshold?: number
-  }>(),
+  defineProps<EnumTableProps>(),
   {
     label: 'Allowed values',
     defaultLabel: 'Default',
