@@ -157,6 +157,53 @@ const runtimeScenarios = [
     page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
   },
   {
+    // Real consumer wiring of ApiDocsSchemaComposition through a display model:
+    // a payment_method discriminated by `type` (card | wallet), proving a
+    // downstream Nuxt project can drive oneOf + discriminator + field-level
+    // composition delegation purely via props.
+    label: 'api-docs-schema-composition',
+    item: 'api-docs-schema-composition',
+    build: true,
+    // ps-9 is the discriminator row's indent — unique to this component's
+    // template, so its presence proves the SchemaComposition source was copied.
+    cssMarker: 'ps-9',
+    page: `<script setup lang="ts">
+const composition = {
+  kind: 'oneOf' as const,
+  discriminator: {
+    propertyName: 'type',
+    mapping: [
+      { value: 'card', variantId: 'card' },
+      { value: 'wallet', variantId: 'wallet' },
+    ],
+  },
+  variants: [
+    {
+      id: 'card',
+      label: 'Card',
+      description: 'A tokenized payment card.',
+      fields: [
+        { path: 'payment_method_card_brand', name: 'brand', type: 'string', required: true },
+        { path: 'payment_method_card_last4', name: 'last4', type: 'string', required: true },
+      ],
+    },
+    {
+      id: 'wallet',
+      label: 'Wallet',
+      description: 'A hosted wallet balance.',
+      fields: [
+        { path: 'payment_method_wallet_provider', name: 'provider', type: 'string', required: true },
+      ],
+    },
+  ],
+}
+</script>
+<template>
+  <ApiDocsSchemaComposition v-bind="composition" :heading-level="3" />
+</template>
+`,
+  },
+  {
     label: 'api-docs-webhook-protocol',
     item: 'api-docs-webhook-protocol',
     build: true,
