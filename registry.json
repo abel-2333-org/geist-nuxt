@@ -274,7 +274,8 @@
       "description": "Filterable allowed-values table.",
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown"],
       "files": [
-        { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/api-docs/EnumTable.vue" }
+        { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/api-docs/EnumTable.vue" },
+        { "path": "kits/api-docs/utils/enum.ts", "target": "app/utils/enum.ts" }
       ]
     },
     {
@@ -291,11 +292,22 @@
       "name": "api-docs-field-item",
       "type": "registry:component",
       "title": "ApiDocsFieldItem",
-      "description": "Recursive API schema field row with deep-link handling.",
+      "description": "Recursive API schema field row with deep-link handling. Field-level schema composition (the optional `composition` field) renders when api-docs-schema-composition is also installed.",
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-copy", "api-docs-enum-table", "api-docs-lifecycle-badge"],
       "files": [
         { "path": "kits/api-docs/components/FieldItem.vue", "target": "app/components/api-docs/FieldItem.vue" },
-        { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" }
+        { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" },
+        { "path": "kits/api-docs/utils/field.ts", "target": "app/utils/field.ts" }
+      ]
+    },
+    {
+      "name": "api-docs-schema-composition",
+      "type": "registry:component",
+      "title": "ApiDocsSchemaComposition",
+      "description": "Faithful oneOf/anyOf/allOf schema composition with discriminator field rows and deep-link reveal.",
+      "registryDependencies": ["api-docs-field-item"],
+      "files": [
+        { "path": "kits/api-docs/components/SchemaComposition.vue", "target": "app/components/api-docs/SchemaComposition.vue" }
       ]
     },
     {

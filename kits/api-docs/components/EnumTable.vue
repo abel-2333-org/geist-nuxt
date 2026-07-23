@@ -1,27 +1,18 @@
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
 
-// Domain component (API docs): renders a field's allowed values. Self-contained
-// per the kit slice convention — the enum display types travel with the
-// component. Composed from Nuxt UI primitives + core atoms (InlineCode,
-// InlineMarkdown, both supplied by the foundation dependency closure).
+// Domain component (API docs): renders a field's allowed values. Composed from
+// Nuxt UI primitives + core atoms (InlineCode, InlineMarkdown, both supplied by
+// the foundation dependency closure).
+//
+// The enum display model (EnumValue/EnumVariant) now lives in the co-slice util
+// `utils/enum.ts` so it resolves through `#imports` in both the source repo and
+// a copied-in consumer (see that file). It is re-exported here so existing
+// callers that import `{ EnumValue, EnumVariant } from './EnumTable.vue'`
+// keep compiling unchanged.
+import type { EnumValue, EnumVariant } from '#imports'
 
-/** A single enum member.
- *  `value` is deliberately `string` (not `string | number`): the default-row
- *  marker relies on strict `===` against `defaultValue`, so widening this
- *  type would silently break that match. Callers stringify numerics. */
-export interface EnumValue {
-  value: string
-  description: string
-}
-
-/** A named group of enum members — e.g. bank lists that apply under a condition. */
-export interface EnumVariant {
-  title?: string
-  /** When this group of values applies (already localized). */
-  when?: string
-  values: EnumValue[]
-}
+export type { EnumValue, EnumVariant }
 
 const props = withDefaults(
   defineProps<{

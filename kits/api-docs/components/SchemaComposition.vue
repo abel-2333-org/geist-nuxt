@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Playground candidate → kits/api-docs (ApiDocsSchemaComposition).
+// Domain component (API docs): ApiDocsSchemaComposition.
 // Renders an OpenAPI / JSON Schema composition block faithfully:
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
 //   anyOf  → non-exclusive options    → stacked collapsible sections
@@ -20,24 +20,31 @@
 // including a repeated link to the same path. oneOf
 // panels stay in the DOM via `unmount-on-hide=false`.
 //
-// Spec: playground/composition.spec.md (issue #31).
+// Reference: references/kits/api-docs/schema-composition.md (issue #31).
 
 import type { TabsItem } from '@nuxt/ui'
-import type { FieldItemLabels, FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
+// The composition + field display model lives in the co-slice util
+// `utils/field.ts` so it resolves through `#imports` in both the source repo
+// and a copied-in consumer (see that file). Re-exported here for callers that
+// import the composition model from this component (mirrors FieldItem).
+import type {
+  CompositionDiscriminator,
+  CompositionKind,
+  CompositionNode,
+  CompositionVariant,
+  FieldItemLabels,
+  FieldNode,
+  HeadingLevel,
+  SchemaCompositionLabels,
+} from '#imports'
 
-export type CompositionKind = 'oneOf' | 'anyOf' | 'allOf'
-
-export interface CompositionVariant {
-  /** Stable identity: tab selection, discriminator mapping target, and anchor
-   *  namespace segment. Never rendered as part of a wire path. */
-  id: string
-  /** Localized variant title (user content, rendered verbatim). */
-  label: string
-  description?: string
-  /** The variant's field tree; each `path` is a real anchor id. */
-  fields: FieldNode[]
-  /** Nested composition inside this variant (recursive). */
-  composition?: CompositionNode
+export type {
+  CompositionDiscriminator,
+  CompositionKind,
+  CompositionNode,
+  CompositionVariant,
+  HeadingLevel,
+  SchemaCompositionLabels,
 }
 
 export interface CompositionDiscriminator {
@@ -82,9 +89,10 @@ export interface SchemaCompositionLabels {
   empty?: string
 }
 
-// Recursive self-reference name (playground prefix; becomes
-// ApiDocsSchemaComposition on promotion).
-defineOptions({ name: 'PlaygroundSchemaComposition' })
+// Recursive self-reference name (kit uses pathPrefix: false, so the global
+// component name is ApiDocsSchemaComposition); declared explicitly so the
+// template's recursion resolves.
+defineOptions({ name: 'ApiDocsSchemaComposition' })
 
 type SchemaCompositionProps = CompositionNode & {
   labels?: SchemaCompositionLabels
@@ -347,7 +355,7 @@ function toggleVariant(variantId: string) {
               :labels="fieldLabels"
             />
           </div>
-          <PlaygroundSchemaComposition
+          <ApiDocsSchemaComposition
             v-if="item.view.variant.composition"
             v-bind="item.view.variant.composition"
             :labels="labels"
@@ -408,7 +416,7 @@ function toggleVariant(variantId: string) {
                   :labels="fieldLabels"
                 />
               </div>
-              <PlaygroundSchemaComposition
+              <ApiDocsSchemaComposition
                 v-if="view.variant.composition"
                 v-bind="view.variant.composition"
                 :labels="labels"
@@ -443,7 +451,7 @@ function toggleVariant(variantId: string) {
             :labels="fieldLabels"
           />
         </div>
-        <PlaygroundSchemaComposition
+        <ApiDocsSchemaComposition
           v-if="view.variant.composition"
           v-bind="view.variant.composition"
           :labels="labels"
