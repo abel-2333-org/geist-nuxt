@@ -69,7 +69,7 @@ type CompositionNode =
 | `anyOf` | 纵向堆叠的 `UCollapsible` 分区，独立开合，默认收起（deep link 自动展开）；**绝不渲染成互斥 selector** | eyebrow `ANY OF (N)` + "One or more of the following may apply." |
 | `allOf` | 顺序全展开的分段列表（variant label 作分段小标题，无开合、无选择器）；**绝不渲染成 tabs** | eyebrow `ALL OF (N)` + "All of the following apply." |
 
-- eyebrow 用 FieldGroup 的 mono uppercase + `(N)` 计数语法；assistive 句是可见正文（非仅靠布局/颜色传意），labels 可覆盖。
+- eyebrow 用 FieldGroup 的 mono uppercase + `(N)` 计数语法；variant 的 `(N)` 表示顶层字段数 + 嵌套 composition 块（description 不计），为 0 时隐藏，避免把“仅有说明文字”读成空内容；assistive 句是可见正文（非仅靠布局/颜色传意），labels 可覆盖。
 - variant 顺序 = 数组顺序，渲染层不重排。
 
 ## Discriminator（仅 oneOf/anyOf 会出现）
@@ -79,6 +79,7 @@ type CompositionNode =
   - 二版：改为头部句拼接（"… applies. `type` selects the variant."）+ 裸 code chip `type = "card"`；仍被评审指出啰嗦，且 chip 长得像约束标注，无法回答"payload 里到底有没有这个字段"。
   - **终版：discriminator 渲染为真实字段行**（Stripe 同款）。它本来就是 payload property，所以合成一个 `FieldNode` 插到每个 mapped variant 字段列表首行：单值映射为 `provider` · string · required · description "Always \`google_pay\`."；N:1 mapping 聚合全部 wire values（包含空字符串）并按 mapping 顺序显示为 "One of …"。`discriminatorDescription(values)` label factory 可覆盖。与其他字段同一语言，零新增词汇；头部只剩一句白话 hint。
   - 若 caller 已提供同名字段，保留其 path、type、examples 等 richer metadata，把 mapping 说明合并进 description，并把该行移到首行；不重复合成第二行。
+  - 当前 display model 不表达 OpenAPI 3.2 的 `defaultMapping`；因此映射到 variant 的 discriminator property 必须按 OAS 3.0 / 3.1 契约渲染为 required，caller 即使传入 `required: false` 也会被归一为 `true`。若未来支持 3.2 的可选 discriminator，必须先扩展模型显式表达 `defaultMapping`，不能复用这个布尔值暗示版本语义。
   - 合成行不带 `path`（跨 variant 重复，不可单独 deep link）；`(N)` 计数包含该行。
 - 文案不得暗示 discriminator 决定校验——它只是提示，验证语义仍由 kind 表达。
 
@@ -86,7 +87,7 @@ type CompositionNode =
 
 - **不虚构 wire path**：UI 中字段名、层级只体现真实 payload 结构（`type`、`token`），任何位置不显示 `card.token` 拼接路径。
 - **anchor id 是 identity 层，不是展示层**：唯一性由 display model 的 `path` 保证，约定以 variant id 做命名空间段（`request-body_card_token` vs `request-body_wallet_token`），两层分离在此明确。
-- **deep link 进隐藏 variant**：组件 watch `useFieldAnchor().active`，用 variant 全量 path 集合（含嵌套 composition）判断目标落点。先在全部 variants 中匹配 `active === path`，再选最长 `active.startsWith(path + '_')` prefix，避免短前缀抢占精确或更具体的 anchor → oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 现有 waitForElement/waitForElementStable 完成滚动+高亮，**不改 composable**。
+- **deep link 进隐藏 variant**：`useFieldAnchor` 同时维护目标 `active` 与导航事件 `revision`；每次 `goTo(path)` 都递增 revision，所以同一路径在用户手动切走 tab / 收起分区后再次触发，仍会重新揭示。组件 watch 两者，用 variant 全量 path 集合（含嵌套 composition）判断目标落点。先在全部 variants 中匹配 `active === path`，再选最长 `active.startsWith(path + '_')` prefix，避免短前缀抢占精确或更具体的 anchor → oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 的 waitForElement/waitForElementStable 完成滚动+高亮。
 - oneOf panel 靠 `unmount-on-hide=false` 保留 DOM，hash 轮询能找到隐藏元素；切 tab 后元素可见、layout 稳定即滚动。
 
 ## Anatomy
@@ -110,7 +111,7 @@ type CompositionNode =
 | default | oneOf 显示首个 variant；anyOf 全收起；allOf 全展开 |
 | tab selected | UTabs pill 选中；未选 panel `hidden`（DOM 保留） |
 | open / closed | anyOf 分区 chevron 旋转 + 内容显隐（`unmount-on-hide=false`） |
-| active-anchor | 目标行高亮（FieldItem 现有行为）；祖先 variant 自动切换/展开 |
+| active-anchor | 目标行高亮；祖先 variant / FieldItem 自动切换或展开；同一路径的后续导航事件会再次执行揭示 |
 | props changed | variants / kind / field paths 异步替换后保留仍有效 selection；失效时回退首项，并重新尝试 pending active anchor |
 | focus-visible | tabs（reka 内置）与自绘 button `outline-primary` 环 |
 | 空 variants | 空态框（`labels.empty`，英文默认） |
@@ -121,6 +122,7 @@ type CompositionNode =
 - oneOf 用 UTabs 完整语义（tablist/tab/tabpanel、方向键、`aria-selected`）——确认 reka 内置而非重写。
 - anyOf/allOf 分区标题经 `headingLevel` 进文档 outline（接受 3–6，默认 4，嵌套自动 +1，封顶 6），与 FieldGroup 的 headingLevel 惯例一致。
 - anyOf 的 `aria-expanded` / `aria-controls` 由真实 `<button>` 持有，`aria-controls` 指向对应内容 id；heading 只负责 outline，不承担交互状态。
+- anyOf 按钮不再附加 “Show/Hide Fields” 的 sr-only 状态文本，避免与 `aria-expanded` 重复宣告；其 accessible name 保持 variant label + 非零计数。
 - assistive 句为可见文本，屏幕阅读器按阅读顺序自然读到 kind 语义与 discriminator。
 - reading order：语义头 → variants（discriminator 合成行随字段列表自然读出）；deep link `goTo(path, { focus: true })` 把焦点落到目标行（composable 现有行为）。
 
@@ -128,7 +130,8 @@ type CompositionNode =
 
 - **必做**：`CompositionNode` 等类型与组件一起晋升时，同步把 `FieldNode` 抽到 `kits/api-docs/utils/field.ts`（annotation.spec.md 已记录同一要求，合并处理）；`FieldNode` 增加 `composition?: CompositionNode`，FieldItem 在 children collapsible 之后委托 `ApiDocsSchemaComposition` 渲染字段级 composition。
 - registry 新切片 `api-docs-schema-composition`：registryDependencies 含 field-item（及其闭环 enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）。
-- component tests 覆盖：full（oneOf + discriminator + nested）/ partial（无 discriminator、无 description、空 variants）/ anyOf 非互斥（两分区可同开）与 button ARIA ownership / allOf 无选择器且忽略非法 runtime discriminator / discriminator 合成字段行（首行、required、description、无 path、计数含该行、N:1、空字符串、existing-field merge）/ async variants、kind、path replacement / exact-first + longest-prefix deep link / anchor 唯一性 / heading cap 6。
+- 当前 playground candidate 已有 component tests，覆盖 discriminator 合成/merge、allOf runtime 防守、anyOf 独立开合与 ARIA ownership、重复 deep-link 重新揭示、async variants/kind/path replacement、exact-first + longest-prefix、嵌套计数与 heading cap 6。
+- 晋升时把同一行为矩阵迁入 registry 切片测试，并补齐 full / partial / 空 variants、anchor 唯一性、FieldItem 字段级 composition 与正式 consumer 回归；不能把当前 candidate tests 误记为“尚未开始”。
 - isolated consumer fixture（payment-method）只经 display model 接入，不 import 任何 OpenAPI 解析物。
 - oneOf panel 目前依赖 UTabs `unmount-on-hide=false`；晋升时确认 Nuxt UI 版本升级不回归（panel DOM 必须常驻，否则 deep link 失效）。
 

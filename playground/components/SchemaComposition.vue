@@ -16,8 +16,8 @@
 // Anchor strategy: field `path`s are real anchor ids namespaced by variant id
 // (e.g. `request-body_card_token`) — identity layer only, never shown as a
 // wire path. The component watches the shared active anchor and reveals the
-// containing variant (switch tab / expand section) so useFieldAnchor's
-// existing element polling + stable-layout scroll works unchanged. oneOf
+// containing variant (switch tab / expand section) on every navigation event,
+// including a repeated link to the same path. oneOf
 // panels stay in the DOM via `unmount-on-hide=false`.
 //
 // Spec: playground/composition.spec.md (issue #31).
@@ -54,7 +54,7 @@ interface CompositionNodeBase {
 
 /** A discriminator selects alternatives; it cannot describe an allOf
  * conjunction. The union keeps that invalid state out of typed callers while
- * fieldsFor still guards JavaScript/runtime input defensively. */
+ * field derivation still guards JavaScript/runtime input defensively. */
 export type CompositionNode =
   | (CompositionNodeBase & {
     kind: 'oneOf' | 'anyOf'
@@ -79,8 +79,6 @@ export interface SchemaCompositionLabels {
   /** Description factory for the synthesized discriminator field row. A
    *  variant may accept multiple wire values, including the empty string. */
   discriminatorDescription?: (values: readonly string[]) => string
-  showFields?: string
-  hideFields?: string
   empty?: string
 }
 
@@ -121,8 +119,6 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
   discriminatorDescription: (values: readonly string[]) => values.length === 1
     ? `Always ${discriminatorValue(values[0]!)}.`
     : `One of ${values.map(discriminatorValue).join(', ')}.`,
-  showFields: 'Show Fields',
-  hideFields: 'Hide Fields',
   empty: 'No variants documented',
   ...props.labels,
 }))
@@ -183,10 +179,6 @@ const activeTab = shallowRef('')
 
 const variantIds = computed(() => props.variants.map(v => v.id))
 
-const tabItems = computed<TabsItem[]>(() =>
-  props.variants.map(v => ({ label: v.label, value: v.id })),
-)
-
 // ---------------------------------------------------------------------------
 // anyOf — independent open state per variant (non-exclusive by design: any
 // number of sections can be open at once). Auto-open mirrors FieldItem's
@@ -213,7 +205,7 @@ function reveal(active: string) {
 }
 
 watch(
-  [() => props.kind, variantIds, variantPaths, anchor.active],
+  [() => props.kind, variantIds, variantPaths, anchor.active, anchor.revision],
   ([kind, ids, _paths, active]) => {
     syncOpen(ids)
     if (kind === 'oneOf' && !ids.includes(activeTab.value)) {
@@ -231,9 +223,7 @@ watch(
 // field, no dedicated caption vocabulary. No `path`: the row repeats across
 // variants, so it is not individually deep-linkable.
 // ---------------------------------------------------------------------------
-const variantById = computed(() => new Map(props.variants.map(v => [v.id, v])))
-
-function fieldsFor(variant: CompositionVariant): FieldNode[] {
+function buildFields(variant: CompositionVariant): FieldNode[] {
   if (props.kind === 'allOf' || !props.discriminator) return variant.fields
 
   const values = props.discriminator.mapping
@@ -247,7 +237,7 @@ function fieldsFor(variant: CompositionVariant): FieldNode[] {
   const discriminator: FieldNode = current
     ? {
         ...current,
-        required: current.required ?? true,
+        required: true,
         description: current.description
           ? `${mappingDescription} ${current.description}`
           : mappingDescription,
@@ -262,11 +252,41 @@ function fieldsFor(variant: CompositionVariant): FieldNode[] {
   return [discriminator, ...variant.fields.filter((_, fieldIndex) => fieldIndex !== index)]
 }
 
+interface CompositionVariantView {
+  variant: CompositionVariant
+  fields: FieldNode[]
+  /** Top-level documented items behind a variant: fields + nested block. */
+  count: number
+}
+
+type CompositionTabItem = TabsItem & { view: CompositionVariantView }
+
+const variantViews = computed<CompositionVariantView[]>(() =>
+  props.variants.map((variant) => {
+    const fields = buildFields(variant)
+    return {
+      variant,
+      fields,
+      count: fields.length + (variant.composition ? 1 : 0),
+    }
+  }),
+)
+
+const tabItems = computed<CompositionTabItem[]>(() =>
+  variantViews.value.map(view => ({
+    label: view.variant.label,
+    value: view.variant.id,
+    view,
+  })),
+)
+
 const headingTag = computed(() => `h${props.headingLevel}`)
 const nestedHeadingLevel = computed(() => Math.min(props.headingLevel + 1, 6) as HeadingLevel)
 const contentIdBase = useId()
 
 function contentId(variantId: string) {
+  // ARIA resolves ids as opaque strings. Callers and tests must use
+  // getElementById rather than interpolating this encoded id into a selector.
   return `${contentIdBase}-composition-${encodeURIComponent(variantId)}`
 }
 
@@ -313,33 +333,28 @@ function toggleVariant(variantId: string) {
       class="w-full gap-3"
     >
       <template #content="{ item }">
-        <div
-          v-if="variantById.get(String(item.value))"
-          class="flex flex-col gap-3"
-        >
-          <template v-for="v in [variantById.get(String(item.value))!]" :key="v.id">
-            <p v-if="v.description" class="text-sm leading-relaxed text-toned">
-              <InlineMarkdown :text="v.description" />
-            </p>
-            <!-- The discriminator renders as the first real field row
-                 (synthesized in fieldsFor), not as a caption. -->
-            <div v-if="fieldsFor(v).length">
-              <ApiDocsFieldItem
-                v-for="field in fieldsFor(v)"
-                :key="field.path ?? field.name"
-                v-bind="field"
-                :labels="fieldLabels"
-              />
-            </div>
-            <PlaygroundSchemaComposition
-              v-if="v.composition"
-              v-bind="v.composition"
-              :labels="labels"
-              :field-labels="fieldLabels"
-              :heading-level="nestedHeadingLevel"
-              class="border-s border-default ps-4"
+        <div class="flex flex-col gap-3">
+          <p v-if="item.view.variant.description" class="text-sm leading-relaxed text-toned">
+            <InlineMarkdown :text="item.view.variant.description" />
+          </p>
+          <!-- The discriminator renders as the first real field row
+               (synthesized in buildFields), not as a caption. -->
+          <div v-if="item.view.fields.length">
+            <ApiDocsFieldItem
+              v-for="field in item.view.fields"
+              :key="field.path ?? field.name"
+              v-bind="field"
+              :labels="fieldLabels"
             />
-          </template>
+          </div>
+          <PlaygroundSchemaComposition
+            v-if="item.view.variant.composition"
+            v-bind="item.view.variant.composition"
+            :labels="labels"
+            :field-labels="fieldLabels"
+            :heading-level="nestedHeadingLevel"
+            class="border-s border-default ps-4"
+          />
         </div>
       </template>
     </UTabs>
@@ -351,52 +366,51 @@ function toggleVariant(variantId: string) {
       class="divide-y divide-default overflow-hidden rounded-lg border border-default"
     >
       <section
-        v-for="v in variants"
-        :key="v.id"
+        v-for="view in variantViews"
+        :key="view.variant.id"
       >
         <component :is="headingTag">
           <button
             type="button"
             class="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-            :aria-expanded="open[v.id] ?? false"
-            :aria-controls="contentId(v.id)"
-            @click="toggleVariant(v.id)"
+            :aria-expanded="open[view.variant.id] ?? false"
+            :aria-controls="contentId(view.variant.id)"
+            @click="toggleVariant(view.variant.id)"
           >
             <UIcon
               name="i-lucide-chevron-right"
               class="size-4 shrink-0 text-dimmed transition-transform duration-200"
-              :class="{ 'rotate-90': open[v.id] }"
+              :class="{ 'rotate-90': open[view.variant.id] }"
               aria-hidden="true"
             />
-            <span class="text-sm font-medium text-highlighted">{{ v.label }}</span>
+            <span class="text-sm font-medium text-highlighted">{{ view.variant.label }}</span>
             <!-- `(N)` count grammar: how much is behind the fold. -->
-            <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
-            <span class="sr-only">{{ open[v.id] ? t.hideFields : t.showFields }}</span>
+            <span v-if="view.count" class="text-sm font-normal text-dimmed">({{ view.count }})</span>
           </button>
         </component>
         <UCollapsible
-          v-model:open="open[v.id]"
+          v-model:open="open[view.variant.id]"
           :unmount-on-hide="false"
         >
           <template #content>
             <div
-              :id="contentId(v.id)"
+              :id="contentId(view.variant.id)"
               class="flex flex-col gap-3 px-3 pb-3 ps-9"
             >
-              <p v-if="v.description" class="text-sm leading-relaxed text-toned">
-                <InlineMarkdown :text="v.description" />
+              <p v-if="view.variant.description" class="text-sm leading-relaxed text-toned">
+                <InlineMarkdown :text="view.variant.description" />
               </p>
-              <div v-if="fieldsFor(v).length">
+              <div v-if="view.fields.length">
                 <ApiDocsFieldItem
-                  v-for="field in fieldsFor(v)"
+                  v-for="field in view.fields"
                   :key="field.path ?? field.name"
                   v-bind="field"
                   :labels="fieldLabels"
                 />
               </div>
               <PlaygroundSchemaComposition
-                v-if="v.composition"
-                v-bind="v.composition"
+                v-if="view.variant.composition"
+                v-bind="view.variant.composition"
                 :labels="labels"
                 :field-labels="fieldLabels"
                 :heading-level="nestedHeadingLevel"
@@ -410,28 +424,28 @@ function toggleVariant(variantId: string) {
     <!-- allOf: conjunction → every part fully expanded in order. Never tabs,
          never collapsibles: nothing here is optional to read. -->
     <div v-else class="flex flex-col gap-5">
-      <section v-for="v in variants" :key="v.id" class="space-y-2">
+      <section v-for="view in variantViews" :key="view.variant.id" class="space-y-2">
         <component
           :is="headingTag"
           class="flex flex-wrap items-baseline gap-x-2 border-b border-default pb-1.5 text-sm font-medium text-highlighted"
         >
-          {{ v.label }}
-          <span class="text-sm font-normal text-dimmed">({{ fieldsFor(v).length }})</span>
+          {{ view.variant.label }}
+          <span v-if="view.count" class="text-sm font-normal text-dimmed">({{ view.count }})</span>
         </component>
-        <p v-if="v.description" class="text-sm leading-relaxed text-toned">
-          <InlineMarkdown :text="v.description" />
+        <p v-if="view.variant.description" class="text-sm leading-relaxed text-toned">
+          <InlineMarkdown :text="view.variant.description" />
         </p>
-        <div v-if="fieldsFor(v).length">
+        <div v-if="view.fields.length">
           <ApiDocsFieldItem
-            v-for="field in fieldsFor(v)"
+            v-for="field in view.fields"
             :key="field.path ?? field.name"
             v-bind="field"
             :labels="fieldLabels"
           />
         </div>
         <PlaygroundSchemaComposition
-          v-if="v.composition"
-          v-bind="v.composition"
+          v-if="view.variant.composition"
+          v-bind="view.variant.composition"
           :labels="labels"
           :field-labels="fieldLabels"
           :heading-level="nestedHeadingLevel"

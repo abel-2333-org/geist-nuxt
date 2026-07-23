@@ -181,15 +181,13 @@ function onCopyLink() {
 // getter): the initial render matches SSR (closed), and the open happens after
 // hydration, which Reka's controlled Collapsible reliably animates — a
 // getter-driven `open` left the SSR-closed state stuck after hydration.
-const open = ref(false)
+const open = shallowRef(false)
 
-// Open on (or after) mount when this row is an ancestor of the active anchor.
-onMounted(() => {
-  if (descendantActive.value) open.value = true
-})
-watch(descendantActive, (v) => {
+// Re-run on every navigation event as well as path changes. This matters when
+// a user follows the same descendant link after manually closing this row.
+watch([descendantActive, anchor.revision], ([v]) => {
   if (v) open.value = true
-})
+}, { immediate: true })
 
 const hasChildren = computed(() => (props.children?.length ?? 0) > 0)
 const hasEnum = computed(

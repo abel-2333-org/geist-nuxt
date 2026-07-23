@@ -20,6 +20,14 @@ export function useActiveFieldPath() {
   return useState<string>('reference-active-field', () => '')
 }
 
+// A path is state, but navigating is an event: choosing the same deep link
+// again must still ask collapsed ancestors to reveal the target. Consumers
+// watch this revision alongside the path so repeated goTo(path) calls are not
+// collapsed by Vue's same-value ref semantics.
+export function useFieldAnchorRevision() {
+  return useState<number>('reference-active-field-revision', () => 0)
+}
+
 /** Height of the sticky header, so scrolled-to rows clear it (see scroll-mt). */
 const SCROLL_MARGIN_CLASS = 'scroll-mt-24'
 
@@ -35,6 +43,7 @@ export interface FieldAnchorCopyMessages {
 
 export function useFieldAnchor() {
   const active = useActiveFieldPath()
+  const revision = useFieldAnchorRevision()
   // `copied` is surfaced so an anchor button can mirror the same transient
   // copied → check feedback the shared CopyButton gives elsewhere. Each
   // useFieldAnchor() call owns its own useCopy instance, so this state is
@@ -55,6 +64,7 @@ export function useFieldAnchor() {
    */
   async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
+    revision.value++
     if (opts.updateHash !== false && import.meta.client) {
       history.replaceState(history.state, '', `#${path}`)
     }
@@ -222,5 +232,5 @@ export function useFieldAnchor() {
     })
   }
 
-  return { active, copied, goTo, copyLink, urlFor, initFromHash, SCROLL_MARGIN_CLASS }
+  return { active, revision, copied, goTo, copyLink, urlFor, initFromHash, SCROLL_MARGIN_CLASS }
 }
