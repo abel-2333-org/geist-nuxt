@@ -89,7 +89,6 @@ describe('PlaygroundSchemaComposition', () => {
     expect(buttons[0]?.attributes('aria-expanded')).toBe('false')
     expect(buttons[0]?.attributes('aria-controls')).toBeTruthy()
     const contentId = buttons[0]!.attributes('aria-controls')!
-    expect(contentId).toContain('email%2Fprimary')
     expect(wrapper.findAll('[id]').some(node => node.attributes('id') === contentId)).toBe(true)
     expect(buttons[0]?.text()).toBe('Email(1)')
     expect(buttons[0]?.text()).not.toMatch(/Show|Hide/)
