@@ -10,12 +10,5 @@ definePageMeta({ nav: false })
     >
       <PlaygroundAnnotationDemo />
     </PlaygroundStage>
-
-    <PlaygroundStage
-      title="Composition schema 候选"
-      description="OpenAPI / JSON Schema composition 呈现:oneOf 用 tabs、anyOf 用可折叠分区、allOf 全展开,discriminator 作为每个 variant 的首行真实字段,deep link 自动揭示隐藏 variant。spec 见 playground/composition.spec.md。"
-    >
-      <PlaygroundCompositionDemo />
-    </PlaygroundStage>
   </div>
 </template>

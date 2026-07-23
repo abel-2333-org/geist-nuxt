@@ -1,16 +1,20 @@
 <script setup lang="ts">
-// Playground demo page for the SchemaComposition candidate. Demo-only
-// fixtures stay inline here (never promoted). Exercises:
+import type { CompositionNode, FieldNode } from '../../../../kits/api-docs/utils/field'
+
+definePageMeta({ nav: { label: 'Schema 组合', icon: 'i-lucide-git-fork', order: 4 } })
+
+// Demo/story for <ApiDocsSchemaComposition> — per the geist-nuxt layering,
+// demo fixtures live in the gallery and the kit only ships the data-agnostic
+// component. Inline neutral ViewModels exercise:
 //   1. oneOf + discriminator (payment method) with a nested oneOf inside a
 //      variant — recursion + tab auto-switching for deep links;
 //   2. anyOf (contact channels) — non-exclusive collapsible sections;
 //   3. allOf (resource shape) — fully expanded conjunction, incl. a
-//      description-only variant (partial data);
-//   4. deep-link buttons that jump into hidden variants to verify the
+//      description-only part (partial data);
+//   4. field-level composition — a plain field whose value is itself a oneOf,
+//      rendered by ApiDocsFieldItem via delegation (the promotion's new path);
+//   5. deep-link buttons that jump into hidden variants to verify the
 //      switch/expand → scroll → flash chain end to end.
-// Spec: playground/composition.spec.md (issue #31).
-
-import type { CompositionNode } from './SchemaComposition.vue'
 
 // --- 1. oneOf + discriminator: payment method -------------------------------
 const paymentMethod: CompositionNode = {
@@ -205,6 +209,65 @@ const resourceShape: CompositionNode = {
   ],
 }
 
+// --- 4. Field-level composition: a field row whose value is itself a oneOf ----
+// ApiDocsFieldItem delegates the `composition` to ApiDocsSchemaComposition
+// after any concrete children — the promotion's new capability.
+const destinationField: FieldNode = {
+  path: 'transfer_destination',
+  name: 'destination',
+  type: 'object',
+  required: true,
+  description: 'Where the transfer lands. Concrete metadata plus a polymorphic target.',
+  children: [
+    {
+      path: 'transfer_destination_reference',
+      name: 'reference',
+      type: 'string',
+      required: true,
+      description: 'Idempotent client reference for this destination.',
+    },
+  ],
+  composition: {
+    kind: 'oneOf',
+    discriminator: {
+      propertyName: 'kind',
+      mapping: [
+        { value: 'bank_account', variantId: 'bank' },
+        { value: 'card', variantId: 'card' },
+      ],
+    },
+    variants: [
+      {
+        id: 'bank',
+        label: 'Bank account',
+        fields: [
+          {
+            path: 'transfer_destination_bank_iban',
+            name: 'iban',
+            type: 'string',
+            required: true,
+            description: 'Destination IBAN.',
+            examples: ['DE89370400440532013000'],
+          },
+        ],
+      },
+      {
+        id: 'card',
+        label: 'Debit card',
+        fields: [
+          {
+            path: 'transfer_destination_card_last4',
+            name: 'last4',
+            type: 'string',
+            required: true,
+            description: 'Last four digits of the destination card.',
+          },
+        ],
+      },
+    ],
+  },
+}
+
 // --- Deep links into hidden variants -----------------------------------------
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -213,61 +276,78 @@ const deepLinks = [
   { label: 'card → token (other tab)', path: 'request-body_card_token' },
   { label: 'wallet → Apple Pay device_token (nested tab)', path: 'request-body_wallet_apple-pay_device-token' },
   { label: 'phone → sms_opt_in (collapsed section)', path: 'contact_phone_sms-opt-in' },
+  { label: 'destination → card last4 (field-level tab)', path: 'transfer_destination_card_last4' },
 ]
 </script>
 
 <template>
-  <div class="space-y-12">
-    <!-- Deep-link harness: each jump targets a row hidden behind a tab or a
-         collapsed section, verifying reveal → scroll → flash. -->
-    <section class="space-y-3">
-      <h2 class="text-base font-semibold text-highlighted">
-        Deep-link checks
-      </h2>
-      <div class="flex flex-wrap gap-2">
-        <UButton
-          v-for="link in deepLinks"
-          :key="link.path"
-          color="neutral"
-          variant="subtle"
-          size="xs"
-          icon="i-lucide-link-2"
-          @click="anchor.goTo(link.path, { focus: true })"
-        >
-          {{ link.label }}
-        </UButton>
+  <UContainer class="py-16 sm:py-24">
+    <section id="schema-composition" class="scroll-mt-20 space-y-10">
+      <div class="space-y-2">
+        <h2 class="text-2xl font-semibold tracking-tight text-highlighted">Schema 组合</h2>
+        <p class="max-w-2xl text-muted">
+          <code class="font-mono text-[0.8125rem]">ApiDocsSchemaComposition</code>：忠实呈现 OpenAPI / JSON Schema
+          的 <b class="font-medium text-toned">oneOf / anyOf / allOf</b> 组合——
+          oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、
+          allOf 顺序全展开（全部成立），三种语义绝不互相误读。
+          <code class="font-mono text-[0.8125rem]">discriminator</code> 渲染为每个 variant 的首行真实字段（不虚构 wire path），
+          deep link 会自动揭示隐藏的 tab / 分区。字段级组合由
+          <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code> 在子字段之后委托本组件渲染。
+          组件数据无关、locale-ready，所有文案由调用方注入。
+        </p>
       </div>
-    </section>
 
-    <!-- 1. Top-level oneOf under a field group: the request body itself is a
-         composition, so SchemaComposition sits directly inside FieldGroup. -->
-    <section class="space-y-4">
-      <h2 class="text-base font-semibold text-highlighted">
-        oneOf + discriminator — payment method
-      </h2>
-      <ApiDocsFieldGroup label="Request body" :heading-level="3">
-        <PlaygroundSchemaComposition v-bind="paymentMethod" :heading-level="4" class="pt-3" />
-      </ApiDocsFieldGroup>
-    </section>
+      <!-- Deep-link harness: each jump targets a row hidden behind a tab or a
+           collapsed section, verifying reveal → scroll → flash. -->
+      <section class="space-y-3">
+        <h3 class="text-sm font-semibold text-highlighted">深链接检查</h3>
+        <div class="flex flex-wrap gap-2">
+          <UButton
+            v-for="link in deepLinks"
+            :key="link.path"
+            color="neutral"
+            variant="subtle"
+            size="xs"
+            icon="i-lucide-link-2"
+            @click="anchor.goTo(link.path, { focus: true })"
+          >
+            {{ link.label }}
+          </UButton>
+        </div>
+      </section>
 
-    <!-- 2. anyOf: sections open independently — verify two can be open at once. -->
-    <section class="space-y-4">
-      <h2 class="text-base font-semibold text-highlighted">
-        anyOf — contact channels
-      </h2>
-      <ApiDocsFieldGroup label="Contact" :heading-level="3">
-        <PlaygroundSchemaComposition v-bind="contactChannels" :heading-level="4" class="pt-3" />
-      </ApiDocsFieldGroup>
-    </section>
+      <!-- 1. Top-level oneOf under a field group: the request body itself is a
+           composition, so SchemaComposition sits directly inside FieldGroup. -->
+      <section class="space-y-4">
+        <h3 class="text-sm font-semibold text-highlighted">oneOf + discriminator — 支付方式</h3>
+        <ApiDocsFieldGroup label="Request body" :heading-level="3">
+          <ApiDocsSchemaComposition v-bind="paymentMethod" :heading-level="4" class="pt-3" />
+        </ApiDocsFieldGroup>
+      </section>
 
-    <!-- 3. allOf: no selector, everything expanded, incl. a description-only part. -->
-    <section class="space-y-4">
-      <h2 class="text-base font-semibold text-highlighted">
-        allOf — resource shape
-      </h2>
-      <ApiDocsFieldGroup label="Response body" :heading-level="3">
-        <PlaygroundSchemaComposition v-bind="resourceShape" :heading-level="4" class="pt-3" />
-      </ApiDocsFieldGroup>
+      <!-- 2. anyOf: sections open independently — verify two can be open at once. -->
+      <section class="space-y-4">
+        <h3 class="text-sm font-semibold text-highlighted">anyOf — 联系渠道</h3>
+        <ApiDocsFieldGroup label="Contact" :heading-level="3">
+          <ApiDocsSchemaComposition v-bind="contactChannels" :heading-level="4" class="pt-3" />
+        </ApiDocsFieldGroup>
+      </section>
+
+      <!-- 3. allOf: no selector, everything expanded, incl. a description-only part. -->
+      <section class="space-y-4">
+        <h3 class="text-sm font-semibold text-highlighted">allOf — 资源形态</h3>
+        <ApiDocsFieldGroup label="Response body" :heading-level="3">
+          <ApiDocsSchemaComposition v-bind="resourceShape" :heading-level="4" class="pt-3" />
+        </ApiDocsFieldGroup>
+      </section>
+
+      <!-- 4. Field-level composition delegated by a regular FieldItem row. -->
+      <section class="space-y-4">
+        <h3 class="text-sm font-semibold text-highlighted">字段级组合 — 委托自 FieldItem</h3>
+        <ApiDocsFieldGroup label="Transfer" :heading-level="3">
+          <ApiDocsFieldItem v-bind="destinationField" />
+        </ApiDocsFieldGroup>
+      </section>
     </section>
-  </div>
+  </UContainer>
 </template>

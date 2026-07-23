@@ -1,48 +1,22 @@
+<script lang="ts">
+// Preserve the component's pre-util type import surface.
+export type { EnumValue, EnumVariant } from '#imports'
+</script>
+
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
 
-// Domain component (API docs): renders a field's allowed values. Self-contained
-// per the kit slice convention — the enum display types travel with the
-// component. Composed from Nuxt UI primitives + core atoms (InlineCode,
-// InlineMarkdown, both supplied by the foundation dependency closure).
-
-/** A single enum member.
- *  `value` is deliberately `string` (not `string | number`): the default-row
- *  marker relies on strict `===` against `defaultValue`, so widening this
- *  type would silently break that match. Callers stringify numerics. */
-export interface EnumValue {
-  value: string
-  description: string
-}
-
-/** A named group of enum members — e.g. bank lists that apply under a condition. */
-export interface EnumVariant {
-  title?: string
-  /** When this group of values applies (already localized). */
-  when?: string
-  values: EnumValue[]
-}
-
+// Domain component (API docs): renders a field's allowed values. Composed from
+// Nuxt UI primitives + core atoms (InlineCode, InlineMarkdown, both supplied by
+// the foundation dependency closure).
+//
+// The enum display model (EnumValue/EnumVariant) lives in the co-slice util
+// `utils/enum.ts` and is referenced bare here — Nuxt auto-imports this kit's
+// `utils/` dir, so no import statement is needed (same pattern as the
+// lifecycle/method preset types). New callers import from `~/utils/enum`; the
+// module script above preserves the previous component import surface.
 const props = withDefaults(
-  defineProps<{
-    /** Flat enum: a single list of allowed values. */
-    values?: EnumValue[]
-    /** Grouped enum: values that vary by condition (e.g. bank lists per market). */
-    variants?: EnumVariant[]
-    /** The field's default value — its row gets a trailing marker, tying the
-     *  summary row's DEFAULT pill to the concrete entry in this table. */
-    defaultValue?: string
-    /** Structural labels; overridable for i18n. */
-    label?: string
-    defaultLabel?: string
-    searchPlaceholder?: string
-    emptyLabel?: string
-    /** Fallback tab label for an unnamed variant; receives the 0-based index
-     *  so the whole string is owned by the caller (e.g. `i => `选项 ${i + 1}``). */
-    variantLabel?: (index: number) => string
-    /** Lists at or above this length get a filter box + scroll area. */
-    filterThreshold?: number
-  }>(),
+  defineProps<EnumTableProps>(),
   {
     label: 'Allowed values',
     defaultLabel: 'Default',

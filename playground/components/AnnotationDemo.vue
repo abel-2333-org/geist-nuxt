@@ -4,7 +4,7 @@
 // map, FieldNodes shared with the reference rows below (single source of
 // truth), and async doc-preview loaders (one succeeding, one failing).
 
-import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
+import type { FieldNode } from '../../kits/api-docs/utils/field'
 import type { DocPreview } from './DocAnnotation.vue'
 
 provideGlossary({

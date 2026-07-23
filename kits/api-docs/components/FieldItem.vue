@@ -1,19 +1,36 @@
+<script lang="ts">
+// Keep the pre-util public type surface for existing consumers. New code should
+// import from `~/utils/field`, while these type-only exports bridge copy-in
+// projects that still import directly from FieldItem.vue.
+export type {
+  EnumValue,
+  EnumVariant,
+  FieldItemLabels,
+  FieldLifecycle,
+  FieldLifecycleInfo,
+  FieldNode,
+  FieldNote,
+  RequiredState,
+} from '#imports'
+</script>
+
 <script setup lang="ts">
 // Domain component (API docs): renders one field row of an endpoint's schema —
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
 // constraints, example, lifecycle), and recursive object/array subfields.
 //
-// Self-contained per the kit slice convention: the field data model (FieldNode
-// and friends) travels inline with the component, mirroring how EnumTable/
-// CodeBlock carry their own display types. The types it shares with the sibling
-// slices it already depends on — EnumValue/EnumVariant (enum-table) and
-// FieldLifecycle (lifecycle-badge) — are imported from those slices rather than
-// re-declared, so the shared contract is compiler-enforced (see imports below).
+// The field data model (FieldNode, FieldItemLabels and friends) lives in the
+// co-slice util `utils/field.ts`. Nuxt auto-imports this kit's `utils/` dir,
+// so those types — and the composition model on `FieldNode.composition` — are
+// referenced bare here with no import statement (same pattern as the lifecycle/
+// method preset types). Callers that need the model import it from
+// `~/utils/field`, the single canonical home.
 //
 // Composed from Nuxt UI primitives (UIcon, UCollapsible) + core atoms
-// (InlineCode and InlineMarkdown from foundation) + kit
-// siblings (ApiDocsEnumTable, ApiDocsLifecycleBadge). Deep linking is handled
-// by the kit's useFieldAnchor composable (auto-imported).
+// (InlineCode and InlineMarkdown from foundation) + kit siblings
+// (ApiDocsEnumTable, ApiDocsLifecycleBadge, and ApiDocsSchemaComposition for
+// field-level composition). Deep linking is handled by the kit's useFieldAnchor
+// composable (auto-imported).
 //
 // Anatomy:  summary row  ── anchor · name · type · format · requiredness
 //                           (required/conditional only; optional is unmarked) ·
@@ -22,142 +39,42 @@
 //                           secondary band (deprecation-first → enum →
 //                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
+//           composition  ── field-level oneOf/anyOf/allOf delegated to
+//                           <ApiDocsSchemaComposition> after the children
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
 //           carry dynamic aria-labels; copied state announced politely.
-
-// Types shared with sibling slices are imported from their canonical owner (not
-// re-declared) so drift is a compile error, not a silent structural mismatch.
-// All three owner slices are declared in this component's registryDependencies.
-// Component siblings use relative imports; lifecycle types resolve through
-// Nuxt's standard `#imports` surface after copy-in to app/utils.
-import type { EnumValue, EnumVariant } from './EnumTable.vue'
-import type { FieldLifecycle } from '#imports'
-export type { EnumValue, EnumVariant, FieldLifecycle }
-
-/** `true` / `false`(absent) / `'conditional'` (required only in certain cases). */
-export type RequiredState = boolean | 'conditional'
-
-/**
- * Field lifecycle metadata. `status` drives the badge; `since` and
- * `description` (already localized) surface in a callout under the field.
- */
-export interface FieldLifecycleInfo {
-  status: FieldLifecycle
-  /** Version/date the status took effect, e.g. `v2.3` or `2026-03`. */
-  since?: string
-  /** What the status means for this field (migration hint, etc.). */
-  description?: string
-}
-
-/** A short note shown under a field (constraints, consistency rules, caveats…). */
-export interface FieldNote {
-  tone?: 'caution' | 'info'
-  /** Category tag (Range / Rule / Unsupported…) rendered as a leading pill. */
-  label?: string
-  text: string
-}
-
-/**
- * A field node. `children` (object/array subfields) is what makes it
- * expandable. This is the data contract of the component: everything the row
- * can render, and the recursive shape passed to child rows.
- */
-export interface FieldNode {
-  /**
-   * Stable, unique, hierarchical id used as the DOM id and URL hash for deep
-   * linking, e.g. `request-body_customer_address_city`. Underscore-separated
-   * so a row can tell whether the active anchor lives among its descendants
-   * (prefix match) and auto-expand.
-   */
-  path?: string
-  name: string
-  type: string
-  /** Serialization hint from the spec, e.g. `json_string`. */
-  format?: string
-  /** `true`, `false`/absent, or `'conditional'` (required only in certain cases). */
-  required?: RequiredState
-  /** Explains when a conditional field becomes required (already localized). */
-  condition?: string
-  defaultValue?: string
-  /** Field lifecycle (new/beta/deprecated) with optional since + description. */
-  lifecycle?: FieldLifecycleInfo
-  description?: string
-  /** One or more example values. */
-  examples?: string[]
-  notes?: FieldNote[]
-  /** Flat enum (single list of allowed values). */
-  enumValues?: EnumValue[]
-  /** Grouped enum (values that vary by condition). */
-  enumVariants?: EnumVariant[]
-  /** Object/array subfields. Presence of children is the only thing that makes a row expandable. */
-  children?: FieldNode[]
-}
-
-/**
- * Component-owned ("chrome") copy, so a doc site can localize every field row
- * in one place — e.g. pass `$t()` values from @nuxtjs/i18n. Content strings
- * (names, descriptions, notes) come from the data and are rendered verbatim.
- */
-export interface FieldItemLabels {
-  required?: string
-  conditional?: string
-  default?: string
-  example?: string
-  constraints?: string
-  /** Fallback category tag for a note without its own `label`. */
-  note?: string
-  /** Lead-in before a lifecycle `since` version, e.g. "Since v2.3". */
-  since?: string
-  showChildren?: string
-  hideChildren?: string
-  copyLink?: string
-  copiedLink?: string
-  /** Full toast sentence after copying a field's link. Receives the field name
-   *  so the whole string is owned here (not concatenated in the composable),
-   *  e.g. `(name) => `${name} 的链接已复制``. */
-  linkCopied?: (fieldName: string) => string
-  /** Complete failure toast sentence; receives the field name for i18n parity. */
-  linkCopyFailed?: (fieldName: string) => string
-
-  // Passthrough labels for nested chrome. These have NO defaults here — when
-  // omitted they stay `undefined` and the child component's own English
-  // default applies, so the default string lives in exactly one place (the
-  // child) and cannot drift. They flow to recursive child rows via `labels`.
-
-  /** Per-status override for the lifecycle badge label (e.g. for i18n),
-   *  keyed by status so one map covers every row a labels object reaches. */
-  lifecycle?: Partial<Record<FieldLifecycle, string>>
-  /** EnumTable heading (default `Allowed values`). */
-  enumLabel?: string
-  /** EnumTable filter placeholder + aria-label (default `Filter values`). */
-  enumFilter?: string
-  /** EnumTable empty state after filtering (default `No matching values`). */
-  enumEmpty?: string
-  /** EnumTable fallback tab label for an unnamed variant; receives the
-   *  0-based index (default `` i => `Option ${i + 1}` ``). */
-  enumVariant?: (index: number) => string
-}
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
 // ApiDocsFieldItem); declared explicitly so the template's recursion resolves.
 defineOptions({ name: 'ApiDocsFieldItem' })
 
+// Field-level composition is delegated to ApiDocsSchemaComposition — a
+// HIGHER-level slice that itself depends on FieldItem. A static
+// <ApiDocsSchemaComposition> tag here would either force a dependency cycle
+// (if declared) or leave FieldItem un-installable on its own (if not). The
+// optional lookup below preserves that one-way dependency.
 const props = withDefaults(
-  defineProps<FieldNode & {
-    /** Overridable UI copy for localization. See FieldItemLabels. */
-    labels?: FieldItemLabels
-  }>(),
+  defineProps<FieldItemProps>(),
   {
     required: false,
     labels: () => ({}),
   },
 )
 
+// Resolve the higher-level slice only when this field actually needs it. Plain
+// standalone FieldItem installs never attempt the optional lookup, while a
+// composition-bearing field still gets Nuxt's normal component auto-import.
+const schemaComposition = computed(() => {
+  if (!props.composition) return null
+  const resolved = resolveComponent('ApiDocsSchemaComposition')
+  return typeof resolved === 'string' ? null : resolved
+})
+
 // Merge caller copy over neutral English defaults. Chrome text only.
-// Passthrough labels (lifecycle / enum*) are excluded: they have no defaults
-// here and are read straight from `props.labels` at the passing site.
-type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant'
+// Passthrough labels (lifecycle / enum* / composition) are excluded: they have
+// no defaults here and are read straight from `props.labels` at the passing site.
+type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant' | 'composition'
 const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
   conditional: 'Conditional',
@@ -180,9 +97,8 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
 // into a collapsed subfield reveals itself.
 const anchor = useFieldAnchor()
 const isActive = computed(() => !!props.path && anchor.active.value === props.path)
-const descendantActive = computed(
-  () => !!props.path && anchor.active.value.startsWith(`${props.path}_`),
-)
+const childPaths = computed(() => collectFieldPaths(props.children ?? []))
+const descendantActive = computed(() => childPaths.value.includes(anchor.active.value))
 
 function onCopyLink() {
   // Build the *complete* toast sentence here via our own labels, so it flows
@@ -576,5 +492,21 @@ const lifecycleMeta = computed(() => {
         </div>
       </template>
     </UCollapsible>
+
+    <!-- Field-level composition — this field's value is itself a
+         oneOf/anyOf/allOf. Delegated to ApiDocsSchemaComposition (not flattened
+         into rows) so the alternative shape keeps its own semantics, rendered
+         after any concrete subfields. Rendered via a dynamically resolved
+         component (see script) so FieldItem installs standalone without a
+         dependency cycle; the block only appears when that slice is present.
+         FieldItem passes both its own chrome and `labels.composition` through. -->
+    <div v-if="composition && schemaComposition" class="mt-3 border-s border-default ps-4">
+      <component
+        :is="schemaComposition"
+        v-bind="composition"
+        :labels="labels.composition"
+        :field-labels="labels"
+      />
+    </div>
   </div>
 </template>

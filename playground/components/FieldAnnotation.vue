@@ -17,7 +17,7 @@
 // TermAnnotation) so stale ids never break the narrative.
 
 import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
-import type { FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
+import type { FieldNode } from '../../kits/api-docs/utils/field'
 
 export interface FieldAnnotationLabels extends AnnotationPopoverLabels {
   /** Eyebrow caption of the popover. */

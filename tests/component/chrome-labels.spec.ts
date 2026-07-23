@@ -21,6 +21,16 @@ const zhLabels = {
   enumFilter: '筛选值',
   enumEmpty: '无匹配值',
   enumVariant: (i: number) => `选项 ${i + 1}`,
+  composition: {
+    oneOf: '其中一个',
+    anyOf: '任意组合',
+    allOf: '全部组合',
+    oneOfHint: '以下仅一个适用。',
+    anyOfHint: '以下至少一个适用。',
+    allOfHint: '以下全部适用。',
+    discriminatorDescription: (values: readonly string[]) => `固定为 ${values.join('、')}。`,
+    empty: '暂无组合形态',
+  },
 }
 
 /** ≥ filterThreshold(30) 的扁平 enum，触发筛选框 + 空态路径。 */
@@ -134,6 +144,37 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     expect(wrapper.text()).toContain('允许值')
     expect(wrapper.text()).not.toContain('Beta')
     expect(wrapper.text()).not.toContain('Allowed values')
+  })
+})
+
+describe('FieldItem → SchemaComposition structural label passthrough', () => {
+  it('localizes field-level composition chrome through the shared labels object', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'destination',
+        type: 'object',
+        composition: {
+          kind: 'oneOf' as const,
+          discriminator: {
+            propertyName: 'kind',
+            mapping: [{ value: 'bank', variantId: 'bank' }],
+          },
+          variants: [{
+            id: 'bank',
+            label: '银行账户',
+            fields: [{ name: 'iban', type: 'string' }],
+          }],
+        },
+        labels: zhLabels,
+      },
+    })
+
+    expect(wrapper.text()).toContain('其中一个')
+    expect(wrapper.text()).toContain('以下仅一个适用。')
+    expect(wrapper.text()).toContain('固定为 bank。')
+    expect(wrapper.text()).not.toContain('One of')
+    expect(wrapper.text()).not.toContain('Exactly one')
+    expect(wrapper.text()).not.toContain('Always')
   })
 })
 

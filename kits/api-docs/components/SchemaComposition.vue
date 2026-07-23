@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Playground candidate → kits/api-docs (ApiDocsSchemaComposition).
+// Domain component (API docs): ApiDocsSchemaComposition.
 // Renders an OpenAPI / JSON Schema composition block faithfully:
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
 //   anyOf  → non-exclusive options    → stacked collapsible sections
@@ -20,71 +20,20 @@
 // including a repeated link to the same path. oneOf
 // panels stay in the DOM via `unmount-on-hide=false`.
 //
-// Spec: playground/composition.spec.md (issue #31).
+// Reference: references/kits/api-docs/schema-composition.md (issue #31).
 
 import type { TabsItem } from '@nuxt/ui'
-import type { FieldItemLabels, FieldNode } from '../../kits/api-docs/components/FieldItem.vue'
+// The composition + field display model lives in the co-slice util
+// `utils/field.ts`. Nuxt auto-imports this kit's `utils/` dir, so the types
+// (CompositionNode, CompositionVariant, CompositionDiscriminator,
+// SchemaCompositionLabels, HeadingLevel, FieldNode, FieldItemLabels) are
+// referenced bare here with no import statement — same pattern as the
+// lifecycle/method preset types. Callers import the model from `~/utils/field`.
 
-export type CompositionKind = 'oneOf' | 'anyOf' | 'allOf'
-
-export interface CompositionVariant {
-  /** Stable identity: tab selection, discriminator mapping target, and anchor
-   *  namespace segment. Never rendered as part of a wire path. */
-  id: string
-  /** Localized variant title (user content, rendered verbatim). */
-  label: string
-  description?: string
-  /** The variant's field tree; each `path` is a real anchor id. */
-  fields: FieldNode[]
-  /** Nested composition inside this variant (recursive). */
-  composition?: CompositionNode
-}
-
-export interface CompositionDiscriminator {
-  /** The discriminating payload property, e.g. `type`. */
-  propertyName: string
-  /** Complete wire value → variant id mapping, order preserved. */
-  mapping: Array<{ value: string, variantId: string }>
-}
-
-interface CompositionNodeBase {
-  /** Order preserved, ids stable. */
-  variants: CompositionVariant[]
-}
-
-/** A discriminator selects alternatives; it cannot describe an allOf
- * conjunction. The union keeps that invalid state out of typed callers while
- * field derivation still guards JavaScript/runtime input defensively. */
-export type CompositionNode =
-  | (CompositionNodeBase & {
-    kind: 'oneOf' | 'anyOf'
-    discriminator?: CompositionDiscriminator
-  })
-  | (CompositionNodeBase & {
-    kind: 'allOf'
-    discriminator?: never
-  })
-
-export type HeadingLevel = 3 | 4 | 5 | 6
-
-/** Component-owned chrome copy, overridable for i18n (FieldItem convention). */
-export interface SchemaCompositionLabels {
-  oneOf?: string
-  anyOf?: string
-  allOf?: string
-  /** Assistive sentence under the kind eyebrow. Visible text, not color-only. */
-  oneOfHint?: string
-  anyOfHint?: string
-  allOfHint?: string
-  /** Description factory for the synthesized discriminator field row. A
-   *  variant may accept multiple wire values, including the empty string. */
-  discriminatorDescription?: (values: readonly string[]) => string
-  empty?: string
-}
-
-// Recursive self-reference name (playground prefix; becomes
-// ApiDocsSchemaComposition on promotion).
-defineOptions({ name: 'PlaygroundSchemaComposition' })
+// Recursive self-reference name (kit uses pathPrefix: false, so the global
+// component name is ApiDocsSchemaComposition); declared explicitly so the
+// template's recursion resolves.
+defineOptions({ name: 'ApiDocsSchemaComposition' })
 
 type SchemaCompositionProps = CompositionNode & {
   labels?: SchemaCompositionLabels
@@ -125,22 +74,26 @@ const t = computed<Required<SchemaCompositionLabels>>(() => ({
 
 const hint = computed(() => t.value[`${props.kind}Hint` as const])
 
+// FieldItem has one labels object for its own chrome and every nested slice.
+// Merge this component's labels into that object so a field-level composition
+// nested anywhere below inherits the same localized schema vocabulary.
+const itemLabels = computed<FieldItemLabels>(() => ({
+  ...props.fieldLabels,
+  composition: {
+    ...props.fieldLabels?.composition,
+    ...props.labels,
+  },
+}))
+
 // ---------------------------------------------------------------------------
 // Anchor containment. A variant "contains" the active anchor when the anchor
 // equals or descends from any real field path inside it — including paths in
 // nested compositions, so an inner deep link also reveals the outer variant.
 // ---------------------------------------------------------------------------
 function collectPaths(variant: CompositionVariant): string[] {
-  const out: string[] = []
-  const walkFields = (fields: FieldNode[]) => {
-    for (const f of fields) {
-      if (f.path) out.push(f.path)
-      if (f.children?.length) walkFields(f.children)
-    }
-  }
-  walkFields(variant.fields)
+  const out = collectFieldPaths(variant.fields)
   if (variant.composition) {
-    for (const nested of variant.composition.variants) out.push(...collectPaths(nested))
+    out.push(...collectCompositionPaths(variant.composition))
   }
   return out
 }
@@ -344,10 +297,10 @@ function toggleVariant(variantId: string) {
               v-for="field in item.view.fields"
               :key="field.path ?? field.name"
               v-bind="field"
-              :labels="fieldLabels"
+              :labels="itemLabels"
             />
           </div>
-          <PlaygroundSchemaComposition
+          <ApiDocsSchemaComposition
             v-if="item.view.variant.composition"
             v-bind="item.view.variant.composition"
             :labels="labels"
@@ -405,10 +358,10 @@ function toggleVariant(variantId: string) {
                   v-for="field in view.fields"
                   :key="field.path ?? field.name"
                   v-bind="field"
-                  :labels="fieldLabels"
+                  :labels="itemLabels"
                 />
               </div>
-              <PlaygroundSchemaComposition
+              <ApiDocsSchemaComposition
                 v-if="view.variant.composition"
                 v-bind="view.variant.composition"
                 :labels="labels"
@@ -440,10 +393,10 @@ function toggleVariant(variantId: string) {
             v-for="field in view.fields"
             :key="field.path ?? field.name"
             v-bind="field"
-            :labels="fieldLabels"
+            :labels="itemLabels"
           />
         </div>
-        <PlaygroundSchemaComposition
+        <ApiDocsSchemaComposition
           v-if="view.variant.composition"
           v-bind="view.variant.composition"
           :labels="labels"

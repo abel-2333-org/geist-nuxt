@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { cp, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +35,82 @@ const BUILT_IN_COMPONENTS = new Set([
 function run(command, args, cwd, env = process.env) {
   console.log(`> ${command} ${args.join(' ')}`)
   execFileSync(command, args, { cwd, stdio: 'inherit', env })
+}
+
+async function openPort() {
+  const server = createServer()
+  await new Promise((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+  const address = server.address()
+  if (!address || typeof address === 'string') throw new Error('failed to allocate consumer runtime port')
+  await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()))
+  return address.port
+}
+
+async function renderBuiltPage(consumerRoot) {
+  const port = await openPort()
+  const url = `http://127.0.0.1:${port}/`
+  const child = spawn(process.execPath, ['.output/server/index.mjs'], {
+    cwd: consumerRoot,
+    env: {
+      ...process.env,
+      NITRO_HOST: '127.0.0.1',
+      NITRO_PORT: String(port),
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  const logs = []
+  const record = chunk => logs.push(chunk.toString())
+  child.stdout.on('data', record)
+  child.stderr.on('data', record)
+
+  try {
+    // Readiness is probed by polling the port, not by scraping Nitro's startup
+    // banner — the log text is an implementation detail that has changed across
+    // Nitro versions and would make this silently time out. We still fail fast
+    // if the child errors or exits before it can serve.
+    const deadline = Date.now() + 10_000
+    let exited = null
+    child.once('error', error => { exited = { error } })
+    child.once('exit', code => { exited ??= { code } })
+
+    let response
+    while (true) {
+      if (exited) {
+        if (exited.error) throw exited.error
+        throw new Error(`consumer runtime exited before listening (status ${exited.code})\n${logs.join('')}`)
+      }
+      if (Date.now() > deadline) {
+        throw new Error(`consumer runtime did not start at ${url}\n${logs.join('')}`)
+      }
+      try {
+        response = await fetch(url, { signal: AbortSignal.timeout(1_000) })
+        break
+      }
+      catch {
+        // Connection refused / aborted while the server is still booting.
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+    }
+
+    const html = await response.text()
+    if (!response.ok) {
+      throw new Error(`consumer runtime returned HTTP ${response.status}\n${html}\n${logs.join('')}`)
+    }
+    return { html, output: logs.join('') }
+  }
+  finally {
+    if (child.exitCode === null) {
+      child.kill('SIGTERM')
+      await Promise.race([
+        new Promise(resolve => child.once('exit', resolve)),
+        new Promise(resolve => setTimeout(resolve, 2_000)),
+      ])
+      if (child.exitCode === null) child.kill('SIGKILL')
+    }
+  }
 }
 
 async function protectedHashes(consumerRoot) {
@@ -140,6 +217,8 @@ const runtimeScenarios = [
     item: 'api-docs-field-item',
     build: true,
     cssMarker: 'scroll-mt-24',
+    renderedMarkers: ['amount', 'string'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
     page: `<template>\n  <ApiDocsFieldItem name="amount" type="string" />\n</template>\n`,
   },
   {
@@ -155,6 +234,59 @@ const runtimeScenarios = [
     build: true,
     cssMarker: 'max-sm\\:px-1\\.5',
     page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
+  },
+  {
+    // Render SchemaComposition only through FieldItem's optional field-level
+    // delegation. The page never references ApiDocsSchemaComposition directly,
+    // so this covers dynamic resolution after registry copy-in.
+    label: 'api-docs-schema-composition',
+    item: 'api-docs-schema-composition',
+    build: true,
+    // ps-9 is the discriminator row's indent — unique to this component's
+    // template, so its presence proves the SchemaComposition source was copied.
+    cssMarker: 'ps-9',
+    renderedMarkers: ['One of', 'Card', 'brand'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
+    page: `<script setup lang="ts">
+const field = {
+  path: 'payment_method',
+  name: 'payment_method',
+  type: 'object',
+  composition: {
+    kind: 'oneOf' as const,
+    discriminator: {
+      propertyName: 'type',
+      mapping: [
+        { value: 'card', variantId: 'card' },
+        { value: 'wallet', variantId: 'wallet' },
+      ],
+    },
+    variants: [
+      {
+        id: 'card',
+        label: 'Card',
+        description: 'A tokenized payment card.',
+        fields: [
+          { path: 'payment_method_card_brand', name: 'brand', type: 'string', required: true },
+          { path: 'payment_method_card_last4', name: 'last4', type: 'string', required: true },
+        ],
+      },
+      {
+        id: 'wallet',
+        label: 'Wallet',
+        description: 'A hosted wallet balance.',
+        fields: [
+          { path: 'payment_method_wallet_provider', name: 'provider', type: 'string', required: true },
+        ],
+      },
+    ],
+  },
+}
+</script>
+<template>
+  <ApiDocsFieldItem v-bind="field" />
+</template>
+`,
   },
   {
     label: 'api-docs-webhook-protocol',
@@ -332,6 +464,20 @@ try {
             }
             if (scenario.cssMarker && !builtCss.includes(scenario.cssMarker)) {
               throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
+            }
+            if (scenario.renderedMarkers || scenario.forbiddenRuntimeOutput) {
+              const runtime = await renderBuiltPage(consumerRoot)
+              const rendered = runtime.html
+              for (const marker of scenario.renderedMarkers ?? []) {
+                if (!rendered.includes(marker)) {
+                  throw new Error(`${scenario.label}: rendered HTML did not contain ${marker}`)
+                }
+              }
+              for (const pattern of scenario.forbiddenRuntimeOutput ?? []) {
+                if (runtime.output.includes(pattern)) {
+                  throw new Error(`${scenario.label}: runtime output contained ${pattern}`)
+                }
+              }
             }
           }
           console.log(`Consumer closure smoke passed (${scenario.label}): ${consumerRoot}`)
