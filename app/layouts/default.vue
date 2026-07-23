@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const items = useGalleryNav()
+// Playground 是未采纳候选,只在开发环境暴露入口,正式 gallery 保持干净。
+const dev = import.meta.dev
 </script>
 
 <template>
@@ -30,6 +32,14 @@ const items = useGalleryNav()
           aria-label="GitHub 仓库"
           to="https://github.com/abel-2333-org/geist-nuxt"
           target="_blank"
+        />
+        <UButton
+          v-if="dev"
+          icon="i-lucide-flask-conical"
+          color="neutral"
+          variant="ghost"
+          aria-label="Playground"
+          to="/playground"
         />
         <ThemeToggle />
       </template>
