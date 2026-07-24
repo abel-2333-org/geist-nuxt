@@ -104,16 +104,31 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Brief highlight so the eye lands on the right row. Uses the Web Animations
-    // API (no persistent class to clean up) and respects reduced-motion.
+    // Highlight so the eye lands on the right row: a dashed primary frame plus a
+    // faint background wash that hold for ~2s, then fade over the final second
+    // (3s total). Driven by the Web Animations API with no `fill`, so the row
+    // reverts to its CSS state when the animation ends — no persistent class or
+    // inline style to clean up. `outlineStyle`/`outlineWidth`/`outlineOffset`
+    // repeat in every keyframe so they stay applied (held, not interpolated)
+    // while only the colors animate. Respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
+      const frame = (outlineColor: string, backgroundColor: string, offset?: number) => ({
+        outlineWidth: '1px',
+        outlineStyle: 'dashed',
+        outlineOffset: '2px',
+        outlineColor,
+        backgroundColor,
+        ...(offset === undefined ? {} : { offset }),
+      })
+      const wash = 'color-mix(in oklch, var(--ui-primary) 8%, transparent)'
       el.animate(
         [
-          { backgroundColor: 'color-mix(in oklch, var(--ui-primary) 10%, transparent)' },
-          { backgroundColor: 'transparent' },
+          frame('var(--ui-primary)', wash),
+          frame('var(--ui-primary)', wash, 0.66),
+          frame('transparent', 'transparent'),
         ],
-        { duration: 1600, easing: 'ease-out' },
+        { duration: 3000, easing: 'ease-out' },
       )
     }
   }
@@ -163,11 +178,14 @@ export function useFieldAnchor() {
     })
   }
 
-  /** Copy a field's deep link and focus it. Complete success/failure messages
-   *  keep localization owned by the caller; foundation only supplies generic
-   *  English defaults. A success-message string remains accepted for callers
-   *  copied from the previous API. Navigation still runs when clipboard
-   *  permission fails. */
+  /** Copy a field's deep link to the clipboard — nothing else. Copying is not
+   *  navigating: it neither scrolls, updates the URL hash, nor marks the row
+   *  active, so grabbing a link never yanks the reader away from where they
+   *  are. The copied URL still carries the `#path`, so pasting it elsewhere
+   *  deep-links as expected. Complete success/failure messages keep
+   *  localization owned by the caller; foundation only supplies generic English
+   *  defaults. A success-message string remains accepted for callers copied
+   *  from the previous API. */
   async function copyLink(
     path: string,
     messagesOrSuccess: FieldAnchorCopyMessages | string = {},
@@ -175,9 +193,6 @@ export function useFieldAnchor() {
     const messages: FieldAnchorCopyMessages = typeof messagesOrSuccess === 'string'
       ? { successMessage: messagesOrSuccess }
       : messagesOrSuccess
-    // Fire-and-forget: navigation/scroll runs independently of the clipboard
-    // write below; we don't want to block the copy on the scroll animation.
-    void goTo(path, { updateHash: true })
     try {
       await copy(urlFor(path), {
         label: 'Link',
@@ -186,8 +201,8 @@ export function useFieldAnchor() {
       })
     }
     catch {
-      // Clipboard unavailable/denied — the hash is still updated so the user
-      // can copy from the address bar.
+      // Clipboard unavailable/denied — useCopy surfaces the failure toast; the
+      // reader can still copy the URL from the address bar manually.
     }
   }
 
