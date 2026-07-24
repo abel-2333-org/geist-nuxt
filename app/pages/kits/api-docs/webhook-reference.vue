@@ -10,11 +10,17 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 // 没有任何一处把「identity + 协议 + payload + 示例」收在一页里。本页补上这个
 // baseline：验证现有 kit 组件已足以组合出完整 webhook 参考页，无需新增组件。
 //
-// 阅读顺序（= DOM 顺序）：
+// 阅读顺序（= DOM 顺序）——左栏是纯文档流，按「读者最想先看什么」排序：
 //   identity 头（EVENT 徽章 + 事件名 + h1 摘要 + 描述）
-//   → <ApiDocsWebhookProtocol>（验证 → 确认 → 投递，identity 的正文伙伴）
-//   → payload 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）
-// 右栏：payload 示例（单卡，无双例需求，故不用 <ApiDocsCodeRail>）。
+//   → payload 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）：整页主角，
+//     「我到底会收到什么数据」，紧跟 identity，不被协议挤下去；
+//   → <ApiDocsWebhookProtocol>（验证 → 确认 → 投递）：跨事件近乎样板的机制性
+//     参考，作为二级内容置于 payload 之后。
+// 右栏「线缆样本」= webhook 的两个方向，与端点 baseline 的 Request/Response
+// 镜像对称，用 <ApiDocsCodeRail> 纵向双栏：
+//   Payload（平台 → 你，上）/ Acknowledgement（你 → 平台，下）。
+// 关键 IA 裁决：ACK 的字面响应体是「线缆样本」而非文档散文，故与 payload 一同
+// 进右栏，不内联在左侧协议段里——左栏只留 ACK 的 facts 并指向右栏示例。
 //
 // identity 头此处手写（与 reference.vue 端点 baseline 一致）：standalone 单
 // operation 页里事件摘要即页面唯一 <h1>，而 <ApiDocsOperationHeader> 的
@@ -45,31 +51,17 @@ const verification = {
   ],
 }
 
+// ACK 段只保留「facts」——它的字面响应体示例是「线缆样本」，与 payload 示例一样
+// 归右栏 CodeRail（见下方 ackExample + 模板 #bottom），不内联在左侧文档流里。
+// facts 里的「响应体」行明确把读者指向右栏。
 const acknowledgement = {
   label: 'ACKNOWLEDGEMENT',
   description: '返回下列响应即视为确认成功；其它任何响应都会触发重试。',
   facts: [
     { term: 'HTTP status', value: '200', code: true },
     { term: 'Media type', value: 'application/json', code: true },
-    { term: '响应体', value: '固定 JSON 字面量，与右侧示例完全一致。' },
+    { term: '响应体', value: '固定 JSON 字面量，见右栏 Acknowledgement 示例。' },
   ],
-  example: {
-    code: '{\n  "received": true\n}',
-    language: 'json',
-    title: '确认响应体',
-    labels: {
-      language: '语言',
-      copy: '复制代码',
-      copied: '已复制到剪贴板',
-      copyToast: '确认响应体',
-      copySuccess: '确认响应体已复制。',
-      copyFailure: '复制失败，请重试。',
-      wrapOn: '启用自动换行',
-      wrapOff: '关闭自动换行',
-      emptyTitle: '暂无示例',
-      emptyHint: '当前没有确认响应体示例。',
-    },
-  },
 }
 
 const delivery = {
@@ -164,8 +156,13 @@ const payloadFields = [
   },
 ]
 
-// payload 示例：单卡（webhook 只投递一种载荷，无场景/状态双维度），
-// 故用 <ApiDocsRequestExample> 一个 scenario 承载，不需要 CodeRail 双例分栏。
+// 右栏「线缆样本」= webhook 的两个方向，与端点 baseline 的 Request/Response
+// 双栏镜像对称：
+//   - Payload（平台 → 你，inbound）：本次投递的 JSON 载荷；
+//   - Acknowledgement（你 → 平台，outbound）：你回给平台的固定确认体。
+// 二者用 <ApiDocsCodeRail> 纵向双栏承载（Payload 在上 / ACK 在下），与
+// reference.vue 的 Request/Response rail 用同一装配。各自单一 scenario，
+// 故用一个 variant 承载。
 const payloadExample = [
   {
     id: 'payload',
@@ -188,6 +185,25 @@ const payloadExample = [
     ],
   },
 ]
+
+// ACK 固定响应体（literal）——作为右栏底部卡，直接喂给 <ApiDocsCodeBlock>。
+const ackExample = {
+  code: '{\n  "received": true\n}',
+  language: 'json',
+  title: 'Acknowledgement',
+  labels: {
+    language: '语言',
+    copy: '复制代码',
+    copied: '已复制到剪贴板',
+    copyToast: '确认响应体',
+    copySuccess: '确认响应体已复制。',
+    copyFailure: '复制失败，请重试。',
+    wrapOn: '启用自动换行',
+    wrapOff: '关闭自动换行',
+    emptyTitle: '暂无示例',
+    emptyHint: '当前没有确认响应体示例。',
+  },
+}
 
 // --- 组合级形态变体（区别于组件级变体，后者见 /kits/api-docs/webhook-protocol）---
 // partial：协议缺「确认」段（echo/空/字面之外，有些事件干脆不要求特定确认体）；
@@ -257,24 +273,45 @@ onMounted(() => anchor.initFromHash())
           </header>
 
           <div class="mt-8 space-y-12">
-            <!-- identity 的正文伙伴：协议三段。sections 各自独立省略，此处齐全。 -->
+            <!-- 整页主角：payload 字段树，紧跟 identity（与端点 Request/Response
+                 Body 同构）。读者最想先看「我会收到什么」。 -->
+            <ApiDocsFieldGroup label="Event Payload" :count="payloadFields.length">
+              <ApiDocsFieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
+            </ApiDocsFieldGroup>
+
+            <!-- 二级参考：协议三段（验证 → 确认 → 投递）。跨事件近乎样板的机制性
+                 内容，置于 payload 之后。sections 各自独立省略，此处齐全；ACK 的
+                 字面响应体示例已移至右栏（见 #end），此处只保留 facts。 -->
             <ApiDocsWebhookProtocol
               :verification="verification"
               :acknowledgement="acknowledgement"
               :delivery="delivery"
             />
-
-            <!-- payload 字段树：与端点 Request/Response Body 同构。 -->
-            <ApiDocsFieldGroup label="Event Payload" :count="payloadFields.length">
-              <ApiDocsFieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
-            </ApiDocsFieldGroup>
           </div>
         </div>
       </template>
 
+      <!-- 右：线缆样本双栏。lg+ 钉成视口高 sticky 长条，Payload/ACK 纵向分栏 +
+           内容优先重分配；<lg 回退为堆叠各卡自滚动。与 reference.vue 同装配。 -->
       <template #end>
-        <div class="lg:sticky lg:top-20">
-          <ApiDocsRequestExample title="Payload" :scenarios="payloadExample" max-height="calc(100dvh - 9rem)" />
+        <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
+          <ApiDocsCodeRail
+            storage-key="api-docs-webhook-rail-split"
+            resize-label="Resize payload and acknowledgement panels"
+            class="h-full max-lg:space-y-4"
+          >
+            <template #top="{ maxHeight }">
+              <ApiDocsRequestExample title="Payload" :scenarios="payloadExample" :max-height="maxHeight" />
+            </template>
+            <template #bottom="{ maxHeight }">
+              <ApiDocsCodeBlock
+                :title="ackExample.title"
+                :labels="ackExample.labels"
+                :variants="[{ language: ackExample.language, code: ackExample.code }]"
+                :max-height="maxHeight"
+              />
+            </template>
+          </ApiDocsCodeRail>
         </div>
       </template>
     </SplitPane>
