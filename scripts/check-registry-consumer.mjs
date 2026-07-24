@@ -213,6 +213,46 @@ const runtimeScenarios = [
     page: `<template>\n  <p>Rate limits use a <AnnotationPopover label="Term">sliding window<template #content>A rolling time span for counting requests.</template></AnnotationPopover> algorithm.</p>\n</template>\n`,
   },
   {
+    label: 'foundation-term-annotation',
+    item: 'foundation-term-annotation',
+    build: true,
+    cssMarker: 'decoration-dashed',
+    renderedMarkers: ['Sliding window'],
+    page: `<script setup lang="ts">
+provideGlossary({
+  'sliding-window': {
+    term: 'Sliding window',
+    definition: 'A rolling time span for counting requests.',
+  },
+})
+</script>
+<template>
+  <p>Rate limits use a <TermAnnotation id="sliding-window" /> algorithm.</p>
+</template>
+`,
+  },
+  {
+    label: 'foundation-doc-annotation',
+    item: 'foundation-doc-annotation',
+    build: true,
+    cssMarker: 'decoration-dashed',
+    renderedMarkers: ['Rate limiting guide'],
+    page: `<script setup lang="ts">
+async function loadGuide() {
+  return {
+    title: 'Rate limiting guide',
+    description: 'Recommended retry backoff.',
+  }
+}
+</script>
+<template>
+  <DocAnnotation to="/guides/rate-limits" :load="loadGuide">
+    Rate limiting guide
+  </DocAnnotation>
+</template>
+`,
+  },
+  {
     label: 'api-docs-field-item',
     item: 'api-docs-field-item',
     build: true,
@@ -220,6 +260,29 @@ const runtimeScenarios = [
     renderedMarkers: ['amount', 'string'],
     forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
     page: `<template>\n  <ApiDocsFieldItem name="amount" type="string" />\n</template>\n`,
+  },
+  {
+    label: 'api-docs-field-annotation',
+    item: 'api-docs-field-annotation',
+    build: true,
+    cssMarker: 'decoration-dashed',
+    renderedMarkers: ['amount'],
+    page: `<script setup lang="ts">
+provideFieldSource({
+  amount: {
+    field: {
+      path: 'body_amount',
+      name: 'amount',
+      type: 'integer',
+      required: true,
+    },
+  },
+})
+</script>
+<template>
+  <ApiDocsFieldAnnotation field-ref="amount" />
+</template>
+`,
   },
   {
     label: 'api-docs-sidebar-nav',

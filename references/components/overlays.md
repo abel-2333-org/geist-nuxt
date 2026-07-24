@@ -58,7 +58,7 @@ foundation 组件（非 Nuxt UI 原语）：narrative 文本中的**行内注释
 
 foundation 组件，Annotation 家族的**概念形态**：把 glossary 术语 id 解析成行内定义浮层，未命中时**优雅降级为纯文本**（stale markdown 永不破页）。registry item：`foundation-term-annotation`（依赖 `foundation-annotation-popover` `foundation-inline-markdown` `foundation-use-glossary`）。
 
-**props**：`id`（glossary 键）`labels`（继承 `AnnotationPopoverLabels`，含 `category`/`learnMore`）。默认 slot 可覆盖可见短语（缺省用 glossary `term`）。术语库经 `useGlossary` 的 `provideGlossary()` 由页面/布局按需注入，组件侧 `injectGlossary()` 读取。
+**props**：`id`（glossary 键）`labels`（继承 `AnnotationPopoverLabels`，含 `category`/`learnMore`）。默认 slot 可覆盖可见短语（缺省用 glossary `term`）。术语库经 `useGlossary` 的 `provideGlossary()` 由页面/布局按需注入，组件侧 `useGlossary()` 读取。
 
 ```vue
 限流采用 <TermAnnotation id="sliding-window" /> 算法。

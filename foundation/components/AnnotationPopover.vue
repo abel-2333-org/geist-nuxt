@@ -19,6 +19,9 @@
 // AnnotationPopoverLabels is auto-imported from `utils/annotation` (referenced
 // bare, no import) so the label model is reachable from both foundation forms
 // and the kit's field form across the copy-in topology boundary.
+// Keep the original SFC type export stable for consumers that imported it
+// before the canonical definition moved into the auto-imported util.
+export type { AnnotationPopoverLabels } from '../utils/annotation'
 
 const props = withDefaults(
   defineProps<{

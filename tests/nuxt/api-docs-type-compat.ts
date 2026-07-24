@@ -12,6 +12,7 @@ import type {
   EnumValue,
   EnumVariant,
 } from '../../kits/api-docs/components/EnumTable.vue'
+import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
 
 const required: RequiredState = 'conditional'
 const lifecycle: FieldLifecycle = 'beta'
@@ -21,6 +22,10 @@ const value: EnumValue = { value: 'card', description: 'Card payment.' }
 const variant: EnumVariant = { values: [value] }
 const fieldValue: FieldEnumValue = value
 const fieldVariant: FieldEnumVariant = variant
+const annotationLabels: AnnotationPopoverLabels = {
+  loading: '正在加载预览',
+  retry: '重试预览',
+}
 const labels: FieldItemLabels = {
   composition: {
     oneOf: '其中一个',
@@ -38,4 +43,5 @@ const field: FieldNode = {
 
 void field
 void fieldValue
+void annotationLabels
 void labels
