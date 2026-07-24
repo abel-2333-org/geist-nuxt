@@ -71,13 +71,16 @@ export function useFieldAnchor() {
 
     if (!import.meta.client) return
     const token = ++navigationToken
+    console.log('[v0] goTo start', { path, token, navigationToken })
     await nextTick()
+    console.log('[v0] goTo afterNextTick', { path, token, elNow: !!document.getElementById(path) })
 
     // The row may not exist yet: hash arrival can precede an async field tree
     // (data still loading on a fresh navigation). Poll for the element within
     // a bounded window instead of failing on the first miss; the token drops
     // this positioning if a newer navigation started meanwhile.
     const el = await waitForElement(path, token)
+    console.log('[v0] goTo afterWaitForElement', { path, token, navigationToken, elFound: !!el, superseded: token !== navigationToken })
     if (!el || token !== navigationToken) return
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
@@ -85,6 +88,7 @@ export function useFieldAnchor() {
     // on a fixed delay is racy. Instead wait until the element's layout is stable
     // across two frames (expansion settled), then do a single scroll + flash.
     await waitForElementStable(el)
+    console.log('[v0] goTo afterStable', { path, token, navigationToken, superseded: token !== navigationToken })
     if (token !== navigationToken) return
 
     el.scrollIntoView({ block: 'start' })
@@ -123,6 +127,7 @@ export function useFieldAnchor() {
     // `var()`, so they hold fine across the keyframes while only the colors
     // animate. Respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    console.log('[v0] goTo animateBranch', { path, token, reduced, canAnimate: typeof el.animate === 'function' })
     if (!reduced && typeof el.animate === 'function') {
       const frame = (outlineColor: string, backgroundColor: string, offset: number) => ({
         offset,
@@ -238,6 +243,7 @@ export function useFieldAnchor() {
   function initFromHash() {
     if (!import.meta.client) return
     const apply = (path: string) => {
+      console.log('[v0] initFromHash apply', { path, empty: !path })
       if (path) {
         void goTo(path, { updateHash: false, focus: true })
       }
@@ -256,7 +262,8 @@ export function useFieldAnchor() {
       apply(rawPath)
     }
     const route = useRoute()
-    watch(() => route.fullPath, () => {
+    watch(() => route.fullPath, (nv, ov) => {
+      console.log('[v0] fullPath watcher fired', { nv, ov, hash: route.hash })
       // Vue Router exposes a normalized, already-decoded hash. Decoding it a
       // second time would throw for valid literal-percent paths such as `%`.
       apply(route.hash.replace(/^#/, ''))
