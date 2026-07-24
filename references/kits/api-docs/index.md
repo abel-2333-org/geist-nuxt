@@ -254,7 +254,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 - 字段深链接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮；消费项目可在自己的全局滚动策略中抑制首次 hash 跳动，但 kit 不覆盖全局 router 配置。
 - 字段锚点必须是可查询、稳定且无歧义的 DOM id；按路径逐段 slugify，再用稳定分隔符连接。字段原名只用于展示，不直接拼进 selector。
-- 复制反馈复用 foundation `useCopy()` 与应用级 toast live region；不要为字段表的每一行再创建 `role="status"`。纯图标锚点按钮提供随状态变化的 `aria-label`。
+- 复制反馈复用 foundation `useCopy()` 与应用级 toast live region；不要为字段表的每一行再创建 `role="status"`。纯图标锚点按钮的默认 `aria-label` 随状态变化且包含字段名，保证 screen-reader 的按钮列表可辨别目标。`copyLink` / `copiedLink` 可用函数按字段名生成完整标签；兼容字符串继续按完整标签原样使用。
 - 本地化复制提示时传入完整成功/失败消息，不在 foundation 与 kit 之间拼接半句；`FieldItemLabels.linkCopied` / `linkCopyFailed` 都接收字段名并返回完整句子。
 - **nested chrome 本地化走同一个 `labels` 对象，不 fork 组件**：`FieldItemLabels` 除自身 chrome 键外还有一组**透传键**——`lifecycle`（按 status 覆盖徽章文案的映射）、`enumLabel` / `enumFilter` / `enumEmpty` / `enumVariant`（内部 EnumTable 的标题 / 筛选 placeholder / 空态 / 未命名 variant 兜底函数），以及 `composition`（字段级 SchemaComposition 的 kind / hint / discriminator / 空态文案）。透传键在 FieldItem **不设默认值**：省略时保持 `undefined`，由子组件自己的英文默认接管，英文默认字符串只存在一处、不会漂移；递归子行经同一 `labels` 对象获得同一套文案。操作级同理：`OperationHeader.lifecycle-label` 与 `LifecycleNotice.title` 覆盖对应徽章 / 横幅文案，二者共用 `EndpointLifecycle` 词表（含 beta）。
 

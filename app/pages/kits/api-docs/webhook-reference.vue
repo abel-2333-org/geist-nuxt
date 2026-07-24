@@ -7,17 +7,20 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 //   - /kits/api-docs/webhook-protocol 只单独陈列 <ApiDocsWebhookProtocol>；
 //   - 文档站外壳的 webhook 段只有 identity + payload 字段树 + payload 示例，
 //     整个协议三段（验证/确认/投递）缺席。
-// 没有任何一处把「identity + 协议 + payload + 示例」收在一页里。本页补上这个
-// baseline：验证现有 kit 组件已足以组合出完整 webhook 参考页，无需新增组件。
+// 没有任何一处把「identity + requirements/guide 扩展区 + 协议 + payload +
+// 示例 + relations 扩展区」收在一页里。本页补上这个 baseline：验证现有 kit
+// primitives 已足以支撑整页 recipe；FieldItem 的锚点可访问名则在本轮补强。
 //
 // 阅读顺序（= DOM 顺序）——左栏是纯文档流，按 webhook「处理生命周期」排序
 // （= 开发者写 handler 的代码顺序：verify → read → respond → retry），而非把
 // 协议三段捆成一块压在 payload 之上或之下：
 //   identity 头（EVENT 徽章 + 事件名 + h1 摘要 + 描述）
+//   → REQUIREMENTS / GUIDE：可选前置事实与指南扩展区；
 //   → VERIFICATION：收到请求先验签（安全关口，须在信任 payload 前置顶）；
 //   → PAYLOAD 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）：验签后解析的
 //     数据，整页主角，紧跟验证；
-//   → ACKNOWLEDGEMENT → DELIVERY：处理后怎么回应、失败怎么重试（背景参考殿后）。
+//   → ACKNOWLEDGEMENT → DELIVERY：处理后怎么回应、失败怎么重试；
+//   → RELATED RESOURCES：可选 relations 扩展区（背景参考殿后）。
 // <ApiDocsWebhookProtocol> 三段各自独立省略，故渲染两次把 payload 夹在中间。
 // 右栏「线缆样本」= webhook 的两个方向，与端点 baseline 的 Request/Response
 // 镜像对称，用 <ApiDocsCodeRail> 纵向双栏：
@@ -41,6 +44,29 @@ const webhook = {
     'Sent after a subscription successfully renews for the next billing cycle. Use it to extend access, issue a receipt, or reconcile your own records. Delivered to every registered endpoint that subscribes to this event.',
 }
 
+// --- 通用扩展区：由页面/consumer 持有，kit 不定义认证或 relation 业务 shape ---
+// full 同时提供 requirements/guide + relations；partial 只保留 requirements；
+// minimal 两者都省略，验证可选区独立出现/省略时不会留下空壳。
+const requirements = [
+  { term: 'Endpoint', value: '公开可访问的 HTTPS URL。' },
+  { term: '订阅', value: '在控制台显式订阅本事件。' },
+]
+const partialRequirements = [
+  { term: 'Endpoint', value: '公开可访问的 HTTPS URL。' },
+]
+const relations = [
+  {
+    label: 'Event data object',
+    description: '查看本事件携带的订阅数据。',
+    to: '#payload_data',
+  },
+  {
+    label: 'Previous attributes',
+    description: '查看本次续费前发生变化的字段。',
+    to: '#payload_data_previousAttributes',
+  },
+]
+
 // --- 协议三段：验证 / 确认 / 投递 ---
 // 主 fixture 三段齐全，覆盖 ACK 的 literal body 语义（给 example）。
 const verification = {
@@ -63,13 +89,13 @@ const acknowledgement = {
   facts: [
     { term: 'HTTP status', value: '200', code: true },
     { term: 'Media type', value: 'application/json', code: true },
-    { term: '响应体', value: '固定 JSON 字面量，见右栏 Acknowledgement 示例。' },
+    { term: '响应体', value: '固定 JSON 字面量，见本页 Acknowledgement 示例。' },
   ],
 }
 
 const delivery = {
   label: 'DELIVERY',
-  description: '未收到成功确认时按退避序列重试，最长约 24 小时。',
+  description: '未收到成功确认时按退避序列重试，最长约 28 小时。',
   facts: [
     { term: '总次数', value: '首次投递 + 最多 8 次重试。' },
     { term: '超时', value: '每次请求 10 秒未响应即视为失败。' },
@@ -276,6 +302,30 @@ onMounted(() => anchor.initFromHash())
           </header>
 
           <div class="mt-8 space-y-12">
+            <!-- 可选 requirements / guide 扩展区：页面只定义位置与语义层级，
+                 consumer 自己提供已解析、已本地化的内容。 -->
+            <ApiDocsFieldGroup label="Requirements">
+              <div class="space-y-4 pt-2">
+                <dl class="divide-y divide-default">
+                  <div
+                    v-for="item in requirements"
+                    :key="item.term"
+                    class="flex flex-col gap-1 py-2.5 sm:flex-row sm:gap-4"
+                  >
+                    <dt class="shrink-0 text-sm text-muted sm:w-36">{{ item.term }}</dt>
+                    <dd class="text-sm text-highlighted">{{ item.value }}</dd>
+                  </div>
+                </dl>
+                <ULink
+                  to="/kits/api-docs/webhook-protocol"
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                  查看 Webhook protocol 指南
+                  <UIcon name="i-lucide-arrow-right" class="size-3.5" aria-hidden="true" />
+                </ULink>
+              </div>
+            </ApiDocsFieldGroup>
+
             <!-- 按 webhook 处理生命周期穿插排布（= handler 代码顺序），而非把协议
                  三段捆成一整块压在 payload 之上或之下。<ApiDocsWebhookProtocol>
                  三段各自独立省略，故此处渲染两次、把 payload 夹在中间：
@@ -297,6 +347,29 @@ onMounted(() => anchor.initFromHash())
               :acknowledgement="acknowledgement"
               :delivery="delivery"
             />
+
+            <!-- 可选 relations 扩展区：仅承载通用链接/描述，不把 callback、
+                 response-link 或消费项目路由 shape 固化进 kit。 -->
+            <ApiDocsFieldGroup label="Related Resources">
+              <ul class="divide-y divide-default">
+                <li v-for="relation in relations" :key="relation.to">
+                  <ULink
+                    :to="relation.to"
+                    class="group flex items-start justify-between gap-4 py-3 text-highlighted"
+                  >
+                    <span class="min-w-0">
+                      <span class="block text-sm font-medium group-hover:underline">{{ relation.label }}</span>
+                      <span class="mt-1 block text-sm leading-relaxed text-muted">{{ relation.description }}</span>
+                    </span>
+                    <UIcon
+                      name="i-lucide-arrow-right"
+                      class="mt-0.5 size-4 shrink-0 text-dimmed transition-transform group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </ULink>
+                </li>
+              </ul>
+            </ApiDocsFieldGroup>
           </div>
         </div>
       </template>
@@ -342,10 +415,10 @@ onMounted(() => anchor.initFromHash())
       </div>
 
       <div class="grid gap-6 lg:grid-cols-2">
-        <!-- partial：协议缺「确认」段 + 无 payload 示例 -->
+        <!-- partial：保留 requirements，省略 relations /「确认」段 / payload 示例 -->
         <figure class="space-y-4 rounded-lg border border-default p-6">
           <figcaption class="text-sm font-medium text-toned">
-            Partial —— 只声明验证与投递（无确认段），且不提供 payload 示例
+            Partial —— 保留 requirements 与协议，省略 relations、确认段和 payload 示例
           </figcaption>
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -354,6 +427,18 @@ onMounted(() => anchor.initFromHash())
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Invoice finalized</h3>
           </header>
+          <ApiDocsFieldGroup label="Requirements" :heading-level="4">
+            <dl class="divide-y divide-default pt-2">
+              <div
+                v-for="item in partialRequirements"
+                :key="item.term"
+                class="flex flex-col gap-1 py-2.5"
+              >
+                <dt class="text-sm text-muted">{{ item.term }}</dt>
+                <dd class="text-sm text-highlighted">{{ item.value }}</dd>
+              </div>
+            </dl>
+          </ApiDocsFieldGroup>
           <ApiDocsWebhookProtocol
             :verification="partialVerification"
             :delivery="partialDelivery"

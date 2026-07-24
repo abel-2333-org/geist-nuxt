@@ -85,8 +85,8 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   since: 'Since',
   showChildren: 'Show Child Parameters',
   hideChildren: 'Hide Child Parameters',
-  copyLink: 'Copy link to this field',
-  copiedLink: 'Link copied',
+  copyLink: (fieldName: string) => `Copy link to ${fieldName}`,
+  copiedLink: (fieldName: string) => `${fieldName} link copied`,
   linkCopied: (fieldName: string) => `${fieldName} link copied to clipboard`,
   linkCopyFailed: () => 'Copy failed. Select the URL and copy it manually',
   ...props.labels,
@@ -99,6 +99,14 @@ const anchor = useFieldAnchor()
 const isActive = computed(() => !!props.path && anchor.active.value === props.path)
 const childPaths = computed(() => collectFieldPaths(props.children ?? []))
 const descendantActive = computed(() => childPaths.value.includes(anchor.active.value))
+
+function resolveAnchorLabel(label: string | ((fieldName: string) => string)) {
+  return typeof label === 'function' ? label(props.name) : label
+}
+
+const anchorLabel = computed(() =>
+  resolveAnchorLabel(anchor.copied.value ? t.value.copiedLink : t.value.copyLink),
+)
 
 function onCopyLink() {
   // Build the *complete* toast sentence here via our own labels, so it flows
@@ -216,7 +224,7 @@ const lifecycleMeta = computed(() => {
       <button
         v-if="path"
         type="button"
-        :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
+        :aria-label="anchorLabel"
         class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:block"
         :class="{ 'opacity-100': isActive || anchor.copied.value, 'text-primary': anchor.copied.value }"
         @click="onCopyLink"
@@ -285,7 +293,7 @@ const lifecycleMeta = computed(() => {
       <button
         v-if="path"
         type="button"
-        :aria-label="anchor.copied.value ? t.copiedLink : t.copyLink"
+        :aria-label="anchorLabel"
         class="ms-auto -my-1 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
         :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
