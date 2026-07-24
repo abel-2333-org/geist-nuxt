@@ -237,6 +237,18 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
+    // Own the scroll when a deep link is present. On reload the browser saves
+    // the pre-reload scroll offset and, with scrollRestoration 'auto', keeps
+    // re-applying it asynchronously while content streams in — on slower
+    // (mobile) loads that restore fires AFTER our settled scrollIntoView and
+    // yanks the page back to the old position (typically the top), leaving
+    // only a flash of the expanded row. Declaring 'manual' tells the browser
+    // the hash target — not the stale offset — is authoritative, matching
+    // fresh-visit behavior for the same shared link. Gated on an actual hash
+    // so plain reloads keep native position restoration.
+    if (location.hash.length > 1 && 'scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
     const apply = (path: string) => {
       if (path) {
         void goTo(path, { updateHash: false, focus: true })
