@@ -117,7 +117,7 @@ prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 ## 明暗与响应式
 
 - ThemeToggle 委托 Nuxt UI 的 `UColorModeButton`，可访问名称读取根 `UApp` locale；story 使用语义 token。
-- 移动优先，使用系��断点和 Nuxt UI primitive。
+- 移动优先，使用系统断点和 Nuxt UI primitive。
 - 连续、内容相关的溢出不要硬猜断点；使用 `ResizeObserver` + 隐藏测量层，规则见 `foundations/responsiveness.md`。
 
 ## 晋升收尾

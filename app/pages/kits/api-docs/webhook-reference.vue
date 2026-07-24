@@ -28,7 +28,7 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 // 关键 IA 裁决：ACK 的字面响应体是「线缆样本」而非文档散文，故与 payload 一同
 // 进右栏，不内联在左侧协议段里——左栏只留 ACK 的 facts 并指向右栏示例。
 //
-// identity 头此处手写（与 reference.vue 端点 baseline 一致）：standalone 单
+// identity 头此处手写（与 endpoint-reference.vue 端点 baseline 一致）：standalone 单
 // operation 页里事件摘要即页面唯一 <h1>，而 <ApiDocsOperationHeader> 的
 // headingLevel 上限是 2（供「域 h1 下多 operation」的外壳场景，见
 // DocsShellReference）。两条路径都成立，取决于页面是单 operation 还是多
@@ -190,7 +190,7 @@ const payloadFields = [
 //   - Payload（平台 → 你，inbound）：本次投递的 JSON 载荷；
 //   - Acknowledgement（你 → 平台，outbound）：你回给平台的固定确认体。
 // 二者用 <ApiDocsCodeRail> 纵向双栏承载（Payload 在上 / ACK 在下），与
-// reference.vue 的 Request/Response rail 用同一装配。各自单一 scenario，
+// endpoint-reference.vue 的 Request/Response rail 用同一装配。各自单一 scenario，
 // 故用一个 variant 承载。
 const payloadExample = [
   {
@@ -286,7 +286,7 @@ onMounted(() => anchor.initFromHash())
     >
       <template #start>
         <div class="lg:pe-8">
-          <!-- identity 头：手写以取得页面唯一 h1（与 reference.vue 端点 baseline
+          <!-- identity 头：手写以取得页面唯一 h1（与 endpoint-reference.vue 端点 baseline
                对称）。EVENT 徽章取代 METHOD 徽章——方向相反：平台回调你。 -->
           <header class="space-y-4 border-b border-default pb-8">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -375,7 +375,7 @@ onMounted(() => anchor.initFromHash())
       </template>
 
       <!-- 右：线缆样本双栏。lg+ 钉成视口高 sticky 长条，Payload/ACK 纵向分栏 +
-           内容优先重分配；<lg 回退为堆叠各卡自滚动。与 reference.vue 同装配。 -->
+           内容优先重分配；<lg 回退为堆叠各卡自滚动。与 endpoint-reference.vue 同装配。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <ApiDocsCodeRail
