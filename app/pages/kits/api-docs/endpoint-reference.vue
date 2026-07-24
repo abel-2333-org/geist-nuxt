@@ -68,12 +68,12 @@ const relations = [
   {
     label: 'Deployment object',
     description: '查看返回的部署对象完整字段。',
-    to: '#res_state',
+    to: '#res_id',
   },
   {
-    label: 'List deployments',
-    description: '分页拉取项目下的历史部署。',
-    to: '#req_gitSource',
+    label: 'Build state',
+    description: '了解部署状态机各枚举值的含义。',
+    to: '#res_state',
   },
 ]
 
@@ -527,7 +527,7 @@ onMounted(() => anchor.initFromHash())
               <ApiDocsMethodBadge :method="endpoint.method" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
             </div>
-            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-[2rem] sm:leading-tight">
+            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
               {{ endpoint.summary }}
             </h1>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">

@@ -93,6 +93,8 @@ test('keeps repository links on the live endpoint reference route', async () => 
   const files = await Promise.all([
     readFile(new URL('../README.md', import.meta.url), 'utf8'),
     readFile(new URL('../app/pages/kits/api-docs/index.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../app/components/demo/api-docs/DocsShellReference.vue', import.meta.url), 'utf8'),
+    readFile(new URL('../references/kits/api-docs/index.md', import.meta.url), 'utf8'),
   ])
 
   for (const source of files) {

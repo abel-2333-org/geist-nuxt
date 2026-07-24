@@ -293,7 +293,7 @@ onMounted(() => anchor.initFromHash())
               <ApiDocsEventBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ webhook.event }}</code>
             </div>
-            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-[2rem] sm:leading-tight">
+            <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
               {{ webhook.summary }}
             </h1>
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
