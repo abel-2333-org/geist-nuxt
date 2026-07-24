@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ nav: { label: 'Webhook 协议', icon: 'i-lucide-webhook', order: 3 } })
+definePageMeta({ nav: { label: 'Webhook 协议', icon: 'i-lucide-webhook', order: 4 } })
 
 // Demo/story for <ApiDocsWebhookProtocol> — 按 geist-nuxt 分层，组件 story
 // 使用本页内联的中性假 ViewModel；kit 只分发数据无关组件。

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ nav: { label: '侧边栏导航', icon: 'i-lucide-panel-left', order: 2 } })
+definePageMeta({ nav: { label: '侧边栏导航', icon: 'i-lucide-panel-left', order: 3 } })
 
 // Demo/story for <ApiDocsSidebarNav> — per the geist-nuxt layering, demos live
 // in gallery and the kit only ships the data-agnostic component. Inline fake
