@@ -1,3 +1,11 @@
+<script lang="ts">
+// Keep the pre-util public type surface for existing consumers. New code should
+// reference AnnotationPopoverLabels bare (auto-imported from utils/annotation);
+// this type-only re-export bridges copy-in projects that still import it
+// directly from AnnotationPopover.vue (same pattern as FieldItem / EnumTable).
+export type { AnnotationPopoverLabels } from '#imports'
+</script>
+
 <script setup lang="ts">
 // Interaction shell of the Annotation family: an inline, focusable trigger
 // anchored to a non-modal popover.
@@ -18,10 +26,8 @@
 //
 // AnnotationPopoverLabels is auto-imported from `utils/annotation` (referenced
 // bare, no import) so the label model is reachable from both foundation forms
-// and the kit's field form across the copy-in topology boundary.
-// Keep the original SFC type export stable for consumers that imported it
-// before the canonical definition moved into the auto-imported util.
-export type { AnnotationPopoverLabels } from '../utils/annotation'
+// and the kit's field form across the copy-in topology boundary. The public
+// SFC type re-export lives in the plain <script> block above.
 
 const props = withDefaults(
   defineProps<{
