@@ -132,13 +132,18 @@ export function useFieldAnchor() {
       const wash = 'color-mix(in oklch, var(--ui-primary) 10%, transparent)'
       const prevRadius = el.style.borderRadius
       el.style.borderRadius = 'var(--ui-radius)'
+      // 800ms per blink (up from a flicker-fast 520) reads as a calm, legible
+      // pulse rather than a strobe; three of them settle in ~2.4s. The easing is
+      // the Geist signature curve spelled out explicitly — WAAPI's `'ease-out'`
+      // keyword is the plain CSS curve, NOT the `--ease-out` we override
+      // system-wide, so the literal cubic-bezier keeps the pulse on-brand.
       const anim = el.animate(
         [
           frame('var(--ui-primary)', wash, 0),
           frame('var(--ui-primary)', wash, 0.35),
           frame('transparent', 'transparent', 1),
         ],
-        { duration: 520, iterations: 3, easing: 'ease-out' },
+        { duration: 800, iterations: 3, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.1)' },
       )
       const restoreRadius = () => { el.style.borderRadius = prevRadius }
       anim.addEventListener('finish', restoreRadius)

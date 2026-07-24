@@ -200,9 +200,19 @@ const lifecycleMeta = computed(() => {
 </script>
 
 <template>
+  <!-- Deep-link/annotation jumps move keyboard focus here (tabindex set at
+       runtime by useFieldAnchor.goTo), so the row needs the system focus
+       treatment: without it the browser paints its default outline — blue, and
+       far more saturated than our palette — which both clashes with the purple
+       primary and violates the focus convention (focus must follow the semantic
+       color, keyboard-only). `outline-none` drops that default so a mouse/hash
+       jump shows no ring, while `focus-visible:*` re-adds the 2px purple ring
+       only for keyboard users. `rounded-md` matches the --ui-radius the pulse
+       highlight rounds to, so the steady focus ring and the transient pulse
+       frame share the same corner. -->
   <div
     :id="path"
-    class="relative border-b border-default py-3.5 last:border-b-0"
+    class="relative rounded-md border-b border-default py-3.5 outline-none last:border-b-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
     <!-- Summary row — always visible. Owns the hover group so the anchor icon
