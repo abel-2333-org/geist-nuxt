@@ -99,8 +99,12 @@ export interface FieldItemLabels {
   since?: string
   showChildren?: string
   hideChildren?: string
-  copyLink?: string
-  copiedLink?: string
+  /** Accessible name for the field-anchor action. Strings remain complete
+   *  labels for backward compatibility; functions receive the field name. */
+  copyLink?: string | ((fieldName: string) => string)
+  /** Accessible name after the field link is copied. Same resolution rule as
+   *  `copyLink`: strings remain complete; functions receive the field name. */
+  copiedLink?: string | ((fieldName: string) => string)
   /** Full toast sentence after copying a field's link. Receives the field name
    *  so the whole string is owned here (not concatenated in the composable),
    *  e.g. `(name) => `${name} 的链接已复制``. */

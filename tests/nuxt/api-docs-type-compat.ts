@@ -22,6 +22,8 @@ const variant: EnumVariant = { values: [value] }
 const fieldValue: FieldEnumValue = value
 const fieldVariant: FieldEnumVariant = variant
 const labels: FieldItemLabels = {
+  copyLink: name => `Copy ${name} link`,
+  copiedLink: 'Link copied',
   composition: {
     oneOf: '其中一个',
     oneOfHint: '以下仅一个适用。',
