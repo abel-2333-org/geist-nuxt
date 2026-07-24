@@ -10,12 +10,15 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 // 没有任何一处把「identity + 协议 + payload + 示例」收在一页里。本页补上这个
 // baseline：验证现有 kit 组件已足以组合出完整 webhook 参考页，无需新增组件。
 //
-// 阅读顺序（= DOM 顺序）——左栏是纯文档流，按「读者最想先看什么」排序：
+// 阅读顺序（= DOM 顺序）——左栏是纯文档流，按 webhook「处理生命周期」排序
+// （= 开发者写 handler 的代码顺序：verify → read → respond → retry），而非把
+// 协议三段捆成一块压在 payload 之上或之下：
 //   identity 头（EVENT 徽章 + 事件名 + h1 摘要 + 描述）
-//   → payload 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）：整页主角，
-//     「我到底会收到什么数据」，紧跟 identity，不被协议挤下去；
-//   → <ApiDocsWebhookProtocol>（验证 → 确认 → 投递）：跨事件近乎样板的机制性
-//     参考，作为二级内容置于 payload 之后。
+//   → VERIFICATION：收到请求先验签（安全关口，须在信任 payload 前置顶）；
+//   → PAYLOAD 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）：验签后解析的
+//     数据，整页主角，紧跟验证；
+//   → ACKNOWLEDGEMENT → DELIVERY：处理后怎么回应、失败怎么重试（背景参考殿后）。
+// <ApiDocsWebhookProtocol> 三段各自独立省略，故渲染两次把 payload 夹在中间。
 // 右栏「线缆样本」= webhook 的两个方向，与端点 baseline 的 Request/Response
 // 镜像对称，用 <ApiDocsCodeRail> 纵向双栏：
 //   Payload（平台 → 你，上）/ Acknowledgement（你 → 平台，下）。
@@ -273,17 +276,24 @@ onMounted(() => anchor.initFromHash())
           </header>
 
           <div class="mt-8 space-y-12">
-            <!-- 整页主角：payload 字段树，紧跟 identity（与端点 Request/Response
-                 Body 同构）。读者最想先看「我会收到什么」。 -->
+            <!-- 按 webhook 处理生命周期穿插排布（= handler 代码顺序），而非把协议
+                 三段捆成一整块压在 payload 之上或之下。<ApiDocsWebhookProtocol>
+                 三段各自独立省略，故此处渲染两次、把 payload 夹在中间：
+
+                 1) VERIFICATION —— 收到请求「第一件事」：验签。安全关口，须在信任
+                    payload 之前置顶；内容紧凑，不会挤压 payload。 -->
+            <ApiDocsWebhookProtocol :verification="verification" />
+
+            <!-- 2) PAYLOAD —— 验签通过后解析的数据，整页主角（与端点 Request/
+                 Response Body 同构）。 -->
             <ApiDocsFieldGroup label="Event Payload" :count="payloadFields.length">
               <ApiDocsFieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
             </ApiDocsFieldGroup>
 
-            <!-- 二级参考：协议三段（验证 → 确认 → 投递）。跨事件近乎样板的机制性
-                 内容，置于 payload 之后。sections 各自独立省略，此处齐全；ACK 的
-                 字面响应体示例已移至右栏（见 #end），此处只保留 facts。 -->
+            <!-- 3) ACKNOWLEDGEMENT → 4) DELIVERY —— 处理完「怎么回应」与「失败怎么
+                 重试/时序」。后者偏背景参考，殿后。ACK 的字面响应体示例已移至右栏
+                 （见 #end），此处只保留 facts。 -->
             <ApiDocsWebhookProtocol
-              :verification="verification"
               :acknowledgement="acknowledgement"
               :delivery="delivery"
             />
