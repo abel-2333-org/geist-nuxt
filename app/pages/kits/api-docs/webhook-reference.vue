@@ -2,7 +2,7 @@
 definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower', order: 2 } })
 
 // API 文档场景的「整页级 webhook 组合」demo（不是可分发切片，也不是通用组件）——
-// 与端点参考页 /kits/api-docs/reference 镜像对称：端点问「你怎么调平台」，
+// 与端点参考页 /kits/api-docs/endpoint-reference 镜像对称：端点问「你怎么调平台」，
 // webhook 问「平台怎么回调你」。此前 webhook 的证据是散的：
 //   - /kits/api-docs/webhook-protocol 只单独陈列 <ApiDocsWebhookProtocol>；
 //   - 文档站外壳的 webhook 段只有 identity + payload 字段树 + payload 示例，

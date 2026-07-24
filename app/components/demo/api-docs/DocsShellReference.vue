@@ -17,7 +17,7 @@ import {
 // 文档站外壳的正文列：指南锚点 section + reference 式端点页。出血布局下由
 // 正文列自己管理内边距（不依赖外层容器）。
 //
-// 支付域是完整样板——端点 reference 与 /kits/api-docs/reference 同构：
+// 支付域是完整样板——端点 reference 与 /kits/api-docs/endpoint-reference 同构：
 // 头部走 kit 的 <ApiDocsOperationHeader>（identity）+ <ApiDocsOperationTarget>
 // （环境 host + 地址 + 复制）；横向分栏用通用基座的 <SplitPane>（lg+ 可拖拽、
 // 独立 storage key 持久化，<lg 自动堆叠），右侧代码栏用 kit 的
