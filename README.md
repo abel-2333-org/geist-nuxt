@@ -20,7 +20,8 @@ pnpm dev
 - `/components`：通用组件目录
 - `/compositions`：组合组件
 - `/kits/api-docs`：API Docs kit
-- `/kits/api-docs/reference`：完整参考页
+- `/kits/api-docs/endpoint-reference`：完整 Endpoint 参考页
+- `/kits/api-docs/webhook-reference`：完整 Webhook 参考页
 - `/playground`：候选组件草稿面，不进入正式导航
 
 设计中源码放 `playground/`；人工采纳后再移动到 `foundation/` 或 `kits/<kit>/`，补根 registry 与正式 gallery。详细流程见 `references/method/component-reflow.md`。

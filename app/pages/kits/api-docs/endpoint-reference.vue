@@ -9,7 +9,7 @@ definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', or
 //   - 文档站外壳的端点段（DocsShellReference）有环境联动（OperationTarget +
 //     host 派生请求示例），却是出血多域外壳 recipe，且缺 linked scenario。
 // 没有任何一处把「identity + 环境联动 + requirements/guide 扩展区 + 请求/响应
-// 字段树 + 独立 error 目录 + relations 扩展区 + 双例码轨道」收在一个可运行
+// 字段树 + 独立 error response 字段与目录 + relations 扩展区 + 双例码轨道」收在一个可运行
 // baseline 里。本页补上这个 baseline：验证现有 kit primitives 已足以支撑整页
 // 端点 recipe，并与 webhook-reference.vue 严格对称。
 //
@@ -20,9 +20,9 @@ definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', or
 //   → 环境联动（<ApiDocsOperationTarget>：host 切换 + 地址 + 复制，紧贴头部）；
 //   → REQUIREMENTS / GUIDE：可选前置事实与指南扩展区；
 //   → REQUEST / RESPONSE BODY 字段树（整页主角）；
-//   → ERRORS：独立错误目录（error code → 含义 → 触发条件），字面错误响应体
-//     作为「线缆样本」归右栏（与 ACK 的 IA 裁决同构），左栏只留 facts 目录并
-//     指向右栏；
+//   → ERROR RESPONSE / ERRORS：独立错误响应字段树 + 错误目录（error code →
+//     含义 → 触发条件），字面错误响应体作为「线缆样本」归右栏（与 ACK 的
+//     IA 裁决同构），左栏保留字段契约与 facts 目录并指向右栏；
 //   → RELATED RESOURCES：可选 relations 扩展区（背景参考殿后）。
 // 右栏「线缆样本」= 端点的两个方向，用 <ApiDocsCodeRail> 纵向双栏：
 //   Request（你 → 平台，上）/ Response（平台 → 你，下）。Response 的状态维度
@@ -93,6 +93,7 @@ function makeRequestScenarios(baseUrl: string) {
   -H "Content-Type: application/json" \\
   -d '{
     "name": "my-app",
+    "type": "git",
     "target": "production",
     "gitSource": { "repoId": "ghr_9f2a", "ref": "main" }
   }'`,
@@ -108,6 +109,7 @@ function makeRequestScenarios(baseUrl: string) {
   },
   body: JSON.stringify({
     name: "my-app",
+    type: "git",
     target: "production",
     gitSource: { repoId: "ghr_9f2a", ref: "main" },
   }),
@@ -124,6 +126,7 @@ res = requests.post(
     headers={"Authorization": f"Bearer {token}"},
     json={
         "name": "my-app",
+        "type": "git",
         "target": "production",
         "gitSource": {"repoId": "ghr_9f2a", "ref": "main"},
     },
@@ -134,7 +137,7 @@ deployment = res.json()`,
     },
     {
       id: 'inline',
-      label: '文件部署',
+      label: '文件部署（仅请求）',
       variants: [
         {
           label: 'cURL',
@@ -142,6 +145,7 @@ deployment = res.json()`,
           code: `curl -X POST ${baseUrl}/v1/deployments \\
   -H "Authorization: Bearer $TOKEN" \\
   -F 'name=my-app' \\
+  -F 'type=inline' \\
   -F 'files=@index.html'`,
         },
       ],
@@ -177,6 +181,22 @@ const responseScenarios = [
   "url": "https://my-app.example.app",
   "gitSource": { "repoId": "ghr_9f2a", "ref": "main" },
   "createdAt": 1720000000000
+}`,
+              },
+            ],
+          },
+          {
+            id: 'vendor-json',
+            kind: 'code' as const,
+            mediaType: 'application/vnd.geist.deployment+json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
+  "id": "dpl_8Kx2fQ",
+  "url": "https://my-app.example.app",
+  "state": "READY",
+  "createdAt": 1753366800000
 }`,
               },
             ],
@@ -252,6 +272,36 @@ const responseScenarios = [
       },
     ],
   },
+  {
+    // 响应侧独有场景：选择后 RequestExample 找不到同 id，确定性派生到首项，
+    // 但不回写父级；与 request-only inline 场景共同验证双向缺侧 fallback。
+    id: 'async',
+    label: '异步结果（仅响应）',
+    statuses: [
+      {
+        status: 202,
+        statusText: 'Accepted',
+        bodies: [
+          {
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
+  "id": "dpl_8Kx2fQ",
+  "url": "https://my-app.example.app/deployments/dpl_8Kx2fQ",
+  "state": "QUEUED",
+  "createdAt": 1753366800000
+}`,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 // --- 独立 ERRORS 目录：error code → 含义 → 触发条件。是端点侧的「独立 error
@@ -284,6 +334,17 @@ const bodyFields = [
     ],
   },
   {
+    path: 'req_type',
+    name: 'type',
+    type: 'enum',
+    required: true,
+    description: 'Deployment source type. Controls whether `gitSource` or `files` is required.',
+    enumValues: [
+      { value: 'git', description: 'Build from a connected Git repository.' },
+      { value: 'inline', description: 'Upload one or more files directly.' },
+    ],
+  },
+  {
     path: 'req_target',
     name: 'target',
     type: 'enum',
@@ -291,6 +352,24 @@ const bodyFields = [
     defaultValue: 'production',
     description: 'Deploy environment.',
     enumValues,
+  },
+  {
+    path: 'req_files',
+    name: 'files',
+    type: 'array',
+    required: 'conditional' as const,
+    condition: 'Required when `type` is `inline`.',
+    description: 'Files uploaded for an inline deployment.',
+    children: [
+      {
+        path: 'req_files_item',
+        name: 'item',
+        type: 'string',
+        format: 'binary',
+        required: true,
+        description: 'One file in the deployment bundle.',
+      },
+    ],
   },
   {
     path: 'req_gitSource',
@@ -363,9 +442,37 @@ const responseFields = [
   { path: 'res_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: 'Creation timestamp in milliseconds.' },
 ]
 
+const errorResponseFields = [
+  {
+    path: 'err_error',
+    name: 'error',
+    type: 'object',
+    required: true,
+    description: 'Structured error returned for non-2xx responses.',
+    children: [
+      {
+        path: 'err_error_code',
+        name: 'code',
+        type: 'string',
+        required: true,
+        description: 'Stable machine-readable error code.',
+        examples: ['invalid_name'],
+      },
+      {
+        path: 'err_error_message',
+        name: 'message',
+        type: 'string',
+        required: true,
+        description: 'Reader-facing explanation of the failure.',
+        examples: ['Project name must be lowercase letters, digits and dashes.'],
+      },
+    ],
+  },
+]
+
 // --- 场景联动（linked）：页面级一个 ref 同时绑 Request / Response 的
-// v-model:scenario。响应侧只有 git 场景（缺 inline）——请求切到「文件部署」时，
-// 响应确定性收敛到第一项（fallback 只派生不回写），正好演示缺侧行为。
+// v-model:scenario。请求侧缺 async、响应侧缺 inline：任一侧选中独有场景时，
+// 另一侧确定性收敛到第一项（fallback 只派生不回写），双向演示缺侧行为。
 // scenario 间的 mapping 归本页（consumer）持有，kit 组件零 mapping。
 const activeScenario = ref('git')
 
@@ -463,6 +570,14 @@ onMounted(() => anchor.initFromHash())
               <ApiDocsFieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
             </ApiDocsFieldGroup>
 
+            <ApiDocsFieldGroup label="Error Response Body" :count="errorResponseFields.length">
+              <ApiDocsFieldItem
+                v-for="f in errorResponseFields"
+                :key="f.path ?? f.name"
+                v-bind="f"
+              />
+            </ApiDocsFieldGroup>
+
             <!-- 独立 ERRORS 目录：error code → 含义 → 触发条件。字面错误响应体
                  作为线缆样本归右栏（Response 的 4xx 状态），此处只留目录并连线。 -->
             <ApiDocsFieldGroup label="Errors" :count="errors.length">
@@ -551,7 +666,7 @@ onMounted(() => anchor.initFromHash())
 
       <div class="grid gap-6 lg:grid-cols-2">
         <!-- partial：单 host（无环境 select）、保留精简 errors、省略 relations -->
-        <figure class="space-y-4 rounded-lg border border-default p-6">
+        <figure class="min-w-0 space-y-4 rounded-lg border border-default p-6">
           <figcaption class="text-sm font-medium text-toned">
             Partial —— 单环境（地址无 select）、保留精简 errors，省略 requirements 与 relations
           </figcaption>
@@ -584,7 +699,7 @@ onMounted(() => anchor.initFromHash())
         </figure>
 
         <!-- minimal：只读端点——无环境切换、无 errors、无 relations -->
-        <figure class="space-y-4 rounded-lg border border-default p-6">
+        <figure class="min-w-0 space-y-4 rounded-lg border border-default p-6">
           <figcaption class="text-sm font-medium text-toned">
             Minimal —— 只读端点：无环境切换、无错误目录，正文只有 identity + 极简字段
           </figcaption>

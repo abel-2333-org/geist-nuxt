@@ -507,7 +507,7 @@ provideFieldSource({
     field: { path: 'body_gitSource_repoId', name: 'repoId', type: 'string', required: true, description: '已连接仓库的 id（位于可折叠的 gitSource 对象内，跳转时自动展开）。' },
   },
   'create-deployment.state': {
-    page: '/kits/api-docs/reference',
+    page: '/kits/api-docs/endpoint-reference',
     field: { path: 'res_state', name: 'state', type: 'enum', required: true, description: '部署状态，定义在 Reference 页的响应体（跨页字段）。' },
   },
 })

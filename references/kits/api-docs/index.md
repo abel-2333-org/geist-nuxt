@@ -189,7 +189,7 @@ export function computeSplitBudgets(
 
 1. 先运行 `pnpm geist:copy -- geist-foundation <item...> --target <consumer> --to <checkout-40-char-sha>` 查看 dry-run plan；确认后用同一命令追加 `--write`。工具会展开 `registryDependencies`，将 kit 与 foundation 依赖的 component / composable / util / CSS / config 完整写入 target；不带 `--write` 不会复制任何文件。
 2. `CopyButton` / `useCopy` / `SemanticBadge` 等 foundation 能力也是显式 registry item，不存在 layer 隐式依赖。
-3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树/导航/全站搜索）。组合示例见 gallery 五个互补 demo 页，按需在自己项目里照着拼。
+3. 组合方式（怎么把请求 + 响应 + 徽章 + 字段树拼成一页）不作为切片分发——kit 只 ship 数据无关积木（代码块/请求/响应/method·lifecycle 徽章/enum 表/字段树/导航/全站搜索）。组合示例见 gallery 七个互补 demo 页，按需在自己项目里照着拼。
 4. 组件使用 `@nuxt/ui` 与 `@vueuse/core`；消费项目必须显式具备 registry 所声明的外部依赖。**不要**为了代码块安装 Shiki / `@nuxt/content`。
 
 > **组件名 = 目录名 + 文件名**：约定 `pathPrefix: true`，所以 `app/components/api-docs/CodeBlock.vue` 在模板里是 `<ApiDocsCodeBlock>`。切片必须整体落到消费者的 `app/components/api-docs/`（保留目录），前缀才成立，也才与消费者自有组件隔离。
@@ -197,12 +197,12 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**六个 api-docs demo 页，职责互补**：
+gallery 有**七个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
 | `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
-| `app/pages/kits/api-docs/endpoint-reference.vue` | 端点参考页 | **整页级端点组合** | 招牌两栏端点参考页：横向 `SplitPane`（左字段树 / 右双例码轨道）+ kit 的 `<ApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。整页 anatomy 齐全：identity 头 + `<ApiDocsOperationTarget>` 环境联动（host 切换驱动请求示例 baseUrl）+ requirements/relations 扩展区 + 请求/响应字段树 + 独立 Errors 目录（左目录连右栏 4xx 样本）+ linked scenario；主区下方 full/partial/minimal 三态纵向陈列。是下游消费页 copy & adapt 的活骨架 |
+| `app/pages/kits/api-docs/endpoint-reference.vue` | 端点参考页 | **整页级端点组合** | 招牌两栏端点参考页：横向 `SplitPane`（左字段树 / 右双例码轨道）+ kit 的 `<ApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。整页 anatomy 齐全：identity 头 + `<ApiDocsOperationTarget>` 环境联动（host 切换驱动请求示例 baseUrl）+ requirements/relations 扩展区 + 请求/响应/error response 字段树 + 独立 Errors 目录（左目录连右栏 4xx 样本）+ matched/request-only/response-only controlled scenario + multi status/media/body；主区下方 full/partial/minimal 三态纵向陈列。是下游消费页 copy & adapt 的活骨架 |
 | `app/pages/kits/api-docs/webhook-reference.vue` | Webhook 参考页 | **整页级 webhook 组合** | 与端点参考页镜像对称（方向相反：平台回调你）：identity（EVENT 徽章）+ requirements/guide 扩展区 + 协议三段（验证/确认/投递，按 handler 生命周期穿插 payload）+ payload 字段树 + relations 扩展区；右栏线缆样本 Payload/Acknowledgement 双栏；主区下方 full/partial/minimal 三态。ACK 字面响应体作为线缆样本归右栏 |
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
 | `app/pages/kits/api-docs/webhook-protocol.vue` | Webhook 协议 | **协议事实专项** | 三段齐全的内联中性 fixture + 变体区：section 省略规则、ACK 三语义（literal/echo/intentional empty）、无 steps schedule 与 `maxScheduleSteps=1` 边界 |
@@ -278,7 +278,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition 显示模型,kit auto-import）
 - `kits/api-docs/components/FieldAnnotation.vue` + `kits/api-docs/composables/useFieldSource.ts`（Annotation 家族字段形态；壳复用 foundation `AnnotationPopover`）
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
-- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`endpoint-reference.vue`、`webhook-reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
+- 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`endpoint-reference.vue`、`webhook-reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`schema-composition.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/{badge,breakpoints}.ts`
 
 ## 不要臆造

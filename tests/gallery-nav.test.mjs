@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { buildGalleryNav } from '../app/composables/useGalleryNav.ts'
 
@@ -10,15 +11,18 @@ test('builds a stable two-level tree from static visible routes', () => {
   const items = buildGalleryNav([
     route('/compositions', { label: 'Compositions', order: 2 }),
     route('/kits/zeta/guide'),
-    route('/kits/api-docs/docs-shell', { label: '文档站外壳', order: 3 }),
+    route('/kits/api-docs/docs-shell', { label: '文档站外壳', order: 6 }),
     route('/playground', false),
     route('/kits/api-docs/:domain'),
-    route('/kits/api-docs/reference', { label: '参考页组合', order: 1 }),
+    route('/kits/api-docs/endpoint-reference', { label: '端点参考页', order: 1 }),
+    route('/kits/api-docs/webhook-reference', { label: 'Webhook 参考页', order: 2 }),
     route('/kits/api-docs', { label: '组件目录', icon: 'i-lucide-file-code', order: 0 }),
     route('/components', { label: 'Components', order: 1 }),
     route('/', { label: 'Overview', order: 0 }),
-    route('/kits/api-docs/sidebar-nav', { label: '侧边栏导航', order: 2 }),
-    route('/kits/api-docs/deep/topic', { order: 4 }),
+    route('/kits/api-docs/sidebar-nav', { label: '侧边栏导航', order: 3 }),
+    route('/kits/api-docs/webhook-protocol', { label: 'Webhook 协议', order: 4 }),
+    route('/kits/api-docs/schema-composition', { label: 'Schema 组合', order: 5 }),
+    route('/kits/api-docs/deep/topic', { order: 7 }),
     route('/internal/deep'),
   ], '/components')
 
@@ -33,8 +37,11 @@ test('builds a stable two-level tree from static visible routes', () => {
   const apiDocs = items[3]
   assert.deepEqual(apiDocs.children?.map(item => item.label), [
     '组件目录',
-    '参考页组合',
+    '端点参考页',
+    'Webhook 参考页',
     '侧边栏导航',
+    'Webhook 协议',
+    'Schema 组合',
     '文档站外壳',
     'Topic',
   ])
@@ -53,7 +60,7 @@ test('builds a stable two-level tree from static visible routes', () => {
 test('marks the kit and longest static page for dynamic descendants', () => {
   const routes = [
     route('/kits/api-docs', { label: '组件目录', order: 0 }),
-    route('/kits/api-docs/reference', { label: '参考页组合', order: 1 }),
+    route('/kits/api-docs/endpoint-reference', { label: '端点参考页', order: 1 }),
     route('/kits/api-docs/docs-shell', { label: '文档站外壳', order: 2 }),
     route('/kits/solo/guide'),
   ]
@@ -80,4 +87,16 @@ test('marks the kit and longest static page for dynamic descendants', () => {
   assert.deepEqual(lookalikePage.children?.filter(item => item.active).map(item => item.to), [
     '/kits/api-docs',
   ])
+})
+
+test('keeps repository links on the live endpoint reference route', async () => {
+  const files = await Promise.all([
+    readFile(new URL('../README.md', import.meta.url), 'utf8'),
+    readFile(new URL('../app/pages/kits/api-docs/index.vue', import.meta.url), 'utf8'),
+  ])
+
+  for (const source of files) {
+    assert.doesNotMatch(source, /\/kits\/api-docs\/reference/)
+    assert.match(source, /\/kits\/api-docs\/endpoint-reference/)
+  }
 })
