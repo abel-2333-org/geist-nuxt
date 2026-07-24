@@ -27,6 +27,8 @@ const annotationLabels: AnnotationPopoverLabels = {
   retry: '重试预览',
 }
 const labels: FieldItemLabels = {
+  copyLink: name => `Copy ${name} link`,
+  copiedLink: 'Link copied',
   composition: {
     oneOf: '其中一个',
     oneOfHint: '以下仅一个适用。',

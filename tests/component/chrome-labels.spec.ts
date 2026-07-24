@@ -84,6 +84,39 @@ describe('FieldItem lifecycle badge labels', () => {
   })
 })
 
+describe('FieldItem anchor accessible labels', () => {
+  it('includes the field name in every default anchor action', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: { name: 'amount', path: 'body_amount', type: 'integer' },
+    })
+    const labels = wrapper.findAll('button[aria-label]').map(button => button.attributes('aria-label'))
+
+    expect(labels).toEqual(['Copy link to amount', 'Copy link to amount'])
+  })
+
+  it('keeps string labels compatible and lets a function own the complete label', async () => {
+    const stringWrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'amount',
+        path: 'body_amount',
+        type: 'integer',
+        labels: { copyLink: '复制字段链接' },
+      },
+    })
+    expect(stringWrapper.find('button[aria-label]').attributes('aria-label')).toBe('复制字段链接')
+
+    const functionWrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'amount',
+        path: 'body_amount',
+        type: 'integer',
+        labels: { copyLink: name => `复制 ${name} 的字段链接` },
+      },
+    })
+    expect(functionWrapper.find('button[aria-label]').attributes('aria-label')).toBe('复制 amount 的字段链接')
+  })
+})
+
 describe('FieldItem → EnumTable structural label passthrough', () => {
   it('flat enum: localizes heading, filter placeholder and empty state', async () => {
     const wrapper = await mountSuspended(FieldItem, {

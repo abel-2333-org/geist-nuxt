@@ -15,9 +15,11 @@ app/pages/
   playground.vue                    隐藏的候选设计面
   kits/api-docs/
     index.vue                       API Docs 组件目录
-    reference.vue                   页面级完整参考页
+    endpoint-reference.vue          页面级完整端点参考页
+    webhook-reference.vue           页面级完整 Webhook 参考页
     sidebar-nav.vue                 SidebarNav 专项响应式样例
     webhook-protocol.vue            Webhook 协议事实专项
+    schema-composition.vue          Schema composition 专项
     docs-shell/
       index.vue                     重定向到默认域
       [domain]/index.vue            多域文档站外壳（域首页 = 参考长滚动）
