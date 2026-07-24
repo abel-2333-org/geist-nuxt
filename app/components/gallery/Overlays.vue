@@ -12,6 +12,32 @@ const menuItems = [
   ],
   [{ label: 'Delete', icon: 'i-lucide-trash', color: 'error' as const }],
 ]
+
+// TermAnnotation reads a page-provided glossary; provide one for this section.
+provideGlossary({
+  'sliding-window': {
+    term: 'Sliding window',
+    definition: 'A rolling time span for counting requests, re-evaluated on **every** call instead of at fixed interval boundaries.',
+  },
+})
+
+// DocAnnotation is pipeline-agnostic: the gallery hands it a plain async loader
+// (a real @nuxt/content consumer would wrap queryCollection instead). One
+// resolves, one rejects to show the error → retry → open-page fallback. Return
+// types are inferred against the `load` prop, so no DocPreview import is needed.
+function loadGuide() {
+  return new Promise<{ title: string, description?: string }>((resolve) => {
+    setTimeout(() => resolve({
+      title: 'Rate limiting guide',
+      description: 'Covers the sliding window and token bucket strategies, plus recommended retry backoff.',
+    }), 500)
+  })
+}
+function loadBroken() {
+  return new Promise<{ title: string, description?: string }>((_resolve, reject) => {
+    setTimeout(() => reject(new Error('not found')), 500)
+  })
+}
 </script>
 
 <template>
@@ -107,6 +133,48 @@ const menuItems = [
             </template>
           </AnnotationPopover>
           drains requests at a fixed pace.
+        </p>
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
+      name="TermAnnotation"
+      description="Concept form of the Annotation family: resolves a glossary term id to an inline definition popover, degrading to plain text when the id is unknown."
+      :usage-href="`${DOC}#termannotation`"
+    >
+      <GalleryExample label="Glossary term">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          Rate limits use a
+          <TermAnnotation id="sliding-window" />
+          algorithm to smooth out bursts.
+        </p>
+      </GalleryExample>
+      <GalleryExample label="Unknown id (degrades to text)">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          The
+          <TermAnnotation id="does-not-exist">token bucket</TermAnnotation>
+          entry is not in the glossary, so it renders as plain text.
+        </p>
+      </GalleryExample>
+    </GalleryEntry>
+
+    <GalleryEntry
+      name="DocAnnotation"
+      description="Doc-preview form of the Annotation family: an internal link that lazily loads a title + summary on open; the error state still offers to open the page."
+      :usage-href="`${DOC}#docannotation`"
+    >
+      <GalleryExample label="Lazy preview">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          See the
+          <DocAnnotation to="/components" :load="loadGuide">rate limiting guide</DocAnnotation>
+          for recommended settings.
+        </p>
+      </GalleryExample>
+      <GalleryExample label="Load error (retry + open fallback)">
+        <p class="max-w-md text-sm leading-relaxed text-default">
+          A stale link like the
+          <DocAnnotation to="/components" :load="loadBroken">legacy reconciliation doc</DocAnnotation>
+          fails to preview but still navigates.
         </p>
       </GalleryExample>
     </GalleryEntry>

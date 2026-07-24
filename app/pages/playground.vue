@@ -5,10 +5,14 @@ definePageMeta({ nav: false })
 <template>
   <div>
     <PlaygroundStage
-      title="Annotation 家族候选"
-      description="叙事 markdown 行内注释:概念解释 / API 字段关联 / 站内文档预览。壳 + 三形态,hover 增强、click 兜底。spec 见 playground/annotation.spec.md。"
+      title="Playground"
+      description="未采纳组件候选的暂存区。用真实状态数据验证 HMR 后，按 references/method/component-reflow.md 决定归属（foundation / kit）或删除。当前无进行中的候选。"
     >
-      <PlaygroundAnnotationDemo />
+      <p class="text-sm text-muted">
+        暂无候选。新增候选组件放
+        <code class="font-mono text-[0.8125rem]">playground/components/</code>
+        并在此挂载预览。
+      </p>
     </PlaygroundStage>
   </div>
 </template>

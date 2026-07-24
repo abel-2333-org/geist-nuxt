@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// Playground candidate → kits/api-docs (ApiDocsFieldAnnotation). Field form of
-// the Annotation family: previews a FieldNode summary (name / type /
-// requiredness / description) and deep-links into the reference field row.
+// Field form of the Annotation family (kits/api-docs → ApiDocsFieldAnnotation):
+// previews a FieldNode summary (name / type / requiredness / description) and
+// deep-links into the reference field row.
 //
 // Two ways to bind a field:
 //  1. `field` prop — the page passes the FieldNode directly (it already owns
@@ -15,9 +15,11 @@
 //
 // Unresolvable `field-ref` degrades to plain text (same policy as
 // TermAnnotation) so stale ids never break the narrative.
-
-import type { AnnotationPopoverLabels } from '../../foundation/components/AnnotationPopover.vue'
-import type { FieldNode } from '../../kits/api-docs/utils/field'
+//
+// FieldNode (utils/field) and AnnotationPopoverLabels (foundation
+// utils/annotation) are Nuxt auto-imports, referenced bare — the same contract
+// FieldItem uses, and the reason the label model lives in a util rather than
+// the shell SFC (reachable across the copy-in topology boundary).
 
 export interface FieldAnnotationLabels extends AnnotationPopoverLabels {
   /** Eyebrow caption of the popover. */

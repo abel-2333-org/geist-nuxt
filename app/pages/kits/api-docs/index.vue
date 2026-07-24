@@ -491,6 +491,34 @@ const demoHosts = [
   { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
 ]
 
+// ApiDocsFieldAnnotation demo — inline field references inside narrative prose.
+// The field source maps ids → { field, page? }; markdown-style narrative only
+// ever cites ids. Same-page entries omit `page` and deep-link via useFieldAnchor
+// (scroll + expand + flash on the field tree below); the nested repoId entry
+// proves the collapsed ancestor auto-expands on arrival. The cross-page entry
+// names the reference page, so the action becomes a `{page}#{path}` link whose
+// target page runs its own initFromHash() on arrival. An unregistered id
+// degrades to plain text.
+provideFieldSource({
+  'create-deployment.name': {
+    field: { path: 'body_name', name: 'name', type: 'string', required: true, description: '唯一项目名，会成为默认域名的一部分。' },
+  },
+  'create-deployment.gitSource.repoId': {
+    field: { path: 'body_gitSource_repoId', name: 'repoId', type: 'string', required: true, description: '已连接仓库的 id（位于可折叠的 gitSource 对象内，跳转时自动展开）。' },
+  },
+  'create-deployment.state': {
+    page: '/kits/api-docs/reference',
+    field: { path: 'res_state', name: 'state', type: 'enum', required: true, description: '部署状态，定义在 Reference 页的响应体（跨页字段）。' },
+  },
+})
+
+const fieldLabels = {
+  category: '字段',
+  required: '必填',
+  conditional: '条件必填',
+  viewField: '查看字段详情',
+}
+
 // Honor an incoming `#path` hash: navigate + expand + scroll to the field.
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -662,6 +690,29 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Enum 值表</h3>
           <ApiDocsEnumTable :values="enumValues" />
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">Field 注释</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            <code class="font-mono text-[0.8125rem]">ApiDocsFieldAnnotation</code>
+            把字段引用嵌进叙事文本：hover / 点击预览字段摘要，动作跳转到字段行。
+            同页字段经 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code>
+            滚动 + 展开 + 高亮（下方字段树即跳转目标，嵌套字段会自动展开祖先）；
+            跨页字段渲染为 <code class="font-mono text-[0.8125rem]">{page}#{path}</code>
+            链接，由目标页的 <code class="font-mono text-[0.8125rem]">initFromHash</code> 接管。
+          </p>
+          <p class="mb-8 max-w-2xl leading-relaxed text-toned">
+            创建部署时，
+            <ApiDocsFieldAnnotation field-ref="create-deployment.name" :labels="fieldLabels" />
+            为必填的唯一项目名；若从 Git 部署，
+            <ApiDocsFieldAnnotation field-ref="create-deployment.gitSource.repoId" :labels="fieldLabels" />
+            指向已连接的仓库（跳转会展开下方折叠的 gitSource 对象）。部署结果的
+            <ApiDocsFieldAnnotation field-ref="create-deployment.state" :labels="fieldLabels" />
+            定义在 Reference 页（跨页跳转）。历史字段如
+            <ApiDocsFieldAnnotation field-ref="create-deployment.removed">legacyRegion</ApiDocsFieldAnnotation>
+            未登记，降级为纯文本。
+          </p>
         </div>
 
         <div>

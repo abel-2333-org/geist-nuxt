@@ -121,10 +121,40 @@
       "name": "foundation-annotation-popover",
       "type": "registry:component",
       "title": "AnnotationPopover",
-      "description": "Inline annotation trigger anchored to a non-modal popover with hover enhancement and loading/error chrome.",
+      "description": "Inline annotation trigger anchored to a non-modal popover with hover enhancement and loading/error chrome. Shared label model lives in the auto-imported utils/annotation so every annotation form extends it bare.",
       "registryDependencies": ["geist-foundation"],
       "files": [
-        { "path": "foundation/components/AnnotationPopover.vue", "target": "app/components/AnnotationPopover.vue" }
+        { "path": "foundation/components/AnnotationPopover.vue", "target": "app/components/AnnotationPopover.vue" },
+        { "path": "foundation/utils/annotation.ts", "target": "app/utils/annotation.ts" }
+      ]
+    },
+    {
+      "name": "foundation-use-glossary",
+      "type": "registry:hook",
+      "title": "useGlossary",
+      "description": "Page-scoped glossary provide/inject for TermAnnotation.",
+      "files": [
+        { "path": "foundation/composables/useGlossary.ts", "target": "app/composables/useGlossary.ts" }
+      ]
+    },
+    {
+      "name": "foundation-term-annotation",
+      "type": "registry:component",
+      "title": "TermAnnotation",
+      "description": "Concept form of the Annotation family: resolves a glossary term id to an inline definition popover, degrading to plain text when unresolved.",
+      "registryDependencies": ["foundation-annotation-popover", "foundation-inline-markdown", "foundation-use-glossary"],
+      "files": [
+        { "path": "foundation/components/TermAnnotation.vue", "target": "app/components/TermAnnotation.vue" }
+      ]
+    },
+    {
+      "name": "foundation-doc-annotation",
+      "type": "registry:component",
+      "title": "DocAnnotation",
+      "description": "Doc-preview form of the Annotation family: an internal link whose popover lazily loads a title + summary via a consumer-provided async loader, with error fallback that still navigates.",
+      "registryDependencies": ["foundation-annotation-popover", "foundation-inline-markdown"],
+      "files": [
+        { "path": "foundation/components/DocAnnotation.vue", "target": "app/components/DocAnnotation.vue" }
       ]
     },
     {
@@ -308,6 +338,17 @@
       "registryDependencies": ["api-docs-field-item"],
       "files": [
         { "path": "kits/api-docs/components/SchemaComposition.vue", "target": "app/components/api-docs/SchemaComposition.vue" }
+      ]
+    },
+    {
+      "name": "api-docs-field-annotation",
+      "type": "registry:component",
+      "title": "ApiDocsFieldAnnotation",
+      "description": "Field form of the Annotation family: previews a FieldNode summary inline and deep-links into its reference row (same-page via useFieldAnchor, or cross-page via {page}#{path}). Bundles useFieldSource; the FieldNode model and useFieldAnchor arrive through api-docs-field-item.",
+      "registryDependencies": ["api-docs-field-item", "foundation-annotation-popover", "foundation-inline-code", "foundation-inline-markdown"],
+      "files": [
+        { "path": "kits/api-docs/components/FieldAnnotation.vue", "target": "app/components/api-docs/FieldAnnotation.vue" },
+        { "path": "kits/api-docs/composables/useFieldSource.ts", "target": "app/composables/useFieldSource.ts" }
       ]
     },
     {
