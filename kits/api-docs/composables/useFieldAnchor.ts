@@ -105,20 +105,23 @@ export function useFieldAnchor() {
       el.focus({ preventScroll: true })
     }
     // Highlight so the eye lands on the right row: a rounded primary frame plus a
-    // faint background wash that PULSE — the row blinks on, eases off, and blinks
-    // again three times before settling. The blink (rather than a single fade)
-    // is what draws the eye to a row that may already be on screen. A single
-    // keyframe pass runs `on -> hold -> off`; `iterations: 3` replays it, and the
-    // hard jump from the last frame back to the first at each iteration boundary
-    // is what reads as a distinct blink. Ending on the transparent frame lets the
-    // final pulse fade out cleanly. Driven by the Web Animations API with no
-    // `fill`, so the outline colors revert to the CSS state when the animation
-    // ends. The rounded corners come from an inline `border-radius` set at the
-    // system token BEFORE animating (WAAPI silently drops `var()` inside
-    // `border-radius` keyframes, so it can't live in the keyframes) and cleared
-    // on finish/cancel — the dashed outline follows that radius. `outlineWidth`/
-    // `Style`/`Offset` carry no `var()`, so they hold fine across the keyframes
-    // while only the colors animate. Respects reduced-motion.
+    // faint background wash that BREATHE — the row fades in, fades out, and fades
+    // in once more before settling, all in one continuous pass. The gentle
+    // fade-in/fade-out (rather than a hard blink) is what draws the eye to a row
+    // that may already be on screen without strobing. This is a SINGLE keyframe
+    // sequence — the transparent -> visible -> transparent -> visible ->
+    // transparent offsets do the alternation themselves, so there is no
+    // `iterations` replay and thus no hard jump at an iteration boundary. Every
+    // segment is eased (`ease-in-out`), so each rise and fall is smooth, and both
+    // ends rest on the transparent frame so the highlight arrives and departs
+    // softly. Driven by the Web Animations API with no `fill`, so the outline
+    // colors revert to the CSS state when the animation ends. The rounded corners
+    // come from an inline `border-radius` set at the system token BEFORE
+    // animating (WAAPI silently drops `var()` inside `border-radius` keyframes,
+    // so it can't live in the keyframes) and cleared on finish/cancel — the
+    // dashed outline follows that radius. `outlineWidth`/`Style`/`Offset` carry no
+    // `var()`, so they hold fine across the keyframes while only the colors
+    // animate. Respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
       const frame = (outlineColor: string, backgroundColor: string, offset: number) => ({
@@ -129,21 +132,16 @@ export function useFieldAnchor() {
         outlineColor,
         backgroundColor,
       })
-      const wash = 'color-mix(in oklch, var(--ui-primary) 10%, transparent)'
+      const on = (offset: number) =>
+        frame('var(--ui-primary)', 'color-mix(in oklch, var(--ui-primary) 10%, transparent)', offset)
+      const off = (offset: number) => frame('transparent', 'transparent', offset)
       const prevRadius = el.style.borderRadius
       el.style.borderRadius = 'var(--ui-radius)'
-      // 800ms per blink (up from a flicker-fast 520) reads as a calm, legible
-      // pulse rather than a strobe; three of them settle in ~2.4s. The easing is
-      // the Geist signature curve spelled out explicitly — WAAPI's `'ease-out'`
-      // keyword is the plain CSS curve, NOT the `--ease-out` we override
-      // system-wide, so the literal cubic-bezier keeps the pulse on-brand.
+      // ~2.6s total for two full breaths: fade in, out, in, out. `ease-in-out`
+      // makes each rise and fall symmetric and soft — no snap at either end.
       const anim = el.animate(
-        [
-          frame('var(--ui-primary)', wash, 0),
-          frame('var(--ui-primary)', wash, 0.35),
-          frame('transparent', 'transparent', 1),
-        ],
-        { duration: 800, iterations: 3, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.1)' },
+        [off(0), on(0.25), off(0.5), on(0.75), off(1)],
+        { duration: 2600, easing: 'ease-in-out' },
       )
       const restoreRadius = () => { el.style.borderRadius = prevRadius }
       anim.addEventListener('finish', restoreRadius)
