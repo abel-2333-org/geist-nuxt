@@ -520,7 +520,7 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
           <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境 + 地址 + 复制）与
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
-          双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「参考页组合」。
+          双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
           <code class="font-mono text-[0.8125rem]">SemanticBadge</code> 之上包一层域词汇。
         </p>
