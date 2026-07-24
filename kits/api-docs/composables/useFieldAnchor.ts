@@ -104,32 +104,45 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Highlight so the eye lands on the right row: a dashed primary frame plus a
-    // faint background wash that hold for ~2s, then fade over the final second
-    // (3s total). Driven by the Web Animations API with no `fill`, so the row
-    // reverts to its CSS state when the animation ends — no persistent class or
-    // inline style to clean up. `outlineStyle`/`outlineWidth`/`outlineOffset`
-    // repeat in every keyframe so they stay applied (held, not interpolated)
+    // Highlight so the eye lands on the right row: a rounded primary frame plus a
+    // faint background wash that PULSE — the row blinks on, eases off, and blinks
+    // again three times before settling. The blink (rather than a single fade)
+    // is what draws the eye to a row that may already be on screen. A single
+    // keyframe pass runs `on -> hold -> off`; `iterations: 3` replays it, and the
+    // hard jump from the last frame back to the first at each iteration boundary
+    // is what reads as a distinct blink. Ending on the transparent frame lets the
+    // final pulse fade out cleanly. Driven by the Web Animations API with no
+    // `fill`, so the outline colors revert to the CSS state when the animation
+    // ends. The rounded corners come from an inline `border-radius` set at the
+    // system token BEFORE animating (WAAPI silently drops `var()` inside
+    // `border-radius` keyframes, so it can't live in the keyframes) and cleared
+    // on finish/cancel — the dashed outline follows that radius. `outlineWidth`/
+    // `Style`/`Offset` carry no `var()`, so they hold fine across the keyframes
     // while only the colors animate. Respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
-      const frame = (outlineColor: string, backgroundColor: string, offset?: number) => ({
+      const frame = (outlineColor: string, backgroundColor: string, offset: number) => ({
+        offset,
         outlineWidth: '1px',
         outlineStyle: 'dashed',
         outlineOffset: '2px',
         outlineColor,
         backgroundColor,
-        ...(offset === undefined ? {} : { offset }),
       })
-      const wash = 'color-mix(in oklch, var(--ui-primary) 8%, transparent)'
-      el.animate(
+      const wash = 'color-mix(in oklch, var(--ui-primary) 10%, transparent)'
+      const prevRadius = el.style.borderRadius
+      el.style.borderRadius = 'var(--ui-radius)'
+      const anim = el.animate(
         [
-          frame('var(--ui-primary)', wash),
-          frame('var(--ui-primary)', wash, 0.66),
-          frame('transparent', 'transparent'),
+          frame('var(--ui-primary)', wash, 0),
+          frame('var(--ui-primary)', wash, 0.35),
+          frame('transparent', 'transparent', 1),
         ],
-        { duration: 3000, easing: 'ease-out' },
+        { duration: 520, iterations: 3, easing: 'ease-out' },
       )
+      const restoreRadius = () => { el.style.borderRadius = prevRadius }
+      anim.addEventListener('finish', restoreRadius)
+      anim.addEventListener('cancel', restoreRadius)
     }
   }
 
