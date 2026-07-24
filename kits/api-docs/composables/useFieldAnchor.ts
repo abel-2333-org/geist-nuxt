@@ -35,13 +35,32 @@ const SCROLL_MARGIN_CLASS = 'scroll-mt-24'
 // a stale in-flight positioning (e.g. waiting for an async field tree that
 // mounted late) can never scroll/flash after the user already moved on.
 let navigationToken = 0
+let navigationOwner: symbol | undefined
+let highlightAnimation: Animation | undefined
+let highlightOwner: symbol | undefined
+let scrollRestorationOwner: symbol | undefined
+let previousScrollRestoration: ScrollRestoration | undefined
+
+function stopHighlight(owner?: symbol) {
+  if (owner && highlightOwner !== owner) return
+  const animation = highlightAnimation
+  highlightAnimation = undefined
+  highlightOwner = undefined
+  animation?.cancel()
+}
 
 export interface FieldAnchorCopyMessages {
   successMessage?: string
   failureMessage?: string
 }
 
+export interface FieldAnchorCopyOptions extends FieldAnchorCopyMessages {
+  /** Preserve the legacy navigate-on-copy behavior unless a caller opts out. */
+  navigate?: boolean
+}
+
 export function useFieldAnchor() {
+  const owner = Symbol('field-anchor')
   const active = useActiveFieldPath()
   const revision = useFieldAnchorRevision()
   // `copied` is surfaced so an anchor button can mirror the same transient
@@ -49,6 +68,35 @@ export function useFieldAnchor() {
   // useFieldAnchor() call owns its own useCopy instance, so this state is
   // naturally scoped to the row that triggered the copy.
   const { copy, copied } = useCopy()
+  let hashInitialized = false
+
+  onScopeDispose(() => {
+    if (!hashInitialized) return
+    releaseScrollRestoration()
+    if (navigationOwner === owner) {
+      navigationOwner = undefined
+      navigationToken++
+      stopHighlight(owner)
+    }
+  })
+
+  function claimScrollRestoration() {
+    if (!('scrollRestoration' in history)) return
+    if (!scrollRestorationOwner) {
+      previousScrollRestoration = history.scrollRestoration
+      history.scrollRestoration = 'manual'
+    }
+    scrollRestorationOwner = owner
+  }
+
+  function releaseScrollRestoration() {
+    if (scrollRestorationOwner !== owner) return
+    if (history.scrollRestoration === 'manual' && previousScrollRestoration) {
+      history.scrollRestoration = previousScrollRestoration
+    }
+    scrollRestorationOwner = undefined
+    previousScrollRestoration = undefined
+  }
 
   /** Full shareable URL for a field path. */
   function urlFor(path: string) {
@@ -59,8 +107,9 @@ export function useFieldAnchor() {
   /**
    * Focus a field: mark it active (which expands ancestors reactively), then
    * wait a tick + the collapsible open transition before scrolling and
-   * flashing it. `getElementById` avoids any need to escape the id for a
-   * CSS/querySelector selector.
+   * flashing it. During a page transition, outgoing and incoming trees can
+   * briefly share an id; `findElement` deliberately selects the incoming,
+   * later-in-document match.
    */
   async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
@@ -71,6 +120,8 @@ export function useFieldAnchor() {
 
     if (!import.meta.client) return
     const token = ++navigationToken
+    navigationOwner = owner
+    stopHighlight()
     await nextTick()
 
     // The row may not exist yet: hash arrival can precede an async field tree
@@ -82,8 +133,8 @@ export function useFieldAnchor() {
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
     // may also try a native scroll to the hash. Both shift layout, so scrolling
-    // on a fixed delay is racy. Instead wait until the element's layout is stable
-    // across two frames (expansion settled), then do a single scroll + flash.
+    // on a fixed delay is racy. Wait until the target position and the page's
+    // scroll extent are both stable, then do a single scroll + flash.
     await waitForElementStable(el)
     if (token !== navigationToken) return
 
@@ -104,17 +155,26 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Brief highlight so the eye lands on the right row. Uses the Web Animations
-    // API (no persistent class to clean up) and respects reduced-motion.
+    // Brief arrival cue. Keep outline exclusively for the persistent focus ring;
+    // the transient cue only fades a token-based background.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
-      el.animate(
+      const animation = el.animate(
         [
-          { backgroundColor: 'color-mix(in oklch, var(--ui-primary) 10%, transparent)' },
+          { backgroundColor: 'color-mix(in oklch, var(--ui-primary) 12%, transparent)' },
           { backgroundColor: 'transparent' },
         ],
-        { duration: 1600, easing: 'ease-out' },
+        { duration: 300, easing: 'ease-out' },
       )
+      highlightAnimation = animation
+      highlightOwner = owner
+      const clear = () => {
+        if (highlightAnimation !== animation) return
+        highlightAnimation = undefined
+        highlightOwner = undefined
+      }
+      animation.addEventListener('finish', clear, { once: true })
+      animation.addEventListener('cancel', clear, { once: true })
     }
   }
 
@@ -129,7 +189,8 @@ export function useFieldAnchor() {
       const start = performance.now()
       const tick = () => {
         if (token !== navigationToken) return resolve(null)
-        const el = document.getElementById(id)
+        const matches = document.querySelectorAll<HTMLElement>(`#${CSS.escape(id)}`)
+        const el = matches[matches.length - 1]
         if (el) return resolve(el)
         if (performance.now() - start > maxMs) return resolve(null)
         requestAnimationFrame(tick)
@@ -139,55 +200,58 @@ export function useFieldAnchor() {
   }
 
   /**
-   * Resolve once the target element's own layout has settled: it must be
-   * visible (non-zero height — i.e. ancestor collapsibles have opened) and hold
-   * a stable top for two consecutive frames, so the expand transition is done
-   * before we scroll. Tracking the element itself (not just page height) avoids
-   * scrolling to a pre-expansion position while the animation hasn't started.
+   * Resolve once both the target and the page's scroll extent have settled.
+   * Tracking the target catches opening ancestors; tracking scrollHeight also
+   * catches nested content below it that opens later and increases the maximum
+   * scroll position. Both must remain stable for four consecutive frames.
    * Capped so we never wait indefinitely.
    */
   function waitForElementStable(el: HTMLElement, maxMs = 900): Promise<void> {
     return new Promise((resolve) => {
       const start = performance.now()
       let lastTop = Number.NaN
+      let lastScrollHeight = Number.NaN
       let stableFrames = 0
       const tick = () => {
         const rect = el.getBoundingClientRect()
-        const settled = rect.height > 0 && rect.top === lastTop
+        const scrollHeight = document.documentElement.scrollHeight
+        const settled = rect.height > 0
+          && rect.top === lastTop
+          && scrollHeight === lastScrollHeight
         stableFrames = settled ? stableFrames + 1 : 0
         lastTop = rect.top
-        if (stableFrames >= 2 || performance.now() - start > maxMs) resolve()
+        lastScrollHeight = scrollHeight
+        if (stableFrames >= 4 || performance.now() - start > maxMs) resolve()
         else requestAnimationFrame(tick)
       }
       requestAnimationFrame(tick)
     })
   }
 
-  /** Copy a field's deep link and focus it. Complete success/failure messages
-   *  keep localization owned by the caller; foundation only supplies generic
-   *  English defaults. A success-message string remains accepted for callers
-   *  copied from the previous API. Navigation still runs when clipboard
-   *  permission fails. */
+  /** Copy a field's deep link. Existing consumers still navigate by default;
+   *  UI surfaces that only need the clipboard can pass `navigate: false`.
+   *  Complete success/failure messages remain caller-owned, and the legacy
+   *  success-message string is still accepted. */
   async function copyLink(
     path: string,
-    messagesOrSuccess: FieldAnchorCopyMessages | string = {},
+    optionsOrSuccess: FieldAnchorCopyOptions | string = {},
   ) {
-    const messages: FieldAnchorCopyMessages = typeof messagesOrSuccess === 'string'
-      ? { successMessage: messagesOrSuccess }
-      : messagesOrSuccess
-    // Fire-and-forget: navigation/scroll runs independently of the clipboard
-    // write below; we don't want to block the copy on the scroll animation.
-    void goTo(path, { updateHash: true })
+    const options: FieldAnchorCopyOptions = typeof optionsOrSuccess === 'string'
+      ? { successMessage: optionsOrSuccess }
+      : optionsOrSuccess
+    if (options.navigate !== false) {
+      // Preserve the public API's original behavior without blocking clipboard.
+      void goTo(path, { updateHash: true })
+    }
     try {
       await copy(urlFor(path), {
         label: 'Link',
-        successMessage: messages.successMessage,
-        failureMessage: messages.failureMessage,
+        successMessage: options.successMessage,
+        failureMessage: options.failureMessage,
       })
     }
     catch {
-      // Clipboard unavailable/denied — the hash is still updated so the user
-      // can copy from the address bar.
+      // useCopy owns the localized failure toast.
     }
   }
 
@@ -206,12 +270,19 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
+    hashInitialized = true
     const apply = (path: string) => {
       if (path) {
+        claimScrollRestoration()
         void goTo(path, { updateHash: false, focus: true })
       }
       else {
-        navigationToken++
+        releaseScrollRestoration()
+        if (navigationOwner === owner) {
+          navigationOwner = undefined
+          navigationToken++
+          stopHighlight(owner)
+        }
         active.value = ''
       }
     }

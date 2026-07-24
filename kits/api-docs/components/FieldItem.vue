@@ -114,6 +114,7 @@ function onCopyLink() {
   // required, etc.) — no half-sentence concatenation inside the composable.
   if (props.path) {
     void anchor.copyLink(props.path, {
+      navigate: false,
       successMessage: t.value.linkCopied(props.name),
       failureMessage: t.value.linkCopyFailed(props.name),
     })
@@ -210,22 +211,21 @@ const lifecycleMeta = computed(() => {
 <template>
   <div
     :id="path"
-    class="relative border-b border-default py-3.5 last:border-b-0"
+    class="relative rounded-md border-b border-default py-3.5 outline-hidden last:border-b-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
     <!-- Summary row — always visible. Owns the hover group so the anchor icon
          reveals only for THIS row; child rows are siblings (in the collapsible
          below), not descendants, so hovering a child no longer lights up every
          ancestor's icon. -->
-    <div class="group/field relative flex flex-wrap items-center gap-x-3 gap-y-1.5">
+    <div class="group/field relative flex items-start gap-x-2">
       <!-- Anchor affordance (desktop) — hangs in the left gutter, revealed on
-           hover or when this row is the active anchor. Vertically centered on
-           the summary row so it lines up with the field name at any row height. -->
+           hover or when this row is active; pinned to the field-name line. -->
       <button
         v-if="path"
         type="button"
         :aria-label="anchorLabel"
-        class="absolute -start-6 top-1/2 hidden translate-y-[calc(-50%+1px)] rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:block"
+        class="absolute -start-6 top-0 hidden h-5 items-center rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:flex"
         :class="{ 'opacity-100': isActive || anchor.copied.value, 'text-primary': anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -241,60 +241,50 @@ const lifecycleMeta = computed(() => {
            own aria-label. A per-row status node would be a third, redundant
            announcement (and dozens of empty regions on a large table). -->
 
-      <code
-        class="font-mono text-sm font-medium"
-        :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
-      >{{ name }}</code>
-      <!-- Data type (string, integer, object, enum…): plain mono text, no
-           surface/border, so it never competes with the method/status badges. -->
-      <span class="font-mono text-xs text-muted">{{ type }}</span>
+      <!-- Metadata owns wrapping; the mobile action remains a fixed sibling. -->
+      <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
+        <code
+          class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
+          :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
+        >{{ name }}</code>
+        <!-- Data type (string, integer, object, enum…): plain mono text, no
+             surface/border, so it never competes with status badges. -->
+        <span class="font-mono text-xs text-muted">{{ type }}</span>
 
-      <!-- Serialization hint (e.g. json_string) sits next to the type. -->
-      <span
-        v-if="format"
-        class="font-mono text-xs text-dimmed"
-      >{{ format }}</span>
+        <span
+          v-if="format"
+          class="font-mono text-xs text-dimmed"
+        >{{ format }}</span>
 
-      <!-- Requirement tag — only for required/conditional; optional rows carry
-           no tag (absence is the signal, see requiredState above).
-           This is the requirement-strength axis: red = required (a hard rule),
-           amber = conditional (required only in some cases). Conditional keeps
-           amber — NOT neutral — so it stays visibly ON the same axis as red
-           rather than blending into the neutral type/format metadata beside it.
-           The amber here points AT the amber condition callout below (label →
-           block), a same-meaning echo, not the ambiguous cross-axis wash we
-           removed. Beta stays a badge (a different shape), so it never blurs
-           with this text tag even on a conditional + beta field. -->
-      <span
-        v-if="requiredState"
-        class="text-xs font-medium uppercase tracking-wide"
-        :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
-      >
-        {{ requiredLabel }}
-      </span>
-
-      <span v-if="defaultValue !== undefined" class="inline-flex items-center gap-1.5">
-        <span class="text-xs font-medium uppercase tracking-wide text-dimmed">
-          {{ t.default }}
+        <!-- Optional is unmarked; required/conditional stay on one strength axis. -->
+        <span
+          v-if="requiredState"
+          class="text-xs font-medium uppercase tracking-wide"
+          :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+        >
+          {{ requiredLabel }}
         </span>
-        <InlineCode>{{ defaultValue }}</InlineCode>
-      </span>
 
-      <ApiDocsLifecycleBadge
-        v-if="lifecycle"
-        :status="lifecycle.status"
-        :label="labels?.lifecycle?.[lifecycle.status]"
-      />
+        <span v-if="defaultValue !== undefined" class="inline-flex items-center gap-1.5">
+          <span class="text-xs font-medium uppercase tracking-wide text-dimmed">
+            {{ t.default }}
+          </span>
+          <InlineCode>{{ defaultValue }}</InlineCode>
+        </span>
 
-      <!-- Anchor affordance (touch) — inline and always visible on small
-           screens, where there's no hover or left gutter. Pushed to the row
-           end; padding grows the tap target to 32px while negative margins
-           keep the visual footprint inside the row's rhythm. -->
+        <ApiDocsLifecycleBadge
+          v-if="lifecycle"
+          :status="lifecycle.status"
+          :label="labels?.lifecycle?.[lifecycle.status]"
+        />
+      </div>
+
+      <!-- Touch action stays on the first line and outside metadata wrapping. -->
       <button
         v-if="path"
         type="button"
         :aria-label="anchorLabel"
-        class="ms-auto -my-1 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
+        class="-mt-1.5 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
         :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
       >
