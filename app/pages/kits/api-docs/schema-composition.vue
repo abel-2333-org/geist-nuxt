@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CompositionNode, FieldNode } from '../../../../kits/api-docs/utils/field'
 
-definePageMeta({ nav: { label: 'Schema 组合', icon: 'i-lucide-git-fork', order: 4 } })
+definePageMeta({ nav: { label: 'Schema 组合', icon: 'i-lucide-git-fork', order: 5 } })
 
 // Demo/story for <ApiDocsSchemaComposition> — per the geist-nuxt layering,
 // demo fixtures live in the gallery and the kit only ships the data-agnostic
