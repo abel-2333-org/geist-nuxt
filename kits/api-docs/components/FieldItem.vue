@@ -240,7 +240,9 @@ const lifecycleMeta = computed(() => {
            own aria-label. A per-row status node would be a third, redundant
            announcement (and dozens of empty regions on a large table). -->
 
-      <!-- Metadata owns wrapping; the mobile action remains a fixed sibling. -->
+      <!-- Metadata owns wrapping; the mobile action remains a fixed sibling.
+           Field identity is Label 14; type / requirement / lifecycle share one
+           Label 12 tier centered within the same 20px summary line box. -->
       <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
         <code
           class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
@@ -275,6 +277,7 @@ const lifecycleMeta = computed(() => {
           v-if="lifecycle"
           :status="lifecycle.status"
           :label="labels?.lifecycle?.[lifecycle.status]"
+          class="shrink-0 py-0.5 text-xs/4"
         />
       </div>
 

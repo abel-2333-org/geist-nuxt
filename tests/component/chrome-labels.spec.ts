@@ -82,6 +82,23 @@ describe('FieldItem lifecycle badge labels', () => {
     })
     expect(wrapper.text()).toContain('New')
   })
+
+  it('keeps lifecycle status on the same metadata type tier as requiredness', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'gitSource',
+        type: 'object',
+        required: 'conditional',
+        lifecycle: { status: 'beta' as const },
+      },
+    })
+    const summary = wrapper.find('.group\\/field > div')
+    const badge = wrapper.find('[data-slot="base"]')
+
+    expect(summary.classes()).toContain('items-center')
+    expect(badge.classes()).toContain('text-xs/4')
+    expect(badge.classes()).toContain('py-0.5')
+  })
 })
 
 describe('FieldItem anchor accessible labels', () => {
