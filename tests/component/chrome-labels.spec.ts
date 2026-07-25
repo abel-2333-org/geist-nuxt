@@ -11,6 +11,7 @@ import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
 import LifecycleNotice from '../../kits/api-docs/components/LifecycleNotice.vue'
+import LifecycleBadge from '../../kits/api-docs/components/LifecycleBadge.vue'
 
 /** 中文 chrome labels，一次声明覆盖整棵字段树（含递归子行）。 */
 const zhLabels = {
@@ -92,12 +93,18 @@ describe('FieldItem lifecycle badge labels', () => {
         lifecycle: { status: 'beta' as const },
       },
     })
-    const summary = wrapper.find('.group\\/field > div')
-    const badge = wrapper.find('[data-slot="base"]')
 
-    expect(summary.classes()).toContain('items-center')
-    expect(badge.classes()).toContain('text-xs/4')
-    expect(badge.classes()).toContain('py-0.5')
+    // Contract, not utility-class strings: the row asks the badge for the `md`
+    // size tier — the tier whose theme token is Label 12 (text-xs) plus a
+    // size-4 icon, matching the plain-text metadata spans (type /
+    // CONDITIONAL / DEFAULT). Asserting the prop keeps this test green when
+    // Nuxt UI re-tunes the tier's utilities, and red if the row silently
+    // falls back to the default `sm` (10px) tier.
+    expect(wrapper.findComponent(LifecycleBadge).props('size')).toBe('md')
+
+    // The status must read as part of the same line box, so the summary row
+    // centers its items instead of baseline/stretch-aligning them.
+    expect(wrapper.find('.group\\/field > div').classes()).toContain('items-center')
   })
 })
 

@@ -273,11 +273,18 @@ const lifecycleMeta = computed(() => {
           <InlineCode>{{ defaultValue }}</InlineCode>
         </span>
 
+        <!-- `md` is the badge tier whose token IS Label 12 (text-xs) plus a
+             size-4 icon, so the status lands on the same tier as the metadata
+             spans above without hand-writing a font size here. Only vertical
+             density is tuned at the consumption site: the tier ships py-1 (a
+             24px box) while this summary row is the 20px line box owned by the
+             Label 14 field name. -->
         <ApiDocsLifecycleBadge
           v-if="lifecycle"
           :status="lifecycle.status"
           :label="labels?.lifecycle?.[lifecycle.status]"
-          class="shrink-0 py-0.5 text-xs/4"
+          size="md"
+          class="shrink-0 py-0.5"
         />
       </div>
 
