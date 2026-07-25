@@ -162,12 +162,12 @@ const revealOnHover
          floor lives on the TEXT (6ch keeps "https…" legible), because on the
          segment the copy button's reserved slot eats the whole budget and the
          host collapses to "h…" — a floor that guarantees nothing.
-         STACKED only: `flex-1` absorbs the leftover space on line 1 so the
-         whole-address button is pushed to the trailing edge instead of being
-         dragged down onto the path's line. Once both halves share one line
-         (`@md/target`) that same growth would strand the button in mid-row, so
-         it reverts to plain shrink-only. -->
-    <div class="group flex min-w-0 flex-1 items-center gap-0.5 rounded-sm px-1 transition-colors @md/target:grow-0 @md/target:basis-auto @md/target:shrink hover:bg-accented/50 focus-within:bg-accented/50">
+         `flex-initial` (`0 1 auto`) — shrink but never GROW — so the trailing
+         button's `ml-auto` keeps the leftover space and stays pinned right.
+         Use the `flex` SHORTHAND, not a `grow-0`/`basis-auto` longhand: a
+         longhand loses to any `flex-1` on source order and silently does
+         nothing, which is exactly how the button once drifted mid-row. -->
+    <div class="group flex min-w-0 flex-initial items-center gap-0.5 rounded-sm px-1 transition-colors hover:bg-accented/50 focus-within:bg-accented/50">
       <code
         class="min-w-[6ch] truncate font-mono text-sm text-muted"
         :title="baseUrl"
@@ -183,29 +183,25 @@ const revealOnHover
       </span>
     </div>
 
-    <!-- Whole address — the row's primary action, always the row's trailing
-         control and always the last focusable in it, so visual and tab order
-         agree in BOTH layouts. Placed before the path in the DOM because when
-         the path wraps it must stay up on line 1 (pushed right by the host's
-         `flex-1`); on one line `order-last` + `ml-auto` send it back to the
-         true trailing edge instead of stranding it between the two halves.
-         It sits outside every scroll area on purpose, because the task is to
-         GET the address, not read it, so it must never scroll away. -->
-    <CopyButton
-      :value="fullAddress"
-      :toast-label="props.copyToastLabel ?? 'Endpoint'"
-      size="sm"
-      class="shrink-0 @md/target:order-last @md/target:ml-auto"
-    />
+    <!-- STACKED-only line breaker. A zero-height, full-width flex item is the
+         only way to force a wrap at an exact point, and it is what lets DOM
+         order stay the natural reading order (host → path → copy-all). The
+         obvious alternative — keeping the button before the path and flipping
+         it with `order-last` — is a trap: `order` moves the BOX but never the
+         tab sequence, so it silently desynchronises focus from what is on
+         screen. Ordering the DOM correctly and breaking the LINE instead keeps
+         visual, DOM and tab order identical at every width. -->
+    <span aria-hidden="true" class="w-full @md/target:hidden" />
 
     <!-- path segment — the operation's identity, so it never truncates.
-         MOBILE-FIRST: by default it takes a line of its own (`basis-full`),
-         because squeezing both halves onto one narrow line leaves the host a
-         useless stub AND pushes the identity out of sight — strictly worse
-         than two honest lines. From the `md` CONTAINER width up it rejoins the
-         host on one line, where the hairline (environment-supplied vs
-         operation-owned) finally reads as a real boundary. -->
-    <div class="group flex min-w-0 basis-full items-center gap-0.5 rounded-sm border-default px-1 transition-colors @md/target:basis-auto @md/target:border-l @md/target:pl-2 hover:bg-accented/50 focus-within:bg-accented/50">
+         MOBILE-FIRST it starts its own line (see the breaker above), because
+         squeezing both halves onto one narrow line leaves the host a useless
+         stub AND pushes the identity out of sight — strictly worse than two
+         honest lines. From the `md` CONTAINER width up the breaker is removed
+         from the flow and it rejoins the host on one line, where the hairline
+         (environment-supplied vs operation-owned) finally reads as a real
+         boundary. -->
+    <div class="group flex min-w-0 flex-initial items-center gap-0.5 rounded-sm border-default px-1 transition-colors @md/target:border-l @md/target:pl-2 hover:bg-accented/50 focus-within:bg-accented/50">
       <!-- Only the path TEXT scrolls, never its copy button. Note the two jobs
            must live on different elements: `overflow-x-auto` makes a flex line
            size to max-content, which silently disables `shrink` on its items —
@@ -232,6 +228,23 @@ const revealOnHover
       </span>
     </div>
 
-
+    <!-- Whole address — the row's primary action, hence last: `ml-auto` claims
+         all leftover space so it parks at the trailing edge in both layouts
+         (which is why neither segment may GROW). Being last in the DOM too, it
+         is last for the keyboard as well, with no `order` to desync the two.
+         It also sits outside every scroll area on purpose, because the task is
+         to GET the address, not read it — it must never scroll away.
+         The classes live on this wrapper, NOT on <CopyButton>: that component
+         is multi-root (button + its aria-live status span), so Vue has no
+         single host to fall through to and a `class` passed to it is dropped
+         silently. The wrapper also keeps the status span travelling with its
+         button instead of becoming a stray flex item. -->
+    <span class="ml-auto flex shrink-0">
+      <CopyButton
+        :value="fullAddress"
+        :toast-label="props.copyToastLabel ?? 'Endpoint'"
+        size="sm"
+      />
+    </span>
   </div>
 </template>
