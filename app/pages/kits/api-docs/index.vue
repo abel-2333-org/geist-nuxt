@@ -645,7 +645,7 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Operation Header / Target</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            ��作身份头：一个组件承担端点与 webhook 两形态
+            操作身份头：一个组件承担端点与 webhook 两形态
             （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
             端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
