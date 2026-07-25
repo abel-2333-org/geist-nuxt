@@ -18,6 +18,9 @@ import type { RouterConfig } from '@nuxt/schema'
 //   wait for the destination page to finish rendering first; the second
 //   scrollIntoView on the next frame re-settles after late reflow (images,
 //   code blocks above the target), mirroring useFieldAnchor.goTo.
+//
+// All scrolling here is instant, mirroring useFieldAnchor.goTo; foundation
+// main.css records why smooth scrolling is not used anywhere.
 export default <RouterConfig>{
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {

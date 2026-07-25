@@ -9,16 +9,17 @@ const codeLabels = {
   copyFailure: 'Copy unavailable',
 }
 
-// Compile-only compatibility probe for projects that copied an earlier
-// copy composables and still call their positional APIs. It is not invoked.
-function legacyCopyApiCompatibility() {
+// Compile-only API probe. It is not invoked.
+function copyApiContract() {
   const { copy } = useCopy(1500)
   const copyPromise = copy('legacy consumer smoke', 'Value', {
     successMessage: 'Value copied',
     failureMessage: 'Copy unavailable',
   })
   const { copyLink } = useFieldAnchor()
-  const linkPromise = copyLink('amount', 'Amount link copied')
+  // @ts-expect-error breaking change: copyLink no longer accepts a positional message
+  void copyLink('amount', 'Amount link copied')
+  const linkPromise = copyLink('amount', { successMessage: 'Amount link copied' })
   return Promise.all([copyPromise, linkPromise])
 }
 const groups = [{
