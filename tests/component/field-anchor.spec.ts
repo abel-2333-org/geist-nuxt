@@ -141,10 +141,9 @@ describe('useFieldAnchor', () => {
     // Scrolls only once the layout has settled, so it must have sampled the
     // scroll extent across multiple frames rather than firing on a fixed delay.
     expect(readScrollHeight.mock.calls.length).toBeGreaterThan(1)
-    // In-page jumps travel smoothly to keep the reader oriented, and must not
-    // re-settle afterwards: a second call would retarget the in-flight scroll.
-    expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
-    expect(target.scrollIntoView).toHaveBeenCalledTimes(2)
+    // Instant — no `behavior` is requested, so smooth is never opted into. The
+    // re-settle pass is asserted in the deep-link test below.
+    expect(target.scrollIntoView).toHaveBeenCalledWith({ block: 'start' })
     second.finish()
     wrapper.unmount()
   })
@@ -200,10 +199,10 @@ describe('useFieldAnchor', () => {
     expect(firstAnimate).toHaveBeenCalledOnce()
     expect(first.cancel).toHaveBeenCalledOnce()
     expect(history.scrollRestoration).toBe('manual')
-    // An initial hash arrival must land instantly: animating it would drift the
-    // page down from the top, the symptom the manual restoration claim prevents.
-    // Instant mode also keeps the next-frame re-settle pass for late reflow.
-    expect(scrollMocks[0]).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
+    // A hash arrival lands instantly and then re-settles on the next frame:
+    // animating it would drift the page down from the top, the very symptom the
+    // manual restoration claim prevents.
+    expect(scrollMocks[0]).toHaveBeenCalledWith({ block: 'start' })
     await vi.waitFor(() => expect(scrollMocks[0]).toHaveBeenCalledTimes(2))
 
     oldRoute.unmount()

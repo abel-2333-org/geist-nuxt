@@ -126,10 +126,7 @@ export function useFieldAnchor() {
    * briefly share an id; `findElement` deliberately selects the incoming,
    * later-in-document match.
    */
-  async function goTo(
-    path: string,
-    opts: { updateHash?: boolean, focus?: boolean, smooth?: boolean } = {},
-  ) {
+  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
@@ -156,30 +153,22 @@ export function useFieldAnchor() {
     await waitForElementStable(el)
     if (token !== navigationToken) return
 
-    // Smooth travel keeps the reader oriented for IN-PAGE jumps (annotation and
-    // composition links, later hash changes): seeing the page move explains
-    // where the target sits relative to where they were. It is opt-out because
-    // an initial hash arrival must NOT animate — see initFromHash.
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const smooth = opts.smooth !== false && !reduced
-    el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
+    // Instant, deliberately. Smooth travel was tried and rejected: it cannot be
+    // applied consistently, because native `<a href="#…">` anchors bypass JS and
+    // the only thing that reaches them — a global CSS `scroll-behavior: smooth`
+    // on the root scroller — also overrides a script's explicit
+    // `behavior: 'auto'`, so arrivals (this deep-link path included) could no
+    // longer opt out and would slide down from the top.
+    el.scrollIntoView({ block: 'start' })
     // Content above the target (images, code blocks) can still reflow after the
     // first scroll, nudging the row off its scroll-margin anchor. Re-run the
     // scroll on the next frame so we settle on the final, correct position.
     // Re-check inside the callback: a newer navigation (or unmount) can happen
     // before this frame fires, and a stale target must not drag scroll back.
-    //
-    // Instant mode only. A second scrollIntoView one frame into a smooth scroll
-    // RETARGETS the in-flight animation rather than correcting it, and the
-    // browser is still traveling for hundreds of ms afterwards anyway, so the
-    // re-settle cannot do its job there. Smooth instead relies on
-    // waitForElementStable having settled layout before we ever started moving.
-    if (!smooth) {
-      requestAnimationFrame(() => {
-        if (token !== navigationToken || !el.isConnected) return
-        el.scrollIntoView({ behavior: 'auto', block: 'start' })
-      })
-    }
+    requestAnimationFrame(() => {
+      if (token !== navigationToken || !el.isConnected) return
+      el.scrollIntoView({ block: 'start' })
+    })
     // Optionally move keyboard focus to the row (deep links, annotation jumps)
     // so Tab continues from the target instead of wherever the journey began.
     // `preventScroll` keeps the settled scroll position authoritative.
@@ -203,6 +192,7 @@ export function useFieldAnchor() {
     // box-shadow also follows the row's own border-radius, so no inline radius
     // is needed. Runs without `fill`, so every property reverts to its CSS state
     // when the cue ends. Respects reduced-motion.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
       const on = (offset: number) => ({
         offset,
@@ -331,20 +321,10 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
-    // The FIRST application is an arrival, not a journey: the reader landed
-    // directly on this hash (fresh visit or refresh), so there is no "where I
-    // came from" to preserve and nothing to orient them relative to. Animating
-    // it would mean watching the page drift down from the top — the very
-    // symptom the manual scrollRestoration claim exists to prevent — and a
-    // touch or competing native hash scroll during that travel would abort it
-    // mid-way. Later applications are in-page hash changes, where smooth helps.
-    let firstApply = true
     const apply = (path: string) => {
-      const smooth = !firstApply
-      firstApply = false
       if (path) {
         claimScrollRestoration()
-        void goTo(path, { updateHash: false, focus: true, smooth })
+        void goTo(path, { updateHash: false, focus: true })
       }
       else {
         releaseScrollRestoration()

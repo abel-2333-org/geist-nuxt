@@ -298,8 +298,9 @@ body {
  * from the top, which is the exact mobile-refresh jank useFieldAnchor's manual
  * scrollRestoration claim exists to prevent.
  *
- * Smooth travel is therefore opted INTO per script-driven journey instead — see
- * useFieldAnchor.goTo and router.options.ts.
+ * In-page scrolling is therefore instant everywhere (useFieldAnchor.goTo,
+ * router.options.ts), which at least keeps script-driven jumps and native
+ * anchors consistent with each other.
  */
 
 /*
