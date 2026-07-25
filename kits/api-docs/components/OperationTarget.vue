@@ -198,8 +198,42 @@ function measure() {
 useResizeObserver(pathTrack, measure)
 watch([baseUrl, () => props.path], () => void nextTick(measure))
 
-/** Shared look of the two text-as-control segments. */
-const segment = 'cursor-pointer select-text rounded-sm px-1 text-left font-mono text-sm transition-colors hover:bg-accented focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+/**
+ * Shared look of the two text-as-control segments. Inline in the compact row
+ * (where the row's own height is the target), but STACKED they each own a line,
+ * so they take a real touch height there — `min-h-9` + `py-1.5` clears the ~24px
+ * floor that a bare 20px line-box would miss. `@md` returns them to inline
+ * metrics so the compact row does not grow a step taller on the desktop side.
+ */
+const segment = 'min-h-9 cursor-pointer select-text rounded-sm px-1.5 py-1.5 text-left font-mono text-sm transition-colors hover:bg-accented focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary @md/target:min-h-0 @md/target:px-1 @md/target:py-0'
+
+/**
+ * host segment — the part that gives way.
+ * STACKED it owns the whole line, so the hit area matches the line the eye reads
+ * (a shrink-wrapped host left a dead gap to its right, which made the row look
+ * unbalanced and the target look accidental).
+ * `@md` puts it back on the shrink ladder: `flex-initial` (`0 1 auto`) shrinks
+ * but never GROWS, leaving the trailing button's `ml-auto` to claim the slack,
+ * and `min-w-[6ch]` makes it degrade to a legible "https…" instead of "h…".
+ * Use the flex SHORTHAND — a `grow-0` longhand loses to any `flex-1` on source
+ * order and silently does nothing, which is how the button once drifted mid-row.
+ * Dimmed against the path's `text-highlighted`, carrying the
+ * environment-supplied vs operation-owned distinction.
+ */
+const hostSegment = 'w-full truncate text-muted hover:text-default @md/target:w-auto @md/target:min-w-[6ch] @md/target:flex-initial'
+
+/**
+ * path segment — the operation's identity, so it never truncates.
+ * STACKED, `flex-1` takes the slack on the path's own line so the trailing copy
+ * button parks at the CARD's edge rather than hugging the path text (which read
+ * as "this button copies the path"). `@md` returns to `flex-initial` so the
+ * button's `ml-auto` gets the slack instead.
+ * The shrink ladder and the scroll container are the same element (`min-w-0` +
+ * `overflow-x-auto`): a scroll container's automatic minimum size is 0, so it
+ * shrinks below max-content instead of pushing the copy button out of the row.
+ * Scrollbar is hidden (the row is short); the measured fade signals "more".
+ */
+const pathSegment = 'min-w-0 flex-1 overflow-x-auto border-default text-highlighted [scrollbar-width:none] @md/target:flex-initial @md/target:border-l @md/target:pl-2 [&::-webkit-scrollbar]:hidden'
 </script>
 
 <template>
@@ -225,19 +259,10 @@ const segment = 'cursor-pointer select-text rounded-sm px-1 text-left font-mono 
       class="w-full border-t border-default @md/target:hidden"
     />
 
-    <!-- host segment — the part that gives way: it shrinks and truncates, with
-         a `min-w-[6ch]` floor so it degrades to a legible "https…" rather than
-         a useless "h…". Dimmed (`text-muted`) against the path's
-         `text-highlighted`, carrying the environment-supplied vs
-         operation-owned distinction.
-         `flex-initial` (`0 1 auto`) — shrink but never GROW — so the trailing
-         button's `ml-auto` keeps the leftover space and stays pinned right.
-         Use the `flex` SHORTHAND, not a `grow-0`/`basis-auto` longhand: a
-         longhand loses to any `flex-1` on source order and silently does
-         nothing, which is exactly how the button once drifted mid-row. -->
+    <!-- host segment — text IS the control; see `hostSegment` for the layout. -->
     <button
       type="button"
-      :class="[segment, 'min-w-[6ch] flex-initial truncate text-muted hover:text-default']"
+      :class="[segment, hostSegment]"
       :title="baseUrl"
       :aria-label="hostCopied ? t.copiedHost : t.copyHost"
       @click="onCopyHost"
@@ -265,7 +290,7 @@ const segment = 'cursor-pointer select-text rounded-sm px-1 text-left font-mono 
       type="button"
       :class="[
         segment,
-        'min-w-0 flex-initial overflow-x-auto border-default text-highlighted [scrollbar-width:none] @md/target:border-l @md/target:pl-2 [&::-webkit-scrollbar]:hidden',
+        pathSegment,
         clipped ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]' : undefined,
       ]"
       :aria-label="pathCopied ? t.copiedPath : t.copyPath"
