@@ -80,7 +80,7 @@ registry item 为 `api-docs-site-search`，只声明
 >
 > 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
-> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
+> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸���，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
 ### Operation identity 分层（endpoint 与 webhook 的身份表面）
 
@@ -158,7 +158,7 @@ kit 内部纯函数（`<ApiDocsCodeRail>` 持有，随 `api-docs-code-rail` 切�
 /**
  * 内容优先重分配：给定去掉把手后的固定总高 H 与两栏自然（未封顶）高度，
  * 返回各栏高度预算。仅在溢出态（H < natTop + natBottom）调用；两栏都放得下
- * 时按自然高渲染、根本不用它。
+ * 时按自然高渲染、根本不用��。
  * - 基线按 ratio : 1-ratio 分 H，各栏不低于 minPane。
  * - 若一栏内容用不满其份额 → 封顶到自然高，把富余让给溢出的另一栏。
  */
@@ -203,7 +203,7 @@ gallery 有**七个 api-docs demo 页，职责互补**：
 |---|---|---|---|
 | `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `app/pages/kits/api-docs/endpoint-reference.vue` | 端点参考页 | **整页级端点组合** | 招牌两栏端点参考页：横向 `SplitPane`（左字段树 / 右双例码轨道）+ kit 的 `<ApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。整页 anatomy 齐全：identity 头 + `<ApiDocsOperationTarget>` 环境联动（host 切换驱动请求示例 baseUrl）+ requirements/relations 扩展区 + 请求/响应/error response 字段树 + 独立 Errors 目录（左目录连右栏 4xx 样本）+ matched/request-only/response-only controlled scenario + multi status/media/body；主区下方 full/partial/minimal 三态纵向陈列。是下游消费页 copy & adapt 的活骨架 |
-| `app/pages/kits/api-docs/webhook-reference.vue` | Webhook 参考页 | **整页级 webhook 组合** | 与端点参考页镜像对称（方向相反：平台回调你）：identity（EVENT 徽章）+ requirements/guide 扩展区 + 协议三段（验证/确认/投递，按 handler 生命周期穿插 payload）+ payload 字段树 + relations 扩展区；右栏线缆样本 Payload/Acknowledgement 双栏；主区下方 full/partial/minimal 三态。ACK 字面响应体作为线缆样本归右栏 |
+| `app/pages/kits/api-docs/webhook-reference.vue` | Webhook 参考页 | **整页级 webhook 组合** | 与端点参考页镜像对称（方向相反：平台回调你）：identity（EVENT ���章）+ requirements/guide 扩展区 + 协议三段（验证/确认/投递，按 handler 生命周期穿插 payload）+ payload 字段树 + relations 扩展区；右栏线缆样本 Payload/Acknowledgement 双栏；主区下方 full/partial/minimal 三态。ACK 字面响应体作为线缆样本归右栏 |
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
 | `app/pages/kits/api-docs/webhook-protocol.vue` | Webhook 协议 | **协议事实专项** | 三段齐全的内联中性 fixture + 变体区：section 省略规则、ACK 三语义（literal/echo/intentional empty）、无 steps schedule 与 `maxScheduleSteps=1` 边界 |
 | `app/pages/kits/api-docs/schema-composition.vue` | Schema 组合 | **composition 专项** | 三种 kind（oneOf/anyOf/allOf)、带 discriminator 的 oneOf、字段级 composition 委托(payment-method 风格)、嵌套 composition、空态；deep link 揭示隐藏 variant 与 anchor 唯一性压力用例 |
@@ -256,7 +256,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 - 字段深链接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮。
 - **滚动一律瞬时**，并在次帧 re-settle 以纠正迟到 reflow。平滑滚动**评估后否决**：唯一能覆盖原生 `<a href="#…">`（绕过 JS）的手段是全局 CSS `html { scroll-behavior: smooth }`，但实测根滚动器上的它会**盖掉脚本显式传的 `behavior: 'auto'`**，使所有"到达"都无法退出动画——换页回顶变成缓慢爬回、后退恢复位置漂移、初始 hash 深链从顶部下移（正是本 kit 的 manual restoration 要消除的移动端刷新抖动）。故不引入，保持脚本路径与原生锚点手感一致。
 - **滚动权归属**：`initFromHash()` 检测到 URL 带 hash 时会**接管 `history.scrollRestoration`**（置为 `manual`），因为浏览器在刷新时会异步反复恢复刷新前的旧偏移，在慢加载下会发生在展开+滚动之后、把页面拽回顶部。接管是**引用计数**的：多个 anchor scope（如 page transition 期间新旧路由并存）共享同一份 claim，仅当最后一个 claim 释放时才把原值还原，因此单个 scope 卸载不会误还原；若目标在等待窗口内始终未挂载，当前 hash navigation 会主动释放自己的 claim，stale / malformed fragment 不会让页面余下生命周期一直停在 `manual`。无 hash 时不接管，普通刷新仍走浏览器原生位置恢复。kit 不改写 router 配置；可选的 `router.options.ts` hash 调整只是额外消除一次冷加载闪动。
-- 字段锚点必须是可查询、稳定且无歧义的 DOM id：**行的 `id` 直接采用 display model 的 `path` 原文，kit 不做 slugify**——`path` 的稳定与无歧义由数据作者 / adapter 保证（它本身即用稳定分隔符连接的层级标识）。page transition 期间新旧字段树可能短暂存在重复 id，跳转因此使用 `querySelectorAll(#${CSS.escape(path)})` 并选择文档中最后一个（incoming）匹配；`path` 会先经 `CSS.escape`，无需数据作者自行处理 selector 转义。`#path` 往返只做百分号编解码（`urlFor` 拼 `#path`、`initFromHash` 用 `decodeURIComponent` 还原）。字段展示名（`name`）只用于展示，不拼进 id 或 selector。
+- 字段锚点必须是可查询、稳定且无歧义的 DOM id：**行的 `id` 直接采用 display model 的 `path` 原文，kit 不做 slugify**——`path` 的稳定与无歧义由数据作者 / adapter 保证（它本身即用稳定分隔符连接的层级标识）。page transition 期间新旧字段树可能短暂存在重复 id，跳转因此使用 `querySelectorAll(#${CSS.escape(path)})` 并选择文档中最后一个（incoming）匹配；`path` 会先经 `CSS.escape`，无需数据作者自行处理 selector 转义。`#path` 往返只做百分号编解码（`urlFor` 拼 `#path`、`initFromHash` 用 `decodeURIComponent` 还原）。字段展示名（`name`）只用于展示，不拼进 id 或 selector。**空 path 直接被拒**：`CSS.escape('')` 得到空串、`'#'` 是非法 selector，会让 `querySelectorAll` 抛 `SyntaxError`，故 `goTo('')` 在改动任何状态前就返回——不改 active 行、不写 hash，外部消费者传空既不会崩也不留半套状态；清空 active 行是 `initFromHash()` 空 hash 分支的职责，不是畸形跳转请求的副作用。
 - **`copyLink` 只写剪贴板，从不导航**：不滚动、不写 hash、不改 active 行，避免"取个链接却被带走"。复制到的 URL 仍含 `#path`，粘贴照常深链。复制与跳转是两个独立意图，没有 `navigate` 开关；确需"跳过去并复制"的调用方自行组合 `goTo()` + `copyLink()`。
 - 复制反馈复用 foundation `useCopy()` 与应用级 toast live region；不要为字段表的每一行再创建 `role="status"`。纯图标锚点按钮的默认 `aria-label` 随状态变化且包含字段名，保证 screen-reader 的按钮列表可辨别目标。`copyLink` / `copiedLink` 可用函数按字段名生成完整标签；兼容字符串继续按完整标签原样使用。
 - 本地化复制提示时传入完整成功/失败消息，不在 foundation 与 kit 之间拼接半句；`FieldItemLabels.linkCopied` / `linkCopyFailed` 都接收字段名并返回完整句子。

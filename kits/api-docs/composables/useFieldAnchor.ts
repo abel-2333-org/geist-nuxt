@@ -133,6 +133,14 @@ export function useFieldAnchor() {
     path: string,
     opts: { updateHash?: boolean, focus?: boolean } = {},
   ): Promise<NavigationResult> {
+    // An empty path has no target, and `'#' + CSS.escape('')` is `'#'` — an
+    // invalid selector that makes querySelectorAll throw. Bail out BEFORE
+    // touching shared state or the URL: `goTo` is public API, so a consumer
+    // outside this repo can reach here, and a half-applied navigation would
+    // clear the active row and rewrite the hash to a bare '#' on the way out.
+    // Clearing the active field is initFromHash's job (its empty-hash branch),
+    // not a side effect of a malformed jump request.
+    if (!path) return 'missing'
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
@@ -183,7 +191,7 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Arrival cue: the row BREATHES three times — a primary ring plus a faint
+    // Arrival cue: the row BREATHES (see BREATHS below) — a primary ring plus a faint
     // wash fade in and out, repeated, in one continuous pass. A slow alternation
     // (rather than a fast blink) draws the eye to a row that may already be on
     // screen without strobing. This is a SINGLE keyframe sequence, so the

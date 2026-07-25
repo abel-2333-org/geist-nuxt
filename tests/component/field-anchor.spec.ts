@@ -104,6 +104,35 @@ describe('useFieldAnchor', () => {
     wrapper.unmount()
   })
 
+  it('rejects an empty path instead of throwing on an invalid selector', async () => {
+    vi.stubGlobal('requestAnimationFrame', vi.fn(() => 0))
+    let goTo!: ReturnType<typeof useFieldAnchor>['goTo']
+    const Host = defineComponent({
+      setup() {
+        const anchor = useFieldAnchor()
+        goTo = anchor.goTo
+        return { active: anchor.active }
+      },
+      template: '<div id="amount">Amount</div>',
+    })
+    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+
+    // `goTo` is public API, so a consumer outside this repo can pass an empty
+    // path. It must be a no-op rather than a crash: `'#' + CSS.escape('')` is
+    // `'#'`, an invalid selector that makes querySelectorAll throw a
+    // SyntaxError (verified in a real browser).
+    // Snapshot before/after rather than comparing against '': the contract is
+    // "goTo changed nothing". Pinning absolute values would instead depend on
+    // leftovers from earlier cases — `active` is a Nuxt `useState`, so it is
+    // shared across this file, and an earlier `#missing` case leaves it set.
+    const hashBefore = location.hash
+    const activeBefore = wrapper.vm.active
+    await expect(goTo('')).resolves.toBeUndefined()
+    expect(wrapper.vm.active).toBe(activeBefore)
+    expect(location.hash).toBe(hashBefore)
+    wrapper.unmount()
+  })
+
   it('keeps manual restoration when a hash navigation is superseded', async () => {
     Object.defineProperty(history, 'scrollRestoration', {
       configurable: true,
