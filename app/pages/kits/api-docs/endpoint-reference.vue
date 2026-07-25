@@ -533,14 +533,22 @@ onMounted(() => anchor.initFromHash())
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               {{ endpoint.description }}
             </p>
-            <!-- 环境联动：host 切换 + 地址 + 复制，紧贴头部。选中 host 由本页
-                 持有，右栏请求示例从同一 host 派生。 -->
+            <!-- 环境联动：host 切换 + 分段地址（host / path 各自可复制）+ 整体
+                 复制，紧贴头部。选中 host 由本页持有，右栏请求示例从同一 host
+                 派生。 -->
             <ApiDocsOperationTarget
               v-model="selectedHostId"
               :hosts="hosts"
               :path="endpoint.path"
               select-label="选择环境"
               copy-toast-label="接口地址"
+              :labels="{
+                copyHost: '复制服务地址',
+                copyPath: '复制请求路径',
+                hostToast: '服务地址',
+                pathToast: '请求路径',
+                copied: '已复制',
+              }"
             />
           </header>
 
@@ -626,7 +634,7 @@ onMounted(() => anchor.initFromHash())
       </template>
 
       <!-- 右：双例码轨道。lg+ 钉成视口高 sticky 长条，Request/Response 纵向分栏 +
-           内容优先重分配；<lg 回退为堆叠各卡自滚动。 -->
+           内容优先���分配；<lg 回退为堆叠各卡自滚动。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <ApiDocsCodeRail storage-key="api-docs-endpoint-rail-split" class="h-full max-lg:space-y-4">

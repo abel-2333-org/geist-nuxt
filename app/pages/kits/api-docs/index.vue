@@ -546,7 +546,7 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
           Operation 身份层由
           <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
-          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境 + 地址 + 复制）与
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境切换 + 分段地址 + 分段/整体复制）与
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
           双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
@@ -645,7 +645,7 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Operation Header / Target</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            操作身份头：一个组件承担端点与 webhook 两形态
+            ��作身份头：一个组件承担端点与 webhook 两形态
             （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
             端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
