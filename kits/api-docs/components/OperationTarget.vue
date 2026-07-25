@@ -11,28 +11,32 @@ import { useResizeObserver } from '@vueuse/core'
 // — a sentence of copy, not an address bar — so webhook headers should NOT
 // force this component in.
 //
-// Anatomy:  [ USelect (env, only when hosts > 1) | ‹host ⧉ │ path ⧉› | CopyButton ]
-//           one bordered `bg-elevated` row. The middle is a scroll track
-//           holding two segments; the trailing CopyButton takes the whole
-//           address and lives OUTSIDE the track, so it is reachable no matter
-//           how far the address is scrolled.
+// Anatomy (wide container, one line):
+//   [ USelect (env, only when hosts > 1) | host ⧉ │ path ⧉ | CopyButton ]
+// Anatomy (narrow container, wraps to two lines):
+//   [ USelect | host ⧉ ......... CopyButton ]
+//   [ path ⧉ ................................ ]
+// One bordered `bg-elevated` row. The whole-address CopyButton stays on the
+// first line and outside every scroll area, so it is reachable no matter how
+// far the path is scrolled.
 //
-// Narrow-screen degradation is ASYMMETRIC, and deliberately so:
+// Narrow-container degradation is ASYMMETRIC, and deliberately so:
 //   - host is an ENVIRONMENT property. Every endpoint on the site shares it,
 //     and the select to its left already names it ("生产" / "沙箱"), so it is
 //     the most redundant text in the row → it truncates first, keeping a
-//     `min-w-[5ch]` readable floor (never an empty shell).
+//     `min-w-[6ch]` readable floor on the TEXT (never an empty shell).
 //   - path is the OPERATION'S IDENTITY. It is why this page is this page →
-//     `shrink-0`, never truncated.
-//   Only when host has hit its floor and the path still doesn't fit does the
-//   track scroll horizontally. Overflow is then made honest with a right-edge
-//   fade (measured, not decorative — it appears only when actually clipped).
+//     never truncated. Below the `md` container width it gets its own full
+//     line rather than fighting the host for a few characters; only if it
+//     still doesn't fit does the path text itself scroll horizontally, made
+//     honest by a right-edge fade (measured, not decorative — present only
+//     when actually clipped).
 //
 // Sizing follows the component's OWN width, not the viewport: this row lives in
 // the left pane of a user-draggable SplitPane (see DocsShellReference), so
 // viewport breakpoints have no stable relation to the space it actually has.
-// The ladder is pure flex shrink (continuous, no breakpoints, no JS); `@container`
-// is declared on the root for container-relative tweaks.
+// Hence the named container `@container/target` + `@md/target:` variants,
+// matching the `@container/response` convention in <ApiDocsResponseExample>.
 //
 // States:   selected host (v-model, defaults to the first host); per-segment
 //           copy affordance idle/revealed; track clipped/not; copy idle/copied
@@ -143,7 +147,7 @@ const revealOnHover
 </script>
 
 <template>
-  <div class="@container flex flex-wrap items-center gap-1 rounded-md border border-default bg-elevated p-1">
+  <div class="@container/target flex flex-wrap items-center gap-1 rounded-md border border-default bg-elevated p-1">
     <USelect
       v-if="props.hosts.length > 1"
       v-model="selectedId"
@@ -157,8 +161,13 @@ const revealOnHover
     <!-- host segment — the part that gives way. It shrinks and truncates; the
          floor lives on the TEXT (6ch keeps "https…" legible), because on the
          segment the copy button's reserved slot eats the whole budget and the
-         host collapses to "h…" — a floor that guarantees nothing. -->
-    <div class="group flex min-w-0 shrink items-center gap-0.5 rounded-sm px-1 transition-colors hover:bg-accented/50 focus-within:bg-accented/50">
+         host collapses to "h…" — a floor that guarantees nothing.
+         STACKED only: `flex-1` absorbs the leftover space on line 1 so the
+         whole-address button is pushed to the trailing edge instead of being
+         dragged down onto the path's line. Once both halves share one line
+         (`@md/target`) that same growth would strand the button in mid-row, so
+         it reverts to plain shrink-only. -->
+    <div class="group flex min-w-0 flex-1 items-center gap-0.5 rounded-sm px-1 transition-colors @md/target:grow-0 @md/target:basis-auto @md/target:shrink hover:bg-accented/50 focus-within:bg-accented/50">
       <code
         class="min-w-[6ch] truncate font-mono text-sm text-muted"
         :title="baseUrl"
@@ -174,15 +183,29 @@ const revealOnHover
       </span>
     </div>
 
+    <!-- Whole address — the row's primary action, always the row's trailing
+         control and always the last focusable in it, so visual and tab order
+         agree in BOTH layouts. Placed before the path in the DOM because when
+         the path wraps it must stay up on line 1 (pushed right by the host's
+         `flex-1`); on one line `order-last` + `ml-auto` send it back to the
+         true trailing edge instead of stranding it between the two halves.
+         It sits outside every scroll area on purpose, because the task is to
+         GET the address, not read it, so it must never scroll away. -->
+    <CopyButton
+      :value="fullAddress"
+      :toast-label="props.copyToastLabel ?? 'Endpoint'"
+      size="sm"
+      class="shrink-0 @md/target:order-last @md/target:ml-auto"
+    />
+
     <!-- path segment — the operation's identity, so it never truncates.
-         Below a 30rem CONTAINER it takes a line of its own (`order-last` +
-         `basis-full`): squeezing both halves onto one narrow line leaves the
-         host as a useless stub AND pushes the identity out of sight, which is
-         strictly worse than two honest lines. Wrapping also keeps DOM order
-         equal to visual order, so tab order needs no fixing.
-         The hairline (environment-supplied vs operation-owned) only reads as a
-         boundary while the two sit side by side, so it drops when stacked. -->
-    <div class="group flex min-w-0 items-center gap-0.5 rounded-sm border-default pl-1 pr-1 transition-colors @min-[30rem]:border-l @min-[30rem]:pl-2 @max-[30rem]:order-last @max-[30rem]:basis-full hover:bg-accented/50 focus-within:bg-accented/50">
+         MOBILE-FIRST: by default it takes a line of its own (`basis-full`),
+         because squeezing both halves onto one narrow line leaves the host a
+         useless stub AND pushes the identity out of sight — strictly worse
+         than two honest lines. From the `md` CONTAINER width up it rejoins the
+         host on one line, where the hairline (environment-supplied vs
+         operation-owned) finally reads as a real boundary. -->
+    <div class="group flex min-w-0 basis-full items-center gap-0.5 rounded-sm border-default px-1 transition-colors @md/target:basis-auto @md/target:border-l @md/target:pl-2 hover:bg-accented/50 focus-within:bg-accented/50">
       <!-- Only the path TEXT scrolls, never its copy button. Note the two jobs
            must live on different elements: `overflow-x-auto` makes a flex line
            size to max-content, which silently disables `shrink` on its items —
@@ -209,14 +232,6 @@ const revealOnHover
       </span>
     </div>
 
-    <!-- Whole address. `ml-auto` pins it to the trailing edge, and it sits
-         outside every scroll area on purpose: the primary task is to GET the
-         address, not to read it, so this must never scroll away. -->
-    <CopyButton
-      :value="fullAddress"
-      :toast-label="props.copyToastLabel ?? 'Endpoint'"
-      size="sm"
-      class="ml-auto"
-    />
+
   </div>
 </template>
