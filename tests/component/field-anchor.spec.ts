@@ -141,6 +141,10 @@ describe('useFieldAnchor', () => {
     // Scrolls only once the layout has settled, so it must have sampled the
     // scroll extent across multiple frames rather than firing on a fixed delay.
     expect(readScrollHeight.mock.calls.length).toBeGreaterThan(1)
+    // In-page jumps travel smoothly to keep the reader oriented, and must not
+    // re-settle afterwards: a second call would retarget the in-flight scroll.
+    expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+    expect(target.scrollIntoView).toHaveBeenCalledTimes(2)
     second.finish()
     wrapper.unmount()
   })
@@ -162,6 +166,7 @@ describe('useFieldAnchor', () => {
     const second = fakeAnimation()
     const firstAnimate = vi.fn(() => first.animation)
     const secondAnimate = vi.fn(() => second.animation)
+    const scrollMocks: ReturnType<typeof vi.fn>[] = []
     const makeHost = (animate: () => Animation) => defineComponent({
       setup() {
         const target = shallowRef<HTMLElement>()
@@ -180,6 +185,7 @@ describe('useFieldAnchor', () => {
             toJSON: () => ({}),
           }))
           el.scrollIntoView = vi.fn()
+          scrollMocks.push(el.scrollIntoView as ReturnType<typeof vi.fn>)
           Object.defineProperty(el, 'animate', { configurable: true, value: animate })
           anchor.initFromHash()
         })
@@ -194,6 +200,11 @@ describe('useFieldAnchor', () => {
     expect(firstAnimate).toHaveBeenCalledOnce()
     expect(first.cancel).toHaveBeenCalledOnce()
     expect(history.scrollRestoration).toBe('manual')
+    // An initial hash arrival must land instantly: animating it would drift the
+    // page down from the top, the symptom the manual restoration claim prevents.
+    // Instant mode also keeps the next-frame re-settle pass for late reflow.
+    expect(scrollMocks[0]).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
+    await vi.waitFor(() => expect(scrollMocks[0]).toHaveBeenCalledTimes(2))
 
     oldRoute.unmount()
     expect(second.cancel).not.toHaveBeenCalled()

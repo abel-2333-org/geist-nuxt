@@ -126,7 +126,10 @@ export function useFieldAnchor() {
    * briefly share an id; `findElement` deliberately selects the incoming,
    * later-in-document match.
    */
-  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
+  async function goTo(
+    path: string,
+    opts: { updateHash?: boolean, focus?: boolean, smooth?: boolean } = {},
+  ) {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
@@ -153,16 +156,30 @@ export function useFieldAnchor() {
     await waitForElementStable(el)
     if (token !== navigationToken) return
 
-    el.scrollIntoView({ block: 'start' })
+    // Smooth travel keeps the reader oriented for IN-PAGE jumps (annotation and
+    // composition links, later hash changes): seeing the page move explains
+    // where the target sits relative to where they were. It is opt-out because
+    // an initial hash arrival must NOT animate — see initFromHash.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const smooth = opts.smooth !== false && !reduced
+    el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
     // Content above the target (images, code blocks) can still reflow after the
     // first scroll, nudging the row off its scroll-margin anchor. Re-run the
     // scroll on the next frame so we settle on the final, correct position.
     // Re-check inside the callback: a newer navigation (or unmount) can happen
     // before this frame fires, and a stale target must not drag scroll back.
-    requestAnimationFrame(() => {
-      if (token !== navigationToken || !el.isConnected) return
-      el.scrollIntoView({ block: 'start' })
-    })
+    //
+    // Instant only. A second scrollIntoView one frame into a smooth scroll
+    // RETARGETS the in-flight animation rather than correcting it, and the
+    // browser is still traveling for hundreds of ms afterwards anyway, so the
+    // re-settle cannot do its job there. Smooth relies on waitForElementStable
+    // having already settled layout before we ever started moving.
+    if (!smooth) {
+      requestAnimationFrame(() => {
+        if (token !== navigationToken || !el.isConnected) return
+        el.scrollIntoView({ block: 'start' })
+      })
+    }
     // Optionally move keyboard focus to the row (deep links, annotation jumps)
     // so Tab continues from the target instead of wherever the journey began.
     // `preventScroll` keeps the settled scroll position authoritative.
@@ -170,14 +187,14 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Arrival cue: the row BREATHES — a primary ring plus a faint wash fade in,
-    // out, in, and out again in one continuous pass. A slow alternation (rather
-    // than a fast blink) draws the eye to a row that may already be on screen
-    // without strobing. This is a SINGLE keyframe sequence, so the alternation
-    // comes from the off/on/off/on/off offsets themselves; there is no
-    // `iterations` replay and therefore no hard jump at an iteration boundary.
-    // `ease-in-out` makes every rise and fall symmetric, and both ends rest on
-    // the transparent frame so the cue arrives and departs softly.
+    // Arrival cue: the row BREATHES three times — a primary ring plus a faint
+    // wash fade in and out, repeated, in one continuous pass. A slow alternation
+    // (rather than a fast blink) draws the eye to a row that may already be on
+    // screen without strobing. This is a SINGLE keyframe sequence, so the
+    // alternation comes from the alternating off/on offsets themselves; there is
+    // no `iterations` replay and therefore no hard jump at an iteration
+    // boundary. `ease-in-out` makes every rise and fall symmetric, and both ends
+    // rest on the transparent frame so the cue arrives and departs softly.
     //
     // The ring is a `boxShadow`, NOT an outline: outline belongs exclusively to
     // the persistent focus ring. Animating outline here would override that ring
@@ -186,7 +203,6 @@ export function useFieldAnchor() {
     // box-shadow also follows the row's own border-radius, so no inline radius
     // is needed. Runs without `fill`, so every property reverts to its CSS state
     // when the cue ends. Respects reduced-motion.
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
       const on = (offset: number) => ({
         offset,
@@ -198,9 +214,18 @@ export function useFieldAnchor() {
         boxShadow: '0 0 0 1px transparent',
         backgroundColor: 'transparent',
       })
+      // Three breaths of BREATH_MS each. Offsets are derived so the peaks stay
+      // evenly spaced if either constant is retuned: each breath spans one
+      // slice, peaking at its midpoint.
+      const BREATHS = 3
+      const BREATH_MS = 1400
+      const frames = [off(0)]
+      for (let i = 0; i < BREATHS; i++) {
+        frames.push(on((i + 0.5) / BREATHS), off((i + 1) / BREATHS))
+      }
       const animation = el.animate(
-        [off(0), on(0.25), off(0.5), on(0.75), off(1)],
-        { duration: 2600, easing: 'ease-in-out' },
+        frames,
+        { duration: BREATHS * BREATH_MS, easing: 'ease-in-out' },
       )
       highlightAnimation = animation
       highlightOwner = owner
@@ -306,10 +331,20 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
+    // The FIRST application is an arrival, not a journey: the reader landed
+    // directly on this hash (fresh visit or refresh), so there is no "where I
+    // came from" to preserve and nothing to orient them relative to. Animating
+    // it would mean watching the page drift down from the top — the very
+    // symptom the manual scrollRestoration claim exists to prevent — and a
+    // touch or competing native hash scroll during that travel would abort it
+    // mid-way. Later applications are in-page hash changes, where smooth helps.
+    let firstApply = true
     const apply = (path: string) => {
+      const smooth = !firstApply
+      firstApply = false
       if (path) {
         claimScrollRestoration()
-        void goTo(path, { updateHash: false, focus: true })
+        void goTo(path, { updateHash: false, focus: true, smooth })
       }
       else {
         releaseScrollRestoration()
