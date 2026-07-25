@@ -12,41 +12,41 @@ import { useResizeObserver } from '@vueuse/core'
 //
 // Anatomy (wide container, one line):
 //   [ USelect (env, only when hosts > 1) | host │ path ......... CopyButton ]
-// Anatomy (narrow container, wraps to two lines):
-//   [ USelect | host ..................................................... ]
-//   [ path ........................................... CopyButton ]
-// One bordered `bg-elevated` row with EXACTLY ONE copy button, which copies the
-// whole address.
+// Anatomy (narrow container — controls row + address card):
+//   [ USelect ............................................................ ]
+//   ────────────────────────────────────────────────────────────── hairline
+//   [ host ............................................................... ]
+//   [ path .......................................... CopyButton ]
 //
-// Why one and not three: the row previously offered host-only and path-only
-// copy buttons alongside it. The real task on this page is "get the address I
-// can paste into curl" — the segments are ways to READ that address, not
-// separate things people fetch. Three identical, unlabelled icons of equal
-// weight made the row read as three peer choices for one job, and the cost
-// landed hardest exactly where the row is smallest: the segment buttons were
-// hover-revealed, but hover does not exist on touch, so `pointer-coarse` had to
-// show them permanently and mobile got all three at once, the primary one
-// visually indistinguishable from the path's own. Rare segment-level needs are
-// already served without any chrome, because both halves stay real selectable
-// <code> text.
+// Three copy intents, three DIFFERENT affordances — the row does not offer
+// three peer icons:
+//   - host / path: the TEXT itself is the control. Click (or Enter/Space when
+//     focused) copies that segment, so a segment costs no chrome at any width
+//     and works on touch, where hover-revealed icons never existed.
+//   - whole address: the one explicit <CopyButton>, because "paste this into
+//     curl" is the row's primary task and must stay visible and labelled.
+// Segment buttons keep `select-text` and skip the copy when the click ends a
+// real text selection inside them, so drag-selecting a substring still works
+// instead of firing a copy the user did not ask for.
 //
-// The one CopyButton is always the row's LAST element — in the DOM, on screen
-// and for the keyboard alike — and sits outside every scroll area, so it is
-// reachable no matter how far the path is scrolled. The wrap is produced by a
-// full-width breaker span rather than by `order`, precisely so those three
-// orders can never drift apart.
+// The CopyButton is always the row's LAST element — in the DOM, on screen and
+// for the keyboard alike — and sits outside every scroll area, so it is
+// reachable no matter how far the path is scrolled. Wraps come from zero-height
+// full-width breaker spans rather than `order`, precisely so those three orders
+// can never drift apart.
 //
 // Narrow-container degradation is ASYMMETRIC, and deliberately so:
 //   - host is an ENVIRONMENT property. Every endpoint on the site shares it,
-//     and the select to its left already names it ("生产" / "沙箱"), so it is
-//     the most redundant text in the row → it truncates first, keeping a
+//     and the select above it already names it ("生产" / "沙箱"), so it is the
+//     most redundant text in the row → it truncates first, keeping a
 //     `min-w-[6ch]` readable floor on the TEXT (never an empty shell).
 //   - path is the OPERATION'S IDENTITY. It is why this page is this page →
 //     never truncated. Below the `md` container width it gets its own full
-//     line rather than fighting the host for a few characters; only if it
-//     still doesn't fit does the path text itself scroll horizontally, made
-//     honest by a right-edge fade (measured, not decorative — present only
-//     when actually clipped).
+//     line; only if it still doesn't fit does the path text itself scroll
+//     horizontally, made honest by a right-edge fade (measured, not
+//     decorative — present only when actually clipped).
+// The environment select also leaves the address line entirely below `md`, so
+// touch gets one purpose per row instead of three controls fighting for width.
 //
 // Sizing follows the component's OWN width, not the viewport: this row lives in
 // the left pane of a user-draggable SplitPane (see DocsShellReference), so
@@ -55,14 +55,13 @@ import { useResizeObserver } from '@vueuse/core'
 // matching the `@container/response` convention in <ApiDocsResponseExample>.
 //
 // States:   selected host (v-model, defaults to the first host); path track
-//           clipped/not; copy idle/copied is owned by <CopyButton>/useCopy.
-// A11y:     the select carries an aria-label; addresses stay real selectable
-//           <code> text (segments are NOT buttons — that would destroy text
-//           selection, which is what makes segment-level copying possible at
-//           all); the truncated host keeps its full value in `title`, and the
-//           copy value is always the FULL address regardless of truncation or
-//           scroll position, so nothing degrades for keyboard or screen-reader
-//           users.
+//           clipped/not; three independent copied pulses.
+// A11y:     the select carries an aria-label; every copy control is a real
+//           <button> with a dynamic accessible name (idle/copied) and the
+//           system `focus-visible` ring; segment results are announced through
+//           ONE shared polite live region (the CopyButton owns its own); the
+//           truncated host keeps its full value in `title`, and every copy
+//           value is the untruncated data regardless of scroll position.
 
 export interface OperationHost {
   id: string
@@ -78,10 +77,18 @@ export interface OperationHost {
  * convention used by <ApiDocsCodeBlock>.
  */
 export interface ApiTargetLabels {
-  /** Accessible name for the copy button, e.g. "复制完整地址". */
+  /** Accessible name for the whole-address copy button, e.g. "复制完整地址". */
   copy?: string
-  /** Accessible name shown right after a successful copy. */
+  /** Accessible name shown right after the whole address is copied. */
   copied?: string
+  /** Accessible name for the host segment, e.g. "复制 host". */
+  copyHost?: string
+  /** Accessible name shown right after the host is copied. */
+  copiedHost?: string
+  /** Accessible name for the path segment, e.g. "复制 path". */
+  copyPath?: string
+  /** Accessible name shown right after the path is copied. */
+  copiedPath?: string
 }
 
 const props = withDefaults(
@@ -94,6 +101,10 @@ const props = withDefaults(
     selectLabel?: string
     /** Toast object name for the whole-address copy, e.g. "Endpoint". */
     copyToastLabel?: string
+    /** Toast object name for the host copy, e.g. "Host". */
+    hostToastLabel?: string
+    /** Toast object name for the path copy, e.g. "Path". */
+    pathToastLabel?: string
     /** Overridable UI copy for localization. See ApiTargetLabels. */
     labels?: ApiTargetLabels
   }>(),
@@ -106,6 +117,10 @@ const selected = defineModel<string>()
 const t = computed<Required<ApiTargetLabels>>(() => ({
   copy: 'Copy endpoint',
   copied: 'Copied',
+  copyHost: 'Copy host',
+  copiedHost: 'Host copied',
+  copyPath: 'Copy path',
+  copiedPath: 'Path copied',
   ...props.labels,
 }))
 
@@ -129,6 +144,45 @@ const baseUrl = computed(() => activeHost.value?.baseUrl ?? '')
 const fullAddress = computed(() => `${baseUrl.value}${props.path}`)
 
 /* ------------------------------------------------------------------ *
+ * Segment copy. Two independent useCopy instances so the two pulses (and
+ * the two toasts) never overwrite each other, but ONE live region: the
+ * announcement describes "what just got copied", which is a single fact.
+ * ------------------------------------------------------------------ */
+const { copied: hostCopied, copy: writeHost } = useCopy()
+const { copied: pathCopied, copy: writePath } = useCopy()
+
+const segmentStatus = computed(() => {
+  if (hostCopied.value) return t.value.copiedHost
+  if (pathCopied.value) return t.value.copiedPath
+  return ''
+})
+
+/**
+ * True when this click merely FINISHED a text selection inside the segment.
+ * `detail === 0` means keyboard activation (Enter/Space), which never carries a
+ * selection intent, so it must not be swallowed.
+ */
+function selecting(event: MouseEvent) {
+  if (event.detail === 0) return false
+  const selection = window.getSelection?.()
+  if (!selection || selection.isCollapsed || !selection.toString().trim()) return false
+  const el = event.currentTarget as HTMLElement | null
+  return el && typeof selection.containsNode === 'function'
+    ? selection.containsNode(el, true)
+    : true
+}
+
+function onCopyHost(event: MouseEvent) {
+  if (selecting(event)) return
+  void writeHost(baseUrl.value, { label: props.hostToastLabel ?? 'Host' })
+}
+
+function onCopyPath(event: MouseEvent) {
+  if (selecting(event)) return
+  void writePath(props.path, { label: props.pathToastLabel ?? 'Path' })
+}
+
+/* ------------------------------------------------------------------ *
  * Overflow probe — drives the right-edge fade only when the path is
  * genuinely clipped. SSR renders `false` (deterministic default) and the
  * measurement refines it after mount, so there is no hydration mismatch.
@@ -143,6 +197,9 @@ function measure() {
 
 useResizeObserver(pathTrack, measure)
 watch([baseUrl, () => props.path], () => void nextTick(measure))
+
+/** Shared look of the two text-as-control segments. */
+const segment = 'cursor-pointer select-text rounded-sm px-1 text-left font-mono text-sm transition-colors hover:bg-accented focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 </script>
 
 <template>
@@ -157,65 +214,68 @@ watch([baseUrl, () => props.path], () => void nextTick(measure))
       class="shrink-0"
     />
 
+    <!-- Controls/address divider — STACKED only. A zero-height, full-width flex
+         item is the only way to force a wrap at an exact point; the hairline is
+         what turns the two halves into "controls row + address card" without a
+         second nested container (which would size to max-content and cancel the
+         shrink ladder below). Nothing to read, hence aria-hidden. -->
+    <span
+      v-if="props.hosts.length > 1"
+      aria-hidden="true"
+      class="w-full border-t border-default @md/target:hidden"
+    />
+
     <!-- host segment — the part that gives way: it shrinks and truncates, with
          a `min-w-[6ch]` floor so it degrades to a legible "https…" rather than
          a useless "h…". Dimmed (`text-muted`) against the path's
-         `text-highlighted`, which is what carries the environment-supplied vs
-         operation-owned distinction now that no per-segment chrome does.
+         `text-highlighted`, carrying the environment-supplied vs
+         operation-owned distinction.
          `flex-initial` (`0 1 auto`) — shrink but never GROW — so the trailing
          button's `ml-auto` keeps the leftover space and stays pinned right.
          Use the `flex` SHORTHAND, not a `grow-0`/`basis-auto` longhand: a
          longhand loses to any `flex-1` on source order and silently does
          nothing, which is exactly how the button once drifted mid-row. -->
-    <code
-      class="min-w-[6ch] flex-initial truncate px-1 font-mono text-sm text-muted"
+    <button
+      type="button"
+      :class="[segment, 'min-w-[6ch] flex-initial truncate text-muted hover:text-default']"
       :title="baseUrl"
-    >{{ baseUrl }}</code>
+      :aria-label="hostCopied ? t.copiedHost : t.copyHost"
+      @click="onCopyHost"
+    ><code>{{ baseUrl }}</code></button>
 
-    <!-- STACKED-only line breaker. A zero-height, full-width flex item is the
-         only way to force a wrap at an exact point, and it is what lets DOM
-         order stay the natural reading order (host → path → copy-all). The
-         obvious alternative — keeping the button before the path and flipping
-         it with `order-last` — is a trap: `order` moves the BOX but never the
-         tab sequence, so it silently desynchronises focus from what is on
-         screen. Ordering the DOM correctly and breaking the LINE instead keeps
-         visual, DOM and tab order identical at every width. -->
+    <!-- STACKED-only line breaker, so DOM order stays the natural reading order
+         (host → path → copy-all). The obvious alternative — keeping the button
+         before the path and flipping it with `order-last` — is a trap: `order`
+         moves the BOX but never the tab sequence, so it silently desynchronises
+         focus from what is on screen. Ordering the DOM correctly and breaking
+         the LINE instead keeps visual, DOM and tab order identical. -->
     <span aria-hidden="true" class="w-full @md/target:hidden" />
 
-    <!-- path segment — the operation's identity, so it never truncates.
-         MOBILE-FIRST it starts its own line (see the breaker above), because
-         squeezing both halves onto one narrow line leaves the host a useless
-         stub AND pushes the identity out of sight — strictly worse than two
-         honest lines. From the `md` CONTAINER width up the breaker is removed
-         from the flow and it rejoins the host on one line, where the hairline
-         (environment-supplied vs operation-owned) finally reads as a real
-         boundary. -->
     <!-- path segment — the operation's identity, so it never truncates. Below
          the `md` container width it takes its own line (see the breaker above);
          only if it STILL doesn't fit does the text scroll horizontally.
-         The shrink ladder and the scroll container may share this one element
+         The shrink ladder and the scroll container share this one element
          (`flex-initial` + `overflow-x-auto` + `min-w-0`): a scroll container's
          automatic minimum size is 0, so it shrinks below max-content instead of
-         pushing the button out of the row. That only broke back when the track
-         was WRAPPED in another flex line holding a segment copy button, because
-         the wrapper then sized to max-content and cancelled the shrink — with
-         the extra button gone, so is the extra element.
+         pushing the copy button out of the row.
          Scrollbar is hidden (this row is ~2rem tall); the measured fade is what
          signals "there is more". -->
-    <div
+    <button
       ref="pathTrack"
-      class="min-w-0 flex-initial overflow-x-auto border-default px-1 [scrollbar-width:none] @md/target:border-l @md/target:pl-2 [&::-webkit-scrollbar]:hidden"
-      :class="clipped
-        ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]'
-        : undefined"
-    >
-      <code class="block whitespace-nowrap font-mono text-sm text-highlighted">{{ props.path }}</code>
-    </div>
+      type="button"
+      :class="[
+        segment,
+        'min-w-0 flex-initial overflow-x-auto border-default text-highlighted [scrollbar-width:none] @md/target:border-l @md/target:pl-2 [&::-webkit-scrollbar]:hidden',
+        clipped ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]' : undefined,
+      ]"
+      :aria-label="pathCopied ? t.copiedPath : t.copyPath"
+      @click="onCopyPath"
+    ><code class="block whitespace-nowrap">{{ props.path }}</code></button>
 
-    <!-- The row's ONE action, hence last: `ml-auto` claims all leftover space so
-         it parks at the trailing edge in both layouts (which is why neither
-         segment may GROW). Being last in the DOM too, it is last for the
-         keyboard as well, with no `order` to desync the two. It also sits
+    <!-- The row's PRIMARY action, hence last: `ml-auto` claims all leftover
+         space so it parks at the trailing edge in both layouts (which is why
+         neither segment may GROW). Being last in the DOM too, it is last for
+         the keyboard as well, with no `order` to desync the two. It also sits
          outside the path's scroll area on purpose, because the task is to GET
          the address, not read it — it must never scroll away.
          The classes live on this wrapper, NOT on <CopyButton>: that component
@@ -232,5 +292,9 @@ watch([baseUrl, () => props.path], () => void nextTick(measure))
         size="sm"
       />
     </span>
+
+    <!-- ONE polite region for both segments: they answer the same question
+         ("what did I just copy?"), and two regions would compete. -->
+    <span role="status" aria-live="polite" class="sr-only">{{ segmentStatus }}</span>
   </div>
 </template>

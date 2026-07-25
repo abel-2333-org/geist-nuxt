@@ -204,7 +204,7 @@ const responseScenarios = [
         ],
       },
       {
-        // 有意空正文（区别于「缺示例」），见组件目录页全形态演示。
+        // 有意空正文（区别于「缺示例」），见组件目录���全形态演示。
         status: 204,
         statusText: 'No Content',
         bodies: [{ id: 'empty', kind: 'empty' as const, note: '异步受理，协议约定不返回正文。' }],
@@ -533,17 +533,24 @@ onMounted(() => anchor.initFromHash())
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               {{ endpoint.description }}
             </p>
-            <!-- 环境联动：host 切换 + 完整地址 + 单个复制键，紧贴头部。选中
-                 host 由本页持有，右栏请求示例从同一 host 派生。 -->
+            <!-- 环境联动：host 切换 + 分段地址（host / path 文本本身即复制控件）
+                 + 复制完整地址，紧贴头部。选中 host 由本页持有，右栏请求示例从
+                 同一 host 派生。 -->
             <ApiDocsOperationTarget
               v-model="selectedHostId"
               :hosts="hosts"
               :path="endpoint.path"
               select-label="选择环境"
               copy-toast-label="接口地址"
+              host-toast-label="环境地址"
+              path-toast-label="接口路径"
               :labels="{
                 copy: '复制完整地址',
                 copied: '已复制',
+                copyHost: '复制环境地址',
+                copiedHost: '环境地址已复制',
+                copyPath: '复制接口路径',
+                copiedPath: '接口路径已复制',
               }"
             />
           </header>
