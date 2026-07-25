@@ -546,7 +546,7 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
           Operation 身份层由
           <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
-          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境切换 + 分段地址 + 分段/整体复制）与
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
           双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
