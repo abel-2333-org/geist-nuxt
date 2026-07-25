@@ -68,6 +68,8 @@ export interface FieldAnchorCopyMessages {
  */
 export type FieldAnchorCopyOptions = FieldAnchorCopyMessages
 
+type NavigationResult = 'landed' | 'missing' | 'aborted'
+
 export function useFieldAnchor() {
   const owner = Symbol('field-anchor')
   const active = useActiveFieldPath()
@@ -127,14 +129,17 @@ export function useFieldAnchor() {
    * briefly share an id; `waitForElement` deliberately selects the incoming,
    * later-in-document match.
    */
-  async function navigate(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
+  async function navigate(
+    path: string,
+    opts: { updateHash?: boolean, focus?: boolean } = {},
+  ): Promise<NavigationResult> {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
       history.replaceState(history.state, '', `#${path}`)
     }
 
-    if (!import.meta.client) return false
+    if (!import.meta.client) return 'aborted'
     const token = ++navigationToken
     navigationOwner = owner
     stopHighlight()
@@ -145,14 +150,15 @@ export function useFieldAnchor() {
     // a bounded window instead of failing on the first miss; the token drops
     // this positioning if a newer navigation started meanwhile.
     const el = await waitForElement(path, token)
-    if (!el || token !== navigationToken) return false
+    if (token !== navigationToken) return 'aborted'
+    if (!el) return 'missing'
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
     // may also try a native scroll to the hash. Both shift layout, so scrolling
     // on a fixed delay is racy. Wait until the target position and the page's
     // scroll extent are both stable, then do a single scroll + flash.
     await waitForElementStable(el)
-    if (token !== navigationToken) return false
+    if (token !== navigationToken) return 'aborted'
 
     // Instant, deliberately. Smooth travel was tried and rejected: it cannot be
     // applied consistently, because native `<a href="#…">` anchors bypass JS and
@@ -228,7 +234,7 @@ export function useFieldAnchor() {
       animation.addEventListener('finish', clear, { once: true })
       animation.addEventListener('cancel', clear, { once: true })
     }
-    return true
+    return 'landed'
   }
 
   async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
@@ -328,11 +334,12 @@ export function useFieldAnchor() {
       const run = ++hashNavigation
       if (path) {
         claimScrollRestoration()
-        const landed = await navigate(path, { updateHash: false, focus: true })
+        const result = await navigate(path, { updateHash: false, focus: true })
         // A missing/stale fragment must not leave browser restoration disabled.
-        // The generation guard prevents an older miss from releasing the claim
-        // now owned by a newer hash navigation in the same scope.
-        if (!landed && run === hashNavigation) releaseScrollRestoration()
+        // An aborted navigation is different: its successor still needs the
+        // existing claim. The generation guard prevents an older confirmed miss
+        // from releasing a claim now owned by a newer hash navigation.
+        if (result === 'missing' && run === hashNavigation) releaseScrollRestoration()
       }
       else {
         releaseScrollRestoration()

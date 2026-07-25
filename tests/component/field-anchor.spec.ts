@@ -104,6 +104,65 @@ describe('useFieldAnchor', () => {
     wrapper.unmount()
   })
 
+  it('keeps manual restoration when a hash navigation is superseded', async () => {
+    Object.defineProperty(history, 'scrollRestoration', {
+      configurable: true,
+      writable: true,
+      value: 'auto',
+    })
+    history.replaceState(history.state, '', '/#missing')
+    const frames: FrameRequestCallback[] = []
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback)
+      return frames.length
+    }))
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })))
+
+    let goTo!: ReturnType<typeof useFieldAnchor>['goTo']
+    const Host = defineComponent({
+      setup() {
+        const anchor = useFieldAnchor()
+        goTo = anchor.goTo
+        onMounted(() => anchor.initFromHash())
+      },
+      template: '<div id="amount">Amount</div>',
+    })
+    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+    const target = wrapper.find('#amount').element as HTMLElement
+    target.getBoundingClientRect = vi.fn(() => ({
+      bottom: 120,
+      height: 20,
+      left: 0,
+      right: 100,
+      top: 100,
+      width: 100,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    }))
+    target.scrollIntoView = vi.fn()
+
+    expect(history.scrollRestoration).toBe('manual')
+    const direct = goTo('amount', { updateHash: false })
+    await vi.waitFor(() => expect(frames.length).toBeGreaterThan(0))
+
+    // Resolve the stale hash poll after the direct navigation owns the token.
+    // That is an abort, not proof that the hash target is missing.
+    frames.shift()!(0)
+    await Promise.resolve()
+    expect(history.scrollRestoration).toBe('manual')
+
+    while (frames.length) {
+      frames.shift()!(0)
+      await Promise.resolve()
+    }
+    await direct
+    expect(history.scrollRestoration).toBe('manual')
+
+    wrapper.unmount()
+    expect(history.scrollRestoration).toBe('auto')
+  })
+
   it('cancels the previous cue and never animates the focus outline', async () => {
     const heights = [100, 100, 200, 200, 200, 200, 200, 200]
     const readScrollHeight = vi
@@ -159,29 +218,19 @@ describe('useFieldAnchor', () => {
     expect(frames.length).toBeGreaterThan(2)
     expect(JSON.stringify(frames[0])).toMatch(/transparent/)
     expect(JSON.stringify(frames.at(-1))).toMatch(/transparent/)
-    // Assert the breathing CONTRACT, not the tuning: peaks stay evenly spaced
-    // and every breath keeps a constant length however BREATHS / BREATH_MS are
-    // retuned. Pinning `duration` to a literal would fail a legitimate design
-    // retune (verified: 3 → 4 breaths reports 5600 ≠ 4200) while proving nothing
-    // about how the cue actually reads.
-    expect(options.easing).toBe('ease-in-out')
     // Discriminate on boxShadow, not the whole frame: a lit frame's background
     // is a `color-mix(… , transparent)`, so matching "transparent" anywhere
     // would count every frame as unlit.
     const peaks = frames
       .filter((frame: Keyframe) => !/transparent/.test(String(frame.boxShadow)))
       .map((frame: Keyframe) => frame.offset as number)
-    expect(peaks.length).toBeGreaterThanOrEqual(2)
-    // Each peak sits at the MIDPOINT of its own breath, which is what makes the
-    // rise and fall symmetric. Deriving the expectation from the peak count keeps
-    // this true for any breath count, while still catching an off-centre peak
-    // (equal spacing alone would not: shifting every peak equally keeps the gaps
-    // equal but makes each breath rise faster than it falls).
+    expect(peaks).toHaveLength(3)
+    // Each of the three peaks sits at its breath's midpoint, keeping every rise
+    // and fall symmetric while still catching an off-centre peak.
     peaks.forEach((offset, i) => {
       expect(offset).toBeCloseTo((i + 0.5) / peaks.length, 5)
     })
-    // duration = breaths × a constant per-breath length.
-    expect(options.duration % peaks.length).toBe(0)
+    expect(options).toMatchObject({ duration: 4200, easing: 'ease-in-out' })
     // The height changes from 100 → 200, then the algorithm observes five
     // identical 200 samples: one baseline plus four consecutive stable frames.
     const observedHeights = readScrollHeight.mock.results.map(result => result.value)
