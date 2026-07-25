@@ -255,12 +255,25 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 - 字段深链接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮。
 - **滚动一律瞬时**，并在次帧 re-settle 以纠正迟到 reflow。平滑滚动**评估后否决**：唯一能覆盖原生 `<a href="#…">`（绕过 JS）的手段是全局 CSS `html { scroll-behavior: smooth }`，但实测根滚动器上的它会**盖掉脚本显式传的 `behavior: 'auto'`**，使所有"到达"都无法退出动画——换页回顶变成缓慢爬回、后退恢复位置漂移、初始 hash 深链从顶部下移（正是本 kit 的 manual restoration 要消除的移动端刷新抖动）。故不引入，保持脚本路径与原生锚点手感一致。
-- **滚动权归属**：`initFromHash()` 检测到 URL 带 hash 时会**接管 `history.scrollRestoration`**（置为 `manual`），因为浏览器在刷新时会异步反复恢复刷新前的旧偏移，在慢加载下会发生在展开+滚动之后、把页面拽回顶部。接管是**引用计数**的：多个 anchor scope（如 page transition 期间新旧路由并存）共享同一份 claim，仅当最后一个 claim 释放时才把原值还原，因此单个 scope 卸载不会误还原。无 hash 时不接管，普通刷新仍走浏览器原生位置恢复。kit 不改写 router 配置；可选的 `router.options.ts` hash 调整只是额外消除一次冷加载闪动。
-- 字段锚点必须是可查询、稳定且无歧义的 DOM id：**行的 `id` 直接采用 display model 的 `path` 原文，kit 不做 slugify**——`path` 的稳定与无歧义由数据作者 / adapter 保证（它本身即用稳定分隔符连接的层级标识）。跳转经 `getElementById(path)` 精确匹配、不走 CSS selector 解析，故 `path` 无需为 selector 转义；`#path` 往返只做百分号编解码（`urlFor` 拼 `#path`、`initFromHash` 用 `decodeURIComponent` 还原）。字段展示名（`name`）只用于展示，不拼进 id 或 selector。
+- **滚动权归属**：`initFromHash()` 检测到 URL 带 hash 时会**接管 `history.scrollRestoration`**（置为 `manual`），因为浏览器在刷新时会异步反复恢复刷新前的旧偏移，在慢加载下会发生在展开+滚动之后、把页面拽回顶部。接管是**引用计数**的：多个 anchor scope（如 page transition 期间新旧路由并存）共享同一份 claim，仅当最后一个 claim 释放时才把原值还原，因此单个 scope 卸载不会误还原；若目标在等待窗口内始终未挂载，当前 hash navigation 会主动释放自己的 claim，stale / malformed fragment 不会让页面余下生命周期一直停在 `manual`。无 hash 时不接管，普通刷新仍走浏览器原生位置恢复。kit 不改写 router 配置；可选的 `router.options.ts` hash 调整只是额外消除一次冷加载闪动。
+- 字段锚点必须是可查询、稳定且无歧义的 DOM id：**行的 `id` 直接采用 display model 的 `path` 原文，kit 不做 slugify**——`path` 的稳定与无歧义由数据作者 / adapter 保证（它本身即用稳定分隔符连接的层级标识）。page transition 期间新旧字段树可能短暂存在重复 id，跳转因此使用 `querySelectorAll(#${CSS.escape(path)})` 并选择文档中最后一个（incoming）匹配；`path` 会先经 `CSS.escape`，无需数据作者自行处理 selector 转义。`#path` 往返只做百分号编解码（`urlFor` 拼 `#path`、`initFromHash` 用 `decodeURIComponent` 还原）。字段展示名（`name`）只用于展示，不拼进 id 或 selector。
 - **`copyLink` 只写剪贴板，从不导航**：不滚动、不写 hash、不改 active 行，避免"取个链接却被带走"。复制到的 URL 仍含 `#path`，粘贴照常深链。复制与跳转是两个独立意图，没有 `navigate` 开关；确需"跳过去并复制"的调用方自行组合 `goTo()` + `copyLink()`。
 - 复制反馈复用 foundation `useCopy()` 与应用级 toast live region；不要为字段表的每一行再创建 `role="status"`。纯图标锚点按钮的默认 `aria-label` 随状态变化且包含字段名，保证 screen-reader 的按钮列表可辨别目标。`copyLink` / `copiedLink` 可用函数按字段名生成完整标签；兼容字符串继续按完整标签原样使用。
 - 本地化复制提示时传入完整成功/失败消息，不在 foundation 与 kit 之间拼接半句；`FieldItemLabels.linkCopied` / `linkCopyFailed` 都接收字段名并返回完整句子。
 - **nested chrome 本地化走同一个 `labels` 对象，不 fork 组件**：`FieldItemLabels` 除自身 chrome 键外还有一组**透传键**——`lifecycle`（按 status 覆盖徽章文案的映射）、`enumLabel` / `enumFilter` / `enumEmpty` / `enumVariant`（内部 EnumTable 的标题 / 筛选 placeholder / 空态 / 未命名 variant 兜底函数），以及 `composition`（字段级 SchemaComposition 的 kind / hint / discriminator / 空态文案）。透传键在 FieldItem **不设默认值**：省略时保持 `undefined`，由子组件自己的英文默认接管，英文默认字符串只存在一处、不会漂移；递归子行经同一 `labels` 对象获得同一套文案。操作级同理：`OperationHeader.lifecycle-label` 与 `LifecycleNotice.title` 覆盖对应徽章 / 横幅文案，二者共用 `EndpointLifecycle` 词表（含 beta）。
+
+#### 迁移：`copyLink` 拆分复制与导航（breaking change）
+
+早期切片的 `copyLink(path, successMessage)` 会先更新 active/hash 并滚动，再复制链接；新契约把复制与导航拆成两个明确意图，并删除 positional message 签名。升级 copy-in 切片时改用 options object：
+
+```ts
+await copyLink(path, {
+  successMessage: 'Link copied',
+  failureMessage: 'Copy unavailable',
+})
+```
+
+需要原来的组合行为时显式调用 `await goTo(path)` 后再 `await copyLink(path, options)`。旧的 `copyLink(path, 'Link copied')` 会在 typecheck 阶段报错，避免升级后静默改变运行时行为。
 
 ### FieldAnnotation 的字段引用约束
 

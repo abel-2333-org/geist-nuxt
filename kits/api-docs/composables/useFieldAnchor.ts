@@ -81,10 +81,11 @@ export function useFieldAnchor() {
   onScopeDispose(() => {
     // Only the restoration claim is tied to initFromHash — that is the sole
     // path that claims it. Ownership and the highlight, however, are created by
-    // `goTo` alone, so consumers that never call initFromHash (FieldAnnotation,
-    // SchemaComposition) still need their in-flight navigation invalidated and
-    // their cue cancelled here; gating this cleanup on `hashInitialized` would
-    // leak a stale token and leave an animation running past unmount.
+    // navigation alone, so consumers that never call initFromHash
+    // (FieldAnnotation, SchemaComposition) still need their in-flight
+    // navigation invalidated and their cue cancelled here; gating this cleanup
+    // on hash initialization would leak a stale token and leave an animation
+    // running past unmount.
     releaseScrollRestoration()
     if (navigationOwner === owner) {
       navigationOwner = undefined
@@ -123,17 +124,17 @@ export function useFieldAnchor() {
    * Focus a field: mark it active (which expands ancestors reactively), then
    * wait a tick + the collapsible open transition before scrolling and
    * flashing it. During a page transition, outgoing and incoming trees can
-   * briefly share an id; `findElement` deliberately selects the incoming,
+   * briefly share an id; `waitForElement` deliberately selects the incoming,
    * later-in-document match.
    */
-  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
+  async function navigate(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
       history.replaceState(history.state, '', `#${path}`)
     }
 
-    if (!import.meta.client) return
+    if (!import.meta.client) return false
     const token = ++navigationToken
     navigationOwner = owner
     stopHighlight()
@@ -144,14 +145,14 @@ export function useFieldAnchor() {
     // a bounded window instead of failing on the first miss; the token drops
     // this positioning if a newer navigation started meanwhile.
     const el = await waitForElement(path, token)
-    if (!el || token !== navigationToken) return
+    if (!el || token !== navigationToken) return false
 
     // Ancestor collapsibles animate open after `active` changes, and the browser
     // may also try a native scroll to the hash. Both shift layout, so scrolling
     // on a fixed delay is racy. Wait until the target position and the page's
     // scroll extent are both stable, then do a single scroll + flash.
     await waitForElementStable(el)
-    if (token !== navigationToken) return
+    if (token !== navigationToken) return false
 
     // Instant, deliberately. Smooth travel was tried and rejected: it cannot be
     // applied consistently, because native `<a href="#…">` anchors bypass JS and
@@ -227,6 +228,11 @@ export function useFieldAnchor() {
       animation.addEventListener('finish', clear, { once: true })
       animation.addEventListener('cancel', clear, { once: true })
     }
+    return true
+  }
+
+  async function goTo(path: string, opts: { updateHash?: boolean, focus?: boolean } = {}) {
+    await navigate(path, opts)
   }
 
   /**
@@ -284,16 +290,12 @@ export function useFieldAnchor() {
    * navigate: it leaves scroll position, the URL hash and the active row
    * untouched, so grabbing a link to share never yanks the reader somewhere
    * else. The copied URL still carries `#path`, so pasting it deep-links as
-   * expected. Complete success/failure messages remain caller-owned, and the
-   * legacy success-message string is still accepted.
+   * expected. Complete success/failure messages remain caller-owned.
    */
   async function copyLink(
     path: string,
-    optionsOrSuccess: FieldAnchorCopyOptions | string = {},
+    options: FieldAnchorCopyOptions = {},
   ) {
-    const options: FieldAnchorCopyOptions = typeof optionsOrSuccess === 'string'
-      ? { successMessage: optionsOrSuccess }
-      : optionsOrSuccess
     try {
       await copy(urlFor(path), {
         label: 'Link',
@@ -321,10 +323,16 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
-    const apply = (path: string) => {
+    let hashNavigation = 0
+    const apply = async (path: string) => {
+      const run = ++hashNavigation
       if (path) {
         claimScrollRestoration()
-        void goTo(path, { updateHash: false, focus: true })
+        const landed = await navigate(path, { updateHash: false, focus: true })
+        // A missing/stale fragment must not leave browser restoration disabled.
+        // The generation guard prevents an older miss from releasing the claim
+        // now owned by a newer hash navigation in the same scope.
+        if (!landed && run === hashNavigation) releaseScrollRestoration()
       }
       else {
         releaseScrollRestoration()
@@ -338,18 +346,18 @@ export function useFieldAnchor() {
     }
     const rawPath = location.hash.replace(/^#/, '')
     try {
-      apply(decodeURIComponent(rawPath))
+      void apply(decodeURIComponent(rawPath))
     }
     catch {
       // A malformed raw escape must not abort anchor initialization. Leaving
       // it encoded simply means no field row matches the invalid fragment.
-      apply(rawPath)
+      void apply(rawPath)
     }
     const route = useRoute()
     watch(() => route.fullPath, () => {
       // Vue Router exposes a normalized, already-decoded hash. Decoding it a
       // second time would throw for valid literal-percent paths such as `%`.
-      apply(route.hash.replace(/^#/, ''))
+      void apply(route.hash.replace(/^#/, ''))
     })
   }
 

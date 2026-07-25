@@ -27,32 +27,25 @@ afterEach(() => {
 })
 
 describe('useFieldAnchor', () => {
-  it('never navigates on copy, including via the legacy string signature', async () => {
+  it('never navigates when copying a field link', async () => {
     vi.stubGlobal('requestAnimationFrame', vi.fn(() => 0))
     const Host = defineComponent({
       setup() {
         const anchor = useFieldAnchor()
         return {
           active: anchor.active,
-          copyLegacy: () => { void anchor.copyLink('legacy', 'Legacy link copied') },
           copyOptions: () => { void anchor.copyLink('pure', { successMessage: 'Copied' }) },
         }
       },
       template: `
         <button data-testid="copy-options" @click="copyOptions">Copy options</button>
-        <button data-testid="copy-legacy" @click="copyLegacy">Copy legacy</button>
       `,
     })
     const wrapper = await mountSuspended(Host)
 
     // Copy is clipboard-only: no hash write and no active-row change, so the
-    // reader is never yanked away. The legacy string signature (a success
-    // message, not an options object) must behave identically.
+    // reader is never yanked away.
     await wrapper.find('[data-testid="copy-options"]').trigger('click')
-    expect(location.hash).toBe('')
-    expect(wrapper.vm.active).toBe('')
-
-    await wrapper.find('[data-testid="copy-legacy"]').trigger('click')
     expect(location.hash).toBe('')
     expect(wrapper.vm.active).toBe('')
     wrapper.unmount()
@@ -79,6 +72,36 @@ describe('useFieldAnchor', () => {
     expect(history.scrollRestoration).toBe('manual')
     wrapper.unmount()
     expect(history.scrollRestoration).toBe('auto')
+  })
+
+  it('restores native scroll restoration when the hash target never mounts', async () => {
+    Object.defineProperty(history, 'scrollRestoration', {
+      configurable: true,
+      writable: true,
+      value: 'auto',
+    })
+    history.replaceState(history.state, '', '/#missing')
+    let now = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => {
+      now += 1001
+      return now
+    })
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      callback(0)
+      return 1
+    }))
+
+    const Host = defineComponent({
+      setup() {
+        const anchor = useFieldAnchor()
+        onMounted(() => anchor.initFromHash())
+      },
+      template: '<div>No matching field</div>',
+    })
+    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+
+    await vi.waitFor(() => expect(history.scrollRestoration).toBe('auto'))
+    wrapper.unmount()
   })
 
   it('cancels the previous cue and never animates the focus outline', async () => {
@@ -129,18 +152,19 @@ describe('useFieldAnchor', () => {
     const [frames, options] = animate.mock.calls[0]!
     // Outline belongs to the persistent focus ring, so the cue must never
     // animate it (a cue passing through transparent would blink a keyboard
-    // user's focus indicator out). Assert that contract, not a specific tuning:
-    // duration/easing are design values the system is free to retune.
+    // user's focus indicator out).
     expect(JSON.stringify(frames)).not.toMatch(/outline|borderRadius/)
     // It breathes: the cue alternates off → on → … → off within one pass rather
     // than ending lit, so both ends must rest transparent.
     expect(frames.length).toBeGreaterThan(2)
     expect(JSON.stringify(frames[0])).toMatch(/transparent/)
     expect(JSON.stringify(frames.at(-1))).toMatch(/transparent/)
-    expect(options.easing).toBe('ease-in-out')
-    // Scrolls only once the layout has settled, so it must have sampled the
-    // scroll extent across multiple frames rather than firing on a fixed delay.
-    expect(readScrollHeight.mock.calls.length).toBeGreaterThan(1)
+    expect(options).toMatchObject({ duration: 4200, easing: 'ease-in-out' })
+    // The height changes from 100 → 200, then the algorithm observes five
+    // identical 200 samples: one baseline plus four consecutive stable frames.
+    const observedHeights = readScrollHeight.mock.results.map(result => result.value)
+    expect(observedHeights).toContain(100)
+    expect(observedHeights.slice(-5)).toEqual([200, 200, 200, 200, 200])
     // Instant — no `behavior` is requested, so smooth is never opted into. The
     // re-settle pass is asserted in the deep-link test below.
     expect(target.scrollIntoView).toHaveBeenCalledWith({ block: 'start' })
