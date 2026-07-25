@@ -18,6 +18,12 @@ import type { RouterConfig } from '@nuxt/schema'
 //   wait for the destination page to finish rendering first; the second
 //   scrollIntoView on the next frame re-settles after late reflow (images,
 //   code blocks above the target), mirroring useFieldAnchor.goTo.
+//
+// Smooth vs instant mirrors useFieldAnchor: a same-page hash change is a
+// JOURNEY (travel smoothly, so the reader sees where the target sits relative
+// to where they were), while every arrival — cross-page hash, page change,
+// restored history position — is INSTANT. Smooth is opted into per journey
+// rather than set globally in CSS; foundation main.css records why.
 export default <RouterConfig>{
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
@@ -60,6 +66,8 @@ export default <RouterConfig>{
         })
       })
     }
+    // Arrivals, not journeys — and instant by default, since there is no global
+    // CSS smooth rule to opt out of (see the note in foundation main.css).
     if (savedPosition) return savedPosition
     return { top: 0 }
   },

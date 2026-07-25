@@ -285,6 +285,24 @@ body {
 }
 
 /*
+ * NOTE — deliberately NO global `html { scroll-behavior: smooth }`.
+ *
+ * It would be the only way to animate native `<a href="#…">` jumps (they bypass
+ * JS, so script cannot reach them), but it cannot be scoped safely: a CSS
+ * `scroll-behavior: smooth` on the root scroller OVERRIDES a script's explicit
+ * `behavior: 'auto'` (verified in-browser: window.scrollTo({behavior:'auto'})
+ * still animated). Arrivals could therefore no longer opt out, and every one of
+ * them would animate — page-change scroll-to-top would crawl back up through
+ * outgoing content, restored history positions would drift instead of being
+ * where the reader left off, and an initial hash deep link would slide down
+ * from the top, which is the exact mobile-refresh jank useFieldAnchor's manual
+ * scrollRestoration claim exists to prevent.
+ *
+ * Smooth travel is therefore opted INTO per script-driven journey instead — see
+ * useFieldAnchor.goTo and router.options.ts.
+ */
+
+/*
  * Accessibility — honor prefers-reduced-motion (Geist: drop nonessential
  * motion). Collapses animations/transitions to near-instant for users who
  * request reduced motion, without removing focus/state feedback.

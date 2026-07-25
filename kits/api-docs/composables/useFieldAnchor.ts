@@ -169,15 +169,15 @@ export function useFieldAnchor() {
     // Re-check inside the callback: a newer navigation (or unmount) can happen
     // before this frame fires, and a stale target must not drag scroll back.
     //
-    // Instant only. A second scrollIntoView one frame into a smooth scroll
+    // Instant mode only. A second scrollIntoView one frame into a smooth scroll
     // RETARGETS the in-flight animation rather than correcting it, and the
     // browser is still traveling for hundreds of ms afterwards anyway, so the
-    // re-settle cannot do its job there. Smooth relies on waitForElementStable
-    // having already settled layout before we ever started moving.
+    // re-settle cannot do its job there. Smooth instead relies on
+    // waitForElementStable having settled layout before we ever started moving.
     if (!smooth) {
       requestAnimationFrame(() => {
         if (token !== navigationToken || !el.isConnected) return
-        el.scrollIntoView({ block: 'start' })
+        el.scrollIntoView({ behavior: 'auto', block: 'start' })
       })
     }
     // Optionally move keyboard focus to the row (deep links, annotation jumps)
