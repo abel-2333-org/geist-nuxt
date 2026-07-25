@@ -114,7 +114,6 @@ function onCopyLink() {
   // required, etc.) — no half-sentence concatenation inside the composable.
   if (props.path) {
     void anchor.copyLink(props.path, {
-      navigate: false,
       successMessage: t.value.linkCopied(props.name),
       failureMessage: t.value.linkCopyFailed(props.name),
     })

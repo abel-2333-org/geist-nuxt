@@ -38,7 +38,13 @@ let navigationToken = 0
 let navigationOwner: symbol | undefined
 let highlightAnimation: Animation | undefined
 let highlightOwner: symbol | undefined
-let scrollRestorationOwner: symbol | undefined
+// Reference-counted, because two anchor scopes can legitimately overlap during
+// a page transition: the outgoing route is still mounted while the incoming one
+// already claimed manual restoration. A single-owner flag would let whichever
+// scope disposes FIRST hand control back to the browser, and the still-live
+// deep link would then be yanked to the restored offset. Native restoration is
+// only handed back once the last claimant is gone.
+const scrollRestorationClaims = new Set<symbol>()
 let previousScrollRestoration: ScrollRestoration | undefined
 
 function stopHighlight(owner?: symbol) {
@@ -54,10 +60,13 @@ export interface FieldAnchorCopyMessages {
   failureMessage?: string
 }
 
-export interface FieldAnchorCopyOptions extends FieldAnchorCopyMessages {
-  /** Preserve the legacy navigate-on-copy behavior unless a caller opts out. */
-  navigate?: boolean
-}
+/**
+ * Copying a link only ever touches the clipboard, so the only options are the
+ * caller-owned toast messages. There is deliberately no `navigate` escape
+ * hatch: copy and navigate are separate intents, and a caller that wants both
+ * composes `goTo()` with `copyLink()` explicitly.
+ */
+export type FieldAnchorCopyOptions = FieldAnchorCopyMessages
 
 export function useFieldAnchor() {
   const owner = Symbol('field-anchor')
@@ -68,10 +77,14 @@ export function useFieldAnchor() {
   // useFieldAnchor() call owns its own useCopy instance, so this state is
   // naturally scoped to the row that triggered the copy.
   const { copy, copied } = useCopy()
-  let hashInitialized = false
 
   onScopeDispose(() => {
-    if (!hashInitialized) return
+    // Only the restoration claim is tied to initFromHash — that is the sole
+    // path that claims it. Ownership and the highlight, however, are created by
+    // `goTo` alone, so consumers that never call initFromHash (FieldAnnotation,
+    // SchemaComposition) still need their in-flight navigation invalidated and
+    // their cue cancelled here; gating this cleanup on `hashInitialized` would
+    // leak a stale token and leave an animation running past unmount.
     releaseScrollRestoration()
     if (navigationOwner === owner) {
       navigationOwner = undefined
@@ -82,19 +95,21 @@ export function useFieldAnchor() {
 
   function claimScrollRestoration() {
     if (!('scrollRestoration' in history)) return
-    if (!scrollRestorationOwner) {
+    if (scrollRestorationClaims.size === 0) {
       previousScrollRestoration = history.scrollRestoration
       history.scrollRestoration = 'manual'
     }
-    scrollRestorationOwner = owner
+    scrollRestorationClaims.add(owner)
   }
 
   function releaseScrollRestoration() {
-    if (scrollRestorationOwner !== owner) return
+    // `delete` returning false means this scope never claimed, so it must not
+    // release on someone else's behalf.
+    if (!scrollRestorationClaims.delete(owner)) return
+    if (scrollRestorationClaims.size > 0) return
     if (history.scrollRestoration === 'manual' && previousScrollRestoration) {
       history.scrollRestoration = previousScrollRestoration
     }
-    scrollRestorationOwner = undefined
     previousScrollRestoration = undefined
   }
 
@@ -155,16 +170,37 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Brief arrival cue. Keep outline exclusively for the persistent focus ring;
-    // the transient cue only fades a token-based background.
+    // Arrival cue: the row BREATHES — a primary ring plus a faint wash fade in,
+    // out, in, and out again in one continuous pass. A slow alternation (rather
+    // than a fast blink) draws the eye to a row that may already be on screen
+    // without strobing. This is a SINGLE keyframe sequence, so the alternation
+    // comes from the off/on/off/on/off offsets themselves; there is no
+    // `iterations` replay and therefore no hard jump at an iteration boundary.
+    // `ease-in-out` makes every rise and fall symmetric, and both ends rest on
+    // the transparent frame so the cue arrives and departs softly.
+    //
+    // The ring is a `boxShadow`, NOT an outline: outline belongs exclusively to
+    // the persistent focus ring. Animating outline here would override that ring
+    // for the whole cue and, because the cue passes through transparent, would
+    // make a keyboard user's focus indicator blink out entirely (WCAG 2.4.7).
+    // box-shadow also follows the row's own border-radius, so no inline radius
+    // is needed. Runs without `fill`, so every property reverts to its CSS state
+    // when the cue ends. Respects reduced-motion.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!reduced && typeof el.animate === 'function') {
+      const on = (offset: number) => ({
+        offset,
+        boxShadow: '0 0 0 1px var(--ui-primary)',
+        backgroundColor: 'color-mix(in oklch, var(--ui-primary) 10%, transparent)',
+      })
+      const off = (offset: number) => ({
+        offset,
+        boxShadow: '0 0 0 1px transparent',
+        backgroundColor: 'transparent',
+      })
       const animation = el.animate(
-        [
-          { backgroundColor: 'color-mix(in oklch, var(--ui-primary) 12%, transparent)' },
-          { backgroundColor: 'transparent' },
-        ],
-        { duration: 300, easing: 'ease-out' },
+        [off(0), on(0.25), off(0.5), on(0.75), off(1)],
+        { duration: 2600, easing: 'ease-in-out' },
       )
       highlightAnimation = animation
       highlightOwner = owner
@@ -228,10 +264,14 @@ export function useFieldAnchor() {
     })
   }
 
-  /** Copy a field's deep link. Existing consumers still navigate by default;
-   *  UI surfaces that only need the clipboard can pass `navigate: false`.
-   *  Complete success/failure messages remain caller-owned, and the legacy
-   *  success-message string is still accepted. */
+  /**
+   * Copy a field's deep link — clipboard only. It deliberately does NOT
+   * navigate: it leaves scroll position, the URL hash and the active row
+   * untouched, so grabbing a link to share never yanks the reader somewhere
+   * else. The copied URL still carries `#path`, so pasting it deep-links as
+   * expected. Complete success/failure messages remain caller-owned, and the
+   * legacy success-message string is still accepted.
+   */
   async function copyLink(
     path: string,
     optionsOrSuccess: FieldAnchorCopyOptions | string = {},
@@ -239,10 +279,6 @@ export function useFieldAnchor() {
     const options: FieldAnchorCopyOptions = typeof optionsOrSuccess === 'string'
       ? { successMessage: optionsOrSuccess }
       : optionsOrSuccess
-    if (options.navigate !== false) {
-      // Preserve the public API's original behavior without blocking clipboard.
-      void goTo(path, { updateHash: true })
-    }
     try {
       await copy(urlFor(path), {
         label: 'Link',
@@ -270,7 +306,6 @@ export function useFieldAnchor() {
    */
   function initFromHash() {
     if (!import.meta.client) return
-    hashInitialized = true
     const apply = (path: string) => {
       if (path) {
         claimScrollRestoration()

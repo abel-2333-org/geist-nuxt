@@ -4,36 +4,57 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 
+// Cases that need to observe restoration redefine `history.scrollRestoration`
+// as a configurable own property. Restore the original descriptor afterwards
+// instead of deleting the key: deleting it removes the native property, so a
+// later case that does NOT redefine it would read `undefined` and silently skip
+// the `'scrollRestoration' in history` branch it means to exercise.
+const nativeScrollRestoration = Object.getOwnPropertyDescriptor(
+  Object.getPrototypeOf(history),
+  'scrollRestoration',
+)
+
 afterEach(() => {
   history.replaceState(history.state, '', '/')
-  delete (history as History & { scrollRestoration?: ScrollRestoration }).scrollRestoration
+  if (Object.getOwnPropertyDescriptor(history, 'scrollRestoration')) {
+    delete (history as History & { scrollRestoration?: ScrollRestoration }).scrollRestoration
+  }
+  if (nativeScrollRestoration && !('scrollRestoration' in history)) {
+    Object.defineProperty(Object.getPrototypeOf(history), 'scrollRestoration', nativeScrollRestoration)
+  }
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
 describe('useFieldAnchor', () => {
-  it('preserves legacy navigate-on-copy while allowing clipboard-only callers', async () => {
+  it('never navigates on copy, including via the legacy string signature', async () => {
     vi.stubGlobal('requestAnimationFrame', vi.fn(() => 0))
     const Host = defineComponent({
       setup() {
         const anchor = useFieldAnchor()
         return {
+          active: anchor.active,
           copyLegacy: () => { void anchor.copyLink('legacy', 'Legacy link copied') },
-          copyOnly: () => { void anchor.copyLink('pure', { navigate: false }) },
+          copyOptions: () => { void anchor.copyLink('pure', { successMessage: 'Copied' }) },
         }
       },
       template: `
-        <button data-testid="copy-only" @click="copyOnly">Copy only</button>
+        <button data-testid="copy-options" @click="copyOptions">Copy options</button>
         <button data-testid="copy-legacy" @click="copyLegacy">Copy legacy</button>
       `,
     })
     const wrapper = await mountSuspended(Host)
 
-    await wrapper.find('[data-testid="copy-only"]').trigger('click')
+    // Copy is clipboard-only: no hash write and no active-row change, so the
+    // reader is never yanked away. The legacy string signature (a success
+    // message, not an options object) must behave identically.
+    await wrapper.find('[data-testid="copy-options"]').trigger('click')
     expect(location.hash).toBe('')
+    expect(wrapper.vm.active).toBe('')
 
     await wrapper.find('[data-testid="copy-legacy"]').trigger('click')
-    expect(location.hash).toBe('#legacy')
+    expect(location.hash).toBe('')
+    expect(wrapper.vm.active).toBe('')
     wrapper.unmount()
   })
 
@@ -106,9 +127,20 @@ describe('useFieldAnchor', () => {
     expect(first.cancel).toHaveBeenCalledOnce()
     expect(animate).toHaveBeenCalledTimes(2)
     const [frames, options] = animate.mock.calls[0]!
+    // Outline belongs to the persistent focus ring, so the cue must never
+    // animate it (a cue passing through transparent would blink a keyboard
+    // user's focus indicator out). Assert that contract, not a specific tuning:
+    // duration/easing are design values the system is free to retune.
     expect(JSON.stringify(frames)).not.toMatch(/outline|borderRadius/)
-    expect(options).toEqual({ duration: 300, easing: 'ease-out' })
-    expect(readScrollHeight.mock.calls.length).toBeGreaterThanOrEqual(12)
+    // It breathes: the cue alternates off → on → … → off within one pass rather
+    // than ending lit, so both ends must rest transparent.
+    expect(frames.length).toBeGreaterThan(2)
+    expect(JSON.stringify(frames[0])).toMatch(/transparent/)
+    expect(JSON.stringify(frames.at(-1))).toMatch(/transparent/)
+    expect(options.easing).toBe('ease-in-out')
+    // Scrolls only once the layout has settled, so it must have sampled the
+    // scroll extent across multiple frames rather than firing on a fixed delay.
+    expect(readScrollHeight.mock.calls.length).toBeGreaterThan(1)
     second.finish()
     wrapper.unmount()
   })
