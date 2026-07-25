@@ -12,13 +12,15 @@ import { useResizeObserver } from '@vueuse/core'
 // force this component in.
 //
 // Anatomy (wide container, one line):
-//   [ USelect (env, only when hosts > 1) | host ⧉ │ path ⧉ | CopyButton ]
+//   [ USelect (env, only when hosts > 1) | host ⧉ │ path ⧉ ....... CopyButton ]
 // Anatomy (narrow container, wraps to two lines):
-//   [ USelect | host ⧉ ......... CopyButton ]
-//   [ path ⧉ ................................ ]
-// One bordered `bg-elevated` row. The whole-address CopyButton stays on the
-// first line and outside every scroll area, so it is reachable no matter how
-// far the path is scrolled.
+//   [ USelect | host ⧉ ..................................................... ]
+//   [ path ⧉ ....................................... CopyButton ]
+// One bordered `bg-elevated` row. The whole-address CopyButton is always the
+// row's LAST element — in the DOM, on screen and for the keyboard alike — and
+// sits outside every scroll area, so it is reachable no matter how far the path
+// is scrolled. The wrap is produced by a full-width breaker span rather than by
+// `order`, precisely so those three orders can never drift apart.
 //
 // Narrow-container degradation is ASYMMETRIC, and deliberately so:
 //   - host is an ENVIRONMENT property. Every endpoint on the site shares it,
