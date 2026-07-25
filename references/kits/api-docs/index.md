@@ -78,9 +78,9 @@ registry item 为 `api-docs-site-search`，只声明
 > | `*em*` / `_em_` | `ProseEm` |
 > | `~~del~~` | 原生 `<del>`（Nuxt UI 无对应 Prose 组件） |
 >
-> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不���套 `ProseCode`。
+> 要点：①**递归**解析，所以标记可嵌套（`**粗里有 `码`**`、`**[粗链接](/p)**`）。②链接是重点——手写 `<a href="/x">` 会让站内链接整页刷新；`ProseA`/`ULink` 自动判断内/外链，站内走 `NuxtLink` 客户端路由 + 预取，外链才用原生 `<a>` 并自动补 `rel`，消费方只需为外链显式传 `target="_blank"`。③`_` 斜体规则必须带**词边界前瞻/后顾**（`(?<![A-Za-z0-9])_…_(?![A-Za-z0-9])`），否则 `snake_case_name`、URL 里的下划线会被误斜体；`*` 斜体则要求内侧非空白，挡掉孤星（`func(a, b) *`）。**反例**：结构性标识符（字段名、端点 path）用的是带删除线 / truncate 的裸 `<code>`，那是刻意的领域样式，不要套 `ProseCode`。
 >
-> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸���，**绕过整个 Prose 组件体系**��丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
+> **为什么不用 `<MDC>` / 完整 markdown 引擎**（踩过的坑）：先核实真实数据——payment spec 的 194 条富文本描述**全是行内**（`code`/`link`，0 条 `**`、0 条块级 `>`/列表）。`<MDC>` 是为文件型内容管线设计的：它 per-instance 走 `useAsyncData`（异步），在一页渲染上百个实例时会 SSR→客户端 **hydration mismatch**（`<code>` 节点被包进 `<!--[-->…<!--]-->` fragment 锚点，改 props / `cacheKey` / 关 Shiki 都修不掉），且徒增体积。`markdown-it` 则输出 `v-html` 裸串，**绕过整个 Prose 组件体系**并丢掉 ULink 路由，与"复用设计系统"方向相悖。结论：**行内需求就用同步 tokenizer**（贴合设计系统、SSR 稳定、无异步）；只有当块级 markdown（引用/列表）成为真实需求时，才回头评估 MDC，别上 `markdown-it`。
 
 ### Operation identity 分层（endpoint 与 webhook 的身份表面）
 
@@ -141,13 +141,13 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 
 - `components/SplitPaneHandle.vue`（`<SplitPaneHandle>`）—— 纯展示 + a11y 的分隔把手：1px 分隔线（`border-default` 即 `--ui-border`）+ 居中 grip 药丸。**grip 默认隐藏（`opacity-0`），hover / 拖动中（`active`）/ 键盘 `focus-visible` 时才浮现**——静止时只剩一条素净的 hairline，符合 Geist 克制观感。药丸 hover/drag 转 `bg-primary`。`role="separator"` + `aria-orientation`/`aria-valuenow/min/max`、focus-visible 紫环、方向键/Home/End/Enter 键盘操作、`col/row-resize` 光标。**只报告意图（`dragstart`/`step`/`jump` 事件），不持有任何数值**。主轴尺寸则由消费方（纵向把手可 `self-stretch` 填满，或传 `sticky h-[calc(...)]` 做视口高钉住）。
   - **坑**：`group-hover:` 在 Tailwind v4 会被包进 `@media (hover:hover)`，所以 grip 的 hover 浮现只在有鼠标的设备上生效（触屏/无头浏览器 `hover:none` 不触发，属预期）；触屏与键盘用户靠 `active`（拖动中，非 hover 门控）和 `group-focus-visible`（非 hover 门控）两条路径拿到 grip，affordance 不会丢。别用 `transition-[opacity,background-color]` 这种带逗号的 arbitrary value——逗号会打断 Tailwind 的类名扫描、导致其后同一 `class` 里的工具类（含 `group-hover:*`）不被生成；用普通 `transition` 即可。
-- `composables/useSplitPane.ts` —— 轴��关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`���+ `Escape` 取消 + rAF 节流。**只管拖动状态，不含任何布局重分配**——内容优先重分配是 api-docs kit 的领域逻辑，由 kit 的 `<ApiDocsCodeRail>` 承载（见下），不进 foundation。
+- `composables/useSplitPane.ts` —— 轴无关的拖动状态：持有一个数值（栏宽 px、分栏比 0–1…）+ min/max 钳制 + cookie 持久化（`useCookie`+`useState`，同 `useCodeWrap`）+ `Escape` 取消 + rAF 节流。**只管拖动状态，不含任何布局重分配**——内容优先重分配是 api-docs kit 的领域逻辑，由 kit 的 `<ApiDocsCodeRail>` 承载（见下），不进 foundation。
 
   **为什么不复用 Nuxt UI 的 `useResizable`**：`useResizable(key, options)` 是给 Dashboard 面板做的，只支持**横向**拖宽（写死读 `el.parentElement.offsetWidth` + `clientX`）、支持 `%/rem/px` 单位与 collapsible 折叠，但**没有纵向、没有键盘操作（方向键/Home/End）、没有 Escape 取消、没有内容优先重分配**，而且依赖把手包裹一个真实面板 `el`。我们的需求这三块（纵向 Request/Response、键盘 a11y、内容优先重分配）它都缺，横向那一半即便能用也会造成两条边界行为不一致，所以另建一套轴无关原语。命名用 `useSplitPane` 而非 `useResizable` 只是为了和 Nuxt UI 的同名自动导入 API 区分、避免认知混淆——两者签名不同，真撞名是类型错误而非静默遮蔽。
 
 **内容优先重分配（kit 的 `<ApiDocsCodeRail>` 承载，不在 foundation）**：这是与代码卡片「封顶 + 滚动」强耦合的布局逻辑，故不折进 `SplitPane`/`useSplitPane`（foundation 只提供拖动状态）。它由 kit 的 `kits/api-docs/components/CodeRail.vue`（`<ApiDocsCodeRail>`）承载：纵向分 Request/Response、内含下面这段重分配纯函数，通过 slot scope 把 `maxHeight` 预算下发给 `ApiDocsRequestExample`/`ApiDocsResponseExample`。**归 kit 而非 foundation 的理由**：它量自然高时耦合本 kit 代码卡的内部 DOM（`.code-surface`、`pre.raw-pre`），这种耦合是 kit 内部事务，foundation 不应知晓。根 gallery 的 `app/pages/kits/api-docs/endpoint-reference.vue` 已按此接线：横向 `SplitPane`（左字段树文档流 / 右代码栏）+ `<ApiDocsCodeRail>`。多实例（如端点轨道 + webhook 轨道同页）各传独立 `storage-key`，避免比例互相覆盖。
 
-> **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（调用名 `<Demo{Kit}{Name}>`）。这样 kit 归属编码进目���与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。（`CodeRail` 曾是此类，后因下游要重建同等逻辑成本过高而提升进 kit——「demo 私有 → kit 切片」的提升以此为准：当组件承载的不是页面装配而是可复用的领域行为时就该提升。）
+> **gallery 私有 demo 组件按 `demo/<kit>/` 分组**：只服务某个 kit demo 页、既非 foundation 也非 kit 切片的组件，统一落到 `app/components/demo/<kit>/`（调用名 `<Demo{Kit}{Name}>`）。这样 kit 归属编码进目录与调用名，同时与可 copy-in 的 `ApiDocs*` 命名空间和消费侧领域组件区隔。（`CodeRail` 曾是此类，后因下游要重建同等逻辑成本过高而提升进 kit——「demo 私有 → kit 切片」的提升以此为准：当组件承载的不是页面装配而是可复用的领域行为时就该提升。）
 
 不要给短代码块强行分半高——那会在卡片里留下大片空白。规则是：
 
@@ -199,13 +199,13 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**七个 api-docs demo 页，职责互���**：
+gallery 有**七个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
-| `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / ��求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
+| `app/pages/kits/api-docs/index.vue` | 组件目录 | **逐个陈列**（catalog） | 每个 kit 组件在带标签的分区里单独展示：代码块 / 请求 / 响应 / method·lifecycle 徽章 / enum 表 / 字段树（含紧凑 + 高密度两组压力用例） |
 | `app/pages/kits/api-docs/endpoint-reference.vue` | 端点参考页 | **整页级端点组合** | 招牌两栏端点参考页：横向 `SplitPane`（左字段树 / 右双例码轨道）+ kit 的 `<ApiDocsCodeRail>`（纵向分 Request/Response、内容优先重分配）。整页 anatomy 齐全：identity 头 + `<ApiDocsOperationTarget>` 环境联动（host 切换驱动请求示例 baseUrl）+ requirements/relations 扩展区 + 请求/响应/error response 字段树 + 独立 Errors 目录（左目录连右栏 4xx 样本）+ matched/request-only/response-only controlled scenario + multi status/media/body；主区下方 full/partial/minimal 三态纵向陈列。是下游消费页 copy & adapt 的活骨架 |
-| `app/pages/kits/api-docs/webhook-reference.vue` | Webhook 参考页 | **整页级 webhook 组合** | 与端点参考页镜像对称（方向相反：平台回调你）：identity（EVENT ���章）+ requirements/guide 扩展区 + 协议三段（验证/确认/投递，按 handler 生命周期穿插 payload）+ payload 字段树 + relations 扩展区；右栏线缆样本 Payload/Acknowledgement 双栏；主区下方 full/partial/minimal 三态。ACK 字面响应体作为线缆样本归右栏 |
+| `app/pages/kits/api-docs/webhook-reference.vue` | Webhook 参考页 | **整页级 webhook 组合** | 与端点参考页镜像对称（方向相反：平台回调你）：identity（EVENT 徽章）+ requirements/guide 扩展区 + 协议三段（验证/确认/投递，按 handler 生命周期穿插 payload）+ payload 字段树 + relations 扩展区；右栏线缆样本 Payload/Acknowledgement 双栏；主区下方 full/partial/minimal 三态。ACK 字面响应体作为线缆样本归右栏 |
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
 | `app/pages/kits/api-docs/webhook-protocol.vue` | Webhook 协议 | **协议事实专项** | 三段齐全的内联中性 fixture + 变体区：section 省略规则、ACK 三语义（literal/echo/intentional empty）、无 steps schedule 与 `maxScheduleSteps=1` 边界 |
 | `app/pages/kits/api-docs/schema-composition.vue` | Schema 组合 | **composition 专项** | 三种 kind（oneOf/anyOf/allOf)、带 discriminator 的 oneOf、字段级 composition 委托(payment-method 风格)、嵌套 composition、空态；deep link 揭示隐藏 variant 与 anchor 唯一性压力用例 |
@@ -255,7 +255,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 ### FieldItem 的通用交互约束
 
-- 字段深��接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮。
+- 字段深链接由随切片分发的 `useFieldAnchor` 管理。页面在 mounted 后调用 `initFromHash()`，让初始 hash 能展开祖先、滚动并高亮。
 - **滚动一律瞬时**，并在次帧 re-settle 以纠正迟到 reflow。平滑滚动**评估后否决**：唯一能覆盖原生 `<a href="#…">`（绕过 JS）的手段是全局 CSS `html { scroll-behavior: smooth }`，但实测根滚动器上的它会**盖掉脚本显式传的 `behavior: 'auto'`**，使所有"到达"都无法退出动画——换页回顶变成缓慢爬回、后退恢复位置漂移、初始 hash 深链从顶部下移（正是本 kit 的 manual restoration 要消除的移动端刷新抖动）。故不引入，保持脚本路径与原生锚点手感一致。
 - **滚动权归属**：`initFromHash()` 检测到 URL 带 hash 时会**接管 `history.scrollRestoration`**（置为 `manual`），因为浏览器在刷新时会异步反复恢复刷新前的旧偏移，在慢加载下会发生在展开+滚动之后、把页面拽回顶部。接管是**引用计数**的：多个 anchor scope（如 page transition 期间新旧路由并存）共享同一份 claim，仅当最后一个 claim 释放时才把原值还原，因此单个 scope 卸载不会误还原；若目标在等待窗口内始终未挂载，当前 hash navigation 会主动释放自己的 claim，stale / malformed fragment 不会让页面余下生命周期一直停在 `manual`。无 hash 时不接管，普通刷新仍走浏览器原生位置恢复。kit 不改写 router 配置；可选的 `router.options.ts` hash 调整只是额外消除一次冷加载闪动。
 - 字段锚点必须是可查询、稳定且无歧义的 DOM id：**行的 `id` 直接采用 display model 的 `path` 原文，kit 不做 slugify**——`path` 的稳定与无歧义由数据作者 / adapter 保证（它本身即用稳定分隔符连接的层级标识）。page transition 期间新旧字段树可能短暂存在重复 id，跳转因此使用 `querySelectorAll(#${CSS.escape(path)})` 并选择文档中最后一个（incoming）匹配；`path` 会先经 `CSS.escape`，无需数据作者自行处理 selector 转义。`#path` 往返只做百分号编解码（`urlFor` 拼 `#path`、`initFromHash` 用 `decodeURIComponent` 还原）。字段展示名（`name`）只用于展示，不拼进 id 或 selector。**空 path 直接被拒**：`CSS.escape('')` 得到空串、`'#'` 是非法 selector，会让 `querySelectorAll` 抛 `SyntaxError`，故 `goTo('')` 在改动任何状态前就返回——不改 active 行、不写 hash，外部消费者传空既不会崩也不留半套状态；清空 active 行是 `initFromHash()` 空 hash 分支的职责，不是畸形跳转请求的副作用。
@@ -301,7 +301,7 @@ await copyLink(path, {
 
 ## 不要臆造
 
-- 不引入 `@nuxt/content` / Shiki runtime / SQLite 来渲染这些代码块；需要语法高亮时由消费项目在���建期产出并预消毒 HTML，组件只负责显式可信渲染。
+- 不引入 `@nuxt/content` / Shiki runtime / SQLite 来渲染这些代码块；需要语法高亮时由消费项目在构建期产出并预消毒 HTML，组件只负责显式可信渲染。
 - 新增领域组件前，按 `method/component-spec-template.md` 先写 anatomy → states → accessibility 规格。
 - prop 名严格对齐：ApiDocsCodeBlock **只认 `variants`**（`{ language, code, label?, highlightedHtml? }[]`，无 `samples`、无单 `code` 快捷；单块也传单元素数组）；ApiDocsRequestExample/ApiDocsResponseExample 用 `scenarios`（单一固定响应即传单场景单状态，select 自动隐藏）。
 - ApiDocsCodeBlock 语言切换用 `USelect`（非 UTabs），换行状态经 `useCodeWrap` 共享，chrome 文案经 `labels` 本地化；复制不要在 ApiDocsCodeBlock 里重写，用共享 `CopyButton`。

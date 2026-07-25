@@ -630,7 +630,7 @@ onMounted(() => anchor.initFromHash())
       </template>
 
       <!-- 右：双例码轨道。lg+ 钉成视口高 sticky 长条，Request/Response 纵向分栏 +
-           内容优先���分配；<lg 回退为堆叠各卡自滚动。 -->
+           内容优先重分配；<lg 回退为堆叠各卡自滚动。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <ApiDocsCodeRail storage-key="api-docs-endpoint-rail-split" class="h-full max-lg:space-y-4">
