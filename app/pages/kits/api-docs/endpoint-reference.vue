@@ -204,7 +204,7 @@ const responseScenarios = [
         ],
       },
       {
-        // 有意空正文（区别于「缺示例」），见组件目录���全形态演示。
+        // 有意空正文（区别于「缺示例」），见组件目录页全形态演示。
         status: 204,
         statusText: 'No Content',
         bodies: [{ id: 'empty', kind: 'empty' as const, note: '异步受理，协议约定不返回正文。' }],
