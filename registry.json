@@ -375,7 +375,7 @@
       "name": "api-docs-operation-target",
       "type": "registry:component",
       "title": "ApiDocsOperationTarget",
-      "description": "Environment host picker with a segmented request address: host and path copy separately, plus a whole-address copy.",
+      "description": "Environment host picker, full request address, and copy for an endpoint.",
       "registryDependencies": ["geist-foundation", "foundation-copy-button"],
       "files": [
         { "path": "kits/api-docs/components/OperationTarget.vue", "target": "app/components/api-docs/OperationTarget.vue" }
