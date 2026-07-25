@@ -533,9 +533,8 @@ onMounted(() => anchor.initFromHash())
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               {{ endpoint.description }}
             </p>
-            <!-- 环境联动：host 切换 + 分段地址（host / path 各自可复制）+ 整体
-                 复制，紧贴头部。选中 host 由本页持有，右栏请求示例从同一 host
-                 派生。 -->
+            <!-- 环境联动：host 切换 + 完整地址 + 单个复制键，紧贴头部。选中
+                 host 由本页持有，右栏请求示例从同一 host 派生。 -->
             <ApiDocsOperationTarget
               v-model="selectedHostId"
               :hosts="hosts"
@@ -543,10 +542,7 @@ onMounted(() => anchor.initFromHash())
               select-label="选择环境"
               copy-toast-label="接口地址"
               :labels="{
-                copyHost: '复制服务地址',
-                copyPath: '复制请求路径',
-                hostToast: '服务地址',
-                pathToast: '请求路径',
+                copy: '复制完整地址',
                 copied: '已复制',
               }"
             />

@@ -118,10 +118,7 @@ onMounted(() => anchor.initFromHash())
                 select-label="选择环境"
                 copy-toast-label="接口地址"
                 :labels="{
-                  copyHost: '复制服务地址',
-                  copyPath: '复制请求路径',
-                  hostToast: '服务地址',
-                  pathToast: '请求路径',
+                  copy: '复制完整地址',
                   copied: '已复制',
                 }"
               />
