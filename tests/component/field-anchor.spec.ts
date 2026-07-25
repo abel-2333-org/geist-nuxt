@@ -159,7 +159,29 @@ describe('useFieldAnchor', () => {
     expect(frames.length).toBeGreaterThan(2)
     expect(JSON.stringify(frames[0])).toMatch(/transparent/)
     expect(JSON.stringify(frames.at(-1))).toMatch(/transparent/)
-    expect(options).toMatchObject({ duration: 4200, easing: 'ease-in-out' })
+    // Assert the breathing CONTRACT, not the tuning: peaks stay evenly spaced
+    // and every breath keeps a constant length however BREATHS / BREATH_MS are
+    // retuned. Pinning `duration` to a literal would fail a legitimate design
+    // retune (verified: 3 → 4 breaths reports 5600 ≠ 4200) while proving nothing
+    // about how the cue actually reads.
+    expect(options.easing).toBe('ease-in-out')
+    // Discriminate on boxShadow, not the whole frame: a lit frame's background
+    // is a `color-mix(… , transparent)`, so matching "transparent" anywhere
+    // would count every frame as unlit.
+    const peaks = frames
+      .filter((frame: Keyframe) => !/transparent/.test(String(frame.boxShadow)))
+      .map((frame: Keyframe) => frame.offset as number)
+    expect(peaks.length).toBeGreaterThanOrEqual(2)
+    // Each peak sits at the MIDPOINT of its own breath, which is what makes the
+    // rise and fall symmetric. Deriving the expectation from the peak count keeps
+    // this true for any breath count, while still catching an off-centre peak
+    // (equal spacing alone would not: shifting every peak equally keeps the gaps
+    // equal but makes each breath rise faster than it falls).
+    peaks.forEach((offset, i) => {
+      expect(offset).toBeCloseTo((i + 0.5) / peaks.length, 5)
+    })
+    // duration = breaths × a constant per-breath length.
+    expect(options.duration % peaks.length).toBe(0)
     // The height changes from 100 → 200, then the algorithm observes five
     // identical 200 samples: one baseline plus four consecutive stable frames.
     const observedHeights = readScrollHeight.mock.results.map(result => result.value)

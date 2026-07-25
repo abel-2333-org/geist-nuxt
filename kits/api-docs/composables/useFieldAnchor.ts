@@ -205,9 +205,9 @@ export function useFieldAnchor() {
         boxShadow: '0 0 0 1px transparent',
         backgroundColor: 'transparent',
       })
-      // Three breaths of BREATH_MS each. Offsets are derived so the peaks stay
-      // evenly spaced if either constant is retuned: each breath spans one
-      // slice, peaking at its midpoint.
+      // BREATHS breaths of BREATH_MS each. Offsets are derived rather than
+      // written out, so retuning either constant keeps every breath an equal
+      // slice peaking at its own midpoint (symmetric rise and fall).
       const BREATHS = 3
       const BREATH_MS = 1400
       const frames = [off(0)]
