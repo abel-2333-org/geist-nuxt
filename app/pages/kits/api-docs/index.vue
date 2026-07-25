@@ -546,7 +546,7 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
           Operation 身份层由
           <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
-          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
+          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境 + 地址 + 复制）与
           <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
           双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
@@ -649,8 +649,7 @@ onMounted(() => anchor.initFromHash())
             （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
             端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
-            环境切换 + 分段地址（host / path 文本本身即复制控件）+ 行尾显式键复制完整地址；
-            webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
+            环境切换 + 完整地址 + 复制；webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
           </p>
           <div class="space-y-8">
             <!-- story 标题是 h3，头部标题传 4 归入其下，保持 outline 不跳级 -->
@@ -671,16 +670,6 @@ onMounted(() => anchor.initFromHash())
                 path="/v1/checkout/sessions"
                 select-label="选择环境"
                 copy-toast-label="接口地址"
-                host-toast-label="环境地址"
-                path-toast-label="接口路径"
-                :labels="{
-                  copy: '复制完整地址',
-                  copied: '已复制',
-                  copyHost: '复制环境地址',
-                  copiedHost: '环境地址已复制',
-                  copyPath: '复制接口路径',
-                  copiedPath: '接口路径已复制',
-                }"
               />
             </ApiDocsOperationHeader>
 
