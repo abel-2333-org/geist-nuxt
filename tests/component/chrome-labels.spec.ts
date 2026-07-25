@@ -94,13 +94,18 @@ describe('FieldItem lifecycle badge labels', () => {
       },
     })
 
-    // Contract, not utility-class strings: the row asks the badge for the `md`
-    // size tier — the tier whose theme token is Label 12 (text-xs) plus a
-    // size-4 icon, matching the plain-text metadata spans (type /
-    // CONDITIONAL / DEFAULT). Asserting the prop keeps this test green when
-    // Nuxt UI re-tunes the tier's utilities, and red if the row silently
-    // falls back to the default `sm` (10px) tier.
-    expect(wrapper.findComponent(LifecycleBadge).props('size')).toBe('md')
+    const badge = wrapper.findComponent(LifecycleBadge)
+
+    // The public tier must reach the Nuxt UI primitive, not stop at the kit
+    // wrapper. `md` owns Label 12 plus the matching size-4 icon.
+    expect(badge.props('size')).toBe('md')
+    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('md')
+
+    // These are deliberate FieldItem contracts rather than copies of the
+    // upstream tier: 20px row density, 6px Geist control radius, atomic wrap.
+    expect(badge.attributes('class')).toContain('py-0.5')
+    expect(badge.attributes('class')).toContain('rounded-sm')
+    expect(badge.attributes('class')).toContain('shrink-0')
 
     // The status must read as part of the same line box, so the summary row
     // centers its items instead of baseline/stretch-aligning them.
