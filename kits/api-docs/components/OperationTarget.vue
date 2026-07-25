@@ -276,15 +276,9 @@ const pathSegment = 'min-w-0 flex-1 overflow-x-auto border-default text-highligh
          the LINE instead keeps visual, DOM and tab order identical. -->
     <span aria-hidden="true" class="w-full @md/target:hidden" />
 
-    <!-- path segment — the operation's identity, so it never truncates. Below
-         the `md` container width it takes its own line (see the breaker above);
-         only if it STILL doesn't fit does the text scroll horizontally.
-         The shrink ladder and the scroll container share this one element
-         (`flex-initial` + `overflow-x-auto` + `min-w-0`): a scroll container's
-         automatic minimum size is 0, so it shrinks below max-content instead of
-         pushing the copy button out of the row.
-         Scrollbar is hidden (this row is ~2rem tall); the measured fade is what
-         signals "there is more". -->
+    <!-- path segment — text IS the control; see `pathSegment` for the layout.
+         Below the `md` container width it takes its own line (see the breaker
+         above); only if it STILL doesn't fit does the text scroll horizontally. -->
     <button
       ref="pathTrack"
       type="button"
