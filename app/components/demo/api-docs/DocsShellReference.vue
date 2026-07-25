@@ -117,6 +117,13 @@ onMounted(() => anchor.initFromHash())
                 :path="paymentsEndpoint.path"
                 select-label="选择环境"
                 copy-toast-label="接口地址"
+                :labels="{
+                  copyHost: '复制服务地址',
+                  copyPath: '复制请求路径',
+                  hostToast: '服务地址',
+                  pathToast: '请求路径',
+                  copied: '已复制',
+                }"
               />
             </ApiDocsOperationHeader>
 
@@ -151,7 +158,7 @@ onMounted(() => anchor.initFromHash())
 
     <USeparator />
 
-    <!-- 其余端点的紧凑 stub：让侧栏与全站搜索里的每个锚点都有落点。
+    <!-- 其余端点的紧凑 stub：让侧栏与全站搜索里的每个锚点都有落��。
          真实项目里每个端点都是一个完整的 reference section（同上）。
          lifecycle 双形态演示：heading 旁 LifecycleBadge（identity 级标记）+
          正文 LifecycleNotice（解释「发生了什么 + 怎么办」）。 -->
