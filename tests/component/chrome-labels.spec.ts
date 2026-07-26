@@ -96,14 +96,14 @@ describe('FieldItem lifecycle badge labels', () => {
 
     const badge = wrapper.findComponent(LifecycleBadge)
 
-    // The public tier must reach the Nuxt UI primitive, not stop at the kit
-    // wrapper. `md` owns Label 12 plus the matching size-4 icon.
-    expect(badge.props('size')).toBe('md')
-    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('md')
+    // Field metadata uses the compact badge tier. The public tier must reach
+    // the Nuxt UI primitive rather than stop at the kit wrapper.
+    expect(badge.props('size')).toBe('sm')
+    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('sm')
 
-    // These are deliberate FieldItem contracts rather than copies of the
-    // upstream tier: 20px row density, 6px Geist control radius, atomic wrap.
-    expect(badge.attributes('class')).toContain('py-0.5')
+    // The badge is atomic and vertically centered against the mixed mono/text
+    // signature line instead of inheriting its baseline alignment.
+    expect(badge.attributes('class')).toContain('self-center')
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
