@@ -5,3 +5,10 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# Agent skills 的第三方内容。skills-lock.json 记录来源，用
+# `npx skills experimental_install` 还原；不入库，也不进 release snapshot。
+# 本仓库自己的 geist-nuxt skill 是手写的，必须保留。
+.agents/
+.claude/skills/*
+!.claude/skills/geist-nuxt/

@@ -128,6 +128,8 @@ jobs:
             --exclude .nuxt \
             --exclude .output \
             --exclude coverage \
+            --exclude .agents \
+            --exclude .claude \
             --exclude '*.log'
           printf '%s\n' "$TAG" > dist-skill/RELEASE
           printf '{"schemaVersion":1,"sourceSha":"%s"}\n' "$GITHUB_SHA" > dist-skill/.geist-source.json
