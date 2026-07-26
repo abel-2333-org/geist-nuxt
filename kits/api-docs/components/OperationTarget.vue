@@ -102,12 +102,8 @@ const fullAddress = computed(() => `${baseUrl.value}${props.path}`)
  * ------------------------------------------------------------------ */
 const { copied: hostCopied, copy: writeHost } = useCopy()
 const { copied: pathCopied, copy: writePath } = useCopy()
-
-const segmentStatus = computed(() => {
-  if (hostCopied.value) return t.value.copiedHost
-  if (pathCopied.value) return t.value.copiedPath
-  return ''
-})
+const segmentStatus = shallowRef('')
+let copyRevision = 0
 
 /**
  * True when this click merely FINISHED a text selection inside the segment.
@@ -124,20 +120,32 @@ function selecting(event: MouseEvent) {
     : true
 }
 
-function onCopyHost(event: MouseEvent) {
-  if (selecting(event)) return
-  void writeHost(baseUrl.value, {
-    successMessage: t.value.copiedHost,
+async function copySegment(segment: 'host' | 'path', value: string) {
+  const revision = ++copyRevision
+  const successMessage = segment === 'host' ? t.value.copiedHost : t.value.copiedPath
+  const write = segment === 'host' ? writeHost : writePath
+
+  // Clear first so repeating the same action still creates a live-region change.
+  segmentStatus.value = ''
+  const copied = await write(value, {
+    successMessage,
     failureMessage: t.value.copyFailed,
   })
+  if (!copied || revision !== copyRevision) return
+
+  await nextTick()
+  if (revision !== copyRevision) return
+  segmentStatus.value = successMessage
+}
+
+function onCopyHost(event: MouseEvent) {
+  if (selecting(event)) return
+  void copySegment('host', baseUrl.value)
 }
 
 function onCopyPath(event: MouseEvent) {
   if (selecting(event)) return
-  void writePath(props.path, {
-    successMessage: t.value.copiedPath,
-    failureMessage: t.value.copyFailed,
-  })
+  void copySegment('path', props.path)
 }
 
 /* ------------------------------------------------------------------ *

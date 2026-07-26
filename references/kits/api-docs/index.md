@@ -64,7 +64,7 @@ registry item 为 `api-docs-site-search`，只声明
 
 配套 foundation 依赖（由根 registry 的 `registryDependencies` 自动装入）：
 - `foundation/components/CopyButton.vue` —— 共享复制按钮：`UButton` + 可选 `UTooltip` + `useCopy`，`CodeBlock` 的复制委托给它。
-- `foundation/composables/useCopy.ts` —— 剪贴板逻辑单一来源：写入委托给 VueUse 的 `useClipboard({ legacy: true })`（异步 Clipboard API + iframe/execCommand 兜底），外层保留 `copied` 态 + Geist voice toast。签名固定为 `useCopy({ timeout?, successMessage?, failureMessage? })` 与 `copy(text, { successMessage?, failureMessage? })`；消息必须是完整句子，省略时使用完整、通用的英文默认值。对象名 `label` 与 positional 参数已删除，消费项目在类型层面无法再把本地化半句塞进英文模板。依赖 `@vueuse/core`；消费项目必须有该直接依赖。
+- `foundation/composables/useCopy.ts` —— 剪贴板逻辑单一来源：优先使用异步 Clipboard API，拒绝或不可用时走 iframe / insecure context 所需的 `execCommand` 降级，并以对应 API 的明确成功结果为准；外层保留 `copied` 态 + Geist voice toast。签名固定为 `useCopy({ timeout?, successMessage?, failureMessage? })` 与 `copy(text, { successMessage?, failureMessage? })`；`copy()` 仅在剪贴板写入成功时返回 `true`，失败返回 `false`，供调用方驱动与真实结果一致的反馈。消息必须是完整句子，省略时使用完整、通用的英文默认值。对象名 `label` 与 positional 参数已删除，消费项目在类型层面无法再把本地化半句塞进英文模板。
 
 复制反馈采用 clean-cut 迁移，不保留会继续制造半句的兼容入口：
 

@@ -6,8 +6,10 @@
 // structural-label passthrough (flat + variant + filter empty state),
 // recursive child rows, and unchanged English defaults.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { effectScope, ref } from 'vue'
+import { effectScope } from 'vue'
+import { flushPromises } from '@vue/test-utils'
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import CopyButton from '../../foundation/components/CopyButton.vue'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
@@ -16,21 +18,11 @@ import { useCopy } from '../../foundation/composables/useCopy'
 
 const copyState = vi.hoisted(() => ({
   add: vi.fn(),
-  copy: vi.fn(),
+  writeText: vi.fn(),
+  execCommand: vi.fn(),
 }))
 
 mockNuxtImport('useToast', () => () => ({ add: copyState.add }))
-
-vi.mock('@vueuse/core', async (load) => {
-  const actual = await load<typeof import('@vueuse/core')>()
-  return {
-    ...actual,
-    useClipboard: () => ({
-      copy: copyState.copy,
-      isSupported: ref(true),
-    }),
-  }
-})
 
 let stopCopyScope: (() => void) | undefined
 
@@ -42,8 +34,18 @@ function createCopy(options: Parameters<typeof useCopy>[0] = {}) {
 
 beforeEach(() => {
   copyState.add.mockClear()
-  copyState.copy.mockReset()
-  copyState.copy.mockResolvedValue(undefined)
+  copyState.writeText.mockReset()
+  copyState.writeText.mockResolvedValue(undefined)
+  copyState.execCommand.mockReset()
+  copyState.execCommand.mockReturnValue(true)
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: copyState.writeText },
+  })
+  Object.defineProperty(globalThis.document, 'execCommand', {
+    configurable: true,
+    value: copyState.execCommand,
+  })
 })
 
 afterEach(() => stopCopyScope?.())
@@ -89,10 +91,11 @@ describe('useCopy complete-message contract', () => {
   })
 
   it('passes a complete call-level success message through verbatim', async () => {
-    const { copy } = createCopy({ successMessage: 'Fallback copied' })
+    const { copy } = createCopy()
 
-    await copy('value', { successMessage: '接口地址已复制' })
+    const copied = await copy('value', { successMessage: '接口地址已复制' })
 
+    expect(copied).toBe(true)
     expect(copyState.add).toHaveBeenCalledWith({
       title: '接口地址已复制',
       color: 'success',
@@ -100,18 +103,60 @@ describe('useCopy complete-message contract', () => {
     })
   })
 
-  it('uses the complete failure message when clipboard writing fails', async () => {
-    copyState.copy.mockRejectedValue(new Error('blocked'))
-    const { copy } = createCopy({
-      failureMessage: '复制失败，请手动复制地址',
-    })
+  it('uses the complete composable-level success message as the fallback', async () => {
+    const { copy } = createCopy({ successMessage: 'Fallback copied' })
 
     await copy('value')
 
     expect(copyState.add).toHaveBeenCalledWith({
+      title: 'Fallback copied',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('uses the legacy result after Clipboard API rejects', async () => {
+    copyState.writeText.mockRejectedValue(new Error('blocked'))
+    const { copy } = createCopy()
+
+    const copied = await copy('value')
+
+    expect(copied).toBe(true)
+    expect(copyState.execCommand).toHaveBeenCalledWith('copy')
+  })
+
+  it('uses the complete failure message when every clipboard writer fails', async () => {
+    copyState.writeText.mockRejectedValue(new Error('blocked'))
+    copyState.execCommand.mockReturnValue(false)
+    const { copy } = createCopy({
+      failureMessage: '复制失败，请手动复制地址',
+    })
+
+    const copied = await copy('value')
+
+    expect(copied).toBe(false)
+    expect(copyState.add).toHaveBeenCalledWith({
       title: '复制失败，请手动复制地址',
       color: 'error',
       icon: 'i-lucide-triangle-alert',
+    })
+  })
+
+  it('lets CopyButton reuse copiedLabel as its complete success message', async () => {
+    const wrapper = await mountSuspended(CopyButton, {
+      props: {
+        value: 'value',
+        copiedLabel: '值已复制',
+      },
+    })
+
+    await wrapper.get('button').trigger('click')
+    await flushPromises()
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '值已复制',
+      color: 'success',
+      icon: 'i-lucide-check',
     })
   })
 })

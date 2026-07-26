@@ -7,6 +7,7 @@
 //   - visual and keyboard order must agree. The two-line layout relies on DOM
 //     order plus one full-width breaker, never CSS `order`.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { defineComponent } from 'vue'
 import { UApp, UTooltip } from '#components'
@@ -18,7 +19,18 @@ import OperationTarget from '../../kits/api-docs/components/OperationTarget.vue'
 const { write } = vi.hoisted(() => ({ write: vi.fn() }))
 mockNuxtImport('useCopy', () => () => ({ copied: shallowRef(false), copy: write }))
 
-beforeEach(() => write.mockClear())
+beforeEach(() => {
+  write.mockReset()
+  write.mockResolvedValue(true)
+})
+
+function deferred() {
+  let resolve!: (value: boolean) => void
+  const promise = new Promise<boolean>((done) => {
+    resolve = done
+  })
+  return { promise, resolve }
+}
 
 const hosts = [
   { id: 'prod', label: '生产', baseUrl: 'https://api.example.com' },
@@ -170,6 +182,39 @@ describe('OperationTarget copy affordances', () => {
     const wrapper = await mountTarget({ props: { ...base, labels: zh } })
     // The CopyButton owns its own region; the row adds ONE for both segments.
     expect(wrapper.findAll('[aria-live="polite"]')).toHaveLength(2)
+  })
+
+  it('announces the latest segment when host and path are copied in succession', async () => {
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
+
+    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
+    await flushPromises()
+    expect(status.text()).toBe(zh.copiedHost)
+
+    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click')
+    await flushPromises()
+    expect(status.text()).toBe(zh.copiedPath)
+  })
+
+  it('keeps the latest requested segment when clipboard promises resolve out of order', async () => {
+    const host = deferred()
+    const path = deferred()
+    write
+      .mockReturnValueOnce(host.promise)
+      .mockReturnValueOnce(path.promise)
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
+
+    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
+    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click')
+    path.resolve(true)
+    await flushPromises()
+    expect(status.text()).toBe(zh.copiedPath)
+
+    host.resolve(true)
+    await flushPromises()
+    expect(status.text()).toBe(zh.copiedPath)
   })
 })
 

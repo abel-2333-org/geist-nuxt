@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import CopyButtonContract from '../components/CopyButton.vue'
+import ApiDocsCodeBlockContract from '../components/api-docs/CodeBlock.vue'
+import ApiDocsOperationTargetContract from '../components/api-docs/OperationTarget.vue'
+
 const variants = [{
   language: 'json',
   code: '{ "ok": true }',
@@ -28,6 +32,45 @@ function copyApiContract() {
   const linkPromise = copyLink('amount', { successMessage: 'Amount link copied' })
   return Promise.all([copyPromise, linkPromise])
 }
+
+type CopyButtonProps = InstanceType<typeof CopyButtonContract>['$props']
+type CodeBlockProps = InstanceType<typeof ApiDocsCodeBlockContract>['$props']
+type OperationTargetProps = InstanceType<typeof ApiDocsOperationTargetContract>['$props']
+
+// Compile-only component API probes. They are not invoked.
+function componentApiContract() {
+  const copyButton: CopyButtonProps = {
+    value: 'legacy',
+    // @ts-expect-error clean-cut contract: toastLabel was removed
+    toastLabel: 'Value',
+  }
+  const codeBlock: CodeBlockProps = {
+    labels: {
+      // @ts-expect-error clean-cut contract: copyToast was removed
+      copyToast: 'Code',
+    },
+  }
+  const copyToast: OperationTargetProps = {
+    hosts: legacyHosts,
+    path: '/v1/test',
+    // @ts-expect-error clean-cut contract: copyToastLabel was removed
+    copyToastLabel: 'Endpoint',
+  }
+  const hostToast: OperationTargetProps = {
+    hosts: legacyHosts,
+    path: '/v1/test',
+    // @ts-expect-error clean-cut contract: hostToastLabel was removed
+    hostToastLabel: 'Host',
+  }
+  const pathToast: OperationTargetProps = {
+    hosts: legacyHosts,
+    path: '/v1/test',
+    // @ts-expect-error clean-cut contract: pathToastLabel was removed
+    pathToastLabel: 'Path',
+  }
+  return [copyButton, codeBlock, copyToast, hostToast, pathToast]
+}
+
 const groups = [{
   label: 'API reference',
   sections: [{
@@ -57,17 +100,5 @@ const legacyHosts = [{ id: 'prod', label: 'Production', baseUrl: 'https://api.ex
       failure-message="Copy unavailable"
     />
 
-    <div v-if="false">
-      <!-- @vue-expect-error clean-cut contract: toastLabel was removed -->
-      <CopyButton value="legacy" toast-label="Value" />
-      <!-- @vue-expect-error clean-cut contract: copyToast was removed -->
-      <ApiDocsCodeBlock :labels="{ copyToast: 'Code' }" />
-      <!-- @vue-expect-error clean-cut contract: copyToastLabel was removed -->
-      <ApiDocsOperationTarget :hosts="legacyHosts" path="/v1/test" copy-toast-label="Endpoint" />
-      <!-- @vue-expect-error clean-cut contract: hostToastLabel was removed -->
-      <ApiDocsOperationTarget :hosts="legacyHosts" path="/v1/test" host-toast-label="Host" />
-      <!-- @vue-expect-error clean-cut contract: pathToastLabel was removed -->
-      <ApiDocsOperationTarget :hosts="legacyHosts" path="/v1/test" path-toast-label="Path" />
-    </div>
   </UContainer>
 </template>
