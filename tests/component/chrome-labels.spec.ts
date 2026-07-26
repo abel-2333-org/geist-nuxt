@@ -107,16 +107,26 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
-    // Identity and usage facts are separate zones: the status stays atomic in
-    // the facts zone while the field name retains the flexible width budget.
+    // Requiredness is part of the field signature, so developers learn whether
+    // the field may be omitted before scanning fallback or maturity metadata.
     const summary = wrapper.find('[data-field-summary]')
     const identity = wrapper.find('[data-field-identity]')
     const facts = wrapper.find('[data-field-facts]')
     expect(wrapper.classes()).toContain('@container/field')
     expect(identity.text()).toContain('gitSource')
     expect(identity.text()).toContain('object')
-    expect(facts.text()).toContain('Conditional')
+    expect(identity.find('[data-field-requiredness]').text()).toBe('Conditional')
+    expect(facts.text()).not.toContain('Conditional')
     expect(facts.findComponent(LifecycleBadge).exists()).toBe(true)
+  })
+
+  it('keeps requiredness beside the type when no trailing facts exist', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: { name: 'amount', type: 'integer', required: true },
+    })
+
+    expect(wrapper.find('[data-field-identity]').text()).toContain('amountintegerRequired')
+    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
   it('separates long identity content from defaults and lifecycle facts', async () => {

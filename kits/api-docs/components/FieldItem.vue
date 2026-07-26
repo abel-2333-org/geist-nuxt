@@ -32,8 +32,8 @@ export type {
 // field-level composition). Deep linking is handled by the kit's useFieldAnchor
 // composable (auto-imported).
 //
-// Anatomy:  summary row  ── anchor · identity (name/type/format) · facts
-//                           (requiredness/default/lifecycle); container-width
+// Anatomy:  summary row  ── anchor · signature (name/type/format/requiredness)
+//                           · trailing facts (default/lifecycle); container-width
 //                           responsive, optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → description →
 //                           caveat callout(s) → aligned fact band (enum →
@@ -208,9 +208,10 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     class="@container/field relative rounded-md border-b border-default py-3.5 outline-hidden last:border-b-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
-    <!-- The summary has two stable zones: identity answers “what is this?”,
-         facts answer “what must I know before using it?”. Container queries
-         make the row respond to its actual column width, including recursion. -->
+    <!-- The summary follows the developer's scan order: identity answers what
+         the field is and whether it may be omitted; trailing facts cover fallback
+         behavior and maturity. Container queries respond to the actual column
+         width, including recursive fields. -->
     <div class="group/field relative flex items-start gap-2">
       <button
         v-if="path"
@@ -238,18 +239,19 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           >{{ name }}</code>
           <span class="shrink-0 font-mono text-xs text-muted">{{ type }}</span>
           <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ format }}</span>
+          <span
+            v-if="requiredState"
+            data-field-requiredness
+            class="shrink-0 text-xs font-medium uppercase tracking-wide"
+            :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+          >{{ requiredLabel }}</span>
         </div>
 
         <div
-          v-if="requiredState || defaultValue !== undefined || lifecycle"
+          v-if="defaultValue !== undefined || lifecycle"
           data-field-facts
           class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 @md/field:justify-end"
         >
-          <span
-            v-if="requiredState"
-            class="text-xs font-medium uppercase tracking-wide"
-            :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
-          >{{ requiredLabel }}</span>
           <span v-if="defaultValue !== undefined" class="inline-flex min-w-0 items-center gap-1.5">
             <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
             <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
