@@ -224,7 +224,6 @@ const ackExample = {
     language: '语言',
     copy: '复制代码',
     copied: '已复制到剪贴板',
-    copyToast: '确认响应体',
     copySuccess: '确认响应体已复制。',
     copyFailure: '复制失败，请重试。',
     wrapOn: '启用自动换行',

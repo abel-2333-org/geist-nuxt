@@ -116,7 +116,15 @@ onMounted(() => anchor.initFromHash())
                 :hosts="paymentsHosts"
                 :path="paymentsEndpoint.path"
                 select-label="选择环境"
-                copy-toast-label="接口地址"
+                :labels="{
+                  copy: '复制完整地址',
+                  copied: '接口地址已复制',
+                  copyFailed: '复制失败，请手动复制地址',
+                  copyHost: '复制环境地址',
+                  copiedHost: '环境地址已复制',
+                  copyPath: '复制接口路径',
+                  copiedPath: '接口路径已复制',
+                }"
               />
             </ApiDocsOperationHeader>
 

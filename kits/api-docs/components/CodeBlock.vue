@@ -50,8 +50,6 @@ export interface ApiCodeLabels {
   language?: string
   copy?: string
   copied?: string
-  /** Object name used in the copy toast, e.g. 'Code' → "Code copied…". */
-  copyToast?: string
   /** Complete localized success/failure toast sentences. */
   copySuccess?: string
   copyFailure?: string
@@ -102,7 +100,6 @@ const t = computed<ResolvedApiCodeLabels>(() => ({
   language: 'Language',
   copy: 'Copy code',
   copied: 'Copied to clipboard',
-  copyToast: 'Code',
   wrapOn: 'Turn on line wrap',
   wrapOff: 'Turn off line wrap',
   emptyTitle: 'No example available',
@@ -224,7 +221,6 @@ const wrap = useCodeWrap(props.defaultWrap)
         <CopyButton
           v-if="hasContent"
           :value="current?.code ?? ''"
-          :toast-label="t.copyToast"
           :success-message="t.copySuccess"
           :failure-message="t.copyFailure"
           :label="t.copy"
