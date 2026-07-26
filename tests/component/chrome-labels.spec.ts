@@ -107,9 +107,32 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
-    // The status must read as part of the same line box, so the summary row
-    // centers its items instead of baseline/stretch-aligning them.
-    expect(wrapper.find('.group\\/field > div').classes()).toContain('items-center')
+    // Identity and usage facts are separate zones: the status stays atomic in
+    // the facts zone while the field name retains the flexible width budget.
+    const summary = wrapper.find('[data-field-summary]')
+    const identity = wrapper.find('[data-field-identity]')
+    const facts = wrapper.find('[data-field-facts]')
+    expect(wrapper.classes()).toContain('@container/field')
+    expect(identity.text()).toContain('gitSource')
+    expect(identity.text()).toContain('object')
+    expect(facts.text()).toContain('Conditional')
+    expect(facts.findComponent(LifecycleBadge).exists()).toBe(true)
+  })
+
+  it('separates long identity content from defaults and lifecycle facts', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'an_uninterrupted_field_name_that_must_keep_its_own_width_budget',
+        type: 'string',
+        format: 'vendor-specific-format-with-a-long-name',
+        defaultValue: 'a-default-value-that-must-wrap-within-the-facts-zone',
+        lifecycle: { status: 'new' as const },
+      },
+    })
+
+    expect(wrapper.find('[data-field-identity] code').classes()).toContain('wrap-anywhere')
+    expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
+    expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,1fr)_auto]')
   })
 })
 

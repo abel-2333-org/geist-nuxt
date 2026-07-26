@@ -32,11 +32,11 @@ export type {
 // field-level composition). Deep linking is handled by the kit's useFieldAnchor
 // composable (auto-imported).
 //
-// Anatomy:  summary row  ── anchor · name · type · format · requiredness
-//                           (required/conditional only; optional is unmarked) ·
-//                           default · lifecycle badge
+// Anatomy:  summary row  ── anchor · identity (name/type/format) · facts
+//                           (requiredness/default/lifecycle); container-width
+//                           responsive, optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → description →
-//                           caveat callout(s) → secondary band (enum →
+//                           caveat callout(s) → aligned fact band (enum →
 //                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 //           composition  ── field-level oneOf/anyOf/allOf delegated to
@@ -205,16 +205,13 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 <template>
   <div
     :id="path"
-    class="relative rounded-md border-b border-default py-3.5 outline-hidden last:border-b-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
+    class="@container/field relative rounded-md border-b border-default py-3.5 outline-hidden last:border-b-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
-    <!-- Summary row — always visible. Owns the hover group so the anchor icon
-         reveals only for THIS row; child rows are siblings (in the collapsible
-         below), not descendants, so hovering a child no longer lights up every
-         ancestor's icon. -->
-    <div class="group/field relative flex items-start gap-x-2">
-      <!-- Anchor affordance (desktop) — hangs in the left gutter, revealed on
-           hover or when this row is active; pinned to the field-name line. -->
+    <!-- The summary has two stable zones: identity answers “what is this?”,
+         facts answer “what must I know before using it?”. Container queries
+         make the row respond to its actual column width, including recursion. -->
+    <div class="group/field relative flex items-start gap-2">
       <button
         v-if="path"
         type="button"
@@ -229,59 +226,44 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           aria-hidden="true"
         />
       </button>
-      <!-- No per-row live region: useCopy() already fires an app-level toast
-           ("Link copied to clipboard") announced through Nuxt UI's single
-           polite live region, and each button reflects the copied state via its
-           own aria-label. A per-row status node would be a third, redundant
-           announcement (and dozens of empty regions on a large table). -->
 
-      <!-- Metadata owns wrapping; the mobile action remains a fixed sibling.
-           Field identity is Label 14; type / requirement / lifecycle share one
-           Label 12 tier centered within the same 20px summary line box. -->
-      <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1.5">
-        <code
-          class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
-          :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
-        >{{ name }}</code>
-        <!-- Data type (string, integer, object, enum…): plain mono text, no
-             surface/border, so it never competes with status badges. -->
-        <span class="font-mono text-xs text-muted">{{ type }}</span>
+      <div
+        data-field-summary
+        class="grid min-w-0 flex-1 gap-2 @md/field:grid-cols-[minmax(0,1fr)_auto] @md/field:items-start @md/field:gap-x-4"
+      >
+        <div data-field-identity class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+          <code
+            class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
+            :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
+          >{{ name }}</code>
+          <span class="shrink-0 font-mono text-xs text-muted">{{ type }}</span>
+          <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ format }}</span>
+        </div>
 
-        <span
-          v-if="format"
-          class="font-mono text-xs text-dimmed"
-        >{{ format }}</span>
-
-        <!-- Optional is unmarked; required/conditional stay on one strength axis. -->
-        <span
-          v-if="requiredState"
-          class="text-xs font-medium uppercase tracking-wide"
-          :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+        <div
+          v-if="requiredState || defaultValue !== undefined || lifecycle"
+          data-field-facts
+          class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 @md/field:justify-end"
         >
-          {{ requiredLabel }}
-        </span>
-
-        <span v-if="defaultValue !== undefined" class="inline-flex items-center gap-1.5">
-          <span class="text-xs font-medium uppercase tracking-wide text-dimmed">
-            {{ t.default }}
+          <span
+            v-if="requiredState"
+            class="text-xs font-medium uppercase tracking-wide"
+            :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+          >{{ requiredLabel }}</span>
+          <span v-if="defaultValue !== undefined" class="inline-flex min-w-0 items-center gap-1.5">
+            <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
+            <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
           </span>
-          <InlineCode>{{ defaultValue }}</InlineCode>
-        </span>
-
-        <!-- `md` supplies Label 12 (text-xs), a size-4 icon, and the matching
-             horizontal rhythm. The consumption site only restores two FieldItem
-             contracts: py-0.5 keeps the badge inside the Label 14 row's 20px
-             line box; rounded-sm keeps badges on Geist's 6px control tier. -->
-        <ApiDocsLifecycleBadge
-          v-if="lifecycle"
-          :status="lifecycle.status"
-          :label="labels?.lifecycle?.[lifecycle.status]"
-          size="md"
-          class="shrink-0 rounded-sm py-0.5"
-        />
+          <ApiDocsLifecycleBadge
+            v-if="lifecycle"
+            :status="lifecycle.status"
+            :label="labels?.lifecycle?.[lifecycle.status]"
+            size="md"
+            class="shrink-0 rounded-sm py-0.5"
+          />
+        </div>
       </div>
 
-      <!-- Touch action stays on the first line and outside metadata wrapping. -->
       <button
         v-if="path"
         type="button"
@@ -313,21 +295,16 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <!-- 1. Deprecation — migration note for deprecated fields. Plain text
            (not a tinted callout): the strikethrough + badge already carry the
            state; the amber callout shape stays reserved for the condition. -->
-      <p
+      <dl
         v-if="isDeprecated && hasLifecycleCallout && lifecycle"
-        class="text-sm leading-relaxed text-muted"
+        class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
       >
-        <!-- Lead-in is SINCE (the version marker), NOT the status word: the
-             summary badge already carries "Deprecated"; SINCE explains what
-             the number means. Neutral like every other metadata lead-in — a
-             timestamp is not a status. Label omitted when there's no version. -->
-        <span
-          v-if="lifecycle.since"
-          class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
-        >{{ t.since }}</span>
-        <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
-        <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
-      </p>
+        <dt v-if="lifecycle.since" class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
+        <dd class="wrap-anywhere min-w-0" :class="{ 'col-span-2': !lifecycle.since }">
+          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+          <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
+        </dd>
+      </dl>
 
       <!-- 2. Condition — the amber family is graded by FILL, not by hue, so a
            field that is conditional + beta + caveated never reads as one amber
@@ -394,18 +371,15 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
              bordered table with a "(1)" counter is disproportionate chrome for
              one sentence. Downgrading to inline is MORE consistent with the
              band, whose other single-fact rows are all "LABEL + text". -->
-        <p
+        <dl
           v-if="constraints.length === 1 && constraints[0]"
-          class="text-sm leading-relaxed"
+          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
         >
-          <!-- Always neutral: a constraint is enforced, so breaking it fails
-               validation loudly rather than silently. Amber here would compete
-               with the caveat above, which is the note that actually needs it. -->
-          <span
-            class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
-          >{{ constraints[0].label ?? t.note }}</span>
-          <InlineMarkdown :text="constraints[0].text" />
-        </p>
+          <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ constraints[0].label ?? t.note }}</dt>
+          <dd class="wrap-anywhere min-w-0 text-toned">
+            <InlineMarkdown :text="constraints[0].text" />
+          </dd>
+        </dl>
 
         <!-- 3b. Multiple constraints — NOW the table earns its chrome: column
              alignment across rows and hairline dividers let you scan them.
@@ -435,32 +409,26 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           </dl>
         </div>
 
-        <!-- 4. Example — its own line, inline lead-in label + code. -->
-        <p v-if="examples?.length" class="text-sm leading-relaxed">
-          <span class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.example }}</span>
-          <InlineCode v-for="(ex, i) in examples" :key="i" :class="i > 0 ? 'ml-2' : ''">{{ ex }}</InlineCode>
-        </p>
-
-        <!-- 5. Lifecycle (new/beta) — maturity context, last. Inline lead-in
-             label matching the constraint language; the summary badge carries
-             glance. Deprecated renders at position 0 instead (see above). -->
-        <p
-          v-if="!isDeprecated && hasLifecycleCallout && lifecycle"
-          class="text-sm leading-relaxed text-muted"
+        <dl
+          v-if="examples?.length"
+          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
         >
-          <!-- Lead-in is SINCE (the version marker), NOT the status word: the
-               summary badge already carries "New/Beta/Deprecated", so repeating
-               it here is noise. It is also neutral, not badge-tinted: the badge
-               answers "what state is this in", this row answers "when did that
-               happen, and what do I do next" — one meaning, one channel.
-               Label omitted when there's no version. -->
-          <span
-            v-if="lifecycle.since"
-            class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
-          >{{ t.since }}</span>
-          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
-          <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
-        </p>
+          <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.example }}</dt>
+          <dd class="flex min-w-0 flex-wrap gap-2">
+            <InlineCode v-for="(ex, i) in examples" :key="i" class="wrap-anywhere min-w-0">{{ ex }}</InlineCode>
+          </dd>
+        </dl>
+
+        <dl
+          v-if="!isDeprecated && hasLifecycleCallout && lifecycle"
+          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
+        >
+          <dt v-if="lifecycle.since" class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
+          <dd class="wrap-anywhere min-w-0" :class="{ 'col-span-2': !lifecycle.since }">
+            <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+            <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
+          </dd>
+        </dl>
       </div>
     </div>
 
@@ -492,7 +460,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       </template>
 
       <template #content>
-        <div class="mt-1 border-s border-default ps-4">
+        <div class="mt-1 border-s border-default ps-3 @sm/field:ps-4">
           <ApiDocsFieldItem
             v-for="child in children"
             :key="child.path ?? child.name"

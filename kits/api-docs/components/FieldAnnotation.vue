@@ -94,16 +94,19 @@ function jump(close: () => void) {
     <slot>{{ node.name }}</slot>
 
     <template #content>
-      <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <InlineCode>{{ node.name }}</InlineCode>
-        <span class="font-mono text-xs text-muted">{{ node.type }}</span>
-        <span v-if="node.required === true" class="text-xs font-medium text-error">
-          {{ t.required }}
-        </span>
-        <span v-else-if="node.required === 'conditional'" class="text-xs font-medium text-warning">
-          {{ t.conditional }}
-        </span>
-      </p>
+      <div class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+        <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}</InlineCode>
+        <span class="shrink-0 font-mono text-xs text-muted">{{ node.type }}</span>
+        <span v-if="node.format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ node.format }}</span>
+        <span
+          v-if="node.required === true"
+          class="text-xs font-medium uppercase tracking-wide text-error"
+        >{{ t.required }}</span>
+        <span
+          v-else-if="node.required === 'conditional'"
+          class="text-xs font-medium uppercase tracking-wide text-warning"
+        >{{ t.conditional }}</span>
+      </div>
       <p v-if="node.description" class="line-clamp-4 leading-relaxed text-muted">
         <InlineMarkdown :text="node.description" />
       </p>
