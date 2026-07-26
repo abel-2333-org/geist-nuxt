@@ -28,7 +28,7 @@
 | `components/CodeRail.vue` | `<ApiDocsCodeRail>` | 纵向双例码轨道：上下两栏（典型为 Request/Response）+ 可拖横向把手 + 内容优先重分配；耦合本 kit 代码卡内部 DOM（`.code-surface`/`pre.raw-pre`）量自然高，故归 kit 而非 foundation；`storage-key` prop 让多实例互不串扰；把手 aria-label 经 `resize-label` prop 可本地化（同 `SidebarNav` 惯例） | 本页「可拖动分栏」 |
 | `components/EnumTable.vue` | `<ApiDocsEnumTable>` | enum 值表（扁平 `values` + 分组 `variants` 两种形态，标题常带计数 `(N)` 与约束表对称，长表带筛选+滚动；传 `defaultValue` 则该行尾标 Default，与字段行的 DEFAULT pill 连线）；结构文案 `label`/`default-label`/`search-placeholder`/`empty-label` 与未命名 variant 兜底 `variant-label`（函数，收 0 基 index，默认 `Option N`）均可覆盖（i18n） | — |
 | `components/FieldGroup.vue` | `<ApiDocsFieldGroup>` | 字段分组容器：mono 大写组标题（`heading-level` 定层级，默认 `<h2>`）+ 可选计数，包裹一列字段行 | — |
-| `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件做成淡琥珀色容纳 callout（左琥珀边 + `bg-warning/10` + 琥珀分支图标）——把琥珀收进一个有边界的块，与 Beta 徽章成两个独立琥珀物件而非散落；单条约束降级为 inline 行（`LABEL + 文本`，不套带框表格，≥2 条才升级成带计数的表），lifecycle callout 引导标签用 `SINCE`（版本标记，不复读徽章里的状态词，保留 tone 颜色回连徽章）；new/beta 保持在 band 末位;深链接由 `useFieldAnchor` 驱动。字段值本身是 oneOf/anyOf/allOf 时,`composition` prop 在子字段之后委托 `<ApiDocsSchemaComposition>` 渲染，`FieldItemLabels.composition` 注入其 chrome。数据模型 `FieldNode`/`FieldNote`/`FieldItemLabels` 及 composition 类型族全部下沉到 `utils/field.ts`(kit auto-import,组件裸引用),`EnumValue`/`EnumVariant` 来自 `utils/enum.ts`、`FieldLifecycle` 来自 `utils/lifecycle-preset.ts`;全部 chrome(含内部 LifecycleBadge / EnumTable / SchemaComposition 与递归子行)经单个 `labels` 对象本地化,见「Display-model seam → FieldItem 的通用交互约束」 | — |
+| `components/FieldItem.vue` | `<ApiDocsFieldItem>` | 递归字段行：名/类型/必填标记（只标 Required/Conditional，可选缺省不标——省略即可选）/默认值/条件/enum/约束注记/lifecycle + 可折叠子字段；门控前置到**描述之前**、按强度排序：deprecated 迁移提示（该不该用）最先，其次条件 callout（何时必填），然后才是描述；条件行只用左琥珀边（无填充、无图标），caveat 用左琥珀边 + `bg-warning/10` 填充并排在 description 之后——琥珀按填充度分级，条件最轻、caveat 最重；注记按 `FieldNote.kind` 分流：constraint 中性进 band（单条降级为 inline `LABEL + 文本`，≥2 条才升级成带计数的表），caveat 走上方填充 callout 且不计入 `Constraints (N)`；lifecycle callout 引导标签用 `SINCE`（版本标记，恒中性，不复读徽章里的状态词也不借用其状态色）；new/beta 保持在 band 末位;深链接由 `useFieldAnchor` 驱动。字段值本身是 oneOf/anyOf/allOf 时,`composition` prop 在子字段之后委托 `<ApiDocsSchemaComposition>` 渲染，`FieldItemLabels.composition` 注入其 chrome。数据模型 `FieldNode`/`FieldNote`/`FieldItemLabels` 及 composition 类型族全部下沉到 `utils/field.ts`(kit auto-import,组件裸引用),`EnumValue`/`EnumVariant` 来自 `utils/enum.ts`、`FieldLifecycle` 来自 `utils/lifecycle-preset.ts`;全部 chrome(含内部 LifecycleBadge / EnumTable / SchemaComposition 与递归子行)经单个 `labels` 对象本地化,见「Display-model seam → FieldItem 的通用交互约束」 | — |
 | `components/SchemaComposition.vue` | `<ApiDocsSchemaComposition>` | 忠实呈现 OpenAPI / JSON Schema 的 `oneOf`/`anyOf`/`allOf`:oneOf 用 `UTabs`(`unmount-on-hide=false` 保留隐藏 panel DOM,深链接可揭示)、anyOf 用可折叠分区、allOf 全展开;discriminator 合成为每个 variant 的**首行真实字段**(而非扁平化丢失语义);variant 递归(variant 内可再嵌 composition),`heading-level` 定标题层级;chrome 文案(kind 眉标 / hint / discriminator 描述工厂 / 空态)经 `labels` 本地化,`field-labels` 透传给内部字段行。字段行渲染委托 `ApiDocsFieldItem`,故切片依赖它 | `schema-composition.md` |
 | `components/FieldAnnotation.vue` | `<ApiDocsFieldAnnotation>` | Annotation 家族的**字段形态**(壳在 foundation `AnnotationPopover`,与概念形态 `TermAnnotation` / 文档形态 `DocAnnotation` 同族;字段形态因绑 `FieldNode`+`useFieldAnchor` 落本 kit):把字段引用嵌进叙事文本,hover/click 预览字段摘要(名/类型/必填/描述),动作深链接到字段行。两种绑定——`field` 直传 `FieldNode`,或 `field-ref` 经 `useFieldSource`(随切片分发的 provide/inject)解析(叙事 markdown 只引 id);同页 ref 省略 `page`,委托 `useFieldAnchor` 滚动+展开祖先+高亮;跨页 ref 声明 `page`,渲染为 `{page}#{path}` 链接,目标页 `initFromHash()` 接管。未命中 ref **降级为纯文本**(同 TermAnnotation 策略),chrome 文案经 `labels`(继承 `AnnotationPopoverLabels`)本地化。依赖 `api-docs-field-item`(带入 `FieldNode`+`useFieldAnchor` 闭包)+ 三个 foundation item | 本页「Display-model seam」 |
 | `components/SiteSearch.vue` | `<ApiDocsSiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
@@ -231,9 +231,18 @@ gallery 有**七个 api-docs demo 页，职责互补**：
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 - **配色按含义分配（跨 FieldItem 全体生效）**：
   - **必填强度轴**：红=REQUIRED（硬必填）、琥珀=`CONDITIONAL`（仅特定情况必填）、无标记=optional。conditional 用琥珀**不是中性**——它和 red 同属"必填强度轴"的一档，若洗成中性会混进旁边 type/format 那些说明性灰字里，读者分不清它是"必填态的一档"还是"又一个类型注记"。
-  - **琥珀="有前提/需留意"**：`CONDITIONAL` 标签、条件 callout、成熟度 beta、caution 约束。同一字段 conditional + beta 也不糊，靠**形态区分**：条件是琥珀 callout **块**、summary row 的 CONDITIONAL 是琥珀**文字标签**且指向下方那个块（label → block 同义呼应）、beta 是**徽章**。三种形态各异，不会读成"一片琥珀"。真正要避免的是"两个**无关**含义共用一色"，同一含义的多形态呼应不算过载。
-  - 紫=交互（锚点、展开、focus 环）；中性灰阶=类型、format、SINCE 版本号等纯说明性元数据。
-  - **约束注记（`FieldNote.tone`）的使用边界**：普通校验规则（长度、字符集、格式）一律**中性**（省略 tone）——违反它只是校验失败，没有隐藏的坑，和 RANGE 同性质；`caution`（琥珀）只留给**行为性 caveat**——请求不会被拒绝、但不知道就会踩坑的注记（如"值明文存储，勿放秘密""对 preview 部署不生效"）。给格式规则标 caution 属于误用，会稀释琥珀轴。
+  - **琥珀="有前提/需留意"，按填充度分级**：同一字段可能同时 conditional + beta + 带 caveat，不糊的办法是**用形态和填充度做阶梯，色相只表达"需留意"**，从轻到重四级：
+    1. `CONDITIONAL`——琥珀**文字标签**（summary row），指向下方条件行（label → block 同义呼应）。
+    2. 条件行——琥珀**左边框、无填充、无图标**。它陈述的是"何时必填"这个**事实**，不是风险，所以是最轻的琥珀物件；边框 + 底色 + 图标三重强调属于重复表达，已移除后两项。
+    3. caveat callout——琥珀左边框 **+ 浅填充**，行内最重的琥珀物件；它是唯一可能真正造成代价（秘密泄露、数据丢失）的一类。
+    4. `Beta`——**徽章**。
+    要避免的是"两个**无关**含义共用一色"，同一含义的多形态呼应不算过载。
+  - 紫=交互（锚点、展开、focus 环）；中性灰阶=类型、format、SINCE 等纯说明性元数据。
+  - **`SINCE` 恒中性**：SINCE 标签、版本号、后跟说明**一律中性灰**，不随 lifecycle 状态变色。分工是：**徽章回答"现在是什么状态"，SINCE 行回答"何时发生、接下来怎么办"**。给 SINCE 上状态色会让同一含义占两个通道，并把一个纯时间标记读成状态标签。
+  - **注记分类（`FieldNote.kind`）：caveat 不是 constraint**。两者是不同语义，不能共用一个标题：
+    - `constraint`（默认）= **系统强制的输入边界**（长度、字符集、格式、checksum）。违反它只是校验失败，没有隐藏的坑 → **中性**，进 band 的单行 CONSTRAINT / 多条 `Constraints (N)` 表。
+    - `caveat` = **行为性风险**。请求会成功，但不知道就会踩坑（如"值明文存储，勿放秘密""对 preview 部署不生效"）→ **琥珀填充 callout**，位置在 description 之后、band 之前（先知道字段是什么，才能衡量它的风险）。
+    caveat **不得**汇入 `Constraints (N)` 标题下，否则会把它误标为一条校验边界——而它恰恰不是。旧的 `tone: 'caution'` 仅作**兼容别名**解析为 `kind: 'caveat'`（copy-in 消费方不断），新数据不要再用。
 
 ### 页面级结构 / 语义（review 沉淀）
 

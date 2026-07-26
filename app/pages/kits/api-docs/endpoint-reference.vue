@@ -414,7 +414,8 @@ const bodyFields = [
     lifecycle: { status: 'new' as const, since: 'v2.5' },
     description: 'Arbitrary key/value metadata attached to the deployment.',
     notes: [
-      { tone: 'caution' as const, label: 'Caveat', text: 'Values are stored in plain text — do not put secrets here.' },
+      { label: 'Range', text: 'Up to 16 keys.' },
+      { kind: 'caveat' as const, label: 'Caveat', text: 'Values are stored in plain text — do not put secrets here.' },
     ],
     children: [
       { path: 'req_meta_key', name: 'key', type: 'string', required: true, notes: [{ label: 'Range', text: 'Up to 64 characters.' }] },

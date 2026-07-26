@@ -31,12 +31,36 @@ export interface FieldLifecycleInfo {
   description?: string
 }
 
+/**
+ * Note category. It drives BOTH grouping and color, so a doc author cannot file
+ * a caveat under the "Constraints" heading by accident:
+ *   constraint — an enforced input boundary (length, charset, format). Breaking
+ *                it fails validation, so there is no hidden trap: neutral, and
+ *                it belongs in the scannable constraints row/table.
+ *   caveat     — the value IS accepted, but there is behaviour you would regret
+ *                not knowing ("stored in plain text", "ignored on preview
+ *                deployments"). Amber, and read right after the description.
+ */
+export type FieldNoteKind = 'constraint' | 'caveat'
+
 /** A short note shown under a field (constraints, consistency rules, caveats…). */
 export interface FieldNote {
+  /** Defaults to `constraint`. */
+  kind?: FieldNoteKind
+  /**
+   * @deprecated Use `kind`. Retained so copy-in consumers keep compiling:
+   * `caution` resolves to `caveat`, `info`/absent to `constraint`.
+   */
   tone?: 'caution' | 'info'
   /** Category tag (Range / Rule / Unsupported…) rendered as a leading pill. */
   label?: string
   text: string
+}
+
+/** Single resolution point for the deprecated `tone` → `kind` bridge, so the
+ *  legacy spelling is normalized once instead of at every render site. */
+export function resolveNoteKind(note: FieldNote): FieldNoteKind {
+  return note.kind ?? (note.tone === 'caution' ? 'caveat' : 'constraint')
 }
 
 /**
@@ -93,8 +117,10 @@ export interface FieldItemLabels {
   default?: string
   example?: string
   constraints?: string
-  /** Fallback category tag for a note without its own `label`. */
+  /** Fallback category tag for a constraint note without its own `label`. */
   note?: string
+  /** Fallback category tag for a caveat note without its own `label`. */
+  caveat?: string
   /** Lead-in before a lifecycle `since` version, e.g. "Since v2.3". */
   since?: string
   showChildren?: string

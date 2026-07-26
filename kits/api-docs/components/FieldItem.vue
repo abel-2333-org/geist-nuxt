@@ -35,8 +35,8 @@ export type {
 // Anatomy:  summary row  ── anchor · name · type · format · requiredness
 //                           (required/conditional only; optional is unmarked) ·
 //                           default · lifecycle badge
-//           leaf detail  ── condition callout (if any) → description +
-//                           secondary band (deprecation-first → enum →
+//           leaf detail  ── deprecation note → condition rule → description →
+//                           caveat callout(s) → secondary band (enum →
 //                           constraints → example → new/beta lifecycle callout)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 //           composition  ── field-level oneOf/anyOf/allOf delegated to
@@ -82,6 +82,7 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   example: 'Example',
   constraints: 'Constraints',
   note: 'Note',
+  caveat: 'Caveat',
   since: 'Since',
   showChildren: 'Show Child Parameters',
   hideChildren: 'Hide Child Parameters',
@@ -145,6 +146,14 @@ const hasLifecycleCallout = computed(
   () => !!props.lifecycle && (!!props.lifecycle.since || !!props.lifecycle.description),
 )
 
+// Notes are split by category BEFORE rendering. A caveat is a behavioural
+// warning that earns its own amber callout next to the description; a
+// constraint is neutral, scannable metadata that belongs in the band. Merging
+// them under one "Constraints" heading mislabels the caveat as a validation
+// boundary, which is the one thing it is not.
+const constraints = computed(() => (props.notes ?? []).filter(n => resolveNoteKind(n) === 'constraint'))
+const caveats = computed(() => (props.notes ?? []).filter(n => resolveNoteKind(n) === 'caveat'))
+
 const hasDetail = computed(
   () =>
     !!props.description
@@ -175,7 +184,7 @@ const requiredLabel = computed(() => (requiredState.value ? t.value[requiredStat
 const hasSecondary = computed(
   () =>
     hasEnum.value
-    || (props.notes?.length ?? 0) > 0
+    || constraints.value.length > 0
     || (props.examples?.length ?? 0) > 0
     || (hasLifecycleCallout.value && !isDeprecated.value),
 )
@@ -186,25 +195,11 @@ const hasSecondary = computed(
 // de-emphasis, not an error.
 const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
-// Field-lifecycle tone, rendered as a plain-text metadata row (no filled box)
-// so it shares one visual language with the constraint rows. The tone comes
-// from the shared lifecyclePreset (single source of truth with the badge);
-// here we only translate the semantic tone into a text color. The preset's
-// status label is NOT used in the callout — its lead-in is SINCE, and the
-// status word lives exclusively on the badge.
-const TONE_TEXT: Record<BadgeTone, string> = {
-  success: 'text-success',
-  warning: 'text-warning',
-  neutral: 'text-dimmed',
-  error: 'text-error',
-  info: 'text-info',
-  secondary: 'text-secondary',
-}
-const lifecycleMeta = computed(() => {
-  if (!props.lifecycle) return undefined
-  const preset = lifecyclePreset[props.lifecycle.status]
-  return { cls: TONE_TEXT[preset.tone] }
-})
+// SINCE is deliberately NOT tinted by lifecycle status. It answers "when did
+// this happen", not "how risky is this" — the status hue belongs to the badge
+// alone. Tinting SINCE too made one meaning speak through two channels and let
+// a bare version number read as a state word, which is also why the lifecycle
+// row now renders as neutral metadata like DEFAULT and EXAMPLE.
 </script>
 
 <template>
@@ -319,43 +314,55 @@ const lifecycleMeta = computed(() => {
            (not a tinted callout): the strikethrough + badge already carry the
            state; the amber callout shape stays reserved for the condition. -->
       <p
-        v-if="isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
+        v-if="isDeprecated && hasLifecycleCallout && lifecycle"
         class="text-sm leading-relaxed text-muted"
       >
         <!-- Lead-in is SINCE (the version marker), NOT the status word: the
              summary badge already carries "Deprecated"; SINCE explains what
-             the number means. Label omitted when there's no version. -->
+             the number means. Neutral like every other metadata lead-in — a
+             timestamp is not a status. Label omitted when there's no version. -->
         <span
           v-if="lifecycle.since"
-          class="mr-2 text-xs font-medium uppercase tracking-wide"
-          :class="lifecycleMeta.cls"
+          class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
         >{{ t.since }}</span>
         <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
         <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
       </p>
 
-      <!-- 2. Condition — contained in a tinted callout so amber reads as one
-           bounded object (the rule), not a scattered wash — this keeps
-           amber's single meaning ("has strings attached": beta, caution,
-           condition) intact even when a field is conditional + beta.
-           The summary-row CONDITIONAL tag is amber too — a same-meaning echo
-           pointing at this block (label → block). Disambiguation from beta is
-           carried by SHAPE (text tag / callout block / badge), not by hue. -->
+      <!-- 2. Condition — the amber family is graded by FILL, not by hue, so a
+           field that is conditional + beta + caveated never reads as one amber
+           wash: text tag (CONDITIONAL) → bordered rule (this) → filled callout
+           (caveat) → badge (Beta). This rule is the LIGHTEST amber object,
+           which is correct: it states a fact about requiredness, not a risk.
+           Dropping the branch icon and the tint also removes the third
+           redundant emphasis (border + fill + icon all said "look here") and
+           with it a hardcoded optical-centering height. -->
       <div
         v-if="condition"
-        class="flex items-start gap-2 rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
+        class="border-l-2 border-warning ps-3 text-sm leading-relaxed text-toned"
       >
-        <!-- Icon optically centered on the first line (which often holds a
-             taller inline code pill); items-start keeps it top-aligned when the
-             condition wraps. Amber matches the callout it lives in. -->
-        <span class="flex h-[1.6875rem] shrink-0 items-center" aria-hidden="true">
-          <UIcon name="i-lucide-git-branch" class="size-3.5 text-warning" />
-        </span>
         <InlineMarkdown :text="condition" />
       </div>
 
       <p v-if="description" class="text-sm leading-relaxed text-toned">
         <InlineMarkdown :text="description" />
+      </p>
+
+      <!-- 3. Caveats — "the call will succeed, and you may still regret it".
+           Ranked ABOVE the band because a caveat is usually a security or
+           data-loss consequence, and BELOW the description because you have to
+           know what the field is before you can weigh its risk. The filled
+           amber surface makes it the heaviest amber object on the row, which
+           is the point: this is the one that can cost you something. -->
+      <p
+        v-for="(note, i) in caveats"
+        :key="i"
+        class="rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
+      >
+        <span class="mr-2 text-xs font-medium uppercase tracking-wide text-warning">
+          {{ note.label ?? t.caveat }}
+        </span>
+        <InlineMarkdown :text="note.text" />
       </p>
 
       <!-- Secondary metadata band, ordered by a developer's call-time flow:
@@ -388,38 +395,37 @@ const lifecycleMeta = computed(() => {
              one sentence. Downgrading to inline is MORE consistent with the
              band, whose other single-fact rows are all "LABEL + text". -->
         <p
-          v-if="notes?.length === 1 && notes[0]"
+          v-if="constraints.length === 1 && constraints[0]"
           class="text-sm leading-relaxed"
         >
+          <!-- Always neutral: a constraint is enforced, so breaking it fails
+               validation loudly rather than silently. Amber here would compete
+               with the caveat above, which is the note that actually needs it. -->
           <span
-            class="mr-2 text-xs font-medium uppercase tracking-wide"
-            :class="notes[0].tone === 'caution' ? 'text-warning' : 'text-dimmed'"
-          >{{ notes[0].label ?? t.note }}</span>
-          <InlineMarkdown :text="notes[0].text" />
+            class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
+          >{{ constraints[0].label ?? t.note }}</span>
+          <InlineMarkdown :text="constraints[0].text" />
         </p>
 
         <!-- 3b. Multiple constraints — NOW the table earns its chrome: column
              alignment across rows and hairline dividers let you scan them.
              Two columns: a fit-content label column (tone carried by label
              color, unsupported = amber) and the value. -->
-        <div v-else-if="notes && notes.length > 1" class="space-y-2">
+        <div v-else-if="constraints.length > 1" class="space-y-2">
           <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
             {{ t.constraints }}
-            <span class="text-dimmed/70">({{ notes.length }})</span>
+            <span class="text-dimmed/70">({{ constraints.length }})</span>
           </p>
           <!-- One shared grid: the label column is sized once to the widest
                label across all rows (capped at 8rem) via subgrid, so every
                value starts at the same x. -->
           <dl class="grid grid-cols-[fit-content(8rem)_1fr] gap-x-4 divide-y divide-default overflow-hidden rounded-lg border border-default">
             <div
-              v-for="(note, i) in notes"
+              v-for="(note, i) in constraints"
               :key="i"
               class="col-span-2 grid grid-cols-subgrid items-baseline gap-y-1 bg-muted/40 px-3 py-2.5 text-sm leading-relaxed"
             >
-              <dt
-                class="min-w-0 text-xs font-medium uppercase tracking-wide"
-                :class="note.tone === 'caution' ? 'text-warning' : 'text-dimmed'"
-              >
+              <dt class="min-w-0 text-xs font-medium uppercase tracking-wide text-dimmed">
                 {{ note.label ?? t.note }}
               </dt>
               <dd class="min-w-0 text-toned">
@@ -439,19 +445,18 @@ const lifecycleMeta = computed(() => {
              label matching the constraint language; the summary badge carries
              glance. Deprecated renders at position 0 instead (see above). -->
         <p
-          v-if="!isDeprecated && hasLifecycleCallout && lifecycle && lifecycleMeta"
+          v-if="!isDeprecated && hasLifecycleCallout && lifecycle"
           class="text-sm leading-relaxed text-muted"
         >
           <!-- Lead-in is SINCE (the version marker), NOT the status word: the
                summary badge already carries "New/Beta/Deprecated", so repeating
-               it here is noise. SINCE actually explains what the number means,
-               and keeping the badge's tone color on it ties the callout back to
-               the badge without duplicating the word. Label omitted when there's
-               no version (a description-only note stands on its own). -->
+               it here is noise. It is also neutral, not badge-tinted: the badge
+               answers "what state is this in", this row answers "when did that
+               happen, and what do I do next" — one meaning, one channel.
+               Label omitted when there's no version. -->
           <span
             v-if="lifecycle.since"
-            class="mr-2 text-xs font-medium uppercase tracking-wide"
-            :class="lifecycleMeta.cls"
+            class="mr-2 text-xs font-medium uppercase tracking-wide text-dimmed"
           >{{ t.since }}</span>
           <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />

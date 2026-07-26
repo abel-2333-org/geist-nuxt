@@ -220,7 +220,7 @@ const fields = [
     examples: ['my-app'],
     notes: [
       { label: 'Range', text: '1–52 characters.' },
-      { tone: 'caution' as const, label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
+      { label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
     ],
   },
   {
@@ -329,7 +329,7 @@ const denseFields = [
         examples: ['DE89370400440532013000'],
         notes: [
           { label: 'Range', text: '15–34 characters, country-dependent.' },
-          { tone: 'caution' as const, label: 'Rule', text: 'Checksum must pass ISO 7064 MOD-97-10.' },
+          { label: 'Rule', text: 'Checksum must pass ISO 7064 MOD-97-10.' },
         ],
       },
       {
