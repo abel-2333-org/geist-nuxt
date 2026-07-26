@@ -32,9 +32,10 @@ export type {
 // field-level composition). Deep linking is handled by the kit's useFieldAnchor
 // composable (auto-imported).
 //
-// Anatomy:  summary row  ── anchor · signature (name/type/format/requiredness)
-//                           · trailing facts (default/lifecycle); container-width
-//                           responsive, optional remains unmarked
+// Anatomy:  summary row  ── anchor · signature
+//                           (name/type/format/requiredness/lifecycle) · trailing
+//                           fallback fact (default); container-width responsive,
+//                           optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → description →
 //                           caveat callout(s) → aligned fact band (enum →
 //                           constraints → example → new/beta lifecycle callout)
@@ -245,24 +246,25 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             class="shrink-0 text-xs font-medium uppercase tracking-wide"
             :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
           >{{ requiredLabel }}</span>
-        </div>
-
-        <div
-          v-if="defaultValue !== undefined || lifecycle"
-          data-field-facts
-          class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 @md/field:justify-end"
-        >
-          <span v-if="defaultValue !== undefined" class="inline-flex min-w-0 items-center gap-1.5">
-            <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
-            <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
-          </span>
           <ApiDocsLifecycleBadge
             v-if="lifecycle"
+            data-field-lifecycle
             :status="lifecycle.status"
             :label="labels?.lifecycle?.[lifecycle.status]"
             size="md"
             class="shrink-0 rounded-sm py-0.5"
           />
+        </div>
+
+        <div
+          v-if="defaultValue !== undefined"
+          data-field-facts
+          class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 @md/field:justify-end"
+        >
+          <span class="inline-flex min-w-0 items-center gap-1.5">
+            <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
+            <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
+          </span>
         </div>
       </div>
 

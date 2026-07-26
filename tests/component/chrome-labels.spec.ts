@@ -107,17 +107,16 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
-    // Requiredness is part of the field signature, so developers learn whether
-    // the field may be omitted before scanning fallback or maturity metadata.
+    // Requiredness and lifecycle both qualify the field identity. Keeping them
+    // in one wrapping cluster prevents a lifecycle-only orphan row on mobile.
     const summary = wrapper.find('[data-field-summary]')
     const identity = wrapper.find('[data-field-identity]')
-    const facts = wrapper.find('[data-field-facts]')
     expect(wrapper.classes()).toContain('@container/field')
     expect(identity.text()).toContain('gitSource')
     expect(identity.text()).toContain('object')
     expect(identity.find('[data-field-requiredness]').text()).toBe('Conditional')
-    expect(facts.text()).not.toContain('Conditional')
-    expect(facts.findComponent(LifecycleBadge).exists()).toBe(true)
+    expect(identity.findComponent(LifecycleBadge).exists()).toBe(true)
+    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
   it('keeps requiredness beside the type when no trailing facts exist', async () => {
@@ -129,7 +128,7 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
-  it('separates long identity content from defaults and lifecycle facts', async () => {
+  it('keeps lifecycle with a long identity and separates only the default fact', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'an_uninterrupted_field_name_that_must_keep_its_own_width_budget',
@@ -141,6 +140,7 @@ describe('FieldItem lifecycle badge labels', () => {
     })
 
     expect(wrapper.find('[data-field-identity] code').classes()).toContain('wrap-anywhere')
+    expect(wrapper.find('[data-field-identity] [data-field-lifecycle]').exists()).toBe(true)
     expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
     expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,1fr)_auto]')
   })
