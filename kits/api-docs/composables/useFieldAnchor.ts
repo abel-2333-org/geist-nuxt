@@ -312,7 +312,6 @@ export function useFieldAnchor() {
   ) {
     try {
       await copy(urlFor(path), {
-        label: 'Link',
         successMessage: options.successMessage,
         failureMessage: options.failureMessage,
       })

@@ -649,7 +649,8 @@ onMounted(() => anchor.initFromHash())
             （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
             端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
-            环境切换 + 分段地址（host / path 文本本身即复制控件）+ 行尾显式键复制完整地址；
+            环境与 host、path 与完整复制组成响应式两层；host / path 文本本身可复制，
+            hover/focus 时用下划线与 tooltip 表明行为；
             webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
           </p>
           <div class="space-y-8">
@@ -670,12 +671,10 @@ onMounted(() => anchor.initFromHash())
                 :hosts="demoHosts"
                 path="/v1/checkout/sessions"
                 select-label="选择环境"
-                copy-toast-label="接口地址"
-                host-toast-label="环境地址"
-                path-toast-label="接口路径"
                 :labels="{
                   copy: '复制完整地址',
-                  copied: '已复制',
+                  copied: '接口地址已复制',
+                  copyFailed: '复制失败，请手动复制地址',
                   copyHost: '复制环境地址',
                   copiedHost: '环境地址已复制',
                   copyPath: '复制接口路径',

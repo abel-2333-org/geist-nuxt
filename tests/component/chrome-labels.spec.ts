@@ -5,12 +5,48 @@
 // LifecycleNotice), FieldItem lifecycle badge labels, full EnumTable
 // structural-label passthrough (flat + variant + filter empty state),
 // recursive child rows, and unchanged English defaults.
-import { describe, it, expect } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { effectScope, ref } from 'vue'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
 import LifecycleNotice from '../../kits/api-docs/components/LifecycleNotice.vue'
+import { useCopy } from '../../foundation/composables/useCopy'
+
+const copyState = vi.hoisted(() => ({
+  add: vi.fn(),
+  copy: vi.fn(),
+}))
+
+mockNuxtImport('useToast', () => () => ({ add: copyState.add }))
+
+vi.mock('@vueuse/core', async (load) => {
+  const actual = await load<typeof import('@vueuse/core')>()
+  return {
+    ...actual,
+    useClipboard: () => ({
+      copy: copyState.copy,
+      isSupported: ref(true),
+    }),
+  }
+})
+
+let stopCopyScope: (() => void) | undefined
+
+function createCopy(options: Parameters<typeof useCopy>[0] = {}) {
+  const scope = effectScope()
+  stopCopyScope = () => scope.stop()
+  return scope.run(() => useCopy(options))!
+}
+
+beforeEach(() => {
+  copyState.add.mockClear()
+  copyState.copy.mockReset()
+  copyState.copy.mockResolvedValue(undefined)
+})
+
+afterEach(() => stopCopyScope?.())
 
 /** 中文 chrome labels，一次声明覆盖整棵字段树（含递归子行）。 */
 const zhLabels = {
@@ -38,6 +74,47 @@ const manyValues = Array.from({ length: 30 }, (_, i) => ({
   value: `value_${i}`,
   description: `desc ${i}`,
 }))
+
+describe('useCopy complete-message contract', () => {
+  it('uses the complete generic success message without composing a label', async () => {
+    const { copy } = createCopy()
+
+    await copy('value')
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: 'Copied to clipboard',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('passes a complete call-level success message through verbatim', async () => {
+    const { copy } = createCopy({ successMessage: 'Fallback copied' })
+
+    await copy('value', { successMessage: '接口地址已复制' })
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '接口地址已复制',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('uses the complete failure message when clipboard writing fails', async () => {
+    copyState.copy.mockRejectedValue(new Error('blocked'))
+    const { copy } = createCopy({
+      failureMessage: '复制失败，请手动复制地址',
+    })
+
+    await copy('value')
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '复制失败，请手动复制地址',
+      color: 'error',
+      icon: 'i-lucide-triangle-alert',
+    })
+  })
+})
 
 describe('operation-level lifecycle (OperationHeader / LifecycleNotice)', () => {
   it('accepts beta without casts and renders the preset default label', async () => {

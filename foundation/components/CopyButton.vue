@@ -20,9 +20,7 @@ const props = withDefaults(
   defineProps<{
     /** The text written to the clipboard. */
     value: string
-    /** Object name used in the toast, e.g. 'Endpoint' → "Endpoint copied…". */
-    toastLabel?: string
-    /** Complete success toast sentence. Omit to use `<toastLabel> copied…`. */
+    /** Complete success toast sentence. Omit to reuse `copiedLabel`. */
     successMessage?: string
     /** Complete failure toast sentence. Omit to use the foundation default. */
     failureMessage?: string
@@ -46,9 +44,8 @@ const props = withDefaults(
     copiedIcon?: string
   }>(),
   {
-    toastLabel: 'Value',
     label: 'Copy',
-    copiedLabel: 'Copied',
+    copiedLabel: 'Copied to clipboard',
     tooltip: false,
     size: 'sm',
     variant: 'ghost',
@@ -63,8 +60,7 @@ const { copied, copy } = useCopy()
 
 function onCopy() {
   void copy(props.value, {
-    label: props.toastLabel,
-    successMessage: props.successMessage,
+    successMessage: props.successMessage ?? props.copiedLabel,
     failureMessage: props.failureMessage,
   })
 }
