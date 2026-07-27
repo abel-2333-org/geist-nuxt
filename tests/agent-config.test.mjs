@@ -36,7 +36,8 @@ test('reports U+FFFD and stays silent for clean or pathless events', async () =>
   const dir = await mkdtemp(path.join(tmpdir(), 'geist-agent-hook-'))
   const dirty = path.join(dir, 'dirty.txt')
   const clean = path.join(dir, 'clean.txt')
-  await writeFile(dirty, 'ok\n坏�字\n')
+  const replacement = String.fromCodePoint(0xfffd)
+  await writeFile(dirty, `ok\n坏${replacement}字\n`)
   await writeFile(clean, 'ok\n')
 
   const hit = runHook(JSON.stringify({ tool_response: { filePath: dirty } }))
