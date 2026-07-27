@@ -373,7 +373,6 @@ const acknowledgement = {
       language: 'Language',
       copy: 'Copy acknowledgement',
       copied: 'Acknowledgement copied',
-      copyToast: 'Acknowledgement',
       wrapOn: 'Wrap acknowledgement',
       wrapOff: 'Do not wrap acknowledgement',
       emptyTitle: 'No acknowledgement',

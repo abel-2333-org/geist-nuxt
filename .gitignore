@@ -5,3 +5,7 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# Agent skill 内容由 skills-lock.json 记录来源并还原到 .agents/；
+# .claude/skills/ 只跟踪轻量 symlink，保证 fresh clone 可被 Claude Code 发现。
+.agents/

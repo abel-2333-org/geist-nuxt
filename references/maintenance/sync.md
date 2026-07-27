@@ -27,7 +27,7 @@ pnpm build
 pnpm test:consumer
 ```
 
-随后 CI 将仓库根复制为干净的 `dist-skill/`（排除 `.git`、`node_modules`、`.nuxt`、`.output`、coverage、日志），写入顶层 `RELEASE` 与 `.geist-source.json`。source stamp 的固定格式为：
+随后 CI 将仓库根复制为干净的 `dist-skill/`（排除根目录 `.git`、`.agents`、`.claude`，以及 `node_modules`、`.nuxt`、`.output`、coverage、日志），写入顶层 `RELEASE` 与 `.geist-source.json`。`.agents` 保存可重装的第三方 skill 内容，`.claude` 保存 agent-specific 配置；二者都不是下游设计系统资产。source stamp 的固定格式为：
 
 ```json
 {"schemaVersion":1,"sourceSha":"<40-char-github-sha>"}
@@ -46,7 +46,7 @@ pnpm geist:copy -- geist-foundation --target <temp-consumer> --to <source-sha> -
 pnpm geist:check -- --target <temp-consumer>
 ```
 
-最终 tar 始终从未安装依赖的 pristine `dist-skill/` 生成，并扫描 archive entries；`.git`、`node_modules`、`.nuxt`、`.output`、coverage 与日志只要泄漏任意一个就拒绝发布。这两层验证分别证明：真源能运行、registry 能装进独立 consumer、实际 release snapshot 在没有 `.git` 时仍可独立运行且保持来源身份。
+最终 tar 始终从未安装依赖的 pristine `dist-skill/` 生成，并扫描 archive entries；`.git`、`.agents`、`.claude`、`node_modules`、`.nuxt`、`.output`、coverage 与日志只要泄漏任意一个就拒绝发布。这两层验证分别证明：真源能运行、registry 能装进独立 consumer、实际 release snapshot 在没有 repository-private agent 配置时仍可独立运行且保持来源身份。
 
 ## U+FFFD 编码闸门
 

@@ -5,13 +5,51 @@
 // LifecycleNotice), FieldItem lifecycle badge labels, full EnumTable
 // structural-label passthrough (flat + variant + filter empty state),
 // recursive child rows, and unchanged English defaults.
-import { describe, it, expect } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { effectScope } from 'vue'
+import { flushPromises } from '@vue/test-utils'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import CopyButton from '../../foundation/components/CopyButton.vue'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
 import LifecycleNotice from '../../kits/api-docs/components/LifecycleNotice.vue'
 import LifecycleBadge from '../../kits/api-docs/components/LifecycleBadge.vue'
+import { useCopy } from '../../foundation/composables/useCopy'
+
+const copyState = vi.hoisted(() => ({
+  add: vi.fn(),
+  writeText: vi.fn(),
+  execCommand: vi.fn(),
+}))
+
+mockNuxtImport('useToast', () => () => ({ add: copyState.add }))
+
+let stopCopyScope: (() => void) | undefined
+
+function createCopy(options: Parameters<typeof useCopy>[0] = {}) {
+  const scope = effectScope()
+  stopCopyScope = () => scope.stop()
+  return scope.run(() => useCopy(options))!
+}
+
+beforeEach(() => {
+  copyState.add.mockClear()
+  copyState.writeText.mockReset()
+  copyState.writeText.mockResolvedValue(undefined)
+  copyState.execCommand.mockReset()
+  copyState.execCommand.mockReturnValue(true)
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: copyState.writeText },
+  })
+  Object.defineProperty(globalThis.document, 'execCommand', {
+    configurable: true,
+    value: copyState.execCommand,
+  })
+})
+
+afterEach(() => stopCopyScope?.())
 
 /** 中文 chrome labels，一次声明覆盖整棵字段树（含递归子行）。 */
 const zhLabels = {
@@ -39,6 +77,90 @@ const manyValues = Array.from({ length: 30 }, (_, i) => ({
   value: `value_${i}`,
   description: `desc ${i}`,
 }))
+
+describe('useCopy complete-message contract', () => {
+  it('uses the complete generic success message without composing a label', async () => {
+    const { copy } = createCopy()
+
+    await copy('value')
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: 'Copied to clipboard',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('passes a complete call-level success message through verbatim', async () => {
+    const { copy } = createCopy()
+
+    const copied = await copy('value', { successMessage: '接口地址已复制' })
+
+    expect(copied).toBe(true)
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '接口地址已复制',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('uses the complete composable-level success message as the fallback', async () => {
+    const { copy } = createCopy({ successMessage: 'Fallback copied' })
+
+    await copy('value')
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: 'Fallback copied',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+
+  it('uses the legacy result after Clipboard API rejects', async () => {
+    copyState.writeText.mockRejectedValue(new Error('blocked'))
+    const { copy } = createCopy()
+
+    const copied = await copy('value')
+
+    expect(copied).toBe(true)
+    expect(copyState.execCommand).toHaveBeenCalledWith('copy')
+  })
+
+  it('uses the complete failure message when every clipboard writer fails', async () => {
+    copyState.writeText.mockRejectedValue(new Error('blocked'))
+    copyState.execCommand.mockReturnValue(false)
+    const { copy } = createCopy({
+      failureMessage: '复制失败，请手动复制地址',
+    })
+
+    const copied = await copy('value')
+
+    expect(copied).toBe(false)
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '复制失败，请手动复制地址',
+      color: 'error',
+      icon: 'i-lucide-triangle-alert',
+    })
+  })
+
+  it('lets CopyButton reuse copiedLabel as its complete success message', async () => {
+    const wrapper = await mountSuspended(CopyButton, {
+      props: {
+        value: 'value',
+        copiedLabel: '值已复制',
+      },
+    })
+
+    await wrapper.get('button').trigger('click')
+    await flushPromises()
+
+    expect(copyState.add).toHaveBeenCalledWith({
+      title: '值已复制',
+      color: 'success',
+      icon: 'i-lucide-check',
+    })
+  })
+})
 
 describe('operation-level lifecycle (OperationHeader / LifecycleNotice)', () => {
   it('accepts beta without casts and renders the preset default label', async () => {
@@ -96,20 +218,20 @@ describe('FieldItem lifecycle badge labels', () => {
 
     const badge = wrapper.findComponent(LifecycleBadge)
 
-    // Field metadata uses the compact badge tier. The public tier must reach
-    // the Nuxt UI primitive rather than stop at the kit wrapper.
-    expect(badge.props('size')).toBe('sm')
-    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('sm')
+    // The public tier must reach the Nuxt UI primitive rather than stop at the
+    // kit wrapper. `md` aligns lifecycle with the 12px metadata tier.
+    expect(badge.props('size')).toBe('md')
+    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('md')
 
     // The badge is atomic and vertically centered against the mixed mono/text
-    // signature line instead of inheriting its baseline alignment.
+    // signature line; local density keeps it inside the 20px line box.
     expect(badge.attributes('class')).toContain('self-center')
+    expect(badge.attributes('class')).toContain('py-0.5')
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
     // Requiredness and lifecycle both qualify the field identity. Keeping them
     // in one wrapping cluster prevents a lifecycle-only orphan row on mobile.
-    const summary = wrapper.find('[data-field-summary]')
     const identity = wrapper.find('[data-field-identity]')
     expect(wrapper.classes()).toContain('@container/field')
     expect(identity.text()).toContain('gitSource')

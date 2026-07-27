@@ -51,7 +51,7 @@ function toTokens(paragraph: string) {
           v-if="props.page.code"
           :variants="props.page.code.variants"
           :title="props.page.code.title"
-          :labels="{ language: '语言', copy: '复制代码', copied: '已复制到剪贴板', copyToast: '代码' }"
+          :labels="{ language: '语言', copy: '复制代码', copied: '已复制到剪贴板' }"
         />
       </div>
 

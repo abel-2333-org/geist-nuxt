@@ -534,14 +534,23 @@ onMounted(() => anchor.initFromHash())
             <p class="max-w-2xl leading-relaxed text-muted text-pretty">
               {{ endpoint.description }}
             </p>
-            <!-- 环境联动：host 切换 + 地址 + 复制，紧贴头部。选中 host 由本页
-                 持有，右栏请求示例从同一 host 派生。 -->
+            <!-- 环境联动：host 切换 + 分段地址（host / path 文本本身即复制控件）
+                 + 复制完整地址，紧贴头部。选中 host 由本页持有，右栏请求示例从
+                 同一 host 派生。 -->
             <ApiDocsOperationTarget
               v-model="selectedHostId"
               :hosts="hosts"
               :path="endpoint.path"
               select-label="选择环境"
-              copy-toast-label="接口地址"
+              :labels="{
+                copy: '复制完整地址',
+                copied: '接口地址已复制',
+                copyFailed: '复制失败，请手动复制地址',
+                copyHost: '复制环境地址',
+                copiedHost: '环境地址已复制',
+                copyPath: '复制接口路径',
+                copiedPath: '接口路径已复制',
+              }"
             />
           </header>
 
@@ -680,7 +689,6 @@ onMounted(() => anchor.initFromHash())
             <ApiDocsOperationTarget
               :hosts="partialHosts"
               path="/v1/deployments/{id}"
-              copy-toast-label="接口地址"
             />
           </header>
           <ApiDocsFieldGroup label="Response Body" :count="partialBodyFields.length" :heading-level="4">

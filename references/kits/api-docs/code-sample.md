@@ -19,7 +19,7 @@
 
 ### `ApiCodeLabels`（chrome 文案，用于 i18n）
 
-`language` · `copy` · `copied` · `copyToast` · `copySuccess` · `copyFailure` · `wrapOn` · `wrapOff` · `emptyTitle` · `emptyHint`。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。内容类文本（语言标签、标题、代码本身）来自 data props。
+`language` · `copy` · `copied` · `copySuccess` · `copyFailure` · `wrapOn` · `wrapOff` · `emptyTitle` · `emptyHint`。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 只接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。组件不接受对象名并拼接句尾，因此消费项目不会产生混合语言。内容类文本（语言标签、标题、代码本身）来自 data props。
 
 ## 关键点
 

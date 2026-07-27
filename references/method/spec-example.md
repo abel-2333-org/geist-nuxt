@@ -102,7 +102,7 @@ const wrap = useCodeWrap(props.defaultWrap)   // 共享 + 持久化
           :aria-label="wrap ? t.wrapOff : t.wrapOn" :aria-pressed="wrap" @click="wrap = !wrap" />
         <!-- 复用通用基座的复制按钮：剪贴板逻辑、copied 态、播报、兜底全在里面 -->
         <CopyButton v-if="hasContent" :value="current?.code ?? ''"
-          toast-label="Code" :label="t.copy" :copied-label="t.copied" size="xs" />
+          :label="t.copy" :copied-label="t.copied" :success-message="t.copied" size="xs" />
       </div>
     </div>
 
