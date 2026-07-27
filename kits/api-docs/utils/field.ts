@@ -21,7 +21,7 @@ export type RequiredState = boolean | 'conditional'
 
 /**
  * Field lifecycle metadata. `status` drives the badge; `since` and
- * `description` (already localized) surface in a callout under the field.
+ * `description` (already localized) surface as detail under the field.
  */
 export interface FieldLifecycleInfo {
   status: FieldLifecycle
