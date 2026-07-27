@@ -53,6 +53,9 @@ jobs:
       - name: Install root dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test agent configuration
+        run: pnpm test:agent
+
       - name: Validate registry contract
         run: pnpm registry:validate
 
@@ -128,8 +131,8 @@ jobs:
             --exclude .nuxt \
             --exclude .output \
             --exclude coverage \
-            --exclude .agents \
-            --exclude .claude \
+            --exclude '/.agents/' \
+            --exclude '/.claude/' \
             --exclude '*.log'
           printf '%s\n' "$TAG" > dist-skill/RELEASE
           printf '{"schemaVersion":1,"sourceSha":"%s"}\n' "$GITHUB_SHA" > dist-skill/.geist-source.json
@@ -196,7 +199,7 @@ jobs:
             }
           '
           tar czf dist-skill.tar.gz -C dist-skill .
-          if tar tzf dist-skill.tar.gz | grep -E '(^|/)(\.git|node_modules|\.nuxt|\.output|coverage)(/|$)|\.log$'; then
+          if tar tzf dist-skill.tar.gz | grep -E '(^|/)(\.git|node_modules|\.nuxt|\.output|coverage)(/|$)|^(\./)?\.(agents|claude)(/|$)|\.log$'; then
             echo "::error::Generated or repository-private files leaked into dist-skill.tar.gz." >&2
             exit 1
           fi

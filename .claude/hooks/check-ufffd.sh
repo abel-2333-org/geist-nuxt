@@ -10,7 +10,19 @@
 #       未命中时静默退出，不干扰正常编辑。
 set -uo pipefail
 
-file=$(jq -r '.tool_response.filePath // .tool_input.file_path // empty')
+if ! command -v jq >/dev/null 2>&1; then
+  echo "check-ufffd: jq is required to parse PostToolUse input" >&2
+  exit 2
+fi
+
+payload=$(cat)
+
+if ! jq -e 'type == "object"' >/dev/null 2>&1 <<< "$payload"; then
+  echo "check-ufffd: invalid PostToolUse JSON payload" >&2
+  exit 2
+fi
+
+file=$(jq -r '(.tool_response.filePath // .tool_input.file_path // empty) | select(type == "string")' <<< "$payload")
 
 [ -n "$file" ] && [ -f "$file" ] || exit 0
 
