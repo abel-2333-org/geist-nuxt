@@ -206,7 +206,7 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(wrapper.text()).toContain('New')
   })
 
-  it('keeps lifecycle status on the same metadata type tier as requiredness', async () => {
+  it('keeps lifecycle status compact within the field identity', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'gitSource',
@@ -218,15 +218,15 @@ describe('FieldItem lifecycle badge labels', () => {
 
     const badge = wrapper.findComponent(LifecycleBadge)
 
-    // The public tier must reach the Nuxt UI primitive rather than stop at the
-    // kit wrapper. `md` aligns lifecycle with the 12px metadata tier.
-    expect(badge.props('size')).toBe('md')
-    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('md')
+    // The compact tier must reach the Nuxt UI primitive rather than stop at
+    // the kit wrapper. `sm` keeps lifecycle secondary to the field signature.
+    expect(badge.props('size')).toBe('sm')
+    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('sm')
 
-    // The badge is atomic and vertically centered against the mixed mono/text
-    // signature line; local density keeps it inside the 20px line box.
+    // The badge remains atomic and vertically centered against the mixed
+    // mono/text signature line without inflating the `sm` vertical padding.
     expect(badge.attributes('class')).toContain('self-center')
-    expect(badge.attributes('class')).toContain('py-0.5')
+    expect(badge.attributes('class')).not.toContain('py-0.5')
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 

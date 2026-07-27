@@ -251,8 +251,8 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             data-field-lifecycle
             :status="lifecycle.status"
             :label="labels?.lifecycle?.[lifecycle.status]"
-            size="md"
-            class="self-center shrink-0 rounded-sm py-0.5"
+            size="sm"
+            class="self-center shrink-0 rounded-sm"
           />
         </div>
 
