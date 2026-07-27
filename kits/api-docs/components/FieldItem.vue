@@ -38,7 +38,7 @@ export type {
 //                           optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → description →
 //                           caveat callout(s) → aligned fact band (enum →
-//                           constraints → example → new/beta lifecycle callout)
+//                           constraints → example → new/beta lifecycle metadata)
 //           children     ── UCollapsible of nested <ApiDocsFieldItem>
 //           composition  ── field-level oneOf/anyOf/allOf delegated to
 //                           <ApiDocsSchemaComposition> after the children
@@ -142,8 +142,8 @@ const hasChildren = computed(() => (props.children?.length ?? 0) > 0)
 const hasEnum = computed(
   () => (props.enumValues?.length ?? 0) > 0 || (props.enumVariants?.length ?? 0) > 0,
 )
-// A lifecycle callout renders only when there's something to say beyond the badge.
-const hasLifecycleCallout = computed(
+// Lifecycle detail renders only when there's something to say beyond the badge.
+const hasLifecycleDetail = computed(
   () => !!props.lifecycle && (!!props.lifecycle.since || !!props.lifecycle.description),
 )
 
@@ -152,8 +152,8 @@ const hasLifecycleCallout = computed(
 // constraint is neutral, scannable metadata that belongs in the band. Merging
 // them under one "Constraints" heading mislabels the caveat as a validation
 // boundary, which is the one thing it is not.
-const constraints = computed(() => (props.notes ?? []).filter(n => resolveNoteKind(n) === 'constraint'))
-const caveats = computed(() => (props.notes ?? []).filter(n => resolveNoteKind(n) === 'caveat'))
+const constraints = computed(() => (props.notes ?? []).filter(n => n.kind !== 'caveat'))
+const caveats = computed(() => (props.notes ?? []).filter(n => n.kind === 'caveat'))
 
 const hasDetail = computed(
   () =>
@@ -162,7 +162,7 @@ const hasDetail = computed(
     || (props.examples?.length ?? 0) > 0
     || (props.notes?.length ?? 0) > 0
     || hasEnum.value
-    || hasLifecycleCallout.value,
+    || hasLifecycleDetail.value,
 )
 
 // Requirement marker. Optional is the default state of a field, so it renders
@@ -181,13 +181,13 @@ const requiredLabel = computed(() => (requiredState.value ? t.value[requiredStat
 // apart with a larger rhythm gap.
 // The condition and the deprecation note are rendered above the description
 // as gates, so neither counts toward the secondary band; only a new/beta
-// lifecycle callout (rendered at the band's end) does.
+// lifecycle detail (rendered at the band's end) does.
 const hasSecondary = computed(
   () =>
     hasEnum.value
     || constraints.value.length > 0
     || (props.examples?.length ?? 0) > 0
-    || (hasLifecycleCallout.value && !isDeprecated.value),
+    || (hasLifecycleDetail.value && !isDeprecated.value),
 )
 
 // A deprecated field gets its name struck through so the "on its way out"
@@ -231,7 +231,10 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
       <div
         data-field-summary
-        class="grid min-w-0 flex-1 gap-2 @md/field:grid-cols-[minmax(0,1fr)_auto] @md/field:items-start @md/field:gap-x-4"
+        class="grid min-w-0 flex-1 gap-2"
+        :class="defaultValue !== undefined
+          ? '@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] @md/field:items-start @md/field:gap-x-4'
+          : ''"
       >
         <div data-field-identity class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
           <code
@@ -241,19 +244,25 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           <span class="shrink-0 font-mono text-xs text-muted">{{ type }}</span>
           <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ format }}</span>
           <span
-            v-if="requiredState"
-            data-field-requiredness
-            class="shrink-0 text-xs font-medium uppercase tracking-wide"
-            :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
-          >{{ requiredLabel }}</span>
-          <ApiDocsLifecycleBadge
-            v-if="lifecycle"
-            data-field-lifecycle
-            :status="lifecycle.status"
-            :label="labels?.lifecycle?.[lifecycle.status]"
-            size="sm"
-            class="self-center shrink-0 rounded-sm"
-          />
+            v-if="requiredState || lifecycle"
+            data-field-qualifiers
+            class="inline-flex shrink-0 items-center gap-2"
+          >
+            <span
+              v-if="requiredState"
+              data-field-requiredness
+              class="shrink-0 text-xs font-medium uppercase tracking-wide"
+              :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+            >{{ requiredLabel }}</span>
+            <ApiDocsLifecycleBadge
+              v-if="lifecycle"
+              data-field-lifecycle
+              :status="lifecycle.status"
+              :label="labels?.lifecycle?.[lifecycle.status]"
+              size="sm"
+              class="shrink-0 rounded-sm"
+            />
+          </span>
         </div>
 
         <div
@@ -300,15 +309,23 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            (not a tinted callout): the strikethrough + badge already carry the
            state; the amber callout shape stays reserved for the condition. -->
       <dl
-        v-if="isDeprecated && hasLifecycleCallout && lifecycle"
+        v-if="isDeprecated && lifecycle?.since"
+        data-field-lifecycle-detail
         class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
       >
-        <dt v-if="lifecycle.since" class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
-        <dd class="wrap-anywhere min-w-0" :class="{ 'col-span-2': !lifecycle.since }">
-          <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+        <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
+        <dd class="wrap-anywhere min-w-0">
+          {{ lifecycle.since }}<template v-if="lifecycle.description"> — </template>
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </dd>
       </dl>
+      <p
+        v-else-if="isDeprecated && lifecycle?.description"
+        data-field-lifecycle-detail
+        class="text-sm leading-relaxed text-muted"
+      >
+        <InlineMarkdown :text="lifecycle.description" />
+      </p>
 
       <!-- 2. Condition — the amber family is graded by FILL, not by hue, so a
            field that is conditional + beta + caveated never reads as one amber
@@ -338,6 +355,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <p
         v-for="(note, i) in caveats"
         :key="i"
+        data-field-caveat
         class="rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
       >
         <span class="mr-2 text-xs font-medium uppercase tracking-wide text-warning">
@@ -348,10 +366,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
       <!-- Secondary metadata band, ordered by a developer's call-time flow:
            what values → boundaries → sample → maturity. (The gating condition
-           is hoisted above the description as its own callout.) All rows share
-           one label language: a plain uppercase tag whose color carries tone
-           (neutral = dimmed, caution/warning = amber). No filled boxes, so the
-           band reads as compact structured metadata. -->
+           is hoisted above the description as its own callout.) Constraint rows
+           share one neutral uppercase label language; caveats stay outside this
+           band in their dedicated warning callouts. -->
       <div v-if="hasSecondary" class="flex flex-col gap-3">
         <!-- 2. Allowed values — the most actionable metadata. The field's
              default is passed down so its row is marked in the table. -->
@@ -377,6 +394,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
              band, whose other single-fact rows are all "LABEL + text". -->
         <dl
           v-if="constraints.length === 1 && constraints[0]"
+          data-field-constraints
           class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
         >
           <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ constraints[0].label ?? t.note }}</dt>
@@ -387,9 +405,8 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
         <!-- 3b. Multiple constraints — NOW the table earns its chrome: column
              alignment across rows and hairline dividers let you scan them.
-             Two columns: a fit-content label column (tone carried by label
-             color, unsupported = amber) and the value. -->
-        <div v-else-if="constraints.length > 1" class="space-y-2">
+             Two columns: a fit-content category label and the value. -->
+        <div v-else-if="constraints.length > 1" data-field-constraints class="space-y-2">
           <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
             {{ t.constraints }}
             <span class="text-dimmed/70">({{ constraints.length }})</span>
@@ -424,15 +441,23 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         </dl>
 
         <dl
-          v-if="!isDeprecated && hasLifecycleCallout && lifecycle"
+          v-if="!isDeprecated && lifecycle?.since"
+          data-field-lifecycle-detail
           class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
         >
-          <dt v-if="lifecycle.since" class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
-          <dd class="wrap-anywhere min-w-0" :class="{ 'col-span-2': !lifecycle.since }">
-            <template v-if="lifecycle.since">{{ lifecycle.since }}<template v-if="lifecycle.description"> — </template></template>
+          <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
+          <dd class="wrap-anywhere min-w-0">
+            {{ lifecycle.since }}<template v-if="lifecycle.description"> — </template>
             <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
           </dd>
         </dl>
+        <p
+          v-else-if="!isDeprecated && lifecycle?.description"
+          data-field-lifecycle-detail
+          class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted"
+        >
+          <InlineMarkdown :text="lifecycle.description" />
+        </p>
       </div>
     </div>
 

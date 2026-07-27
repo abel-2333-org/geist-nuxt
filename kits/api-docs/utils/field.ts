@@ -47,20 +47,9 @@ export type FieldNoteKind = 'constraint' | 'caveat'
 export interface FieldNote {
   /** Defaults to `constraint`. */
   kind?: FieldNoteKind
-  /**
-   * @deprecated Use `kind`. Retained so copy-in consumers keep compiling:
-   * `caution` resolves to `caveat`, `info`/absent to `constraint`.
-   */
-  tone?: 'caution' | 'info'
   /** Category tag (Range / Rule / Unsupported…) rendered as a leading pill. */
   label?: string
   text: string
-}
-
-/** Single resolution point for the deprecated `tone` → `kind` bridge, so the
- *  legacy spelling is normalized once instead of at every render site. */
-export function resolveNoteKind(note: FieldNote): FieldNoteKind {
-  return note.kind ?? (note.tone === 'caution' ? 'caveat' : 'constraint')
 }
 
 /**

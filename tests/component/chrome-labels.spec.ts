@@ -223,21 +223,21 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(badge.props('size')).toBe('sm')
     expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('sm')
 
-    // The badge remains atomic and vertically centered against the mixed
-    // mono/text signature line without inflating the `sm` vertical padding.
-    expect(badge.attributes('class')).toContain('self-center')
+    // The badge remains compact without inflating the `sm` vertical padding.
     expect(badge.attributes('class')).not.toContain('py-0.5')
     expect(badge.attributes('class')).toContain('rounded-sm')
     expect(badge.attributes('class')).toContain('shrink-0')
 
-    // Requiredness and lifecycle both qualify the field identity. Keeping them
-    // in one wrapping cluster prevents a lifecycle-only orphan row on mobile.
+    // Requiredness and lifecycle form one atomic qualifier cluster so flex
+    // wrapping cannot leave the lifecycle badge on a row by itself.
     const identity = wrapper.find('[data-field-identity]')
+    const qualifiers = identity.find('[data-field-qualifiers]')
     expect(wrapper.classes()).toContain('@container/field')
     expect(identity.text()).toContain('gitSource')
     expect(identity.text()).toContain('object')
-    expect(identity.find('[data-field-requiredness]').text()).toBe('Conditional')
-    expect(identity.findComponent(LifecycleBadge).exists()).toBe(true)
+    expect(qualifiers.classes()).toEqual(expect.arrayContaining(['inline-flex', 'shrink-0', 'items-center']))
+    expect(qualifiers.find('[data-field-requiredness]').text()).toBe('Conditional')
+    expect(qualifiers.findComponent(LifecycleBadge).exists()).toBe(true)
     expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
@@ -264,7 +264,76 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(wrapper.find('[data-field-identity] code').classes()).toContain('wrap-anywhere')
     expect(wrapper.find('[data-field-identity] [data-field-lifecycle]').exists()).toBe(true)
     expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
-    expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,1fr)_auto]')
+    expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
+  })
+
+  it('keeps a full-width identity column when no default fact is rendered', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'transactionSettlementInstruction',
+        type: 'object',
+        lifecycle: { status: 'beta' as const },
+      },
+    })
+
+    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
+    expect(wrapper.find('[data-field-summary]').classes()).not.toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
+  })
+
+  it.each(['beta', 'deprecated'] as const)(
+    'renders a %s description-only lifecycle as prose instead of an orphan definition',
+    async (status) => {
+      const wrapper = await mountSuspended(FieldItem, {
+        props: {
+          name: 'legacyMode',
+          type: 'string',
+          lifecycle: { status, description: 'Use `mode` instead.' },
+        },
+      })
+
+      const detail = wrapper.get('[data-field-lifecycle-detail]')
+      expect(detail.element.tagName).toBe('P')
+      expect(detail.text()).toContain('Use')
+      expect(detail.text()).toContain('instead.')
+      expect(wrapper.find('dl').exists()).toBe(false)
+    },
+  )
+
+  it('renders lifecycle since metadata as a complete term-definition pair', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'channel',
+        type: 'string',
+        lifecycle: { status: 'beta', since: 'v2.4', description: 'Shape may change.' },
+      },
+    })
+
+    const detail = wrapper.get('[data-field-lifecycle-detail]')
+    expect(detail.element.tagName).toBe('DL')
+    expect(detail.get('dt').text()).toBe('Since')
+    expect(detail.get('dd').text()).toContain('v2.4')
+  })
+
+  it('uses kind as the single note category and defaults omitted kind to constraint', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'metadata',
+        type: 'object',
+        notes: [
+          { text: 'Default constraint.' },
+          { kind: 'constraint', text: 'Explicit constraint.' },
+          { kind: 'caveat', text: 'Behavioral caveat.' },
+        ],
+      },
+    })
+
+    const constraints = wrapper.get('[data-field-constraints]')
+    const caveat = wrapper.get('[data-field-caveat]')
+    expect(constraints.text()).toContain('Default constraint.')
+    expect(constraints.text()).toContain('Explicit constraint.')
+    expect(constraints.text()).not.toContain('Behavioral caveat.')
+    expect(constraints.text()).toContain('(2)')
+    expect(caveat.text()).toContain('Behavioral caveat.')
   })
 })
 

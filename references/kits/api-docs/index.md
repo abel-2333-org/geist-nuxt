@@ -254,7 +254,7 @@ gallery 有**七个 api-docs demo 页，职责互补**：
   - **注记分类（`FieldNote.kind`）：caveat 不是 constraint**。两者是不同语义，不能共用一个标题：
     - `constraint`（默认）= **系统强制的输入边界**（长度、字符集、格式、checksum）。违反它只是校验失败，没有隐藏的坑 → **中性**，进 band 的单行 CONSTRAINT / 多条 `Constraints (N)` 表。
     - `caveat` = **行为性风险**。请求会成功，但不知道就会踩坑（如"值明文存储，勿放秘密""对 preview 部署不生效"）→ **琥珀填充 callout**，位置在 description 之后、band 之前（先知道字段是什么，才能衡量它的风险）。
-    caveat **不得**汇入 `Constraints (N)` 标题下，否则会把它误标为一条校验边界——而它恰恰不是。旧的 `tone: 'caution'` 仅作**兼容别名**解析为 `kind: 'caveat'`（copy-in 消费方不断），新数据不要再用。
+    caveat **不得**汇入 `Constraints (N)` 标题下，否则会把它误标为一条校验边界——而它恰恰不是。`kind` 是唯一分类入口；未传时默认 `constraint`，不保留 `tone` 等平行写法。升级旧数据时把 `tone: 'caution'` 直接改为 `kind: 'caveat'`，原 `info` 注记删除 `tone` 即可。
 
 ### 页面级结构 / 语义（review 沉淀）
 

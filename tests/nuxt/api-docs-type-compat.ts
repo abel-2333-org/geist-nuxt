@@ -17,7 +17,9 @@ import type { AnnotationPopoverLabels } from '../../foundation/components/Annota
 const required: RequiredState = 'conditional'
 const lifecycle: FieldLifecycle = 'beta'
 const lifecycleInfo: FieldLifecycleInfo = { status: lifecycle, since: 'v2' }
-const note: FieldNote = { text: 'Stable legacy type import.' }
+const note: FieldNote = { kind: 'constraint', text: 'Stable type import.' }
+// @ts-expect-error `tone` was removed; note semantics have one canonical key.
+const legacyNote: FieldNote = { tone: 'caution', text: 'Legacy note shape.' }
 const value: EnumValue = { value: 'card', description: 'Card payment.' }
 const variant: EnumVariant = { values: [value] }
 const fieldValue: FieldEnumValue = value
@@ -47,3 +49,4 @@ void field
 void fieldValue
 void annotationLabels
 void labels
+void legacyNote

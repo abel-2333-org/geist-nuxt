@@ -207,7 +207,7 @@ const enumValues = [
 
 // Field tree — the recursive schema view. Inline sample data exercises every
 // facet ApiDocsFieldItem renders: the three requiredness states, default value,
-// examples, a condition, an enum, constraint notes (both tones), field
+// examples, a condition, an enum, constraint notes, field
 // lifecycle (new/beta/deprecated), and nested object children (collapsible +
 // deep-linkable). `path` is the stable id used for the URL hash anchor.
 const fields = [
