@@ -1,7 +1,238 @@
 {
   "version": 1,
   "round": 1,
-  "lastRunAt": null,
-  "lastPicked": [],
-  "items": {}
+  "lastRunAt": "2026-07-28T16:29:35.909Z",
+  "lastPicked": [
+    "foundation-inline-markdown",
+    "api-docs-field-item"
+  ],
+  "items": {
+    "foundation-copy-button": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-inline-code": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-inline-markdown": {
+      "round": 1,
+      "lastAuditedAt": "2026-07-28T16:29:35.909Z",
+      "lastAuditedSha": "c5a73094643e378d75a84a64bbb36f53dca2771c",
+      "verdict": "improved",
+      "notes": "修复 4 类标记游程被半吞、裸标记漏进渲染结果的缺陷（***x***、__x__、___x___、MAX__VALUE__LIMIT），补齐最长游程优先规则与 `_` 词边界；新增 36 例 tokenizer spec，同步 reference 与 gallery。",
+      "openFindings": [
+        "内层标记与外层收尾标记紧贴时仍残留一个标记（`**bold *em***` → `<strong>bold *em</strong>*`）。既有行为，非本次回归；彻底修复需把有序规则表换成 CommonMark delimiter-run 算法（左右 flanking + rule of three）。",
+        "裸 `***` 渲染为 `<em>*</em>`。收紧 `*` em 规则两端守卫可修，但实测会回退 `**bold***em*`；与上一条同属 delimiter-run 改造，应一并处理。"
+      ]
+    },
+    "foundation-semantic-badge": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-theme-toggle": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-annotation-popover": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-term-annotation": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-doc-annotation": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-split-pane-handle": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "foundation-split-pane": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-code-block": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-request-example": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-response-example": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-lifecycle-badge": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-method-badge": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-enum-table": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-field-group": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-field-item": {
+      "round": 1,
+      "lastAuditedAt": "2026-07-28T16:29:35.909Z",
+      "lastAuditedSha": "c5a73094643e378d75a84a64bbb36f53dca2771c",
+      "verdict": "improved",
+      "notes": "补齐 deprecated lifecycle 描述漏掉的 wrap-anywhere 溢出守卫（与 new/beta 镜像分支已漂移），并加测试锁住两个位置；订正三处把 auto-expand 写成 prefix match 的注释——实现是 collectFieldPaths 集合成员判定，公开 FieldNode.path 契约据此放宽。",
+      "openFindings": []
+    },
+    "api-docs-schema-composition": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-field-annotation": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-event-badge": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-lifecycle-notice": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-operation-target": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-operation-header": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-code-rail": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-site-search": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-webhook-protocol": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    },
+    "api-docs-sidebar-nav": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "lastAuditedSha": null,
+      "verdict": null,
+      "notes": null,
+      "openFindings": []
+    }
+  }
 }
