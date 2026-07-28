@@ -173,6 +173,16 @@ test('rejects undeclared files, duplicate targets, cycles, and undeclared relati
     await assert.rejects(validateRegistry(registry, { repoRoot }), /outside declared sourceRoots/)
   })
 
+  await t.test('symlinked canonical source root', async () => {
+    const { repoRoot, registry } = await fixture()
+    const outsideRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-outside-'))
+    await symlink(outsideRoot, path.join(repoRoot, 'kits'), 'dir')
+    await assert.rejects(
+      validateRegistry(registry, { repoRoot }),
+      /canonical source root must be a non-symlink directory: kits/,
+    )
+  })
+
   await t.test('duplicate target', async () => {
     const { repoRoot, registry } = await fixture()
     registry.items[1].files[0].target = registry.items[0].files[0].target

@@ -393,10 +393,15 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
     const canonicalSources = new Set()
     for (const root of ['foundation', 'kits']) {
       try {
+        const info = await lstat(path.join(repoRoot, root))
+        if (!info.isDirectory() || info.isSymbolicLink()) {
+          fail(`canonical source root must be a non-symlink directory: ${root}`)
+          continue
+        }
         for (const source of await walkFiles(repoRoot, root)) canonicalSources.add(source)
       }
       catch (error) {
-        if (error instanceof RegistryError && error.message === `source root does not exist: ${root}`) continue
+        if (error?.code === 'ENOENT') continue
         throw error
       }
     }

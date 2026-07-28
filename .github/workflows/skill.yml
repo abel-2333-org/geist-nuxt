@@ -224,6 +224,7 @@ jobs:
             exit 0
           fi
           gh release create "$TAG" dist-skill.tar.gz \
+            --target "$GITHUB_SHA" \
             --title "$TAG" \
             --notes "Source-first geist-nuxt skill distribution. The asset is a runnable root gallery/v0 snapshot with foundation, kits, registry tools and references. Sync by overwriting the memory-area skill directory wholesale."
           echo "Released $TAG"
