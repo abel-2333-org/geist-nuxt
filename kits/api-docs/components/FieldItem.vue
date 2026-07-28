@@ -165,14 +165,15 @@ const hasDetail = computed(
     || hasLifecycleDetail.value,
 )
 
-// Requirement marker. Optional is the default state of a field, so it renders
+// Requirement marker. Derived from `required` AND `condition` together (see
+// fieldRequiredState in utils/field): a field that explains when it becomes
+// required IS conditional, so the marker cannot go missing just because the
+// author set only one of the two. Optional is the default state and renders
 // nothing — absence of a Required/Conditional tag IS the "optional" signal
 // (industry convention: Stripe, Mintlify). Tagging every optional row would
 // add a non-informative word to the majority of rows and dilute the contrast
 // of the tags that matter.
-const requiredState = computed<'required' | 'conditional' | null>(() =>
-  props.required === true ? 'required' : props.required === 'conditional' ? 'conditional' : null,
-)
+const requiredState = computed(() => fieldRequiredState(props))
 // Localized label for the rendered requirement states (chrome copy).
 const requiredLabel = computed(() => (requiredState.value ? t.value[requiredState.value] : ''))
 
@@ -210,9 +211,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
     <!-- The summary follows the developer's scan order: identity answers what
-         the field is and whether it may be omitted; trailing facts cover fallback
-         behavior and maturity. Container queries respond to the actual column
-         width, including recursive fields. -->
+         the field is, whether it may be omitted and how mature it is; the
+         trailing fact covers fallback behavior (default). Container queries
+         respond to the actual column width, including recursive fields. -->
     <div class="group/field relative flex items-start gap-2">
       <button
         v-if="path"
@@ -307,11 +308,12 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
       <!-- 1. Deprecation — migration note for deprecated fields. Plain text
            (not a tinted callout): the strikethrough + badge already carry the
-           state; the amber callout shape stays reserved for the condition. -->
+           state, and amber stays reserved for the conditional/caveat family
+           (see the fill ladder on the condition rule below). -->
       <dl
         v-if="isDeprecated && lifecycle?.since"
         data-field-lifecycle-detail
-        class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
+        class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
       >
         <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
         <dd class="wrap-anywhere min-w-0">
@@ -334,10 +336,16 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            which is correct: it states a fact about requiredness, not a risk.
            Dropping the branch icon and the tint also removes the third
            redundant emphasis (border + fill + icon all said "look here") and
-           with it a hardcoded optical-centering height. -->
+           with it a hardcoded optical-centering height.
+           No lead-in tag here: the summary row's CONDITIONAL is *derived* from
+           this very prop (fieldRequiredState), so the word is guaranteed to be
+           on screen already — repeating it 30px below would be the same word
+           twice, and the condition sentence ("Required when …") is itself the
+           text channel that keeps amber from carrying the meaning alone. -->
       <div
         v-if="condition"
-        class="border-l-2 border-warning ps-3 text-sm leading-relaxed text-toned"
+        data-field-condition
+        class="border-s-2 border-warning ps-3 text-sm leading-relaxed text-toned"
       >
         <InlineMarkdown :text="condition" />
       </div>
@@ -356,9 +364,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         v-for="(note, i) in caveats"
         :key="i"
         data-field-caveat
-        class="rounded-md border-l-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
+        class="rounded-md border-s-2 border-warning bg-warning/10 px-3 py-2 text-sm leading-relaxed text-toned"
       >
-        <span class="mr-2 text-xs font-medium uppercase tracking-wide text-warning">
+        <span class="me-2 text-xs font-medium uppercase tracking-wide text-warning">
           {{ note.label ?? t.caveat }}
         </span>
         <InlineMarkdown :text="note.text" />
@@ -395,7 +403,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         <dl
           v-if="constraints.length === 1 && constraints[0]"
           data-field-constraints
-          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
+          class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
         >
           <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ constraints[0].label ?? t.note }}</dt>
           <dd class="wrap-anywhere min-w-0 text-toned">
@@ -432,7 +440,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
         <dl
           v-if="examples?.length"
-          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
+          class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
         >
           <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.example }}</dt>
           <dd class="flex min-w-0 flex-wrap gap-2">
@@ -443,7 +451,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         <dl
           v-if="!isDeprecated && lifecycle?.since"
           data-field-lifecycle-detail
-          class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
+          class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed text-muted"
         >
           <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.since }}</dt>
           <dd class="wrap-anywhere min-w-0">

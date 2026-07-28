@@ -202,6 +202,35 @@ export type CompositionNode =
     discriminator?: never
   })
 
+/**
+ * Derive the requiredness marker from the whole field, not from `required`
+ * alone. A `condition` ("Required when `type` is `git`") already asserts
+ * conditional requiredness, so a field carrying one is conditional whether or
+ * not the author also set `required: 'conditional'`.
+ *
+ * This is why the condition block needs no lead-in tag of its own: the word
+ * appears exactly once, in the summary row, and the derivation — not the doc
+ * author's discipline — guarantees it is there. An orphan condition (a
+ * `condition` with no `required`) is fixed at the data layer instead of being
+ * papered over with a duplicate label 30px below the first one.
+ *
+ * Conflict semantics are fail-soft: an explicit `required: true` wins the
+ * marker (a hard requirement is the stronger claim, and downgrading it to
+ * "conditional" would be a correctness bug), while the condition text still
+ * renders — the reader sees both the hard marker and the qualifying sentence
+ * rather than losing information the author supplied.
+ *
+ * Optional returns `null`: absence of a marker IS the optional signal
+ * (Stripe/Mintlify convention), so there is no `'optional'` member to render.
+ */
+export function fieldRequiredState(
+  field: Pick<FieldNode, 'required' | 'condition'>,
+): 'required' | 'conditional' | null {
+  if (field.required === true) return 'required'
+  if (field.required === 'conditional' || field.condition) return 'conditional'
+  return null
+}
+
 /** Collect every real field anchor reachable through children and field-level
  *  compositions. Order follows the display model and duplicate paths remain
  *  visible to callers that need to diagnose invalid input. */

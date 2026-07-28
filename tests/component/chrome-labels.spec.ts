@@ -2,9 +2,10 @@
 // be able to remove every English chrome string through public props — no
 // preset swap, no type cast, no component fork, no CSS hiding.
 // Covers: operation-level beta + label injection (OperationHeader /
-// LifecycleNotice), FieldItem lifecycle badge labels, full EnumTable
-// structural-label passthrough (flat + variant + filter empty state),
-// recursive child rows, and unchanged English defaults.
+// LifecycleNotice), FieldItem lifecycle badge labels + condition rule lead-in,
+// full EnumTable structural-label passthrough (flat + variant + filter empty
+// state), recursive child rows, and unchanged English defaults. Layout-only
+// FieldItem assertions live in field-item-structure.spec.ts.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectScope } from 'vue'
 import { flushPromises } from '@vue/test-utils'
@@ -14,7 +15,6 @@ import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
 import LifecycleNotice from '../../kits/api-docs/components/LifecycleNotice.vue'
-import LifecycleBadge from '../../kits/api-docs/components/LifecycleBadge.vue'
 import { useCopy } from '../../foundation/composables/useCopy'
 
 const copyState = vi.hoisted(() => ({
@@ -206,80 +206,6 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(wrapper.text()).toContain('New')
   })
 
-  it('keeps lifecycle status compact within the field identity', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'gitSource',
-        type: 'object',
-        required: 'conditional',
-        lifecycle: { status: 'beta' as const },
-      },
-    })
-
-    const badge = wrapper.findComponent(LifecycleBadge)
-
-    // The compact tier must reach the Nuxt UI primitive rather than stop at
-    // the kit wrapper. `sm` keeps lifecycle secondary to the field signature.
-    expect(badge.props('size')).toBe('sm')
-    expect(badge.findComponent({ name: 'UBadge' }).props('size')).toBe('sm')
-
-    // The badge remains compact without inflating the `sm` vertical padding.
-    expect(badge.attributes('class')).not.toContain('py-0.5')
-    expect(badge.attributes('class')).toContain('rounded-sm')
-    expect(badge.attributes('class')).toContain('shrink-0')
-
-    // Requiredness and lifecycle form one atomic qualifier cluster so flex
-    // wrapping cannot leave the lifecycle badge on a row by itself.
-    const identity = wrapper.find('[data-field-identity]')
-    const qualifiers = identity.find('[data-field-qualifiers]')
-    expect(wrapper.classes()).toContain('@container/field')
-    expect(identity.text()).toContain('gitSource')
-    expect(identity.text()).toContain('object')
-    expect(qualifiers.classes()).toEqual(expect.arrayContaining(['inline-flex', 'shrink-0', 'items-center']))
-    expect(qualifiers.find('[data-field-requiredness]').text()).toBe('Conditional')
-    expect(qualifiers.findComponent(LifecycleBadge).exists()).toBe(true)
-    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
-  })
-
-  it('keeps requiredness beside the type when no trailing facts exist', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: { name: 'amount', type: 'integer', required: true },
-    })
-
-    expect(wrapper.find('[data-field-identity]').text()).toContain('amountintegerRequired')
-    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
-  })
-
-  it('keeps lifecycle with a long identity and separates only the default fact', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'an_uninterrupted_field_name_that_must_keep_its_own_width_budget',
-        type: 'string',
-        format: 'vendor-specific-format-with-a-long-name',
-        defaultValue: 'a-default-value-that-must-wrap-within-the-facts-zone',
-        lifecycle: { status: 'new' as const },
-      },
-    })
-
-    expect(wrapper.find('[data-field-identity] code').classes()).toContain('wrap-anywhere')
-    expect(wrapper.find('[data-field-identity] [data-field-lifecycle]').exists()).toBe(true)
-    expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
-    expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
-  })
-
-  it('keeps a full-width identity column when no default fact is rendered', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'transactionSettlementInstruction',
-        type: 'object',
-        lifecycle: { status: 'beta' as const },
-      },
-    })
-
-    expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
-    expect(wrapper.find('[data-field-summary]').classes()).not.toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
-  })
-
   it.each(['beta', 'deprecated'] as const)(
     'renders a %s description-only lifecycle as prose instead of an orphan definition',
     async (status) => {
@@ -314,26 +240,51 @@ describe('FieldItem lifecycle badge labels', () => {
     expect(detail.get('dd').text()).toContain('v2.4')
   })
 
-  it('uses kind as the single note category and defaults omitted kind to constraint', async () => {
+})
+
+describe('FieldItem requiredness derivation', () => {
+  it('marks a condition-only field conditional and leaves the rule unlabelled', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
-        name: 'metadata',
-        type: 'object',
-        notes: [
-          { text: 'Default constraint.' },
-          { kind: 'constraint', text: 'Explicit constraint.' },
-          { kind: 'caveat', text: 'Behavioral caveat.' },
-        ],
+        name: 'teamId',
+        type: 'string',
+        condition: 'Required when the token is scoped to a team.',
       },
     })
 
-    const constraints = wrapper.get('[data-field-constraints]')
-    const caveat = wrapper.get('[data-field-caveat]')
-    expect(constraints.text()).toContain('Default constraint.')
-    expect(constraints.text()).toContain('Explicit constraint.')
-    expect(constraints.text()).not.toContain('Behavioral caveat.')
-    expect(constraints.text()).toContain('(2)')
-    expect(caveat.text()).toContain('Behavioral caveat.')
+    // The word is derived into the summary row, so the rule below carries the
+    // sentence alone — one occurrence, guaranteed by the derivation.
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('Conditional')
+    const rule = wrapper.get('[data-field-condition]')
+    expect(rule.text()).toBe('Required when the token is scoped to a team.')
+  })
+
+  it('localizes the derived marker through the shared conditional key', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'teamId',
+        type: 'string',
+        condition: '仅团队作用域下必填。',
+        labels: { conditional: '条件必填' },
+      },
+    })
+
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('条件必填')
+    expect(wrapper.text()).not.toContain('Conditional')
+  })
+
+  it('lets an explicit hard requirement win while still rendering the condition', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'teamId',
+        type: 'string',
+        required: true,
+        condition: 'Required when the token is scoped to a team.',
+      },
+    })
+
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('Required')
+    expect(wrapper.get('[data-field-condition]').text()).toContain('scoped to a team')
   })
 })
 
