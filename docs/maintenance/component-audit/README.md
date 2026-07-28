@@ -38,10 +38,12 @@
 ## 命令
 
 ```bash
-pnpm audit:plan              # 打印今天该审计哪几个组件
-pnpm audit:plan -- --json    # 机器可读，routine 消费这个
+pnpm audit:plan                          # 人读：打印今天该审计哪几个组件
+node scripts/audit-plan.mjs --json       # 机读：routine 消费这个
 node scripts/audit-plan.mjs --record <result.json>
 ```
+
+取 JSON 时直接调 node，不要走 `pnpm audit:plan -- --json`：pnpm 会在前面加三行脚本横幅，输出就不是合法 JSON 了。
 
 `--record` 的输入是一个数组：
 
