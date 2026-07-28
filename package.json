@@ -12,6 +12,7 @@
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
     "registry:validate": "node scripts/validate-registry.mjs",
+    "audit:plan": "node scripts/audit-plan.mjs",
     "geist:copy": "node scripts/copy-registry.mjs",
     "geist:update": "node scripts/copy-registry.mjs --update",
     "geist:check": "node scripts/check-registry-consumer.mjs",
