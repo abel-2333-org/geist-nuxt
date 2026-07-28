@@ -2,7 +2,7 @@
 // be able to remove every English chrome string through public props — no
 // preset swap, no type cast, no component fork, no CSS hiding.
 // Covers: operation-level beta + label injection (OperationHeader /
-// LifecycleNotice), FieldItem lifecycle badge labels + condition rule lead-in,
+// LifecycleNotice), FieldItem lifecycle badge labels + requiredness derivation,
 // full EnumTable structural-label passthrough (flat + variant + filter empty
 // state), recursive child rows, and unchanged English defaults. Layout-only
 // FieldItem assertions live in field-item-structure.spec.ts.
