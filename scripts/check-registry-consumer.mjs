@@ -9,6 +9,7 @@ import { ElementTypes, parse as parseTemplate } from '@vue/compiler-dom'
 import { parse as parseSfc } from '@vue/compiler-sfc'
 import {
   applyCopyPlan,
+  assertExactSha,
   checkConsumer,
   loadRegistry,
   parseArgs,
@@ -384,6 +385,82 @@ async function checkLegacyConfigMigration({
   }
 }
 
+async function materializeSource(sourceSha) {
+  const sourceRoot = await mkdtemp(path.join(tmpdir(), 'geist-upgrade-source-'))
+  try {
+    const archivePath = path.join(sourceRoot, 'source.tar')
+    run('git', ['archive', '--format=tar', '--output', archivePath, sourceSha], repoRoot)
+    run('tar', ['xf', archivePath, '-C', sourceRoot], repoRoot)
+    await rm(archivePath)
+    await writeFile(path.join(sourceRoot, '.geist-source.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      sourceSha,
+    }, null, 2)}\n`)
+    return sourceRoot
+  }
+  catch (error) {
+    await rm(sourceRoot, { recursive: true, force: true })
+    throw error
+  }
+}
+
+async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeModules }) {
+  let sourceRoot
+  let consumerRoot
+  try {
+    run('git', ['merge-base', '--is-ancestor', baseSha, headSha], repoRoot)
+    sourceRoot = await materializeSource(baseSha)
+    consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-consumer-upgrade-'))
+    const baseRegistry = await loadRegistry(path.join(sourceRoot, 'registry.json'))
+    await validateRegistry(baseRegistry, { repoRoot: sourceRoot, checkFiles: true })
+
+    await cp(path.join(sourceRoot, 'tests/fixtures/consumer'), consumerRoot, { recursive: true })
+    await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(packageJson(headRegistry), null, 2)}\n`)
+    await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
+    const before = await protectedHashes(consumerRoot)
+
+    run(process.execPath, [
+      path.join(sourceRoot, 'scripts/copy-registry.mjs'),
+      '--all',
+      '--target',
+      consumerRoot,
+      '--to',
+      baseSha,
+      '--write',
+    ], sourceRoot)
+    const installed = await protectedHashes(consumerRoot)
+    if (JSON.stringify(before) !== JSON.stringify(installed)) {
+      throw new Error('base copy-in modified a protected consumer file')
+    }
+    await checkConsumer({ registry: baseRegistry, repoRoot: sourceRoot, consumerRoot })
+
+    run(process.execPath, [
+      path.join(repoRoot, 'scripts/copy-registry.mjs'),
+      '--update',
+      '--target',
+      consumerRoot,
+      '--to',
+      headSha,
+      '--write',
+    ], repoRoot)
+    const updated = await protectedHashes(consumerRoot)
+    if (JSON.stringify(before) !== JSON.stringify(updated)) {
+      throw new Error('HEAD update modified a protected consumer file')
+    }
+    const lock = await checkConsumer({ registry: headRegistry, repoRoot, consumerRoot })
+
+    run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
+    await assertResolvedComponents(consumerRoot, lock)
+    run('pnpm', ['run', 'typecheck'], consumerRoot)
+    run('pnpm', ['run', 'build'], consumerRoot)
+    console.log(`Consumer upgrade smoke passed: ${baseSha} -> ${headSha}`)
+  }
+  finally {
+    if (consumerRoot) await rm(consumerRoot, { recursive: true, force: true })
+    if (sourceRoot) await rm(sourceRoot, { recursive: true, force: true })
+  }
+}
+
 const runtimeScenarios = [
   { label: 'all-items', all: true, build: true, cssMarker: 'scroll-mt-24' },
   {
@@ -664,11 +741,16 @@ try {
     console.log(`Consumer lock valid: ${Object.keys(lock.items).length} items, ${Object.keys(lock.files).length} files`)
   }
   else {
-    const sourceSha = resolveSourceSha(repoRoot, options.sha ?? options.to, { allowDirty: true })
-    const scenarios = closureScenarios(registry, {
-      selectedLabel: options.scenario,
-      group: options.group,
-    })
+    const upgradeFrom = options.upgrade_from
+      ? assertExactSha(options.upgrade_from, 'upgrade source SHA')
+      : undefined
+    const sourceSha = resolveSourceSha(repoRoot, options.sha ?? options.to, { allowDirty: !upgradeFrom })
+    const scenarios = upgradeFrom
+      ? []
+      : closureScenarios(registry, {
+          selectedLabel: options.scenario,
+          group: options.group,
+        })
     const kept = []
     const dependencyRoot = options.skip_install
       ? undefined
@@ -682,7 +764,7 @@ try {
         run('pnpm', ['install', '--ignore-workspace', '--ignore-scripts'], dependencyRoot)
       }
 
-      if (!options.scenario && (!options.group || options.group === 'runtime')) {
+      if (!upgradeFrom && !options.scenario && (!options.group || options.group === 'runtime')) {
         const legacyConsumer = await checkLegacyConfigMigration({
           registry,
           sourceSha,
@@ -690,6 +772,15 @@ try {
           keepTemp: options.keep_temp,
         })
         if (legacyConsumer) kept.push(legacyConsumer)
+      }
+
+      if (upgradeFrom) {
+        await runUpgradeSmoke({
+          baseSha: upgradeFrom,
+          headSha: sourceSha,
+          headRegistry: registry,
+          dependencyNodeModules,
+        })
       }
 
       for (const scenario of scenarios) {

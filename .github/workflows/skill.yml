@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: skill-${{ github.event.pull_request.number || github.run_id }}
+  group: skill-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -81,6 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           persist-credentials: false
 
       - uses: pnpm/action-setup@v4
@@ -97,6 +98,13 @@ jobs:
 
       - name: Test registry consumer (${{ matrix.group }})
         run: pnpm test:consumer -- --group ${{ matrix.group }}
+
+      - name: Test registry consumer upgrade from PR base
+        if: github.event_name == 'pull_request' && matrix.group == 'runtime'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_SHA: ${{ github.sha }}
+        run: pnpm test:consumer:upgrade -- --upgrade-from "$BASE_SHA" --to "$MERGE_SHA" --skip-install
 
   release-skill:
     name: Assemble, verify and release Source-first snapshot
@@ -210,6 +218,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           : "${TAG:?TAG is required}"
+          LIVE_MAIN_SHA="$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)"
+          if [ "$LIVE_MAIN_SHA" != "$GITHUB_SHA" ]; then
+            echo "Skip stale release: workflow SHA $GITHUB_SHA is not current main $LIVE_MAIN_SHA"
+            exit 0
+          fi
           gh release create "$TAG" dist-skill.tar.gz \
             --title "$TAG" \
             --notes "Source-first geist-nuxt skill distribution. The asset is a runnable root gallery/v0 snapshot with foundation, kits, registry tools and references. Sync by overwriting the memory-area skill directory wholesale."

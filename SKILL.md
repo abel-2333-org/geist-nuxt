@@ -20,7 +20,7 @@ description: geist-nuxt 是基于 Nuxt UI v4（Vue）的 Geist 风格 Source-fir
 - `registry.json`：唯一机器可读 manifest，描述 source、target 和依赖闭包。
 - `references/`：AI 读取的设计与操作契约；视觉实现不得反向覆盖文字规则。
 
-不存在 `@geist-nuxt/core` npm 包、Nuxt layer、workspace package 或 starter 分发边界。旧架构仅保留在 `docs/archive/`，已 superseded。
+不存在 `@geist-nuxt/core` npm 包、Nuxt layer、workspace package 或 starter 分发边界。旧架构仅保留在 Git 历史中，不得恢复为现行边界。
 
 ## 新增组件流程
 
@@ -29,7 +29,7 @@ description: geist-nuxt 是基于 Nuxt UI v4（Vue）的 Geist 风格 Source-fir
 3. 候选源码放 `playground/`，在根 `/playground` 用真实状态数据验证 HMR。
 4. 验证明暗、390px 到宽屏、键盘、focus、loading / empty / error / disabled / 长内容等相关状态。
 5. 人工决定归属：跨场景 → `foundation/`；单领域 → `kits/<kit>/`；未采纳则留在消费项目或删除。
-6. 采纳后同步根 `registry.json` 与正式 gallery；运行 `pnpm registry:validate && pnpm test:registry && pnpm typecheck && pnpm build && pnpm test:consumer`。
+6. 采纳后同步根 `registry.json` 与正式 gallery；运行 `pnpm test:agent && pnpm registry:validate && pnpm test:registry && pnpm test:component && pnpm typecheck && pnpm build && pnpm test:consumer`。
 
 完整晋升与 playground 收尾见 `references/method/component-reflow.md`。
 

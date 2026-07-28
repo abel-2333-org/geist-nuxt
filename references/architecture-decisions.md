@@ -27,7 +27,7 @@ registry.json                唯一 copy-in manifest
 references/                  AI 契约
 ```
 
-旧的 `packages/core` npm Nuxt layer + `packages/kits` workspace + `apps/gallery` + 独立 `starter` 方案已被取代。历史规格保留在 `docs/archive/refactor-spec-step1.md` 与 `step2.md`，不得再作为现行实施依据。
+旧的 `packages/core` npm Nuxt layer + `packages/kits` workspace + `apps/gallery` + 独立 `starter` 方案已被取代。迁移过程由 Git 历史中的 `23dff47`、`c716272` 与 PR #11（merge commit `a817611`）保留，不得恢复为现行实施边界。
 
 ### 原因
 

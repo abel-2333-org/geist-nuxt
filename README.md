@@ -7,7 +7,7 @@ Geist 风格的 Source-first Nuxt UI v4（Vue）设计系统。仓库根目录�
 - `foundation/` 与 `kits/` 的唯一源码真源；
 - 根 `registry.json` 的 copy-in 分发源。
 
-不再发布 `@geist-nuxt/core`，不使用 Nuxt layer、workspace package 或独立 starter。旧方案保留在 `docs/archive/`，仅用于追溯。
+不再发布 `@geist-nuxt/core`，不使用 Nuxt layer、workspace package 或独立 starter。旧方案只通过 Git 历史追溯，不再随当前源码和 AI snapshot 分发。
 
 ## 本地设计与预览
 
@@ -66,8 +66,10 @@ pnpm geist:check -- --target ../my-nuxt-app
 ## 维护验证
 
 ```bash
+pnpm test:agent
 pnpm registry:validate
 pnpm test:registry
+pnpm test:component
 pnpm typecheck
 pnpm build
 pnpm test:consumer

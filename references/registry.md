@@ -9,7 +9,7 @@
 | 根 gallery / v0 preview | 直接运行根源码，不执行 copy-in |
 | 外部 Nuxt 项目 | 用 `geist:copy` 预览并安装 `geist-foundation`、所选切片及依赖闭包 |
 | 已安装项目 | 用 `geist:update` 预览并更新受管文件，用 `geist:check` 检查漂移 |
-| CI | `registry:validate` + `test:registry` + `test:consumer` |
+| CI | `test:agent` + `registry:validate` + `test:registry` + `test:component` + `typecheck` + `build` + `test:consumer` |
 
 ## Manifest 契约
 
@@ -188,12 +188,12 @@ pnpm geist:check -- --target <consumer-directory>
 - dry-run 会把已不属于新依赖闭包的受管文件显示为 `delete`，但不会删除。
 - 带 `--write` 更新时，未被本地修改的 stale managed file 会被删除，并从 lock 的 item / file 记录中清理；若 stale file 已被本地修改，则整个 batch 停止且不写入。
 - 现存受管文件也是同一冲突规则：内容仍等于 lock hash 才能更新；有本地修改就停止整个 batch。
-- `geist:check` 只读比较 lock、当前 registry 与目标文件，发现缺失、内容漂移、陈旧受管文件或 manifest 不一致时非零退出。
+- `geist:check` 只读比较 lock、当前 checkout、当前 registry 与目标文件；lock 的 source SHA 落后当前 checkout，或发现缺失、内容漂移、陈旧受管文件、manifest 不一致时均非零退出，并要求先运行 `geist:update`。
 - 普通受管组件的本地业务改动优先放在消费项目外层组合；`main.css` 可以按消费项目需要追加 override，但后续更新会把它视为需要人工合并的本地差异。
 
 当 registry 移动受管 config fragment 时，dry-run 会把新 target 显示为 `create`、旧 target 显示为 `delete`。`nuxt.config.ts` 与 `app/app.config.ts` 是消费项目拥有的 protected entrypoint，update 不会改写其中的 import；消费方必须在同一个变更批次内把 import 切到新的中性路径。`geist:check` 只验证 lock 与 managed files，不能替代消费项目自己的 typecheck / build。
 
-更新后在消费项目运行其 typecheck / build / focused tests。仓库自己的端到端保证由 `pnpm test:consumer` 提供。
+更新后在消费项目运行其 typecheck / build / focused tests。仓库自己的 fresh-install 端到端保证由 `pnpm test:consumer` 提供；PR 另由 `test:consumer:upgrade` 自动从 base Git tree 安装旧 lock、更新到 GitHub checkout 的 PR merge tree，再执行 check / typecheck / build。
 
 ## 新增 item 的最小流程
 
@@ -204,8 +204,10 @@ pnpm geist:check -- --target <consumer-directory>
 5. 运行完整 gate：
 
 ```bash
+pnpm test:agent
 pnpm registry:validate
 pnpm test:registry
+pnpm test:component
 pnpm typecheck
 pnpm build
 pnpm test:consumer
