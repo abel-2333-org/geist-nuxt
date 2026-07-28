@@ -257,9 +257,24 @@ async function loadGuide() {
     item: 'api-docs-field-item',
     build: true,
     cssMarker: 'scroll-mt-24',
-    renderedMarkers: ['amount', 'string'],
+    renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
-    page: `<template>\n  <ApiDocsFieldItem name="amount" type="string" />\n</template>\n`,
+    page: `<script setup lang="ts">
+import type { FieldNote } from '~/utils/field'
+
+const notes: FieldNote[] = [
+  { text: 'Default constraint note.' },
+  { kind: 'caveat', text: 'Explicit caveat note.' },
+]
+
+// @ts-expect-error \`tone\` was removed; \`kind\` is the only note category.
+const legacyNote: FieldNote = { tone: 'caution', text: 'Legacy note shape.' }
+void legacyNote
+</script>
+<template>
+  <ApiDocsFieldItem name="amount" type="string" :notes="notes" />
+</template>
+`,
   },
   {
     label: 'api-docs-field-annotation',

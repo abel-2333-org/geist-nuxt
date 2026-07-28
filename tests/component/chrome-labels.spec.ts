@@ -2,9 +2,10 @@
 // be able to remove every English chrome string through public props — no
 // preset swap, no type cast, no component fork, no CSS hiding.
 // Covers: operation-level beta + label injection (OperationHeader /
-// LifecycleNotice), FieldItem lifecycle badge labels, full EnumTable
-// structural-label passthrough (flat + variant + filter empty state),
-// recursive child rows, and unchanged English defaults.
+// LifecycleNotice), FieldItem lifecycle badge labels + requiredness derivation,
+// full EnumTable structural-label passthrough (flat + variant + filter empty
+// state), recursive child rows, and unchanged English defaults. Layout-only
+// FieldItem assertions live in field-item-structure.spec.ts.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectScope } from 'vue'
 import { flushPromises } from '@vue/test-utils'
@@ -203,6 +204,87 @@ describe('FieldItem lifecycle badge labels', () => {
       props: { name: 'channel', type: 'string', lifecycle: { status: 'new' as const }, labels: { lifecycle: { beta: '内测' } } },
     })
     expect(wrapper.text()).toContain('New')
+  })
+
+  it.each(['beta', 'deprecated'] as const)(
+    'renders a %s description-only lifecycle as prose instead of an orphan definition',
+    async (status) => {
+      const wrapper = await mountSuspended(FieldItem, {
+        props: {
+          name: 'legacyMode',
+          type: 'string',
+          lifecycle: { status, description: 'Use `mode` instead.' },
+        },
+      })
+
+      const detail = wrapper.get('[data-field-lifecycle-detail]')
+      expect(detail.element.tagName).toBe('P')
+      expect(detail.text()).toContain('Use')
+      expect(detail.text()).toContain('instead.')
+      expect(wrapper.find('dl').exists()).toBe(false)
+    },
+  )
+
+  it('renders lifecycle since metadata as a complete term-definition pair', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'channel',
+        type: 'string',
+        lifecycle: { status: 'beta', since: 'v2.4', description: 'Shape may change.' },
+      },
+    })
+
+    const detail = wrapper.get('[data-field-lifecycle-detail]')
+    expect(detail.element.tagName).toBe('DL')
+    expect(detail.get('dt').text()).toBe('Since')
+    expect(detail.get('dd').text()).toContain('v2.4')
+  })
+
+})
+
+describe('FieldItem requiredness derivation', () => {
+  it('marks a condition-only field conditional and leaves the rule unlabelled', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'teamId',
+        type: 'string',
+        condition: 'Required when the token is scoped to a team.',
+      },
+    })
+
+    // The word is derived into the summary row, so the rule below carries the
+    // sentence alone — one occurrence, guaranteed by the derivation.
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('Conditional')
+    const rule = wrapper.get('[data-field-condition]')
+    expect(rule.text()).toBe('Required when the token is scoped to a team.')
+  })
+
+  it('localizes the derived marker through the shared conditional key', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'teamId',
+        type: 'string',
+        condition: '仅团队作用域下必填。',
+        labels: { conditional: '条件必填' },
+      },
+    })
+
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('条件必填')
+    expect(wrapper.text()).not.toContain('Conditional')
+  })
+
+  it('lets an explicit hard requirement win while still rendering the condition', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'teamId',
+        type: 'string',
+        required: true,
+        condition: 'Required when the token is scoped to a team.',
+      },
+    })
+
+    expect(wrapper.find('[data-field-requiredness]').text()).toBe('Required')
+    expect(wrapper.get('[data-field-condition]').text()).toContain('scoped to a team')
   })
 })
 

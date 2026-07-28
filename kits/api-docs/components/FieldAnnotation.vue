@@ -55,6 +55,12 @@ const source = useFieldSource()
 const entry = computed(() => (props.fieldRef ? source[props.fieldRef] : undefined))
 const node = computed<FieldNode | undefined>(() => props.field ?? entry.value?.field)
 
+// Same derivation as the field row (utils/field): the preview and the row it
+// links to must agree on requiredness, including for a node that carries only
+// a `condition`. Sharing the function — not re-reading `required` here — is
+// what keeps the two surfaces from drifting.
+const requiredState = computed(() => (node.value ? fieldRequiredState(node.value) : null))
+
 const route = useRoute()
 const anchor = useFieldAnchor()
 
@@ -94,16 +100,16 @@ function jump(close: () => void) {
     <slot>{{ node.name }}</slot>
 
     <template #content>
-      <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <InlineCode>{{ node.name }}</InlineCode>
-        <span class="font-mono text-xs text-muted">{{ node.type }}</span>
-        <span v-if="node.required === true" class="text-xs font-medium text-error">
-          {{ t.required }}
-        </span>
-        <span v-else-if="node.required === 'conditional'" class="text-xs font-medium text-warning">
-          {{ t.conditional }}
-        </span>
-      </p>
+      <div class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+        <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}</InlineCode>
+        <span class="shrink-0 font-mono text-xs text-muted">{{ node.type }}</span>
+        <span v-if="node.format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ node.format }}</span>
+        <span
+          v-if="requiredState"
+          class="text-xs font-medium uppercase tracking-wide"
+          :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
+        >{{ requiredState === 'required' ? t.required : t.conditional }}</span>
+      </div>
       <p v-if="node.description" class="line-clamp-4 leading-relaxed text-muted">
         <InlineMarkdown :text="node.description" />
       </p>

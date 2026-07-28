@@ -207,6 +207,25 @@ describe('ApiDocsFieldAnnotation', () => {
     expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/reference#res_state')
   })
 
+  it('derives the requiredness marker so an orphan condition is tagged in the preview too', async () => {
+    // Same fieldRequiredState derivation as the field row: the popover and the
+    // row it links to must not disagree about whether a field is conditional.
+    wrapper = await mountSuspended(FieldAnnotation, {
+      props: {
+        field: {
+          path: 'body_teamId',
+          name: 'teamId',
+          type: 'string',
+          condition: 'Required when the token is scoped to a team.',
+        },
+      },
+      attachTo: document.body,
+    })
+
+    await open(wrapper)
+    expect(panel()!.textContent).toContain('Conditional')
+  })
+
   it('degrades an unresolved field ref to plain slot text', async () => {
     wrapper = await mountSuspended(FieldAnnotation, {
       props: { fieldRef: 'missing' },

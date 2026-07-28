@@ -21,7 +21,7 @@ export type RequiredState = boolean | 'conditional'
 
 /**
  * Field lifecycle metadata. `status` drives the badge; `since` and
- * `description` (already localized) surface in a callout under the field.
+ * `description` (already localized) surface as detail under the field.
  */
 export interface FieldLifecycleInfo {
   status: FieldLifecycle
@@ -31,9 +31,22 @@ export interface FieldLifecycleInfo {
   description?: string
 }
 
+/**
+ * Note category. It drives BOTH grouping and color, so a doc author cannot file
+ * a caveat under the "Constraints" heading by accident:
+ *   constraint — an enforced input boundary (length, charset, format). Breaking
+ *                it fails validation, so there is no hidden trap: neutral, and
+ *                it belongs in the scannable constraints row/table.
+ *   caveat     — the value IS accepted, but there is behaviour you would regret
+ *                not knowing ("stored in plain text", "ignored on preview
+ *                deployments"). Amber, and read right after the description.
+ */
+export type FieldNoteKind = 'constraint' | 'caveat'
+
 /** A short note shown under a field (constraints, consistency rules, caveats…). */
 export interface FieldNote {
-  tone?: 'caution' | 'info'
+  /** Defaults to `constraint`. */
+  kind?: FieldNoteKind
   /** Category tag (Range / Rule / Unsupported…) rendered as a leading pill. */
   label?: string
   text: string
@@ -93,8 +106,10 @@ export interface FieldItemLabels {
   default?: string
   example?: string
   constraints?: string
-  /** Fallback category tag for a note without its own `label`. */
+  /** Fallback category tag for a constraint note without its own `label`. */
   note?: string
+  /** Fallback category tag for a caveat note without its own `label`. */
+  caveat?: string
   /** Lead-in before a lifecycle `since` version, e.g. "Since v2.3". */
   since?: string
   showChildren?: string
@@ -186,6 +201,35 @@ export type CompositionNode =
     kind: 'allOf'
     discriminator?: never
   })
+
+/**
+ * Derive the requiredness marker from the whole field, not from `required`
+ * alone. A `condition` ("Required when `type` is `git`") already asserts
+ * conditional requiredness, so a field carrying one is conditional whether or
+ * not the author also set `required: 'conditional'`.
+ *
+ * This is why the condition block needs no lead-in tag of its own: the word
+ * appears exactly once, in the summary row, and the derivation — not the doc
+ * author's discipline — guarantees it is there. An orphan condition (a
+ * `condition` with no `required`) is fixed at the data layer instead of being
+ * papered over with a duplicate label 30px below the first one.
+ *
+ * Conflict semantics are fail-soft: an explicit `required: true` wins the
+ * marker (a hard requirement is the stronger claim, and downgrading it to
+ * "conditional" would be a correctness bug), while the condition text still
+ * renders — the reader sees both the hard marker and the qualifying sentence
+ * rather than losing information the author supplied.
+ *
+ * Optional returns `null`: absence of a marker IS the optional signal
+ * (Stripe/Mintlify convention), so there is no `'optional'` member to render.
+ */
+export function fieldRequiredState(
+  field: Pick<FieldNode, 'required' | 'condition'>,
+): 'required' | 'conditional' | null {
+  if (field.required === true) return 'required'
+  if (field.required === 'conditional' || field.condition) return 'conditional'
+  return null
+}
 
 /** Collect every real field anchor reachable through children and field-level
  *  compositions. Order follows the display model and duplicate paths remain
