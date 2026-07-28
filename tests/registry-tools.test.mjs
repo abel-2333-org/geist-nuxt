@@ -380,6 +380,45 @@ test('stops a managed config rename before creating replacements when an old tar
   }
 })
 
+test('stops a managed config rename before deleting old targets when a new target conflicts', async () => {
+  const { repoRoot, consumerRoot, registry, oldFiles } = await configFixture()
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['foundation-config']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  const beforeLock = await readFile(lockPath, 'utf8')
+  const { current, newFiles } = await migrateConfigFixture(registry, repoRoot)
+  const conflictingTarget = path.join(consumerRoot, newFiles[0].target)
+  const localContent = 'export default { consumer: true }\n'
+  await mkdir(path.dirname(conflictingTarget), { recursive: true })
+  await writeFile(conflictingTarget, localContent)
+
+  await assert.rejects(
+    planCopy({
+      registry: current,
+      resolution: resolveCopyRequest(current, [], {
+        lock: await readLock(consumerRoot),
+        update: true,
+      }),
+      repoRoot,
+      consumerRoot,
+      sourceSha: OTHER_SOURCE_SHA,
+      update: true,
+    }),
+    /conflicting target/,
+  )
+  assert.equal(await readFile(lockPath, 'utf8'), beforeLock)
+  for (const file of oldFiles) {
+    assert.equal(await readFile(path.join(consumerRoot, file.target), 'utf8'), file.content)
+  }
+  assert.equal(await readFile(conflictingTarget, 'utf8'), localContent)
+  await assert.rejects(readFile(path.join(consumerRoot, newFiles[1].target)), /ENOENT/)
+})
+
 test('reconcile rejects a lock issued by another registry before trusting managed hashes', async () => {
   const { repoRoot, consumerRoot, registry } = await fixture()
   const resolution = resolveItems(registry, ['feature'])
