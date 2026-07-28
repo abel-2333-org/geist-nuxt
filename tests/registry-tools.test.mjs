@@ -4,12 +4,14 @@ import { mkdtemp, mkdir, readFile, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
+import { fileURLToPath } from 'node:url'
 import {
   RegistryError,
   applyCopyPlan,
   assertExactSha,
   assertSafeTarget,
   checkConsumer,
+  loadRegistry,
   parseArgs,
   planCopy,
   readLock,
@@ -22,6 +24,7 @@ import {
 
 const SOURCE_SHA = '1234567890abcdef1234567890abcdef12345678'
 const OTHER_SOURCE_SHA = 'abcdef1234567890abcdef1234567890abcdef12'
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 test('accepts the pnpm argument separator', () => {
   const options = parseArgs(['--', 'geist-foundation', '--target', '../consumer', '--to', SOURCE_SHA])
@@ -67,6 +70,57 @@ async function fixture() {
   return { repoRoot, consumerRoot, registry }
 }
 
+async function configFixture() {
+  const result = await fixture()
+  await mkdir(path.join(result.repoRoot, 'foundation/config'), { recursive: true })
+  const oldFiles = [
+    {
+      path: 'foundation/config/geist-nuxt.ts',
+      target: 'app/config/geist-nuxt.ts',
+      content: 'export const geistNuxtConfig = { ui: {} }\n',
+    },
+    {
+      path: 'foundation/config/geist-app.ts',
+      target: 'app/config/geist-app.ts',
+      content: 'export const geistAppConfig = { ui: {} }\n',
+    },
+  ]
+  for (const file of oldFiles) {
+    await writeFile(path.join(result.repoRoot, file.path), file.content)
+  }
+  result.registry.sourceRoots.push('foundation/config')
+  result.registry.items.push({
+    name: 'foundation-config',
+    type: 'registry:style',
+    title: 'Foundation config',
+    description: 'Managed Nuxt and App config fragments.',
+    files: oldFiles.map(({ path: source, target }) => ({ path: source, target })),
+  })
+  return { ...result, oldFiles }
+}
+
+async function migrateConfigFixture(registry, repoRoot) {
+  const current = structuredClone(registry)
+  const item = current.items.find(candidate => candidate.name === 'foundation-config')
+  const newFiles = [
+    {
+      path: 'foundation/config/nuxt.ts',
+      target: 'app/config/foundation/nuxt.ts',
+      content: 'export default { ui: {} }\n',
+    },
+    {
+      path: 'foundation/config/app.ts',
+      target: 'app/config/foundation/app.ts',
+      content: 'export default { ui: {} }\n',
+    },
+  ]
+  for (const file of newFiles) {
+    await writeFile(path.join(repoRoot, file.path), file.content)
+  }
+  item.files = newFiles.map(({ path: source, target }) => ({ path: source, target }))
+  return { current, newFiles }
+}
+
 test('validates a complete registry and resolves dependency-first closure', async () => {
   const { repoRoot, registry } = await fixture()
   const result = await validateRegistry(registry, { repoRoot })
@@ -74,6 +128,31 @@ test('validates a complete registry and resolves dependency-first closure', asyn
   const resolution = resolveItems(registry, ['feature'])
   assert.deepEqual(resolution.items.map(item => item.name), ['dependency', 'feature'])
   assert.deepEqual(resolution.files.map(file => file.target), ['app/components/Dependency.vue', 'app/components/Feature.vue'])
+})
+
+test('keeps the real managed config surface vendor-neutral', async () => {
+  const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
+  const foundation = registry.items.find(item => item.name === 'geist-foundation')
+  assert.deepEqual(
+    foundation.files.filter(file => file.path.startsWith('foundation/config/')),
+    [
+      { path: 'foundation/config/nuxt.ts', target: 'app/config/foundation/nuxt.ts' },
+      { path: 'foundation/config/app.ts', target: 'app/config/foundation/app.ts' },
+    ],
+  )
+  const vendorTargets = registry.items
+    .flatMap(item => item.files.map(file => file.target))
+    .filter(target => /geist/i.test(target))
+  assert.deepEqual(vendorTargets, [])
+
+  for (const [entrypoint, expectedImport] of Object.entries({
+    'tests/fixtures/consumer/nuxt.config.ts': "import base from './app/config/foundation/nuxt'",
+    'tests/fixtures/consumer/app/app.config.ts': "import base from './config/foundation/app'",
+  })) {
+    const source = await readFile(path.join(PROJECT_ROOT, entrypoint), 'utf8')
+    assert.equal(source.split('\n', 1)[0], expectedImport)
+    assert.doesNotMatch(source, /\bgeist[A-Z]\w*|config\/geist-/)
+  }
 })
 
 test('rejects undeclared files, duplicate targets, cycles, and undeclared relative imports', async (t) => {
@@ -212,6 +291,132 @@ test('dry-run planning writes nothing; write records exact SHA and source/target
   assert.equal(record.sourceSha, SOURCE_SHA)
   assert.equal(record.sourceHash, record.targetHash)
   assert.equal(record.targetHash, sha256(await readFile(path.join(consumerRoot, record.target))))
+})
+
+test('renames managed config targets and rewrites their lock records', async () => {
+  const { repoRoot, consumerRoot, registry, oldFiles } = await configFixture()
+  const initial = resolveItems(registry, ['foundation-config'])
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: initial,
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const beforeLock = await readFile(path.join(consumerRoot, 'geist.lock.json'), 'utf8')
+  const { current, newFiles } = await migrateConfigFixture(registry, repoRoot)
+  const resolution = resolveCopyRequest(current, [], {
+    lock: await readLock(consumerRoot),
+    update: true,
+  })
+
+  const plan = await planCopy({
+    registry: current,
+    resolution,
+    repoRoot,
+    consumerRoot,
+    sourceSha: OTHER_SOURCE_SHA,
+    update: true,
+  })
+  assert.deepEqual(
+    Object.fromEntries(plan.operations.map(operation => [operation.target, operation.action])),
+    {
+      'app/config/foundation/nuxt.ts': 'create',
+      'app/config/foundation/app.ts': 'create',
+      'app/config/geist-nuxt.ts': 'delete',
+      'app/config/geist-app.ts': 'delete',
+    },
+  )
+  assert.equal(await readFile(path.join(consumerRoot, 'geist.lock.json'), 'utf8'), beforeLock)
+  for (const file of oldFiles) assert.equal(await readFile(path.join(consumerRoot, file.target), 'utf8'), file.content)
+  for (const file of newFiles) {
+    await assert.rejects(readFile(path.join(consumerRoot, file.target)), /ENOENT/)
+  }
+
+  const lock = await applyCopyPlan(plan)
+  assert.deepEqual(lock.items['foundation-config'].files, newFiles.map(file => file.target))
+  for (const file of oldFiles) {
+    assert.equal(lock.files[file.target], undefined)
+    await assert.rejects(readFile(path.join(consumerRoot, file.target)), /ENOENT/)
+  }
+  for (const file of newFiles) {
+    assert.equal(lock.files[file.target].source, file.path)
+    assert.equal(await readFile(path.join(consumerRoot, file.target), 'utf8'), file.content)
+  }
+  await checkConsumer({ registry: current, repoRoot, consumerRoot })
+})
+
+test('stops a managed config rename before creating replacements when an old target drifted', async () => {
+  const { repoRoot, consumerRoot, registry, oldFiles } = await configFixture()
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['foundation-config']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  const beforeLock = await readFile(lockPath, 'utf8')
+  await writeFile(path.join(consumerRoot, oldFiles[0].target), 'export default { local: true }\n')
+  const { current, newFiles } = await migrateConfigFixture(registry, repoRoot)
+
+  await assert.rejects(
+    planCopy({
+      registry: current,
+      resolution: resolveCopyRequest(current, [], {
+        lock: await readLock(consumerRoot),
+        update: true,
+      }),
+      repoRoot,
+      consumerRoot,
+      sourceSha: OTHER_SOURCE_SHA,
+      update: true,
+    }),
+    /conflicting target/,
+  )
+  assert.equal(await readFile(lockPath, 'utf8'), beforeLock)
+  for (const file of newFiles) {
+    await assert.rejects(readFile(path.join(consumerRoot, file.target)), /ENOENT/)
+  }
+})
+
+test('stops a managed config rename before deleting old targets when a new target conflicts', async () => {
+  const { repoRoot, consumerRoot, registry, oldFiles } = await configFixture()
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['foundation-config']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  const beforeLock = await readFile(lockPath, 'utf8')
+  const { current, newFiles } = await migrateConfigFixture(registry, repoRoot)
+  const conflictingTarget = path.join(consumerRoot, newFiles[0].target)
+  const localContent = 'export default { consumer: true }\n'
+  await mkdir(path.dirname(conflictingTarget), { recursive: true })
+  await writeFile(conflictingTarget, localContent)
+
+  await assert.rejects(
+    planCopy({
+      registry: current,
+      resolution: resolveCopyRequest(current, [], {
+        lock: await readLock(consumerRoot),
+        update: true,
+      }),
+      repoRoot,
+      consumerRoot,
+      sourceSha: OTHER_SOURCE_SHA,
+      update: true,
+    }),
+    /conflicting target/,
+  )
+  assert.equal(await readFile(lockPath, 'utf8'), beforeLock)
+  for (const file of oldFiles) {
+    assert.equal(await readFile(path.join(consumerRoot, file.target), 'utf8'), file.content)
+  }
+  assert.equal(await readFile(conflictingTarget, 'utf8'), localContent)
+  await assert.rejects(readFile(path.join(consumerRoot, newFiles[1].target)), /ENOENT/)
 })
 
 test('reconcile rejects a lock issued by another registry before trusting managed hashes', async () => {

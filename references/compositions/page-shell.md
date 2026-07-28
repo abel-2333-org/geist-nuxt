@@ -40,9 +40,9 @@ const items = /* 你的导航数据源，NavigationMenuItem[] */
 import { zh_cn } from '@nuxt/ui/locale'
 
 useHead({
-  title: 'geist-nuxt · Geist visual language on Nuxt UI',
+  title: 'Developer Portal',
   meta: [
-    { name: 'description', content: '...' },
+    { name: 'description', content: 'Product documentation and API reference.' },
   ],
   link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
   htmlAttrs: { lang: 'zh-CN' },
@@ -76,7 +76,8 @@ useHead({
 基于 Nuxt UI `UHeader mode="slideover"`：**桌面横排导航、移动端汉堡 + slideover 抽屉、断点 `lg`、路由变化自动收起**——全部内建，不手写 `<header>`、不手写 media query。它**数据无关**：
 
 - **prop `items: NavigationMenuItem[]`** —— 导航数据由消费方传入（如从路由树自动派生，见 `references/gallery.md`「页面组织」）。
-- **slot `#brand`** —— logo / wordmark / badge，默认给 geist-nuxt 兜底，可完全覆盖。
+- **prop `brand`** —— 未提供 slot 时的中性 wordmark，默认 `Application`。
+- **slot `#brand`** —— logo / wordmark / badge，可完全覆盖 `brand` fallback。
 - **slot `#actions`** —— 右侧动作区，**默认内置 `<ThemeToggle />`**；覆盖后需自己带上。
 
 ```vue
@@ -87,15 +88,12 @@ const items = useGalleryNav()
 <template>
   <CompositionAppHeader :items="items">
     <template #brand>
-      <NuxtLink to="/" class="flex items-center gap-2.5 text-highlighted" aria-label="geist-nuxt 首页">
-        <img src="/favicon.svg" alt="" class="size-6" width="24" height="24" />
-        <span class="font-mono text-sm font-semibold tracking-tight">geist-nuxt</span>
+      <NuxtLink to="/" class="flex items-center gap-2.5 text-highlighted" aria-label="Developer Docs home">
+        <span class="font-mono text-sm font-semibold tracking-tight">Developer Docs</span>
       </NuxtLink>
-      <UBadge color="neutral" variant="subtle" size="sm" class="font-mono max-sm:hidden">Nuxt · Nuxt UI</UBadge>
     </template>
     <template #actions>
-      <UButton label="文档" color="neutral" variant="ghost" trailing-icon="i-lucide-arrow-up-right" to="https://ui.nuxt.com" target="_blank" class="max-sm:hidden" />
-      <UButton icon="i-simple-icons-github" color="neutral" variant="ghost" aria-label="GitHub 仓库" to="https://github.com/abel-2333-org/geist-nuxt" target="_blank" />
+      <UButton label="Guides" color="neutral" variant="ghost" to="/guides" class="max-sm:hidden" />
       <ThemeToggle />
     </template>
   </CompositionAppHeader>

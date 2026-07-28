@@ -1,5 +1,5 @@
 import { createResolver } from '@nuxt/kit'
-import { geistNuxtConfig } from './foundation/config/geist-nuxt'
+import base from './foundation/config/nuxt'
 
 const { resolve } = createResolver(import.meta.url)
 
@@ -12,8 +12,8 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui'],
   css: [resolve('./app/assets/css/main.css')],
 
-  colorMode: geistNuxtConfig.colorMode,
-  ui: geistNuxtConfig.ui,
+  colorMode: base.colorMode,
+  ui: base.ui,
 
   // Explicit roots preserve the existing component API without layer scanning:
   // CopyButton stays bare, kit files stay ApiDocs*, and gallery/demo names stay

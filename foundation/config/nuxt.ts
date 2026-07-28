@@ -1,5 +1,5 @@
 /** Nuxt UI capabilities required by the Source-first foundation. */
-export const geistNuxtConfig = {
+export default {
   colorMode: {
     preference: 'system' as const,
     fallback: 'light' as const,

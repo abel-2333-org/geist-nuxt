@@ -19,9 +19,9 @@
     },
     "consumerSetup": [
       "Wrap the application in UApp.",
-      "Merge app/config/geist-app.ts into the consumer app/app.config.ts.",
-      "Merge app/config/geist-nuxt.ts into the consumer nuxt.config.ts.",
-      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and Geist foundation entry.",
+      "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts.",
+      "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry.",
       "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
       "Keep Nuxt color mode enabled through @nuxt/ui."
     ]
@@ -45,8 +45,8 @@
       "description": "Geist tokens and non-overwriting Nuxt/App config fragments.",
       "files": [
         { "path": "foundation/assets/css/main.css", "target": "app/assets/css/main.css" },
-        { "path": "foundation/config/geist-nuxt.ts", "target": "app/config/geist-nuxt.ts" },
-        { "path": "foundation/config/geist-app.ts", "target": "app/config/geist-app.ts" }
+        { "path": "foundation/config/nuxt.ts", "target": "app/config/foundation/nuxt.ts" },
+        { "path": "foundation/config/app.ts", "target": "app/config/foundation/app.ts" }
       ]
     },
     {
