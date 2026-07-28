@@ -95,8 +95,10 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
 }))
 
 // Deep-linking. A row highlights when it is the active anchor, and auto-expands
-// when the active anchor lives among its descendants (prefix match) so a link
-// into a collapsed subfield reveals itself.
+// when the active anchor lives among its descendants so a link into a collapsed
+// subfield reveals itself. Descendancy is decided by membership in the paths
+// collected from this row's own subtree — NOT by string prefix — so the
+// disclosure follows the real `children` graph rather than the id spelling.
 const anchor = useFieldAnchor()
 const isActive = computed(() => !!props.path && anchor.active.value === props.path)
 const childPaths = computed(() => collectFieldPaths(props.children ?? []))
@@ -321,10 +323,15 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           <InlineMarkdown v-if="lifecycle.description" :text="lifecycle.description" />
         </dd>
       </dl>
+      <!-- Mirrors the new/beta lifecycle detail at the end of the secondary
+           band below — same markup, different position (a deprecation is a
+           gate, a new/beta note is metadata). Keep the two in sync; a
+           migration note carries the same long unbroken tokens (upgrade URLs,
+           replacement identifiers) and needs the same overflow guard. -->
       <p
         v-else-if="isDeprecated && lifecycle?.description"
         data-field-lifecycle-detail
-        class="text-sm leading-relaxed text-muted"
+        class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted"
       >
         <InlineMarkdown :text="lifecycle.description" />
       </p>

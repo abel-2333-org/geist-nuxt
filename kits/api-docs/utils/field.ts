@@ -59,10 +59,16 @@ export interface FieldNote {
  */
 export interface FieldNode {
   /**
-   * Stable, unique, hierarchical id used as the DOM id and URL hash for deep
-   * linking, e.g. `request-body_customer_address_city`. Underscore-separated
-   * so a row can tell whether the active anchor lives among its descendants
-   * (prefix match) and auto-expand.
+   * Stable, unique id used as the DOM id and URL hash for deep linking, e.g.
+   * `request-body_customer_address_city`. A row auto-expands by testing the
+   * active anchor against the paths actually collected from its own subtree
+   * (`collectFieldPaths`), so uniqueness is the only requirement this renderer
+   * places on the format — a path need not encode its ancestry.
+   *
+   * Underscore-separated hierarchical ids remain the recommended convention:
+   * ApiDocsSchemaComposition resolves a deep link into a hidden variant by
+   * longest `active.startsWith(path + '_')` prefix, so a field tree that also
+   * renders through a composition does depend on the separator.
    */
   path?: string
   name: string

@@ -4,8 +4,9 @@
  * A single shared piece of state — the "active field path" — drives three
  * things at once, so every field row can stay self-governing:
  *  - a row highlights itself when its own path is active;
- *  - a row auto-expands when the active path is one of its descendants
- *    (prefix match), so deep links into collapsed subfields reveal themselves;
+ *  - a row auto-expands when the active path is one of its descendants — tested
+ *    against the paths collected from its own subtree, not by string prefix —
+ *    so deep links into collapsed subfields reveal themselves;
  *  - navigation (from a click or an incoming URL hash) sets the active path,
  *    waits for ancestor collapsibles to open, then scrolls + flashes the row.
  *
