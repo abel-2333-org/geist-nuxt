@@ -70,6 +70,11 @@ test('locks the root-only agent snapshot boundary', async () => {
 
   assert.match(workflow, /--exclude '\/\.agents\/'/)
   assert.match(workflow, /--exclude '\/\.claude\/'/)
+  assert.match(workflow, /group: skill-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}/)
+  assert.match(workflow, /LIVE_MAIN_SHA=.*commits\/main/)
+  assert.match(workflow, /\[ "\$LIVE_MAIN_SHA" != "\$GITHUB_SHA" \]/)
+  assert.match(workflow, /gh release create "\$TAG" dist-skill\.tar\.gz \\\n\s+--target "\$GITHUB_SHA"/)
+  assert.match(workflow, /test:consumer:upgrade -- --upgrade-from "\$BASE_SHA" --to "\$MERGE_SHA" --skip-install/)
 
   const archiveGuard = workflow.match(/tar tzf dist-skill\.tar\.gz \| grep -E '([^']+)'/)
   assert.ok(archiveGuard)
@@ -78,4 +83,27 @@ test('locks the root-only agent snapshot boundary', async () => {
   assert.match('./.agents/skills/private/SKILL.md', blocked)
   assert.match('./.claude/settings.json', blocked)
   assert.doesNotMatch('./docs/example/.claude/fixture.json', blocked)
+})
+
+test('locks the Source-first repository boundary', async () => {
+  const config = JSON.parse(await readFile(path.join(root, 'v0.json'), 'utf8'))
+  assert.equal(config.starter.source, 'skill-directory')
+  assert.equal(config.starter.path, '.')
+
+  const retiredPaths = [
+    'apps',
+    'assets',
+    'docs/archive',
+    'exports',
+    'packages',
+    'pnpm-workspace.yaml',
+    'starter',
+  ]
+  for (const retiredPath of retiredPaths) {
+    await assert.rejects(
+      lstat(path.join(root, retiredPath)),
+      error => error?.code === 'ENOENT',
+      `${retiredPath} must not return as a live repository boundary`,
+    )
+  }
 })

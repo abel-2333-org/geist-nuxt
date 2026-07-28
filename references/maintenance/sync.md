@@ -20,8 +20,10 @@ GitHub 真源根目录
 Source-first 真源必须依次通过：
 
 ```bash
+pnpm test:agent
 pnpm registry:validate
 pnpm test:registry
+pnpm test:component
 pnpm typecheck
 pnpm build
 pnpm test:consumer
@@ -39,6 +41,7 @@ pnpm test:consumer
 pnpm install --frozen-lockfile
 pnpm registry:validate
 pnpm test:registry
+pnpm test:component
 pnpm typecheck
 pnpm build
 pnpm geist:copy -- geist-foundation --target <temp-consumer> --to <source-sha>

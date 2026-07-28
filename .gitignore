@@ -2,7 +2,9 @@ node_modules/
 .nuxt/
 .output/
 .vercel/
-dist/
+/dist-skill/
+/dist-verify/
+/dist-skill.tar.gz
 *.log
 .DS_Store
 

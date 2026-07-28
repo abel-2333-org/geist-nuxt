@@ -86,8 +86,10 @@ kit 只能依赖 foundation 或同 kit item；禁止 kit → kit。私有 spec�
 ## 6. 完整 gate
 
 ```bash
+pnpm test:agent
 pnpm registry:validate
 pnpm test:registry
+pnpm test:component
 pnpm typecheck
 pnpm build
 pnpm test:consumer

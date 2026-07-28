@@ -390,6 +390,24 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
         else throw error
       }
     }
+    const canonicalSources = new Set()
+    for (const root of ['foundation', 'kits']) {
+      try {
+        const info = await lstat(path.join(repoRoot, root))
+        if (!info.isDirectory() || info.isSymbolicLink()) {
+          fail(`canonical source root must be a non-symlink directory: ${root}`)
+          continue
+        }
+        for (const source of await walkFiles(repoRoot, root)) canonicalSources.add(source)
+      }
+      catch (error) {
+        if (error?.code === 'ENOENT') continue
+        throw error
+      }
+    }
+    for (const source of canonicalSources) {
+      if (!discovered.has(source)) fail(`source file is outside declared sourceRoots: ${source}`)
+    }
     for (const source of discovered) if (!sourceOwners.has(source)) fail(`source file is not declared by any item: ${source}`)
     for (const source of sourceOwners.keys()) if (!discovered.has(source)) fail(`declared source is outside or missing from sourceRoots: ${source}`)
 
@@ -710,12 +728,9 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     }
   }
 
-  let checkoutSha
-  try {
-    checkoutSha = getCheckoutSha(repoRoot)
-  }
-  catch {
-    checkoutSha = undefined
+  const checkoutSha = getCheckoutSha(repoRoot)
+  if (lockedSourceSha && checkoutSha && lockedSourceSha !== checkoutSha) {
+    errors.push(`consumer source SHA ${lockedSourceSha} does not match checked-out source ${checkoutSha}; run geist:update`)
   }
   for (const [target, record] of Object.entries(lock.files)) {
     let safeTarget

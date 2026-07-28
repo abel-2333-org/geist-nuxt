@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, mkdir, readFile, symlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
@@ -37,6 +37,10 @@ async function fixture() {
   const repoRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-repo-'))
   const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-consumer-'))
   await mkdir(path.join(repoRoot, 'foundation/components'), { recursive: true })
+  await writeFile(path.join(repoRoot, '.geist-source.json'), `${JSON.stringify({
+    schemaVersion: 1,
+    sourceSha: SOURCE_SHA,
+  })}\n`)
   await writeFile(path.join(repoRoot, 'foundation/components/Dependency.vue'), '<template><span>dependency</span></template>\n')
   await writeFile(path.join(repoRoot, 'foundation/components/Feature.vue'), '<script setup>\nimport Dependency from \'./Dependency.vue\'\n</script>\n<template><Dependency /></template>\n')
   const registry = {
@@ -160,6 +164,23 @@ test('rejects undeclared files, duplicate targets, cycles, and undeclared relati
     const { repoRoot, registry } = await fixture()
     await writeFile(path.join(repoRoot, 'foundation/components/Undeclared.vue'), '<template />\n')
     await assert.rejects(validateRegistry(registry, { repoRoot }), /not declared by any item/)
+  })
+
+  await t.test('source file outside declared source roots', async () => {
+    const { repoRoot, registry } = await fixture()
+    await mkdir(path.join(repoRoot, 'foundation/composables'), { recursive: true })
+    await writeFile(path.join(repoRoot, 'foundation/composables/useUndeclared.ts'), 'export const useUndeclared = () => true\n')
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /outside declared sourceRoots/)
+  })
+
+  await t.test('symlinked canonical source root', async () => {
+    const { repoRoot, registry } = await fixture()
+    const outsideRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-outside-'))
+    await symlink(outsideRoot, path.join(repoRoot, 'kits'), 'dir')
+    await assert.rejects(
+      validateRegistry(registry, { repoRoot }),
+      /canonical source root must be a non-symlink directory: kits/,
+    )
   })
 
   await t.test('duplicate target', async () => {
@@ -343,6 +364,10 @@ test('renames managed config targets and rewrites their lock records', async () 
     assert.equal(lock.files[file.target].source, file.path)
     assert.equal(await readFile(path.join(consumerRoot, file.target), 'utf8'), file.content)
   }
+  await writeFile(path.join(repoRoot, '.geist-source.json'), `${JSON.stringify({
+    schemaVersion: 1,
+    sourceSha: OTHER_SOURCE_SHA,
+  })}\n`)
   await checkConsumer({ registry: current, repoRoot, consumerRoot })
 })
 
@@ -469,6 +494,36 @@ test('consumer check requires one exact source SHA and matching installed hashes
     await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
     await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /sourceHash must match targetHash/)
   })
+
+  await t.test('installed source SHA matches the checked-out source', async () => {
+    await writeFile(lockPath, `${JSON.stringify(originalLock, null, 2)}\n`)
+    await writeFile(path.join(repoRoot, '.geist-source.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      sourceSha: OTHER_SOURCE_SHA,
+    })}\n`)
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /does not match checked-out source.*geist:update/)
+  })
+
+  await t.test('source metadata is required outside a Git checkout', async () => {
+    await writeFile(lockPath, `${JSON.stringify(originalLock, null, 2)}\n`)
+    await rm(path.join(repoRoot, '.geist-source.json'))
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /neither \.git nor \.geist-source\.json exists/)
+  })
+
+  await t.test('source metadata must be valid JSON', async () => {
+    await writeFile(lockPath, `${JSON.stringify(originalLock, null, 2)}\n`)
+    await writeFile(path.join(repoRoot, '.geist-source.json'), '{not-json}\n')
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /\.geist-source\.json is not valid JSON/)
+  })
+
+  await t.test('source metadata must contain an exact SHA', async () => {
+    await writeFile(lockPath, `${JSON.stringify(originalLock, null, 2)}\n`)
+    await writeFile(path.join(repoRoot, '.geist-source.json'), `${JSON.stringify({
+      schemaVersion: 1,
+      sourceSha: 'main',
+    })}\n`)
+    await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /must be an exact 40-character Git SHA/)
+  })
 })
 
 test('copy into an existing lock reconciles the full request set and prunes removed locked items', async () => {
@@ -565,8 +620,7 @@ test('consumer check detects target drift', async () => {
   const { repoRoot, consumerRoot, registry } = await fixture()
   const resolution = resolveItems(registry, ['feature'])
   await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
-  // The fixture SHA intentionally differs from its non-git source, so only target
-  // integrity is checked; real CLI runs always use the checked-out exact SHA.
+  // The fixture source stamp matches the lock SHA, so this test isolates target drift.
   await checkConsumer({ registry, repoRoot, consumerRoot })
   await writeFile(path.join(consumerRoot, 'app/components/Feature.vue'), '<template>drift</template>\n')
   await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /managed target drifted/)
