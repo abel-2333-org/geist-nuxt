@@ -1,3 +1,3 @@
-import { geistAppConfig } from '../foundation/config/geist-app'
+import base from '../foundation/config/app'
 
-export default defineAppConfig(geistAppConfig)
+export default defineAppConfig(base)

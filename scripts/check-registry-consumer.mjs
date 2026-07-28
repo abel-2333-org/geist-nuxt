@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync, spawn } from 'node:child_process'
-import { cp, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -8,10 +8,15 @@ import { fileURLToPath } from 'node:url'
 import { ElementTypes, parse as parseTemplate } from '@vue/compiler-dom'
 import { parse as parseSfc } from '@vue/compiler-sfc'
 import {
+  applyCopyPlan,
   checkConsumer,
   loadRegistry,
   parseArgs,
+  planCopy,
   printRegistryError,
+  readLock,
+  resolveCopyRequest,
+  resolveItems,
   resolveSourceSha,
   sha256,
   validateRegistry,
@@ -35,6 +40,13 @@ const BUILT_IN_COMPONENTS = new Set([
 function run(command, args, cwd, env = process.env) {
   console.log(`> ${command} ${args.join(' ')}`)
   execFileSync(command, args, { cwd, stdio: 'inherit', env })
+}
+
+function capture(command, args, cwd, env = process.env) {
+  console.log(`> ${command} ${args.join(' ')}`)
+  const output = execFileSync(command, args, { cwd, encoding: 'utf8', env })
+  process.stdout.write(output)
+  return output
 }
 
 async function openPort() {
@@ -125,6 +137,18 @@ async function protectedHashes(consumerRoot) {
   })))
 }
 
+async function fileHashes(root, targets) {
+  return Object.fromEntries(await Promise.all(targets.map(async (target) => {
+    try {
+      return [target, sha256(await readFile(path.join(root, target)))]
+    }
+    catch (error) {
+      if (error?.code === 'ENOENT') return [target, null]
+      throw error
+    }
+  })))
+}
+
 async function readTreeText(directory, extension = '.mjs') {
   const chunks = []
   const visit = async (current) => {
@@ -193,6 +217,170 @@ function packageJson(registry) {
       typescript: '~5.9.0',
       'vue-tsc': '^3.3.6',
     },
+  }
+}
+
+const configMigration = [
+  {
+    currentSource: 'foundation/config/nuxt.ts',
+    currentTarget: 'app/config/foundation/nuxt.ts',
+    legacySource: 'foundation/config/geist-nuxt.ts',
+    legacyTarget: 'app/config/geist-nuxt.ts',
+    legacyExport: 'geistNuxtConfig',
+  },
+  {
+    currentSource: 'foundation/config/app.ts',
+    currentTarget: 'app/config/foundation/app.ts',
+    legacySource: 'foundation/config/geist-app.ts',
+    legacyTarget: 'app/config/geist-app.ts',
+    legacyExport: 'geistAppConfig',
+  },
+]
+
+async function checkLegacyConfigMigration({
+  registry,
+  sourceSha,
+  dependencyNodeModules,
+  keepTemp = false,
+}) {
+  const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-consumer-legacy-config-'))
+  const legacyRoot = await mkdtemp(path.join(tmpdir(), 'geist-registry-legacy-config-'))
+  try {
+    await cp(fixtureRoot, consumerRoot, { recursive: true })
+    await writeFile(
+      path.join(consumerRoot, 'app/pages/index.vue'),
+      '<template>\n  <main>Legacy config migration</main>\n</template>\n',
+    )
+    const currentEntrypoints = {
+      nuxt: await readFile(path.join(consumerRoot, 'nuxt.config.ts'), 'utf8'),
+      app: await readFile(path.join(consumerRoot, 'app/app.config.ts'), 'utf8'),
+    }
+    await writeFile(
+      path.join(consumerRoot, 'nuxt.config.ts'),
+      currentEntrypoints.nuxt
+        .replace("import base from './app/config/foundation/nuxt'", "import { geistNuxtConfig } from './app/config/geist-nuxt'")
+        .replaceAll('base.', 'geistNuxtConfig.'),
+    )
+    await writeFile(
+      path.join(consumerRoot, 'app/app.config.ts'),
+      currentEntrypoints.app
+        .replace("import base from './config/foundation/app'", "import { geistAppConfig } from './config/geist-app'")
+        .replace('defineAppConfig(base)', 'defineAppConfig(geistAppConfig)'),
+    )
+    await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(packageJson(registry), null, 2)}\n`)
+    await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
+
+    const legacyRegistry = structuredClone(registry)
+    const foundation = legacyRegistry.items.find(item => item.name === 'geist-foundation')
+    if (!foundation) throw new Error('legacy config migration: geist-foundation item is missing')
+    foundation.files = foundation.files.map((file) => {
+      const migration = configMigration.find(candidate => candidate.currentTarget === file.target)
+      return migration
+        ? { path: migration.legacySource, target: migration.legacyTarget }
+        : file
+    })
+    legacyRegistry.externalRequirements.consumerSetup = [
+      legacyRegistry.externalRequirements.consumerSetup[0],
+      'Merge app/config/geist-app.ts into the consumer app/app.config.ts.',
+      'Merge app/config/geist-nuxt.ts into the consumer nuxt.config.ts.',
+      'Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and Geist foundation entry.',
+      ...legacyRegistry.externalRequirements.consumerSetup.slice(4),
+    ]
+
+    for (const file of foundation.files) {
+      await mkdir(path.join(legacyRoot, path.dirname(file.path)), { recursive: true })
+      const migration = configMigration.find(candidate => candidate.legacySource === file.path)
+      const source = migration
+        ? (await readFile(path.join(repoRoot, migration.currentSource), 'utf8'))
+            .replace('export default', `export const ${migration.legacyExport} =`)
+        : await readFile(path.join(repoRoot, file.path))
+      await writeFile(path.join(legacyRoot, file.path), source)
+    }
+
+    await applyCopyPlan(await planCopy({
+      registry: legacyRegistry,
+      resolution: resolveItems(legacyRegistry, ['geist-foundation']),
+      repoRoot: legacyRoot,
+      consumerRoot,
+      sourceSha,
+    }))
+    const protectedBefore = await protectedHashes(consumerRoot)
+    const lock = await readLock(consumerRoot)
+    const resolution = resolveCopyRequest(registry, [], { lock, update: true })
+    const plan = await planCopy({
+      registry,
+      resolution,
+      repoRoot,
+      consumerRoot,
+      sourceSha,
+      update: true,
+    })
+    const actions = Object.fromEntries(plan.operations.map(operation => [operation.target, operation.action]))
+    for (const migration of configMigration) {
+      if (actions[migration.currentTarget] !== 'create' || actions[migration.legacyTarget] !== 'delete') {
+        throw new Error(`legacy config migration: expected create/delete plan for ${migration.currentTarget}`)
+      }
+    }
+
+    const copyArgs = [
+      path.join(repoRoot, 'scripts/copy-registry.mjs'),
+      '--update',
+      '--target',
+      consumerRoot,
+      '--sha',
+      sourceSha,
+    ]
+    const copyEnv = {
+      ...process.env,
+      GEIST_REGISTRY_TEST_ALLOW_DIRTY: '1',
+    }
+    const migrationTargets = configMigration.flatMap(migration => [
+      migration.currentTarget,
+      migration.legacyTarget,
+    ])
+    const dryRunBefore = {
+      lock: sha256(await readFile(path.join(consumerRoot, 'geist.lock.json'))),
+      files: await fileHashes(consumerRoot, migrationTargets),
+    }
+    const dryRunOutput = capture(process.execPath, copyArgs, repoRoot, copyEnv)
+    for (const migration of configMigration) {
+      if (
+        !dryRunOutput.includes(`create    ${migration.currentTarget}`)
+        || !dryRunOutput.includes(`delete    ${migration.legacyTarget}`)
+      ) {
+        throw new Error(`legacy config migration: CLI dry-run did not report create/delete for ${migration.currentTarget}`)
+      }
+    }
+    const dryRunAfter = {
+      lock: sha256(await readFile(path.join(consumerRoot, 'geist.lock.json'))),
+      files: await fileHashes(consumerRoot, migrationTargets),
+    }
+    if (JSON.stringify(dryRunBefore) !== JSON.stringify(dryRunAfter)) {
+      throw new Error('legacy config migration: CLI dry-run modified the consumer')
+    }
+    run(process.execPath, [...copyArgs, '--write'], repoRoot, copyEnv)
+    const protectedAfter = await protectedHashes(consumerRoot)
+    if (JSON.stringify(protectedBefore) !== JSON.stringify(protectedAfter)) {
+      throw new Error('legacy config migration: update modified a protected consumer entrypoint')
+    }
+    const staleNuxt = await readFile(path.join(consumerRoot, 'nuxt.config.ts'), 'utf8')
+    const staleApp = await readFile(path.join(consumerRoot, 'app/app.config.ts'), 'utf8')
+    if (!staleNuxt.includes('config/geist-nuxt') || !staleApp.includes('config/geist-app')) {
+      throw new Error('legacy config migration: protected entrypoints did not retain their old imports')
+    }
+
+    await writeFile(path.join(consumerRoot, 'nuxt.config.ts'), currentEntrypoints.nuxt)
+    await writeFile(path.join(consumerRoot, 'app/app.config.ts'), currentEntrypoints.app)
+    await checkConsumer({ registry, repoRoot, consumerRoot })
+    run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
+    run('pnpm', ['run', 'typecheck'], consumerRoot)
+    run('pnpm', ['run', 'build'], consumerRoot)
+    console.log(`Legacy config migration smoke passed: ${consumerRoot}`)
+    return keepTemp ? consumerRoot : undefined
+  }
+  finally {
+    await rm(legacyRoot, { recursive: true, force: true })
+    if (!keepTemp) await rm(consumerRoot, { recursive: true, force: true })
   }
 }
 
@@ -492,6 +680,16 @@ try {
       if (dependencyRoot) {
         await writeFile(path.join(dependencyRoot, 'package.json'), `${JSON.stringify(packageJson(registry), null, 2)}\n`)
         run('pnpm', ['install', '--ignore-workspace', '--ignore-scripts'], dependencyRoot)
+      }
+
+      if (!options.scenario && (!options.group || options.group === 'runtime')) {
+        const legacyConsumer = await checkLegacyConfigMigration({
+          registry,
+          sourceSha,
+          dependencyNodeModules,
+          keepTemp: options.keep_temp,
+        })
+        if (legacyConsumer) kept.push(legacyConsumer)
       }
 
       for (const scenario of scenarios) {

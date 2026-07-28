@@ -83,7 +83,7 @@ pnpm geist:copy -- geist-foundation <item...> \
 - 每个 resolved item 的 `registryDependencies`、source SHA 和目标文件列表；
 - 每个受管文件的 source、target、source SHA、source hash 与 target hash。
 
-lock 是 update / check 的受管状态真源，不是依赖安装器。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/geist-app.ts`；消费项目必须按 `externalRequirements.consumerSetup` 将它显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/geist-nuxt.ts` 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的兼容范围当成已自动满足的依赖。
+lock 是 update / check 的受管状态真源，不是依赖安装器。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/foundation/app.ts`；消费项目必须按 `externalRequirements.consumerSetup` 将它的 default export 显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/foundation/nuxt.ts` 的 default export 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的兼容范围当成已自动满足的依赖。
 
 ## Nuxt 4 消费项目接线
 
@@ -92,14 +92,14 @@ copy-in 不覆盖消费项目拥有的 `nuxt.config.ts`、`app/app.config.ts` �
 ### `app/app.config.ts`
 
 ```ts
-import { geistAppConfig } from './config/geist-app'
+import base from './config/foundation/app'
 
 export default defineAppConfig({
-  ...geistAppConfig,
+  ...base,
   ui: {
-    ...geistAppConfig.ui,
+    ...base.ui,
     colors: {
-      ...geistAppConfig.ui.colors,
+      ...base.ui.colors,
       // 在这里追加或覆盖消费项目自己的语义色别名。
     },
     // 在这里追加消费项目自己的 Nuxt UI component overrides。
@@ -107,12 +107,12 @@ export default defineAppConfig({
 })
 ```
 
-入口必须是 Nuxt 4 的 `app/app.config.ts`。受管 fragment 留在 `app/config/geist-app.ts`，不要改它，也不要另建根 `app.config.ts`。
+入口必须是 Nuxt 4 的 `app/app.config.ts`。受管 fragment 留在 `app/config/foundation/app.ts`，不要改它，也不要另建根 `app.config.ts`。
 
 ### 根 `nuxt.config.ts`
 
 ```ts
-import { geistNuxtConfig } from './app/config/geist-nuxt'
+import base from './app/config/foundation/nuxt'
 
 export default defineNuxtConfig({
   modules: [
@@ -125,33 +125,33 @@ export default defineNuxtConfig({
   ],
 
   colorMode: {
-    ...geistNuxtConfig.colorMode,
+    ...base.colorMode,
     // 在这里追加消费项目自己的 color-mode 配置。
   },
 
   ui: {
-    ...geistNuxtConfig.ui,
+    ...base.ui,
     theme: {
-      ...geistNuxtConfig.ui.theme,
+      ...base.ui.theme,
       // 在这里追加消费项目自己的 Nuxt UI theme 配置。
     },
   },
 })
 ```
 
-复制得到的样式入口已经包含 Tailwind、Nuxt UI 和全部 Geist foundation：
+复制得到的样式入口已经包含 Tailwind、Nuxt UI 和全部设计基础：
 
 ```css
 /* app/assets/css/main.css */
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/* Geist @theme、semantic tokens、light/dark 与 motion。 */
+/* Foundation @theme、semantic tokens、light/dark 与 motion。 */
 
 /* 消费项目自己的 override 放在 foundation 声明之后。 */
 ```
 
-如果项目已有 `app/assets/css/main.css` 且内容不同，首次 copy 会停止并报告 conflict，不会覆盖。先人工合并或采用 foundation 入口，再重新执行 copy；复制完成后该文件归消费项目所有，可以继续追加 override，但任何本地修改都会让后续 `geist:update` 停止并要求人工合并。若已有 `colorMode` / `ui` 配置，在消费项目入口按示例显式合并覆盖；不要修改 `app/config/geist-nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
+如果项目已有 `app/assets/css/main.css` 且内容不同，首次 copy 会停止并报告 conflict，不会覆盖。先人工合并或采用 foundation 入口，再重新执行 copy；复制完成后该文件归消费项目所有，可以继续追加 override，但任何本地修改都会让后续 `geist:update` 停止并要求人工合并。若已有 `colorMode` / `ui` 配置，在消费项目入口按示例显式合并覆盖；不要修改 `app/config/foundation/nuxt.ts`。所需 package 版本以 lock 的 `externalRequirements.packages` 为准。
 
 ### `app/app.vue`
 
@@ -190,6 +190,8 @@ pnpm geist:check -- --target <consumer-directory>
 - 现存受管文件也是同一冲突规则：内容仍等于 lock hash 才能更新；有本地修改就停止整个 batch。
 - `geist:check` 只读比较 lock、当前 registry 与目标文件，发现缺失、内容漂移、陈旧受管文件或 manifest 不一致时非零退出。
 - 普通受管组件的本地业务改动优先放在消费项目外层组合；`main.css` 可以按消费项目需要追加 override，但后续更新会把它视为需要人工合并的本地差异。
+
+当 registry 移动受管 config fragment 时，dry-run 会把新 target 显示为 `create`、旧 target 显示为 `delete`。`nuxt.config.ts` 与 `app/app.config.ts` 是消费项目拥有的 protected entrypoint，update 不会改写其中的 import；消费方必须在同一个变更批次内把 import 切到新的中性路径。`geist:check` 只验证 lock 与 managed files，不能替代消费项目自己的 typecheck / build。
 
 更新后在消费项目运行其 typecheck / build / focused tests。仓库自己的端到端保证由 `pnpm test:consumer` 提供。
 

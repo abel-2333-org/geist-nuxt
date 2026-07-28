@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-defineProps<{ items?: NavigationMenuItem[] }>()
+const props = withDefaults(defineProps<{
+  items?: NavigationMenuItem[]
+  brand?: string
+}>(), {
+  brand: 'Application',
+})
 </script>
 
 <template>
@@ -9,7 +14,7 @@ defineProps<{ items?: NavigationMenuItem[] }>()
     <template #left>
       <slot name="brand">
         <NuxtLink to="/" class="flex items-center gap-2 font-semibold tracking-tight text-highlighted">
-          geist-nuxt
+          {{ props.brand }}
         </NuxtLink>
       </slot>
     </template>
