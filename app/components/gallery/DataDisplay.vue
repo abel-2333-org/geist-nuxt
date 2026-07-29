@@ -96,9 +96,8 @@ const columns = [
           <InlineMarkdown text="Supports **bold**, *em*, ***both***, `code`, ~~strikethrough~~ and [links](https://vercel.com)." />
         </p>
       </GalleryExample>
-      <!-- The safety facet, not a second syntax demo: a marker run is either
-           recognised whole or rendered literally, so the identifiers and
-           patterns that fill API copy survive untouched. -->
+      <!-- The safety facet, not a second syntax demo: CommonMark delimiter
+           rules leave these API identifiers and patterns literal. -->
       <GalleryExample label="Technical text stays literal" layout="stack">
         <p class="text-sm text-muted">
           <InlineMarkdown text="Leaves snake_case, MAX__VALUE__LIMIT, [a-z_]__[0-9] and 2*3*4 alone." />

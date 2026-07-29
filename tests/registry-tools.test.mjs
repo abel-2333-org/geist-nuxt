@@ -59,6 +59,7 @@ async function fixture() {
         type: 'registry:component',
         title: 'Dependency',
         description: 'Dependency component.',
+        packageDependencies: { 'dependency-package': '^1.0.0' },
         files: [{ path: 'foundation/components/Dependency.vue', target: 'app/components/Dependency.vue' }],
       },
       {
@@ -66,6 +67,7 @@ async function fixture() {
         type: 'registry:component',
         title: 'Feature',
         description: 'Feature component.',
+        packageDependencies: { 'feature-package': '^2.0.0' },
         registryDependencies: ['dependency'],
         files: [{ path: 'foundation/components/Feature.vue', target: 'app/components/Feature.vue' }],
       },
@@ -132,6 +134,12 @@ test('validates a complete registry and resolves dependency-first closure', asyn
   const resolution = resolveItems(registry, ['feature'])
   assert.deepEqual(resolution.items.map(item => item.name), ['dependency', 'feature'])
   assert.deepEqual(resolution.files.map(file => file.target), ['app/components/Dependency.vue', 'app/components/Feature.vue'])
+  assert.deepEqual(resolution.externalRequirements.packages, {
+    '@nuxt/ui': '^4.9.0',
+    '@vueuse/core': '^14.3.0',
+    'dependency-package': '^1.0.0',
+    'feature-package': '^2.0.0',
+  })
 })
 
 test('keeps the real managed config surface vendor-neutral', async () => {
@@ -193,6 +201,101 @@ test('rejects undeclared files, duplicate targets, cycles, and undeclared relati
     const { repoRoot, registry } = await fixture()
     registry.items[0].registryDependencies = ['feature']
     await assert.rejects(validateRegistry(registry, { repoRoot }), /dependency cycle/)
+  })
+
+  await t.test('invalid item package dependency', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[1].packageDependencies = { 'Feature Package': '' }
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /invalid package name|valid semver range/)
+  })
+
+  await t.test('invalid item package range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[1].packageDependencies = { 'feature-package': '' }
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /valid semver range/)
+
+    registry.items[1].packageDependencies = { 'feature-package': '^17..0' }
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /valid semver range/)
+  })
+
+  await t.test('conflicting package dependency', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[1].packageDependencies = { '@nuxt/ui': '^5.0.0' }
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /package dependency conflict/)
+    assert.throws(() => resolveItems(registry, ['feature']), /package dependency conflict/)
+  })
+
+  await t.test('independent items may use incompatible ranges until selected together', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].packageDependencies = { shared: '^1.0.0' }
+    registry.items[1].packageDependencies = { shared: '^2.0.0' }
+    registry.items[1].registryDependencies = []
+    await writeFile(path.join(repoRoot, 'foundation/components/Feature.vue'), '<template><span>feature</span></template>\n')
+
+    await validateRegistry(registry, { repoRoot })
+    assert.doesNotThrow(() => resolveItems(registry, ['dependency']))
+    assert.doesNotThrow(() => resolveItems(registry, ['feature']))
+    assert.throws(() => resolveItems(registry, ['dependency', 'feature']), /package dependency conflict/)
+  })
+
+  await t.test('package names cannot collide with object prototype keys', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].packageDependencies = { constructor: '^1.0.0' }
+
+    await validateRegistry(registry, { repoRoot })
+    assert.equal(resolveItems(registry, ['dependency']).externalRequirements.packages.constructor, '^1.0.0')
+  })
+
+  await t.test('bare imports require a package declaration in the item closure', async () => {
+    const { repoRoot, registry } = await fixture()
+    delete registry.items[1].packageDependencies
+    await writeFile(
+      path.join(repoRoot, 'foundation/components/Feature.vue'),
+      '<script setup>\nimport feature from \'feature-package\'\nvoid feature\n</script>\n<template><span>feature</span></template>\n',
+    )
+
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /imports package feature-package.*without declaring/)
+  })
+
+  await t.test('comments, strings, and Node builtins do not create package requirements', async () => {
+    const { repoRoot, registry } = await fixture()
+    await writeFile(
+      path.join(repoRoot, 'foundation/components/Feature.vue'),
+      `<script setup lang="ts">
+import path from 'path'
+const example = "import('not-a-package')"
+// import commented from 'also-not-a-package'
+void path
+void example
+</script>
+<template><span>feature</span></template>
+`,
+    )
+
+    await validateRegistry(registry, { repoRoot })
+  })
+
+  await t.test('CSS imports resolve packages without treating comments or URLs as packages', async () => {
+    const { repoRoot, registry } = await fixture()
+    await writeFile(
+      path.join(repoRoot, 'foundation/components/imports.css'),
+      `/* @import "comment-only"; */
+@import url(tailwindcss);
+@import url("https://example.test/theme.css");
+`,
+    )
+    registry.items.push({
+      name: 'styles',
+      type: 'registry:style',
+      title: 'Styles',
+      description: 'Style imports.',
+      packageDependencies: { tailwindcss: '^4.0.0' },
+      files: [{ path: 'foundation/components/imports.css', target: 'app/assets/css/imports.css' }],
+    })
+
+    await validateRegistry(registry, { repoRoot })
+    delete registry.items.at(-1).packageDependencies
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /imports package tailwindcss.*without declaring/)
   })
 
   await t.test('missing dependency declaration for a relative import', async () => {
@@ -306,8 +409,10 @@ test('dry-run planning writes nothing; write records exact SHA and source/target
   const lock = await readLock(consumerRoot)
   assert.deepEqual(lock.requestedItems, ['feature'])
   assert.equal(lock.items.feature.sourceSha, SOURCE_SHA)
+  assert.deepEqual(lock.items.dependency.packageDependencies, { 'dependency-package': '^1.0.0' })
+  assert.deepEqual(lock.items.feature.packageDependencies, { 'feature-package': '^2.0.0' })
   assert.deepEqual(lock.registry.compatibility, registry.compatibility)
-  assert.deepEqual(lock.registry.externalRequirements, registry.externalRequirements)
+  assert.deepEqual(lock.registry.externalRequirements, resolution.externalRequirements)
   const record = lock.files['app/components/Feature.vue']
   assert.equal(record.sourceSha, SOURCE_SHA)
   assert.equal(record.sourceHash, record.targetHash)
@@ -638,6 +743,17 @@ test('consumer check detects registry metadata and dependency-closure drift', as
     /registry metadata differs/,
   )
 
+  const packagesChanged = structuredClone(registry)
+  packagesChanged.items.find(item => item.name === 'feature').packageDependencies['feature-package'] = '^3.0.0'
+  await assert.rejects(
+    checkConsumer({ registry: packagesChanged, repoRoot, consumerRoot }),
+    error => (
+      error instanceof RegistryError
+      && /registry metadata differs/.test(error.message)
+      && /item package dependencies differ/.test(error.message)
+    ),
+  )
+
   const closureChanged = structuredClone(registry)
   closureChanged.items.unshift({
     name: 'new-dependency',
@@ -671,6 +787,17 @@ test('lock reader rejects array-shaped item/file maps', async () => {
     files: [],
   })}\n`)
   await assert.rejects(readLock(consumerRoot), /unsupported format/)
+})
+
+test('lock reader accepts v1 item records created before packageDependencies', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  const lock = JSON.parse(await readFile(lockPath, 'utf8'))
+  for (const item of Object.values(lock.items)) delete item.packageDependencies
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`)
+  assert.ok(await readLock(consumerRoot))
 })
 
 test('empty reconcile still rejects a symlinked lock target before writing', async () => {

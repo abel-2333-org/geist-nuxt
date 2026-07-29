@@ -59,16 +59,11 @@ export interface FieldNote {
  */
 export interface FieldNode {
   /**
-   * Stable, unique id used as the DOM id and URL hash for deep linking, e.g.
-   * `request-body_customer_address_city`. A row auto-expands by testing the
-   * active anchor against the paths actually collected from its own subtree
-   * (`collectFieldPaths`), so uniqueness is the only requirement this renderer
-   * places on the format — a path need not encode its ancestry.
-   *
-   * Underscore-separated hierarchical ids remain the recommended convention:
-   * ApiDocsSchemaComposition resolves a deep link into a hidden variant by
-   * longest `active.startsWith(path + '_')` prefix, so a field tree that also
-   * renders through a composition does depend on the separator.
+   * Stable, unique, opaque id used verbatim as the DOM id and encoded once when
+   * transported in a URL hash for deep linking. The renderer never appends a
+   * suffix, slugifies it, or infers ancestry from separators. Hidden variants
+   * and ancestor rows are revealed by exact membership in recursively collected
+   * field/composition path sets.
    */
   path?: string
   name: string
@@ -171,8 +166,8 @@ export interface FieldItemProps extends FieldNode {
 export type CompositionKind = 'oneOf' | 'anyOf' | 'allOf'
 
 export interface CompositionVariant {
-  /** Stable identity: tab selection, discriminator mapping target, and anchor
-   *  namespace segment. Never rendered as part of a wire path. */
+  /** Stable identity for tab selection and discriminator mapping. Never
+   *  rendered as part of a wire path or used to derive field anchors. */
   id: string
   /** Localized variant title (user content, rendered verbatim). */
   label: string

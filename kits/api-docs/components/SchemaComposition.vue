@@ -13,12 +13,12 @@
 // consumer's contract types. Schema variants and example scenarios are two
 // different concepts: this API does not assume shared ids or any linkage.
 //
-// Anchor strategy: field `path`s are real anchor ids namespaced by variant id
-// (e.g. `request-body_card_token`) — identity layer only, never shown as a
-// wire path. The component watches the shared active anchor and reveals the
-// containing variant (switch tab / expand section) on every navigation event,
-// including a repeated link to the same path. oneOf
-// panels stay in the DOM via `unmount-on-hide=false`.
+// Anchor strategy: every field `path` is an opaque, unique anchor id. It is
+// copied verbatim into the DOM id and encoded once when transported in a URL
+// hash; it is never parsed, prefixed, suffixed or slugified here. The component
+// watches the shared active anchor and reveals the variant whose recursively
+// collected path set contains that exact value. oneOf panels stay in the DOM
+// via `unmount-on-hide=false`.
 //
 // Reference: references/kits/api-docs/schema-composition.md (issue #31).
 
@@ -86,9 +86,8 @@ const itemLabels = computed<FieldItemLabels>(() => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Anchor containment. A variant "contains" the active anchor when the anchor
-// equals or descends from any real field path inside it — including paths in
-// nested compositions, so an inner deep link also reveals the outer variant.
+// Anchor containment. A variant "contains" the active anchor when its fully
+// traversed field/composition graph contains that exact opaque path.
 // ---------------------------------------------------------------------------
 function collectPaths(variant: CompositionVariant): string[] {
   const out = collectFieldPaths(variant.fields)
@@ -104,20 +103,7 @@ const variantPaths = computed(() =>
 
 function containingVariantId(active: string): string | undefined {
   if (!active) return undefined
-  const exact = variantPaths.value.find(({ paths }) => paths.includes(active))
-  if (exact) return exact.id
-
-  // Prefixes may overlap (`item` and `item_detail`). Prefer the most specific
-  // path globally; ties preserve variant/path order.
-  let match: { id: string, length: number } | undefined
-  for (const variant of variantPaths.value) {
-    for (const path of variant.paths) {
-      if (active.startsWith(`${path}_`) && (!match || path.length > match.length)) {
-        match = { id: variant.id, length: path.length }
-      }
-    }
-  }
-  return match?.id
+  return variantPaths.value.find(({ paths }) => paths.includes(active))?.id
 }
 
 const anchor = useFieldAnchor()

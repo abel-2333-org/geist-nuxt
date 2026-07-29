@@ -113,7 +113,7 @@ describe('ApiDocsSchemaComposition', () => {
             path: 'item_detail',
             name: 'detail',
             type: 'object',
-            children: [{ path: 'item_detail_child', name: 'child', type: 'string' }],
+            children: [{ path: 'detail-child', name: 'child', type: 'string' }],
           }],
         },
       ],
@@ -133,7 +133,7 @@ describe('ApiDocsSchemaComposition', () => {
         return {
           anyOf,
           oneOf,
-          goDetail: () => { void anchor.goTo('item_detail_child', { updateHash: false }) },
+          goDetail: () => { void anchor.goTo('detail-child', { updateHash: false }) },
           goPhone: () => { void anchor.goTo('phone', { updateHash: false }) },
         }
       },
@@ -190,7 +190,7 @@ describe('ApiDocsSchemaComposition', () => {
             name: 'destination',
             type: 'object',
             children: [{
-              path: 'destination_card',
+              path: 'card-number',
               name: 'card',
               type: 'string',
             }],
@@ -200,7 +200,7 @@ describe('ApiDocsSchemaComposition', () => {
                 id: 'card',
                 label: 'Card',
                 fields: [{
-                  path: 'destination_card_last4',
+                  path: 'last-four',
                   name: 'last4',
                   type: 'string',
                 }],
@@ -217,7 +217,7 @@ describe('ApiDocsSchemaComposition', () => {
         anchor.active.value = ''
         return {
           node,
-          go: () => { void anchor.goTo('destination_card_last4', { updateHash: false }) },
+          go: () => { void anchor.goTo('last-four', { updateHash: false }) },
         }
       },
       template: `
@@ -236,7 +236,7 @@ describe('ApiDocsSchemaComposition', () => {
     await wrapper.find('[data-testid="go"]').trigger('click')
 
     expect(tabs(composition).props('modelValue')).toBe('second')
-    expect(composition.find('#destination_card_last4').exists()).toBe(true)
+    expect(composition.find('#last-four').exists()).toBe(true)
     expect(childButton()?.text()).toContain('Show Child Parameters')
   })
 
@@ -270,12 +270,21 @@ describe('ApiDocsSchemaComposition', () => {
     expect(wrapper.text()).not.toContain('Immutability rule (0)')
   })
 
-  it('prefers exact and longest anchor matches and retries after reactive input changes', async () => {
+  it('matches only exact opaque paths across the full graph and retries after reactive input changes', async () => {
     const first: CompositionNode = {
       kind: 'oneOf',
       variants: [
-        { id: 'short', label: 'Short', fields: [{ path: 'item', name: 'item', type: 'string' }] },
-        { id: 'detail', label: 'Detail', fields: [{ path: 'item_detail', name: 'detail', type: 'string' }] },
+        { id: 'short', label: 'Short', fields: [{ path: 'destination', name: 'destination', type: 'string' }] },
+        { id: 'detail', label: 'Detail', fields: [{ path: 'card-number', name: 'card number', type: 'string' }] },
+        {
+          id: 'nested',
+          label: 'Nested',
+          fields: [],
+          composition: {
+            kind: 'allOf',
+            variants: [{ id: 'inner', label: 'Inner', fields: [{ path: 'last-four', name: 'last four', type: 'string' }] }],
+          },
+        },
       ],
     }
     const Host = defineComponent({
@@ -289,14 +298,24 @@ describe('ApiDocsSchemaComposition', () => {
       template: '<SchemaComposition v-bind="node" />',
     })
     const wrapper = await mountSuspended(Host)
+    expect(wrapper.find('#card-number').exists()).toBe(true)
+    expect(wrapper.find('#card-number-anchor').exists()).toBe(false)
 
-    wrapper.vm.active = 'item_detail'
+    wrapper.vm.active = 'card-number'
     await wrapper.vm.$nextTick()
     expect(tabs(wrapper).props('modelValue')).toBe('detail')
 
-    wrapper.vm.active = 'item_detail_child'
+    wrapper.vm.active = 'destination'
     await wrapper.vm.$nextTick()
-    expect(tabs(wrapper).props('modelValue')).toBe('detail')
+    expect(tabs(wrapper).props('modelValue')).toBe('short')
+
+    wrapper.vm.active = 'card-number_child'
+    await wrapper.vm.$nextTick()
+    expect(tabs(wrapper).props('modelValue')).toBe('short')
+
+    wrapper.vm.active = 'last-four'
+    await wrapper.vm.$nextTick()
+    expect(tabs(wrapper).props('modelValue')).toBe('nested')
 
     wrapper.vm.active = 'late_field'
     wrapper.vm.node = {

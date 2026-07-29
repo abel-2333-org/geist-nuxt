@@ -56,10 +56,10 @@ try {
     console.log(`Copied registry batch (${sourceSha}): ${JSON.stringify(counts)}`)
     console.log(`Lock written: ${path.join(consumerRoot, 'geist.lock.json')}`)
   }
-  console.log('External packages:')
-  for (const [name, range] of Object.entries(registry.externalRequirements.packages)) console.log(`- ${name}@${range}`)
+  console.log('Resolved external packages:')
+  for (const [name, range] of Object.entries(resolution.externalRequirements.packages)) console.log(`- ${name}@${range}`)
   console.log('Consumer setup (protected entrypoints are never overwritten automatically):')
-  for (const instruction of registry.externalRequirements.consumerSetup) console.log(`- ${instruction}`)
+  for (const instruction of resolution.externalRequirements.consumerSetup) console.log(`- ${instruction}`)
 }
 catch (error) {
   printRegistryError(error)

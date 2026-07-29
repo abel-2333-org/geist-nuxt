@@ -28,6 +28,7 @@ try {
     sourceSha,
     requestedItems: resolution.requested,
     items: resolution.items.map(item => item.name),
+    externalRequirements: resolution.externalRequirements,
     files: resolution.files.map(({ item, path: source, target }) => ({ item, source, target })),
   }, null, 2))
 }

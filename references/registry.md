@@ -19,6 +19,7 @@
 - `type` / `title` / `description`：分类与人类说明。
 - `files[]`：每个文件的 `path`（真源相对仓库根）和 `target`（消费项目相对路径）。
 - `registryDependencies[]`：同一根 registry 中必须先安装的切片。
+- `packageDependencies`（可选）：该切片运行时额外需要的 npm package → version range；只随包含该 item 的解析闭包生效。
 
 约束：
 
@@ -29,6 +30,7 @@
 5. kit item 可依赖 foundation 或同 kit item；禁止跨 kit 依赖。
 6. foundation item 不依赖 kit。
 7. demo、fixture、adapter、页面私有 recipe（如 `DocsShell` 系列）不得进入 registry。
+8. `packageDependencies` 的包名与 semver range 必须有效；分发源码的 bare import 必须能由根 packages 或所属 item 的依赖闭包解释。同一解析闭包若对同一包声明不同 range，验证与 copy 都 fail closed，不擅自选择版本；互不相交的闭包可声明不同 range。
 
 ## 验证 registry
 
@@ -66,8 +68,8 @@ pnpm geist:copy -- geist-foundation <item...> \
 `geist:copy` 的完整行为：
 
 1. 从根 `registry.json` 解析请求 item；
-2. 展开并拓扑排序 `registryDependencies`；
-3. dry-run 计算完整闭包中每个 target 的操作；
+2. 展开并拓扑排序 `registryDependencies`，聚合根 `externalRequirements.packages` 与闭包内各 item 的 `packageDependencies`；
+3. dry-run 打印解析后的 package requirements，并计算完整闭包中每个 target 的操作；
 4. 带 `--write` 时将完整闭包写入每个 `target`，并生成 / 更新 `geist.lock.json`；
 5. 遇到未受管的同名文件或已修改受管文件时，整个 batch 在写入前停止并报告。
 
@@ -78,12 +80,12 @@ pnpm geist:copy -- geist-foundation <item...> \
 成功写入后，目标项目根目录的 lock 会记录：
 
 - registry 名称、仓库、最后一次 source SHA；
-- `compatibility` 与 `externalRequirements`，包括所需包和消费项目必须人工合并的 setup；
+- `compatibility` 与本次解析闭包的 `externalRequirements`，包括根基础包、所选 item 的额外包和消费项目必须人工合并的 setup；
 - 用户直接请求的 items，以及解析后的完整依赖闭包；
-- 每个 resolved item 的 `registryDependencies`、source SHA 和目标文件列表；
+- 每个 resolved item 的 `registryDependencies`、`packageDependencies`、source SHA 和目标文件列表；
 - 每个受管文件的 source、target、source SHA、source hash 与 target hash。
 
-lock 是 update / check 的受管状态真源，不是依赖安装器。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/foundation/app.ts`；消费项目必须按 `externalRequirements.consumerSetup` 将它的 default export 显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/foundation/nuxt.ts` 的 default export 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的兼容范围当成已自动满足的依赖。
+lock 是 update / check 的受管状态真源，不是依赖安装器；copy-in 不修改消费项目的 `package.json` 或 lockfile。消费项目必须安装 `geist.lock.json.registry.externalRequirements.packages` 中的解析结果。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/foundation/app.ts`；消费项目还必须按 `externalRequirements.consumerSetup` 将它的 default export 显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/foundation/nuxt.ts` 的 default export 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的依赖范围当成已自动满足。
 
 ## Nuxt 4 消费项目接线
 
@@ -198,7 +200,7 @@ pnpm geist:check -- --target <consumer-directory>
 ## 新增 item 的最小流程
 
 1. 将采纳后的源码放进 `foundation/` 或 `kits/<kit>/`。
-2. 确定 owning slice；把全部运行依赖列进 `files[]` 或 `registryDependencies[]`。
+2. 确定 owning slice；把全部分发文件列进 `files[]`，内部切片依赖列进 `registryDependencies[]`，额外 npm 运行依赖列进 `packageDependencies`。
 3. 为消费项目选择稳定 target：components → `app/components/`，composables → `app/composables/`，utils → `app/utils/`，样式 / config 按根基础切片约定落位。
 4. 更新正式 gallery story；playground 草稿删除或清空。
 5. 运行完整 gate：

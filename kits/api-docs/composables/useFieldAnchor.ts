@@ -119,8 +119,9 @@ export function useFieldAnchor() {
 
   /** Full shareable URL for a field path. */
   function urlFor(path: string) {
-    if (!import.meta.client) return `#${path}`
-    return `${location.origin}${location.pathname}${location.search}#${path}`
+    const hash = encodeURIComponent(path)
+    if (!import.meta.client) return `#${hash}`
+    return `${location.origin}${location.pathname}${location.search}#${hash}`
   }
 
   /**
@@ -145,7 +146,7 @@ export function useFieldAnchor() {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
-      history.replaceState(history.state, '', `#${path}`)
+      history.replaceState(history.state, '', `#${encodeURIComponent(path)}`)
     }
 
     if (!import.meta.client) return 'aborted'
