@@ -145,6 +145,13 @@ export interface FieldItemLabels {
   /** EnumTable fallback tab label for an unnamed variant; receives the
    *  0-based index (default `` i => `Option ${i + 1}` ``). */
   enumVariant?: (index: number) => string
+  /** EnumTable live-region text when its filter yields hits; receives the count. */
+  enumResults?: (count: number) => string
+  /** EnumTable grouped live-region text; receives aggregate hits, active hits,
+   *  and the localized active-group label. */
+  enumVariantResults?: (totalCount: number, activeCount: number, activeLabel: string) => string
+  /** EnumTable live-region text when its filter yields nothing; receives the query. */
+  enumNoResults?: (query: string) => string
   /** Chrome labels for a field-level ApiDocsSchemaComposition block. */
   composition?: SchemaCompositionLabels
 }

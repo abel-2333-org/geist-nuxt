@@ -205,6 +205,34 @@ const enumValues = [
   { value: 'development', description: 'Local or ephemeral environment. **Not** publicly routed.' },
 ]
 
+// Grouped form of the same table: values that differ by condition. Each variant
+// carries a `when` sentence, so the caption under the selector answers "am I in
+// this group?" — the tab title alone only names it.
+const enumVariants = [
+  {
+    id: 'git',
+    title: 'Git deploys',
+    when: 'Applies when `gitSource` is set — the deploy is built from a connected repository.',
+    values: [
+      { value: 'QUEUED', description: 'Repository checkout is waiting for build capacity.' },
+      { value: 'BUILDING', description: 'Build container is running the framework build.' },
+      { value: 'READY', description: 'Build succeeded and the deployment is serving traffic.' },
+      { value: 'ERROR', description: 'Build failed. See `build.logsUrl` for the failing step.' },
+    ],
+  },
+  {
+    id: 'prebuilt',
+    title: 'Prebuilt uploads',
+    when: 'Applies when the payload carries a prebuilt output — no build step runs.',
+    values: [
+      { value: 'UPLOADING', description: 'Output archive is still being received.' },
+      { value: 'PROCESSING', description: 'Uploaded files are being indexed before activation.' },
+      { value: 'READY', description: 'Output was accepted and is serving traffic.' },
+      { value: 'ERROR', description: 'Uploaded output failed validation and was rejected.' },
+    ],
+  },
+]
+
 // Field tree — the recursive schema view. Inline sample data exercises every
 // facet ApiDocsFieldItem renders: the three requiredness states, default value,
 // examples, a condition, an enum, constraint notes, field
@@ -297,7 +325,7 @@ const fields = [
 // row: very long field names, many summary facets on a single line
 // (name · type · format · requiredness · default · lifecycle badge → wrap
 // behavior), four levels of nesting, and an enum long enough to trip
-// EnumTable's filter/scroll threshold (30) when embedded inside a field.
+// EnumTable's filter/scroll threshold (8) when embedded inside a field.
 const currencyCodes = [
   'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD', 'SEK',
   'NOK', 'DKK', 'NZD', 'KRW', 'INR', 'BRL', 'ZAR', 'MXN', 'RUB', 'TRY', 'PLN',
@@ -698,8 +726,17 @@ onMounted(() => anchor.initFromHash())
         </div>
 
         <div>
-          <h3 class="mb-3 text-sm font-semibold text-highlighted">Enum 值表</h3>
-          <ApiDocsEnumTable :values="enumValues" />
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">Enum 值表</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            两种形态：扁平 <code class="font-mono text-code">values</code>
+            是单一取值列表；分组 <code class="font-mono text-code">variants</code>
+            用于取值随条件变化的字段，tab 标题命名分组，下方
+            <code class="font-mono text-code">when</code> 说明该组何时适用。
+          </p>
+          <div class="grid gap-6 lg:grid-cols-2">
+            <ApiDocsEnumTable :values="enumValues" />
+            <ApiDocsEnumTable :variants="enumVariants" default-value="READY" />
+          </div>
         </div>
 
         <div>
@@ -733,7 +770,7 @@ onMounted(() => anchor.initFromHash())
             点击即复制该字段的深链接（<code class="font-mono text-[0.8125rem]">#body_gitSource_ref</code>
             这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
             带入页面时自动展开并滚动定位）。下面第一组是紧凑示例；第二组是刻意加压的
-            高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超 30 项的长
+            高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超过默认 8 项阈值的长
             enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。
           </p>
           <ApiDocsFieldGroup label="Request Body" :count="fields.length">

@@ -27,7 +27,7 @@ export default <RouterConfig>{
       if (from.matched.length === 0) return false // cold load → anchor owners
 
       const scrollToHash = (resolve: (v: false | { top: number }) => void) => {
-        const el = document.getElementById(decodeURIComponent(to.hash.slice(1)))
+        const el = document.getElementById(to.hash.slice(1))
         if (!el) return resolve({ top: 0 })
         el.scrollIntoView({ block: 'start' })
         requestAnimationFrame(() => el.scrollIntoView({ block: 'start' }))

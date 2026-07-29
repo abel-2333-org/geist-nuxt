@@ -60,6 +60,10 @@ const zhLabels = {
   enumFilter: '筛选值',
   enumEmpty: '无匹配值',
   enumVariant: (i: number) => `选项 ${i + 1}`,
+  enumResults: (n: number) => `找到 ${n} 个值`,
+  enumVariantResults: (total: number, active: number, label: string) =>
+    `全部选项找到 ${total} 个值；${label} 中有 ${active} 个`,
+  enumNoResults: (q: string) => `没有匹配「${q}」的值`,
   composition: {
     oneOf: '其中一个',
     anyOf: '任意组合',
@@ -72,8 +76,8 @@ const zhLabels = {
   },
 }
 
-/** ≥ filterThreshold(30) 的扁平 enum，触发筛选框 + 空态路径。 */
-const manyValues = Array.from({ length: 30 }, (_, i) => ({
+/** ≥ filterThreshold(8) 的扁平 enum，触发筛选框 + 空态路径。 */
+const manyValues = Array.from({ length: 8 }, (_, i) => ({
   value: `value_${i}`,
   description: `desc ${i}`,
 }))
@@ -340,11 +344,17 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     const filter = wrapper.findComponent({ name: 'UInput' })
     expect(filter.props('placeholder')).toBe('筛选值')
 
-    // Filter down to zero matches → localized empty state.
+    // Filter down to zero matches → localized empty state AND a localized
+    // live-region announcement; the sr-only text is chrome too.
     filter.vm.$emit('update:modelValue', 'zzz-no-match')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('无匹配值')
     expect(wrapper.text()).not.toContain('No matching values')
+    expect(wrapper.find('[role="status"]').text()).toBe('没有匹配「zzz-no-match」的值')
+
+    filter.vm.$emit('update:modelValue', '_7')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[role="status"]').text()).toBe('找到 1 个值')
   })
 
   it('variant enum: localizes the unnamed-variant fallback tabs', async () => {
@@ -352,8 +362,8 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
       props: {
         name: 'bank', type: 'string',
         enumVariants: [
-          { values: [{ value: 'a', description: '' }] },
-          { values: [{ value: 'b', description: '' }] },
+          { id: 'first', values: manyValues },
+          { id: 'second', values: [{ value: 'only-second', description: '' }] },
         ],
         labels: zhLabels,
       },
@@ -361,6 +371,11 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     expect(wrapper.text()).toContain('选项 1')
     expect(wrapper.text()).toContain('选项 2')
     expect(wrapper.text()).not.toContain('Option 1')
+
+    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'only-second')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[role="status"]').text())
+      .toBe('全部选项找到 1 个值；选项 1 中有 0 个')
   })
 
   it('recursive children reuse the same labels object', async () => {
@@ -421,7 +436,7 @@ describe('English defaults stay intact', () => {
       props: {
         name: 'status', type: 'string',
         lifecycle: { status: 'beta' as const },
-        enumVariants: [{ values: [{ value: 'a', description: '' }] }],
+        enumVariants: [{ id: 'only', values: [{ value: 'a', description: '' }] }],
       },
     })
     expect(wrapper.text()).toContain('Beta')

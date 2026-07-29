@@ -138,13 +138,10 @@ function trackHashDestination(to: string) {
     return
   }
 
-  const hash = destination.hash.slice(1)
-  try {
-    pendingHashId.value = decodeURIComponent(hash)
-  }
-  catch {
-    pendingHashId.value = hash
-  }
+  // `router.resolve()` already normalizes a string URL and decodes its hash
+  // once. Keep the resulting literal DOM id: decoding again corrupts opaque
+  // ids that contain escape-looking text such as `res_state%25`.
+  pendingHashId.value = destination.hash.slice(1)
 }
 
 function onCloseAutoFocus(event: Event) {

@@ -146,6 +146,19 @@ describe('DocAnnotation', () => {
 })
 
 describe('ApiDocsFieldAnnotation', () => {
+  it('warns through the mounted component when a field ref is unresolved', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    wrapper = await mountSuspended(FieldAnnotation, {
+      props: { fieldRef: 'missing' },
+      slots: { default: () => 'Legacy field' },
+    })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn).toHaveBeenCalledWith(
+      '[FieldAnnotation] no field source entry for field-ref "missing" — rendering plain text',
+    )
+  })
+
   it('resolves a field source entry and jumps to the same-page field', async () => {
     const Host = defineComponent({
       components: { FieldAnnotation },
@@ -195,7 +208,7 @@ describe('ApiDocsFieldAnnotation', () => {
         provideFieldSource({
           state: {
             page: '/reference',
-            field: { path: 'res_state', name: 'state', type: 'enum' },
+            field: { path: 'res_state%25', name: 'state', type: 'enum' },
           },
         })
       },
@@ -204,7 +217,7 @@ describe('ApiDocsFieldAnnotation', () => {
     wrapper = await mountSuspended(Host, { attachTo: document.body })
 
     await open(wrapper)
-    expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/reference#res_state')
+    expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/reference#res_state%2525')
   })
 
   it('derives the requiredness marker so an orphan condition is tagged in the preview too', async () => {
@@ -227,6 +240,7 @@ describe('ApiDocsFieldAnnotation', () => {
   })
 
   it('degrades an unresolved field ref to plain slot text', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     wrapper = await mountSuspended(FieldAnnotation, {
       props: { fieldRef: 'missing' },
       slots: { default: () => 'Legacy field' },

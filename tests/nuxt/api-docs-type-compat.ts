@@ -21,7 +21,9 @@ const note: FieldNote = { kind: 'constraint', text: 'Stable type import.' }
 // @ts-expect-error `tone` was removed; note semantics have one canonical key.
 const legacyNote: FieldNote = { tone: 'caution', text: 'Legacy note shape.' }
 const value: EnumValue = { value: 'card', description: 'Card payment.' }
-const variant: EnumVariant = { values: [value] }
+const variant: EnumVariant = { id: 'card', values: [value] }
+// @ts-expect-error grouped enum identity is required and cannot fall back to localized copy.
+const missingVariantId: EnumVariant = { values: [value] }
 const fieldValue: FieldEnumValue = value
 const fieldVariant: FieldEnumVariant = variant
 const annotationLabels: AnnotationPopoverLabels = {
@@ -50,3 +52,4 @@ void fieldValue
 void annotationLabels
 void labels
 void legacyNote
+void missingVariantId
