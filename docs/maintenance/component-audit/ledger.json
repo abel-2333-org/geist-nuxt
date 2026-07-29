@@ -1,7 +1,7 @@
 {
   "version": 1,
   "round": 1,
-  "lastRunAt": "2026-07-29T01:15:13.301Z",
+  "lastRunAt": "2026-07-29T05:52:58.233Z",
   "lastPicked": [
     "api-docs-enum-table",
     "api-docs-field-annotation",
@@ -18,8 +18,8 @@
     },
     "foundation-inline-code": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T01:15:13.301Z",
-      "lastAuditedSha": "b63513bbd512e4af6239801c4630367d74d4d7c0",
+      "lastAuditedAt": "2026-07-29T05:52:58.233Z",
+      "lastAuditedSha": "ae2eaec4cac3919f15eba4a6b14a077b267dff6d",
       "verdict": "clean",
       "notes": "18 行单一职责原子，位置符合 component-reflow 第 3 节的跨场景裸名规则；两处主题偏离（rounded-sm 控件档圆角、text-code 13px）均有源码内依据，无硬编码；换行策略刻意交由调用方经 attrs fallthrough 决定，比内建 wrap prop 更对。四维度逐条过完无可做改动，不制造 churn。",
       "openFindings": []
@@ -133,13 +133,11 @@
     },
     "api-docs-enum-table": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T01:15:13.301Z",
-      "lastAuditedSha": "b63513bbd512e4af6239801c4630367d74d4d7c0",
+      "lastAuditedAt": "2026-07-29T05:52:58.233Z",
+      "lastAuditedSha": "ae2eaec4cac3919f15eba4a6b14a077b267dff6d",
       "verdict": "improved",
-      "notes": "补渲染 EnumVariant.when（契约声明多时未兑现的静默丢信息）；补筛选 live region 与 SidebarNav 同契约形状；给有界滚动框加 tab stop + 命名 + focus 环（框内全静态文本，键盘用户原本滚不到折叠线以下）；收敛为单次 filteredVariants 使 tab badge 与 body 计数由数据结构保证一致；variants 缩短时同步重置 raw activeTab，避免扩容后旧选择复活；筛选能力消失时清空 query，避免隐藏条件继续过滤。",
-      "openFindings": [
-        "live region 只播报当前 variant 的命中数，其他 variant 的命中仅由 tab badge（视觉）承载；是否补一句「其他分组还有 N 项」等真实屏幕阅读器实测再定。"
-      ]
+      "notes": "补渲染 EnumVariant.when；补跨全部 variant 聚合的筛选 live region，避免当前 tab 无命中时误报全局无结果；仅在当前面板实际达到有界滚动阈值时给滚动框加 tab stop、命名与 focus 环；收敛为单次 filteredVariants 使 tab badge、body 与播报计数同源；variants 缩短时同步重置 raw activeTab；筛选能力消失时清空 query。组件测试覆盖跨分组命中与短活动分组不进入 tab 序列。",
+      "openFindings": []
     },
     "api-docs-field-group": {
       "round": 0,
@@ -167,10 +165,10 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T01:15:13.301Z",
-      "lastAuditedSha": "b63513bbd512e4af6239801c4630367d74d4d7c0",
+      "lastAuditedAt": "2026-07-29T05:52:58.233Z",
+      "lastAuditedSha": "ae2eaec4cac3919f15eba4a6b14a077b267dff6d",
       "verdict": "improved",
-      "notes": "补 dev 下未命中 field-ref 的 console.warn，兑现组件注释自称的「same policy as TermAnnotation」——降级对读者正确，但对作者必须留诊断，否则漏登记的 id 表现为页面上少个浮层、无人察觉。跨页链接对 raw FieldNode.path 做一次 fragment 编码，并移除 app router 对 Vue Router hash 的二次解码，保证字面 % 可逆定位；未动 props / emits / slots 公开契约。",
+      "notes": "补 dev 下未命中 field-ref 的 console.warn，兑现组件注释声明的 TermAnnotation 同策略；跨页链接对 raw FieldNode.path 编码一次，SiteSearch 直接使用 Vue Router 已规范化的 hash 完成滚动与焦点交接，字面 % 的端到端组件测试已覆盖；未动 props / emits / slots 公开契约。",
       "openFindings": [
         "dev-only 告警分支在 @nuxt/test-utils 下不可达（import.meta.dev 为 false），无测试覆盖；TermAnnotation 的同类告警有同一盲区。要覆盖需在 vitest 环境注入 dev 标志或把诊断抽成可单测 util，二者都会影响 foundation 侧，超出本次范围。",
         "t computed 的 labels 合并模式在 Term/Doc/Field 三形态各写一遍（4 行 spread）；抽共享 helper 需跨 foundation ↔ kit 边界新增自动导入符号，且只能落 foundation、让 kit 组件多一条依赖边，收益不抵间接层。建议与 foundation-annotation-popover 那一簇一起复审再定。"
