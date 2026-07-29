@@ -1,7 +1,7 @@
 {
   "version": 1,
   "round": 1,
-  "lastRunAt": "2026-07-29T08:31:43.104Z",
+  "lastRunAt": "2026-07-29T09:14:57.944Z",
   "lastPicked": [
     "foundation-inline-code",
     "api-docs-enum-table",
@@ -18,10 +18,10 @@
     },
     "foundation-inline-code": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T08:31:43.104Z",
-      "lastAuditedSha": "b4d89135816b3f595b36a22ff13464dfe9b07985",
+      "lastAuditedAt": "2026-07-29T09:14:57.944Z",
+      "lastAuditedSha": "e1b697c8d27a6441d81b76d9f53b13c69b642161",
       "verdict": "clean",
-      "notes": "18 行单一职责原子，位置符合 component-reflow 第 3 节的跨场景裸名规则；两处主题偏离（rounded-sm 控件档圆角、text-code 13px）均有源码内依据，无硬编码；换行策略刻意交由调用方经 attrs fallthrough 决定，比内建 wrap prop 更对。四维度逐条过完无可做改动，不制造 churn。",
+      "notes": "18 行单一职责原子，位置符合 component-reflow 第 3 节的跨场景裸名规则；两处主题偏离（rounded-sm 控件档圆角、text-code 13px）均有源码内依据，无硬编码；换行策略刻意交由调用方经 attrs fallthrough 决定，比内建 wrap prop 更对。gallery 新增内联代码也已统一改用 text-code。四维度逐条过完无可做改动，不制造 churn。",
       "openFindings": []
     },
     "foundation-inline-markdown": {
@@ -133,14 +133,11 @@
     },
     "api-docs-enum-table": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T08:31:43.104Z",
-      "lastAuditedSha": "b4d89135816b3f595b36a22ff13464dfe9b07985",
+      "lastAuditedAt": "2026-07-29T09:14:57.944Z",
+      "lastAuditedSha": "e1b697c8d27a6441d81b76d9f53b13c69b642161",
       "verdict": "improved",
-      "notes": "补渲染 EnumVariant.when；补跨全部 variant 聚合的筛选 live region，避免当前 tab 无命中时误报全局无结果；按未过滤的 active group 稳定决定滚动上限与 tab stop，避免筛选命中数跨阈值时长表突然展开，短活动分组仍不进入 tab 序列；收敛为单次 filteredVariants 使 tab badge、body 与播报计数同源；variants 缩短时同步重置 raw activeTab；筛选能力消失时清空 query。",
-      "openFindings": [
-        "聚合 live region 播报全部 variant 的命中数，而空态描述当前 panel；当前 panel 为 0、其他分组有命中时，两者 scope 仍需真实屏幕阅读器实测并决定是否补显式的全局/当前分组文案。",
-        "滚动框目前以未过滤的 active group 数量作为稳定 overflow 代理；强过滤后可能保留一个不再滚动的 tab stop，少量但多行的长描述也可能在阈值以下真实溢出。若要精确判断，需在真实浏览器中按 scrollHeight/clientHeight 响应内容与宽度变化，不能再用过滤后条数切换 max-height。"
-      ]
+      "notes": "补渲染 EnumVariant.when；分组筛选 live region 同时明确全部选项聚合命中数与当前本地化分组命中数，消除 panel scope 歧义；按未过滤 active group 稳定保留滚动上限，再由 ResizeObserver 的 scrollHeight/clientHeight 真实溢出结果控制 tab stop、role、命名与 focus ring，rAF 合并测量且卸载取消；单次 filteredVariants 保证 tab badge、body 与播报计数同源；variants 缩短时重置 raw activeTab；筛选能力消失时清空 query。",
+      "openFindings": []
     },
     "api-docs-field-group": {
       "round": 0,
@@ -168,12 +165,11 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T08:31:43.104Z",
-      "lastAuditedSha": "b4d89135816b3f595b36a22ff13464dfe9b07985",
+      "lastAuditedAt": "2026-07-29T09:14:57.944Z",
+      "lastAuditedSha": "e1b697c8d27a6441d81b76d9f53b13c69b642161",
       "verdict": "improved",
-      "notes": "补 dev 下未命中 field-ref 的 console.warn，兑现组件注释声明的 TermAnnotation 同策略；跨页链接对 raw FieldNode.path 编码一次，app router 直接使用 Vue Router 已规范化的 hash 完成跨页滚动；SiteSearch 同样避免二次解码并完成同页搜索关闭后的焦点交接。字面 % 的 href、router scroll 与 modal focus 测试分别覆盖两条链路；未动 props / emits / slots 公开契约。",
+      "notes": "补 dev 下未命中 field-ref 的 console.warn，诊断抽为同 item composable helper，并在 import.meta.test 下通过组件真实挂载路径覆盖接线与精确文案；跨页链接对 raw FieldNode.path 编码一次，app router 直接使用 Vue Router 已规范化的 hash 完成跨页滚动；SiteSearch 通过真实 command option 点击覆盖同页搜索关闭后的焦点交接。未动 props / emits / slots 公开契约。",
       "openFindings": [
-        "dev-only 告警分支在 @nuxt/test-utils 下不可达（import.meta.dev 为 false），无测试覆盖；TermAnnotation 的同类告警有同一盲区。要覆盖需在 vitest 环境注入 dev 标志或把诊断抽成可单测 util，二者都会影响 foundation 侧，超出本次范围。",
         "t computed 的 labels 合并模式在 Term/Doc/Field 三形态各写一遍（4 行 spread）；抽共享 helper 需跨 foundation ↔ kit 边界新增自动导入符号，且只能落 foundation、让 kit 组件多一条依赖边，收益不抵间接层。建议与 foundation-annotation-popover 那一簇一起复审再定。"
       ]
     },
