@@ -130,6 +130,43 @@ describe('InlineMarkdown literal syntax', () => {
     expect(visibleText(parse(input))).toBe(input)
   })
 
+  // "Raw HTML is never rendered" and "Safe inline markdown subset" (registry
+  // description) are universal claims. Before this matrix they rested on a
+  // single `<kbd>` case, so they are pinned here against the payload shapes an
+  // injection would actually take.
+  it.each([
+    '<img src=x onerror=alert(1)>',
+    '<script>alert(1)</script>',
+    '<div onclick="x">t</div>',
+    '<a href="javascript:alert(1)">z</a>',
+    '<svg/onload=alert(1)>',
+    '<iframe src="data:text/html,x"></iframe>',
+    '<style>*{}</style>',
+    '<!-- c -->',
+  ])('renders no raw HTML for %j', async (input) => {
+    const wrapper = await render(input)
+    expect(wrapper.text()).toBe(input)
+    for (const tag of ['script', 'img', 'iframe', 'svg', 'style', 'div', 'a']) {
+      expect(wrapper.find(tag).exists()).toBe(false)
+    }
+  })
+
+  it.each([
+    '[a](data:text/html,x)',
+    '[a](vbscript:x)',
+    '[a](file:///etc/passwd)',
+    '[a](JaVaScRiPt:alert(1))',
+  ])('refuses the unsafe protocol in %j', (input) => {
+    expect(parse(input).some(node => node.type === 'link')).toBe(false)
+    expect(visibleText(parse(input))).toBe(input)
+  })
+
+  it('still allows relative hrefs and the http/https/mailto allowlist', () => {
+    for (const href of ['mailto:x@y.z', 'https://example.com', 'http://example.com', '/relative']) {
+      expect(parse(`[a](${href})`).some(node => node.type === 'link')).toBe(true)
+    }
+  })
+
   it.each([
     '*',
     '**',
