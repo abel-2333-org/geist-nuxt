@@ -317,6 +317,57 @@ describe('variant selection', () => {
     expect(wrapper.text()).not.toContain('UPLOADING')
   })
 
+  it('drops the selection when an equal-length dataset replaces the groups', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { variants } })
+
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('UPLOADING')
+
+    // Same length, unrelated groups: an index-keyed selection would silently
+    // land on the second group of a dataset it was never chosen from.
+    await wrapper.setProps({
+      variants: [
+        { title: 'Preview', values: [{ value: 'QUEUED', description: 'Waiting.' }] },
+        { title: 'Production', values: [{ value: 'PROMOTED', description: 'Live.' }] },
+      ],
+    })
+
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.text()).toContain('QUEUED')
+    expect(wrapper.text()).not.toContain('PROMOTED')
+  })
+
+  it('follows the selected variant through a reorder', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { variants } })
+
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('UPLOADING')
+
+    // Selection is the group's identity, not its position.
+    await wrapper.setProps({ variants: [variants[1], variants[0]] })
+
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.text()).toContain('UPLOADING')
+    expect(wrapper.text()).toContain('Applies to a prebuilt output.')
+  })
+
+  it('keeps two same-titled groups independently selectable', async () => {
+    const twins = [
+      { title: 'Deploys', values: [{ value: 'FIRST', description: 'One.' }] },
+      { title: 'Deploys', values: [{ value: 'SECOND', description: 'Two.' }] },
+    ]
+    const wrapper = await mountSuspended(EnumTable, { props: { variants: twins } })
+
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('1')
+    expect(wrapper.text()).toContain('SECOND')
+    expect(wrapper.text()).not.toContain('FIRST')
+  })
+
   it('keeps a short active variant out of the tab order when the total remains filterable', async () => {
     setOverflow(640, 320)
     const wrapper = await mountSuspended(EnumTable, {

@@ -60,9 +60,12 @@ const node = computed<FieldNode | undefined>(() => props.field ?? entry.value?.f
 // TermAnnotation does for an unknown glossary id — the family's degrade policy
 // is shared, so its diagnostics should be too. Only for an unresolved *ref*;
 // a bare `field` prop that is absent is the caller's own business.
+// Kept local: it diagnoses *this* component's own resolution step and has no
+// second caller, so it stays out of the kit's auto-imported public surface.
 if (import.meta.dev || import.meta.test) {
   watchEffect(() => {
-    warnUnresolvedFieldRef(props.fieldRef, node.value)
+    if (!props.fieldRef || node.value) return
+    console.warn(`[FieldAnnotation] no field source entry for field-ref "${props.fieldRef}" — rendering plain text`)
   })
 }
 
