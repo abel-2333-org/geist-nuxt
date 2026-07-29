@@ -24,7 +24,7 @@ const props = withDefaults(
     searchPlaceholder: 'Filter values',
     emptyLabel: 'No matching values',
     variantLabel: (index: number) => `Option ${index + 1}`,
-    filterThreshold: 30,
+    filterThreshold: 8,
     resultsAnnouncement: (count: number) => `${count} value${count === 1 ? '' : 's'} found`,
     variantResultsAnnouncement: (totalCount: number, activeCount: number, activeLabel: string) =>
       `${totalCount} value${totalCount === 1 ? '' : 's'} found across all options; `
@@ -55,55 +55,53 @@ const filteredVariants = computed(() =>
   (props.variants ?? []).map(v => ({ ...v, values: filterValues(v.values) })),
 )
 
-// Selection is held as the *identity* of the chosen group, never as its
-// position. A reused instance (a docs route swapping field data) can hand this
-// component an entirely different set of groups with the same length, and a
-// stored index would then silently point at an unrelated group. Title is the
-// group's authored handle; untitled groups fall back to their first value, and
-// a repeated handle gets an occurrence suffix so two same-titled tabs stay
-// distinguishable.
-const variantKeys = computed(() => {
-  const seen = new Map<string, number>()
-  return (props.variants ?? []).map((v, i) => {
-    const base = v.title ?? v.values[0]?.value ?? `#${i}`
-    const n = seen.get(base) ?? 0
-    seen.set(base, n + 1)
-    return n ? `${base}#${n}` : base
-  })
-})
+// `id` is authored identity, separate from localized title/when copy. It is
+// passed straight through UTabs, so locale changes and reorders preserve the
+// selected group without an index/title translation layer.
+const variantIds = computed(() => (props.variants ?? []).map(v => v.id))
+const activeId = shallowRef<string>()
 
-const activeKey = ref<string>()
+// TypeScript can require an id but cannot prove runtime uniqueness. Keep author
+// mistakes loud in source/gallery/consumer development instead of letting
+// Reka's tab lookup silently bind two panels to one value.
+if (import.meta.dev || import.meta.test) {
+  watchEffect(() => {
+    const ids = variantIds.value
+    const invalidIndex = ids.findIndex(
+      (id, i) => typeof id !== 'string' || !id.trim() || ids.indexOf(id) !== i,
+    )
+    if (invalidIndex < 0) return
+    console.warn(
+      `[EnumTable] variant ids must be non-empty and unique; invalid index ${invalidIndex}, `
+      + `received ${JSON.stringify(ids[invalidIndex])}`,
+    )
+  })
+}
 
 // Position is derived, so reordering the groups carries the selection with it
 // and a vanished group falls back to the first — no index arithmetic to keep
 // in sync with the data.
 const activeIndex = computed(() => {
-  const i = activeKey.value ? variantKeys.value.indexOf(activeKey.value) : -1
+  const i = activeId.value ? variantIds.value.indexOf(activeId.value) : -1
   return i >= 0 ? i : 0
 })
 
-// A derived fallback is not enough: leaving a stale key in place would let the
+// A derived fallback is not enough: leaving a stale id in place would let the
 // old selection resurrect if that group ever comes back.
 watch(
-  variantKeys,
-  (keys) => {
-    if (!activeKey.value || !keys.includes(activeKey.value)) activeKey.value = keys[0]
+  variantIds,
+  (ids) => {
+    if (!activeId.value || !ids.includes(activeId.value)) activeId.value = ids[0]
   },
   { flush: 'sync', immediate: true },
 )
-
-// The tab items carry positions (UTabs needs a value per item), so translate
-// back to identity at the single point where the reader picks a group.
-function selectVariant(value: unknown) {
-  activeKey.value = variantKeys.value[Number(value)] ?? variantKeys.value[0]
-}
 
 // Tab per variant, badged with its *filtered* count so an active search reveals
 // which variant holds the matches even while you're viewing another tab.
 const variantTabs = computed<TabsItem[]>(() =>
   filteredVariants.value.map((v, i) => ({
     label: v.title ?? props.variantLabel(i),
-    value: String(i),
+    value: v.id,
     badge: String(v.values.length),
   })),
 )
@@ -242,19 +240,17 @@ const filterAnnouncement = computed(() => {
     </p>
 
     <!-- Variant selector: one click to any group, so nothing is buried below a
-         long list. Badges carry per-variant counts. Bound to the clamped index
-         rather than the raw ref, so the highlighted pill and the rendered panel
-         can never disagree. -->
+         long list. Badges carry per-variant counts. `id` is both the public
+         variant identity and UTabs value; title changes never reset selection. -->
     <UTabs
       v-if="isVariant"
-      :model-value="String(activeIndex)"
+      v-model="activeId"
       :items="variantTabs"
       :content="false"
       color="neutral"
       variant="pill"
       size="xs"
       class="w-full"
-      @update:model-value="selectVariant"
     />
 
     <!-- Applicability caption: the tab title names the group, this sentence

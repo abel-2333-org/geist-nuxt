@@ -21,6 +21,10 @@ export interface EnumValue {
 
 /** A named group of enum members — e.g. bank lists that apply under a condition. */
 export interface EnumVariant {
+  /** Stable, non-empty, unique and locale-neutral within one table.
+   *  This is the tab identity: never derive it from localized `title` / `when`
+   *  copy or from the position/content of `values`. */
+  id: string
   title?: string
   /** When this group of values applies (already localized, inline markdown).
    *  Rendered as a caption under the variant selector: the tab title names the
@@ -42,6 +46,8 @@ export interface EnumTableProps {
   searchPlaceholder?: string
   emptyLabel?: string
   variantLabel?: (index: number) => string
+  /** Inclusive threshold (`>=`) for revealing filtering by aggregate value
+   *  count and bounding the active group's value list by its own count. */
   filterThreshold?: number
   /** Polite live-region text when a filter yields hits. Receives the count.
    *  Same signature as SidebarNav's — the kit's two filterable lists announce

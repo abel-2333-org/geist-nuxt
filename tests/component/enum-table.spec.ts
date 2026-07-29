@@ -82,14 +82,15 @@ function flushAnimationFrames() {
   }
 }
 
-/** ≥ filterThreshold(30) so the filter + bounded scroll box appear. */
-const manyValues = Array.from({ length: 30 }, (_, i) => ({
+/** ≥ filterThreshold(8) so the filter + bounded scroll box appear. */
+const manyValues = Array.from({ length: 8 }, (_, i) => ({
   value: `value_${i}`,
   description: `desc ${i}`,
 }))
 
 const variants = [
   {
+    id: 'git',
     title: 'Git deploys',
     when: 'Applies when `gitSource` is set.',
     values: [
@@ -98,6 +99,7 @@ const variants = [
     ],
   },
   {
+    id: 'prebuilt',
     title: 'Prebuilt uploads',
     when: 'Applies to a prebuilt output.',
     values: [{ value: 'UPLOADING', description: 'Archive uploading.' }],
@@ -123,7 +125,7 @@ describe('variant applicability caption', () => {
     // other description in this kit — the backticks become inline code.
     expect(caption.get('code').text()).toBe('gitSource')
 
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'prebuilt')
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain('Applies to a prebuilt output.')
@@ -132,7 +134,9 @@ describe('variant applicability caption', () => {
 
   it('omits the caption entirely for a variant without `when`', async () => {
     const wrapper = await mountSuspended(EnumTable, {
-      props: { variants: [{ title: 'Only group', values: [{ value: 'a', description: '' }] }] },
+      props: {
+        variants: [{ id: 'only', title: 'Only group', values: [{ value: 'a', description: '' }] }],
+      },
     })
 
     expect(wrapper.text()).toContain('Only group')
@@ -166,6 +170,16 @@ describe('scroll region reachability', () => {
     expect(wrapper.find('[role="group"]').exists()).toBe(false)
   })
 
+  it('keeps seven values below the inclusive default threshold', async () => {
+    const wrapper = await mountSuspended(EnumTable, {
+      props: { values: manyValues.slice(0, 7) },
+    })
+
+    expect(wrapper.findComponent({ name: 'UInput' }).exists()).toBe(false)
+    expect(wrapper.find('[role="status"]').exists()).toBe(false)
+    expect(scrollBox(wrapper.html())).toBe(false)
+  })
+
   it('keeps a long authored list bounded while filtering its visible rows', async () => {
     setOverflow(640, 320)
     const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
@@ -180,7 +194,7 @@ describe('scroll region reachability', () => {
     flushAnimationFrames()
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.findAll('dt')).toHaveLength(11)
+    expect(wrapper.findAll('dt')).toHaveLength(1)
     expect(scrollBox(wrapper.html())).toBe(true)
     expect(box.attributes('tabindex')).toBeUndefined()
     expect(box.attributes('role')).toBeUndefined()
@@ -222,10 +236,9 @@ describe('filter live region', () => {
     expect(region.attributes('aria-live')).toBe('polite')
     expect(region.text()).toBe('')
 
-    filter.vm.$emit('update:modelValue', 'value_1')
+    filter.vm.$emit('update:modelValue', 'value_')
     await wrapper.vm.$nextTick()
-    // value_1 plus value_10..value_19.
-    expect(wrapper.find('[role="status"]').text()).toBe('11 values found')
+    expect(wrapper.find('[role="status"]').text()).toBe('8 values found')
 
     filter.vm.$emit('update:modelValue', 'zzz')
     await wrapper.vm.$nextTick()
@@ -235,7 +248,7 @@ describe('filter live region', () => {
   it('singularizes a lone hit', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
 
-    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'value_29')
+    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'value_7')
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('[role="status"]').text()).toBe('1 value found')
@@ -280,6 +293,38 @@ describe('filter live region', () => {
 })
 
 describe('variant selection', () => {
+  it('warns when authored ids are duplicated', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSuspended(EnumTable, {
+      props: {
+        variants: [
+          { id: 'same', title: 'First', values: [] },
+          { id: 'same', title: 'Second', values: [] },
+        ],
+      },
+    })
+
+    expect(warn).toHaveBeenCalledWith(
+      '[EnumTable] variant ids must be non-empty and unique; invalid index 1, received "same"',
+    )
+  })
+
+  it('warns when a JavaScript consumer omits a variant id', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSuspended(EnumTable, {
+      props: {
+        variants: [
+          // @ts-expect-error — simulate an untyped JavaScript/JSON consumer.
+          { title: 'Missing', values: [] },
+        ],
+      },
+    })
+
+    expect(warn).toHaveBeenCalledWith(
+      '[EnumTable] variant ids must be non-empty and unique; invalid index 0, received undefined',
+    )
+  })
+
   it('badges each tab with its filtered count, matching what the body renders', async () => {
     // Badges and body read one filtered array, so a badge can never claim a
     // count the panel disagrees with.
@@ -299,7 +344,7 @@ describe('variant selection', () => {
   it('falls back to the first group when the selected variant disappears', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { variants } })
 
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'prebuilt')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('UPLOADING')
 
@@ -312,7 +357,7 @@ describe('variant selection', () => {
     // The raw selection is reset, not merely hidden by a computed fallback.
     // Re-expanding must therefore keep the first group selected.
     await wrapper.setProps({ variants })
-    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('git')
     expect(wrapper.text()).toContain('BUILDING')
     expect(wrapper.text()).not.toContain('UPLOADING')
   })
@@ -320,7 +365,7 @@ describe('variant selection', () => {
   it('drops the selection when an equal-length dataset replaces the groups', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { variants } })
 
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'prebuilt')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('UPLOADING')
 
@@ -328,12 +373,12 @@ describe('variant selection', () => {
     // land on the second group of a dataset it was never chosen from.
     await wrapper.setProps({
       variants: [
-        { title: 'Preview', values: [{ value: 'QUEUED', description: 'Waiting.' }] },
-        { title: 'Production', values: [{ value: 'PROMOTED', description: 'Live.' }] },
+        { id: 'preview', title: 'Preview', values: [{ value: 'QUEUED', description: 'Waiting.' }] },
+        { id: 'production', title: 'Production', values: [{ value: 'PROMOTED', description: 'Live.' }] },
       ],
     })
 
-    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('preview')
     expect(wrapper.text()).toContain('QUEUED')
     expect(wrapper.text()).not.toContain('PROMOTED')
   })
@@ -341,31 +386,34 @@ describe('variant selection', () => {
   it('follows the selected variant through a reorder', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { variants } })
 
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'prebuilt')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('UPLOADING')
 
     // Selection is the group's identity, not its position.
     await wrapper.setProps({ variants: [variants[1], variants[0]] })
 
-    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('prebuilt')
     expect(wrapper.text()).toContain('UPLOADING')
     expect(wrapper.text()).toContain('Applies to a prebuilt output.')
   })
 
-  it('keeps two same-titled groups independently selectable', async () => {
-    const twins = [
-      { title: 'Deploys', values: [{ value: 'FIRST', description: 'One.' }] },
-      { title: 'Deploys', values: [{ value: 'SECOND', description: 'Two.' }] },
-    ]
-    const wrapper = await mountSuspended(EnumTable, { props: { variants: twins } })
+  it('keeps the selected id when localized titles change', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { variants } })
 
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'prebuilt')
     await wrapper.vm.$nextTick()
+    await wrapper.setProps({
+      variants: [
+        { ...variants[0], title: 'Git 部署' },
+        { ...variants[1], title: '预构建上传' },
+      ],
+    })
 
-    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('1')
-    expect(wrapper.text()).toContain('SECOND')
-    expect(wrapper.text()).not.toContain('FIRST')
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('prebuilt')
+    expect(wrapper.text()).toContain('预构建上传')
+    expect(wrapper.text()).toContain('UPLOADING')
+    expect(wrapper.text()).not.toContain('BUILDING')
   })
 
   it('keeps a short active variant out of the tab order when the total remains filterable', async () => {
@@ -373,8 +421,8 @@ describe('variant selection', () => {
     const wrapper = await mountSuspended(EnumTable, {
       props: {
         variants: [
-          { title: 'First', values: manyValues },
-          { title: 'Second', values: [{ value: 'only', description: 'One value.' }] },
+          { id: 'first', title: 'First', values: manyValues },
+          { id: 'second', title: 'Second', values: [{ value: 'only', description: 'One value.' }] },
         ],
       },
     })
@@ -382,7 +430,7 @@ describe('variant selection', () => {
     flushAnimationFrames()
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[role="group"]').exists()).toBe(true)
-    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', 'second')
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findComponent({ name: 'UInput' }).exists()).toBe(true)

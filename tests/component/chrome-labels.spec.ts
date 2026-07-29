@@ -76,8 +76,8 @@ const zhLabels = {
   },
 }
 
-/** ≥ filterThreshold(30) 的扁平 enum，触发筛选框 + 空态路径。 */
-const manyValues = Array.from({ length: 30 }, (_, i) => ({
+/** ≥ filterThreshold(8) 的扁平 enum，触发筛选框 + 空态路径。 */
+const manyValues = Array.from({ length: 8 }, (_, i) => ({
   value: `value_${i}`,
   description: `desc ${i}`,
 }))
@@ -352,7 +352,7 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     expect(wrapper.text()).not.toContain('No matching values')
     expect(wrapper.find('[role="status"]').text()).toBe('没有匹配「zzz-no-match」的值')
 
-    filter.vm.$emit('update:modelValue', '_29')
+    filter.vm.$emit('update:modelValue', '_7')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[role="status"]').text()).toBe('找到 1 个值')
   })
@@ -362,8 +362,8 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
       props: {
         name: 'bank', type: 'string',
         enumVariants: [
-          { values: manyValues },
-          { values: [{ value: 'only-second', description: '' }] },
+          { id: 'first', values: manyValues },
+          { id: 'second', values: [{ value: 'only-second', description: '' }] },
         ],
         labels: zhLabels,
       },
@@ -436,7 +436,7 @@ describe('English defaults stay intact', () => {
       props: {
         name: 'status', type: 'string',
         lifecycle: { status: 'beta' as const },
-        enumVariants: [{ values: [{ value: 'a', description: '' }] }],
+        enumVariants: [{ id: 'only', values: [{ value: 'a', description: '' }] }],
       },
     })
     expect(wrapper.text()).toContain('Beta')

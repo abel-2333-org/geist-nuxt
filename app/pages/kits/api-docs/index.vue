@@ -210,20 +210,25 @@ const enumValues = [
 // this group?" — the tab title alone only names it.
 const enumVariants = [
   {
+    id: 'git',
     title: 'Git deploys',
     when: 'Applies when `gitSource` is set — the deploy is built from a connected repository.',
     values: [
+      { value: 'QUEUED', description: 'Repository checkout is waiting for build capacity.' },
       { value: 'BUILDING', description: 'Build container is running the framework build.' },
       { value: 'READY', description: 'Build succeeded and the deployment is serving traffic.' },
       { value: 'ERROR', description: 'Build failed. See `build.logsUrl` for the failing step.' },
     ],
   },
   {
+    id: 'prebuilt',
     title: 'Prebuilt uploads',
     when: 'Applies when the payload carries a prebuilt output — no build step runs.',
     values: [
       { value: 'UPLOADING', description: 'Output archive is still being received.' },
+      { value: 'PROCESSING', description: 'Uploaded files are being indexed before activation.' },
       { value: 'READY', description: 'Output was accepted and is serving traffic.' },
+      { value: 'ERROR', description: 'Uploaded output failed validation and was rejected.' },
     ],
   },
 ]
@@ -320,7 +325,7 @@ const fields = [
 // row: very long field names, many summary facets on a single line
 // (name · type · format · requiredness · default · lifecycle badge → wrap
 // behavior), four levels of nesting, and an enum long enough to trip
-// EnumTable's filter/scroll threshold (30) when embedded inside a field.
+// EnumTable's filter/scroll threshold (8) when embedded inside a field.
 const currencyCodes = [
   'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD', 'SEK',
   'NOK', 'DKK', 'NZD', 'KRW', 'INR', 'BRL', 'ZAR', 'MXN', 'RUB', 'TRY', 'PLN',
@@ -765,7 +770,7 @@ onMounted(() => anchor.initFromHash())
             点击即复制该字段的深链接（<code class="font-mono text-[0.8125rem]">#body_gitSource_ref</code>
             这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
             带入页面时自动展开并滚动定位）。下面第一组是紧凑示例；第二组是刻意加压的
-            高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超 30 项的长
+            高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超过默认 8 项阈值的长
             enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。
           </p>
           <ApiDocsFieldGroup label="Request Body" :count="fields.length">
