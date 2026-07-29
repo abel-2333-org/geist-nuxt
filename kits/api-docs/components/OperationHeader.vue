@@ -4,15 +4,15 @@
 // (OpenAPI 3.1 treats endpoint operations and webhooks as the same Operation
 // object); the two forms are ~90% isomorphic, only the identity row differs:
 //
-//   endpoint → <ApiDocsMethodBadge> + mono path      (you call the platform)
-//   webhook  → <ApiDocsEventBadge>  + mono event name (the platform calls you)
+//   endpoint → <HttpMethodBadge> + mono path      (you call the platform)
+//   webhook  → <WebhookBadge>  + mono event name (the platform calls you)
 //
 // Deliberately ORTHOGONAL to its siblings: it does not embed OperationTarget
 // or LifecycleNotice — the consumer places those after the header, so each
 // piece stays independently reusable.
 //
 // Anatomy:  identity row ── badge · mono identifier · [#actions, right-aligned]
-//           heading      ── summary (+ inline <ApiDocsLifecycleBadge> when
+//           heading      ── summary (+ inline <LifecycleBadge> when
 //                           `lifecycle` is set)
 //           #description ── caller copy (component stays copy-agnostic)
 //           #default     ── trailing blocks (OperationTarget, LifecycleNotice…)
@@ -69,8 +69,8 @@ const identifier = computed(() =>
 <template>
   <header class="flex flex-col gap-3">
     <div class="flex min-w-0 items-center gap-3">
-      <ApiDocsMethodBadge v-if="props.kind === 'endpoint'" :method="props.method" />
-      <ApiDocsEventBadge v-else />
+      <HttpMethodBadge v-if="props.kind === 'endpoint'" :method="props.method" />
+      <WebhookBadge v-else />
 
       <code class="min-w-0 truncate font-mono text-sm text-highlighted">
         {{ identifier }}
@@ -88,7 +88,7 @@ const identifier = computed(() =>
       >
         {{ props.summary }}
       </component>
-      <ApiDocsLifecycleBadge
+      <LifecycleBadge
         v-if="props.lifecycle"
         :status="props.lifecycle"
         :label="props.lifecycleLabel"

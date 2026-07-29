@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ nav: { label: '侧边栏导航', icon: 'i-lucide-panel-left', order: 3 } })
 
-// Demo/story for <ApiDocsSidebarNav> — per the geist-nuxt layering, demos live
+// Demo/story for <SidebarNav> — per the geist-nuxt layering, demos live
 // in gallery and the kit only ships the data-agnostic component. Inline fake
 // ViewModel drives one payments-style docs portal sidebar, now split into two
 // labelled groups so the guide/endpoints boundary is unmistakable:
@@ -150,7 +150,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">侧边栏导航</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">ApiDocsSidebarNav</code>：一个菜单容纳多个可折叠板块，
+          <code class="font-mono text-[0.8125rem]">SidebarNav</code>：一个菜单容纳多个可折叠板块，
           而各板块指向的页面性质差异很大——「指南」板块是文字链接，接口板块是<b class="font-medium text-toned">按用途命名</b>的端点链接。
           接口不严格遵循 REST、一个接口常服务多个业务场景，所以它<b class="font-medium text-toned">只出现一次</b>，
           行首是<b class="font-medium text-toned">请求方法色标</b>（GET/POST…，「怎么调」）、中间是用途名、行尾是<b class="font-medium text-toned">场景标签</b>（订阅、授权…，「用在哪」）。
@@ -168,7 +168,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
           <UIcon name="i-lucide-credit-card" class="size-4 text-muted" />
           支付 API 文档
         </div>
-        <ApiDocsSiteSearch
+        <SiteSearch
           :groups="siteSearchGroups"
           trigger-label="搜索全部文档"
           aria-label="搜索全部文档"
@@ -184,7 +184,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
       <div class="grid gap-8 lg:grid-cols-[auto_1fr]">
         <!-- The sidebar itself, sticky like a real docs shell. -->
         <div class="h-[32rem] overflow-hidden rounded-lg border border-default lg:sticky lg:top-20 lg:self-start">
-          <ApiDocsSidebarNav
+          <SidebarNav
             :groups="groups"
             aria-label="支付文档"
             search-placeholder="搜索文档"
@@ -206,7 +206,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
                 <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）由 <code class="font-mono text-[0.8125rem]">ApiDocsSiteSearch</code> 提供，跨指南与接口导航；消费项目还可通过异步 <code class="font-mono text-[0.8125rem]">search</code> 接入自己的正文索引。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。</span>
+                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）由 <code class="font-mono text-[0.8125rem]">SiteSearch</code> 提供，跨指南与接口导航；消费项目还可通过异步 <code class="font-mono text-[0.8125rem]">search</code> 接入自己的正文索引。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />

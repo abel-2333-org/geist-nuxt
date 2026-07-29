@@ -401,7 +401,7 @@ export const paymentsEndpointStubs: DocsShellEndpointStub[] = [
 
 /* ===================== 支付域：Webhook 样板数据 ===================== *
  * webhook 与端点同为 operation（OpenAPI 3.1），identity 换成事件名：正文用
- * <ApiDocsOperationHeader kind="webhook">（EVENT 徽章 + mono 事件名）渲染。 */
+ * <OperationHeader kind="webhook">（EVENT 徽章 + mono 事件名）渲染。 */
 
 export const paymentsWebhook = {
   event: 'payment.succeeded',
@@ -513,7 +513,7 @@ const paymentsNavGroups: DocsShellNavGroup[] = [
       },
       {
         // Webhook 一等身份（item.kind 泛化）是后续 scope；这里 `method: 'EVENT'`
-        // 走 MethodBadge 的 fallback（neutral+subtle），渲染效果与 EventBadge
+        // 走 HttpMethodBadge 的 fallback（neutral+subtle），渲染效果与 WebhookBadge
         // 一致——是数据层 stopgap，不是词汇方案的一部分。
         label: 'WEBHOOKS',
         kind: 'endpoints',

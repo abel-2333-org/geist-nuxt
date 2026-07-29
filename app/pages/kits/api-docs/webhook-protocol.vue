@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ nav: { label: 'Webhook 协议', icon: 'i-lucide-webhook', order: 4 } })
 
-// Demo/story for <ApiDocsWebhookProtocol> — 按 geist-nuxt 分层，组件 story
+// Demo/story for <WebhookProtocol> — 按 geist-nuxt 分层，组件 story
 // 使用本页内联的中性假 ViewModel；kit 只分发数据无关组件。
 const webhookProtocol = {
   verification: {
@@ -99,7 +99,7 @@ const uniformDelivery = {
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">Webhook 协议</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">ApiDocsWebhookProtocol</code>：连贯呈现一个 webhook 的
+          <code class="font-mono text-[0.8125rem]">WebhookProtocol</code>：连贯呈现一个 webhook 的
           <b class="font-medium text-toned">Verification / Acknowledgement / Delivery</b> 三段协议事实，
           是 <code class="font-mono text-[0.8125rem]">OperationHeader</code>（kind="webhook"）的正文伙伴。
           三段各自独立省略——没写进契约的段<b class="font-medium text-toned">整段不出现</b>，绝不渲染空卡片；
@@ -111,7 +111,7 @@ const uniformDelivery = {
 
       <!-- 主 fixture：三段齐全（本页内联中性假 ViewModel） -->
       <div class="rounded-lg border border-default p-6 sm:p-8">
-        <ApiDocsWebhookProtocol
+        <WebhookProtocol
           :verification="webhookProtocol.verification"
           :acknowledgement="webhookProtocol.acknowledgement"
           :delivery="webhookProtocol.delivery"
@@ -127,7 +127,7 @@ const uniformDelivery = {
             <figcaption class="text-sm font-medium text-toned">
               ACK 为回显语义（echo）—— 没有 example，用 facts 行说明回显哪个参数
             </figcaption>
-            <ApiDocsWebhookProtocol
+            <WebhookProtocol
               :verification="omittedVerification"
               :acknowledgement="echoAck"
               :heading-level="4"
@@ -137,19 +137,19 @@ const uniformDelivery = {
             <figcaption class="text-sm font-medium text-toned">
               ACK 刻意为空（intentional empty）—— 明说「空」，而不是留白
             </figcaption>
-            <ApiDocsWebhookProtocol :acknowledgement="emptyAck" :heading-level="4" />
+            <WebhookProtocol :acknowledgement="emptyAck" :heading-level="4" />
           </figure>
           <figure class="space-y-3 rounded-lg border border-default p-6">
             <figcaption class="text-sm font-medium text-toned">
               只提供 Delivery、schedule 无 steps —— 其余两段整段省略，节奏只显示总结句
             </figcaption>
-            <ApiDocsWebhookProtocol :delivery="uniformDelivery" :heading-level="4" />
+            <WebhookProtocol :delivery="uniformDelivery" :heading-level="4" />
           </figure>
           <figure class="space-y-3 rounded-lg border border-default p-6">
             <figcaption class="text-sm font-medium text-toned">
               折叠阈值为 1 —— 初始不铺 chip，但展开按钮仍然可用
             </figcaption>
-            <ApiDocsWebhookProtocol
+            <WebhookProtocol
               :delivery="webhookProtocol.delivery"
               :heading-level="4"
               :max-schedule-steps="1"

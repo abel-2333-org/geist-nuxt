@@ -4,7 +4,7 @@
 // domain types, just a heading + optional count wrapping a slot of field rows.
 //
 // Anatomy:  header  ── mono uppercase label · optional count
-//           body    ── slot (typically a stack of <ApiDocsFieldItem>)
+//           body    ── slot (typically a stack of <FieldItem>)
 // The heading text is user content → passed in via prop; `count` is optional.
 // `headingLevel` lets the consumer slot the group into its outline (e.g. under
 // an <h2> endpoint title the groups become <h3>); defaults to 2 for standalone

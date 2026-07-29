@@ -14,13 +14,14 @@ foundation/assets/css/          token / 全局样式
 foundation/config/              app / Nuxt UI 配置
 kits/<kit>/components/          领域组件
 kits/<kit>/composables/         领域 composables
+kits/<kit>/internal/            随公共组件复制、但不自动注册的内部 helper
 kits/<kit>/utils/               领域 utils
 playground/                      未采纳候选
 ```
 
 根 `nuxt.config.ts` 显式扫描 foundation、kit 与 playground 源目录。消费项目不复制这套扫描配置；`geist:copy` 会按 registry target 将文件放到标准 `app/components`、`app/composables`、`app/utils` 等目录。
 
-根 preview 显式把 `foundation/compositions/SignupForm.vue` 注册为 `<CompositionSignupForm>`；`kits/api-docs/components/FieldItem.vue` 注册为 `<ApiDocsFieldItem>`。copy-in 后的组件名由 registry target（如 `app/components/api-docs/FieldItem.vue`）决定，根目录通用件保持裸名。
+根 preview 对 foundation composition 与 kit component 都关闭目录前缀，例如 `foundation/compositions/AppHeader.vue` 注册为 `<AppHeader>`，`kits/api-docs/components/FieldItem.vue` 注册为 `<FieldItem>`。registry 同样把每个公共组件扁平复制到 `app/components/<Name>.vue`，因此消费项目使用默认 component scan 或 `pathPrefix: false` 都得到相同名称。只供公共组件显式导入的 helper 复制到 `app/internal/`，不进入 Nuxt 自动注册面。
 
 ## 组件写法
 

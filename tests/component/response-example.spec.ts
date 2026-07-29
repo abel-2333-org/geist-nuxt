@@ -1,4 +1,4 @@
-// <ApiDocsResponseExample> — controlled / uncontrolled scenario selection.
+// <ResponseExample> — controlled / uncontrolled scenario selection.
 // Same seam as RequestExample, plus the status dimension which stays INTERNAL
 // and preserves a still-valid status across scenario changes, falling back only
 // when the previous status is unavailable.
@@ -112,7 +112,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('ApiDocsResponseExample scenario selection', () => {
+describe('ResponseExample scenario selection', () => {
   it('uncontrolled: renders the first scenario and its first status by default', async () => {
     const wrapper = await mountSuspended(ResponseExample, { props: { scenarios } })
     expect(wrapper.text()).toContain('BASIC-200')
@@ -320,7 +320,7 @@ describe('ApiDocsResponseExample scenario selection', () => {
   })
 })
 
-describe('ApiDocsResponseExample body selection', () => {
+describe('ResponseExample body selection', () => {
   it('preserves the default body by id across same-context reorder', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: bodyScenarios },

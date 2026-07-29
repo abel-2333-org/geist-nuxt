@@ -15,9 +15,8 @@ export default defineNuxtConfig({
   colorMode: base.colorMode,
   ui: base.ui,
 
-  // Explicit roots preserve the existing component API without layer scanning:
-  // CopyButton stays bare, kit files stay ApiDocs*, and gallery/demo names stay
-  // isolated from distributable source.
+  // Public source roots expose neutral component names. Gallery/demo prefixes
+  // remain private namespaces and never leak into the registry contract.
   components: [
     {
       path: resolve('./app/components/gallery/showcase'),
@@ -32,8 +31,8 @@ export default defineNuxtConfig({
     },
     { path: resolve('./app/components/demo'), prefix: 'Demo', pathPrefix: true },
     { path: resolve('./playground/components'), prefix: 'Playground', pathPrefix: false },
-    { path: resolve('./kits/api-docs/components'), prefix: 'ApiDocs', pathPrefix: false },
-    { path: resolve('./foundation/compositions'), prefix: 'Composition', pathPrefix: false },
+    { path: resolve('./kits/api-docs/components'), pathPrefix: false },
+    { path: resolve('./foundation/compositions'), pathPrefix: false },
     { path: resolve('./foundation/components'), pathPrefix: false },
   ],
 

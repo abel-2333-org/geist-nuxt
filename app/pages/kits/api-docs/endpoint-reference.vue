@@ -17,20 +17,20 @@ definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', or
 // 开发者集成时的思考顺序：往哪调 → 满足前置 → 发什么 → 收什么 → 出错怎么办
 // → 相关背景）：
 //   identity 头（METHOD 徽章 + path + h1 摘要 + 描述）
-//   → 环境联动（<ApiDocsOperationTarget>：host 切换 + 地址 + 复制，紧贴头部）；
+//   → 环境联动（<OperationTarget>：host 切换 + 地址 + 复制，紧贴头部）；
 //   → REQUIREMENTS / GUIDE：可选前置事实与指南扩展区；
 //   → REQUEST / RESPONSE BODY 字段树（整页主角）；
 //   → ERROR RESPONSE / ERRORS：独立错误响应字段树 + 错误目录（error code →
 //     含义 → 触发条件），字面错误响应体作为「线缆样本」归右栏（与 ACK 的
 //     IA 裁决同构），左栏保留字段契约与 facts 目录并指向右栏；
 //   → RELATED RESOURCES：可选 relations 扩展区（背景参考殿后）。
-// 右栏「线缆样本」= 端点的两个方向，用 <ApiDocsCodeRail> 纵向双栏：
+// 右栏「线缆样本」= 端点的两个方向，用 <CodeRail> 纵向双栏：
 //   Request（你 → 平台，上）/ Response（平台 → 你，下）。Response 的状态维度
 //   同时承载成功体与错误样本（400/401/409），与左栏 ERRORS 目录连线。
 //
 // identity 头手写以取得页面唯一 <h1>（与 webhook-reference.vue 对称）：
 // standalone 单 operation 页里端点摘要即页面唯一 h1，而
-// <ApiDocsOperationHeader> 的 headingLevel 上限是 2（供「域 h1 下多 operation」
+// <OperationHeader> 的 headingLevel 上限是 2（供「域 h1 下多 operation」
 // 的外壳场景，见 DocsShellReference）。两条路径都成立，取决于页面是单
 // operation 还是多 operation——这是刻意的分层，不是缺口。
 //
@@ -525,7 +525,7 @@ onMounted(() => anchor.initFromHash())
           <!-- identity 头：手写以取得页面唯一 h1（与 webhook-reference.vue 对称）。 -->
           <header class="space-y-4 border-b border-default pb-8">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsMethodBadge :method="endpoint.method" />
+              <HttpMethodBadge :method="endpoint.method" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
             </div>
             <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
@@ -537,7 +537,7 @@ onMounted(() => anchor.initFromHash())
             <!-- 环境联动：host 切换 + 分段地址（host / path 文本本身即复制控件）
                  + 复制完整地址，紧贴头部。选中 host 由本页持有，右栏请求示例从
                  同一 host 派生。 -->
-            <ApiDocsOperationTarget
+            <OperationTarget
               v-model="selectedHostId"
               :hosts="hosts"
               :path="endpoint.path"
@@ -557,7 +557,7 @@ onMounted(() => anchor.initFromHash())
           <div class="mt-8 space-y-10">
             <!-- 可选 requirements / guide 扩展区：页面只定义位置与语义层级，
                  consumer 自己提供已解析、已本地化的内容。 -->
-            <ApiDocsFieldGroup label="Requirements">
+            <FieldGroup label="Requirements">
               <div class="space-y-4 pt-2">
                 <dl class="divide-y divide-default">
                   <div
@@ -570,27 +570,27 @@ onMounted(() => anchor.initFromHash())
                   </div>
                 </dl>
               </div>
-            </ApiDocsFieldGroup>
+            </FieldGroup>
 
-            <ApiDocsFieldGroup label="Request Body" :count="bodyFields.length">
-              <ApiDocsFieldItem v-for="f in bodyFields" :key="f.path ?? f.name" v-bind="f" />
-            </ApiDocsFieldGroup>
+            <FieldGroup label="Request Body" :count="bodyFields.length">
+              <FieldItem v-for="f in bodyFields" :key="f.path ?? f.name" v-bind="f" />
+            </FieldGroup>
 
-            <ApiDocsFieldGroup label="Response Body" :count="responseFields.length">
-              <ApiDocsFieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
-            </ApiDocsFieldGroup>
+            <FieldGroup label="Response Body" :count="responseFields.length">
+              <FieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
+            </FieldGroup>
 
-            <ApiDocsFieldGroup label="Error Response Body" :count="errorResponseFields.length">
-              <ApiDocsFieldItem
+            <FieldGroup label="Error Response Body" :count="errorResponseFields.length">
+              <FieldItem
                 v-for="f in errorResponseFields"
                 :key="f.path ?? f.name"
                 v-bind="f"
               />
-            </ApiDocsFieldGroup>
+            </FieldGroup>
 
             <!-- 独立 ERRORS 目录：error code → 含义 → 触发条件。字面错误响应体
                  作为线缆样本归右栏（Response 的 4xx 状态），此处只留目录并连线。 -->
-            <ApiDocsFieldGroup label="Errors" :count="errors.length">
+            <FieldGroup label="Errors" :count="errors.length">
               <dl class="divide-y divide-default">
                 <div
                   v-for="err in errors"
@@ -607,11 +607,11 @@ onMounted(() => anchor.initFromHash())
               <p class="mt-2 text-sm text-dimmed">
                 各错误的响应体样本见右栏 Response 的对应状态。
               </p>
-            </ApiDocsFieldGroup>
+            </FieldGroup>
 
             <!-- 可选 relations 扩展区：仅承载通用链接/描述，不把消费项目路由
                  shape 固化进 kit。 -->
-            <ApiDocsFieldGroup label="Related Resources">
+            <FieldGroup label="Related Resources">
               <ul class="divide-y divide-default">
                 <li v-for="relation in relations" :key="relation.to">
                   <ULink
@@ -630,7 +630,7 @@ onMounted(() => anchor.initFromHash())
                   </ULink>
                 </li>
               </ul>
-            </ApiDocsFieldGroup>
+            </FieldGroup>
           </div>
         </div>
       </template>
@@ -639,22 +639,22 @@ onMounted(() => anchor.initFromHash())
            内容优先重分配；<lg 回退为堆叠各卡自滚动。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
-          <ApiDocsCodeRail storage-key="api-docs-endpoint-rail-split" class="h-full max-lg:space-y-4">
+          <CodeRail storage-key="api-docs-endpoint-rail-split" class="h-full max-lg:space-y-4">
             <template #top="{ maxHeight }">
-              <ApiDocsRequestExample
+              <RequestExample
                 v-model:scenario="activeScenario"
                 :scenarios="requestScenarios"
                 :max-height="maxHeight"
               />
             </template>
             <template #bottom="{ maxHeight }">
-              <ApiDocsResponseExample
+              <ResponseExample
                 v-model:scenario="activeScenario"
                 :scenarios="responseScenarios"
                 :max-height="maxHeight"
               />
             </template>
-          </ApiDocsCodeRail>
+          </CodeRail>
         </div>
       </template>
     </SplitPane>
@@ -682,19 +682,19 @@ onMounted(() => anchor.initFromHash())
           </figcaption>
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsMethodBadge method="GET" />
+              <HttpMethodBadge method="GET" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/deployments/{id}</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Get a deployment</h3>
-            <ApiDocsOperationTarget
+            <OperationTarget
               :hosts="partialHosts"
               path="/v1/deployments/{id}"
             />
           </header>
-          <ApiDocsFieldGroup label="Response Body" :count="partialBodyFields.length" :heading-level="4">
-            <ApiDocsFieldItem v-for="f in partialBodyFields" :key="f.path" v-bind="f" />
-          </ApiDocsFieldGroup>
-          <ApiDocsFieldGroup label="Errors" :count="partialErrors.length" :heading-level="4">
+          <FieldGroup label="Response Body" :count="partialBodyFields.length" :heading-level="4">
+            <FieldItem v-for="f in partialBodyFields" :key="f.path" v-bind="f" />
+          </FieldGroup>
+          <FieldGroup label="Errors" :count="partialErrors.length" :heading-level="4">
             <dl class="divide-y divide-default">
               <div v-for="err in partialErrors" :key="err.code" class="flex items-baseline gap-3 py-2.5">
                 <dt class="flex shrink-0 items-center gap-2">
@@ -704,7 +704,7 @@ onMounted(() => anchor.initFromHash())
                 <dd class="text-sm leading-relaxed text-muted">{{ err.when }}</dd>
               </div>
             </dl>
-          </ApiDocsFieldGroup>
+          </FieldGroup>
         </figure>
 
         <!-- minimal：只读端点——无环境切换、无 errors、无 relations -->
@@ -714,17 +714,17 @@ onMounted(() => anchor.initFromHash())
           </figcaption>
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsMethodBadge method="GET" />
+              <HttpMethodBadge method="GET" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/health</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Health check</h3>
           </header>
-          <ApiDocsFieldGroup label="Request" :count="minimalBodyFields.length" :heading-level="4">
-            <ApiDocsFieldItem v-for="f in minimalBodyFields" :key="f.path" v-bind="f" />
-          </ApiDocsFieldGroup>
-          <ApiDocsFieldGroup label="Response Body" :count="minimalResponseFields.length" :heading-level="4">
-            <ApiDocsFieldItem v-for="f in minimalResponseFields" :key="f.path" v-bind="f" />
-          </ApiDocsFieldGroup>
+          <FieldGroup label="Request" :count="minimalBodyFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalBodyFields" :key="f.path" v-bind="f" />
+          </FieldGroup>
+          <FieldGroup label="Response Body" :count="minimalResponseFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalResponseFields" :key="f.path" v-bind="f" />
+          </FieldGroup>
         </figure>
       </div>
 

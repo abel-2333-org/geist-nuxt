@@ -35,6 +35,7 @@
     "foundation/utils",
     "kits/api-docs/components",
     "kits/api-docs/composables",
+    "kits/api-docs/internal",
     "kits/api-docs/utils"
   ],
   "items": [
@@ -202,41 +203,11 @@
     {
       "name": "foundation-composition-app-header",
       "type": "registry:block",
-      "title": "CompositionAppHeader",
+      "title": "AppHeader",
       "description": "Responsive application header composition.",
       "registryDependencies": ["geist-foundation", "foundation-theme-toggle"],
       "files": [
-        { "path": "foundation/compositions/AppHeader.vue", "target": "app/components/composition/AppHeader.vue" }
-      ]
-    },
-    {
-      "name": "foundation-composition-feedback",
-      "type": "registry:block",
-      "title": "CompositionFeedback",
-      "description": "Feedback-state composition.",
-      "registryDependencies": ["geist-foundation"],
-      "files": [
-        { "path": "foundation/compositions/Feedback.vue", "target": "app/components/composition/Feedback.vue" }
-      ]
-    },
-    {
-      "name": "foundation-composition-navigation",
-      "type": "registry:block",
-      "title": "CompositionNavigation",
-      "description": "Navigation composition.",
-      "registryDependencies": ["geist-foundation"],
-      "files": [
-        { "path": "foundation/compositions/Navigation.vue", "target": "app/components/composition/Navigation.vue" }
-      ]
-    },
-    {
-      "name": "foundation-composition-signup-form",
-      "type": "registry:block",
-      "title": "CompositionSignupForm",
-      "description": "Sign-up form composition.",
-      "registryDependencies": ["geist-foundation"],
-      "files": [
-        { "path": "foundation/compositions/SignupForm.vue", "target": "app/components/composition/SignupForm.vue" }
+        { "path": "foundation/compositions/AppHeader.vue", "target": "app/components/AppHeader.vue" }
       ]
     },
     {
@@ -251,85 +222,85 @@
     {
       "name": "api-docs-code-block",
       "type": "registry:component",
-      "title": "ApiDocsCodeBlock",
+      "title": "CodeBlock",
       "description": "Structured API code sample with language, wrap, and copy controls.",
       "registryDependencies": ["geist-foundation", "foundation-copy-button", "api-docs-use-code-wrap"],
       "files": [
-        { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/api-docs/CodeBlock.vue" },
+        { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/CodeBlock.vue" },
         { "path": "kits/api-docs/utils/lang-preset.ts", "target": "app/utils/lang-preset.ts" }
       ]
     },
     {
       "name": "api-docs-request-example",
       "type": "registry:component",
-      "title": "ApiDocsRequestExample",
+      "title": "RequestExample",
       "description": "Scenario-aware request example.",
       "registryDependencies": ["api-docs-code-block"],
       "files": [
-        { "path": "kits/api-docs/components/RequestExample.vue", "target": "app/components/api-docs/RequestExample.vue" }
+        { "path": "kits/api-docs/components/RequestExample.vue", "target": "app/components/RequestExample.vue" }
       ]
     },
     {
       "name": "api-docs-response-example",
       "type": "registry:component",
-      "title": "ApiDocsResponseExample",
+      "title": "ResponseExample",
       "description": "Scenario and status-aware response example with explicit body semantics (code, empty, unavailable, file).",
       "registryDependencies": ["api-docs-code-block"],
       "files": [
-        { "path": "kits/api-docs/components/ResponseExample.vue", "target": "app/components/api-docs/ResponseExample.vue" }
+        { "path": "kits/api-docs/components/ResponseExample.vue", "target": "app/components/ResponseExample.vue" }
       ]
     },
     {
       "name": "api-docs-lifecycle-badge",
       "type": "registry:component",
-      "title": "ApiDocsLifecycleBadge",
+      "title": "LifecycleBadge",
       "description": "API lifecycle preset over SemanticBadge.",
       "registryDependencies": ["foundation-semantic-badge"],
       "files": [
-        { "path": "kits/api-docs/components/LifecycleBadge.vue", "target": "app/components/api-docs/LifecycleBadge.vue" },
+        { "path": "kits/api-docs/components/LifecycleBadge.vue", "target": "app/components/LifecycleBadge.vue" },
         { "path": "kits/api-docs/utils/lifecycle-preset.ts", "target": "app/utils/lifecycle-preset.ts" }
       ]
     },
     {
       "name": "api-docs-method-badge",
       "type": "registry:component",
-      "title": "ApiDocsMethodBadge",
+      "title": "HttpMethodBadge",
       "description": "HTTP method preset over SemanticBadge.",
       "registryDependencies": ["foundation-semantic-badge"],
       "files": [
-        { "path": "kits/api-docs/components/MethodBadge.vue", "target": "app/components/api-docs/MethodBadge.vue" },
+        { "path": "kits/api-docs/components/HttpMethodBadge.vue", "target": "app/components/HttpMethodBadge.vue" },
         { "path": "kits/api-docs/utils/method-preset.ts", "target": "app/utils/method-preset.ts" }
       ]
     },
     {
       "name": "api-docs-enum-table",
       "type": "registry:component",
-      "title": "ApiDocsEnumTable",
+      "title": "EnumTable",
       "description": "Filterable allowed-values table.",
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown"],
       "files": [
-        { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/api-docs/EnumTable.vue" },
+        { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/EnumTable.vue" },
         { "path": "kits/api-docs/utils/enum.ts", "target": "app/utils/enum.ts" }
       ]
     },
     {
       "name": "api-docs-field-group",
       "type": "registry:component",
-      "title": "ApiDocsFieldGroup",
+      "title": "FieldGroup",
       "description": "Semantic field group heading.",
       "registryDependencies": ["geist-foundation"],
       "files": [
-        { "path": "kits/api-docs/components/FieldGroup.vue", "target": "app/components/api-docs/FieldGroup.vue" }
+        { "path": "kits/api-docs/components/FieldGroup.vue", "target": "app/components/FieldGroup.vue" }
       ]
     },
     {
       "name": "api-docs-field-item",
       "type": "registry:component",
-      "title": "ApiDocsFieldItem",
+      "title": "FieldItem",
       "description": "Recursive API schema field row with deep-link handling. Field-level schema composition (the optional `composition` field) renders when api-docs-schema-composition is also installed.",
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-copy", "api-docs-enum-table", "api-docs-lifecycle-badge"],
       "files": [
-        { "path": "kits/api-docs/components/FieldItem.vue", "target": "app/components/api-docs/FieldItem.vue" },
+        { "path": "kits/api-docs/components/FieldItem.vue", "target": "app/components/FieldItem.vue" },
         { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" },
         { "path": "kits/api-docs/utils/field.ts", "target": "app/utils/field.ts" }
       ]
@@ -337,104 +308,104 @@
     {
       "name": "api-docs-schema-composition",
       "type": "registry:component",
-      "title": "ApiDocsSchemaComposition",
+      "title": "SchemaComposition",
       "description": "Faithful oneOf/anyOf/allOf schema composition with discriminator field rows and deep-link reveal.",
       "registryDependencies": ["api-docs-field-item"],
       "files": [
-        { "path": "kits/api-docs/components/SchemaComposition.vue", "target": "app/components/api-docs/SchemaComposition.vue" }
+        { "path": "kits/api-docs/components/SchemaComposition.vue", "target": "app/components/SchemaComposition.vue" }
       ]
     },
     {
       "name": "api-docs-field-annotation",
       "type": "registry:component",
-      "title": "ApiDocsFieldAnnotation",
+      "title": "FieldAnnotation",
       "description": "Field form of the Annotation family: previews a FieldNode summary inline and deep-links into its reference row (same-page via useFieldAnchor, or cross-page via {page}#{path}). Bundles useFieldSource; the FieldNode model and useFieldAnchor arrive through api-docs-field-item.",
       "registryDependencies": ["api-docs-field-item", "foundation-annotation-popover", "foundation-inline-code", "foundation-inline-markdown"],
       "files": [
-        { "path": "kits/api-docs/components/FieldAnnotation.vue", "target": "app/components/api-docs/FieldAnnotation.vue" },
+        { "path": "kits/api-docs/components/FieldAnnotation.vue", "target": "app/components/FieldAnnotation.vue" },
         { "path": "kits/api-docs/composables/useFieldSource.ts", "target": "app/composables/useFieldSource.ts" }
       ]
     },
     {
       "name": "api-docs-event-badge",
       "type": "registry:component",
-      "title": "ApiDocsEventBadge",
-      "description": "Webhook EVENT identity badge, the out-of-band counterpart of MethodBadge.",
+      "title": "WebhookBadge",
+      "description": "Webhook EVENT identity badge, the out-of-band counterpart of HttpMethodBadge.",
       "registryDependencies": ["foundation-semantic-badge"],
       "files": [
-        { "path": "kits/api-docs/components/EventBadge.vue", "target": "app/components/api-docs/EventBadge.vue" }
+        { "path": "kits/api-docs/components/WebhookBadge.vue", "target": "app/components/WebhookBadge.vue" }
       ]
     },
     {
       "name": "api-docs-lifecycle-notice",
       "type": "registry:component",
-      "title": "ApiDocsLifecycleNotice",
+      "title": "LifecycleNotice",
       "description": "Operation lifecycle banner sharing the LifecycleBadge preset vocabulary.",
       "registryDependencies": ["geist-foundation", "foundation-badge-utils", "api-docs-lifecycle-badge"],
       "files": [
-        { "path": "kits/api-docs/components/LifecycleNotice.vue", "target": "app/components/api-docs/LifecycleNotice.vue" }
+        { "path": "kits/api-docs/components/LifecycleNotice.vue", "target": "app/components/LifecycleNotice.vue" }
       ]
     },
     {
       "name": "api-docs-operation-target",
       "type": "registry:component",
-      "title": "ApiDocsOperationTarget",
+      "title": "OperationTarget",
       "description": "Environment host picker with a segmented request address: host and path copy separately, plus a whole-address copy.",
       "registryDependencies": ["geist-foundation", "foundation-copy-button"],
       "files": [
-        { "path": "kits/api-docs/components/OperationTarget.vue", "target": "app/components/api-docs/OperationTarget.vue" }
+        { "path": "kits/api-docs/components/OperationTarget.vue", "target": "app/components/OperationTarget.vue" }
       ]
     },
     {
       "name": "api-docs-operation-header",
       "type": "registry:component",
-      "title": "ApiDocsOperationHeader",
+      "title": "OperationHeader",
       "description": "Identity header for endpoint and webhook operations (badge, identifier, summary, lifecycle, actions).",
       "registryDependencies": ["api-docs-method-badge", "api-docs-event-badge", "api-docs-lifecycle-badge"],
       "files": [
-        { "path": "kits/api-docs/components/OperationHeader.vue", "target": "app/components/api-docs/OperationHeader.vue" }
+        { "path": "kits/api-docs/components/OperationHeader.vue", "target": "app/components/OperationHeader.vue" }
       ]
     },
     {
       "name": "api-docs-code-rail",
       "type": "registry:component",
-      "title": "ApiDocsCodeRail",
+      "title": "CodeRail",
       "description": "Vertical dual-example code rail with content-priority reallocation.",
       "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-split-pane", "foundation-split-pane-handle"],
       "files": [
-        { "path": "kits/api-docs/components/CodeRail.vue", "target": "app/components/api-docs/CodeRail.vue" }
+        { "path": "kits/api-docs/components/CodeRail.vue", "target": "app/components/CodeRail.vue" }
       ]
     },
     {
       "name": "api-docs-site-search",
       "type": "registry:component",
-      "title": "ApiDocsSiteSearch",
+      "title": "SiteSearch",
       "description": "Data-agnostic site-wide documentation search command palette.",
       "registryDependencies": ["api-docs-method-badge"],
       "files": [
-        { "path": "kits/api-docs/components/SiteSearch.vue", "target": "app/components/api-docs/SiteSearch.vue" }
+        { "path": "kits/api-docs/components/SiteSearch.vue", "target": "app/components/SiteSearch.vue" }
       ]
     },
     {
       "name": "api-docs-webhook-protocol",
       "type": "registry:component",
-      "title": "ApiDocsWebhookProtocol",
+      "title": "WebhookProtocol",
       "description": "Webhook verification, acknowledgement, and delivery protocol facts.",
       "registryDependencies": ["geist-foundation", "foundation-inline-code", "api-docs-field-group", "api-docs-code-block"],
       "files": [
-        { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/api-docs/WebhookProtocol.vue" },
+        { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/WebhookProtocol.vue" },
         { "path": "kits/api-docs/utils/webhook-protocol.ts", "target": "app/utils/webhook-protocol.ts" }
       ]
     },
     {
       "name": "api-docs-sidebar-nav",
       "type": "registry:component",
-      "title": "ApiDocsSidebarNav",
+      "title": "SidebarNav",
       "description": "Searchable, resizable API documentation sidebar with width-aware scenario tags.",
       "registryDependencies": ["geist-foundation", "api-docs-method-badge"],
       "files": [
-        { "path": "kits/api-docs/components/SidebarNav.vue", "target": "app/components/api-docs/SidebarNav.vue" },
-        { "path": "kits/api-docs/components/ScenarioTags.vue", "target": "app/components/api-docs/ScenarioTags.vue" }
+        { "path": "kits/api-docs/components/SidebarNav.vue", "target": "app/components/SidebarNav.vue" },
+        { "path": "kits/api-docs/internal/SidebarScenarioTags.vue", "target": "app/internal/SidebarScenarioTags.vue" }
       ]
     }
   ]

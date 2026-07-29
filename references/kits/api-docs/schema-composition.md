@@ -1,15 +1,15 @@
-# ApiDocsSchemaComposition `<ApiDocsSchemaComposition>`
+# SchemaComposition `<SchemaComposition>`
 
-忠实呈现 OpenAPI / JSON Schema 的**组合**（composition）：`oneOf`（恰好一个 variant 成立）、`anyOf`（至少一个成立）、`allOf`（全部成立），以及可选的 `discriminator`（payload property + wire-value 映射的**提示**，不改变验证语义）。普通字段树（`ApiDocsFieldGroup` / `ApiDocsFieldItem`）只能表达「并存的字段」——把互斥的 variants flatten 成普通字段会把**互斥读成并存**、生成 `card.token` 这类**虚构 wire path**、并丢掉三种 kind 的语义差异。本组件是那道缺口的专用件。
+忠实呈现 OpenAPI / JSON Schema 的**组合**（composition）：`oneOf`（恰好一个 variant 成立）、`anyOf`（至少一个成立）、`allOf`（全部成立），以及可选的 `discriminator`（payload property + wire-value 映射的**提示**，不改变验证语义）。普通字段树（`FieldGroup` / `FieldItem`）只能表达「并存的字段」——把互斥的 variants flatten 成普通字段会把**互斥读成并存**、生成 `card.token` 这类**虚构 wire path**、并丢掉三种 kind 的语义差异。本组件是那道缺口的专用件。
 
-> 真源在 `kits/api-docs/components/SchemaComposition.vue`；根 registry target 保留 `app/components/api-docs/SchemaComposition.vue`，故模板名是 `<ApiDocsSchemaComposition>`。数据无关：只接收 presentation-neutral 的**显示模型**（`CompositionNode`），不解析 OpenAPI document、不依赖任何 consumer 的 contract 类型，所有 chrome 文案经 props 注入（i18n-ready）。
+> 真源在 `kits/api-docs/components/SchemaComposition.vue`；registry 扁平复制到 `app/components/SchemaComposition.vue`，故模板名稳定为 `<SchemaComposition>`。数据无关：只接收 presentation-neutral 的**显示模型**（`CompositionNode`），不解析 OpenAPI document、不依赖任何 consumer 的 contract 类型，所有 chrome 文案经 props 注入（i18n-ready）。
 
 ## 三种入口形态
 
 | 场景 | 装配 |
 |---|---|
-| **顶层组合**（request body 本身是 oneOf） | `ApiDocsFieldGroup` 下直接放 `<ApiDocsSchemaComposition>` |
-| **字段级组合**（某字段的值是 oneOf） | 给 `FieldNode` 设 `composition?: CompositionNode`；`ApiDocsFieldItem` 在子字段 collapsible **之后**委托本组件渲染 |
+| **顶层组合**（request body 本身是 oneOf） | `FieldGroup` 下直接放 `<SchemaComposition>` |
+| **字段级组合**（某字段的值是 oneOf） | 给 `FieldNode` 设 `composition?: CompositionNode`；`FieldItem` 在子字段 collapsible **之后**委托本组件渲染 |
 | **嵌套组合**（variant 内再套一层） | `CompositionVariant.composition` 递归，heading level 自动 +1（封顶 6） |
 
 这是「组合 recipe」而非把逻辑塞进 FieldItem：flatten 进 FieldItem 会破坏其「一行字段」心智（正是 issue #31 反对的做法），纯独立组件又覆盖不了字段级嵌套，组合 recipe 与 kit 现有惯例一致（EnumTable 被 FieldItem 组合）。
@@ -77,7 +77,7 @@ type CompositionNode =
 |---|---|---|
 | （展开 `CompositionNode`） | `kind` + `variants` + `discriminator?` | 组合显示模型，直接 `v-bind` 一个 `CompositionNode` |
 | `labels` | `SchemaCompositionLabels` | chrome 文案覆盖（英文默认，对齐 FieldItem 惯例）：`oneOf`/`anyOf`/`allOf` eyebrow、`oneOfHint`/`anyOfHint`/`allOfHint` assistive 句、`discriminatorDescription(values)`、`empty` |
-| `fieldLabels` | `FieldItemLabels` | 透传给内部 `ApiDocsFieldItem` 行的本地化文案；字段级 composition 继续通过 `FieldItemLabels.composition` 继承本组件的 `labels` |
+| `fieldLabels` | `FieldItemLabels` | 透传给内部 `FieldItem` 行的本地化文案；字段级 composition 继续通过 `FieldItemLabels.composition` 继承本组件的 `labels` |
 | `headingLevel` | `3 \| 4 \| 5 \| 6` | anyOf / allOf 分区小标题的 outline 层级，默认 `4`；嵌套自动 +1、封顶 6 |
 
 ## Accessibility
@@ -118,13 +118,13 @@ const paymentMethod: CompositionNode = {
 
 <template>
   <!-- 顶层组合：request body 本身是 oneOf -->
-  <ApiDocsFieldGroup label="Request body" :heading-level="3">
-    <ApiDocsSchemaComposition v-bind="paymentMethod" :heading-level="4" />
-  </ApiDocsFieldGroup>
+  <FieldGroup label="Request body" :heading-level="3">
+    <SchemaComposition v-bind="paymentMethod" :heading-level="4" />
+  </FieldGroup>
 </template>
 ```
 
-字段级组合交给 `ApiDocsFieldItem`——给字段设 `composition`，它在子字段之后委托本组件：
+字段级组合交给 `FieldItem`——给字段设 `composition`，它在子字段之后委托本组件：
 
 ```ts
 const destination: FieldNode = {
@@ -132,13 +132,13 @@ const destination: FieldNode = {
   children: [{ path: 'transfer_destination_reference', name: 'reference', type: 'string', required: true }],
   composition: { kind: 'oneOf', discriminator: { /* … */ }, variants: [/* bank / card */] },
 }
-// <ApiDocsFieldItem v-bind="destination" />
+// <FieldItem v-bind="destination" />
 ```
 
 ## 相关组件
 
-- `<ApiDocsFieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。依赖是**单向**的：本组件依赖 FieldItem，FieldItem **不**依赖本组件。字段级组合（`FieldNode.composition`）是可选增强——FieldItem 只有收到 composition 数据时才用 `resolveComponent('ApiDocsSchemaComposition')` 动态解析并 `<component :is>` 渲染；普通 standalone FieldItem 不查找高层组件，装了本切片后字段级增强才生效，故无依赖环也无无关 missing-component warning。
-- `<ApiDocsFieldGroup>` — 顶层组合的容器（mono 大写组标题 + 计数）。
+- `<FieldItem>` — 本 kit 兄弟切片，渲染每个 variant 的字段行。`registryDependencies` 声明 `api-docs-field-item`，其闭环（enum-table / lifecycle-badge / use-field-anchor / inline-code / inline-markdown）随 copy-in 一起拉入。依赖是**单向**的：本组件依赖 FieldItem，FieldItem **不**依赖本组件。字段级组合（`FieldNode.composition`）是可选增强——FieldItem 只有收到 composition 数据时才用 `resolveComponent('SchemaComposition')` 动态解析并 `<component :is>` 渲染；普通 standalone FieldItem 不查找高层组件，装了本切片后字段级增强才生效，故无依赖环也无无关 missing-component warning。
+- `<FieldGroup>` — 顶层组合的容器（mono 大写组标题 + 计数）。
 - `useFieldAnchor` — 深链接 composable（`active` + `revision` 事件驱动的重新揭示）。
 - `<UTabs>` / `<UCollapsible>` — Nuxt UI 原语（oneOf tabs / anyOf 分区）。
 

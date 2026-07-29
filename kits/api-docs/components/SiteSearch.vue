@@ -108,7 +108,7 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
       if (active) {
         searchFailed.value = true
         if (import.meta.dev) {
-          console.warn('[ApiDocsSiteSearch] Search source failed:', error)
+          console.warn('[SiteSearch] Search source failed:', error)
         }
       }
     }
@@ -126,7 +126,7 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
 if (import.meta.dev) {
   watchEffect(() => {
     if (props.search && !props.searchGroupLabel) {
-      console.warn('[ApiDocsSiteSearch] `searchGroupLabel` is required when `search` is provided.')
+      console.warn('[SiteSearch] `searchGroupLabel` is required when `search` is provided.')
     }
   })
 }
@@ -246,7 +246,7 @@ const fuse = computed(() => ({
         @update:model-value="open = false"
       >
         <template #item-leading="{ item }">
-          <ApiDocsMethodBadge v-if="item.method" :method="item.method" />
+          <HttpMethodBadge v-if="item.method" :method="item.method" />
           <UIcon
             v-else-if="item.icon"
             :name="item.icon"

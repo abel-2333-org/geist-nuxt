@@ -73,7 +73,7 @@ foundation / kit 只认通用 props 或 ViewModel，不认识私有 spec。展�
 app/components/demo/api-docs/DocsShell.vue
 ```
 
-判断私有的依据不是消费者数量，而是「是否与页面 recipe 的 chrome 强耦合、缺乏稳定的跨项目分发契约」（判断标准见 ADR-004/ADR-010）。反例即 `CodeRail`：它曾是此类 gallery-private recipe，重构解耦页面 chrome（sticky/视口高由消费页容器拥有、断点 gate 泛化为 `enabled-from` prop、多实例经 `storage-key` 隔离）后已提升为 kit 组件 `<ApiDocsCodeRail>` 并随 registry `api-docs-code-rail` 切片分发（见 ADR-010）。
+判断私有的依据不是消费者数量，而是「是否与页面 recipe 的 chrome 强耦合、缺乏稳定的跨项目分发契约」（判断标准见 ADR-004/ADR-010）。反例即 `CodeRail`：它曾是此类 gallery-private recipe，重构解耦页面 chrome（sticky/视口高由消费页容器拥有、断点 gate 泛化为 `enabled-from` prop、多实例经 `storage-key` 隔离）后已提升为 kit 组件 `<CodeRail>` 并随 registry `api-docs-code-rail` 切片分发（见 ADR-010）。
 
 `DocsShell.vue`、`DocsDomainSwitcher.vue`、`DocsShellReference.vue`
 与 `DocsShellGuidePage.vue` 共同组成 `/kits/api-docs/docs-shell/[domain]`
@@ -82,7 +82,7 @@ prev/next）的 gallery-private 文档站 recipe。域 fixture 与
 `nav → site search` adapter 放在 `app/utils/demo/api-docs/docs-shell-data.ts`，不放进
 `app/components/`，避免 Nuxt 把普通 `.ts` 数据文件纳入组件扫描。整套 recipe：
 
-- 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/ApiDocsCodeRail` 如何装配成完整文档站；
+- 只用于展示 `SiteSearch + SidebarNav + reference content + SplitPane/CodeRail` 如何装配成完整文档站；
 - 不进入 foundation、kit 或 registry；
 - 使用与 sidebar-nav / reference demo 一致的中文支付世界观数据 + 中性假品牌，不携带任何消费项目品牌、路由或 contract（demo 单语中文直写，消费项目文案走 i18n 注入）；
 - 下游可以参考结构，但应在自己的页面层维护域切换、i18n、内容 adapter 与路由。demo 采用与消费项目同构的路径分段路由与拆页策略（`/docs-shell/[domain]` 域首页长滚动参考 + `/[domain]/[slug]` 指南子页，域切换器即 NuxtLink；支付域为最小示范，其余域为单页 stub），见 `references/kits/api-docs/project-setup.md`「多域路由」与「域内怎么拆页」；

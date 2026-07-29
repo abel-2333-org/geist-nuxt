@@ -28,7 +28,7 @@ export type {
 //
 // Composed from Nuxt UI primitives (UIcon, UCollapsible) + core atoms
 // (InlineCode and InlineMarkdown from foundation) + kit siblings
-// (ApiDocsEnumTable, ApiDocsLifecycleBadge, and ApiDocsSchemaComposition for
+// (EnumTable, LifecycleBadge, and SchemaComposition for
 // field-level composition). Deep linking is handled by the kit's useFieldAnchor
 // composable (auto-imported).
 //
@@ -39,20 +39,20 @@ export type {
 //           leaf detail  ── deprecation note → condition rule → description →
 //                           caveat callout(s) → aligned fact band (enum →
 //                           constraints → example → new/beta lifecycle metadata)
-//           children     ── UCollapsible of nested <ApiDocsFieldItem>
+//           children     ── UCollapsible of nested <FieldItem>
 //           composition  ── field-level oneOf/anyOf/allOf delegated to
-//                           <ApiDocsSchemaComposition> after the children
+//                           <SchemaComposition> after the children
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
 //           carry dynamic aria-labels; copied state announced politely.
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
-// ApiDocsFieldItem); declared explicitly so the template's recursion resolves.
-defineOptions({ name: 'ApiDocsFieldItem' })
+// FieldItem); declared explicitly so the template's recursion resolves.
+defineOptions({ name: 'FieldItem' })
 
-// Field-level composition is delegated to ApiDocsSchemaComposition — a
+// Field-level composition is delegated to SchemaComposition — a
 // HIGHER-level slice that itself depends on FieldItem. A static
-// <ApiDocsSchemaComposition> tag here would either force a dependency cycle
+// <SchemaComposition> tag here would either force a dependency cycle
 // (if declared) or leave FieldItem un-installable on its own (if not). The
 // optional lookup below preserves that one-way dependency.
 const props = withDefaults(
@@ -68,7 +68,7 @@ const props = withDefaults(
 // composition-bearing field still gets Nuxt's normal component auto-import.
 const schemaComposition = computed(() => {
   if (!props.composition) return null
-  const resolved = resolveComponent('ApiDocsSchemaComposition')
+  const resolved = resolveComponent('SchemaComposition')
   return typeof resolved === 'string' ? null : resolved
 })
 
@@ -261,7 +261,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
               class="shrink-0 text-xs font-medium uppercase tracking-wide"
               :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
             >{{ requiredLabel }}</span>
-            <ApiDocsLifecycleBadge
+            <LifecycleBadge
               v-if="lifecycle"
               data-field-lifecycle
               :status="lifecycle.status"
@@ -393,7 +393,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
              default is passed down so its row is marked in the table. -->
         <!-- Structural chrome flows through: `undefined` lets the table's own
              English defaults apply, so those strings live in one place. -->
-        <ApiDocsEnumTable
+        <EnumTable
           v-if="hasEnum"
           :values="enumValues"
           :variants="enumVariants"
@@ -512,7 +512,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
       <template #content>
         <div class="mt-1 border-s border-default ps-3 @sm/field:ps-4">
-          <ApiDocsFieldItem
+          <FieldItem
             v-for="child in children"
             :key="child.path ?? child.name"
             v-bind="child"
@@ -523,7 +523,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     </UCollapsible>
 
     <!-- Field-level composition — this field's value is itself a
-         oneOf/anyOf/allOf. Delegated to ApiDocsSchemaComposition (not flattened
+         oneOf/anyOf/allOf. Delegated to SchemaComposition (not flattened
          into rows) so the alternative shape keeps its own semantics, rendered
          after any concrete subfields. Rendered via a dynamically resolved
          component (see script) so FieldItem installs standalone without a

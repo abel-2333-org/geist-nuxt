@@ -11,7 +11,7 @@ function tabs(wrapper: VueWrapper) {
   return wrapper.findComponent({ name: 'UTabs' })
 }
 
-describe('ApiDocsSchemaComposition', () => {
+describe('SchemaComposition', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
   })
@@ -457,7 +457,7 @@ describe('ApiDocsSchemaComposition', () => {
     expect(new Set(tokenIds).size).toBe(tokenIds.length)
   })
 
-  it('FieldItem delegates a field-level composition to ApiDocsSchemaComposition after its children', async () => {
+  it('FieldItem delegates a field-level composition to SchemaComposition after its children', async () => {
     const field: FieldNode = {
       path: 'destination',
       name: 'destination',

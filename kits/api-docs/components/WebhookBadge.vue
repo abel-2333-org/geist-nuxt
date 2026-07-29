@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { BadgeProps } from '@nuxt/ui'
 
-// PRESET WRAPPER (domain: API docs): the webhook counterpart of MethodBadge.
+// PRESET WRAPPER (domain: API docs): the webhook counterpart of HttpMethodBadge.
 // Marks an operation as an OUT-OF-BAND EVENT (the platform calls you) instead
 // of an HTTP verb (you call the platform). Same anatomy slot, same size, same
-// mono/tabular typography as MethodBadge so the two align 1:1 wherever
+// mono/tabular typography as HttpMethodBadge so the two align 1:1 wherever
 // operations are listed side by side.
 //
 // Vocabulary is a SINGLE value ("EVENT"), so the preset degenerates to an
@@ -16,13 +16,13 @@ import type { BadgeProps } from '@nuxt/ui'
 //  - `secondary` (purple family) is NOT used: PATCH already owns it in
 //    method-preset, and purple is calibrated for interaction (FieldItem).
 // The label is domain vocabulary, not copy — it is intentionally NOT a prop
-// (mirrors how method names pass through MethodBadge verbatim).
+// (mirrors how method names pass through HttpMethodBadge verbatim).
 
 const props = withDefaults(
   defineProps<{
     size?: BadgeProps['size']
   }>(),
-  // Default matches MethodBadge / LifecycleBadge so the atoms align when they
+  // Default matches HttpMethodBadge / LifecycleBadge so the atoms align when they
   // co-occur (e.g. in an operation header).
   { size: 'sm' },
 )

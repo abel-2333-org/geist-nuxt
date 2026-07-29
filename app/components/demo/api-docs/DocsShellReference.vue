@@ -18,10 +18,10 @@ import {
 // 正文列自己管理内边距（不依赖外层容器）。
 //
 // 支付域是完整样板——端点 reference 与 /kits/api-docs/endpoint-reference 同构：
-// 头部走 kit 的 <ApiDocsOperationHeader>（identity）+ <ApiDocsOperationTarget>
+// 头部走 kit 的 <OperationHeader>（identity）+ <OperationTarget>
 // （环境 host + 地址 + 复制）；横向分栏用通用基座的 <SplitPane>（lg+ 可拖拽、
 // 独立 storage key 持久化，<lg 自动堆叠），右侧代码栏用 kit 的
-// <ApiDocsCodeRail>（Request 上 / Response 下，纵向高度可拖 + 内容优先重分配）。
+// <CodeRail>（Request 上 / Response 下，纵向高度可拖 + 内容优先重分配）。
 // 端点段之后是 Webhooks 段：同一 OperationHeader 以 kind="webhook" 渲染
 // （EVENT 徽章 + mono 事件名），左 payload 字段树 / 右 payload 示例。
 // 其余域走 stub 分支：overview + 指南段 + 端点 stub，保证该域侧栏与 ⌘K
@@ -98,7 +98,7 @@ onMounted(() => anchor.initFromHash())
             <!-- identity/header 走 kit 组合件：identity 行（badge + path +
                  #actions 页面级操作位）→ 标题（+ lifecycle）→ 描述 →
                  尾部由消费方摆 OperationTarget（正交，不内嵌）。 -->
-            <ApiDocsOperationHeader
+            <OperationHeader
               kind="endpoint"
               :method="paymentsEndpoint.method"
               :path="paymentsEndpoint.path"
@@ -111,7 +111,7 @@ onMounted(() => anchor.initFromHash())
               </template>
               <!-- 选中环境由本组件持有（v-model）：地址栏、复制值与右栏
                    请求示例都从同一个 host 派生，切环境三处同步。 -->
-              <ApiDocsOperationTarget
+              <OperationTarget
                 v-model="selectedHostId"
                 :hosts="paymentsHosts"
                 :path="paymentsEndpoint.path"
@@ -126,32 +126,32 @@ onMounted(() => anchor.initFromHash())
                   copiedPath: '接口路径已复制',
                 }"
               />
-            </ApiDocsOperationHeader>
+            </OperationHeader>
 
             <!-- 端点标题是 h2，字段分组归入其下为 h3（FieldGroup 默认 h2
                  是给独立成岛的场景用的） -->
             <div class="mt-8 space-y-10">
-              <ApiDocsFieldGroup label="Request Body" :count="paymentsBodyFields.length" :heading-level="3">
-                <ApiDocsFieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" />
-              </ApiDocsFieldGroup>
+              <FieldGroup label="Request Body" :count="paymentsBodyFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" />
+              </FieldGroup>
 
-              <ApiDocsFieldGroup label="Response Body" :count="paymentsResponseFields.length" :heading-level="3">
-                <ApiDocsFieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" />
-              </ApiDocsFieldGroup>
+              <FieldGroup label="Response Body" :count="paymentsResponseFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" />
+              </FieldGroup>
             </div>
           </div>
         </template>
 
         <template #end>
           <div class="xl:sticky xl:top-[var(--docs-shell-sticky-offset)] xl:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
-            <ApiDocsCodeRail enabled-from="xl" storage-key="docs-shell-rail-split" class="h-full max-xl:space-y-4">
+            <CodeRail enabled-from="xl" storage-key="docs-shell-rail-split" class="h-full max-xl:space-y-4">
               <template #top="{ maxHeight }">
-                <ApiDocsRequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
+                <RequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
               </template>
               <template #bottom="{ maxHeight }">
-                <ApiDocsResponseExample :scenarios="paymentsResponseScenarios" :max-height="maxHeight" />
+                <ResponseExample :scenarios="paymentsResponseScenarios" :max-height="maxHeight" />
               </template>
-            </ApiDocsCodeRail>
+            </CodeRail>
           </div>
         </template>
       </SplitPane>
@@ -171,15 +171,15 @@ onMounted(() => anchor.initFromHash())
         class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
       >
         <div class="flex flex-wrap items-center gap-2.5">
-          <ApiDocsMethodBadge :method="stub.method" />
+          <HttpMethodBadge :method="stub.method" />
           <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
           <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
-          <ApiDocsLifecycleBadge v-if="stub.lifecycle" :status="stub.lifecycle" />
+          <LifecycleBadge v-if="stub.lifecycle" :status="stub.lifecycle" />
         </div>
         <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
-        <ApiDocsLifecycleNotice
+        <LifecycleNotice
           v-if="stub.lifecycle === 'deprecated'"
           status="deprecated"
           title="已弃用"
@@ -222,7 +222,7 @@ onMounted(() => anchor.initFromHash())
       >
         <template #start>
           <div class="lg:pe-8">
-            <ApiDocsOperationHeader
+            <OperationHeader
               kind="webhook"
               :event="paymentsWebhook.event"
               :summary="paymentsWebhook.summary"
@@ -231,19 +231,19 @@ onMounted(() => anchor.initFromHash())
               <template #description>
                 {{ paymentsWebhook.description }}
               </template>
-            </ApiDocsOperationHeader>
+            </OperationHeader>
 
             <div class="mt-8 space-y-10">
-              <ApiDocsFieldGroup label="Event Payload" :count="paymentsWebhookPayloadFields.length" :heading-level="3">
-                <ApiDocsFieldItem v-for="f in paymentsWebhookPayloadFields" :key="f.path" v-bind="f" />
-              </ApiDocsFieldGroup>
+              <FieldGroup label="Event Payload" :count="paymentsWebhookPayloadFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsWebhookPayloadFields" :key="f.path" v-bind="f" />
+              </FieldGroup>
             </div>
           </div>
         </template>
 
         <template #end>
           <div class="xl:sticky xl:top-[var(--docs-shell-sticky-offset)]">
-            <ApiDocsRequestExample
+            <RequestExample
               title="Payload"
               :scenarios="[{
                 id: 'payload',
@@ -266,7 +266,7 @@ onMounted(() => anchor.initFromHash())
         class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
       >
         <div class="flex flex-wrap items-center gap-2.5">
-          <ApiDocsEventBadge />
+          <WebhookBadge />
           <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.event }}</code>
         </div>
         <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
@@ -306,7 +306,7 @@ onMounted(() => anchor.initFromHash())
         class="scroll-mt-[var(--docs-shell-sticky-offset)] space-y-2"
       >
         <div class="flex flex-wrap items-center gap-2.5">
-          <ApiDocsMethodBadge :method="stub.method" />
+          <HttpMethodBadge :method="stub.method" />
           <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
         </div>
         <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>

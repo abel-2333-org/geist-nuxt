@@ -31,6 +31,8 @@
 6. foundation item 不依赖 kit。
 7. demo、fixture、adapter、页面私有 recipe（如 `DocsShell` 系列）不得进入 registry。
 8. `packageDependencies` 的包名与 semver range 必须有效；分发源码的 bare import 必须能由根 packages 或所属 item 的依赖闭包解释。同一解析闭包若对同一包声明不同 range，验证与 copy 都 fail closed，不擅自选择版本；互不相交的闭包可声明不同 range。
+9. 每个 `registry:component` / `registry:block` 恰好暴露一个扁平的 `app/components/<Name>.vue`；`title` 必须等于 `<Name>`，公共名称不得使用 `ApiDocs` / `Composition` 这类来源前缀。
+10. 随公共组件复制但不应被消费者直接使用的 Vue helper 放到 `app/internal/`，由公共组件显式相对导入。
 
 ## 验证 registry
 
@@ -39,7 +41,7 @@ pnpm registry:validate
 pnpm test:registry
 ```
 
-- `registry:validate` 校验 schema、唯一性、source 存在性、target 安全、依赖闭包和方向。
+- `registry:validate` 校验 schema、唯一性、source 存在性、target 安全、公共组件命名、依赖闭包和方向。
 - `test:registry` 对 resolve / copy / update / check 做行为测试，防止只通过静态 JSON 校验。
 
 新增、移动或删除任何 foundation / kit 文件时，必须同步 registry 并运行两条命令。

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-// Field form of the Annotation family (kits/api-docs → ApiDocsFieldAnnotation):
+// Field form of the Annotation family (kits/api-docs → FieldAnnotation):
 // previews a FieldNode summary (name / type / requiredness / description) and
 // deep-links into the reference field row.
 //
 // Two ways to bind a field:
 //  1. `field` prop — the page passes the FieldNode directly (it already owns
-//     the endpoint's field tree for <ApiDocsFieldItem>).
+//     the endpoint's field tree for <FieldItem>).
 //  2. `field-ref` prop — resolved against the page-provided field source
 //     (useFieldSource), which is what narrative markdown uses:
 //       :field[amount]{field-ref="create-payment.amount"}

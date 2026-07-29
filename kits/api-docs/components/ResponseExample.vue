@@ -222,7 +222,7 @@ if (import.meta.dev || import.meta.test) {
   const warnOnce = (message: string) => {
     if (warned.has(message)) return
     warned.add(message)
-    console.warn(`[ApiDocsResponseExample] ${message}`)
+    console.warn(`[ResponseExample] ${message}`)
   }
   watchEffect(() => {
     const seen = new Set<string>()
@@ -469,7 +469,7 @@ const panelAnnouncement = computed(() => {
     <p data-response-announcement class="sr-only" role="status" aria-atomic="true">
       {{ panelAnnouncement }}
     </p>
-    <ApiDocsCodeBlock
+    <CodeBlock
       :variants="codeVariants"
       :title="title ?? t.title"
       icon="i-lucide-file-json-2"
@@ -669,6 +669,6 @@ const panelAnnouncement = computed(() => {
           </div>
         </div>
       </template>
-    </ApiDocsCodeBlock>
+    </CodeBlock>
   </div>
 </template>

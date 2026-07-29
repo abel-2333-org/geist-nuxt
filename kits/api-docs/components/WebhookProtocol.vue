@@ -12,7 +12,7 @@ import type { ApiCodeLabels } from './CodeBlock.vue'
 // Anatomy:
 //   root（无外框列，space-y 分段；外框/留白归页面布局）
 //   └─ section ×0..3（未提供的 section 整段省略——绝不渲染空卡片或 "none"）
-//      ├─ header       ── 复用 <ApiDocsFieldGroup>（mono 大写 label + headingLevel）
+//      ├─ header       ── 复用 <FieldGroup>（mono 大写 label + headingLevel）
 //      ├─ description  ── 可选导语
 //      ├─ facts <dl>   ── term/value 行（value 可为 InlineCode token），可选 note
 //      ├─ ACK 专属     ── 可选 CodeBlock example（仅 literal 语义且确有文本 body）
@@ -118,7 +118,7 @@ function toggleSchedule() {
 
 <template>
   <div class="space-y-8">
-    <ApiDocsFieldGroup
+    <FieldGroup
       v-for="section in sections"
       :key="section.key"
       :label="section.data.label"
@@ -206,7 +206,7 @@ function toggleSchedule() {
         </dl>
 
         <!-- ACK 专属：literal body 示例（复用 CodeBlock，不强行建模为 ResponseExample） -->
-        <ApiDocsCodeBlock
+        <CodeBlock
           v-if="section.key === 'acknowledgement' && acknowledgement?.example"
           :title="acknowledgement.example.title"
           :labels="acknowledgement.example.labels"
@@ -217,6 +217,6 @@ function toggleSchedule() {
           max-height="16rem"
         />
       </div>
-    </ApiDocsFieldGroup>
+    </FieldGroup>
   </div>
 </template>

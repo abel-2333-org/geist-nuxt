@@ -1,4 +1,4 @@
-// <ApiDocsRequestExample> — controlled / uncontrolled scenario selection.
+// <RequestExample> — controlled / uncontrolled scenario selection.
 // Covers issue #21 acceptance: optional v-model:scenario, standard events,
 // predictable parent updates, silent fallback (no write-back, no emit),
 // and the ≤1-scenario selector-hidden rule.
@@ -19,7 +19,7 @@ function scenarioSelect(wrapper: VueWrapper<InstanceType<typeof RequestExample>>
     .find(c => c.props('icon') === 'i-lucide-layers')
 }
 
-describe('ApiDocsRequestExample scenario selection', () => {
+describe('RequestExample scenario selection', () => {
   it('uncontrolled: renders the first scenario by default', async () => {
     const wrapper = await mountSuspended(RequestExample, { props: { scenarios } })
     expect(wrapper.text()).toContain('CODE-BASIC')

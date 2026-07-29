@@ -4,7 +4,7 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 // API 文档场景的「整页级 webhook 组合」demo（不是可分发切片，也不是通用组件）——
 // 与端点参考页 /kits/api-docs/endpoint-reference 镜像对称：端点问「你怎么调平台」，
 // webhook 问「平台怎么回调你」。此前 webhook 的证据是散的：
-//   - /kits/api-docs/webhook-protocol 只单独陈列 <ApiDocsWebhookProtocol>；
+//   - /kits/api-docs/webhook-protocol 只单独陈列 <WebhookProtocol>；
 //   - 文档站外壳的 webhook 段只有 identity + payload 字段树 + payload 示例，
 //     整个协议三段（验证/确认/投递）缺席。
 // 没有任何一处把「identity + requirements/guide 扩展区 + 协议 + payload +
@@ -17,19 +17,19 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 //   identity 头（EVENT 徽章 + 事件名 + h1 摘要 + 描述）
 //   → REQUIREMENTS / GUIDE：可选前置事实与指南扩展区；
 //   → VERIFICATION：收到请求先验签（安全关口，须在信任 payload 前置顶）；
-//   → PAYLOAD 字段树（<ApiDocsFieldGroup> + <ApiDocsFieldItem>）：验签后解析的
+//   → PAYLOAD 字段树（<FieldGroup> + <FieldItem>）：验签后解析的
 //     数据，整页主角，紧跟验证；
 //   → ACKNOWLEDGEMENT → DELIVERY：处理后怎么回应、失败怎么重试；
 //   → RELATED RESOURCES：可选 relations 扩展区（背景参考殿后）。
-// <ApiDocsWebhookProtocol> 三段各自独立省略，故渲染两次把 payload 夹在中间。
+// <WebhookProtocol> 三段各自独立省略，故渲染两次把 payload 夹在中间。
 // 右栏「线缆样本」= webhook 的两个方向，与端点 baseline 的 Request/Response
-// 镜像对称，用 <ApiDocsCodeRail> 纵向双栏：
+// 镜像对称，用 <CodeRail> 纵向双栏：
 //   Payload（平台 → 你，上）/ Acknowledgement（你 → 平台，下）。
 // 关键 IA 裁决：ACK 的字面响应体是「线缆样本」而非文档散文，故与 payload 一同
 // 进右栏，不内联在左侧协议段里——左栏只留 ACK 的 facts 并指向右栏示例。
 //
 // identity 头此处手写（与 endpoint-reference.vue 端点 baseline 一致）：standalone 单
-// operation 页里事件摘要即页面唯一 <h1>，而 <ApiDocsOperationHeader> 的
+// operation 页里事件摘要即页面唯一 <h1>，而 <OperationHeader> 的
 // headingLevel 上限是 2（供「域 h1 下多 operation」的外壳场景，见
 // DocsShellReference）。两条路径都成立，取决于页面是单 operation 还是多
 // operation——这是刻意的分层，不是缺口。
@@ -189,7 +189,7 @@ const payloadFields = [
 // 双栏镜像对称：
 //   - Payload（平台 → 你，inbound）：本次投递的 JSON 载荷；
 //   - Acknowledgement（你 → 平台，outbound）：你回给平台的固定确认体。
-// 二者用 <ApiDocsCodeRail> 纵向双栏承载（Payload 在上 / ACK 在下），与
+// 二者用 <CodeRail> 纵向双栏承载（Payload 在上 / ACK 在下），与
 // endpoint-reference.vue 的 Request/Response rail 用同一装配。各自单一 scenario，
 // 故用一个 variant 承载。
 const payloadExample = [
@@ -215,7 +215,7 @@ const payloadExample = [
   },
 ]
 
-// ACK 固定响应体（literal）——作为右栏底部卡，直接喂给 <ApiDocsCodeBlock>。
+// ACK 固定响应体（literal）——作为右栏底部卡，直接喂给 <CodeBlock>。
 const ackExample = {
   code: '{\n  "received": true\n}',
   language: 'json',
@@ -289,7 +289,7 @@ onMounted(() => anchor.initFromHash())
                对称）。EVENT 徽章取代 METHOD 徽章——方向相反：平台回调你。 -->
           <header class="space-y-4 border-b border-default pb-8">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsEventBadge />
+              <WebhookBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ webhook.event }}</code>
             </div>
             <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
@@ -303,7 +303,7 @@ onMounted(() => anchor.initFromHash())
           <div class="mt-8 space-y-12">
             <!-- 可选 requirements / guide 扩展区：页面只定义位置与语义层级，
                  consumer 自己提供已解析、已本地化的内容。 -->
-            <ApiDocsFieldGroup label="Requirements">
+            <FieldGroup label="Requirements">
               <div class="space-y-4 pt-2">
                 <dl class="divide-y divide-default">
                   <div
@@ -323,33 +323,33 @@ onMounted(() => anchor.initFromHash())
                   <UIcon name="i-lucide-arrow-right" class="size-3.5" aria-hidden="true" />
                 </ULink>
               </div>
-            </ApiDocsFieldGroup>
+            </FieldGroup>
 
             <!-- 按 webhook 处理生命周期穿插排布（= handler 代码顺序），而非把协议
-                 三段捆成一整块压在 payload 之上或之下。<ApiDocsWebhookProtocol>
+                 三段捆成一整块压在 payload 之上或之下。<WebhookProtocol>
                  三段各自独立省略，故此处渲染两次、把 payload 夹在中间：
 
                  1) VERIFICATION —— 收到请求「第一件事」：验签。安全关口，须在信任
                     payload 之前置顶；内容紧凑，不会挤压 payload。 -->
-            <ApiDocsWebhookProtocol :verification="verification" />
+            <WebhookProtocol :verification="verification" />
 
             <!-- 2) PAYLOAD —— 验签通过后解析的数据，整页主角（与端点 Request/
                  Response Body 同构）。 -->
-            <ApiDocsFieldGroup label="Event Payload" :count="payloadFields.length">
-              <ApiDocsFieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
-            </ApiDocsFieldGroup>
+            <FieldGroup label="Event Payload" :count="payloadFields.length">
+              <FieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
+            </FieldGroup>
 
             <!-- 3) ACKNOWLEDGEMENT → 4) DELIVERY —— 处理完「怎么回应」与「失败怎么
                  重试/时序」。后者偏背景参考，殿后。ACK 的字面响应体示例已移至右栏
                  （见 #end），此处只保留 facts。 -->
-            <ApiDocsWebhookProtocol
+            <WebhookProtocol
               :acknowledgement="acknowledgement"
               :delivery="delivery"
             />
 
             <!-- 可选 relations 扩展区：仅承载通用链接/描述，不把 callback、
                  response-link 或消费项目路由 shape 固化进 kit。 -->
-            <ApiDocsFieldGroup label="Related Resources">
+            <FieldGroup label="Related Resources">
               <ul class="divide-y divide-default">
                 <li v-for="relation in relations" :key="relation.to">
                   <ULink
@@ -368,7 +368,7 @@ onMounted(() => anchor.initFromHash())
                   </ULink>
                 </li>
               </ul>
-            </ApiDocsFieldGroup>
+            </FieldGroup>
           </div>
         </div>
       </template>
@@ -377,23 +377,23 @@ onMounted(() => anchor.initFromHash())
            内容优先重分配；<lg 回退为堆叠各卡自滚动。与 endpoint-reference.vue 同装配。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
-          <ApiDocsCodeRail
+          <CodeRail
             storage-key="api-docs-webhook-rail-split"
             resize-label="Resize payload and acknowledgement panels"
             class="h-full max-lg:space-y-4"
           >
             <template #top="{ maxHeight }">
-              <ApiDocsRequestExample title="Payload" :scenarios="payloadExample" :max-height="maxHeight" />
+              <RequestExample title="Payload" :scenarios="payloadExample" :max-height="maxHeight" />
             </template>
             <template #bottom="{ maxHeight }">
-              <ApiDocsCodeBlock
+              <CodeBlock
                 :title="ackExample.title"
                 :labels="ackExample.labels"
                 :variants="[{ language: ackExample.language, code: ackExample.code }]"
                 :max-height="maxHeight"
               />
             </template>
-          </ApiDocsCodeRail>
+          </CodeRail>
         </div>
       </template>
     </SplitPane>
@@ -421,12 +421,12 @@ onMounted(() => anchor.initFromHash())
           </figcaption>
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsEventBadge />
+              <WebhookBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">invoice.finalized</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Invoice finalized</h3>
           </header>
-          <ApiDocsFieldGroup label="Requirements" :heading-level="4">
+          <FieldGroup label="Requirements" :heading-level="4">
             <dl class="divide-y divide-default pt-2">
               <div
                 v-for="item in partialRequirements"
@@ -437,15 +437,15 @@ onMounted(() => anchor.initFromHash())
                 <dd class="text-sm text-highlighted">{{ item.value }}</dd>
               </div>
             </dl>
-          </ApiDocsFieldGroup>
-          <ApiDocsWebhookProtocol
+          </FieldGroup>
+          <WebhookProtocol
             :verification="partialVerification"
             :delivery="partialDelivery"
             :heading-level="4"
           />
-          <ApiDocsFieldGroup label="Event Payload" :count="partialPayloadFields.length" :heading-level="4">
-            <ApiDocsFieldItem v-for="f in partialPayloadFields" :key="f.path" v-bind="f" />
-          </ApiDocsFieldGroup>
+          <FieldGroup label="Event Payload" :count="partialPayloadFields.length" :heading-level="4">
+            <FieldItem v-for="f in partialPayloadFields" :key="f.path" v-bind="f" />
+          </FieldGroup>
         </figure>
 
         <!-- minimal：无协议段，仅 identity + 极简 payload -->
@@ -455,14 +455,14 @@ onMounted(() => anchor.initFromHash())
           </figcaption>
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
-              <ApiDocsEventBadge />
+              <WebhookBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">ping.sent</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Ping sent</h3>
           </header>
-          <ApiDocsFieldGroup label="Event Payload" :count="minimalPayloadFields.length" :heading-level="4">
-            <ApiDocsFieldItem v-for="f in minimalPayloadFields" :key="f.path" v-bind="f" />
-          </ApiDocsFieldGroup>
+          <FieldGroup label="Event Payload" :count="minimalPayloadFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalPayloadFields" :key="f.path" v-bind="f" />
+          </FieldGroup>
         </figure>
       </div>
 

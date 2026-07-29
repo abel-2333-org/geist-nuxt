@@ -76,7 +76,7 @@ foundation 组件，Annotation 家族的**站内文档预览形态**：内链触
 详见 <DocAnnotation to="/guide/rate-limit" :load="loadGuide">限流指南</DocAnnotation>。
 ```
 
-> Annotation 家族第三形态 **FieldAnnotation** 绑定 API 字段领域（`FieldNode` + `useFieldAnchor`），归属 `kits/api-docs`（`<ApiDocsFieldAnnotation>`），契约见 `references/kits/api-docs/`。壳与三形态的完整形态矩阵 spec 亦在该处。
+> Annotation 家族第三形态 **FieldAnnotation** 绑定 API 字段领域（`FieldNode` + `useFieldAnchor`），归属 `kits/api-docs`（`<FieldAnnotation>`），契约见 `references/kits/api-docs/`。壳与三形态的完整形态矩阵 spec 亦在该处。
 
 ## UTooltip
 

@@ -6,7 +6,7 @@ const dev = import.meta.dev
 
 <template>
   <div class="min-h-screen bg-default text-default antialiased flex flex-col">
-    <CompositionAppHeader :items="items">
+    <AppHeader :items="items">
       <template #brand>
         <NuxtLink to="/" class="flex items-center gap-2.5 text-highlighted" aria-label="geist-nuxt 首页">
           <img src="/favicon.svg" alt="" class="size-6" width="24" height="24" />
@@ -43,7 +43,7 @@ const dev = import.meta.dev
         />
         <ThemeToggle />
       </template>
-    </CompositionAppHeader>
+    </AppHeader>
 
     <main class="flex-1">
       <slot />

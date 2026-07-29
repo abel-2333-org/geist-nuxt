@@ -1,15 +1,15 @@
-# ApiDocsWebhookProtocol `<ApiDocsWebhookProtocol>`
+# WebhookProtocol `<WebhookProtocol>`
 
 连贯呈现一个 webhook 的 **Verification / Acknowledgement / Delivery** 三段协议事实，是 `OperationHeader`（`kind="webhook"`）的**正文伙伴**：header 管 identity（事件名、语义摘要），本件管「怎么验证、怎么确认、怎么投递重试」。三段共享同一套排版骨架（`FieldGroup` 段头 + `<dl>` 事实行），读者在一处顺序读完整套协议约定，而不是散落在三处各自发明的排版里。
 
-> 真源在 `kits/api-docs/components/WebhookProtocol.vue`（+ `kits/api-docs/utils/webhook-protocol.ts`）；根 registry target 保留 `app/components/api-docs/WebhookProtocol.vue`，所以模板名是 `<ApiDocsWebhookProtocol>`。数据无关、locale-ready：label、term、value、总结句由调用方以**已本地化文本**注入（展开/收起按钮提供可覆盖的英文默认文案，结构 chrome 惯例）；组件不解析 Contract、不实现签名或重试逻辑。
+> 真源在 `kits/api-docs/components/WebhookProtocol.vue`（+ `kits/api-docs/utils/webhook-protocol.ts`）；registry 扁平复制到 `app/components/WebhookProtocol.vue`，所以模板名稳定为 `<WebhookProtocol>`。数据无关、locale-ready：label、term、value、总结句由调用方以**已本地化文本**注入（展开/收起按钮提供可覆盖的英文默认文案，结构 chrome 惯例）；组件不解析 Contract、不实现签名或重试逻辑。
 
 ## Anatomy（结构）
 
 ```
 root（无外框列，space-y 分段；外框/留白归页面布局）
 └─ section ×0..3（未提供的 section 整段省略——绝不渲染空卡片或 "none"）
-   ├─ header       ── ApiDocsFieldGroup（mono 大写 label + headingLevel 接入大纲）
+   ├─ header       ── FieldGroup（mono 大写 label + headingLevel 接入大纲）
    ├─ description  ── 可选导语（text-muted）
    ├─ facts <dl>   ── term/value 行；value 可为 InlineCode token；可选 note
    ├─ ACK 专属     ── 可选 CodeBlock example（仅 literal 语义且确有文本 body）

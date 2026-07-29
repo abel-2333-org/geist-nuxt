@@ -3,9 +3,9 @@ definePageMeta({ nav: { label: '组件目录', icon: 'i-lucide-file-code', order
 
 // API 文档场景的组合演示（demo/story）——按 geist-nuxt「demo 归 gallery、kit 只 ship
 // 数据无关积木」的分层，这里用内联假 ViewModel 驱动 kit 的数据无关组件：代码块 /
-// 请求 / 响应（ApiDocsCodeBlock、ApiDocsResponseExample）+ method / lifecycle 徽章
-// + enum 值表（ApiDocsMethodBadge、ApiDocsLifecycleBadge、ApiDocsEnumTable）+ 字段树
-// （ApiDocsFieldGroup、ApiDocsFieldItem，含递归子字段与 useFieldAnchor 深链接）。
+// 请求 / 响应（CodeBlock、ResponseExample）+ method / lifecycle 徽章
+// + enum 值表（HttpMethodBadge、LifecycleBadge、EnumTable）+ 字段树
+// （FieldGroup、FieldItem，含递归子字段与 useFieldAnchor 深链接）。
 const requestSamples = [
   {
     label: 'cURL',
@@ -234,7 +234,7 @@ const enumVariants = [
 ]
 
 // Field tree — the recursive schema view. Inline sample data exercises every
-// facet ApiDocsFieldItem renders: the three requiredness states, default value,
+// facet FieldItem renders: the three requiredness states, default value,
 // examples, a condition, an enum, constraint notes, field
 // lifecycle (new/beta/deprecated), and nested object children (collapsible +
 // deep-linkable). `path` is the stable id used for the URL hash anchor.
@@ -519,7 +519,7 @@ const demoHosts = [
   { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
 ]
 
-// ApiDocsFieldAnnotation demo — inline field references inside narrative prose.
+// FieldAnnotation demo — inline field references inside narrative prose.
 // The field source maps ids → { field, page? }; markdown-style narrative only
 // ever cites ids. Same-page entries omit `page` and deep-link via useFieldAnchor
 // (scroll + expand + flash on the field tree below); the nested repoId entry
@@ -559,24 +559,24 @@ onMounted(() => anchor.initFromHash())
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">API 文档场景</h2>
         <p class="text-muted max-w-2xl">
           API 文档场景的领域组件：代码块
-          <code class="font-mono text-[0.8125rem]">ApiDocsCodeBlock</code>、
+          <code class="font-mono text-[0.8125rem]">CodeBlock</code>、
           请求 / 响应示例
-          <code class="font-mono text-[0.8125rem]">ApiDocsRequestExample</code> /
-          <code class="font-mono text-[0.8125rem]">ApiDocsResponseExample</code>，
+          <code class="font-mono text-[0.8125rem]">RequestExample</code> /
+          <code class="font-mono text-[0.8125rem]">ResponseExample</code>，
           以及 method / event / lifecycle 徽章
-          <code class="font-mono text-[0.8125rem]">ApiDocsMethodBadge</code> /
-          <code class="font-mono text-[0.8125rem]">ApiDocsEventBadge</code> /
-          <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleBadge</code>
+          <code class="font-mono text-[0.8125rem]">HttpMethodBadge</code> /
+          <code class="font-mono text-[0.8125rem]">WebhookBadge</code> /
+          <code class="font-mono text-[0.8125rem]">LifecycleBadge</code>
           与 enum 值表
-          <code class="font-mono text-[0.8125rem]">ApiDocsEnumTable</code>，
+          <code class="font-mono text-[0.8125rem]">EnumTable</code>，
           以及字段树
-          <code class="font-mono text-[0.8125rem]">ApiDocsFieldGroup</code> /
-          <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code>（递归子字段 + 深链接）。
+          <code class="font-mono text-[0.8125rem]">FieldGroup</code> /
+          <code class="font-mono text-[0.8125rem]">FieldItem</code>（递归子字段 + 深链接）。
           Operation 身份层由
-          <code class="font-mono text-[0.8125rem]">ApiDocsOperationHeader</code>（端点 / webhook 同构头部）、
-          <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
-          <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>（生命周期横幅）承担；
-          双例码轨道 <code class="font-mono text-[0.8125rem]">ApiDocsCodeRail</code> 见「端点参考页」。
+          <code class="font-mono text-[0.8125rem]">OperationHeader</code>（端点 / webhook 同构头部）、
+          <code class="font-mono text-[0.8125rem]">OperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
+          <code class="font-mono text-[0.8125rem]">LifecycleNotice</code>（生命周期横幅）承担；
+          双例码轨道 <code class="font-mono text-[0.8125rem]">CodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
           <code class="font-mono text-[0.8125rem]">SemanticBadge</code> 之上包一层域词汇。
         </p>
@@ -585,7 +585,7 @@ onMounted(() => anchor.initFromHash())
       <div class="space-y-8">
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">请求示例</h3>
-          <ApiDocsCodeBlock :variants="requestSamples" />
+          <CodeBlock :variants="requestSamples" />
         </div>
 
         <div>
@@ -597,7 +597,7 @@ onMounted(() => anchor.initFromHash())
             <code class="font-mono text-[0.8125rem]">file</code>（二进制 metadata + 可选下载）；
             状态支持数字码与 <code class="font-mono text-[0.8125rem]">'default'</code>，可带 status 级描述。
           </p>
-          <ApiDocsResponseExample :scenarios="responseScenarios" :labels="responseLabels" />
+          <ResponseExample :scenarios="responseScenarios" :labels="responseLabels" />
         </div>
 
         <div>
@@ -611,11 +611,11 @@ onMounted(() => anchor.initFromHash())
             不回写、不发事件，因此无更新循环，也不会抖动。
           </p>
           <div class="space-y-4">
-            <ApiDocsRequestExample
+            <RequestExample
               v-model:scenario="linkedScenario"
               :scenarios="linkedRequestScenarios"
             />
-            <ApiDocsResponseExample
+            <ResponseExample
               v-model:scenario="linkedScenario"
               :scenarios="linkedResponseScenarios"
             />
@@ -625,7 +625,7 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Method 徽章</h3>
           <div class="flex flex-wrap items-center gap-2">
-            <ApiDocsMethodBadge v-for="m in methods" :key="m" :method="m" />
+            <HttpMethodBadge v-for="m in methods" :key="m" :method="m" />
           </div>
         </div>
 
@@ -638,11 +638,11 @@ onMounted(() => anchor.initFromHash())
           </p>
           <div class="flex flex-wrap items-center gap-2">
             <span class="flex items-center gap-2.5">
-              <ApiDocsEventBadge />
+              <WebhookBadge />
               <code class="font-mono text-sm text-highlighted">payment.succeeded</code>
             </span>
             <span class="flex items-center gap-2.5">
-              <ApiDocsEventBadge />
+              <WebhookBadge />
               <code class="font-mono text-sm text-highlighted">refund.completed</code>
             </span>
           </div>
@@ -651,18 +651,18 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 徽章</h3>
           <div class="flex flex-wrap items-center gap-2">
-            <ApiDocsLifecycleBadge v-for="s in lifecycles" :key="s" :status="s" />
+            <LifecycleBadge v-for="s in lifecycles" :key="s" :status="s" />
           </div>
         </div>
 
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 横幅</h3>
           <p class="mb-3 max-w-2xl text-sm text-muted">
-            <code class="font-mono text-[0.8125rem]">ApiDocsLifecycleNotice</code>
+            <code class="font-mono text-[0.8125rem]">LifecycleNotice</code>
             与 Lifecycle 徽章共用同一份 preset 词表与色调：徽章标记一行，横幅在正文里解释
             「发生了什么 + 怎么办」。置于 Operation Header 之后、字段区之前。
           </p>
-          <ApiDocsLifecycleNotice
+          <LifecycleNotice
             status="deprecated"
             title="已弃用"
             description="该接口不再接受新接入，存量调用仍可用。请迁移到替代接口。"
@@ -676,14 +676,14 @@ onMounted(() => anchor.initFromHash())
             操作身份头：一个组件承担端点与 webhook 两形态
             （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
-            端点形态下接 <code class="font-mono text-[0.8125rem]">ApiDocsOperationTarget</code>：
+            端点形态下接 <code class="font-mono text-[0.8125rem]">OperationTarget</code>：
             环境与 host、path 与完整复制组成响应式两层；host / path 文本本身可复制，
             hover/focus 时用下划线与 tooltip 表明行为；
             webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
           </p>
           <div class="space-y-8">
             <!-- story 标题是 h3，头部标题传 4 归入其下，保持 outline 不跳级 -->
-            <ApiDocsOperationHeader
+            <OperationHeader
               kind="endpoint"
               method="POST"
               path="/v1/checkout/sessions"
@@ -695,7 +695,7 @@ onMounted(() => anchor.initFromHash())
               <template #description>
                 为一次支付或订阅创建托管结算会话，返回托管收银台 URL。
               </template>
-              <ApiDocsOperationTarget
+              <OperationTarget
                 :hosts="demoHosts"
                 path="/v1/checkout/sessions"
                 select-label="选择环境"
@@ -709,9 +709,9 @@ onMounted(() => anchor.initFromHash())
                   copiedPath: '接口路径已复制',
                 }"
               />
-            </ApiDocsOperationHeader>
+            </OperationHeader>
 
-            <ApiDocsOperationHeader
+            <OperationHeader
               kind="webhook"
               event="payment.succeeded"
               summary="支付成功"
@@ -721,7 +721,7 @@ onMounted(() => anchor.initFromHash())
               <template #description>
                 一笔支付被成功捕获后投递。先校验签名再处理，并以事件 id 幂等去重。
               </template>
-            </ApiDocsOperationHeader>
+            </OperationHeader>
           </div>
         </div>
 
@@ -734,15 +734,15 @@ onMounted(() => anchor.initFromHash())
             <code class="font-mono text-code">when</code> 说明该组何时适用。
           </p>
           <div class="grid gap-6 lg:grid-cols-2">
-            <ApiDocsEnumTable :values="enumValues" />
-            <ApiDocsEnumTable :variants="enumVariants" default-value="READY" />
+            <EnumTable :values="enumValues" />
+            <EnumTable :variants="enumVariants" default-value="READY" />
           </div>
         </div>
 
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Field 注释</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            <code class="font-mono text-[0.8125rem]">ApiDocsFieldAnnotation</code>
+            <code class="font-mono text-[0.8125rem]">FieldAnnotation</code>
             把字段引用嵌进叙事文本：hover / 点击预览字段摘要，动作跳转到字段行。
             同页字段经 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code>
             滚动 + 展开 + 高亮（下方字段树即跳转目标，嵌套字段会自动展开祖先）；
@@ -751,13 +751,13 @@ onMounted(() => anchor.initFromHash())
           </p>
           <p class="mb-8 max-w-2xl leading-relaxed text-toned">
             创建部署时，
-            <ApiDocsFieldAnnotation field-ref="create-deployment.name" :labels="fieldLabels" />
+            <FieldAnnotation field-ref="create-deployment.name" :labels="fieldLabels" />
             为必填的唯一项目名；若从 Git 部署，
-            <ApiDocsFieldAnnotation field-ref="create-deployment.gitSource.repoId" :labels="fieldLabels" />
+            <FieldAnnotation field-ref="create-deployment.gitSource.repoId" :labels="fieldLabels" />
             指向已连接的仓库（跳转会展开下方折叠的 gitSource 对象）。部署结果的
-            <ApiDocsFieldAnnotation field-ref="create-deployment.state" :labels="fieldLabels" />
+            <FieldAnnotation field-ref="create-deployment.state" :labels="fieldLabels" />
             定义在 Reference 页（跨页跳转）。历史字段如
-            <ApiDocsFieldAnnotation field-ref="create-deployment.removed">legacyRegion</ApiDocsFieldAnnotation>
+            <FieldAnnotation field-ref="create-deployment.removed">legacyRegion</FieldAnnotation>
             未登记，降级为纯文本。
           </p>
         </div>
@@ -773,14 +773,14 @@ onMounted(() => anchor.initFromHash())
             高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超过默认 8 项阈值的长
             enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。
           </p>
-          <ApiDocsFieldGroup label="Request Body" :count="fields.length">
-            <ApiDocsFieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
-          </ApiDocsFieldGroup>
+          <FieldGroup label="Request Body" :count="fields.length">
+            <FieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
+          </FieldGroup>
 
           <div class="mt-8">
-            <ApiDocsFieldGroup label="Settlement Payload" :count="denseFields.length">
-              <ApiDocsFieldItem v-for="f in denseFields" :key="f.path ?? f.name" v-bind="f" />
-            </ApiDocsFieldGroup>
+            <FieldGroup label="Settlement Payload" :count="denseFields.length">
+              <FieldItem v-for="f in denseFields" :key="f.path ?? f.name" v-bind="f" />
+            </FieldGroup>
           </div>
         </div>
       </div>
