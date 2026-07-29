@@ -76,7 +76,7 @@ Story 数据仍按层级分工：原子 story 用内联假 ViewModel；页面形
 
 **状态：已采纳。**
 
-`ApiDocsSidebarNav` 的数据模型含 method、scenario、endpoint 等领域概念，并依赖 API Docs 的 method badge / scenario tags，所以整体留在 `kits/api-docs/`。
+`SidebarNav` 的数据模型含 method、scenario、endpoint 等领域概念，并依赖 API Docs 的 method badge / scenario tags，所以整体留在 `kits/api-docs/`。
 
 场景标签使用连续的 measurement overflow：`ResizeObserver` 观察可用宽度，`aria-hidden` 隐藏层测量每个标签自然像素宽，再贪心决定平铺项与 `+N` / 计数 chip。测量层不对长标签施加可见层的截断上限，否则会误判“放得下”。SSR 先渲染确定性默认，mounted 后精修，避免 hydration mismatch。
 
@@ -115,7 +115,7 @@ CI 先验证根 registry、registry 行为、root typecheck/build 与临时 cons
 
 **状态：已采纳，2026-07-19。**
 
-`ApiDocsSiteSearch` 是 API 文档领域组件：它复用 method badge，并围绕指南、端点、
+`SiteSearch` 是 API 文档领域组件：它复用 method badge，并围绕指南、端点、
 HTTP method 与 scenario 组织结果，因此进入 `kits/api-docs/` 和根 registry。组件只认
 已解析的 display model；静态 groups 始终可用，可选 `search(query)` 接收消费项目的
 正文索引结果。它不导入 `@nuxt/content`、不认识 OpenAPI 或私有 spec。
@@ -139,7 +139,7 @@ gallery-private recipe：不进 foundation、kit 或 registry。gallery 使用�
 
 **状态：已采纳，2026-07-20。取代 ADR-004。**
 
-`kits/api-docs/components/CodeRail.vue`（`<ApiDocsCodeRail>`）承载 Request / Response 的纵向分配与内容优先重分配，进入 API Docs kit 并作为根 registry 的 `api-docs-code-rail` 切片分发。
+`kits/api-docs/components/CodeRail.vue`（`<CodeRail>`）承载 Request / Response 的纵向分配与内容优先重分配，进入 API Docs kit 并作为根 registry 的 `api-docs-code-rail` 切片分发。
 
 **ADR-004 的前提为何不再成立**：重构后 CodeRail 不再耦合页面 chrome——sticky 偏移与视口高长条由消费页的外层容器拥有（组件只 `h-full` 填充）；断点 gate 泛化为 `enabled-from` prop（依赖 foundation 的 breakpoints util）；分栏比持久化经 `storage-key` prop 隔离多实例（默认 `useId()` 实例级隔离，跨刷新持久化才要求显式 key）。它对外只暴露 `#top`/`#bottom` 插槽 + slot scope 下发 `maxHeight` 预算，这是一个可陈述、可跨项目复用的契约。
 

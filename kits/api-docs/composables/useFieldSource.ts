@@ -1,10 +1,10 @@
 import type { InjectionKey } from 'vue'
 
 /**
- * Field provide/inject for ApiDocsFieldAnnotation (kits/api-docs).
+ * Field provide/inject for FieldAnnotation (kits/api-docs).
  *
  * FieldNode is auto-imported from this kit's `utils/field` (referenced bare,
- * no import) — the same canonical model ApiDocsFieldItem renders.
+ * no import) — the same canonical model FieldItem renders.
  *
  * Mirror of useGlossary for API fields: the page (or layout) registers the
  * fields its narrative wants to reference — including fields documented on

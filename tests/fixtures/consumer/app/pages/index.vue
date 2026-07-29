@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CopyButtonContract from '../components/CopyButton.vue'
-import ApiDocsCodeBlockContract from '../components/api-docs/CodeBlock.vue'
-import ApiDocsOperationTargetContract from '../components/api-docs/OperationTarget.vue'
+import CodeBlockContract from '../components/CodeBlock.vue'
+import OperationTargetContract from '../components/OperationTarget.vue'
 
 const variants = [{
   language: 'json',
@@ -34,8 +34,8 @@ function copyApiContract() {
 }
 
 type CopyButtonProps = InstanceType<typeof CopyButtonContract>['$props']
-type CodeBlockProps = InstanceType<typeof ApiDocsCodeBlockContract>['$props']
-type OperationTargetProps = InstanceType<typeof ApiDocsOperationTargetContract>['$props']
+type CodeBlockProps = InstanceType<typeof CodeBlockContract>['$props']
+type OperationTargetProps = InstanceType<typeof OperationTargetContract>['$props']
 
 // Compile-only component API probes. They are not invoked.
 function componentApiContract() {
@@ -85,8 +85,8 @@ const legacyHosts = [{ id: 'prod', label: 'Production', baseUrl: 'https://api.ex
 
 <template>
   <UContainer class="py-8">
-    <ApiDocsSidebarNav :groups="groups" :resizable="false" />
-    <ApiDocsCodeBlock
+    <SidebarNav :groups="groups" :resizable="false" />
+    <CodeBlock
       class="mt-8"
       title="response.json"
       :variants="variants"

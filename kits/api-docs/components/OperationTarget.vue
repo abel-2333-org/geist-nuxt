@@ -29,7 +29,7 @@ export interface OperationHost {
 /**
  * Component-owned ("chrome") copy, so a doc site can localize the row in one
  * place — e.g. pass `$t()` values from @nuxtjs/i18n. Mirrors the ApiCodeLabels
- * convention used by <ApiDocsCodeBlock>.
+ * convention used by <CodeBlock>.
  */
 export interface ApiTargetLabels {
   /** Accessible name for the whole-address copy button, e.g. "复制完整地址". */

@@ -126,11 +126,12 @@ async function renderBuiltPage(consumerRoot) {
   }
 }
 
-async function protectedHashes(consumerRoot) {
+async function protectedHashes(consumerRoot, extra = []) {
   const protectedFiles = [
     'nuxt.config.ts',
     'app/app.config.ts',
     'app/app.vue',
+    ...extra,
   ]
   return Object.fromEntries(await Promise.all(protectedFiles.map(async (file) => {
     const content = await readFile(path.join(consumerRoot, file))
@@ -177,6 +178,16 @@ function templateComponentTags(source, filename) {
   return [...tags]
 }
 
+function localComponentImports(source, filename) {
+  const { descriptor, errors } = parseSfc(source, { filename })
+  if (errors.length > 0) throw new Error(`${filename}: failed to parse Vue SFC imports`)
+  const scripts = [descriptor.script?.content, descriptor.scriptSetup?.content].filter(Boolean).join('\n')
+  return new Set(
+    [...scripts.matchAll(/\bimport\s+([A-Z][\w$]*)\s+from\s+['"][^'"]+\.vue['"]/g)]
+      .map(match => match[1]),
+  )
+}
+
 function pascalizeComponent(tag) {
   return tag
     .split(/[-_]/)
@@ -192,9 +203,10 @@ async function assertResolvedComponents(consumerRoot, lock) {
   for (const record of Object.values(lock.files)) {
     if (!record.target.endsWith('.vue')) continue
     const source = await readFile(path.join(consumerRoot, record.target), 'utf8')
+    const localComponents = localComponentImports(source, record.target)
     for (const tag of templateComponentTags(source, record.target)) {
       const name = pascalizeComponent(tag)
-      if (!name || BUILT_IN_COMPONENTS.has(name) || declared.has(name)) continue
+      if (!name || BUILT_IN_COMPONENTS.has(name) || declared.has(name) || localComponents.has(name)) continue
       unresolved.push(`${record.target} -> <${tag}>`)
     }
   }
@@ -437,8 +449,8 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
     run('git', ['merge-base', '--is-ancestor', baseSha, headSha], repoRoot)
     sourceRoot = await materializeSource(baseSha)
     consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-consumer-upgrade-'))
+    run(process.execPath, [path.join(sourceRoot, 'scripts/validate-registry.mjs')], sourceRoot)
     const baseRegistry = await loadRegistry(path.join(sourceRoot, 'registry.json'))
-    await validateRegistry(baseRegistry, { repoRoot: sourceRoot, checkFiles: true })
 
     await cp(path.join(sourceRoot, 'tests/fixtures/consumer'), consumerRoot, { recursive: true })
     const headResolution = allResolution(headRegistry)
@@ -448,7 +460,8 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
       `${JSON.stringify(headManifest, null, 2)}\n`,
     )
     await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
-    const before = await protectedHashes(consumerRoot)
+    const snapshot = () => protectedHashes(consumerRoot, ['app/pages/index.vue'])
+    const before = await snapshot()
 
     run(process.execPath, [
       path.join(sourceRoot, 'scripts/copy-registry.mjs'),
@@ -459,7 +472,7 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
       baseSha,
       '--write',
     ], sourceRoot)
-    const installed = await protectedHashes(consumerRoot)
+    const installed = await snapshot()
     if (JSON.stringify(before) !== JSON.stringify(installed)) {
       throw new Error('base copy-in modified a protected consumer file')
     }
@@ -474,10 +487,18 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
       headSha,
       '--write',
     ], repoRoot)
-    const updated = await protectedHashes(consumerRoot)
+    const updated = await snapshot()
     if (JSON.stringify(before) !== JSON.stringify(updated)) {
       throw new Error('HEAD update modified a protected consumer file')
     }
+
+    // Registry updates never rewrite consumer-owned pages. The fixture applies
+    // the current public API explicitly, just as a real consumer must for an
+    // intentional breaking rename, before validating the upgraded runtime.
+    await cp(
+      path.join(fixtureRoot, 'app/pages/index.vue'),
+      path.join(consumerRoot, 'app/pages/index.vue'),
+    )
     const lock = await checkConsumer({ registry: headRegistry, repoRoot, consumerRoot })
     assertPackageRequirements(headManifest, lock, 'consumer upgrade')
 
@@ -495,6 +516,13 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
 
 const runtimeScenarios = [
   { label: 'all-items', all: true, build: true, cssMarker: 'scroll-mt-24' },
+  {
+    label: 'all-items-path-prefix-false',
+    all: true,
+    build: true,
+    pathPrefix: false,
+    cssMarker: 'scroll-mt-24',
+  },
   {
     label: 'foundation-split-pane',
     item: 'foundation-split-pane',
@@ -555,7 +583,7 @@ async function loadGuide() {
     build: true,
     cssMarker: 'scroll-mt-24',
     renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
-    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
 import type { FieldNote } from '~/utils/field'
 
@@ -569,7 +597,7 @@ const legacyNote: FieldNote = { tone: 'caution', text: 'Legacy note shape.' }
 void legacyNote
 </script>
 <template>
-  <ApiDocsFieldItem name="amount" type="string" :notes="notes" />
+  <FieldItem name="amount" type="string" :notes="notes" />
 </template>
 `,
   },
@@ -592,7 +620,7 @@ provideFieldSource({
 })
 </script>
 <template>
-  <ApiDocsFieldAnnotation field-ref="amount" />
+  <FieldAnnotation field-ref="amount" />
 </template>
 `,
   },
@@ -601,18 +629,18 @@ provideFieldSource({
     item: 'api-docs-sidebar-nav',
     build: true,
     cssMarker: '--api-docs-nav-w',
-    page: `<script setup lang="ts">\nconst sections = [{ label: 'Resources', kind: 'endpoints' as const, items: [{ label: 'Create resource', method: 'POST', scenarios: ['Batch'] }] }]\n</script>\n<template>\n  <ApiDocsSidebarNav :sections="sections" :resizable="false" />\n</template>\n`,
+    page: `<script setup lang="ts">\nconst sections = [{ label: 'Resources', kind: 'endpoints' as const, items: [{ label: 'Create resource', method: 'POST', scenarios: ['Batch'] }] }]\n</script>\n<template>\n  <SidebarNav :sections="sections" :resizable="false" />\n</template>\n`,
   },
   {
     label: 'api-docs-site-search',
     item: 'api-docs-site-search',
     build: true,
     cssMarker: 'max-sm\\:px-1\\.5',
-    page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <ApiDocsSiteSearch :groups="groups" />\n</template>\n`,
+    page: `<script setup lang="ts">\nconst groups = [{ id: 'guides', label: 'Guides', items: [{ label: 'Quickstart', to: '#quickstart', icon: 'i-lucide-rocket' }] }]\n</script>\n<template>\n  <SiteSearch :groups="groups" />\n</template>\n`,
   },
   {
     // Render SchemaComposition only through FieldItem's optional field-level
-    // delegation. The page never references ApiDocsSchemaComposition directly,
+    // delegation. The page never references SchemaComposition directly,
     // so this covers dynamic resolution after registry copy-in.
     label: 'api-docs-schema-composition',
     item: 'api-docs-schema-composition',
@@ -621,7 +649,7 @@ provideFieldSource({
     // template, so its presence proves the SchemaComposition source was copied.
     cssMarker: 'ps-9',
     renderedMarkers: ['One of', 'Card', 'brand'],
-    forbiddenRuntimeOutput: ['Failed to resolve component: ApiDocsSchemaComposition'],
+    forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
 const field = {
   path: 'payment_method',
@@ -659,7 +687,7 @@ const field = {
 }
 </script>
 <template>
-  <ApiDocsFieldItem v-bind="field" />
+  <FieldItem v-bind="field" />
 </template>
 `,
   },
@@ -708,7 +736,7 @@ const delivery = {
 }
 </script>
 <template>
-  <ApiDocsWebhookProtocol
+  <WebhookProtocol
     :verification="verification"
     :acknowledgement="acknowledgement"
     :delivery="delivery"
@@ -826,6 +854,16 @@ try {
           const manifest = packageJson(resolution.externalRequirements)
           await cp(fixtureRoot, consumerRoot, { recursive: true })
           if (scenario.page) await writeFile(path.join(consumerRoot, 'app/pages/index.vue'), scenario.page)
+          if (scenario.pathPrefix === false) {
+            const configPath = path.join(consumerRoot, 'nuxt.config.ts')
+            const config = await readFile(configPath, 'utf8')
+            const configured = config.replace(
+              "  modules: ['@nuxt/ui'],",
+              "  modules: ['@nuxt/ui'],\n  components: [{ path: '~/components', pathPrefix: false }],",
+            )
+            if (configured === config) throw new Error(`${scenario.label}: failed to configure pathPrefix: false`)
+            await writeFile(configPath, configured)
+          }
           const before = await protectedHashes(consumerRoot)
           await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
           await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')

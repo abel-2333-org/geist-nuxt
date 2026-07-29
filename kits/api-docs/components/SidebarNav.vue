@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SidebarScenarioTags from '../internal/SidebarScenarioTags.vue'
+
 // Domain component (API docs): a documentation sidebar where ONE menu holds
 // several sections whose destination pages differ in nature. Two axes keep the
 // two worlds visually distinct so guides never blur into endpoint lists:
@@ -29,7 +31,7 @@
 //
 // In-tree search vs. site-wide search are kept orthogonal. This component only
 // does the former (filter the nav tree in place). Site-wide ⌘K search belongs
-// in the app's top bar and can use ApiDocsSiteSearch or a consumer-owned content
+// in the app's top bar and can use SiteSearch or a consumer-owned content
 // search. An optional #header slot remains for genuinely local controls.
 //
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
@@ -39,7 +41,7 @@
 // resets to the default. Below lg the nav takes full container width. Opt out
 // with :resizable=false.
 //
-// Composed from Nuxt UI primitives + this kit's ApiDocsMethodBadge:
+// Composed from Nuxt UI primitives + this kit's HttpMethodBadge:
 //   root        <nav> — chrome-less, full-height column; the owning layout sets
 //                       height/border/radius and the menu body owns scrolling
 //   search      UInput + UKbd hint  (global filter, '/' focuses, Esc clears)
@@ -52,7 +54,7 @@
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
-// i18n-ready). The one sibling dependency is ApiDocsMethodBadge (declared in
+// i18n-ready). The one sibling dependency is HttpMethodBadge (declared in
 // registry.json), reached through Nuxt auto-import; scenario tags are
 // plain neutral UBadges.
 
@@ -65,7 +67,7 @@ export interface SidebarNavItem {
   label: string
   /** Destination route; rendered with ULink so active state + prefetch work. */
   to?: string
-  /** Single HTTP request method (e.g. 'POST') → leading ApiDocsMethodBadge.
+  /** Single HTTP request method (e.g. 'POST') → leading HttpMethodBadge.
    *  How you call this endpoint; pairs with `scenarios` (what it's for). */
   method?: string
   /** Usage scenarios this endpoint serves (e.g. ['Async', 'Batch']) → trailing
@@ -583,7 +585,7 @@ onMounted(() => {
                        "+N" popover trigger (a <button>) out of the <a>: nesting a
                        button inside an anchor is invalid HTML and made tapping
                        "+N" also navigate. Only that button opts back into
-                       pointer events (`pointer-events-auto` in ScenarioTags), so
+                       pointer events (`pointer-events-auto` in SidebarScenarioTags), so
                        the row navigates but the tag reveal doesn't. Text colour
                        is driven by `isItemActive` + `group-hover/row` rather than
                        the link's own classes, since the link no longer wraps the
@@ -612,7 +614,7 @@ onMounted(() => {
                            fixed-width slot so purpose labels line up regardless
                            of verb width (GET vs DELETE); a guide shows its icon. -->
                       <span v-if="item.method" class="flex w-14 shrink-0 justify-start">
-                        <ApiDocsMethodBadge :method="item.method" size="sm" />
+                        <HttpMethodBadge :method="item.method" size="sm" />
                       </span>
                       <UIcon
                         v-else-if="item.icon"
@@ -622,7 +624,7 @@ onMounted(() => {
                       <!-- Purpose-named label (prose sans, `shrink` so it yields
                            space to the tags rather than hogging it), then the
                            scenarios it serves as a quiet trailing tag cluster.
-                           ScenarioTags is `flex-1`: it takes the space the label
+                           SidebarScenarioTags is `flex-1`: it takes the space the label
                            leaves and reveals as many whole tags as measurably
                            fit, folding the rest into "+N" (or a lone count chip
                            when nothing fits). So a wide sidebar spreads every
@@ -630,7 +632,7 @@ onMounted(() => {
                            label keeps a readable `min-w-16` floor either way.
                            Colour stays reserved for the active state. -->
                       <span class="min-w-16 shrink truncate">{{ item.label }}</span>
-        <ApiDocsScenarioTags
+        <SidebarScenarioTags
           v-if="itemScenarios(item).length"
           :scenarios="itemScenarios(item)"
           :scenarios-label="scenariosLabel"

@@ -145,7 +145,7 @@ describe('DocAnnotation', () => {
   })
 })
 
-describe('ApiDocsFieldAnnotation', () => {
+describe('FieldAnnotation', () => {
   it('warns through the mounted component when a field ref is unresolved', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     wrapper = await mountSuspended(FieldAnnotation, {

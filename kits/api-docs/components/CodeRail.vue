@@ -15,7 +15,7 @@
 // Data-agnostic: it owns split math only. Content comes through the #top /
 // #bottom slots, and the computed per-pane height budget is handed back via
 // slot scope (`maxHeight`) so the page can wire it onto the code cards
-// (ApiDocsRequestExample / ApiDocsResponseExample both accept `max-height`).
+// (RequestExample / ResponseExample both accept `max-height`).
 //
 // Anatomy:  #top pane · <SplitPaneHandle horizontal> · #bottom pane
 // States:   below `enabledFrom` (default `lg`) → stacked, no handle, each card

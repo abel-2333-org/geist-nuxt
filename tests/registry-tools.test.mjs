@@ -131,6 +131,7 @@ test('validates a complete registry and resolves dependency-first closure', asyn
   const { repoRoot, registry } = await fixture()
   const result = await validateRegistry(registry, { repoRoot })
   assert.equal(result.sourceOwners.size, 2)
+  assert.deepEqual([...result.publicComponentOwners.keys()], ['Dependency', 'Feature'])
   const resolution = resolveItems(registry, ['feature'])
   assert.deepEqual(resolution.items.map(item => item.name), ['dependency', 'feature'])
   assert.deepEqual(resolution.files.map(file => file.target), ['app/components/Dependency.vue', 'app/components/Feature.vue'])
@@ -165,6 +166,19 @@ test('keeps the real managed config surface vendor-neutral', async () => {
     assert.equal(source.split('\n', 1)[0], expectedImport)
     assert.doesNotMatch(source, /\bgeist[A-Z]\w*|config\/geist-/)
   }
+})
+
+test('keeps the real public component surface flat, neutral, and unique', async () => {
+  const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
+  const result = await validateRegistry(registry, { repoRoot: PROJECT_ROOT })
+  const publicNames = [...result.publicComponentOwners.keys()]
+
+  assert.equal(publicNames.length, 29)
+  assert.equal(new Set(publicNames).size, publicNames.length)
+  assert.equal(publicNames.includes('HttpMethodBadge'), true)
+  assert.equal(publicNames.includes('WebhookBadge'), true)
+  assert.equal(publicNames.includes('AppHeader'), true)
+  assert.deepEqual(publicNames.filter(name => /^(?:ApiDocs|Composition)/.test(name)), [])
 })
 
 test('rejects undeclared files, duplicate targets, cycles, and undeclared relative imports', async (t) => {
@@ -315,8 +329,20 @@ void example
 
   await t.test('relative import whose copied targets no longer preserve the source layout', async () => {
     const { repoRoot, registry } = await fixture()
-    registry.items[0].files[0].target = 'app/components/nested/Dependency.vue'
+    registry.items[0].files[0].target = 'app/components/RenamedDependency.vue'
     await assert.rejects(validateRegistry(registry, { repoRoot }), /does not resolve.*after copy/)
+  })
+
+  await t.test('rendering item with a nested public target', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].files[0].target = 'app/components/nested/Dependency.vue'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /exactly one flat app\/components/)
+  })
+
+  await t.test('rendering item whose title differs from its public component', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].title = 'ApiDocsDependency'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /title must match public component name/)
   })
 
   await t.test('dynamic relative import still requires its owning item dependency', async () => {

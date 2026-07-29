@@ -47,7 +47,7 @@ function toTokens(paragraph: string) {
           </template>
         </p>
 
-        <ApiDocsCodeBlock
+        <CodeBlock
           v-if="props.page.code"
           :variants="props.page.code.variants"
           :title="props.page.code.title"

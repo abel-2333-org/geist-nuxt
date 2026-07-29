@@ -6,7 +6,7 @@ import { BADGE_TONE_COLOR } from '../utils/badge'
 // Presentation ATOM: a semantic badge. It knows nothing about lifecycle /
 // HTTP method / any domain concept — it only renders a curated `tone` (color +
 // a11y icon + text label). Mapping a domain value to a tone is a PRESET concern
-// (kept in the consuming project / kit, e.g. LifecycleBadge, MethodBadge), so
+// (kept in the consuming project / kit, e.g. LifecycleBadge, HttpMethodBadge), so
 // this atom stays drop-in reusable for any state vocabulary.
 //
 // Tone → UBadge color is the design-system's semantic calibration:

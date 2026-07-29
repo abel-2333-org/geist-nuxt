@@ -3,7 +3,7 @@ import type { CompositionNode, FieldNode } from '../../../../kits/api-docs/utils
 
 definePageMeta({ nav: { label: 'Schema 组合', icon: 'i-lucide-git-fork', order: 5 } })
 
-// Demo/story for <ApiDocsSchemaComposition> — per the geist-nuxt layering,
+// Demo/story for <SchemaComposition> — per the geist-nuxt layering,
 // demo fixtures live in the gallery and the kit only ships the data-agnostic
 // component. Inline neutral ViewModels exercise:
 //   1. oneOf + discriminator (payment method) with a nested oneOf inside a
@@ -12,7 +12,7 @@ definePageMeta({ nav: { label: 'Schema 组合', icon: 'i-lucide-git-fork', order
 //   3. allOf (resource shape) — fully expanded conjunction, incl. a
 //      description-only part (partial data);
 //   4. field-level composition — a plain field whose value is itself a oneOf,
-//      rendered by ApiDocsFieldItem via delegation (the promotion's new path);
+//      rendered by FieldItem via delegation (the promotion's new path);
 //   5. deep-link buttons that jump into hidden variants to verify the
 //      switch/expand → scroll → flash chain end to end.
 
@@ -210,7 +210,7 @@ const resourceShape: CompositionNode = {
 }
 
 // --- 4. Field-level composition: a field row whose value is itself a oneOf ----
-// ApiDocsFieldItem delegates the `composition` to ApiDocsSchemaComposition
+// FieldItem delegates the `composition` to SchemaComposition
 // after any concrete children — the promotion's new capability.
 const destinationField: FieldNode = {
   path: 'transfer_destination',
@@ -286,13 +286,13 @@ const deepLinks = [
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">Schema 组合</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">ApiDocsSchemaComposition</code>：忠实呈现 OpenAPI / JSON Schema
+          <code class="font-mono text-[0.8125rem]">SchemaComposition</code>：忠实呈现 OpenAPI / JSON Schema
           的 <b class="font-medium text-toned">oneOf / anyOf / allOf</b> 组合——
           oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、
           allOf 顺序全展开（全部成立），三种语义绝不互相误读。
           <code class="font-mono text-[0.8125rem]">discriminator</code> 渲染为每个 variant 的首行真实字段（不虚构 wire path），
           deep link 会自动揭示隐藏的 tab / 分区。字段级组合由
-          <code class="font-mono text-[0.8125rem]">ApiDocsFieldItem</code> 在子字段之后委托本组件渲染。
+          <code class="font-mono text-[0.8125rem]">FieldItem</code> 在子字段之后委托本组件渲染。
           组件数据无关、locale-ready，所有文案由调用方注入。
         </p>
       </div>
@@ -320,33 +320,33 @@ const deepLinks = [
            composition, so SchemaComposition sits directly inside FieldGroup. -->
       <section class="space-y-4">
         <h3 class="text-sm font-semibold text-highlighted">oneOf + discriminator — 支付方式</h3>
-        <ApiDocsFieldGroup label="Request body" :heading-level="3">
-          <ApiDocsSchemaComposition v-bind="paymentMethod" :heading-level="4" class="pt-3" />
-        </ApiDocsFieldGroup>
+        <FieldGroup label="Request body" :heading-level="3">
+          <SchemaComposition v-bind="paymentMethod" :heading-level="4" class="pt-3" />
+        </FieldGroup>
       </section>
 
       <!-- 2. anyOf: sections open independently — verify two can be open at once. -->
       <section class="space-y-4">
         <h3 class="text-sm font-semibold text-highlighted">anyOf — 联系渠道</h3>
-        <ApiDocsFieldGroup label="Contact" :heading-level="3">
-          <ApiDocsSchemaComposition v-bind="contactChannels" :heading-level="4" class="pt-3" />
-        </ApiDocsFieldGroup>
+        <FieldGroup label="Contact" :heading-level="3">
+          <SchemaComposition v-bind="contactChannels" :heading-level="4" class="pt-3" />
+        </FieldGroup>
       </section>
 
       <!-- 3. allOf: no selector, everything expanded, incl. a description-only part. -->
       <section class="space-y-4">
         <h3 class="text-sm font-semibold text-highlighted">allOf — 资源形态</h3>
-        <ApiDocsFieldGroup label="Response body" :heading-level="3">
-          <ApiDocsSchemaComposition v-bind="resourceShape" :heading-level="4" class="pt-3" />
-        </ApiDocsFieldGroup>
+        <FieldGroup label="Response body" :heading-level="3">
+          <SchemaComposition v-bind="resourceShape" :heading-level="4" class="pt-3" />
+        </FieldGroup>
       </section>
 
       <!-- 4. Field-level composition delegated by a regular FieldItem row. -->
       <section class="space-y-4">
         <h3 class="text-sm font-semibold text-highlighted">字段级组合 — 委托自 FieldItem</h3>
-        <ApiDocsFieldGroup label="Transfer" :heading-level="3">
-          <ApiDocsFieldItem v-bind="destinationField" />
-        </ApiDocsFieldGroup>
+        <FieldGroup label="Transfer" :heading-level="3">
+          <FieldItem v-bind="destinationField" />
+        </FieldGroup>
       </section>
     </section>
   </UContainer>

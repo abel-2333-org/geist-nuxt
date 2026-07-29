@@ -106,7 +106,7 @@ const scenarioItems = computed(() =>
 </script>
 
 <template>
-  <ApiDocsCodeBlock
+  <CodeBlock
     :variants="current?.variants ?? []"
     :title="title ?? t.title"
     :default-wrap="defaultWrap"
@@ -128,5 +128,5 @@ const scenarioItems = computed(() =>
         :ui="{ content: 'min-w-fit' }"
       />
     </template>
-  </ApiDocsCodeBlock>
+  </CodeBlock>
 </template>

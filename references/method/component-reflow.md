@@ -81,7 +81,7 @@ kit 只能依赖 foundation 或同 kit item；禁止 kit → kit。私有 spec�
 
 通用组件加入根 `app/components/gallery/<Group>.vue` 的 `<GalleryEntry>`；kit 组件加入 `app/pages/kits/<kit>/` 对应页面。条目只展示真实渲染和关键 facet，Usage 指回 references，不复制 props 表或源码。
 
-页面级 recipe 留在根 app（如 `app/components/demo/api-docs/DocsShell.vue`）。注意「私有 → kit」的边界会随组件解耦而移动：`CodeRail` 曾是 gallery-private recipe，解除页面 chrome 耦合后已提升为 kit 组件 `<ApiDocsCodeRail>` 并进入 registry（见 ADR-010）。
+页面级 recipe 留在根 app（如 `app/components/demo/api-docs/DocsShell.vue`）。注意「私有 → kit」的边界会随组件解耦而移动：`CodeRail` 曾是 gallery-private recipe，解除页面 chrome 耦合后已提升为 kit 组件 `<CodeRail>` 并进入 registry（见 ADR-010）。
 
 ## 6. 完整 gate
 

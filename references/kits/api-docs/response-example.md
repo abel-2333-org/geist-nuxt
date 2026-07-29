@@ -1,15 +1,15 @@
-# ApiDocsResponseExample `<ApiDocsResponseExample>`
+# ResponseExample `<ResponseExample>`
 
-按**业务场景 + HTTP 状态 + body 形态（media type）**三级切换的响应示例，带彩色状态 badge 与 status 级描述条；代码展示 + 语言 + 复制 + 换行委托给 `<ApiDocsCodeBlock>`。场景/状态/media 选择器注入 `#controls`：宽容器内联显示，窄容器折成一个显示当前场景名的触发按钮，popover 内按基数分型：场景可能很多，保持 select（菜单自带滚动）；状态/media 通常 1-3 项，平铺为 radio groups 一步可点。状态 badge 注入 `#leading`，描述注入 `#notice`，非代码 body 面板注入 `#body`。
+按**业务场景 + HTTP 状态 + body 形态（media type）**三级切换的响应示例，带彩色状态 badge 与 status 级描述条；代码展示 + 语言 + 复制 + 换行委托给 `<CodeBlock>`。场景/状态/media 选择器注入 `#controls`：宽容器内联显示，窄容器折成一个显示当前场景名的触发按钮，popover 内按基数分型：场景可能很多，保持 select（菜单自带滚动）；状态/media 通常 1-3 项，平铺为 radio groups 一步可点。状态 badge 注入 `#leading`，描述注入 `#notice`，非代码 body 面板注入 `#body`。
 
 > 覆盖响应的所有形态：多场景/多状态/多 media 交互切换，也包括**单一固定响应**——各维度 ≤1 时对应选择器自动隐藏，只剩状态 badge + body。
 > 展示模型由消费方提供且已本地化，组件**不解析 OpenAPI**。
-> 文件放在 `components/api-docs/ResponseExample.vue`。约定 `pathPrefix: true`，模板名 = 目录 + 文件名 = `<ApiDocsResponseExample>`。
+> 真源在 `kits/api-docs/components/ResponseExample.vue`；registry 扁平复制到 `app/components/ResponseExample.vue`，模板名稳定为 `<ResponseExample>`。
 
 ## Anatomy
 
 ```text
-<ApiDocsCodeBlock>（统一框架）
+<CodeBlock>（统一框架）
 ├─ toolbar：icon · title · 状态 badge（#leading）
 │           宽：场景 / 状态 / media 选择器（#controls）· 语言 · 换行 · 复制
 │           窄：场景名触发 popover（场景 select + 状态/media radio）（#controls）· 语言 · 换行 · 复制
@@ -76,7 +76,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## 受控选择
 
-与 `<ApiDocsRequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。受控与否在挂载时按 prop 是否传入一次性判定（React 风格），运行时在受控/非受控之间切换不受支持。差异点：
+与 `<RequestExample>` 同一受控口（见 `request-example.md` 的「受控选择」）：可选 `v-model:scenario`，uncontrolled 默认、fallback 只派生不回写不发事件、linked 联动由父级一个 ref 绑两侧。受控与否在挂载时按 prop 是否传入一次性判定（React 风格），运行时在受控/非受控之间切换不受支持。差异点：
 
 - **status 不在受控口内**：始终内部状态，与 scenario 同为派生收敛——记住用户最近一次显式选择，当前场景不含该 status 时展示收敛到第一个可用状态（不回写）。
 - 绑定值指向本组件缺失的场景 id 时（如联动中响应侧缺某场景），展示收敛到第一个场景，选择器显示收敛后的值。
@@ -84,7 +84,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 ## 用法
 
 ```vue
-<ApiDocsResponseExample :scenarios="[
+<ResponseExample :scenarios="[
   { id: 'create', label: '创建部署', statuses: [
     { status: 200, statusText: 'OK', description: '返回存储后的完整记录。', bodies: [
       { id: 'json', kind: 'code', mediaType: 'application/json', variants: [{ language: 'json', code: '{ ... }' }] },

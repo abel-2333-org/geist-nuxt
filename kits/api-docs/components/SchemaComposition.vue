@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Domain component (API docs): ApiDocsSchemaComposition.
+// Domain component (API docs): SchemaComposition.
 // Renders an OpenAPI / JSON Schema composition block faithfully:
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
 //   anyOf  → non-exclusive options    → stacked collapsible sections
@@ -31,13 +31,13 @@ import type { TabsItem } from '@nuxt/ui'
 // lifecycle/method preset types. Callers import the model from `~/utils/field`.
 
 // Recursive self-reference name (kit uses pathPrefix: false, so the global
-// component name is ApiDocsSchemaComposition); declared explicitly so the
+// component name is SchemaComposition); declared explicitly so the
 // template's recursion resolves.
-defineOptions({ name: 'ApiDocsSchemaComposition' })
+defineOptions({ name: 'SchemaComposition' })
 
 type SchemaCompositionProps = CompositionNode & {
   labels?: SchemaCompositionLabels
-  /** Passed through to the ApiDocsFieldItem rows. */
+  /** Passed through to the FieldItem rows. */
   fieldLabels?: FieldItemLabels
   /** Outline level of variant section headings (anyOf/allOf); nested
    *  compositions render one level deeper, capped at 6. */
@@ -279,14 +279,14 @@ function toggleVariant(variantId: string) {
           <!-- The discriminator renders as the first real field row
                (synthesized in buildFields), not as a caption. -->
           <div v-if="item.view.fields.length">
-            <ApiDocsFieldItem
+            <FieldItem
               v-for="field in item.view.fields"
               :key="field.path ?? field.name"
               v-bind="field"
               :labels="itemLabels"
             />
           </div>
-          <ApiDocsSchemaComposition
+          <SchemaComposition
             v-if="item.view.variant.composition"
             v-bind="item.view.variant.composition"
             :labels="labels"
@@ -340,14 +340,14 @@ function toggleVariant(variantId: string) {
                 <InlineMarkdown :text="view.variant.description" />
               </p>
               <div v-if="view.fields.length">
-                <ApiDocsFieldItem
+                <FieldItem
                   v-for="field in view.fields"
                   :key="field.path ?? field.name"
                   v-bind="field"
                   :labels="itemLabels"
                 />
               </div>
-              <ApiDocsSchemaComposition
+              <SchemaComposition
                 v-if="view.variant.composition"
                 v-bind="view.variant.composition"
                 :labels="labels"
@@ -375,14 +375,14 @@ function toggleVariant(variantId: string) {
           <InlineMarkdown :text="view.variant.description" />
         </p>
         <div v-if="view.fields.length">
-          <ApiDocsFieldItem
+          <FieldItem
             v-for="field in view.fields"
             :key="field.path ?? field.name"
             v-bind="field"
             :labels="itemLabels"
           />
         </div>
-        <ApiDocsSchemaComposition
+        <SchemaComposition
           v-if="view.variant.composition"
           v-bind="view.variant.composition"
           :labels="labels"

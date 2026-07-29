@@ -1,7 +1,7 @@
 // Shared type surface of the Annotation family (foundation).
 //
 // The shell (AnnotationPopover) and every form (TermAnnotation, DocAnnotation,
-// and the kit's ApiDocsFieldAnnotation) extend these chrome labels. It lives in
+// and the kit's FieldAnnotation) extend these chrome labels. It lives in
 // a util — not inside the shell SFC — so all slices reference it BARE (no
 // import), exactly like the api-docs FieldNode model. This is what makes the
 // type reachable across the foundation ↔ kit topology boundary: a relative

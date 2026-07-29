@@ -1,8 +1,8 @@
 // Field & composition display model (API docs kit).
 //
 // This is the data contract shared by the recursive field renderer
-// (ApiDocsFieldItem) and the schema-composition renderer
-// (ApiDocsSchemaComposition). It lives in a util — not inside a component — so
+// (FieldItem) and the schema-composition renderer
+// (SchemaComposition). It lives in a util — not inside a component — so
 // every slice references one canonical, compiler-enforced definition. Nuxt
 // auto-imports this kit's `utils/` dir, so components reference these types
 // bare (no import), exactly like the lifecycle/method preset types.
@@ -89,8 +89,8 @@ export interface FieldNode {
   children?: FieldNode[]
   /**
    * Field-level composition: this field's value is itself a oneOf/anyOf/allOf
-   * (e.g. a polymorphic payload). Rendered by ApiDocsFieldItem via
-   * ApiDocsSchemaComposition after the children collapsible, so a field can
+   * (e.g. a polymorphic payload). Rendered by FieldItem via
+   * SchemaComposition after the children collapsible, so a field can
    * carry both concrete subfields and an alternative-shaped value.
    */
   composition?: CompositionNode
@@ -152,11 +152,11 @@ export interface FieldItemLabels {
   enumVariantResults?: (totalCount: number, activeCount: number, activeLabel: string) => string
   /** EnumTable live-region text when its filter yields nothing; receives the query. */
   enumNoResults?: (query: string) => string
-  /** Chrome labels for a field-level ApiDocsSchemaComposition block. */
+  /** Chrome labels for a field-level SchemaComposition block. */
   composition?: SchemaCompositionLabels
 }
 
-/** Public props contract for ApiDocsFieldItem. Kept outside the SFC so its
+/** Public props contract for FieldItem. Kept outside the SFC so its
  *  legacy type re-exports remain separate from Vue's prop-type extraction. */
 export interface FieldItemProps extends FieldNode {
   labels?: FieldItemLabels
@@ -164,7 +164,7 @@ export interface FieldItemProps extends FieldNode {
 
 // ---------------------------------------------------------------------------
 // Schema composition model (oneOf / anyOf / allOf + discriminator).
-// Rendered by ApiDocsSchemaComposition. Presentation-neutral: the component
+// Rendered by SchemaComposition. Presentation-neutral: the component
 // never parses an OpenAPI document and never depends on a consumer's contract
 // types. Schema variants and example scenarios are two different concepts —
 // this model does not assume shared ids or any linkage.
@@ -267,7 +267,7 @@ export function collectCompositionPaths(composition: CompositionNode): string[] 
  *  level deeper, capped at 6. */
 export type HeadingLevel = 3 | 4 | 5 | 6
 
-/** Component-owned chrome copy for ApiDocsSchemaComposition, overridable for
+/** Component-owned chrome copy for SchemaComposition, overridable for
  *  i18n (FieldItem convention). */
 export interface SchemaCompositionLabels {
   oneOf?: string

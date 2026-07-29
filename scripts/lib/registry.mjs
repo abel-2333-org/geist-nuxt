@@ -411,6 +411,7 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
   const sourceOwners = new Map()
   const sourceTargets = new Map()
   const targetOwners = new Map()
+  const publicComponentOwners = new Map()
   for (const [index, item] of (registry?.items ?? []).entries()) {
     const prefix = `items[${index}]`
     if (!item || typeof item !== 'object' || Array.isArray(item)) {
@@ -462,6 +463,29 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
   }
 
   for (const item of itemsByName.values()) {
+    if (['registry:component', 'registry:block'].includes(item.type)) {
+      const componentTargets = item.files
+        .map(file => file.target)
+        .filter(target => typeof target === 'string' && target.startsWith('app/components/') && target.endsWith('.vue'))
+      const publicTargets = componentTargets.filter(target => /^app\/components\/[^/]+\.vue$/.test(target))
+      if (componentTargets.length !== 1 || publicTargets.length !== 1) {
+        fail(`rendering item ${item.name} must expose exactly one flat app/components/<Name>.vue target`)
+      }
+      else {
+        const publicTarget = publicTargets[0]
+        const publicName = path.posix.basename(publicTarget, '.vue')
+        if (item.title !== publicName) {
+          fail(`rendering item ${item.name} title must match public component name ${publicName}`)
+        }
+        if (/^(?:ApiDocs|Composition)/.test(publicName)) {
+          fail(`rendering item ${item.name} uses a mechanical public prefix: ${publicName}`)
+        }
+        if (publicComponentOwners.has(publicName)) {
+          fail(`public component name has multiple owners: ${publicName} (${publicComponentOwners.get(publicName)}, ${item.name})`)
+        }
+        else publicComponentOwners.set(publicName, item.name)
+      }
+    }
     for (const dependency of item.registryDependencies ?? []) {
       if (!itemsByName.has(dependency)) fail(`item ${item.name} depends on unknown item ${dependency}`)
     }
@@ -608,7 +632,7 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
   }
 
   if (errors.length) throw new RegistryError(`registry validation failed with ${errors.length} error(s)\n- ${errors.join('\n- ')}`, errors)
-  return { itemsByName, sourceOwners, targetOwners, sourceRoots }
+  return { itemsByName, sourceOwners, targetOwners, publicComponentOwners, sourceRoots }
 }
 
 export function resolveItems(registry, requestedItems) {

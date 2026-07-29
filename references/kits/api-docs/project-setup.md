@@ -78,7 +78,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <ApiDocsResponseExample
+  <ResponseExample
     :scenarios="scenarios"
     :labels="{
       title: t('api.labels.response'),
@@ -93,7 +93,7 @@ const { t } = useI18n()
 ```
 
 - **用户内容**（`scenarios` 里的说明、响应体）与**结构标签**（`labels.title` / `labels.copy` 等）区别在于：结构标签**有内置默认值**（`'Request'`/`'Response'`），单语言项目**不传也能用**；只有多语言项目才需要覆盖。用户内容则**必须**传。复制失败文案用完整的 `labels.copyFailure` 注入，不跨层拼接。
-- kit 组件（`ApiDocsResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
+- kit 组件（`ResponseExample` 等）**不感知** i18n——它只渲染传入的值。切换语言时，页面重新计算 `t(...)`，组件跟着更新。
 - 代码示例这类**不随语言变化**的内容（cURL、JSON body）不要进 locale 文件，保持原样传入 `CodeBlock` 的 `variants`。
 - 每种语言的文案各自遵守 Geist Voice（见 `foundations/voice-content.md`）。
 
@@ -129,11 +129,11 @@ app/pages/docs/[domain]/[...slug].vue  → /docs/payments/checkout/create
 
 这条**针对的是根 preview 的可靠性**，不是禁止真实消费项目使用 content：
 
-- **kit 组件是「内容管线无关」的**：`ApiDocsCodeBlock`、`ApiDocsResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
+- **kit 组件是「内容管线无关」的**：`CodeBlock`、`ResponseExample` 等只吃普通 props（数组 / 字符串），不依赖任何内容源，脱离 content 也能用。
 - **真实项目要用 `@nuxt/content` 管文档内容，是可以的**：让 content 提供**数据**（从 Markdown / YAML 查询出端点、参数、示例），页面把查询结果**作为 props 传给 kit 组件渲染**。数据源与渲染解耦，各司其职。
 - 换句话说：**content 负责「内容从哪来」，kit 组件负责「内容怎么显示」**。根 preview 不内置 content 只是 snapshot 可靠性考量，真实项目可自行引入。
-- **全站搜索的 UI 可以直接使用 `ApiDocsSiteSearch`**：静态 `groups` 由导航 ViewModel 派生；正文检索由消费项目把 Content 查询适配为 `search(query) → SiteSearchItem[]`。这样 kit 提供一致的 `⌘K` trigger / modal / method badge 呈现，但仍不导入 Content。消费项目若更偏好 Content 自带的 `<UContentSearch>` / `<UContentSearchButton>` 也可以直接在 app 层使用；它们仍不进入 kit dependency closure。
-- 无论选哪种实现，正位都是 **app 顶栏 / navbar**，与 `<ApiDocsSidebarNav>` 的 `/` 树内过滤分属不同层级。不要把全站搜索塞进侧栏 `#header`，否则会与树内过滤框形成两个雷同入口。
+- **全站搜索的 UI 可以直接使用 `SiteSearch`**：静态 `groups` 由导航 ViewModel 派生；正文检索由消费项目把 Content 查询适配为 `search(query) → SiteSearchItem[]`。这样 kit 提供一致的 `⌘K` trigger / modal / method badge 呈现，但仍不导入 Content。消费项目若更偏好 Content 自带的 `<UContentSearch>` / `<UContentSearchButton>` 也可以直接在 app 层使用；它们仍不进入 kit dependency closure。
+- 无论选哪种实现，正位都是 **app 顶栏 / navbar**，与 `<SidebarNav>` 的 `/` 树内过滤分属不同层级。不要把全站搜索塞进侧栏 `#header`，否则会与树内过滤框形成两个雷同入口。
 
 消费项目自行安装 `@nuxt/content`，并让 `@nuxt/ui` 先于它注册：
 
@@ -160,7 +160,7 @@ const { data } = await useAsyncData('endpoint', () =>
 </script>
 
 <template>
-  <ApiDocsCodeBlock :variants="data?.requestSamples ?? []" />
+  <CodeBlock :variants="data?.requestSamples ?? []" />
 </template>
 ```
 

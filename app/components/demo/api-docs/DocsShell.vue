@@ -11,8 +11,8 @@ import {
 // copy & adapt 的活样板：
 //
 //   顶栏     中性品牌 / 域切换器（<DemoApiDocsDomainSwitcher>）+
-//            <ApiDocsSiteSearch>（⌘K 全站搜索）
-//   侧栏     <ApiDocsSidebarNav>（sticky 通栏立柱，树内过滤 + 拖宽持久化）
+//            <SiteSearch>（⌘K 全站搜索）
+//   侧栏     <SidebarNav>（sticky 通栏立柱，树内过滤 + 拖宽持久化）
 //   正文     <DemoApiDocsShellReference>（指南锚点 section + reference 式端点页）
 //
 // 三层搜索/导航各司其职、不互相顶替：
@@ -204,7 +204,7 @@ async function searchBody(query: string) {
 
             <template #body>
               <div class="h-full min-h-0" @click="onDrawerNavClick">
-                <ApiDocsSidebarNav
+                <SidebarNav
                   :key="`drawer-${props.domain.id}`"
                   :groups="navGroups"
                   :aria-label="`${props.domain.label}文档`"
@@ -241,7 +241,7 @@ async function searchBody(query: string) {
           />
         </div>
 
-        <ApiDocsSiteSearch
+        <SiteSearch
           :key="props.domain.id"
           :groups="searchGroups"
           :search="searchBody"
@@ -268,7 +268,7 @@ async function searchBody(query: string) {
         <!-- max-width 收到 400：xl（1200px）下限时正文分栏还要装下
              340 + 12 + 340 + 80px padding（见 DocsShellReference 的 gate
              注释），侧栏上限须 ≤ 1200 − 80 − 692 = 428。 -->
-        <ApiDocsSidebarNav
+        <SidebarNav
           :key="props.domain.id"
           class="border-r border-default"
           :groups="navGroups"
