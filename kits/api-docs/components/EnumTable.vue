@@ -24,6 +24,8 @@ const props = withDefaults(
     emptyLabel: 'No matching values',
     variantLabel: (index: number) => `Option ${index + 1}`,
     filterThreshold: 30,
+    resultsAnnouncement: (count: number) => `${count} value${count === 1 ? '' : 's'} found`,
+    noResultsAnnouncement: (q: string) => `No matching values for “${q}”`,
   },
 )
 
@@ -43,23 +45,38 @@ function filterValues(values: EnumValue[]): EnumValue[] {
   )
 }
 
+// Filter every variant once per query. Both the tab badges and the rendered
+// body read this same array, so a badge count can never disagree with the panel
+// it points at — previously each surface ran its own filter pass.
+const filteredVariants = computed(() =>
+  (props.variants ?? []).map(v => ({ ...v, values: filterValues(v.values) })),
+)
+
+// Clamp the selection. `variants` can shrink under a reused instance (a docs
+// route swapping field data), which would otherwise strand the selector on a
+// tab that no longer exists and render the empty state instead of a group.
+const activeIndex = computed(() => {
+  const i = Number(activeTab.value)
+  return Number.isInteger(i) && i >= 0 && i < filteredVariants.value.length ? i : 0
+})
+
 // Tab per variant, badged with its *filtered* count so an active search reveals
 // which variant holds the matches even while you're viewing another tab.
 const variantTabs = computed<TabsItem[]>(() =>
-  (props.variants ?? []).map((v, i) => ({
+  filteredVariants.value.map((v, i) => ({
     label: v.title ?? props.variantLabel(i),
     value: String(i),
-    badge: String(filterValues(v.values).length),
+    badge: String(v.values.length),
   })),
 )
 
-const activeVariant = computed(() => props.variants?.[Number(activeTab.value) || 0])
+const activeVariant = computed(() => filteredVariants.value[activeIndex.value])
 
 // The values actually rendered: the active variant's filtered list, or the
 // filtered flat list.
 const visibleValues = computed<EnumValue[]>(() =>
   isVariant.value
-    ? (activeVariant.value ? filterValues(activeVariant.value.values) : [])
+    ? (activeVariant.value?.values ?? [])
     : filterValues(props.values ?? []),
 )
 
@@ -71,6 +88,17 @@ const totalCount = computed(() =>
 
 // Only large lists need the search affordance.
 const filterable = computed(() => totalCount.value >= props.filterThreshold)
+
+// Filtering rewrites the list silently, so announce what the rendered region
+// now holds — the same contract SidebarNav (this kit's other filterable list)
+// already carries. Empty while idle so ordinary browsing stays quiet.
+const filterAnnouncement = computed(() => {
+  const q = query.value.trim()
+  if (!q) return ''
+  return visibleValues.value.length === 0
+    ? props.noResultsAnnouncement(q)
+    : props.resultsAnnouncement(visibleValues.value.length)
+})
 </script>
 
 <template>
@@ -95,25 +123,51 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
       />
     </div>
 
+    <!-- Polite live region: filtering rewrites the table silently, so a screen
+         reader otherwise gets no feedback on how many values matched. Visually
+         hidden; empty while idle. -->
+    <p v-if="filterable" class="sr-only" role="status" aria-live="polite">
+      {{ filterAnnouncement }}
+    </p>
+
     <!-- Variant selector: one click to any group, so nothing is buried below a
-         long list. Badges carry per-variant counts. -->
+         long list. Badges carry per-variant counts. Bound to the clamped index
+         rather than the raw ref, so the highlighted pill and the rendered panel
+         can never disagree. -->
     <UTabs
       v-if="isVariant"
-      v-model="activeTab"
+      :model-value="String(activeIndex)"
       :items="variantTabs"
       :content="false"
       color="neutral"
       variant="pill"
       size="xs"
       class="w-full"
+      @update:model-value="value => activeTab = String(value)"
     />
+
+    <!-- Applicability caption: the tab title names the group, this sentence
+         says when you are in it. Neutral, never amber — the warning ladder
+         belongs to the field row this table nests inside, and one more amber
+         object there would flatten that grading. -->
+    <p v-if="activeVariant?.when" class="text-xs leading-relaxed text-muted">
+      <InlineMarkdown :text="activeVariant.when" />
+    </p>
 
     <!-- Filterable lists (>= filterThreshold, default 30) scroll within a
          bounded area so a long enum never blows out the page; short lists
-         render at full height. -->
+         render at full height. Nothing inside the box is focusable (it is all
+         static text), so the scroll region itself takes a tab stop — otherwise
+         a keyboard-only user cannot reach the values below the fold. Named and
+         focus-ringed per the system focus spec. -->
     <div
       class="overflow-hidden rounded-lg border border-default"
-      :class="filterable ? 'max-h-80 overflow-y-auto' : ''"
+      :class="filterable
+        ? 'max-h-80 overflow-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+        : ''"
+      :tabindex="filterable ? 0 : undefined"
+      :role="filterable ? 'group' : undefined"
+      :aria-label="filterable ? label : undefined"
     >
       <!-- One shared grid for the whole table: the value column is sized once,
            to the widest code across all rows (capped at 12rem), so every row's

@@ -75,7 +75,10 @@ const schemaComposition = computed(() => {
 // Merge caller copy over neutral English defaults. Chrome text only.
 // Passthrough labels (lifecycle / enum* / composition) are excluded: they have
 // no defaults here and are read straight from `props.labels` at the passing site.
-type PassthroughLabel = 'lifecycle' | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant' | 'composition'
+type PassthroughLabel =
+  | 'lifecycle'
+  | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant' | 'enumResults' | 'enumNoResults'
+  | 'composition'
 const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
   conditional: 'Conditional',
@@ -399,6 +402,8 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           :search-placeholder="labels?.enumFilter"
           :empty-label="labels?.enumEmpty"
           :variant-label="labels?.enumVariant"
+          :results-announcement="labels?.enumResults"
+          :no-results-announcement="labels?.enumNoResults"
         />
 
         <!-- 3a. Single constraint — an inline lead-in row (same grammar as

@@ -227,6 +227,9 @@ describe('ApiDocsFieldAnnotation', () => {
   })
 
   it('degrades an unresolved field ref to plain slot text', async () => {
+    // The component also warns the author in dev (parity with TermAnnotation's
+    // unknown-glossary-id warning), but `import.meta.dev` is false under
+    // @nuxt/test-utils, so that branch is not reachable from this suite.
     wrapper = await mountSuspended(FieldAnnotation, {
       props: { fieldRef: 'missing' },
       slots: { default: () => 'Legacy field' },

@@ -205,6 +205,29 @@ const enumValues = [
   { value: 'development', description: 'Local or ephemeral environment. **Not** publicly routed.' },
 ]
 
+// Grouped form of the same table: values that differ by condition. Each variant
+// carries a `when` sentence, so the caption under the selector answers "am I in
+// this group?" — the tab title alone only names it.
+const enumVariants = [
+  {
+    title: 'Git deploys',
+    when: 'Applies when `gitSource` is set — the deploy is built from a connected repository.',
+    values: [
+      { value: 'BUILDING', description: 'Build container is running the framework build.' },
+      { value: 'READY', description: 'Build succeeded and the deployment is serving traffic.' },
+      { value: 'ERROR', description: 'Build failed. See `build.logsUrl` for the failing step.' },
+    ],
+  },
+  {
+    title: 'Prebuilt uploads',
+    when: 'Applies when the payload carries a prebuilt output — no build step runs.',
+    values: [
+      { value: 'UPLOADING', description: 'Output archive is still being received.' },
+      { value: 'READY', description: 'Output was accepted and is serving traffic.' },
+    ],
+  },
+]
+
 // Field tree — the recursive schema view. Inline sample data exercises every
 // facet ApiDocsFieldItem renders: the three requiredness states, default value,
 // examples, a condition, an enum, constraint notes, field
@@ -698,8 +721,17 @@ onMounted(() => anchor.initFromHash())
         </div>
 
         <div>
-          <h3 class="mb-3 text-sm font-semibold text-highlighted">Enum 值表</h3>
-          <ApiDocsEnumTable :values="enumValues" />
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">Enum 值表</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            两种形态：扁平 <code class="font-mono text-[0.8125rem]">values</code>
+            是单一取值列表；分组 <code class="font-mono text-[0.8125rem]">variants</code>
+            用于取值随条件变化的字段，tab 标题命名分组，下方
+            <code class="font-mono text-[0.8125rem]">when</code> 说明该组何时适用。
+          </p>
+          <div class="grid gap-6 lg:grid-cols-2">
+            <ApiDocsEnumTable :values="enumValues" />
+            <ApiDocsEnumTable :variants="enumVariants" default-value="READY" />
+          </div>
         </div>
 
         <div>

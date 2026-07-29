@@ -55,6 +55,19 @@ const source = useFieldSource()
 const entry = computed(() => (props.fieldRef ? source[props.fieldRef] : undefined))
 const node = computed<FieldNode | undefined>(() => props.field ?? entry.value?.field)
 
+// Degrading to plain text is the right runtime behavior, but silence in dev
+// hides the actual defect: a `field-ref` the page never registered. Warn like
+// TermAnnotation does for an unknown glossary id — the family's degrade policy
+// is shared, so its diagnostics should be too. Only for an unresolved *ref*;
+// a bare `field` prop that is absent is the caller's own business.
+if (import.meta.dev) {
+  watchEffect(() => {
+    if (props.fieldRef && !node.value) {
+      console.warn(`[FieldAnnotation] no field source entry for field-ref "${props.fieldRef}" — rendering plain text`)
+    }
+  })
+}
+
 // Same derivation as the field row (utils/field): the preview and the row it
 // links to must agree on requiredness, including for a node that carries only
 // a `condition`. Sharing the function — not re-reading `required` here — is

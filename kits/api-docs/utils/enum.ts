@@ -22,7 +22,9 @@ export interface EnumValue {
 /** A named group of enum members — e.g. bank lists that apply under a condition. */
 export interface EnumVariant {
   title?: string
-  /** When this group of values applies (already localized). */
+  /** When this group of values applies (already localized, inline markdown).
+   *  Rendered as a caption under the variant selector: the tab title names the
+   *  group, this sentence says when you are in it. */
   when?: string
   values: EnumValue[]
 }
@@ -41,4 +43,10 @@ export interface EnumTableProps {
   emptyLabel?: string
   variantLabel?: (index: number) => string
   filterThreshold?: number
+  /** Polite live-region text when a filter yields hits. Receives the count.
+   *  Same signature as SidebarNav's — the kit's two filterable lists announce
+   *  through one contract shape. */
+  resultsAnnouncement?: (count: number) => string
+  /** Polite live-region text when a filter yields nothing. Receives the query. */
+  noResultsAnnouncement?: (query: string) => string
 }

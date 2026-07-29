@@ -60,6 +60,8 @@ const zhLabels = {
   enumFilter: '筛选值',
   enumEmpty: '无匹配值',
   enumVariant: (i: number) => `选项 ${i + 1}`,
+  enumResults: (n: number) => `找到 ${n} 个值`,
+  enumNoResults: (q: string) => `没有匹配「${q}」的值`,
   composition: {
     oneOf: '其中一个',
     anyOf: '任意组合',
@@ -340,11 +342,17 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     const filter = wrapper.findComponent({ name: 'UInput' })
     expect(filter.props('placeholder')).toBe('筛选值')
 
-    // Filter down to zero matches → localized empty state.
+    // Filter down to zero matches → localized empty state AND a localized
+    // live-region announcement; the sr-only text is chrome too.
     filter.vm.$emit('update:modelValue', 'zzz-no-match')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('无匹配值')
     expect(wrapper.text()).not.toContain('No matching values')
+    expect(wrapper.find('[role="status"]').text()).toBe('没有匹配「zzz-no-match」的值')
+
+    filter.vm.$emit('update:modelValue', '_29')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[role="status"]').text()).toBe('找到 1 个值')
   })
 
   it('variant enum: localizes the unnamed-variant fallback tabs', async () => {
