@@ -39,7 +39,6 @@ const query = ref('')
 // delivery mode), so we surface them as a tab selector instead of stacking every
 // group's values — otherwise a large first group buries the rest off-screen.
 const isVariant = computed(() => !!props.variants?.length)
-const activeTab = ref('0')
 
 function filterValues(values: EnumValue[]): EnumValue[] {
   const q = query.value.trim().toLowerCase()
@@ -56,24 +55,48 @@ const filteredVariants = computed(() =>
   (props.variants ?? []).map(v => ({ ...v, values: filterValues(v.values) })),
 )
 
-// Clamp the selection. `variants` can shrink under a reused instance (a docs
-// route swapping field data), which would otherwise strand the selector on a
-// tab that no longer exists and render the empty state instead of a group.
-const activeIndex = computed(() => {
-  const i = Number(activeTab.value)
-  return Number.isInteger(i) && i >= 0 && i < filteredVariants.value.length ? i : 0
+// Selection is held as the *identity* of the chosen group, never as its
+// position. A reused instance (a docs route swapping field data) can hand this
+// component an entirely different set of groups with the same length, and a
+// stored index would then silently point at an unrelated group. Title is the
+// group's authored handle; untitled groups fall back to their first value, and
+// a repeated handle gets an occurrence suffix so two same-titled tabs stay
+// distinguishable.
+const variantKeys = computed(() => {
+  const seen = new Map<string, number>()
+  return (props.variants ?? []).map((v, i) => {
+    const base = v.title ?? v.values[0]?.value ?? `#${i}`
+    const n = seen.get(base) ?? 0
+    seen.set(base, n + 1)
+    return n ? `${base}#${n}` : base
+  })
 })
 
-// A visual clamp is not enough: if the groups later expand again, an invalid
-// raw index would become valid and silently resurrect the old selection.
+const activeKey = ref<string>()
+
+// Position is derived, so reordering the groups carries the selection with it
+// and a vanished group falls back to the first — no index arithmetic to keep
+// in sync with the data.
+const activeIndex = computed(() => {
+  const i = activeKey.value ? variantKeys.value.indexOf(activeKey.value) : -1
+  return i >= 0 ? i : 0
+})
+
+// A derived fallback is not enough: leaving a stale key in place would let the
+// old selection resurrect if that group ever comes back.
 watch(
-  () => filteredVariants.value.length,
-  (length) => {
-    const i = Number(activeTab.value)
-    if (!Number.isInteger(i) || i < 0 || i >= length) activeTab.value = '0'
+  variantKeys,
+  (keys) => {
+    if (!activeKey.value || !keys.includes(activeKey.value)) activeKey.value = keys[0]
   },
-  { flush: 'sync' },
+  { flush: 'sync', immediate: true },
 )
+
+// The tab items carry positions (UTabs needs a value per item), so translate
+// back to identity at the single point where the reader picks a group.
+function selectVariant(value: unknown) {
+  activeKey.value = variantKeys.value[Number(value)] ?? variantKeys.value[0]
+}
 
 // Tab per variant, badged with its *filtered* count so an active search reveals
 // which variant holds the matches even while you're viewing another tab.
@@ -231,7 +254,7 @@ const filterAnnouncement = computed(() => {
       variant="pill"
       size="xs"
       class="w-full"
-      @update:model-value="value => activeTab = String(value)"
+      @update:model-value="selectVariant"
     />
 
     <!-- Applicability caption: the tab title names the group, this sentence
