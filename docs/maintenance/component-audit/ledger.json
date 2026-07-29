@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "round": 1,
   "lastRunAt": "2026-07-29T14:39:47.783Z",
   "lastPicked": [
@@ -11,231 +11,292 @@
     "foundation-copy-button": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-inline-code": {
       "round": 1,
       "lastAuditedAt": "2026-07-29T14:39:47.783Z",
-      "lastAuditedSha": "6600dc9a238a26ac6864f0beb61a886759faeafb",
-      "verdict": "clean",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "legacy-v1",
+        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+      },
       "notes": "18 行单一职责原子，位置符合 component-reflow 第 3 节的跨场景裸名规则；两处主题偏离（rounded-sm 控件档圆角、text-code 13px）均有源码内依据，无硬编码；换行策略刻意交由调用方经 attrs fallthrough 决定，比内建 wrap prop 更对。gallery 新增内联代码也已统一改用 text-code。四维度逐条过完无可做改动，不制造 churn。",
-      "openFindings": []
+      "findings": []
     },
     "foundation-inline-markdown": {
       "round": 1,
       "lastAuditedAt": "2026-07-28T16:29:35.909Z",
-      "lastAuditedSha": "c5a73094643e378d75a84a64bbb36f53dca2771c",
-      "verdict": "improved",
+      "change": "modified",
+      "status": "deferred",
+      "evidence": {
+        "kind": "legacy-v1",
+        "sha": "c5a73094643e378d75a84a64bbb36f53dca2771c"
+      },
       "notes": "修复 4 类标记游程被半吞、裸标记漏进渲染结果的缺陷（***x***、__x__、___x___、MAX__VALUE__LIMIT），补齐最长游程优先规则与 `_` 词边界；新增 36 例 tokenizer spec，同步 reference 与 gallery。",
-      "openFindings": [
-        "内层标记与外层收尾标记紧贴时仍残留一个标记（`**bold *em***` → `<strong>bold *em</strong>*`）。既有行为，非本次回归；彻底修复需把有序规则表换成 CommonMark delimiter-run 算法（左右 flanking + rule of three）。",
-        "裸 `***` 渲染为 `<em>*</em>`。收紧 `*` em 规则两端守卫可修，但实测会回退 `**bold***em*`；与上一条同属 delimiter-run 改造，应一并处理。"
+      "findings": [
+        {
+          "id": "f-4a60b6008a52",
+          "severity": "unknown",
+          "claim": null,
+          "evidence": "内层标记与外层收尾标记紧贴时仍残留一个标记（`**bold *em***` → `<strong>bold *em</strong>*`）。既有行为，非本次回归；彻底修复需把有序规则表换成 CommonMark delimiter-run 算法（左右 flanking + rule of three）。",
+          "disposition": "open"
+        },
+        {
+          "id": "f-7b91ff128432",
+          "severity": "unknown",
+          "claim": null,
+          "evidence": "裸 `***` 渲染为 `<em>*</em>`。收紧 `*` em 规则两端守卫可修，但实测会回退 `**bold***em*`；与上一条同属 delimiter-run 改造，应一并处理。",
+          "disposition": "open"
+        }
       ]
     },
     "foundation-semantic-badge": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-theme-toggle": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-annotation-popover": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-term-annotation": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-doc-annotation": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-split-pane-handle": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "foundation-split-pane": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-code-block": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-request-example": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-response-example": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-lifecycle-badge": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-method-badge": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-enum-table": {
       "round": 1,
       "lastAuditedAt": "2026-07-29T14:39:47.783Z",
-      "lastAuditedSha": "6600dc9a238a26ac6864f0beb61a886759faeafb",
-      "verdict": "improved",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "legacy-v1",
+        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+      },
       "notes": "补渲染 EnumVariant.when；分组筛选 live region 同时明确全部选项聚合命中数与当前本地化分组命中数；按未过滤 active group 稳定保留滚动上限，再由 ResizeObserver 的真实溢出结果控制键盘滚动入口；单次 filteredVariants 保证 tab badge、body 与播报计数同源；以必填、非空、同表唯一且 locale-neutral 的 EnumVariant.id 作为唯一分组身份并直接绑定 UTabs，语言切换与重排保持选中，分组消失则回落首项；dev/test 对缺失、空白和重复 id 告警；默认 filterThreshold 调整为 8，并用 7/8 成对边界测试与 390px 浏览器预览验证。",
-      "openFindings": []
+      "findings": []
     },
     "api-docs-field-group": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-field-item": {
       "round": 1,
       "lastAuditedAt": "2026-07-28T16:29:35.909Z",
-      "lastAuditedSha": "c5a73094643e378d75a84a64bbb36f53dca2771c",
-      "verdict": "improved",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "legacy-v1",
+        "sha": "c5a73094643e378d75a84a64bbb36f53dca2771c"
+      },
       "notes": "补齐 deprecated lifecycle 描述漏掉的 wrap-anywhere 溢出守卫（与 new/beta 镜像分支已漂移），并加测试锁住两个位置；订正三处把 auto-expand 写成 prefix match 的注释——实现是 collectFieldPaths 集合成员判定，公开 FieldNode.path 契约据此放宽。",
-      "openFindings": []
+      "findings": []
     },
     "api-docs-schema-composition": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-field-annotation": {
       "round": 1,
       "lastAuditedAt": "2026-07-29T14:39:47.783Z",
-      "lastAuditedSha": "6600dc9a238a26ac6864f0beb61a886759faeafb",
-      "verdict": "improved",
+      "change": "modified",
+      "status": "deferred",
+      "evidence": {
+        "kind": "legacy-v1",
+        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+      },
       "notes": "补 dev 下未命中 field-ref 的 console.warn，诊断以内聚于组件的 watchEffect 实现，并在 import.meta.test 下通过组件真实挂载路径覆盖接线与精确文案；跨页链接对 raw FieldNode.path 编码一次，app router 直接使用 Vue Router 已规范化的 hash 完成跨页滚动；SiteSearch 通过真实 command option 点击覆盖同页搜索关闭后的焦点交接。未动 props / emits / slots 公开契约。",
-      "openFindings": [
-        "t computed 的 labels 合并模式在 Term/Doc/Field 三形态各写一遍（4 行 spread）；抽共享 helper 需跨 foundation ↔ kit 边界新增自动导入符号，且只能落 foundation、让 kit 组件多一条依赖边，收益不抵间接层。建议与 foundation-annotation-popover 那一簇一起复审再定。"
+      "findings": [
+        {
+          "id": "f-fd7282669072",
+          "severity": "unknown",
+          "claim": null,
+          "evidence": "t computed 的 labels 合并模式在 Term/Doc/Field 三形态各写一遍（4 行 spread）；抽共享 helper 需跨 foundation ↔ kit 边界新增自动导入符号，且只能落 foundation、让 kit 组件多一条依赖边，收益不抵间接层。建议与 foundation-annotation-popover 那一簇一起复审再定。",
+          "disposition": "open"
+        }
       ]
     },
     "api-docs-event-badge": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-operation-target": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-operation-header": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-code-rail": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-site-search": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-webhook-protocol": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     },
     "api-docs-sidebar-nav": {
       "round": 0,
       "lastAuditedAt": null,
-      "lastAuditedSha": null,
-      "verdict": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
       "notes": null,
-      "openFindings": []
+      "findings": []
     }
   }
 }

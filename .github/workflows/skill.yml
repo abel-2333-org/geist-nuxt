@@ -62,6 +62,12 @@ jobs:
       - name: Test registry operations
         run: pnpm test:registry
 
+      - name: Verify audit evidence on the merge tree
+        # pull_request 事件 checkout 的是 synthetic merge tree。这里同时重算
+        # scope 内容与 registry item 拓扑:内容、files、dependencies、删除或
+        # 改名发生漂移时,旧 verified 证据都会 fail closed。
+        run: pnpm audit:verify
+
       - name: Test API Docs components
         run: pnpm test:component
 

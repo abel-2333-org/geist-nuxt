@@ -6,6 +6,7 @@ node_modules/
 /dist-verify/
 /dist-skill.tar.gz
 *.log
+*.lock.owner-*
 .DS_Store
 
 # Agent skill 内容由 skills-lock.json 记录来源并还原到 .agents/；
