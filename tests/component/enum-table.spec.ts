@@ -37,7 +37,10 @@ describe('variant applicability caption', () => {
   it('renders the active variant `when` and swaps it with the selection', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { variants } })
 
-    expect(wrapper.text()).toContain('Applies when gitSource is set.')
+    const caption = wrapper.get('[data-enum-when]')
+    expect(caption.text()).toContain('Applies when gitSource is set.')
+    expect(caption.classes()).toContain('wrap-anywhere')
+    expect(caption.classes()).toContain('min-w-0')
     expect(wrapper.text()).not.toContain('Applies to a prebuilt output.')
 
     // `when` is authored copy, so it goes through InlineMarkdown like every
@@ -120,6 +123,20 @@ describe('filter live region', () => {
 
     expect(wrapper.find('[role="status"]').exists()).toBe(false)
   })
+
+  it('clears a query when a reused list becomes too short to filter', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
+    const filter = wrapper.findComponent({ name: 'UInput' })
+
+    filter.vm.$emit('update:modelValue', 'zzz')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('No matching values')
+
+    await wrapper.setProps({ values: [{ value: 'a', description: 'only one' }] })
+    expect(wrapper.findComponent({ name: 'UInput' }).exists()).toBe(false)
+    expect(wrapper.text()).toContain('only one')
+    expect(wrapper.text()).not.toContain('No matching values')
+  })
 })
 
 describe('variant selection', () => {
@@ -151,5 +168,12 @@ describe('variant selection', () => {
     await wrapper.setProps({ variants: [variants[0]] })
     expect(wrapper.text()).toContain('BUILDING')
     expect(wrapper.text()).not.toContain('No matching values')
+
+    // The raw selection is reset, not merely hidden by a computed fallback.
+    // Re-expanding must therefore keep the first group selected.
+    await wrapper.setProps({ variants })
+    expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
+    expect(wrapper.text()).toContain('BUILDING')
+    expect(wrapper.text()).not.toContain('UPLOADING')
   })
 })

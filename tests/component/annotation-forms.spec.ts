@@ -195,7 +195,7 @@ describe('ApiDocsFieldAnnotation', () => {
         provideFieldSource({
           state: {
             page: '/reference',
-            field: { path: 'res_state', name: 'state', type: 'enum' },
+            field: { path: 'res_state%25', name: 'state', type: 'enum' },
           },
         })
       },
@@ -204,7 +204,7 @@ describe('ApiDocsFieldAnnotation', () => {
     wrapper = await mountSuspended(Host, { attachTo: document.body })
 
     await open(wrapper)
-    expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/reference#res_state')
+    expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/reference#res_state%2525')
   })
 
   it('derives the requiredness marker so an orphan condition is tagged in the preview too', async () => {

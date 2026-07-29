@@ -88,7 +88,7 @@ const crossPageTo = computed(() => {
   const page = entry.value?.page
   if (!page || normalizePath(page) === normalizePath(route.path)) return undefined
   // Without an anchor path the link still navigates to the documenting page.
-  return node.value?.path ? `${page}#${node.value.path}` : page
+  return node.value?.path ? `${page}#${encodeURIComponent(node.value.path)}` : page
 })
 
 /** Same-page deep link only works when the node carries its anchor path. */

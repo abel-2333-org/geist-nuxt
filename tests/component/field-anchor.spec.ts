@@ -1,6 +1,8 @@
 import { defineComponent, onMounted, shallowRef } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import routerOptions from '../../app/router.options'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 
@@ -385,6 +387,31 @@ describe('useFieldAnchor', () => {
     newRoute.unmount()
     expect(second.cancel).toHaveBeenCalledOnce()
     expect(history.scrollRestoration).toBe('auto')
+  })
+})
+
+describe('field anchor router scroll', () => {
+  it('uses Vue Router decoded hashes as literal DOM ids', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/reference', component: { template: '<div />' } }],
+    })
+    const from = router.resolve('/reference')
+    const to = router.resolve('/reference#res_state%2525')
+    expect(to.hash).toBe('#res_state%25')
+
+    const target = document.createElement('div')
+    target.id = 'res_state%25'
+    target.scrollIntoView = vi.fn()
+    document.body.append(target)
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      callback(0)
+      return 1
+    }))
+
+    await expect(routerOptions.scrollBehavior!(to, from, null)).resolves.toBe(false)
+    expect(target.scrollIntoView).toHaveBeenCalledTimes(2)
+    target.remove()
   })
 })
 

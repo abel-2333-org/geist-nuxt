@@ -60,6 +60,17 @@ const activeIndex = computed(() => {
   return Number.isInteger(i) && i >= 0 && i < filteredVariants.value.length ? i : 0
 })
 
+// A visual clamp is not enough: if the groups later expand again, an invalid
+// raw index would become valid and silently resurrect the old selection.
+watch(
+  () => filteredVariants.value.length,
+  (length) => {
+    const i = Number(activeTab.value)
+    if (!Number.isInteger(i) || i < 0 || i >= length) activeTab.value = '0'
+  },
+  { flush: 'sync' },
+)
+
 // Tab per variant, badged with its *filtered* count so an active search reveals
 // which variant holds the matches even while you're viewing another tab.
 const variantTabs = computed<TabsItem[]>(() =>
@@ -88,6 +99,11 @@ const totalCount = computed(() =>
 
 // Only large lists need the search affordance.
 const filterable = computed(() => totalCount.value >= props.filterThreshold)
+
+// Never retain a filter the reader can no longer see or clear.
+watch(filterable, (value) => {
+  if (!value) query.value = ''
+}, { flush: 'sync' })
 
 // Filtering rewrites the list silently, so announce what the rendered region
 // now holds — the same contract SidebarNav (this kit's other filterable list)
@@ -150,7 +166,11 @@ const filterAnnouncement = computed(() => {
          says when you are in it. Neutral, never amber — the warning ladder
          belongs to the field row this table nests inside, and one more amber
          object there would flatten that grading. -->
-    <p v-if="activeVariant?.when" class="text-xs leading-relaxed text-muted">
+    <p
+      v-if="activeVariant?.when"
+      data-enum-when
+      class="wrap-anywhere min-w-0 text-xs leading-relaxed text-muted"
+    >
       <InlineMarkdown :text="activeVariant.when" />
     </p>
 
