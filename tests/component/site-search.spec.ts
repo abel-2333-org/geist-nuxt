@@ -40,10 +40,9 @@ describe('SiteSearch hash focus handoff', () => {
     await wrapper.get('button').trigger('click')
 
     const palette = wrapper.findComponent({ name: 'UCommandPalette' })
-    const [group] = palette.props('groups')
-    const [item] = group.items
-    item.onSelect()
-    palette.vm.$emit('update:modelValue', item)
+    const option = palette.get('[role="option"][data-slot="item"]')
+    expect(option.text()).toContain('State')
+    await option.trigger('click')
 
     await vi.waitFor(() => expect(document.activeElement).toBe(target))
     expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })

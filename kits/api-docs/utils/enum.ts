@@ -47,6 +47,9 @@ export interface EnumTableProps {
    *  Same signature as SidebarNav's — the kit's two filterable lists announce
    *  through one contract shape. */
   resultsAnnouncement?: (count: number) => string
+  /** Polite live-region text for grouped enums. Receives the aggregate hit
+   *  count, the active group's hit count, and its localized label. */
+  variantResultsAnnouncement?: (totalCount: number, activeCount: number, activeLabel: string) => string
   /** Polite live-region text when a filter yields nothing. Receives the query. */
   noResultsAnnouncement?: (query: string) => string
 }

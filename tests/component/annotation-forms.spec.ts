@@ -146,6 +146,19 @@ describe('DocAnnotation', () => {
 })
 
 describe('ApiDocsFieldAnnotation', () => {
+  it('warns through the mounted component when a field ref is unresolved', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    wrapper = await mountSuspended(FieldAnnotation, {
+      props: { fieldRef: 'missing' },
+      slots: { default: () => 'Legacy field' },
+    })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn).toHaveBeenCalledWith(
+      '[FieldAnnotation] no field source entry for field-ref "missing" — rendering plain text',
+    )
+  })
+
   it('resolves a field source entry and jumps to the same-page field', async () => {
     const Host = defineComponent({
       components: { FieldAnnotation },
@@ -227,9 +240,7 @@ describe('ApiDocsFieldAnnotation', () => {
   })
 
   it('degrades an unresolved field ref to plain slot text', async () => {
-    // The component also warns the author in dev (parity with TermAnnotation's
-    // unknown-glossary-id warning), but `import.meta.dev` is false under
-    // @nuxt/test-utils, so that branch is not reachable from this suite.
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     wrapper = await mountSuspended(FieldAnnotation, {
       props: { fieldRef: 'missing' },
       slots: { default: () => 'Legacy field' },

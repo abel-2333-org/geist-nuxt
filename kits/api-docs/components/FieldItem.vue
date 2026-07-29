@@ -77,7 +77,8 @@ const schemaComposition = computed(() => {
 // no defaults here and are read straight from `props.labels` at the passing site.
 type PassthroughLabel =
   | 'lifecycle'
-  | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant' | 'enumResults' | 'enumNoResults'
+  | 'enumLabel' | 'enumFilter' | 'enumEmpty' | 'enumVariant'
+  | 'enumResults' | 'enumVariantResults' | 'enumNoResults'
   | 'composition'
 const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
@@ -403,6 +404,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           :empty-label="labels?.enumEmpty"
           :variant-label="labels?.enumVariant"
           :results-announcement="labels?.enumResults"
+          :variant-results-announcement="labels?.enumVariantResults"
           :no-results-announcement="labels?.enumNoResults"
         />
 

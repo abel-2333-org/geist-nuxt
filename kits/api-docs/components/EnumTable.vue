@@ -5,6 +5,7 @@ export type { EnumValue, EnumVariant } from '#imports'
 
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
+import { useResizeObserver } from '@vueuse/core'
 
 // Domain component (API docs): renders a field's allowed values. Composed from
 // Nuxt UI primitives + core atoms (InlineCode, InlineMarkdown, both supplied by
@@ -25,6 +26,9 @@ const props = withDefaults(
     variantLabel: (index: number) => `Option ${index + 1}`,
     filterThreshold: 30,
     resultsAnnouncement: (count: number) => `${count} value${count === 1 ? '' : 's'} found`,
+    variantResultsAnnouncement: (totalCount: number, activeCount: number, activeLabel: string) =>
+      `${totalCount} value${totalCount === 1 ? '' : 's'} found across all options; `
+      + `${activeCount} in ${activeLabel}`,
     noResultsAnnouncement: (q: string) => `No matching values for “${q}”`,
   },
 )
@@ -82,6 +86,10 @@ const variantTabs = computed<TabsItem[]>(() =>
 )
 
 const activeVariant = computed(() => filteredVariants.value[activeIndex.value])
+const activeVariantLabel = computed(() => {
+  const label = variantTabs.value[activeIndex.value]?.label
+  return typeof label === 'string' ? label : props.variantLabel(activeIndex.value)
+})
 
 // The values actually rendered: the active variant's filtered list, or the
 // filtered flat list.
@@ -120,6 +128,46 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
 // threshold while typing would remove max-height and expand a long table.
 const bounded = computed(() => activeTotalCount.value >= props.filterThreshold)
 
+// `bounded` keeps the page layout stable while filtering, but keyboard chrome
+// belongs only on a box that genuinely scrolls. Measure the rendered element
+// instead of using row count as a second proxy: descriptions and viewport width
+// both change its real height.
+const scrollBox = useTemplateRef<HTMLElement>('scrollBox')
+const scrollable = shallowRef(false)
+const focusable = computed(() => bounded.value && scrollable.value)
+let measureFrame = 0
+
+function measureOverflow() {
+  const el = scrollBox.value
+  scrollable.value = Boolean(
+    bounded.value
+    && el
+    && el.scrollHeight > el.clientHeight + 1,
+  )
+}
+
+function scheduleOverflowMeasure() {
+  if (typeof requestAnimationFrame === 'undefined') {
+    measureOverflow()
+    return
+  }
+  if (measureFrame) cancelAnimationFrame(measureFrame)
+  measureFrame = requestAnimationFrame(() => {
+    measureFrame = 0
+    measureOverflow()
+  })
+}
+
+useResizeObserver(scrollBox, scheduleOverflowMeasure)
+onMounted(scheduleOverflowMeasure)
+watch([visibleValues, bounded], () => scheduleOverflowMeasure(), {
+  deep: true,
+  flush: 'post',
+})
+onBeforeUnmount(() => {
+  if (measureFrame) cancelAnimationFrame(measureFrame)
+})
+
 // Never retain a filter the reader can no longer see or clear.
 watch(filterable, (value) => {
   if (!value) query.value = ''
@@ -131,9 +179,13 @@ watch(filterable, (value) => {
 const filterAnnouncement = computed(() => {
   const q = query.value.trim()
   if (!q) return ''
-  return filteredCount.value === 0
-    ? props.noResultsAnnouncement(q)
-    : props.resultsAnnouncement(filteredCount.value)
+  if (filteredCount.value === 0) return props.noResultsAnnouncement(q)
+  if (!isVariant.value) return props.resultsAnnouncement(filteredCount.value)
+  return props.variantResultsAnnouncement(
+    filteredCount.value,
+    visibleValues.value.length,
+    activeVariantLabel.value,
+  )
 })
 </script>
 
@@ -194,19 +246,26 @@ const filterAnnouncement = computed(() => {
       <InlineMarkdown :text="activeVariant.when" />
     </p>
 
-    <!-- The active list is bounded only while it still meets the threshold.
-         Filtering or switching to a short variant removes the max-height and
-         tab stop; a non-scrolling static region must not enter keyboard order.
-         Nothing inside a genuinely bounded box is focusable, so that scroll
-         region itself takes a named, focus-ringed tab stop. -->
+    <!-- The authored active list controls the stable max-height; DOM overflow
+         controls keyboard chrome. Filtering therefore never expands a long
+         table, while a now-short/non-scrolling result leaves the tab order.
+         Nothing inside a genuinely scrolling box is focusable, so that region
+         itself takes a named, focus-ringed tab stop. -->
     <div
+      ref="scrollBox"
+      data-enum-scroll
       class="overflow-hidden rounded-lg border border-default"
       :class="bounded
-        ? 'max-h-80 overflow-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+        ? [
+          'max-h-80 overflow-y-auto',
+          focusable
+            ? 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+            : '',
+        ]
         : ''"
-      :tabindex="bounded ? 0 : undefined"
-      :role="bounded ? 'group' : undefined"
-      :aria-label="bounded ? label : undefined"
+      :tabindex="focusable ? 0 : undefined"
+      :role="focusable ? 'group' : undefined"
+      :aria-label="focusable ? label : undefined"
     >
       <!-- One shared grid for the whole table: the value column is sized once,
            to the widest code across all rows (capped at 12rem), so every row's

@@ -29,6 +29,15 @@ export type FieldSourceMap = Record<string, FieldSourceEntry>
 
 const FIELD_SOURCE_KEY: InjectionKey<FieldSourceMap> = Symbol('geist-field-source')
 
+/** Dev diagnostic shared by the component effect and its unit test. */
+export function warnUnresolvedFieldRef(
+  fieldRef: string | undefined,
+  resolved: FieldNode | undefined,
+) {
+  if (!fieldRef || resolved) return
+  console.warn(`[FieldAnnotation] no field source entry for field-ref "${fieldRef}" — rendering plain text`)
+}
+
 /** Call in a page/layout/demo setup to expose referenced fields to descendants. */
 export function provideFieldSource(map: FieldSourceMap) {
   provide(FIELD_SOURCE_KEY, map)

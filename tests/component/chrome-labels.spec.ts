@@ -61,6 +61,8 @@ const zhLabels = {
   enumEmpty: '无匹配值',
   enumVariant: (i: number) => `选项 ${i + 1}`,
   enumResults: (n: number) => `找到 ${n} 个值`,
+  enumVariantResults: (total: number, active: number, label: string) =>
+    `全部选项找到 ${total} 个值；${label} 中有 ${active} 个`,
   enumNoResults: (q: string) => `没有匹配「${q}」的值`,
   composition: {
     oneOf: '其中一个',
@@ -360,8 +362,8 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
       props: {
         name: 'bank', type: 'string',
         enumVariants: [
-          { values: [{ value: 'a', description: '' }] },
-          { values: [{ value: 'b', description: '' }] },
+          { values: manyValues },
+          { values: [{ value: 'only-second', description: '' }] },
         ],
         labels: zhLabels,
       },
@@ -369,6 +371,11 @@ describe('FieldItem → EnumTable structural label passthrough', () => {
     expect(wrapper.text()).toContain('选项 1')
     expect(wrapper.text()).toContain('选项 2')
     expect(wrapper.text()).not.toContain('Option 1')
+
+    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'only-second')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[role="status"]').text())
+      .toBe('全部选项找到 1 个值；选项 1 中有 0 个')
   })
 
   it('recursive children reuse the same labels object', async () => {

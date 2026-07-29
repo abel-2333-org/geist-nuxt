@@ -2,9 +2,85 @@
 // (that lives in chrome-labels.spec.ts). Covers the variant `when` caption, the
 // keyboard-reachable scroll region, the filter live region, and the single
 // filter pass shared by tab badges and the rendered body.
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
+
+let scrollHeight = 0
+let clientHeight = 0
+let observers: TestResizeObserver[] = []
+let frames = new Map<number, FrameRequestCallback>()
+let nextFrame = 0
+let frameRuns = 0
+
+class TestResizeObserver {
+  readonly targets = new Set<Element>()
+
+  constructor(private readonly callback: ResizeObserverCallback) {
+    observers.push(this)
+  }
+
+  observe(target: Element) {
+    this.targets.add(target)
+  }
+
+  unobserve(target: Element) {
+    this.targets.delete(target)
+  }
+
+  disconnect() {
+    this.targets.clear()
+  }
+
+  trigger() {
+    this.callback([], this as unknown as ResizeObserver)
+  }
+}
+
+beforeEach(() => {
+  scrollHeight = 0
+  clientHeight = 0
+  observers = []
+  frames = new Map()
+  nextFrame = 0
+  frameRuns = 0
+  vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() => scrollHeight)
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => clientHeight)
+  vi.stubGlobal('ResizeObserver', TestResizeObserver)
+  vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+    const id = ++nextFrame
+    frames.set(id, callback)
+    return id
+  }))
+  vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => {
+    frames.delete(id)
+  }))
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
+
+function setOverflow(scroll: number, client: number) {
+  scrollHeight = scroll
+  clientHeight = client
+}
+
+function resize(element: Element) {
+  const observer = observers.find(candidate => candidate.targets.has(element))
+  if (!observer) throw new Error('EnumTable scroll box is not observed')
+  observer.trigger()
+}
+
+function flushAnimationFrames() {
+  const pending = [...frames.entries()]
+  frames.clear()
+  for (const [id, callback] of pending) {
+    frameRuns += 1
+    callback(id)
+  }
+}
 
 /** ≥ filterThreshold(30) so the filter + bounded scroll box appear. */
 const manyValues = Array.from({ length: 30 }, (_, i) => ({
@@ -61,6 +137,7 @@ describe('variant applicability caption', () => {
 
     expect(wrapper.text()).toContain('Only group')
     expect(wrapper.text()).not.toContain('Applies')
+    expect(wrapper.find('[data-enum-when]').exists()).toBe(false)
   })
 })
 
@@ -68,7 +145,10 @@ describe('scroll region reachability', () => {
   it('gives the bounded scroll box a named tab stop', async () => {
     // Nothing inside the box is focusable, so without this a keyboard-only
     // user cannot scroll past the fold (focus-a11y.md 键盘可达).
+    setOverflow(640, 320)
     const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
+    flushAnimationFrames()
+    await wrapper.vm.$nextTick()
     const box = wrapper.find('[role="group"]')
 
     expect(box.exists()).toBe(true)
@@ -87,14 +167,48 @@ describe('scroll region reachability', () => {
   })
 
   it('keeps a long authored list bounded while filtering its visible rows', async () => {
+    setOverflow(640, 320)
     const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
+    flushAnimationFrames()
+    await wrapper.vm.$nextTick()
+    const box = wrapper.get('[data-enum-scroll]')
+    expect(box.attributes('tabindex')).toBe('0')
 
+    setOverflow(40, 40)
     wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'value_1')
+    await wrapper.vm.$nextTick()
+    flushAnimationFrames()
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findAll('dt')).toHaveLength(11)
     expect(scrollBox(wrapper.html())).toBe(true)
-    expect(wrapper.find('[role="group"]').attributes('tabindex')).toBe('0')
+    expect(box.attributes('tabindex')).toBeUndefined()
+    expect(box.attributes('role')).toBeUndefined()
+
+    setOverflow(360, 320)
+    resize(box.element)
+    flushAnimationFrames()
+    await wrapper.vm.$nextTick()
+    expect(box.attributes('tabindex')).toBe('0')
+    expect(box.attributes('role')).toBe('group')
+  })
+
+  it('coalesces resize work and cancels a pending frame on unmount', async () => {
+    setOverflow(640, 320)
+    const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
+    const box = wrapper.get('[data-enum-scroll]')
+
+    resize(box.element)
+    resize(box.element)
+    expect(frames.size).toBe(1)
+    expect(requestAnimationFrame).toHaveBeenCalledTimes(3)
+    expect(cancelAnimationFrame).toHaveBeenCalledTimes(2)
+
+    const runsBeforeUnmount = frameRuns
+    wrapper.unmount()
+    expect(frames.size).toBe(0)
+    flushAnimationFrames()
+    expect(frameRuns).toBe(runsBeforeUnmount)
   })
 })
 
@@ -158,7 +272,8 @@ describe('filter live region', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.findAll('dt')).toHaveLength(0)
-    expect(wrapper.find('[role="status"]').text()).toBe('1 value found')
+    expect(wrapper.find('[role="status"]').text())
+      .toBe('1 value found across all options; 0 in Git deploys')
     const items = wrapper.findComponent({ name: 'UTabs' }).props('items') as Array<{ badge: string }>
     expect(items.map(i => i.badge)).toEqual(['0', '1'])
   })
@@ -203,6 +318,7 @@ describe('variant selection', () => {
   })
 
   it('keeps a short active variant out of the tab order when the total remains filterable', async () => {
+    setOverflow(640, 320)
     const wrapper = await mountSuspended(EnumTable, {
       props: {
         variants: [
@@ -212,6 +328,8 @@ describe('variant selection', () => {
       },
     })
 
+    flushAnimationFrames()
+    await wrapper.vm.$nextTick()
     expect(wrapper.find('[role="group"]').exists()).toBe(true)
     wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
     await wrapper.vm.$nextTick()

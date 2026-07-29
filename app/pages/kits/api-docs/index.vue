@@ -723,10 +723,10 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Enum 值表</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            两种形态：扁平 <code class="font-mono text-[0.8125rem]">values</code>
-            是单一取值列表；分组 <code class="font-mono text-[0.8125rem]">variants</code>
+            两种形态：扁平 <code class="font-mono text-code">values</code>
+            是单一取值列表；分组 <code class="font-mono text-code">variants</code>
             用于取值随条件变化的字段，tab 标题命名分组，下方
-            <code class="font-mono text-[0.8125rem]">when</code> 说明该组何时适用。
+            <code class="font-mono text-code">when</code> 说明该组何时适用。
           </p>
           <div class="grid gap-6 lg:grid-cols-2">
             <ApiDocsEnumTable :values="enumValues" />
