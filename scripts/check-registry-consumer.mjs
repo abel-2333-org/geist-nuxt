@@ -414,6 +414,10 @@ async function materializeSource(sourceSha) {
     run('git', ['archive', '--format=tar', '--output', archivePath, sourceSha], repoRoot)
     run('tar', ['xf', archivePath, '-C', sourceRoot], repoRoot)
     await rm(archivePath)
+    // The archived registry CLI belongs to this repository, so it must resolve
+    // this repository's tooling dependencies rather than the consumer fixture's
+    // intentionally minimal dependency tree.
+    await symlink(path.join(repoRoot, 'node_modules'), path.join(sourceRoot, 'node_modules'), 'dir')
     await writeFile(path.join(sourceRoot, '.geist-source.json'), `${JSON.stringify({
       schemaVersion: 1,
       sourceSha,

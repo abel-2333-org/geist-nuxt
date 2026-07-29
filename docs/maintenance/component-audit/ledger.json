@@ -26,11 +26,14 @@
     },
     "foundation-inline-markdown": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T02:42:22.000Z",
-      "lastAuditedSha": "b497e08b7abdec2f51ca0d495d20df38f16fd9f7",
+      "lastAuditedAt": "2026-07-28T16:29:35.909Z",
+      "lastAuditedSha": "c5a73094643e378d75a84a64bbb36f53dca2771c",
       "verdict": "improved",
-      "notes": "PR #50 已用 marked inline lexer + 受控 Vue token renderer 替换有序正则，修复 delimiter-run、危险链接与 image/HTML/autolink 半解析；补齐 item package dependency、consumer closure 与回归测试。合并后的 canonical main tree 已验证与审核 head 完全一致。",
-      "openFindings": []
+      "notes": "修复 4 类标记游程被半吞、裸标记漏进渲染结果的缺陷（***x***、__x__、___x___、MAX__VALUE__LIMIT），补齐最长游程优先规则与 `_` 词边界；新增 36 例 tokenizer spec，同步 reference 与 gallery。",
+      "openFindings": [
+        "内层标记与外层收尾标记紧贴时仍残留一个标记（`**bold *em***` → `<strong>bold *em</strong>*`）。既有行为，非本次回归；彻底修复需把有序规则表换成 CommonMark delimiter-run 算法（左右 flanking + rule of three）。",
+        "裸 `***` 渲染为 `<em>*</em>`。收紧 `*` em 规则两端守卫可修，但实测会回退 `**bold***em*`；与上一条同属 delimiter-run 改造，应一并处理。"
+      ]
     },
     "foundation-semantic-badge": {
       "round": 0,

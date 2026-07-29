@@ -91,6 +91,15 @@ const visibleValues = computed<EnumValue[]>(() =>
     : filterValues(props.values ?? []),
 )
 
+// The filter searches every variant, so its live-region result must use the
+// same global scope. Announcing only the active panel could claim "no matches"
+// while another tab's badge shows a hit.
+const filteredCount = computed(() =>
+  isVariant.value
+    ? filteredVariants.value.reduce((n, v) => n + v.values.length, 0)
+    : visibleValues.value.length,
+)
+
 const totalCount = computed(() =>
   isVariant.value
     ? (props.variants ?? []).reduce((n, v) => n + v.values.length, 0)
@@ -100,20 +109,25 @@ const totalCount = computed(() =>
 // Only large lists need the search affordance.
 const filterable = computed(() => totalCount.value >= props.filterThreshold)
 
+// Search availability is global, but the bounded panel is local to the active
+// result set. Keep a short/filtered panel out of the tab order when it cannot
+// actually scroll.
+const bounded = computed(() => visibleValues.value.length >= props.filterThreshold)
+
 // Never retain a filter the reader can no longer see or clear.
 watch(filterable, (value) => {
   if (!value) query.value = ''
 }, { flush: 'sync' })
 
-// Filtering rewrites the list silently, so announce what the rendered region
-// now holds — the same contract SidebarNav (this kit's other filterable list)
-// already carries. Empty while idle so ordinary browsing stays quiet.
+// Filtering rewrites every variant silently, so announce the aggregate result
+// — the same scope as the input and the tab badges. Empty while idle so
+// ordinary browsing stays quiet.
 const filterAnnouncement = computed(() => {
   const q = query.value.trim()
   if (!q) return ''
-  return visibleValues.value.length === 0
+  return filteredCount.value === 0
     ? props.noResultsAnnouncement(q)
-    : props.resultsAnnouncement(visibleValues.value.length)
+    : props.resultsAnnouncement(filteredCount.value)
 })
 </script>
 
@@ -174,20 +188,19 @@ const filterAnnouncement = computed(() => {
       <InlineMarkdown :text="activeVariant.when" />
     </p>
 
-    <!-- Filterable lists (>= filterThreshold, default 30) scroll within a
-         bounded area so a long enum never blows out the page; short lists
-         render at full height. Nothing inside the box is focusable (it is all
-         static text), so the scroll region itself takes a tab stop — otherwise
-         a keyboard-only user cannot reach the values below the fold. Named and
-         focus-ringed per the system focus spec. -->
+    <!-- The active list is bounded only while it still meets the threshold.
+         Filtering or switching to a short variant removes the max-height and
+         tab stop; a non-scrolling static region must not enter keyboard order.
+         Nothing inside a genuinely bounded box is focusable, so that scroll
+         region itself takes a named, focus-ringed tab stop. -->
     <div
       class="overflow-hidden rounded-lg border border-default"
-      :class="filterable
+      :class="bounded
         ? 'max-h-80 overflow-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
         : ''"
-      :tabindex="filterable ? 0 : undefined"
-      :role="filterable ? 'group' : undefined"
-      :aria-label="filterable ? label : undefined"
+      :tabindex="bounded ? 0 : undefined"
+      :role="bounded ? 'group' : undefined"
+      :aria-label="bounded ? label : undefined"
     >
       <!-- One shared grid for the whole table: the value column is sized once,
            to the widest code across all rows (capped at 12rem), so every row's

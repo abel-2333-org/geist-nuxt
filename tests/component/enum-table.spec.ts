@@ -45,7 +45,7 @@ describe('variant applicability caption', () => {
 
     // `when` is authored copy, so it goes through InlineMarkdown like every
     // other description in this kit — the backticks become inline code.
-    expect(wrapper.html()).toContain('<code')
+    expect(caption.get('code').text()).toBe('gitSource')
 
     wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
     await wrapper.vm.$nextTick()
@@ -137,6 +137,20 @@ describe('filter live region', () => {
     expect(wrapper.text()).toContain('only one')
     expect(wrapper.text()).not.toContain('No matching values')
   })
+
+  it('announces matches across every variant instead of only the active panel', async () => {
+    const wrapper = await mountSuspended(EnumTable, {
+      props: { variants, filterThreshold: 1 },
+    })
+
+    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'UPLOADING')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('dt')).toHaveLength(0)
+    expect(wrapper.find('[role="status"]').text()).toBe('1 value found')
+    const items = wrapper.findComponent({ name: 'UTabs' }).props('items') as Array<{ badge: string }>
+    expect(items.map(i => i.badge)).toEqual(['0', '1'])
+  })
 })
 
 describe('variant selection', () => {
@@ -175,5 +189,24 @@ describe('variant selection', () => {
     expect(wrapper.findComponent({ name: 'UTabs' }).props('modelValue')).toBe('0')
     expect(wrapper.text()).toContain('BUILDING')
     expect(wrapper.text()).not.toContain('UPLOADING')
+  })
+
+  it('keeps a short active variant out of the tab order when the total remains filterable', async () => {
+    const wrapper = await mountSuspended(EnumTable, {
+      props: {
+        variants: [
+          { title: 'First', values: manyValues },
+          { title: 'Second', values: [{ value: 'only', description: 'One value.' }] },
+        ],
+      },
+    })
+
+    expect(wrapper.find('[role="group"]').exists()).toBe(true)
+    wrapper.findComponent({ name: 'UTabs' }).vm.$emit('update:modelValue', '1')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findComponent({ name: 'UInput' }).exists()).toBe(true)
+    expect(wrapper.find('[role="group"]').exists()).toBe(false)
+    expect(scrollBox(wrapper.html())).toBe(false)
   })
 })
