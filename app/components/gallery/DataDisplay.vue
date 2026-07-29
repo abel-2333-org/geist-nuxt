@@ -93,7 +93,14 @@ const columns = [
     >
       <GalleryExample label="Inline subset" layout="stack">
         <p class="text-sm text-muted">
-          <InlineMarkdown text="Supports **bold**, *em*, `code`, ~~strikethrough~~ and [links](https://vercel.com)." />
+          <InlineMarkdown text="Supports **bold**, *em*, ***both***, `code`, ~~strikethrough~~ and [links](https://vercel.com)." />
+        </p>
+      </GalleryExample>
+      <!-- The safety facet, not a second syntax demo: CommonMark delimiter
+           rules leave these API identifiers and patterns literal. -->
+      <GalleryExample label="Technical text stays literal" layout="stack">
+        <p class="text-sm text-muted">
+          <InlineMarkdown text="Leaves snake_case, MAX__VALUE__LIMIT, [a-z_]__[0-9] and 2*3*4 alone." />
         </p>
       </GalleryExample>
     </GalleryEntry>

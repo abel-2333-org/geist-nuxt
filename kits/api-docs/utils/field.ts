@@ -59,10 +59,11 @@ export interface FieldNote {
  */
 export interface FieldNode {
   /**
-   * Stable, unique, hierarchical id used as the DOM id and URL hash for deep
-   * linking, e.g. `request-body_customer_address_city`. Underscore-separated
-   * so a row can tell whether the active anchor lives among its descendants
-   * (prefix match) and auto-expand.
+   * Stable, unique, opaque id used verbatim as the DOM id and encoded once when
+   * transported in a URL hash for deep linking. The renderer never appends a
+   * suffix, slugifies it, or infers ancestry from separators. Hidden variants
+   * and ancestor rows are revealed by exact membership in recursively collected
+   * field/composition path sets.
    */
   path?: string
   name: string
@@ -165,8 +166,8 @@ export interface FieldItemProps extends FieldNode {
 export type CompositionKind = 'oneOf' | 'anyOf' | 'allOf'
 
 export interface CompositionVariant {
-  /** Stable identity: tab selection, discriminator mapping target, and anchor
-   *  namespace segment. Never rendered as part of a wire path. */
+  /** Stable identity for tab selection and discriminator mapping. Never
+   *  rendered as part of a wire path or used to derive field anchors. */
   id: string
   /** Localized variant title (user content, rendered verbatim). */
   label: string

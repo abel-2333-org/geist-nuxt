@@ -84,6 +84,46 @@ describe('FieldItem summary layout', () => {
   })
 })
 
+describe('FieldItem lifecycle detail', () => {
+  // The deprecated and the new/beta lifecycle detail are the same markup in two
+  // positions (gate above the description vs. tail of the secondary band), so
+  // they can drift apart silently. Both carry the same authored prose — a
+  // migration note holds upgrade URLs and replacement identifiers just as a
+  // beta note does — so both need the same long-token overflow guard.
+  it.each([
+    ['deprecated', 'deprecated'],
+    ['beta', 'beta'],
+  ] as const)('wraps a long %s description the same way', async (_name, status) => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'legacyToken',
+        type: 'string',
+        lifecycle: {
+          status,
+          description: 'Use https://example.com/docs/migration/an-unbroken-replacement-identifier instead.',
+        },
+      },
+    })
+
+    const detail = wrapper.get('[data-field-lifecycle-detail]')
+    expect(detail.classes()).toContain('wrap-anywhere')
+  })
+
+  it('keeps the since row aligned in both positions', async () => {
+    for (const status of ['deprecated', 'new'] as const) {
+      const wrapper = await mountSuspended(FieldItem, {
+        props: { name: 'amount', type: 'integer', lifecycle: { status, since: 'v2.3' } },
+      })
+
+      const detail = wrapper.get('[data-field-lifecycle-detail]')
+      expect(detail.element.tagName).toBe('DL')
+      expect(detail.classes()).toContain('grid-cols-[fit-content(8rem)_minmax(0,1fr)]')
+      expect(detail.find('dd').classes()).toContain('wrap-anywhere')
+      expect(detail.text()).toContain('v2.3')
+    }
+  })
+})
+
 describe('FieldItem note category routing', () => {
   it('uses kind as the single note category and defaults omitted kind to constraint', async () => {
     const wrapper = await mountSuspended(FieldItem, {

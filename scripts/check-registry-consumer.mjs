@@ -203,7 +203,7 @@ async function assertResolvedComponents(consumerRoot, lock) {
   }
 }
 
-function packageJson(registry) {
+function packageJson(externalRequirements) {
   return {
     name: 'geist-registry-consumer-smoke',
     private: true,
@@ -213,11 +213,27 @@ function packageJson(registry) {
       typecheck: 'nuxt typecheck',
       build: 'nuxt build',
     },
-    dependencies: registry.externalRequirements.packages,
+    dependencies: externalRequirements.packages,
     devDependencies: {
       typescript: '~5.9.0',
       'vue-tsc': '^3.3.6',
     },
+  }
+}
+
+function allResolution(registry) {
+  return resolveItems(registry, registry.items.map(item => item.name))
+}
+
+function scenarioResolution(registry, scenario) {
+  return scenario.all
+    ? allResolution(registry)
+    : resolveItems(registry, [scenario.item])
+}
+
+function assertPackageRequirements(manifest, lock, label) {
+  if (JSON.stringify(manifest.dependencies) !== JSON.stringify(lock.registry.externalRequirements.packages)) {
+    throw new Error(`${label}: package.json dependencies differ from resolved lock requirements`)
   }
 }
 
@@ -268,7 +284,12 @@ async function checkLegacyConfigMigration({
         .replace("import base from './config/foundation/app'", "import { geistAppConfig } from './config/geist-app'")
         .replace('defineAppConfig(base)', 'defineAppConfig(geistAppConfig)'),
     )
-    await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(packageJson(registry), null, 2)}\n`)
+    const foundationResolution = resolveItems(registry, ['geist-foundation'])
+    const foundationManifest = packageJson(foundationResolution.externalRequirements)
+    await writeFile(
+      path.join(consumerRoot, 'package.json'),
+      `${JSON.stringify(foundationManifest, null, 2)}\n`,
+    )
     await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
 
     const legacyRegistry = structuredClone(registry)
@@ -372,7 +393,8 @@ async function checkLegacyConfigMigration({
 
     await writeFile(path.join(consumerRoot, 'nuxt.config.ts'), currentEntrypoints.nuxt)
     await writeFile(path.join(consumerRoot, 'app/app.config.ts'), currentEntrypoints.app)
-    await checkConsumer({ registry, repoRoot, consumerRoot })
+    const currentLock = await checkConsumer({ registry, repoRoot, consumerRoot })
+    assertPackageRequirements(foundationManifest, currentLock, 'legacy config migration')
     run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
     run('pnpm', ['run', 'typecheck'], consumerRoot)
     run('pnpm', ['run', 'build'], consumerRoot)
@@ -415,7 +437,12 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
     await validateRegistry(baseRegistry, { repoRoot: sourceRoot, checkFiles: true })
 
     await cp(path.join(sourceRoot, 'tests/fixtures/consumer'), consumerRoot, { recursive: true })
-    await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(packageJson(headRegistry), null, 2)}\n`)
+    const headResolution = allResolution(headRegistry)
+    const headManifest = packageJson(headResolution.externalRequirements)
+    await writeFile(
+      path.join(consumerRoot, 'package.json'),
+      `${JSON.stringify(headManifest, null, 2)}\n`,
+    )
     await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
     const before = await protectedHashes(consumerRoot)
 
@@ -448,6 +475,7 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
       throw new Error('HEAD update modified a protected consumer file')
     }
     const lock = await checkConsumer({ registry: headRegistry, repoRoot, consumerRoot })
+    assertPackageRequirements(headManifest, lock, 'consumer upgrade')
 
     run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
     await assertResolvedComponents(consumerRoot, lock)
@@ -760,7 +788,11 @@ try {
       : path.join(repoRoot, 'node_modules')
     try {
       if (dependencyRoot) {
-        await writeFile(path.join(dependencyRoot, 'package.json'), `${JSON.stringify(packageJson(registry), null, 2)}\n`)
+        const resolution = allResolution(registry)
+        await writeFile(
+          path.join(dependencyRoot, 'package.json'),
+          `${JSON.stringify(packageJson(resolution.externalRequirements), null, 2)}\n`,
+        )
         run('pnpm', ['install', '--ignore-workspace', '--ignore-scripts'], dependencyRoot)
       }
 
@@ -786,10 +818,12 @@ try {
       for (const scenario of scenarios) {
         const consumerRoot = await mkdtemp(path.join(tmpdir(), `geist-consumer-${scenario.label}-`))
         try {
+          const resolution = scenarioResolution(registry, scenario)
+          const manifest = packageJson(resolution.externalRequirements)
           await cp(fixtureRoot, consumerRoot, { recursive: true })
           if (scenario.page) await writeFile(path.join(consumerRoot, 'app/pages/index.vue'), scenario.page)
           const before = await protectedHashes(consumerRoot)
-          await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(packageJson(registry), null, 2)}\n`)
+          await writeFile(path.join(consumerRoot, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`)
           await symlink(dependencyNodeModules, path.join(consumerRoot, 'node_modules'), 'dir')
 
           const copyArgs = [path.join(repoRoot, 'scripts/copy-registry.mjs')]
@@ -804,6 +838,7 @@ try {
           const after = await protectedHashes(consumerRoot)
           if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error(`${scenario.label}: copy-in modified a protected consumer file`)
           const lock = await checkConsumer({ registry, repoRoot, consumerRoot })
+          assertPackageRequirements(manifest, lock, scenario.label)
           if (!scenario.all && JSON.stringify(lock.requestedItems) !== JSON.stringify([scenario.item])) {
             throw new Error(`${scenario.label}: lock did not preserve the requested leaf item`)
           }

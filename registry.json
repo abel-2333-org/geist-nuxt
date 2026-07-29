@@ -83,9 +83,13 @@
       "type": "registry:component",
       "title": "InlineMarkdown",
       "description": "Safe inline markdown subset.",
+      "packageDependencies": {
+        "marked": "^17.0.6"
+      },
       "registryDependencies": ["geist-foundation", "foundation-inline-code"],
       "files": [
-        { "path": "foundation/components/InlineMarkdown.vue", "target": "app/components/InlineMarkdown.vue" }
+        { "path": "foundation/components/InlineMarkdown.vue", "target": "app/components/InlineMarkdown.vue" },
+        { "path": "foundation/components/inline-markdown/parse.ts", "target": "app/components/inline-markdown/parse.ts" }
       ]
     },
     {

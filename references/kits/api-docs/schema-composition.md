@@ -40,8 +40,8 @@
 ## Anchor / deep-link 策略
 
 - **不虚构 wire path**：UI 里字段名与层级只体现真实 payload 结构（`type`、`token`），任何位置不显示 `card.token` 拼接路径。
-- **anchor id 是 identity 层、不是展示层**：唯一性由显示模型的 `path` 保证，约定以 variant id 做命名空间段（`request-body_card_token` vs `request-body_wallet_token`）。
-- **deep link 进隐藏 variant**：`useFieldAnchor` 同时维护目标 `active` 与导航事件 `revision`，每次 `goTo(path)` 递增 revision，故同一路径在用户手动切走 tab / 收起分区后再次触发仍会重新揭示。组件 watch 两者，用 variant 全量 path 集合（同时递归 `children`、`FieldNode.composition` 与 `CompositionVariant.composition`）判断落点：先匹配 `active === path`（精确），再选最长 `active.startsWith(path + '_')` 前缀（避免短前缀抢占更具体的 anchor）→ oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 的 waitForElement / waitForElementStable 完成滚动 + 高亮。FieldItem 的 children disclosure 只按真实 `children` 子图判断，不会因同字段下的 composition anchor 而误展开。
+- **anchor id 是 identity 层、不是展示层**：唯一性由显示模型的 `path` 保证；adapter 可自行采用命名空间策略，但 kit 将它视为 opaque id，原样写入 DOM id，进入 URL hash 时只编码一次；不追加 `-anchor`、不 slugify、也不从分隔符推断层级。
+- **deep link 进隐藏 variant**：`useFieldAnchor` 同时维护目标 `active` 与导航事件 `revision`，每次 `goTo(path)` 递增 revision，故同一路径在用户手动切走 tab / 收起分区后再次触发仍会重新揭示。组件 watch 两者，用 variant 全量 path 集合（同时递归 `children`、`FieldNode.composition` 与 `CompositionVariant.composition`）做 `active === path` 精确匹配 → oneOf 切 tab、anyOf 展开分区；随后 `useFieldAnchor` 的 waitForElement / waitForElementStable 完成滚动 + 高亮。FieldItem 的 children disclosure 只按真实 `children` 子图判断，不会因同字段下的 composition anchor 而误展开。
 - oneOf panel 靠 `unmount-on-hide=false` 常驻 DOM，hash 轮询能找到隐藏元素；切 tab 后元素可见、layout 稳定即滚动。**升级 Nuxt UI 时必须确认 panel DOM 仍常驻**，否则 deep link 失效。
 
 ## 显示模型（`~/utils/field`）
@@ -52,7 +52,7 @@
 type CompositionKind = 'oneOf' | 'anyOf' | 'allOf'
 
 interface CompositionVariant {
-  id: string                    // 稳定 identity：tab 选中、discriminator 映射、anchor 命名空间段；不进 wire path 展示
+  id: string                    // 稳定 identity：tab 选中与 discriminator 映射；不派生 field anchor、不进 wire path 展示
   label: string                 // 已本地化的 variant 标题
   description?: string
   fields: FieldNode[]           // variant 的字段树；path 为真实 anchor id

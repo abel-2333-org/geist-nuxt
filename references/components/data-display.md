@@ -50,7 +50,12 @@
 
 ## InlineMarkdown
 
-行内 markdown 子集渲染器（foundation）：同步、SSR 稳定、零依赖。支持 `` `code` ``、`[链接](url)`、`**粗**`、`*斜*`、`~~删除~~`，全部映射到设计系统的 Prose 组件；解析递归可嵌套。**props**：`text`(string)。仅面向"永远是行内"的作者文案——比 MDC 轻、且不会在一页多实例时触发 SSR→client hydration 失配；若真需要块级 markdown 再考虑 MDC。
+行内 markdown 子集渲染器（foundation）：同步、SSR 稳定。由 `marked` 负责 CommonMark inline tokenization，仅将 `` `code` ``、`[链接](url)`、`**粗**` / `__粗__`、`*斜*` / `_斜_`、`***粗斜***` / `___粗斜___`、`~~删除~~` 映射到设计系统组件；解析递归可嵌套。**props**：`text`(string)。仅面向"永远是行内"的作者文案——比 MDC 轻、且不会在一页多实例时触发 SSR→client hydration 失配；若真需要块级 markdown 再使用块级 renderer。
+
+**技术文本边界**：`snake_case`、Unicode 标识符和数值分隔符按 CommonMark 保持字面；adapter 还会将两侧都紧邻词字符的单星号 emphasis 降回原文，避免把 `2*3*4`、`foo*bar*baz` 或 `参数*必填*说明` 当成格式。正则和 glob 常用的反斜杠也原样保留（如 `^\d{3}\*$`、`C:\*.txt`）。其它闭合且受支持的定界符会被渲染；未匹配或超出的定界符仍是字面文本，因此不能以“输出中没有 `*` / `_`”作为正确性判断。
+
+**安全白名单**：只有显式的 `[label](url)` 且协议为站内相对地址、`http:`、`https:` 或 `mailto:` 时才生成链接；HTML、image、autolink 与不安全协议均按原始文本显示。组件不使用 `v-html`，也不把 `marked` 的 HTML 输出注入页面。
+
 ```vue
 <InlineMarkdown text="支持 **粗体**、`code` 和 [链接](https://vercel.com)。" />
 ```

@@ -4,8 +4,9 @@
  * A single shared piece of state — the "active field path" — drives three
  * things at once, so every field row can stay self-governing:
  *  - a row highlights itself when its own path is active;
- *  - a row auto-expands when the active path is one of its descendants
- *    (prefix match), so deep links into collapsed subfields reveal themselves;
+ *  - a row auto-expands when the active path is one of its descendants — tested
+ *    against the paths collected from its own subtree, not by string prefix —
+ *    so deep links into collapsed subfields reveal themselves;
  *  - navigation (from a click or an incoming URL hash) sets the active path,
  *    waits for ancestor collapsibles to open, then scrolls + flashes the row.
  *
@@ -118,8 +119,9 @@ export function useFieldAnchor() {
 
   /** Full shareable URL for a field path. */
   function urlFor(path: string) {
-    if (!import.meta.client) return `#${path}`
-    return `${location.origin}${location.pathname}${location.search}#${path}`
+    const hash = encodeURIComponent(path)
+    if (!import.meta.client) return `#${hash}`
+    return `${location.origin}${location.pathname}${location.search}#${hash}`
   }
 
   /**
@@ -144,7 +146,7 @@ export function useFieldAnchor() {
     active.value = path
     revision.value++
     if (opts.updateHash !== false && import.meta.client) {
-      history.replaceState(history.state, '', `#${path}`)
+      history.replaceState(history.state, '', `#${encodeURIComponent(path)}`)
     }
 
     if (!import.meta.client) return 'aborted'

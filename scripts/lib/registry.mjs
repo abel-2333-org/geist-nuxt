@@ -2,8 +2,13 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { lstat, mkdir, readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
+import { parse as parseSfc } from '@vue/compiler-sfc'
+import postcss from 'postcss'
+import semver from 'semver'
+import ts from 'typescript'
 
 export const LOCK_FILE = 'geist.lock.json'
 export const LOCK_VERSION = 1
@@ -11,6 +16,8 @@ export const SOURCE_FILE = '.geist-source.json'
 
 const EXACT_SHA_RE = /^[0-9a-f]{40}$/i
 const ITEM_NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const PACKAGE_NAME_RE = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/
+const BUILTIN_MODULES = new Set(builtinModules.map(name => name.replace(/^node:/, '')))
 const FORBIDDEN_TARGET_SEGMENTS = new Set(['.git', '.nuxt', '.output', 'node_modules'])
 const PROTECTED_TARGETS = new Set([
   'nuxt.config.ts',
@@ -171,17 +178,81 @@ function dependencyClosure(itemName, itemsByName) {
   return seen
 }
 
-function relativeImports(sourceText) {
+function scriptImports(sourceText, filename) {
   const imports = new Set()
-  const patterns = [
-    /\bfrom\s*['"](\.{1,2}\/[^'"]+)['"]/g,
-    /\bimport\s*['"](\.{1,2}\/[^'"]+)['"]/g,
-    /\bimport\s*\(\s*['"](\.{1,2}\/[^'"]+)['"]\s*\)/g,
-  ]
-  for (const pattern of patterns) {
-    for (const match of sourceText.matchAll(pattern)) imports.add(match[1])
+  const sourceFile = ts.createSourceFile(filename, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const add = (node) => {
+    if (
+      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+      && node.moduleSpecifier
+      && ts.isStringLiteral(node.moduleSpecifier)
+    ) {
+      imports.add(node.moduleSpecifier.text)
+    }
+    else if (
+      ts.isImportEqualsDeclaration(node)
+      && ts.isExternalModuleReference(node.moduleReference)
+      && node.moduleReference.expression
+      && ts.isStringLiteral(node.moduleReference.expression)
+    ) {
+      imports.add(node.moduleReference.expression.text)
+    }
+    else if (
+      ts.isCallExpression(node)
+      && node.expression.kind === ts.SyntaxKind.ImportKeyword
+      && node.arguments.length === 1
+      && ts.isStringLiteral(node.arguments[0])
+    ) {
+      imports.add(node.arguments[0].text)
+    }
+    ts.forEachChild(node, add)
   }
+  add(sourceFile)
   return [...imports]
+}
+
+function cssImports(sourceText) {
+  const imports = []
+  postcss.parse(sourceText).walkAtRules('import', (rule) => {
+    const match = rule.params.match(
+      /^(?:url\(\s*(?:(['"])(.*?)\1|([^)\s]+))\s*\)|(['"])(.*?)\4)/,
+    )
+    const specifier = match?.[2] ?? match?.[3] ?? match?.[5]
+    if (specifier) imports.push(specifier)
+  })
+  return imports
+}
+
+function moduleImports(sourceText, filename) {
+  if (filename.endsWith('.vue')) {
+    const { descriptor, errors } = parseSfc(sourceText, { filename })
+    if (errors.length > 0) throw new RegistryError(`failed to parse Vue SFC imports: ${filename}`)
+    return [
+      ...scriptImports(descriptor.script?.content ?? '', filename),
+      ...scriptImports(descriptor.scriptSetup?.content ?? '', filename),
+      ...descriptor.styles.flatMap(style => cssImports(style.content)),
+    ]
+  }
+  if (/\.[cm]?[jt]sx?$/.test(filename)) return scriptImports(sourceText, filename)
+  if (filename.endsWith('.css')) return cssImports(sourceText)
+  return []
+}
+
+function packageImport(specifier) {
+  if (
+    /^\.{0,2}\//.test(specifier)
+    || specifier.startsWith('#')
+    || specifier.startsWith('~/')
+    || specifier.startsWith('@/')
+    || specifier.startsWith('node:')
+    || specifier.startsWith('//')
+    || /^[a-z][a-z\d+.-]*:/i.test(specifier)
+    || BUILTIN_MODULES.has(specifier)
+  ) return undefined
+  const segments = specifier.split('/')
+  return specifier.startsWith('@')
+    ? segments.slice(0, 2).join('/')
+    : segments[0]
 }
 
 function resolveRelativeFile(fromFile, specifier, declaredFiles) {
@@ -194,6 +265,61 @@ function isPlainObject(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
   const prototype = Object.getPrototypeOf(value)
   return prototype === Object.prototype || prototype === null
+}
+
+function packageMap(value, label, { optional = false } = {}) {
+  if (value === undefined && optional) return {}
+  if (!isPlainObject(value)) throw new RegistryError(`${label} must be an object`)
+  const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
+  for (const [name, range] of entries) {
+    if (!PACKAGE_NAME_RE.test(name)) throw new RegistryError(`${label} contains an invalid package name: ${name}`)
+    if (typeof range !== 'string' || !range || range !== range.trim() || semver.validRange(range) === null) {
+      throw new RegistryError(`${label}.${name} must be a valid semver range`)
+    }
+  }
+  return Object.fromEntries(entries)
+}
+
+function isPackageMap(value) {
+  try {
+    packageMap(value, 'package dependencies')
+    return true
+  }
+  catch {
+    return false
+  }
+}
+
+function resolveExternalRequirements(registry, items) {
+  const sources = [
+    {
+      owner: 'registry externalRequirements',
+      packages: packageMap(registry.externalRequirements?.packages, 'externalRequirements.packages'),
+    },
+    ...items.map(item => ({
+      owner: `item ${item.name}`,
+      packages: packageMap(item.packageDependencies, `item ${item.name} packageDependencies`, { optional: true }),
+    })),
+  ]
+  const packages = new Map()
+  const owners = new Map()
+  for (const source of sources) {
+    for (const [name, range] of Object.entries(source.packages)) {
+      if (packages.has(name) && packages.get(name) !== range) {
+        throw new RegistryError(
+          `package dependency conflict for ${name}: ${owners.get(name)} requires ${packages.get(name)}, ${source.owner} requires ${range}`,
+        )
+      }
+      if (!packages.has(name)) {
+        packages.set(name, range)
+        owners.set(name, source.owner)
+      }
+    }
+  }
+  return {
+    packages: Object.fromEntries([...packages].sort(([left], [right]) => left.localeCompare(right))),
+    consumerSetup: structuredClone(registry.externalRequirements.consumerSetup),
+  }
 }
 
 async function assertNoSymlinkTarget(consumerRoot, target) {
@@ -299,6 +425,14 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
     if (typeof item.description !== 'string' || !item.description) fail(`${prefix}.description must be a non-empty string`)
     if (item.registryDependencies !== undefined && !Array.isArray(item.registryDependencies)) fail(`${prefix}.registryDependencies must be an array`)
     if (new Set(item.registryDependencies ?? []).size !== (item.registryDependencies ?? []).length) fail(`${prefix}.registryDependencies contains duplicates`)
+    if (item.packageDependencies !== undefined) {
+      try {
+        packageMap(item.packageDependencies, `${prefix}.packageDependencies`)
+      }
+      catch (error) {
+        fail(error.message)
+      }
+    }
     if (!Array.isArray(item.files) || item.files.length === 0) {
       fail(`${prefix}.files must be a non-empty array`)
       continue
@@ -341,7 +475,6 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
       if (itemScope?.startsWith('kit:') && dependencyScope?.startsWith('kit:') && itemScope !== dependencyScope) fail(`cross-kit dependency is forbidden: ${item.name} -> ${dependencyName}`)
     }
   }
-
   const visitState = new Map()
   const stack = []
   const visit = (name) => {
@@ -361,6 +494,19 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
     visitState.set(name, 'done')
   }
   for (const name of itemsByName.keys()) visit(name)
+  const dependenciesKnown = [...itemsByName.values()]
+    .every(item => (item.registryDependencies ?? []).every(name => itemsByName.has(name)))
+  if (dependenciesKnown) {
+    for (const item of itemsByName.values()) {
+      const closure = [item, ...[...dependencyClosure(item.name, itemsByName)].map(name => itemsByName.get(name))]
+      try {
+        resolveExternalRequirements(registry, closure)
+      }
+      catch (error) {
+        fail(error.message)
+      }
+    }
+  }
   if (itemsByName.has('geist-foundation')) {
     for (const item of itemsByName.values()) {
       if (!['registry:component', 'registry:block'].includes(item.type)) continue
@@ -423,7 +569,27 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
       }
       const allowedOwners = dependencyClosure(owner, itemsByName)
       allowedOwners.add(owner)
-      for (const specifier of relativeImports(text)) {
+      const allowedPackages = new Set(Object.keys(registry.externalRequirements?.packages ?? {}))
+      for (const itemName of allowedOwners) {
+        for (const packageName of Object.keys(itemsByName.get(itemName)?.packageDependencies ?? {})) {
+          allowedPackages.add(packageName)
+        }
+      }
+      let imports
+      try {
+        imports = moduleImports(text, source)
+      }
+      catch (error) {
+        fail(error.message)
+        continue
+      }
+      for (const specifier of imports) {
+        const packageName = packageImport(specifier)
+        if (packageName && !allowedPackages.has(packageName)) {
+          fail(`item ${owner} imports package ${packageName} from ${source} without declaring it in the item dependency closure`)
+        }
+      }
+      for (const specifier of imports.filter(candidate => /^\.{1,2}\//.test(candidate))) {
         const importedSource = resolveRelativeFile(source, specifier, declaredSources)
         if (!importedSource) {
           fail(`relative import ${specifier} from ${source} does not resolve to a declared source file`)
@@ -460,7 +626,8 @@ export function resolveItems(registry, requestedItems) {
   }
   for (const name of requested) visit(name)
   const files = ordered.flatMap(item => item.files.map(file => ({ ...file, item: item.name })))
-  return { requested, items: ordered, files }
+  const externalRequirements = resolveExternalRequirements(registry, ordered)
+  return { requested, items: ordered, files, externalRequirements }
 }
 
 export function resolveCopyRequest(registry, requestedItems, { lock, update = false } = {}) {
@@ -476,7 +643,14 @@ export function resolveCopyRequest(registry, requestedItems, { lock, update = fa
     ? lock.requestedItems.filter(name => itemsByName.has(name))
     : []
   const combined = [...new Set([...retained, ...requested])]
-  if (combined.length === 0) return { requested: [], items: [], files: [] }
+  if (combined.length === 0) {
+    return {
+      requested: [],
+      items: [],
+      files: [],
+      externalRequirements: resolveExternalRequirements(registry, []),
+    }
+  }
   return resolveItems(registry, combined)
 }
 
@@ -509,6 +683,7 @@ export async function readLock(consumerRoot) {
         && typeof record.sourceSha === 'string'
         && Array.isArray(record.registryDependencies)
         && record.registryDependencies.every(dependency => typeof dependency === 'string')
+        && (record.packageDependencies === undefined || isPackageMap(record.packageDependencies))
         && Array.isArray(record.files)
         && record.files.every(target => typeof target === 'string')
       ))
@@ -608,7 +783,7 @@ function nextLock(plan) {
     repository: plan.registry.repository,
     lastSourceSha: plan.sourceSha,
     compatibility: structuredClone(plan.registry.compatibility),
-    externalRequirements: structuredClone(plan.registry.externalRequirements),
+    externalRequirements: structuredClone(plan.resolution.externalRequirements),
   }
   lock.requestedItems = plan.update
     ? [...plan.resolution.requested].sort()
@@ -622,6 +797,7 @@ function nextLock(plan) {
     lock.items[item.name] = {
       sourceSha: plan.sourceSha,
       registryDependencies: [...(item.registryDependencies ?? [])],
+      packageDependencies: packageMap(item.packageDependencies, `item ${item.name} packageDependencies`, { optional: true }),
       files: item.files.map(file => file.target),
     }
   }
@@ -672,12 +848,6 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
   if (!lock) throw new RegistryError(`${LOCK_FILE} is missing in ${consumerRoot}`)
   const errors = []
 
-  const expectedRegistry = {
-    name: registry.name,
-    repository: registry.repository,
-    compatibility: registry.compatibility,
-    externalRequirements: registry.externalRequirements,
-  }
   const { lastSourceSha, ...lockedRegistry } = lock.registry
   let lockedSourceSha
   try {
@@ -686,18 +856,23 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
   catch (error) {
     errors.push(error.message)
   }
-  if (!isDeepStrictEqual(lockedRegistry, expectedRegistry)) {
-    errors.push('lock registry metadata differs from the current registry')
-  }
-
   let expectedResolution
   try {
-    expectedResolution = lock.requestedItems.length === 0
-      ? { requested: [], items: [], files: [] }
-      : resolveItems(registry, lock.requestedItems)
+    expectedResolution = resolveCopyRequest(registry, [], { lock, update: true })
   }
   catch (error) {
     errors.push(error.message)
+  }
+  if (expectedResolution) {
+    const expectedRegistry = {
+      name: registry.name,
+      repository: registry.repository,
+      compatibility: registry.compatibility,
+      externalRequirements: expectedResolution.externalRequirements,
+    }
+    if (!isDeepStrictEqual(lockedRegistry, expectedRegistry)) {
+      errors.push('lock registry metadata differs from the current registry')
+    }
   }
   if (expectedResolution) {
     const expectedItemNames = expectedResolution.items.map(item => item.name).sort()
@@ -719,6 +894,11 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
       const lockedDependencies = [...itemRecord.registryDependencies].sort()
       if (!isDeepStrictEqual(lockedDependencies, expectedDependencies)) {
         errors.push(`locked item dependencies differ from registry: ${item.name}`)
+      }
+      const expectedPackages = packageMap(item.packageDependencies, `item ${item.name} packageDependencies`, { optional: true })
+      const lockedPackages = packageMap(itemRecord.packageDependencies, `locked item ${item.name} packageDependencies`, { optional: true })
+      if (!isDeepStrictEqual(lockedPackages, expectedPackages)) {
+        errors.push(`locked item package dependencies differ from registry: ${item.name}`)
       }
       const expectedFiles = item.files.map(file => file.target).sort()
       const lockedFiles = [...itemRecord.files].sort()

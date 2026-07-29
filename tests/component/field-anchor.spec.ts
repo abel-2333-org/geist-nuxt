@@ -51,6 +51,45 @@ describe('useFieldAnchor', () => {
     wrapper.unmount()
   })
 
+  it('round-trips reserved characters without changing the DOM identity', async () => {
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      callback(0)
+      return 1
+    }))
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true })))
+    let anchor!: ReturnType<typeof useFieldAnchor>
+    const Host = defineComponent({
+      setup() {
+        anchor = useFieldAnchor()
+      },
+      template: '<div id="amount%25">Amount</div>',
+    })
+    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+    const target = wrapper.find('[id="amount%25"]').element as HTMLElement
+    target.getBoundingClientRect = vi.fn(() => ({
+      bottom: 120,
+      height: 20,
+      left: 0,
+      right: 100,
+      top: 100,
+      width: 100,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    }))
+    target.scrollIntoView = vi.fn()
+
+    await anchor.goTo('amount%25')
+    expect(target.id).toBe('amount%25')
+    expect(location.hash).toBe('#amount%2525')
+    expect(anchor.urlFor('amount%25')).toBe(`${location.origin}/#amount%2525`)
+
+    anchor.active.value = ''
+    anchor.initFromHash()
+    await vi.waitFor(() => expect(anchor.active.value).toBe('amount%25'))
+    wrapper.unmount()
+  })
+
   it('restores native scroll restoration when its component scope is disposed', async () => {
     Object.defineProperty(history, 'scrollRestoration', {
       configurable: true,
