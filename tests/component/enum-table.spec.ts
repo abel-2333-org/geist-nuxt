@@ -85,6 +85,17 @@ describe('scroll region reachability', () => {
     expect(scrollBox(wrapper.html())).toBe(false)
     expect(wrapper.find('[role="group"]').exists()).toBe(false)
   })
+
+  it('keeps a long authored list bounded while filtering its visible rows', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { values: manyValues } })
+
+    wrapper.findComponent({ name: 'UInput' }).vm.$emit('update:modelValue', 'value_1')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.findAll('dt')).toHaveLength(11)
+    expect(scrollBox(wrapper.html())).toBe(true)
+    expect(wrapper.find('[role="group"]').attributes('tabindex')).toBe('0')
+  })
 })
 
 describe('filter live region', () => {

@@ -106,13 +106,19 @@ const totalCount = computed(() =>
     : (props.values?.length ?? 0),
 )
 
+const activeTotalCount = computed(() =>
+  isVariant.value
+    ? (props.variants?.[activeIndex.value]?.values.length ?? 0)
+    : (props.values?.length ?? 0),
+)
+
 // Only large lists need the search affordance.
 const filterable = computed(() => totalCount.value >= props.filterThreshold)
 
 // Search availability is global, but the bounded panel is local to the active
-// result set. Keep a short/filtered panel out of the tab order when it cannot
-// actually scroll.
-const bounded = computed(() => visibleValues.value.length >= props.filterThreshold)
+// authored group. Do not derive this from filtered results: crossing the
+// threshold while typing would remove max-height and expand a long table.
+const bounded = computed(() => activeTotalCount.value >= props.filterThreshold)
 
 // Never retain a filter the reader can no longer see or clear.
 watch(filterable, (value) => {
