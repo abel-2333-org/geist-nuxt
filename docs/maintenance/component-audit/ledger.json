@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-07-29T14:39:47.783Z",
+  "lastRunAt": "2026-07-30T01:14:41.410Z",
   "lastPicked": [
-    "foundation-inline-code",
-    "api-docs-enum-table",
-    "api-docs-field-annotation"
+    "foundation-inline-markdown",
+    "api-docs-field-annotation",
+    "foundation-doc-annotation"
   ],
   "items": {
     "foundation-copy-button": {
@@ -31,28 +31,38 @@
     },
     "foundation-inline-markdown": {
       "round": 1,
-      "lastAuditedAt": "2026-07-28T16:29:35.909Z",
+      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
-        "kind": "legacy-v1",
-        "sha": "c5a73094643e378d75a84a64bbb36f53dca2771c"
+        "kind": "scope-v1",
+        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
+        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
+        "scope": [
+          "app/components/gallery/DataDisplay.vue",
+          "foundation/components/InlineMarkdown.vue",
+          "foundation/components/inline-markdown/parse.ts",
+          "references/components/data-display.md",
+          "tests/component/inline-markdown.spec.ts"
+        ],
+        "scopeDigest": "79103f034cf62074e7f658cddba383a96e569b19449b886c806d1b4bf22ef72a"
       },
-      "notes": "修复 4 类标记游程被半吞、裸标记漏进渲染结果的缺陷（***x***、__x__、___x___、MAX__VALUE__LIMIT），补齐最长游程优先规则与 `_` 词边界；新增 36 例 tokenizer spec，同步 reference 与 gallery。",
+      "notes": "复核两条遗留 delimiter-run finding：均已被 b497e08 换用 marked Lexer.lexInline 的重写消除，实测 `**bold *em***` → <strong>bold <em>em</em></strong>、裸 `***` 保持字面，故按原 id 标 resolved。本轮只补证据不改实现：为 universal claim「Raw HTML is never rendered」与 registry 描述「Safe inline markdown subset」增加 8 例注入 payload 与 4 例不安全协议回归测试（原先仅 <kbd> 单例），并精确断言许可协议的 href 保真与 external 分类。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
-          "severity": "unknown",
+          "severity": "low",
           "claim": null,
           "evidence": "内层标记与外层收尾标记紧贴时仍残留一个标记（`**bold *em***` → `<strong>bold *em</strong>*`）。既有行为，非本次回归；彻底修复需把有序规则表换成 CommonMark delimiter-run 算法（左右 flanking + rule of three）。",
-          "disposition": "open"
+          "disposition": "resolved"
         },
         {
           "id": "f-7b91ff128432",
-          "severity": "unknown",
+          "severity": "low",
           "claim": null,
           "evidence": "裸 `***` 渲染为 `<em>*</em>`。收紧 `*` em 规则两端守卫可修，但实测会回退 `**bold***em*`；与上一条同属 delimiter-run 改造，应一并处理。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
@@ -93,12 +103,24 @@
       "findings": []
     },
     "foundation-doc-annotation": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
+        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
+        "scope": [
+          "app/components/gallery/Overlays.vue",
+          "foundation/components/DocAnnotation.vue",
+          "references/components/overlays.md",
+          "tests/component/annotation-forms.spec.ts"
+        ],
+        "scopeDigest": "ba8c4d2bb080c607cc6e549283a497b73561cb70997ba5bdec611c303ddef689"
+      },
+      "notes": "首次审计。修复固定宽面板的长 token 溢出：标题 <p> 缺 wrap-anywhere，作者内容带不可断 token（长 URL / 长标识符）时面板 scrollWidth 288→502（375px 视口实测），文字溢出面板右边界并被视口裁掉，违反 overlays.md「浮层宽度受限且不超视口」契约；标题与被 line-clamp 的摘要同时补 wrap-anywhere 后回到 288，并用组件 spec 锁定类契约。浏览器实测明暗双主题、375px、error 态仍保留「Open page」动作（href=/components），惰性加载 / 缓存 / stale-response 守卫与既有 3 例 spec 一致。",
       "findings": []
     },
     "foundation-split-pane-handle": {
@@ -208,21 +230,31 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-29T14:39:47.783Z",
+      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
-        "kind": "legacy-v1",
-        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+        "kind": "scope-v1",
+        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
+        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
+        "scope": [
+          "app/pages/kits/api-docs/index.vue",
+          "kits/api-docs/components/FieldAnnotation.vue",
+          "kits/api-docs/composables/useFieldSource.ts",
+          "references/kits/api-docs/index.md",
+          "tests/component/annotation-forms.spec.ts"
+        ],
+        "scopeDigest": "56ec5ecd89e9c94ae105ed8ff0da83ffdb5ad4b21b2f7099dc8d4b4773a747c4"
       },
-      "notes": "补 dev 下未命中 field-ref 的 console.warn，诊断以内聚于组件的 watchEffect 实现，并在 import.meta.test 下通过组件真实挂载路径覆盖接线与精确文案；跨页链接对 raw FieldNode.path 编码一次，app router 直接使用 Vue Router 已规范化的 hash 完成跨页滚动；SiteSearch 通过真实 command option 点击覆盖同页搜索关闭后的焦点交接。未动 props / emits / slots 公开契约。",
+      "notes": "同族同类溢出修复：type span 的 shrink-0 把它钉在 max-content，长 union type 使面板 scrollWidth 288→498，且实测 panel 级与 span 级 overflow-wrap 都无效（498→498），必须允许收缩，故改为与 name / format 兄弟一致的 wrap-anywhere min-w-0（回到 288）；摘要 <p> 同步补 wrap-anywhere，并用组件 spec 锁定类契约。经人工复核并明确授权，f-fd7282669072 标记 wont-fix：四处 labels 的键集、默认值与 Required<Pick<Labels, …>> 类型约束不同，抽共享泛型 helper 只消除 spread 字面重复，却增加 kit → foundation 间接层并削弱当前类型推断。",
       "findings": [
         {
           "id": "f-fd7282669072",
-          "severity": "unknown",
+          "severity": "low",
           "claim": null,
           "evidence": "t computed 的 labels 合并模式在 Term/Doc/Field 三形态各写一遍（4 行 spread）；抽共享 helper 需跨 foundation ↔ kit 边界新增自动导入符号，且只能落 foundation、让 kit 组件多一条依赖边，收益不抵间接层。建议与 foundation-annotation-popover 那一簇一起复审再定。",
-          "disposition": "open"
+          "disposition": "wont-fix"
         }
       ]
     },

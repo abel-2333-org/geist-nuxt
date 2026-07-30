@@ -107,9 +107,13 @@ function onOpen() {
     <slot />
 
     <template #content>
+      <!-- Authored titles and summaries can carry an unbroken token (a URL, a
+           long identifier). The panel is a fixed width, so both slots need
+           `wrap-anywhere` or the token overflows it — the description is
+           additionally line-clamped, the title is not. -->
       <template v-if="preview">
-        <p class="font-medium text-highlighted">{{ preview.title }}</p>
-        <p v-if="preview.description" class="line-clamp-4 leading-relaxed text-muted">
+        <p class="wrap-anywhere font-medium text-highlighted">{{ preview.title }}</p>
+        <p v-if="preview.description" class="line-clamp-4 wrap-anywhere leading-relaxed text-muted">
           <InlineMarkdown :text="preview.description" />
         </p>
       </template>

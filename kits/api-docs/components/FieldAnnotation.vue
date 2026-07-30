@@ -116,7 +116,10 @@ function jump(close: () => void) {
     <template #content>
       <div class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
         <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}</InlineCode>
-        <span class="shrink-0 font-mono text-xs text-muted">{{ node.type }}</span>
+        <!-- Shrinkable like its siblings: `shrink-0` would pin the span to
+             max-content, and a long union type then overflows the fixed-width
+             panel no matter how the text is allowed to wrap. -->
+        <span class="wrap-anywhere min-w-0 font-mono text-xs text-muted">{{ node.type }}</span>
         <span v-if="node.format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ node.format }}</span>
         <span
           v-if="requiredState"
@@ -124,7 +127,7 @@ function jump(close: () => void) {
           :class="requiredState === 'required' ? 'text-error' : 'text-warning'"
         >{{ requiredState === 'required' ? t.required : t.conditional }}</span>
       </div>
-      <p v-if="node.description" class="line-clamp-4 leading-relaxed text-muted">
+      <p v-if="node.description" class="line-clamp-4 wrap-anywhere leading-relaxed text-muted">
         <InlineMarkdown :text="node.description" />
       </p>
     </template>

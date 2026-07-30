@@ -69,6 +69,28 @@ describe('TermAnnotation', () => {
 })
 
 describe('DocAnnotation', () => {
+  it('keeps unbroken authored content inside the fixed-width panel', async () => {
+    const title = 'https://api.example.com/v1/accounts/settlement_reconciliation_batches'
+    const description = 'settlement_reconciliation_batch_cursor_identifier'
+    const load = vi.fn().mockResolvedValue({ title, description })
+    wrapper = await mountSuspended(DocAnnotation, {
+      props: { to: '/guides/settlement', load },
+      slots: { default: () => 'Settlement guide' },
+      attachTo: document.body,
+    })
+
+    await open(wrapper)
+    await flushPromises()
+    const paragraphs = Array.from(panel()!.querySelectorAll('p'))
+    const titleElement = paragraphs.find(element => element.textContent === title)
+    const descriptionElement = paragraphs.find(element => element.textContent === description)
+
+    expect(titleElement).toBeDefined()
+    expect([...titleElement!.classList]).toContain('wrap-anywhere')
+    expect(descriptionElement).toBeDefined()
+    expect([...descriptionElement!.classList]).toContain('wrap-anywhere')
+  })
+
   it('loads once on first open and reuses the cached preview', async () => {
     const load = vi.fn().mockResolvedValue({
       title: 'Rate limiting guide',
@@ -146,6 +168,34 @@ describe('DocAnnotation', () => {
 })
 
 describe('FieldAnnotation', () => {
+  it('allows long field facts to shrink and wrap inside the panel', async () => {
+    const type = 'oneof_settlement_reconciliation_batch_or_payout_adjustment_envelope'
+    const description = 'settlement_reconciliation_batch_cursor_identifier'
+    wrapper = await mountSuspended(FieldAnnotation, {
+      props: {
+        field: {
+          path: 'body_settlement',
+          name: 'settlement',
+          type,
+          description,
+        },
+      },
+      attachTo: document.body,
+    })
+
+    await open(wrapper)
+    const typeElement = Array.from(panel()!.querySelectorAll('span'))
+      .find(element => element.textContent === type)
+    const descriptionElement = Array.from(panel()!.querySelectorAll('p'))
+      .find(element => element.textContent === description)
+
+    expect(typeElement).toBeDefined()
+    expect([...typeElement!.classList]).toEqual(expect.arrayContaining(['wrap-anywhere', 'min-w-0']))
+    expect([...typeElement!.classList]).not.toContain('shrink-0')
+    expect(descriptionElement).toBeDefined()
+    expect([...descriptionElement!.classList]).toContain('wrap-anywhere')
+  })
+
   it('warns through the mounted component when a field ref is unresolved', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     wrapper = await mountSuspended(FieldAnnotation, {
