@@ -54,14 +54,14 @@ if (import.meta.dev) {
     v-if="resolved"
     :label="t.category"
     icon="i-lucide-book-open"
-    trigger-class="decoration-(--ui-text-dimmed) hover:decoration-(--ui-text-toned)"
+    trigger-class="wrap-anywhere decoration-(--ui-text-dimmed) hover:decoration-(--ui-text-toned)"
     :labels="labels"
   >
     <slot>{{ resolved.term }}</slot>
 
     <template #content>
-      <p class="font-medium text-highlighted">{{ resolved.term }}</p>
-      <p class="leading-relaxed text-muted">
+      <p class="wrap-anywhere font-medium text-highlighted">{{ resolved.term }}</p>
+      <p class="wrap-anywhere leading-relaxed text-muted">
         <InlineMarkdown :text="resolved.definition" />
       </p>
     </template>
