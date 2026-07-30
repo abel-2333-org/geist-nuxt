@@ -164,6 +164,21 @@ test('keeps compatibility and external package requirements equivalent', async (
     await assert.rejects(validateRegistry(registry, { repoRoot }), /compatibility.nuxt must be a valid semver range/)
   })
 
+  await t.test('rejects an unsatisfiable compatibility range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.compatibility.nuxt = '>5 <4'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /compatibility.nuxt must be a valid semver range/)
+  })
+
+  await t.test('rejects an unsatisfiable external package range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.externalRequirements.packages.nuxt = '>5 <4'
+    await assert.rejects(
+      validateRegistry(registry, { repoRoot }),
+      /externalRequirements.packages.nuxt must be a valid semver range/,
+    )
+  })
+
   await t.test('rejects a missing mapped package', async () => {
     const { repoRoot, registry } = await fixture()
     delete registry.externalRequirements.packages.tailwindcss

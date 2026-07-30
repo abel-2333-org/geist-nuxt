@@ -272,13 +272,21 @@ function isPlainObject(value) {
   return prototype === Object.prototype || prototype === null
 }
 
+function validRange(value) {
+  return typeof value === 'string'
+    && Boolean(value)
+    && value === value.trim()
+    && semver.validRange(value) !== null
+    && semver.minVersion(value) !== null
+}
+
 function packageMap(value, label, { optional = false } = {}) {
   if (value === undefined && optional) return {}
   if (!isPlainObject(value)) throw new RegistryError(`${label} must be an object`)
   const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
   for (const [name, range] of entries) {
     if (!PACKAGE_NAME_RE.test(name)) throw new RegistryError(`${label} contains an invalid package name: ${name}`)
-    if (typeof range !== 'string' || !range || range !== range.trim() || semver.validRange(range) === null) {
+    if (!validRange(range)) {
       throw new RegistryError(`${label}.${name} must be a valid semver range`)
     }
   }
@@ -388,19 +396,12 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
   for (const [key, packageName] of Object.entries(COMPATIBILITY_PACKAGES)) {
     const compatibility = registry?.compatibility?.[key]
     const requirement = registry?.externalRequirements?.packages?.[packageName]
-    if (
-      typeof compatibility !== 'string'
-      || !compatibility
-      || compatibility !== compatibility.trim()
-      || semver.validRange(compatibility) === null
-    ) {
+    if (!validRange(compatibility)) {
       fail(`compatibility.${key} must be a valid semver range`)
       continue
     }
     if (
-      typeof requirement === 'string'
-      && requirement === requirement.trim()
-      && semver.validRange(requirement) !== null
+      validRange(requirement)
       && (!semver.subset(compatibility, requirement) || !semver.subset(requirement, compatibility))
     ) {
       fail(`compatibility.${key} must match externalRequirements.packages.${packageName}`)
