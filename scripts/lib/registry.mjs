@@ -19,6 +19,11 @@ const ITEM_NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const PACKAGE_NAME_RE = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/
 const BUILTIN_MODULES = new Set(builtinModules.map(name => name.replace(/^node:/, '')))
 const FORBIDDEN_TARGET_SEGMENTS = new Set(['.git', '.nuxt', '.output', 'node_modules'])
+const COMPATIBILITY_PACKAGES = {
+  nuxt: 'nuxt',
+  nuxtUi: '@nuxt/ui',
+  tailwindcss: 'tailwindcss',
+}
 const PROTECTED_TARGETS = new Set([
   'nuxt.config.ts',
   'app.config.ts',
@@ -267,13 +272,23 @@ function isPlainObject(value) {
   return prototype === Object.prototype || prototype === null
 }
 
+function validRange(value) {
+  if (typeof value !== 'string' || !value || value !== value.trim()) return false
+  const range = semver.validRange(value)
+  if (range === null) return false
+  return new semver.Range(range).set.some((comparators) => {
+    const branch = comparators.map(comparator => comparator.value).join(' ')
+    return semver.minVersion(branch) !== null
+  })
+}
+
 function packageMap(value, label, { optional = false } = {}) {
   if (value === undefined && optional) return {}
   if (!isPlainObject(value)) throw new RegistryError(`${label} must be an object`)
   const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
   for (const [name, range] of entries) {
     if (!PACKAGE_NAME_RE.test(name)) throw new RegistryError(`${label} contains an invalid package name: ${name}`)
-    if (typeof range !== 'string' || !range || range !== range.trim() || semver.validRange(range) === null) {
+    if (!validRange(range)) {
       throw new RegistryError(`${label}.${name} must be a valid semver range`)
     }
   }
@@ -375,13 +390,24 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
   if (registry?.schemaVersion !== 1) fail('schemaVersion must be 1')
   if (typeof registry?.name !== 'string' || !registry.name) fail('name must be a non-empty string')
   if (typeof registry?.repository !== 'string' || !registry.repository) fail('repository must be a non-empty string')
-  for (const key of ['nuxt', 'nuxtUi', 'tailwindcss']) {
-    if (typeof registry?.compatibility?.[key] !== 'string' || !registry.compatibility[key]) fail(`compatibility.${key} must be a non-empty range`)
-  }
   if (!registry?.externalRequirements || typeof registry.externalRequirements !== 'object') fail('externalRequirements must be an object')
   if (!registry?.externalRequirements?.packages || typeof registry.externalRequirements.packages !== 'object') fail('externalRequirements.packages must be an object')
-  for (const requiredPackage of ['@nuxt/ui', '@vueuse/core']) {
+  for (const requiredPackage of [...Object.values(COMPATIBILITY_PACKAGES), '@vueuse/core']) {
     if (typeof registry?.externalRequirements?.packages?.[requiredPackage] !== 'string') fail(`externalRequirements.packages must declare ${requiredPackage}`)
+  }
+  for (const [key, packageName] of Object.entries(COMPATIBILITY_PACKAGES)) {
+    const compatibility = registry?.compatibility?.[key]
+    const requirement = registry?.externalRequirements?.packages?.[packageName]
+    if (!validRange(compatibility)) {
+      fail(`compatibility.${key} must be a valid semver range`)
+      continue
+    }
+    if (
+      validRange(requirement)
+      && (!semver.subset(compatibility, requirement) || !semver.subset(requirement, compatibility))
+    ) {
+      fail(`compatibility.${key} must match externalRequirements.packages.${packageName}`)
+    }
   }
   if (!Array.isArray(registry?.externalRequirements?.consumerSetup) || registry.externalRequirements.consumerSetup.length === 0) fail('externalRequirements.consumerSetup must be a non-empty array')
   if (!Array.isArray(registry?.sourceRoots) || registry.sourceRoots.length === 0) fail('sourceRoots must be a non-empty array')

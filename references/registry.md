@@ -2,6 +2,10 @@
 
 根 `registry.json` 是 geist-nuxt 唯一的机器可读分发契约。它覆盖 `foundation/` 与 `kits/` 的全部可安装切片；不存在 kit 内 registry、npm core 包或 Nuxt layer 兜底。
 
+根级 `compatibility` 声明 consumer 支持范围；其中 `nuxt`、`nuxtUi`、`tailwindcss` 必须分别与
+`externalRequirements.packages` 的 `nuxt`、`@nuxt/ui`、`tailwindcss` 表达语义等价的 semver
+集合。根 `package.json` 的精确版本只固定本仓库 gallery / 测试环境，不收窄 consumer 契约。
+
 ## 消费者与职责
 
 | 消费者 | 使用方式 |

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import semver from 'semver'
 import {
   RegistryError,
   applyCopyPlan,
@@ -49,7 +50,12 @@ async function fixture() {
     repository: 'https://example.test/fixture.git',
     compatibility: { nuxt: '>=4.4.0 <5', nuxtUi: '>=4.9.0 <5', tailwindcss: '>=4.3.0 <5' },
     externalRequirements: {
-      packages: { '@nuxt/ui': '^4.9.0', '@vueuse/core': '^14.3.0' },
+      packages: {
+        '@nuxt/ui': '^4.9.0',
+        '@vueuse/core': '^14.3.0',
+        nuxt: '>=4.4.0 <5',
+        tailwindcss: '>=4.3.0 <5',
+      },
       consumerSetup: ['Wrap the app in UApp.'],
     },
     sourceRoots: ['foundation/components'],
@@ -140,7 +146,70 @@ test('validates a complete registry and resolves dependency-first closure', asyn
     '@vueuse/core': '^14.3.0',
     'dependency-package': '^1.0.0',
     'feature-package': '^2.0.0',
+    nuxt: '>=4.4.0 <5',
+    tailwindcss: '>=4.3.0 <5',
   })
+})
+
+test('keeps compatibility and external package requirements equivalent', async (t) => {
+  await t.test('accepts semantically equivalent ranges', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.externalRequirements.packages.nuxt = '^4.4.0'
+    await validateRegistry(registry, { repoRoot })
+  })
+
+  await t.test('accepts an empty OR branch when another branch is satisfiable', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.externalRequirements.packages.nuxt = '>=1 <1 || ^4.4.0'
+    await validateRegistry(registry, { repoRoot })
+  })
+
+  await t.test('rejects an invalid compatibility range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.compatibility.nuxt = '^4..0'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /compatibility.nuxt must be a valid semver range/)
+  })
+
+  await t.test('rejects an unsatisfiable compatibility range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.compatibility.nuxt = '>5 <4'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /compatibility.nuxt must be a valid semver range/)
+  })
+
+  await t.test('rejects an unsatisfiable external package range', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.externalRequirements.packages.nuxt = '>5 <4'
+    await assert.rejects(
+      validateRegistry(registry, { repoRoot }),
+      /externalRequirements.packages.nuxt must be a valid semver range/,
+    )
+  })
+
+  await t.test('rejects a missing mapped package', async () => {
+    const { repoRoot, registry } = await fixture()
+    delete registry.externalRequirements.packages.tailwindcss
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /externalRequirements.packages must declare tailwindcss/)
+  })
+
+  for (const [label, range] of [
+    ['narrower', '4.4.8'],
+    ['broader', '>=4.0.0 <5'],
+  ]) {
+    await t.test(`rejects a ${label} external package range`, async () => {
+      const { repoRoot, registry } = await fixture()
+      registry.externalRequirements.packages.nuxt = range
+      await assert.rejects(
+        validateRegistry(registry, { repoRoot }),
+        /compatibility.nuxt must match externalRequirements.packages.nuxt/,
+      )
+    })
+  }
+})
+
+test('supports Nuxt 4.5 consumers in the real registry contract', async () => {
+  const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
+  assert.equal(semver.satisfies('4.5.0', registry.compatibility.nuxt), true)
+  assert.equal(semver.satisfies('4.5.0', registry.externalRequirements.packages.nuxt), true)
 })
 
 test('keeps the real managed config surface vendor-neutral', async () => {
@@ -294,7 +363,7 @@ void example
     await writeFile(
       path.join(repoRoot, 'foundation/components/imports.css'),
       `/* @import "comment-only"; */
-@import url(tailwindcss);
+@import url(style-package);
 @import url("https://example.test/theme.css");
 `,
     )
@@ -303,13 +372,13 @@ void example
       type: 'registry:style',
       title: 'Styles',
       description: 'Style imports.',
-      packageDependencies: { tailwindcss: '^4.0.0' },
+      packageDependencies: { 'style-package': '^1.0.0' },
       files: [{ path: 'foundation/components/imports.css', target: 'app/assets/css/imports.css' }],
     })
 
     await validateRegistry(registry, { repoRoot })
     delete registry.items.at(-1).packageDependencies
-    await assert.rejects(validateRegistry(registry, { repoRoot }), /imports package tailwindcss.*without declaring/)
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /imports package style-package.*without declaring/)
   })
 
   await t.test('missing dependency declaration for a relative import', async () => {
