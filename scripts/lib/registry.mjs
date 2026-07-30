@@ -273,11 +273,13 @@ function isPlainObject(value) {
 }
 
 function validRange(value) {
-  return typeof value === 'string'
-    && Boolean(value)
-    && value === value.trim()
-    && semver.validRange(value) !== null
-    && semver.minVersion(value) !== null
+  if (typeof value !== 'string' || !value || value !== value.trim()) return false
+  const range = semver.validRange(value)
+  if (range === null) return false
+  return new semver.Range(range).set.some((comparators) => {
+    const branch = comparators.map(comparator => comparator.value).join(' ')
+    return semver.minVersion(branch) !== null
+  })
 }
 
 function packageMap(value, label, { optional = false } = {}) {

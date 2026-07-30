@@ -158,6 +158,12 @@ test('keeps compatibility and external package requirements equivalent', async (
     await validateRegistry(registry, { repoRoot })
   })
 
+  await t.test('accepts an empty OR branch when another branch is satisfiable', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.externalRequirements.packages.nuxt = '>=1 <1 || ^4.4.0'
+    await validateRegistry(registry, { repoRoot })
+  })
+
   await t.test('rejects an invalid compatibility range', async () => {
     const { repoRoot, registry } = await fixture()
     registry.compatibility.nuxt = '^4..0'
