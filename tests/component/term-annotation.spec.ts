@@ -22,7 +22,9 @@ describe('TermAnnotation overflow', () => {
       attachTo: document.body,
     })
 
-    await wrapper.get('button[type="button"]').trigger('click')
+    const trigger = wrapper.get('button[type="button"]')
+    expect(trigger.classes()).toContain('wrap-anywhere')
+    await trigger.trigger('click')
     await vi.waitFor(() => {
       if (!document.querySelector('div[tabindex="-1"][class*="w-72"]')) {
         throw new Error('annotation panel did not open')

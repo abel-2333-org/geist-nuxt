@@ -54,7 +54,7 @@ if (import.meta.dev) {
     v-if="resolved"
     :label="t.category"
     icon="i-lucide-book-open"
-    trigger-class="decoration-(--ui-text-dimmed) hover:decoration-(--ui-text-toned)"
+    trigger-class="wrap-anywhere decoration-(--ui-text-dimmed) hover:decoration-(--ui-text-toned)"
     :labels="labels"
   >
     <slot>{{ resolved.term }}</slot>
