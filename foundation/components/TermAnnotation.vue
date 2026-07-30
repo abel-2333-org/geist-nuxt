@@ -60,8 +60,8 @@ if (import.meta.dev) {
     <slot>{{ resolved.term }}</slot>
 
     <template #content>
-      <p class="font-medium text-highlighted">{{ resolved.term }}</p>
-      <p class="leading-relaxed text-muted">
+      <p class="wrap-anywhere font-medium text-highlighted">{{ resolved.term }}</p>
+      <p class="wrap-anywhere leading-relaxed text-muted">
         <InlineMarkdown :text="resolved.definition" />
       </p>
     </template>
