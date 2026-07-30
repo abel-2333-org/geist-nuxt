@@ -162,8 +162,18 @@ describe('InlineMarkdown literal syntax', () => {
   })
 
   it('still allows relative hrefs and the http/https/mailto allowlist', () => {
-    for (const href of ['mailto:x@y.z', 'https://example.com', 'http://example.com', '/relative']) {
-      expect(parse(`[a](${href})`).some(node => node.type === 'link')).toBe(true)
+    for (const [href, external] of [
+      ['mailto:x@y.z', false],
+      ['https://example.com', true],
+      ['http://example.com', true],
+      ['/relative', false],
+    ] as const) {
+      expect(parse(`[a](${href})`)).toEqual([{
+        type: 'link',
+        href,
+        external,
+        children: [{ type: 'text', value: 'a' }],
+      }])
     }
   })
 
