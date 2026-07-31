@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-07-30T01:14:41.410Z",
+  "lastRunAt": "2026-07-31T20:12:56.379Z",
   "lastPicked": [
-    "foundation-inline-markdown",
-    "api-docs-field-annotation",
-    "foundation-doc-annotation"
+    "foundation-term-annotation",
+    "foundation-annotation-popover",
+    "foundation-semantic-badge"
   ],
   "items": {
     "foundation-copy-button": {
@@ -67,13 +67,36 @@
       ]
     },
     "foundation-semantic-badge": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
+      "change": "none",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
+        "scope": [
+          "app/components/gallery/DataDisplay.vue",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/HttpMethodBadge.vue",
+          "kits/api-docs/components/WebhookBadge.vue",
+          "references/components/data-display.md",
+          "references/method/component-reflow.md"
+        ],
+        "scopeDigest": "b9bde50527634e00ef4d57f616c955b7f0e58683d79f0d9472630c42349d3968"
+      },
+      "notes": "tone 映射、业务隔离与 gallery 六态达标；权威 reference 同时声明 icon? 与‘务必配 icon + 文本’，实现和既有 kit wrapper 允许省略 icon，且 label:string 不保证非空，公开 a11y claim 尚未收敛。",
+      "findings": [
+        {
+          "id": "f-304490421051",
+          "severity": "low",
+          "claim": "语义绝不只靠颜色，务必配 icon + 文本。",
+          "evidence": "references/components/data-display.md 将 icon 标为可选，却同时要求 SemanticBadge 务必配 icon + 文本；组件 props 同样允许省略 icon，HttpMethodBadge/WebhookBadge 也合法地只传 label，且 label:string 可为空。‘icon + 文本’的公开约束与实际 API/消费者不一致，‘label 必填即可结构性保证非颜色语义’亦不成立。应收窄为非空文本必需、icon 可选，或在 API 层强制当前声明。该 reference 同时属于 foundation-inline-markdown 的 verified scope，须与关联 evidence 同批刷新。",
+          "disposition": "open"
+        }
+      ]
     },
     "foundation-theme-toggle": {
       "round": 0,
@@ -85,22 +108,56 @@
       "findings": []
     },
     "foundation-annotation-popover": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
+        "scope": [
+          "app/components/gallery/Overlays.vue",
+          "foundation/components/AnnotationPopover.vue",
+          "foundation/utils/annotation.ts",
+          "references/components/overlays.md",
+          "tests/component/annotation-popover.spec.ts"
+        ],
+        "scopeDigest": "beb2628f060403b0d74955c5a80cc927436850ce62dec67f82f9fa33a70e03d4"
+      },
+      "notes": "壳组件实现与 overlays.md 契约逐条一致；381 行 focused suite 覆盖核心 click/hover、焦点、disabled、loading/error journey，静态 a11y、token 与响应式类由源码核对。",
       "findings": []
     },
     "foundation-term-annotation": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
+      "change": "none",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
+        "scope": [
+          "app/components/gallery/Overlays.vue",
+          "foundation/components/TermAnnotation.vue",
+          "references/components/overlays.md",
+          "tests/component/annotation-forms.spec.ts",
+          "tests/component/term-annotation.spec.ts"
+        ],
+        "scopeDigest": "856b62fd56ade3db4832d3f72e9b7dd29891e7d0e241eed5bb6f956e21937f81"
+      },
+      "notes": "组件实现、测试与 gallery 达标；唯一问题是权威 reference 缺失公开 entry prop。修复会使共享 overlays.md 的 foundation-doc-annotation verified evidence stale，待两项同批重审时补记。",
+      "findings": [
+        {
+          "id": "f-084ace82f441",
+          "severity": "low",
+          "claim": null,
+          "evidence": "TermAnnotation.vue 自晋升（#39）起公开 entry prop（直接传 GlossaryEntry 绕过 glossary；tests/component/term-annotation.spec.ts 亦以 entry 挂载），但 references/components/overlays.md 的 TermAnnotation props 仅记录 id/labels，权威契约漏记 entry。修复需编辑 overlays.md，而该文件同时属于 foundation-doc-annotation 的 verified scope；当前计划不含后者，无法经官方 --record 流程刷新其 evidence，须待两项同批重审。",
+          "disposition": "open"
+        }
+      ]
     },
     "foundation-doc-annotation": {
       "round": 1,
