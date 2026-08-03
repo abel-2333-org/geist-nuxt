@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-07-31T23:22:45.115Z",
+  "lastRunAt": "2026-07-31T20:12:56.379Z",
   "lastPicked": [
     "foundation-term-annotation",
-    "foundation-semantic-badge",
-    "api-docs-lifecycle-badge"
+    "foundation-annotation-popover",
+    "foundation-semantic-badge"
   ],
   "items": {
     "foundation-copy-button": {
@@ -68,13 +68,13 @@
     },
     "foundation-semantic-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-07-31T23:22:45.115Z",
+      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
       "change": "none",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
-        "headSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
+        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -87,7 +87,7 @@
         ],
         "scopeDigest": "b9bde50527634e00ef4d57f616c955b7f0e58683d79f0d9472630c42349d3968"
       },
-      "notes": "组件本体复核达标(源码未变);icon+文本契约冲突的修复面 data-display.md 仍在 foundation-inline-markdown 的 verified scope 内,后者不在本轮计划,继续 deferred 待同批收窄权威 reference。",
+      "notes": "tone 映射、业务隔离与 gallery 六态达标；权威 reference 同时声明 icon? 与‘务必配 icon + 文本’，实现和既有 kit wrapper 允许省略 icon，且 label:string 不保证非空，公开 a11y claim 尚未收敛。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -131,13 +131,13 @@
     },
     "foundation-term-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-31T23:22:45.115Z",
+      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
       "change": "none",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
-        "headSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
+        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -148,7 +148,7 @@
         ],
         "scopeDigest": "856b62fd56ade3db4832d3f72e9b7dd29891e7d0e241eed5bb6f956e21937f81"
       },
-      "notes": "组件本体复核达标(源码未变);entry prop 的 reference drift 修复面 overlays.md 仍在 foundation-doc-annotation 与 foundation-annotation-popover 的 verified scope 内,二者不在本轮计划,继续 deferred 待同批修复。",
+      "notes": "组件实现、测试与 gallery 达标；唯一问题是权威 reference 缺失公开 entry prop。修复会使共享 overlays.md 的 foundation-doc-annotation verified evidence stale，待两项同批重审时补记。",
       "findings": [
         {
           "id": "f-084ace82f441",
@@ -226,30 +226,12 @@
       "findings": []
     },
     "api-docs-lifecycle-badge": {
-      "round": 1,
-      "lastAuditedAt": "2026-07-31T23:22:45.115Z",
-      "change": "none",
-      "status": "verified",
-      "evidence": {
-        "kind": "scope-v1",
-        "baseSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
-        "headSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
-        "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
-        "scope": [
-          "app/pages/kits/api-docs/index.vue",
-          "foundation/components/SemanticBadge.vue",
-          "foundation/utils/badge.ts",
-          "kits/api-docs/components/FieldItem.vue",
-          "kits/api-docs/components/HttpMethodBadge.vue",
-          "kits/api-docs/components/LifecycleBadge.vue",
-          "kits/api-docs/components/LifecycleNotice.vue",
-          "kits/api-docs/components/OperationHeader.vue",
-          "kits/api-docs/utils/lifecycle-preset.ts",
-          "references/kits/api-docs/index.md"
-        ],
-        "scopeDigest": "0b360a2939bfef0ae3df56772fb16d9649d3403b1e05328ce00963e832d1a6aa"
-      },
-      "notes": "首扫 clean:preset wrapper 与 HttpMethodBadge 写法对称,Record<LifecycleStatus,…> 类型层穷尽,六态均 icon+文本齐备(含 LifecycleNotice 共享 preset 的 never-drift claim 结构性成立),gallery 全六态覆盖,registry 依赖闭包正确。",
+      "round": 0,
+      "lastAuditedAt": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
+      "notes": null,
       "findings": []
     },
     "api-docs-method-badge": {
