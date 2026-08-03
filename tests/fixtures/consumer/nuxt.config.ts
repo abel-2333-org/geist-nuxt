@@ -5,5 +5,8 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui'],
   css: ['./app/assets/css/main.css'],
   colorMode: base.colorMode,
-  ui: base.ui,
+  ui: {
+    ...base.ui,
+    fonts: false,
+  },
 })

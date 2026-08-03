@@ -75,6 +75,28 @@ test('locks the root-only agent snapshot boundary', async () => {
   assert.match(workflow, /\[ "\$LIVE_MAIN_SHA" != "\$GITHUB_SHA" \]/)
   assert.match(workflow, /gh release create "\$TAG" dist-skill\.tar\.gz \\\n\s+--target "\$GITHUB_SHA"/)
   assert.match(workflow, /test:consumer:upgrade -- --upgrade-from "\$BASE_SHA" --to "\$MERGE_SHA" --skip-install/)
+  assert.match(workflow, /--group runtime --shard "\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}"/)
+  assert.match(workflow, /--group isolated --shard "\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}" --skip-install/)
+
+  for (const group of ['runtime', 'isolated']) {
+    const gate = workflow.match(new RegExp(
+      `\\n  verify-consumer-${group}:\\n([\\s\\S]*?)(?=\\n  [a-z][a-z0-9-]+:\\n)`,
+    ))
+    assert.ok(gate, `${group} required-check gate must exist`)
+    assert.match(gate[0], new RegExp(`name: Verify consumer \\(${group}\\)`))
+    assert.match(gate[0], /if: \$\{\{ always\(\) \}\}/)
+    assert.match(gate[0], new RegExp(`needs: \\[verify-consumer-${group}-shards\\]`))
+    assert.match(
+      gate[0],
+      new RegExp(`RESULT: \\$\\{\\{ needs\\.verify-consumer-${group}-shards\\.result \\}\\}`),
+    )
+    assert.match(gate[0], /if \[ "\$RESULT" != "success" \]; then/)
+    assert.match(gate[0], /exit 1/)
+  }
+  assert.match(
+    workflow,
+    /needs: \[verify-root, verify-consumer-runtime, verify-consumer-isolated\]/,
+  )
 
   const archiveGuard = workflow.match(/tar tzf dist-skill\.tar\.gz \| grep -E '([^']+)'/)
   assert.ok(archiveGuard)
