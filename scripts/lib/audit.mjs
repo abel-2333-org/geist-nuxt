@@ -920,9 +920,9 @@ export async function recordResults({
 // —— 证据校验:在任意树(PR synthetic merge tree 或 main)上重算 digest ——
 //
 // holds   verified 且 digest 一致:证据成立;在 canonical main 上即 landed
-// stale   verified 但 scope 内容已变化:证据失效,必须重新审计或降级状态(exit 1)
+// stale   scope-v1 的 item/scope 已变化:证据失效,无论 status 都 fail closed(exit 1)
 // legacy  v1 迁移产物,无 digest:下次审计该组件时补齐,不判失败
-// deferred / unaudited 仅列出,不参与成败
+// deferred 仍单独列出 open finding,但其 scope-v1 evidence 也必须可重算
 export async function verifyLedger({ repoRoot, ledger, graph }) {
   const report = { holds: [], stale: [], legacy: [], deferred: [], unaudited: [] }
   for (const [name, entry] of Object.entries(ledger.items).sort(([a], [b]) => a.localeCompare(b))) {
@@ -935,9 +935,9 @@ export async function verifyLedger({ repoRoot, ledger, graph }) {
       report.stale.push({ name, reason: 'registry item 已删除、改名或不再是 component' })
       continue
     }
-    if (entry.status === 'deferred') {
+    const deferred = entry.status === 'deferred'
+    if (deferred) {
       report.deferred.push({ name, openFindings: (entry.findings ?? []).filter(finding => finding.disposition === 'open').length })
-      continue
     }
     if (entry.evidence.kind === 'legacy-v1') {
       report.legacy.push(name)
@@ -955,8 +955,12 @@ export async function verifyLedger({ repoRoot, ledger, graph }) {
       report.stale.push({ name, reason: 'scope 文件缺失或不可读' })
       continue
     }
-    if (digest === entry.evidence.scopeDigest) report.holds.push(name)
-    else report.stale.push({ name, reason: 'scope 内容与审计时不一致' })
+    if (digest !== entry.evidence.scopeDigest) {
+      report.stale.push({ name, reason: 'scope 内容与审计时不一致' })
+    }
+    else if (!deferred) {
+      report.holds.push(name)
+    }
   }
   return report
 }

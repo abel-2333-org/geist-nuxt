@@ -458,9 +458,32 @@ test('verifyLedger 同时校验 scope 内容与 registry item 拓扑', async (t)
   const changedGraph = await graphFor(repoRoot, topologyChanged)
   const report = await verifyLedger({ repoRoot, ledger, graph: changedGraph })
   assert.deepEqual(report.stale.map(item => item.name), ['comp-a', 'comp-b'])
-  assert.deepEqual(report.legacy, ['comp-c'])
+  assert.deepEqual(report.legacy, ['comp-c', 'comp-d'])
   assert.deepEqual(report.deferred, [{ name: 'comp-d', openFindings: 1 }])
   assert.equal(run('status', '--porcelain').includes('foundation/components/B.vue'), true)
+})
+
+test('verifyLedger 对 deferred scope-v1 也重算 digest', async (t) => {
+  const { repoRoot, baseSha } = await fixtureRepo(t, { git: true })
+  const graph = await graphFor(repoRoot)
+  const ledger = v2Ledger()
+  ledger.items['comp-a'] = auditedEntry({
+    status: 'deferred',
+    evidence: exactEvidence(repoRoot, graph, 'comp-a', baseSha, baseSha, ['foundation/components/A.vue']),
+    findings: [{ id: 'f-1', severity: 'low', claim: null, evidence: 'x', disposition: 'open' }],
+  })
+
+  await writeFile(path.join(repoRoot, 'foundation/components/A.vue'), 'drift\n')
+  const report = await verifyLedger({ repoRoot, ledger, graph })
+
+  assert.deepEqual(report.stale, [{ name: 'comp-a', reason: 'scope 内容与审计时不一致' }])
+  assert.deepEqual(report.deferred, [{ name: 'comp-a', openFindings: 1 }])
+  assert.deepEqual(report.holds, [])
+
+  const topologyChanged = structuredClone(FIXTURE_REGISTRY)
+  topologyChanged.items.find(item => item.name === 'comp-a').registryDependencies = []
+  const topologyReport = await verifyLedger({ repoRoot, ledger, graph: await graphFor(repoRoot, topologyChanged) })
+  assert.deepEqual(topologyReport.stale, [{ name: 'comp-a', reason: 'registry item 拓扑或公开 metadata 已变化' }])
 })
 
 test('verifyLedger 把 registry 删除或改名判为 stale,包括 deferred 条目', async (t) => {

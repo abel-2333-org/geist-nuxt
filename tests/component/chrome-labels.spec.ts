@@ -13,6 +13,7 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import CopyButton from '../../foundation/components/CopyButton.vue'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
+import LifecycleBadge from '../../kits/api-docs/components/LifecycleBadge.vue'
 import OperationHeader from '../../kits/api-docs/components/OperationHeader.vue'
 import LifecycleNotice from '../../kits/api-docs/components/LifecycleNotice.vue'
 import { useCopy } from '../../foundation/composables/useCopy'
@@ -166,7 +167,49 @@ describe('useCopy complete-message contract', () => {
   })
 })
 
+describe('LifecycleBadge preset contract', () => {
+  const cases = [
+    { status: 'new', label: 'New', color: 'success', variant: 'subtle', icon: 'i-lucide-sparkles' },
+    { status: 'beta', label: 'Beta', color: 'warning', variant: 'subtle', icon: 'i-lucide-flask-conical' },
+    { status: 'active', label: 'Active', color: 'success', variant: 'subtle', icon: 'i-lucide-circle-check' },
+    { status: 'maintenance', label: 'Maintenance', color: 'warning', variant: 'subtle', icon: 'i-lucide-wrench' },
+    { status: 'deprecated', label: 'Deprecated', color: 'neutral', variant: 'subtle', icon: 'i-lucide-ban' },
+    { status: 'sunset', label: 'Sunsetting', color: 'error', variant: 'solid', icon: 'i-lucide-calendar-clock' },
+  ] as const
+
+  it.each(cases)(
+    'renders the complete $status preset through LifecycleBadge',
+    async ({ status, label, color, variant, icon }) => {
+      const wrapper = await mountSuspended(LifecycleBadge, { props: { status } })
+      const badge = wrapper.findComponent({ name: 'UBadge' })
+
+      expect(wrapper.text()).toContain(label)
+      expect(badge.props()).toMatchObject({
+        color,
+        variant,
+        icon,
+      })
+    },
+  )
+
+  it('falls back to preset text when the label override is blank', async () => {
+    const badge = await mountSuspended(LifecycleBadge, {
+      props: { status: 'beta', label: '   ' },
+    })
+
+    expect(badge.text()).toContain('Beta')
+  })
+})
+
 describe('operation-level lifecycle (OperationHeader / LifecycleNotice)', () => {
+  it('falls back to preset text when the notice title override is blank', async () => {
+    const notice = await mountSuspended(LifecycleNotice, {
+      props: { status: 'beta', title: '' },
+    })
+
+    expect(notice.text()).toContain('Beta')
+  })
+
   it('accepts beta without casts and renders the preset default label', async () => {
     const wrapper = await mountSuspended(OperationHeader, {
       props: { kind: 'endpoint', method: 'POST', path: '/v1/pay', summary: '支付', lifecycle: 'beta' },
