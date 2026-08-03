@@ -14,13 +14,14 @@ const props = withDefaults(
   defineProps<{
     status: LifecycleStatus
     size?: BadgeProps['size']
-    /** Override the preset's default label (e.g. for i18n). */
+    /** Override the preset's default label (e.g. for i18n); blank falls back. */
     label?: string
   }>(),
   { size: 'sm' },
 )
 
 const meta = computed(() => lifecyclePreset[props.status])
+const label = computed(() => props.label?.trim() ? props.label : meta.value.label)
 </script>
 
 <template>
@@ -29,6 +30,6 @@ const meta = computed(() => lifecyclePreset[props.status])
     :variant="meta.variant"
     :icon="meta.icon"
     :size="props.size"
-    :label="props.label ?? meta.label"
+    :label="label"
   />
 </template>

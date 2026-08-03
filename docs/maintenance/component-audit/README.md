@@ -53,6 +53,8 @@ scope 强制并入该 item 当前的全部 registry `files[]`，拒绝非规范�
 `docs/maintenance/component-audit/**`。CI 在 PR synthetic merge tree 上重算 scope 与 item digest：
 内容或 registry 拓扑变化会成为 stale，删除/改名也不能让旧证据继续成立。squash merge 虽会改变
 commit SHA，但内容和 item 拓扑相同，证据仍成立。
+`scope-v1` digest 对 `verified` 与 `deferred` 都会重算；`deferred` 只表示仍有 open finding，
+不能让已记录的 evidence 绕过 stale 检查。
 
 v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来源；它不会把旧分支 SHA
 误称为 main SHA，也不会用当前树伪造过去的 scope，下一次审计该组件时再升级为 `scope-v1`。

@@ -6,8 +6,8 @@
 // after the OperationHeader, before the field groups).
 //
 // A thin wrapper over UAlert:
-//  - color/icon derive from the preset so badge and notice can never drift
-//    apart (one calibration to retune);
+//  - default color/icon/title derive from the preset, so one calibration
+//    retunes both forms; callers may still localize their visible copy;
 //  - NOT dismissible — this is documentation, not a transient toast;
 //  - `title` defaults to the preset label; description is caller copy
 //    (component stays copy-agnostic: props/slot, no hardcoded strings).
@@ -15,17 +15,18 @@
 // Anatomy:  [ icon | title + description ]  (UAlert, variant subtle)
 // States:   none beyond the status prop (static informational surface).
 // A11y:     UAlert renders a landmark-friendly block; meaning is carried by
-//           icon + title text, never color alone (preset guarantees the icon).
+//           icon + non-blank title text, never color alone.
 
 const props = defineProps<{
   status: EndpointLifecycle
-  /** Override the preset's default label (e.g. for i18n). */
+  /** Override the preset's default label (e.g. for i18n); blank falls back. */
   title?: string
   /** Explanation copy; the #default slot wins over this prop if both given. */
   description?: string
 }>()
 
 const meta = computed(() => lifecyclePreset[props.status])
+const title = computed(() => props.title?.trim() ? props.title : meta.value.label)
 
 // BadgeTone → UAlert color. Tones are calibrated on the same semantic axis as
 // alert colors, so the mapping is the identity for every tone the endpoint
@@ -38,7 +39,7 @@ const color = computed(() => BADGE_TONE_COLOR[meta.value.tone])
     :color="color"
     variant="subtle"
     :icon="meta.icon"
-    :title="props.title ?? meta.label"
+    :title="title"
     :description="props.description"
   >
     <template v-if="$slots.default" #description>
