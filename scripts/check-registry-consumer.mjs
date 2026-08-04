@@ -13,12 +13,14 @@ import {
   checkConsumer,
   loadRegistry,
   parseArgs,
+  parseShard,
   planCopy,
   printRegistryError,
   readLock,
   resolveCopyRequest,
   resolveItems,
   resolveSourceSha,
+  selectShard,
   sha256,
   validateRegistry,
 } from './lib/registry.mjs'
@@ -407,7 +409,6 @@ async function checkLegacyConfigMigration({
     await writeFile(path.join(consumerRoot, 'app/app.config.ts'), currentEntrypoints.app)
     const currentLock = await checkConsumer({ registry, repoRoot, consumerRoot })
     assertPackageRequirements(foundationManifest, currentLock, 'legacy config migration')
-    run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
     run('pnpm', ['run', 'typecheck'], consumerRoot)
     run('pnpm', ['run', 'build'], consumerRoot)
     console.log(`Legacy config migration smoke passed: ${consumerRoot}`)
@@ -502,9 +503,8 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
     const lock = await checkConsumer({ registry: headRegistry, repoRoot, consumerRoot })
     assertPackageRequirements(headManifest, lock, 'consumer upgrade')
 
-    run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
-    await assertResolvedComponents(consumerRoot, lock)
     run('pnpm', ['run', 'typecheck'], consumerRoot)
+    await assertResolvedComponents(consumerRoot, lock)
     run('pnpm', ['run', 'build'], consumerRoot)
     console.log(`Consumer upgrade smoke passed: ${baseSha} -> ${headSha}`)
   }
@@ -763,7 +763,7 @@ function isolatedPage(item) {
   return `<script setup lang="ts">\nconst props = {} as any\n</script>\n<template>\n  <${name} v-bind="props" />\n</template>\n`
 }
 
-function closureScenarios(registry, { selectedLabel, group } = {}) {
+function closureScenarios(registry, { selectedLabel, group, shard } = {}) {
   const isolatedRenderingItems = registry.items
     .filter(item => ['registry:component', 'registry:block'].includes(item.type))
     .map(item => ({
@@ -780,7 +780,14 @@ function closureScenarios(registry, { selectedLabel, group } = {}) {
   }
   const allScenarios = [...runtimeScenarios, ...isolatedRenderingItems]
   const scenarios = group ? groups[group] : allScenarios
-  if (!selectedLabel) return scenarios
+  if (!selectedLabel) {
+    if (shard && shard.total > scenarios.length) {
+      throw new Error(`shard ${shard.index}/${shard.total} exceeds ${group} scenario count ${scenarios.length}`)
+    }
+    const selected = selectShard(scenarios, shard)
+    if (shard && selected.length === 0) throw new Error(`shard ${shard.index}/${shard.total} selected no scenarios`)
+    return selected
+  }
   const selected = allScenarios.find(scenario => scenario.label === selectedLabel)
   if (!selected) throw new Error(`unknown consumer smoke scenario: ${selectedLabel}`)
   if (!scenarios.includes(selected)) {
@@ -791,6 +798,11 @@ function closureScenarios(registry, { selectedLabel, group } = {}) {
 
 try {
   const options = parseArgs(process.argv.slice(2))
+  const shard = parseShard(options.shard)
+  if (shard && !options.group) throw new Error('--shard requires --group')
+  if (shard && options.scenario) throw new Error('--shard cannot be combined with --scenario')
+  if (shard && options.upgrade_from) throw new Error('--shard cannot be combined with --upgrade-from')
+  if (shard && (options.target || options.consumer)) throw new Error('--shard cannot be combined with --target or --consumer')
   const registryPath = path.resolve(options.registry ?? path.join(repoRoot, 'registry.json'))
   const registry = await loadRegistry(registryPath)
   await validateRegistry(registry, { repoRoot, checkFiles: true })
@@ -810,6 +822,7 @@ try {
       : closureScenarios(registry, {
           selectedLabel: options.scenario,
           group: options.group,
+          shard,
         })
     const kept = []
     const dependencyRoot = options.skip_install
@@ -828,7 +841,12 @@ try {
         run('pnpm', ['install', '--ignore-workspace', '--ignore-scripts'], dependencyRoot)
       }
 
-      if (!upgradeFrom && !options.scenario && (!options.group || options.group === 'runtime')) {
+      if (
+        !upgradeFrom
+        && !options.scenario
+        && (!options.group || options.group === 'runtime')
+        && (!shard || shard.index === 1)
+      ) {
         const legacyConsumer = await checkLegacyConfigMigration({
           registry,
           sourceSha,
@@ -885,13 +903,12 @@ try {
             throw new Error(`${scenario.label}: lock did not preserve the requested leaf item`)
           }
 
-          run('pnpm', ['exec', 'nuxt', 'prepare'], consumerRoot)
+          run('pnpm', ['run', 'typecheck'], consumerRoot)
           const generatedAppConfig = await readFile(path.join(consumerRoot, '.nuxt/app.config.mjs'), 'utf8')
           if (!generatedAppConfig.includes('/app/app.config.ts')) {
             throw new Error(`${scenario.label}: Nuxt did not discover consumer app/app.config.ts`)
           }
           await assertResolvedComponents(consumerRoot, lock)
-          run('pnpm', ['run', 'typecheck'], consumerRoot)
           if (scenario.build) {
             run('pnpm', ['run', 'build'], consumerRoot)
             const builtRuntime = await readTreeText(path.join(consumerRoot, '.output/server/chunks'))

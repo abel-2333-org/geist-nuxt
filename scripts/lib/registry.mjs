@@ -1028,6 +1028,24 @@ export function parseArgs(argv) {
   return options
 }
 
+export function parseShard(value) {
+  if (value === undefined) return undefined
+  const match = /^([1-9]\d*)\/([1-9]\d*)$/.exec(value)
+  if (!match) throw new RegistryError(`shard must use <index>/<total>, received: ${value}`)
+
+  const index = Number(match[1])
+  const total = Number(match[2])
+  if (!Number.isSafeInteger(index) || !Number.isSafeInteger(total) || index > total) {
+    throw new RegistryError(`shard index must be within 1..${match[2]}, received: ${value}`)
+  }
+  return { index, total }
+}
+
+export function selectShard(values, shard) {
+  if (!shard) return values
+  return values.filter((_, index) => index % shard.total === shard.index - 1)
+}
+
 export function printRegistryError(error) {
   console.error(error.message)
   for (const detail of error.details ?? []) console.error(`- ${typeof detail === 'string' ? detail : JSON.stringify(detail)}`)

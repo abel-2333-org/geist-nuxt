@@ -14,11 +14,13 @@ import {
   checkConsumer,
   loadRegistry,
   parseArgs,
+  parseShard,
   planCopy,
   readLock,
   resolveCopyRequest,
   resolveItems,
   resolveSourceSha,
+  selectShard,
   sha256,
   validateRegistry,
 } from '../scripts/lib/registry.mjs'
@@ -32,6 +34,32 @@ test('accepts the pnpm argument separator', () => {
   assert.deepEqual(options.items, ['geist-foundation'])
   assert.equal(options.target, '../consumer')
   assert.equal(options.to, SOURCE_SHA)
+})
+
+test('partitions consumer scenarios into complete deterministic shards', () => {
+  const scenarios = Array.from({ length: 12 }, (_, index) => `scenario-${index + 1}`)
+  const shards = ['1/3', '2/3', '3/3'].map(value => selectShard(scenarios, parseShard(value)))
+
+  assert.deepEqual(shards, [
+    ['scenario-1', 'scenario-4', 'scenario-7', 'scenario-10'],
+    ['scenario-2', 'scenario-5', 'scenario-8', 'scenario-11'],
+    ['scenario-3', 'scenario-6', 'scenario-9', 'scenario-12'],
+  ])
+  assert.deepEqual(new Set(shards.flat()), new Set(scenarios))
+  assert.equal(shards.flat().length, scenarios.length)
+
+  const isolated = Array.from({ length: 29 }, (_, index) => `isolated-${index + 1}`)
+  const halves = ['1/2', '2/2'].map(value => selectShard(isolated, parseShard(value)))
+  assert.deepEqual(halves.map(values => values.length), [15, 14])
+  assert.deepEqual(new Set(halves.flat()), new Set(isolated))
+  assert.deepEqual(selectShard(scenarios, parseShard('1/3')), shards[0])
+})
+
+test('rejects malformed or out-of-range consumer shards', () => {
+  for (const value of ['0/3', '4/3', '1/0', '01/3', '1/03', '1.5/3', '1/3/4', '1', 'a/b', '9007199254740992/9007199254740992']) {
+    assert.throws(() => parseShard(value), /shard/)
+  }
+  assert.equal(parseShard(undefined), undefined)
 })
 
 async function fixture() {
