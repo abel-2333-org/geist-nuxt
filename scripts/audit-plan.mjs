@@ -139,8 +139,11 @@ try {
       baseSha: planState.base,
       allowWontFix: values['allow-wont-fix'],
     })
-    console.log(`已记录 ${outcome.picked.length} 个组件:${outcome.picked.join('、')}`)
-    console.log(`证据绑定功能提交 ${outcome.headSha};ledger 请作为第二个提交随 PR 交付。`)
+    console.log(`已记录计划组件 ${outcome.picked.length} 个:${outcome.picked.join('、')}`)
+    if (outcome.coReviewed.length > 0) {
+      console.log(`同批复审受影响 evidence owner ${outcome.coReviewed.length} 个:${outcome.coReviewed.join('、')}`)
+    }
+    console.log(`证据统一绑定功能提交 ${outcome.headSha};ledger 请作为第二个提交随 PR 交付。`)
   }
   else if (values.verify) {
     const report = await verifyLedger({ repoRoot, ledger: current.ledger, graph })

@@ -527,7 +527,7 @@ onMounted(() => {
       >
         <p
           v-if="group.group.label"
-          class="px-2.5 pb-1.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-dimmed"
+          class="px-2.5 pb-1.5 font-mono text-xs font-medium uppercase tracking-wide text-dimmed"
         >
           {{ group.group.label }}
         </p>
@@ -632,13 +632,13 @@ onMounted(() => {
                            label keeps a readable `min-w-16` floor either way.
                            Colour stays reserved for the active state. -->
                       <span class="min-w-16 shrink truncate">{{ item.label }}</span>
-        <SidebarScenarioTags
-          v-if="itemScenarios(item).length"
-          :scenarios="itemScenarios(item)"
-          :scenarios-label="scenariosLabel"
-          :overflow-label="scenarioOverflowLabel"
-          :separator="scenarioSeparator"
-        />
+                      <SidebarScenarioTags
+                        v-if="itemScenarios(item).length"
+                        :scenarios="itemScenarios(item)"
+                        :scenarios-label="scenariosLabel"
+                        :overflow-label="scenarioOverflowLabel"
+                        :separator="scenarioSeparator"
+                      />
                       <UBadge
                         v-if="item.badge !== undefined"
                         color="neutral"

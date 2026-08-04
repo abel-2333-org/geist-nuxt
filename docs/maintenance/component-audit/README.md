@@ -56,6 +56,14 @@ commit SHA，但内容和 item 拓扑相同，证据仍成立。
 `scope-v1` digest 对 `verified` 与 `deferred` 都会重算；`deferred` 只表示仍有 open finding，
 不能让已记录的 evidence 绕过 stale 检查。
 
+当计划内的功能改动命中其他条目在 base ledger 中已记录的 `scope-v1` scope，或改变其 registry
+item topology / 公开 metadata 时，这些条目会成为 **required co-review owner**。recorder 从 base
+evidence、当前 registry 与 `base..HEAD` 的已提交 Git diff 自动推导完整 owner 集合；调用方必须在
+同一 results JSON 中为每个 owner 提交带 `coReview: true` 的完整复审结果。
+计划项与 required owner 共用同一个 evidence `headSha`，并一同计入当前审计 round 与 `lastPicked`。
+`deferred` owner 也必须复审；`legacy-v1`
+与未审计条目没有可验证的 scope，不能借 co-review 扩入本批。
+
 v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来源；它不会把旧分支 SHA
 误称为 main SHA，也不会用当前树伪造过去的 scope，下一次审计该组件时再升级为 `scope-v1`。
 
@@ -95,8 +103,8 @@ node scripts/audit-plan.mjs --migrate    # 把磁盘上的 v1 ledger 原子迁�
 
 取 JSON 别走 `pnpm audit:plan -- --json`:pnpm 会加三行横幅,输出不是合法 JSON。
 
-`--record` 在 PR 分支的 worktree 里跑，输入必须与 `--base` Git 树推导出的 item
-集合**严格一致**：
+`--record` 在 PR 分支的 worktree 里跑。普通结果必须与 `--base` Git 树推导出的计划 item
+集合**严格一致**；若 recorder 推导出 required co-review owner，还必须逐项显式附加：
 
 ```json
 [{
@@ -108,6 +116,26 @@ node scripts/audit-plan.mjs --migrate    # 把磁盘上的 v1 ledger 原子迁�
   "findings": [{ "id": "既有 finding 必填", "severity": "high", "claim": "被违反的公开声明(可选)", "evidence": "复现输入/反例", "disposition": "open | resolved" }]
 }]
 ```
+
+co-review 与普通结果使用同一状态机，但必须完整提供 `notes`、`scope` 与 `findings`：
+
+```json
+{
+  "item": "foundation-x",
+  "coReview": true,
+  "change": "modified",
+  "status": "deferred",
+  "notes": "复审受影响的共享 scope，保留仍成立的 open finding。",
+  "scope": ["foundation/components/X.vue", "references/components/x.md"],
+  "findings": [{ "id": "既有 finding", "severity": "low", "claim": "…", "evidence": "…", "disposition": "open" }]
+}
+```
+
+planned item 不得标 `coReview`；计划外结果必须恰好等于 recorder 自动推导的 required owner 集合，
+不能漏项、夹带无关 owner，或从 result scope 删除 HEAD 中仍存在的受影响 base scope 路径（判定
+始终读取 base evidence scope）。旧路径若在 HEAD 已删除、rename 或不再是普通文件，可从新 scope
+移除，但 owner 仍必须复审。co-review 是完整复审，不是 digest refresh：recorder 不会自动生成 verdict，
+也不接受单独的 CLI owner 名单。禁止手改 ledger / digest 绕过该边界。
 
 记录前必须先把组件、tests 与 references 等功能改动提交，且工作区完全干净。record 只读取
 `HEAD` Git blob 生成证据，然后修改 ledger；报告和 ledger 再作为第二个提交。这样 `headSha`

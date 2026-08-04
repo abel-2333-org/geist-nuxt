@@ -47,6 +47,15 @@ const measured = ref(false)
 // can never silently desync the fit math.
 const GAP_FALLBACK = 4
 
+// The overflow badge uses tabular numerals, so every count with the same digit
+// length has the same intrinsic width. Measure one sample per digit length
+// (`+1`, `+10`, `+100`, ...) instead of pessimistically reusing `+total`.
+const samples = computed(() => {
+  const values: number[] = []
+  for (let value = 1; value <= props.scenarios.length; value *= 10) values.push(value)
+  return values
+})
+
 function recompute() {
   const root = rootEl.value
   const measure = measureEl.value
@@ -59,7 +68,11 @@ function recompute() {
 
   const avail = root.clientWidth
   const tagWidths = [...measure.querySelectorAll<HTMLElement>('[data-tag]')].map(el => el.offsetWidth)
-  const plusW = measure.querySelector<HTMLElement>('[data-plus]')?.offsetWidth ?? 0
+  const plusWidths = new Map(
+    [...measure.querySelectorAll<HTMLElement>('[data-plus]')]
+      .map(el => [Number(el.dataset.plus), el.offsetWidth]),
+  )
+  const plusFallback = Math.max(0, ...plusWidths.values())
 
   // Largest k tags that fit, reserving room for the "+N" chip whenever some
   // tags stay hidden (k < total).
@@ -68,7 +81,10 @@ function recompute() {
     let need = 0
     for (let i = 0; i < k; i++) need += tagWidths[i] ?? 0
     need += GAP * (k - 1)
-    if (k < total) need += GAP + plusW
+    if (k < total) {
+      const hidden = total - k
+      need += GAP + (plusWidths.get(String(hidden).length) ?? plusFallback)
+    }
     if (need <= avail) {
       best = k
       break
@@ -148,7 +164,16 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
     class="relative flex min-w-0 flex-1 items-center justify-end gap-1"
   >
     <span class="flex items-center gap-1">
-      <!-- Whole tags that fit: plain, non-interactive. -->
+      <!-- Whole tags that fit: plain, non-interactive. The `max-w-28` cap only
+           guards the unmeasured phase (SSR / first paint), where the
+           deterministic default shows one tag without knowing the real pixel
+           budget — an extreme tag could otherwise blow the row. Once measured,
+           the fit loop has already proven every visible tag fits at its
+           intrinsic width, so the cap comes off and a tag always renders WHOLE.
+           Keeping the cap here would break that guarantee: a tag wider than the
+           cap but narrower than the budget would be laid out truncated (an
+           ellipsised chip carrying no info) with NO "+N" popover to reveal its
+           full text — fitting tags render without the overflow trigger. -->
       <UBadge
         v-for="(s, i) in visibleTags"
         :key="`${s}-${i}`"
@@ -156,7 +181,7 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
         variant="soft"
         size="sm"
         :label="s"
-        class="max-w-28"
+        :class="measured ? undefined : 'max-w-28'"
       />
 
       <!-- Overflow reveal. A hover tooltip is the wrong tool here: reka-ui
@@ -211,13 +236,13 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
     <span class="sr-only">{{ scenarios.join(separator) }}</span>
 
     <!-- Hidden measurement layer: intrinsic widths only, never interactive.
-         Note: unlike the visible tags, the measured badges deliberately carry
-         NO `max-w-28`. With the cap, a tag wider than 112px would report a
-         *clamped* offsetWidth, so the fit loop would think an over-long tag
-         fits and lay it out truncated (an ellipsised chip carrying no info)
-         instead of folding it into "+N". Measuring the intrinsic width lets an
-         over-long tag correctly overflow into the "+N"/count chip, where its
-         full text is reachable via the popover (and the sr-only list). -->
+         No `max-w-28` here — capping would clamp an over-long tag's
+         offsetWidth, so the fit loop would think it fits at the capped width
+         and the fold decision would be wrong. Measured (post-mount) visible
+         tags render at the same intrinsic width (see the cap note above), so
+         the fit math and the render agree: an over-long tag either fits whole
+         or folds into the "+N"/count chip, where its full text stays reachable
+         via the popover (and the sr-only list). -->
     <div
       ref="measureEl"
       aria-hidden="true"
@@ -233,11 +258,13 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
         :label="s"
       />
       <UBadge
-        data-plus
+        v-for="n in samples"
+        :key="n"
+        :data-plus="String(n).length"
         color="neutral"
         variant="soft"
         size="sm"
-        :label="`+${scenarios.length}`"
+        :label="`+${n}`"
         class="tabular-nums"
       />
     </div>

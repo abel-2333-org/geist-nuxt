@@ -816,9 +816,9 @@ function mergeFindings(itemName, previous, submitted, allowWontFix) {
   return [...closed, ...incoming].sort((a, b) => a.id.localeCompare(b.id))
 }
 
-function hasCommittedChange(repoRoot, baseSha, headSha, scope) {
+function hasCommittedPathChange(repoRoot, baseSha, headSha, paths) {
   try {
-    execFileSync('git', ['diff', '--quiet', baseSha, headSha, '--', 'registry.json', ...scope], {
+    execFileSync('git', ['diff', '--quiet', baseSha, headSha, '--', ...paths], {
       cwd: repoRoot,
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -828,6 +828,41 @@ function hasCommittedChange(repoRoot, baseSha, headSha, scope) {
     if (error.status === 1) return true
     throw new AuditError(`无法比较审计功能提交:${error.stderr?.toString('utf8').trim() || error.message}`)
   }
+}
+
+function hasCommittedScopeChange(repoRoot, baseSha, headSha, scope) {
+  return hasCommittedPathChange(repoRoot, baseSha, headSha, scope)
+}
+
+function hasCommittedChange(repoRoot, baseSha, headSha, scope) {
+  return hasCommittedPathChange(repoRoot, baseSha, headSha, ['registry.json', ...scope])
+}
+
+function isGitScopeFile(repoRoot, revision, relativePath) {
+  try {
+    gitBlob(repoRoot, revision, relativePath)
+    return true
+  }
+  catch (error) {
+    if (error instanceof AuditError && (
+      error.message.includes('不存在或不是唯一条目')
+      || error.message.includes('只允许普通文件')
+    )) return false
+    throw error
+  }
+}
+
+function impactedEvidenceOwners(repoRoot, baseSha, headSha, ledger, graph, planned) {
+  return Object.entries(ledger.items)
+    .filter(([name, entry]) => !planned.has(name) && entry.evidence?.kind === 'scope-v1')
+    .map(([name, entry]) => ({
+      name,
+      changed: entry.evidence.scope.filter(scope => hasCommittedScopeChange(repoRoot, baseSha, headSha, [scope])),
+      topologyChanged: !graph.byName.has(name)
+        || registryItemDigest(graph.byName.get(name)) !== entry.evidence.itemDigest,
+    }))
+    .filter(owner => owner.changed.length > 0 || owner.topologyChanged)
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export async function recordResults({
@@ -858,16 +893,57 @@ export async function recordResults({
   const plan = planNext(planGraph, planLedger)
   const resultNames = results.map(result => result?.item)
   if (new Set(resultNames).size !== resultNames.length) throw new AuditError('record 输入包含重复 item')
+
+  const planned = new Set(plan.picked)
+  for (const result of results) {
+    if (result?.coReview !== undefined && typeof result.coReview !== 'boolean') {
+      throw new AuditError(`${result?.item ?? '未知 item'} 的 coReview 必须是 boolean`)
+    }
+    if (planned.has(result?.item) && result.coReview === true) {
+      throw new AuditError(`${result.item} 是当日计划组件,不得标记 coReview`)
+    }
+    if (!planned.has(result?.item) && result?.coReview !== true) {
+      throw new AuditError(`${result?.item ?? '未知 item'} 不在当日计划中,必须是 recorder 要求的 coReview owner`)
+    }
+  }
+
   const expected = [...plan.picked].sort()
-  const received = [...resultNames].sort()
+  const received = results.filter(result => planned.has(result.item)).map(result => result.item).sort()
   if (JSON.stringify(expected) !== JSON.stringify(received)) {
     throw new AuditError(`record 输入必须与当日计划一致\n  计划:${expected.join('、')}\n  收到:${received.join('、')}`)
   }
 
+  const impacts = impactedEvidenceOwners(
+    repoRoot,
+    normalizedBaseSha,
+    evidenceHeadSha,
+    planLedger,
+    graph,
+    planned,
+  )
+  const impacted = impacts.map(owner => owner.name)
+  const impactByName = new Map(impacts.map(owner => [owner.name, owner.changed]))
+  const coReviewed = results.filter(result => result.coReview === true).map(result => result.item).sort()
+  const missingOwners = impacted.filter(name => !coReviewed.includes(name))
+  if (missingOwners.length > 0) {
+    throw new AuditError(`record 输入缺少受当前功能 diff 影响的 evidence owner:${missingOwners.join('、')}`)
+  }
+  const unrelatedOwners = coReviewed.filter(name => !impacted.includes(name))
+  if (unrelatedOwners.length > 0) {
+    throw new AuditError(`coReview 只能包含 base evidence 被当前功能 diff 影响的 scope-v1 owner:${unrelatedOwners.join('、')}`)
+  }
+
   const nextEntries = new Map()
   const resultByName = new Map(results.map(result => [result.item, result]))
-  for (const name of plan.picked) {
+  for (const name of [...plan.picked, ...impacted]) {
     const result = resultByName.get(name)
+    const coReview = result.coReview === true
+    if (coReview) {
+      if (result.change !== 'modified') throw new AuditError(`${name} 的 coReview change 必须是 modified`)
+      if (typeof result.notes !== 'string' || !result.notes.trim()) throw new AuditError(`${name} 的 coReview 必须提供非空 notes`)
+      if (!Array.isArray(result.scope) || result.scope.length === 0) throw new AuditError(`${name} 的 coReview 必须显式提供非空 scope`)
+      if (!Array.isArray(result.findings)) throw new AuditError(`${name} 的 coReview 必须显式提供 findings 数组`)
+    }
     if (!CHANGES.includes(result.change)) throw new AuditError(`${name} 的 change 必须是 ${CHANGES.join(' / ')}`)
     if (!STATUSES.includes(result.status)) throw new AuditError(`${name} 的 status 必须是 ${STATUSES.join(' / ')}`)
     const item = graph.byName.get(name)
@@ -881,6 +957,14 @@ export async function recordResults({
       throw new AuditError(`${name} 标记 verified 却仍有 open finding`)
     }
     const scope = resolveScope(item, result.scope ?? [])
+    if (coReview) {
+      const dropped = impactByName.get(name)
+        .filter(path => isGitScopeFile(repoRoot, evidenceHeadSha, path))
+        .filter(path => !scope.includes(path))
+      if (dropped.length > 0) {
+        throw new AuditError(`${name} 的 coReview scope 不得移除受影响的 base scope 路径:${dropped.join('、')}`)
+      }
+    }
     if (result.change === 'modified' && !hasCommittedChange(repoRoot, normalizedBaseSha, evidenceHeadSha, scope)) {
       throw new AuditError(`${name} 标记 modified,但 base 与功能提交之间的 registry/scope 没有变化`)
     }
@@ -914,7 +998,13 @@ export async function recordResults({
   ledger.lastPicked = [...nextEntries.keys()]
 
   await writeLedgerAtomic(ledgerPath, ledger, rawLedger)
-  return { picked: [...nextEntries.keys()], round: ledger.round, headSha: evidenceHeadSha }
+  return {
+    picked: [...plan.picked],
+    coReviewed: impacted,
+    recorded: [...nextEntries.keys()],
+    round: ledger.round,
+    headSha: evidenceHeadSha,
+  }
 }
 
 // —— 证据校验:在任意树(PR synthetic merge tree 或 main)上重算 digest ——
