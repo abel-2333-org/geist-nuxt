@@ -74,9 +74,26 @@ test('locks the root-only agent snapshot boundary', async () => {
   assert.match(workflow, /LIVE_MAIN_SHA=.*commits\/main/)
   assert.match(workflow, /\[ "\$LIVE_MAIN_SHA" != "\$GITHUB_SHA" \]/)
   assert.match(workflow, /gh release create "\$TAG" dist-skill\.tar\.gz \\\n\s+--target "\$GITHUB_SHA"/)
-  assert.match(workflow, /test:consumer:upgrade -- --upgrade-from "\$BASE_SHA" --to "\$MERGE_SHA" --skip-install/)
-  assert.match(workflow, /--group runtime --shard "\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}"/)
-  assert.match(workflow, /--group isolated --shard "\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}" --skip-install/)
+  const shardJobs = {}
+  for (const [group, matrix] of Object.entries({
+    runtime: '1, 2, 3',
+    isolated: '1, 2',
+  })) {
+    const job = workflow.match(new RegExp(
+      `\\n  verify-consumer-${group}-shards:\\n([\\s\\S]*?)(?=\\n  [a-z][a-z0-9-]+:\\n)`,
+    ))
+    assert.ok(job, `${group} shard job must exist`)
+    shardJobs[group] = job[0]
+    assert.match(job[0], /fail-fast: false/)
+    assert.match(job[0], new RegExp(`shard: \\[${matrix}\\]`))
+    assert.match(
+      job[0],
+      new RegExp(`--group ${group} --shard "\\$\\{\\{ matrix\\.shard \\}\\}/\\$\\{\\{ strategy\\.job-total \\}\\}"`),
+    )
+  }
+  assert.match(shardJobs.isolated, /--skip-install/)
+  assert.match(shardJobs.runtime, /if: github\.event_name == 'pull_request' && matrix\.shard == 1/)
+  assert.match(shardJobs.runtime, /test:consumer:upgrade -- --upgrade-from "\$BASE_SHA" --to "\$MERGE_SHA" --skip-install/)
 
   for (const group of ['runtime', 'isolated']) {
     const gate = workflow.match(new RegExp(
