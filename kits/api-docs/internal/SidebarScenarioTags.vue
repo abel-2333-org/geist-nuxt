@@ -47,6 +47,15 @@ const measured = ref(false)
 // can never silently desync the fit math.
 const GAP_FALLBACK = 4
 
+// The overflow badge uses tabular numerals, so every count with the same digit
+// length has the same intrinsic width. Measure one sample per digit length
+// (`+1`, `+10`, `+100`, ...) instead of pessimistically reusing `+total`.
+const samples = computed(() => {
+  const values: number[] = []
+  for (let value = 1; value <= props.scenarios.length; value *= 10) values.push(value)
+  return values
+})
+
 function recompute() {
   const root = rootEl.value
   const measure = measureEl.value
@@ -59,7 +68,11 @@ function recompute() {
 
   const avail = root.clientWidth
   const tagWidths = [...measure.querySelectorAll<HTMLElement>('[data-tag]')].map(el => el.offsetWidth)
-  const plusW = measure.querySelector<HTMLElement>('[data-plus]')?.offsetWidth ?? 0
+  const plusWidths = new Map(
+    [...measure.querySelectorAll<HTMLElement>('[data-plus]')]
+      .map(el => [Number(el.dataset.plus), el.offsetWidth]),
+  )
+  const plusFallback = Math.max(0, ...plusWidths.values())
 
   // Largest k tags that fit, reserving room for the "+N" chip whenever some
   // tags stay hidden (k < total).
@@ -68,7 +81,10 @@ function recompute() {
     let need = 0
     for (let i = 0; i < k; i++) need += tagWidths[i] ?? 0
     need += GAP * (k - 1)
-    if (k < total) need += GAP + plusW
+    if (k < total) {
+      const hidden = total - k
+      need += GAP + (plusWidths.get(String(hidden).length) ?? plusFallback)
+    }
     if (need <= avail) {
       best = k
       break
@@ -242,11 +258,13 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
         :label="s"
       />
       <UBadge
-        data-plus
+        v-for="n in samples"
+        :key="n"
+        :data-plus="String(n).length"
         color="neutral"
         variant="soft"
         size="sm"
-        :label="`+${scenarios.length}`"
+        :label="`+${n}`"
         class="tabular-nums"
       />
     </div>

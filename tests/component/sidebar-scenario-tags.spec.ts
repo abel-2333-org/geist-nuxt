@@ -97,6 +97,21 @@ describe('SidebarScenarioTags measured overflow', () => {
     expect(trigger!.textContent).toContain('+1')
   })
 
+  it('reserves the rendered "+N" width across a digit boundary', async () => {
+    const scenarios = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十十十']
+    // All ten need 156px, so the last 30px tag cannot fit. Nine 10px tags +
+    // eight 4px tag gaps + one 4px trigger gap + "+1" at 20px = 146px, so
+    // nine fit in 150px. Measuring "+10" instead would reserve 30px and
+    // incorrectly fold one extra tag.
+    await mountTags(scenarios, 150)
+
+    const cluster = visibleCluster()
+    expect(visibleBadgeTexts(cluster)).toEqual(scenarios.slice(0, 9))
+    const trigger = cluster.querySelector('button')
+    expect(trigger).not.toBeNull()
+    expect(trigger!.textContent).toContain('+1')
+  })
+
   it('collapses to a count chip when not even one tag fits', async () => {
     // Widths: 50 each; even 50 + "+2"(20) (+ gaps) > 10 — nothing fits, so the
     // cluster degrades to the lone count-chip trigger showing the total.
