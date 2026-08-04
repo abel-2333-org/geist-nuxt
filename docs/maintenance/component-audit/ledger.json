@@ -1,11 +1,10 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-03T05:48:46.585Z",
+  "lastRunAt": "2026-08-04T02:27:55.157Z",
   "lastPicked": [
-    "foundation-term-annotation",
-    "foundation-semantic-badge",
-    "api-docs-lifecycle-badge"
+    "api-docs-method-badge",
+    "api-docs-sidebar-nav"
   ],
   "items": {
     "foundation-copy-button": {
@@ -259,13 +258,43 @@
       "findings": []
     },
     "api-docs-method-badge": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-08-04T02:27:55.157Z",
+      "change": "none",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
+        "headSha": "4a52cb65277542f22ef65b5aa6b7f92fa7a5942a",
+        "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
+        "scope": [
+          "app/components/demo/api-docs/DocsShellReference.vue",
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "app/pages/kits/api-docs/sidebar-nav.vue",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/HttpMethodBadge.vue",
+          "kits/api-docs/components/OperationHeader.vue",
+          "kits/api-docs/components/SidebarNav.vue",
+          "kits/api-docs/components/SiteSearch.vue",
+          "kits/api-docs/utils/method-preset.ts",
+          "references/components/data-display.md",
+          "references/kits/api-docs/index.md",
+          "references/kits/api-docs/sidebar-nav.md"
+        ],
+        "scopeDigest": "7c9e57ec1a4b4105c1d6ee30d0fd80e3dd6ae0404632746e2aa055704e5225f7"
+      },
+      "notes": "复审发现空串/纯空白 method 会让 badge 失去可见文本主信号；该实现同时属于 foundation-semantic-badge 等既有共享证据 scope，本批不跨 owner 修改与批量重录，改为如实 deferred/open。未知非空 token（如 EVENT）仍保留原文并走 neutral fallback。",
+      "findings": [
+        {
+          "id": "f-d4a766b14726",
+          "severity": "low",
+          "claim": "方法色标的可见文本是主信号，颜色仅作强化",
+          "evidence": "HttpMethodBadge.method 接受任意 string；空串/纯空白经 toUpperCase() 后仍为空，查表必然走 neutral fallback，SemanticBadge 渲染空 label，neutral fallback 的视觉样式会成为唯一可见信号。应在组件边界拒绝或回退空白 method，并补 focused spec。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-enum-table": {
       "round": 1,
@@ -403,13 +432,37 @@
       "findings": []
     },
     "api-docs-sidebar-nav": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-08-04T02:27:55.157Z",
+      "change": "modified",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
+        "headSha": "4a52cb65277542f22ef65b5aa6b7f92fa7a5942a",
+        "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
+        "scope": [
+          "AGENTS.md",
+          "app/pages/kits/api-docs/sidebar-nav.vue",
+          "kits/api-docs/components/SidebarNav.vue",
+          "kits/api-docs/internal/SidebarScenarioTags.vue",
+          "references/foundations/typography.md",
+          "references/kits/api-docs/index.md",
+          "references/kits/api-docs/sidebar-nav.md",
+          "tests/component/sidebar-scenario-tags.spec.ts"
+        ],
+        "scopeDigest": "db52cacd6c3c6fa7c668df61e2e9892d365fc8dd2755be78adabf61085c107c7"
+      },
+      "notes": "修复 SidebarScenarioTags 自然宽度渲染与 +N 预留宽度：每个候选可见数量按实际 hiddenCount 测量 +N；focused spec 覆盖多位数到个位数边界。eyebrow 11px 字阶 finding 继续 deferred；scope 补齐 AGENTS.md 与 typography.md，finding 仅陈述当前组件内的契约偏差，不再声称全部分发源码唯一。",
+      "findings": [
+        {
+          "id": "f-b401a2e3fcdb",
+          "severity": "low",
+          "claim": "AGENTS.md 硬规则「不硬编码颜色、尺寸或圆角」；references/foundations/typography.md 字阶最小档为 Label 12（text-xs）",
+          "evidence": "kits/api-docs/components/SidebarNav.vue 的分组 eyebrow 使用 text-[0.6875rem]（11px）+ tracking-[0.14em]，未落入 typography.md 已定义字阶；同文件 section header 使用合规 text-xs。修向二选一（归一 Label 12 Mono / typography.md 正式增设 11px eyebrow 档）属视觉设计决策，交人工。",
+          "disposition": "open"
+        }
+      ]
     }
   }
 }
