@@ -77,13 +77,13 @@ jobs:
       - name: Build root gallery
         run: pnpm build
 
-  verify-consumer:
-    name: Verify consumer (${{ matrix.group }})
+  verify-consumer-runtime-shards:
+    name: Verify consumer runtime shard (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        group: [runtime, isolated]
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -102,19 +102,76 @@ jobs:
       - name: Install root dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test registry consumer (${{ matrix.group }})
-        run: pnpm test:consumer -- --group ${{ matrix.group }}
+      - name: Test registry consumer runtime shard (${{ matrix.shard }}/${{ strategy.job-total }})
+        run: pnpm test:consumer -- --group runtime --shard "${{ matrix.shard }}/${{ strategy.job-total }}"
 
       - name: Test registry consumer upgrade from PR base
-        if: github.event_name == 'pull_request' && matrix.group == 'runtime'
+        if: github.event_name == 'pull_request' && matrix.shard == 1
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           MERGE_SHA: ${{ github.sha }}
         run: pnpm test:consumer:upgrade -- --upgrade-from "$BASE_SHA" --to "$MERGE_SHA" --skip-install
 
+  verify-consumer-isolated-shards:
+    name: Verify consumer isolated shard (${{ matrix.shard }}/${{ strategy.job-total }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install root dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test registry consumer isolated shard (${{ matrix.shard }}/${{ strategy.job-total }})
+        run: pnpm test:consumer -- --group isolated --shard "${{ matrix.shard }}/${{ strategy.job-total }}" --skip-install
+
+  verify-consumer-runtime:
+    name: Verify consumer (runtime)
+    if: ${{ always() }}
+    needs: [verify-consumer-runtime-shards]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every runtime shard
+        env:
+          RESULT: ${{ needs.verify-consumer-runtime-shards.result }}
+        run: |
+          if [ "$RESULT" != "success" ]; then
+            echo "::error::Runtime consumer shards finished with $RESULT"
+            exit 1
+          fi
+
+  verify-consumer-isolated:
+    name: Verify consumer (isolated)
+    if: ${{ always() }}
+    needs: [verify-consumer-isolated-shards]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every isolated shard
+        env:
+          RESULT: ${{ needs.verify-consumer-isolated-shards.result }}
+        run: |
+          if [ "$RESULT" != "success" ]; then
+            echo "::error::Isolated consumer shards finished with $RESULT"
+            exit 1
+          fi
+
   release-skill:
     name: Assemble, verify and release Source-first snapshot
-    needs: [verify-root, verify-consumer]
+    needs: [verify-root, verify-consumer-runtime, verify-consumer-isolated]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
