@@ -21,10 +21,10 @@ const props = withDefaults(
   { size: 'sm' },
 )
 
-// The cast is only to index `methodPreset`; an unknown/custom method falls
-// through to `methodFallback`, so it is safe despite the cast not being provable.
-const method = computed(() => props.method.toUpperCase() as HttpMethod)
-const meta = computed(() => methodPreset[method.value] ?? methodFallback)
+// Normalize the visible token once. Unknown/custom methods keep that token and
+// use the neutral fallback; blank input becomes an explicit non-colour signal.
+const method = computed(() => props.method.trim().toUpperCase() || 'UNKNOWN')
+const meta = computed(() => methodPreset[method.value as HttpMethod] ?? methodFallback)
 </script>
 
 <template>

@@ -264,12 +264,151 @@ async function recordFixture(t, existingFinding = null) {
   }
   const fixture = await fixtureRepo(t, { git: true, ledger })
   await writeFile(path.join(fixture.repoRoot, 'foundation/components/A.vue'), '<template><span>A2</span></template>\n')
+  await writeFile(path.join(fixture.repoRoot, 'foundation/components/C.vue'), '<template><span>C2</span></template>\n')
   fixture.run('add', '-A')
   fixture.run('commit', '-q', '-m', 'work')
   const graph = await graphFor(fixture.repoRoot)
   const loaded = await loadLedger(fixture.ledgerPath, graph)
   return {
     ...fixture,
+    graph,
+    ledger: loaded.ledger,
+    raw: loaded.raw,
+    planGraph: graph,
+    planLedger: structuredClone(loaded.ledger),
+    baseLedgerRaw: loaded.raw,
+  }
+}
+
+async function coReviewFixture(t, { deleteScope = false } = {}) {
+  const ledger = v2Ledger()
+  ledger.items['comp-c'] = auditedEntry()
+  ledger.items['comp-d'] = auditedEntry()
+  const fixture = await fixtureRepo(t, { git: true, ledger })
+  const graph = await graphFor(fixture.repoRoot)
+  const ownerScope = [
+    'foundation/components/A.vue',
+    'foundation/components/C.vue',
+    'tests/component/a.spec.ts',
+  ]
+
+  ledger.items['comp-c'] = auditedEntry({
+    evidence: exactEvidence(
+      fixture.repoRoot,
+      graph,
+      'comp-c',
+      fixture.baseSha,
+      fixture.baseSha,
+      ownerScope,
+    ),
+  })
+  await writeFile(fixture.ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`)
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'canonical scope evidence')
+  const baseSha = fixture.run('rev-parse', 'HEAD').trim()
+  fixture.run('update-ref', 'refs/remotes/origin/main', baseSha)
+
+  await writeFile(path.join(fixture.repoRoot, 'foundation/components/A.vue'), '<template><span>A2</span></template>\n')
+  if (deleteScope) await rm(path.join(fixture.repoRoot, 'tests/component/a.spec.ts'))
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'change shared scope')
+
+  const loaded = await loadLedger(fixture.ledgerPath, graph)
+  return {
+    ...fixture,
+    baseSha,
+    graph,
+    ledger: loaded.ledger,
+    raw: loaded.raw,
+    planGraph: graph,
+    planLedger: structuredClone(loaded.ledger),
+    baseLedgerRaw: loaded.raw,
+    ownerScope,
+  }
+}
+
+async function topologyCoReviewFixture(t) {
+  const ledger = v2Ledger()
+  ledger.items['comp-c'] = auditedEntry()
+  ledger.items['comp-d'] = auditedEntry()
+  const fixture = await fixtureRepo(t, { git: true, ledger })
+  const planGraph = await graphFor(fixture.repoRoot)
+  const scope = ['foundation/components/C.vue']
+
+  ledger.items['comp-c'] = auditedEntry({
+    evidence: exactEvidence(
+      fixture.repoRoot,
+      planGraph,
+      'comp-c',
+      fixture.baseSha,
+      fixture.baseSha,
+      scope,
+    ),
+  })
+  await writeFile(fixture.ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`)
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'canonical topology evidence')
+  const baseSha = fixture.run('rev-parse', 'HEAD').trim()
+  fixture.run('update-ref', 'refs/remotes/origin/main', baseSha)
+
+  const registry = structuredClone(FIXTURE_REGISTRY)
+  registry.items.find(item => item.name === 'comp-c').description = 'changed description'
+  await writeFile(path.join(fixture.repoRoot, 'registry.json'), `${JSON.stringify(registry, null, 2)}\n`)
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'change registry topology')
+
+  const graph = await graphFor(fixture.repoRoot, registry)
+  const loaded = await loadLedger(fixture.ledgerPath, graph)
+  return {
+    ...fixture,
+    baseSha,
+    graph,
+    ledger: loaded.ledger,
+    raw: loaded.raw,
+    planGraph,
+    planLedger: structuredClone(loaded.ledger),
+    baseLedgerRaw: loaded.raw,
+    scope,
+  }
+}
+
+async function roundCoReviewFixture(t) {
+  const ledger = v2Ledger({ round: 2, lastPicked: ['comp-a'] })
+  for (const name of ['comp-a', 'comp-b', 'comp-c', 'comp-d']) {
+    ledger.items[name] = auditedEntry({ round: 1 })
+  }
+  const fixture = await fixtureRepo(t, { git: true, ledger })
+  const graph = await graphFor(fixture.repoRoot)
+
+  for (const name of ['comp-c', 'comp-d']) {
+    const scope = ['foundation/components/A.vue', `foundation/components/${name.at(-1).toUpperCase()}.vue`]
+    ledger.items[name] = auditedEntry({
+      round: 1,
+      evidence: exactEvidence(
+        fixture.repoRoot,
+        graph,
+        name,
+        fixture.baseSha,
+        fixture.baseSha,
+        scope,
+      ),
+    })
+  }
+  await writeFile(fixture.ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`)
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'canonical round evidence')
+  const baseSha = fixture.run('rev-parse', 'HEAD').trim()
+  fixture.run('update-ref', 'refs/remotes/origin/main', baseSha)
+
+  await writeFile(path.join(fixture.repoRoot, 'foundation/components/A.vue'), '<template><span>A2</span></template>\n')
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'change shared round scope')
+
+  for (const name of graph.components) graph.loc.set(name, 600)
+  const loaded = await loadLedger(fixture.ledgerPath, graph)
+  return {
+    ...fixture,
+    baseSha,
     graph,
     ledger: loaded.ledger,
     raw: loaded.raw,
@@ -310,6 +449,180 @@ test('recordResults 从 base 计划记账,证据绑定 Git HEAD、item 与 scope
   assert.equal(evidence.headSha, outcome.headSha)
   assert.equal(evidence.itemDigest, registryItemDigest(state.graph.byName.get('comp-a')))
   assert.equal(evidence.scopeDigest, computeGitScopeDigest(state.repoRoot, outcome.headSha, evidence.scope))
+})
+
+test('recordResults 要求显式完整 co-review 所有被功能 diff 命中的 evidence owner', async (t) => {
+  const state = await coReviewFixture(t)
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+    now: '2026-07-29T00:00:00.000Z',
+  }
+  const planned = [resultFor('comp-a', { change: 'modified' }), resultFor('comp-b')]
+  const owner = resultFor('comp-c', {
+    coReview: true,
+    change: 'modified',
+    notes: '复审共享 A scope 后证据仍成立',
+    scope: state.ownerScope,
+    findings: [],
+  })
+
+  await assert.rejects(recordResults({ ...args, results: planned }), /缺少受当前功能 diff 影响的 evidence owner:comp-c/)
+  assert.equal(await readFile(state.ledgerPath, 'utf8'), state.raw)
+
+  await assert.rejects(recordResults({
+    ...args,
+    results: [...planned, owner, resultFor('comp-d', {
+      coReview: true,
+      change: 'modified',
+      notes: '无关 owner',
+      scope: ['foundation/components/D.vue'],
+      findings: [],
+    })],
+  }), /coReview 只能包含.*comp-d/)
+
+  await assert.rejects(recordResults({
+    ...args,
+    results: [resultFor('comp-a', { change: 'modified', coReview: true }), resultFor('comp-b'), owner],
+  }), /当日计划组件,不得标记 coReview/)
+
+  await assert.rejects(recordResults({
+    ...args,
+    results: [...planned, { ...owner, notes: '' }],
+  }), /coReview 必须提供非空 notes/)
+
+  await assert.rejects(recordResults({
+    ...args,
+    results: [...planned, { ...owner, scope: ['foundation/components/C.vue'] }],
+  }), /coReview scope 不得移除受影响的 base scope 路径:foundation\/components\/A.vue/)
+
+  const outcome = await recordResults({ ...args, results: [...planned, owner] })
+  assert.deepEqual(outcome.picked, ['comp-a', 'comp-b'])
+  assert.deepEqual(outcome.coReviewed, ['comp-c'])
+  assert.deepEqual(outcome.recorded, ['comp-a', 'comp-b', 'comp-c'])
+
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+  assert.deepEqual(persisted.lastPicked, ['comp-a', 'comp-b', 'comp-c'])
+  assert.equal(persisted.items['comp-c'].round, persisted.items['comp-a'].round)
+  assert.equal(new Set(outcome.recorded.map(name => persisted.items[name].evidence.headSha)).size, 1)
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
+})
+
+test('recordResults 允许 co-review 移除 HEAD 已删除的旧 scope 路径', async (t) => {
+  const state = await coReviewFixture(t, { deleteScope: true })
+  const results = [
+    resultFor('comp-a', { change: 'modified' }),
+    resultFor('comp-b'),
+    resultFor('comp-c', {
+      coReview: true,
+      change: 'modified',
+      notes: '复审共享 scope，并移除 HEAD 已删除的旧测试路径',
+      scope: state.ownerScope.filter(path => path !== 'tests/component/a.spec.ts'),
+      findings: [],
+    }),
+  ]
+
+  const outcome = await recordResults({
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    results,
+    baseSha: state.baseSha,
+  })
+
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+  assert.deepEqual(outcome.coReviewed, ['comp-c'])
+  assert.equal(persisted.items['comp-c'].evidence.scope.includes('tests/component/a.spec.ts'), false)
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
+})
+
+test('recordResults 对仅 registry itemDigest 变化的 owner 也要求 co-review', async (t) => {
+  const state = await topologyCoReviewFixture(t)
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+  }
+  const planned = [resultFor('comp-a'), resultFor('comp-b')]
+
+  await assert.rejects(recordResults({ ...args, results: planned }), /缺少受当前功能 diff 影响的 evidence owner:comp-c/)
+
+  const outcome = await recordResults({
+    ...args,
+    results: [...planned, resultFor('comp-c', {
+      coReview: true,
+      change: 'modified',
+      notes: '复审 registry 公开 metadata 变化',
+      scope: state.scope,
+      findings: [],
+    })],
+  })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+
+  assert.deepEqual(outcome.coReviewed, ['comp-c'])
+  assert.equal(persisted.items['comp-c'].evidence.itemDigest, registryItemDigest(state.graph.byName.get('comp-c')))
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
+})
+
+test('recordResults 将完整 co-review 计入当前 round 并正常 rollover', async (t) => {
+  const state = await roundCoReviewFixture(t)
+  const plan = planNext(state.planGraph, state.planLedger)
+  assert.deepEqual(plan.picked, ['comp-b', 'comp-a'])
+  assert.equal(plan.round, 2)
+
+  const sharedScope = name => [
+    'foundation/components/A.vue',
+    `foundation/components/${name.at(-1).toUpperCase()}.vue`,
+  ]
+  const results = [
+    resultFor('comp-b'),
+    resultFor('comp-a', { change: 'modified' }),
+    ...['comp-c', 'comp-d'].map(name => resultFor(name, {
+      coReview: true,
+      change: 'modified',
+      notes: `round 2 同批复审 ${name}`,
+      scope: sharedScope(name),
+      findings: [],
+    })),
+  ]
+
+  const outcome = await recordResults({
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    results,
+    baseSha: state.baseSha,
+  })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+
+  assert.deepEqual(outcome.coReviewed, ['comp-c', 'comp-d'])
+  assert.equal(persisted.items['comp-c'].round, 2)
+  assert.equal(persisted.items['comp-d'].round, 2)
+  assert.equal(persisted.round, 3)
+  assert.deepEqual(persisted.lastPicked, ['comp-b', 'comp-a', 'comp-c', 'comp-d'])
 })
 
 test('recordResults 拒绝脏工作区、计划集合漂移与非祖先 base', async (t) => {

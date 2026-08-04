@@ -527,7 +527,7 @@ onMounted(() => {
       >
         <p
           v-if="group.group.label"
-          class="px-2.5 pb-1.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-dimmed"
+          class="px-2.5 pb-1.5 font-mono text-xs font-medium uppercase tracking-wide text-dimmed"
         >
           {{ group.group.label }}
         </p>
