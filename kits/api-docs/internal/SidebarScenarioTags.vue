@@ -148,7 +148,16 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
     class="relative flex min-w-0 flex-1 items-center justify-end gap-1"
   >
     <span class="flex items-center gap-1">
-      <!-- Whole tags that fit: plain, non-interactive. -->
+      <!-- Whole tags that fit: plain, non-interactive. The `max-w-28` cap only
+           guards the unmeasured phase (SSR / first paint), where the
+           deterministic default shows one tag without knowing the real pixel
+           budget — an extreme tag could otherwise blow the row. Once measured,
+           the fit loop has already proven every visible tag fits at its
+           intrinsic width, so the cap comes off and a tag always renders WHOLE.
+           Keeping the cap here would break that guarantee: a tag wider than the
+           cap but narrower than the budget would be laid out truncated (an
+           ellipsised chip carrying no info) with NO "+N" popover to reveal its
+           full text — fitting tags render without the overflow trigger. -->
       <UBadge
         v-for="(s, i) in visibleTags"
         :key="`${s}-${i}`"
@@ -156,7 +165,7 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
         variant="soft"
         size="sm"
         :label="s"
-        class="max-w-28"
+        :class="measured ? undefined : 'max-w-28'"
       />
 
       <!-- Overflow reveal. A hover tooltip is the wrong tool here: reka-ui
@@ -211,13 +220,13 @@ const overflowLabel = computed(() => props.overflowLabel(props.scenarios.length)
     <span class="sr-only">{{ scenarios.join(separator) }}</span>
 
     <!-- Hidden measurement layer: intrinsic widths only, never interactive.
-         Note: unlike the visible tags, the measured badges deliberately carry
-         NO `max-w-28`. With the cap, a tag wider than 112px would report a
-         *clamped* offsetWidth, so the fit loop would think an over-long tag
-         fits and lay it out truncated (an ellipsised chip carrying no info)
-         instead of folding it into "+N". Measuring the intrinsic width lets an
-         over-long tag correctly overflow into the "+N"/count chip, where its
-         full text is reachable via the popover (and the sr-only list). -->
+         No `max-w-28` here — capping would clamp an over-long tag's
+         offsetWidth, so the fit loop would think it fits at the capped width
+         and the fold decision would be wrong. Measured (post-mount) visible
+         tags render at the same intrinsic width (see the cap note above), so
+         the fit math and the render agree: an over-long tag either fits whole
+         or folds into the "+N"/count chip, where its full text stays reachable
+         via the popover (and the sr-only list). -->
     <div
       ref="measureEl"
       aria-hidden="true"
