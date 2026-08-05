@@ -1,0 +1,7 @@
+interface:
+  display_name: "geist-nuxt"
+  short_description: "使用并维护 Nuxt UI v4 Geist 设计系统"
+  default_prompt: "使用 $geist-nuxt 在当前 Nuxt 项目中实现或评审界面，并遵循其设计系统与 registry 契约。"
+
+policy:
+  allow_implicit_invocation: true

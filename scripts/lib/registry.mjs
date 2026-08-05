@@ -79,7 +79,10 @@ export function getCheckoutSha(repoRoot) {
   return assertExactSha(value, 'checkout SHA')
 }
 
-export function resolveSourceSha(repoRoot, requestedSha, { allowDirty = false } = {}) {
+export function resolveSourceSha(repoRoot, requestedSha, {
+  allowDirty = false,
+  dirtyPaths = ['foundation', 'kits', 'registry.json'],
+} = {}) {
   const checkoutSha = getCheckoutSha(repoRoot)
   if (requestedSha) {
     const exact = assertExactSha(requestedSha)
@@ -93,16 +96,14 @@ export function resolveSourceSha(repoRoot, requestedSha, { allowDirty = false } 
       '--porcelain=v1',
       '--untracked-files=all',
       '--',
-      'foundation',
-      'kits',
-      'registry.json',
+      ...dirtyPaths,
     ], {
       cwd: repoRoot,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     }).trim()
     if (dirty) {
-      throw new RegistryError('registry source is dirty; commit foundation/, kits/, and registry.json before creating an exact-SHA lock')
+      throw new RegistryError(`source is dirty; commit ${dirtyPaths.join(', ')} before creating an exact-SHA snapshot`)
     }
   }
   return checkoutSha

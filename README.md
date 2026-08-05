@@ -63,6 +63,15 @@ pnpm geist:check -- --target ../my-nuxt-app
 
 `geist:copy` / `geist:update` 默认只打印 dry-run plan；只有显式传 `--write` 才修改目标项目。`--to` 是精确来源断言，必须是当前 clean checkout `HEAD` 的 40 位 Git SHA，并不会替你切换或下载版本；foundation / kit / registry 未提交时会拒绝生成 lock。基础 item 名为 `geist-foundation`；工具会展开 `registryDependencies`，将完整依赖闭包中的 component / composable / util / CSS / config 写入目标项目。完整命令、lock、冲突与更新语义见 `references/registry.md`。
 
+消费项目还可以把本仓库的 AI 契约同步为项目内 skill：
+
+```bash
+pnpm geist:skill -- --target ../my-nuxt-app --to <checkout-40-char-sha>
+pnpm geist:skill -- --target ../my-nuxt-app --to <checkout-40-char-sha> --write
+```
+
+同步结果位于消费项目 `.agents/skills/geist-nuxt/`，并创建 `.claude/skills/geist-nuxt` 轻量入口；两者应随消费项目提交 Git。skill 内的 `.geist-skill.json` 记录来源 SHA 与文件 hash：更新上游 checkout 后重跑 dry-run，即可看到 `create` / `update` / `delete` 差异，再由消费项目 Git 审阅和提交。该命令只管理 AI skill，不替代 runtime copy / update，也不会修改消费项目 `AGENTS.md`、`package.json` 或 `geist.lock.json`。
+
 ## 维护验证
 
 ```bash
@@ -80,7 +89,7 @@ CI 按同一顺序验证根真源，再组装可运行的 `dist-skill` 根 snaps
 ## 多入口
 
 - **v0**：`v0.json` 的 starter path 是根 `.`，新会话直接运行同一份 Source-first snapshot。
-- **Codex**：读取根 `AGENTS.md` 和 `SKILL.md`；作为上游引入消费项目时，用 registry 工具安装，不复制整套 gallery。
+- **Codex / Claude Code**：真源仓库读取根 `AGENTS.md` 和 `SKILL.md`；消费项目用 `geist:skill` 安装项目内 skill，用 registry 工具安装 runtime 资产，不复制整套 gallery。
 - **人类评审**：本地 gallery 或 https://geist-nuxt-gallery.vercel.app。
 
 铁律：只在真源仓库修改 foundation / kit / registry / references。消费项目里的 copy-in 文件是受管副本，用 `geist:update` 更新，不反向覆盖真源。
