@@ -70,6 +70,7 @@ test('locks the root-only agent snapshot boundary', async () => {
 
   assert.match(workflow, /--exclude '\/\.agents\/'/)
   assert.match(workflow, /--exclude '\/\.claude\/'/)
+  assert.match(workflow, /working-directory: dist-verify\n\s+run: pnpm test:agent:portable/)
   assert.match(workflow, /group: skill-\$\{\{ github\.event\.pull_request\.number \|\| github\.ref \}\}/)
   assert.match(workflow, /LIVE_MAIN_SHA=.*commits\/main/)
   assert.match(workflow, /\[ "\$LIVE_MAIN_SHA" != "\$GITHUB_SHA" \]/)

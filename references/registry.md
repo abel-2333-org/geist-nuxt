@@ -13,6 +13,7 @@
 | 根 gallery / v0 preview | 直接运行根源码，不执行 copy-in |
 | 外部 Nuxt 项目 | 用 `geist:copy` 预览并安装 `geist-foundation`、所选切片及依赖闭包 |
 | 已安装项目 | 用 `geist:update` 预览并更新受管文件，用 `geist:check` 检查漂移 |
+| 外部项目内 AI | 用 `geist:skill` 同步 `.agents/skills/geist-nuxt/`，与 runtime 资产独立更新 |
 | CI | `test:agent` + `registry:validate` + `test:registry` + `test:component` + `typecheck` + `build` + `test:consumer` |
 
 ## Manifest 契约

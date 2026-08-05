@@ -228,6 +228,10 @@ jobs:
         working-directory: dist-verify
         run: pnpm install --frozen-lockfile
 
+      - name: Test assembled agent skill
+        working-directory: dist-verify
+        run: pnpm test:agent:portable
+
       - name: Validate assembled registry contract
         working-directory: dist-verify
         run: |

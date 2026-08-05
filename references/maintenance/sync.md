@@ -39,6 +39,7 @@ pnpm test:consumer
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm test:agent:portable
 pnpm registry:validate
 pnpm test:registry
 pnpm test:component
