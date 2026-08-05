@@ -36,7 +36,7 @@
 
 ## SemanticBadge
 
-语义 tone 原子（foundation），建于 `UBadge` 之上。**它只认 tone，不认业务**——把"某个域值 → tone"的映射留给 preset（如 api-docs kit 的 LifecycleBadge / HttpMethodBadge）。**props**：`tone`(`success`/`warning`/`neutral`/`error`/`info`/`secondary`) `label` `icon?` `variant?`(默认 `subtle`) `size?`。tone 全集与 tone→色映射的唯一权威是 `foundation/utils/badge.ts` 的 `BADGE_TONE_COLOR`（`Record<BadgeTone, …>`，新增 tone 漏配即编译报错）；组件读该表而非透传。tone→色是设计系统的语义校准；语义绝不只靠颜色，务必配 `icon` + 文本。
+语义 tone 原子（foundation），建于 `UBadge` 之上。**它只认 tone，不认业务**——把"某个域值 → tone"的映射留给 preset（如 api-docs kit 的 LifecycleBadge / HttpMethodBadge）。**props**：`tone`(`success`/`warning`/`neutral`/`error`/`info`/`secondary`) `label` `icon?` `variant?`(默认 `subtle`) `size?`。tone 全集与 tone→色映射的唯一权威是 `foundation/utils/badge.ts` 的 `BADGE_TONE_COLOR`（`Record<BadgeTone, …>`，新增 tone 漏配即编译报错）；组件读该表而非透传。tone→色是设计系统的语义校准；语义绝不只靠颜色：`label` 必须是非空文本（调用方契约，含义由文本承载），`icon` 可选、用于额外强化。仓库内 preset 包装层各自保证非空文本（HttpMethodBadge 对空输入回落 `UNKNOWN`，LifecycleBadge / LifecycleNotice 空覆盖回落 preset 文案，WebhookBadge 是常量 `EVENT`）。
 ```vue
 <SemanticBadge tone="warning" label="Deprecated" icon="i-lucide-alert-triangle" />
 ```

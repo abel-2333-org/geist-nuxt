@@ -24,7 +24,8 @@
 //           lives in CopyButton.)
 // A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
 //           owned by CopyButton; selects are labelled; :focus-visible rings
-//           are preserved.
+//           are preserved. The scrollable code surface is a keyboard-focusable
+//           named region (tabindex=0) so keyboard users can scroll it.
 
 export interface CodeVariant {
   /** Language id used for selection, e.g. 'curl' | 'json' | 'node' | 'python' | 'go'. */
@@ -57,6 +58,8 @@ export interface ApiCodeLabels {
   wrapOff?: string
   emptyTitle?: string
   emptyHint?: string
+  /** Accessible name of the scrollable code region when no `title` is given. */
+  codeRegion?: string
 }
 
 type ResolvedApiCodeLabels = Required<Omit<ApiCodeLabels, 'copySuccess' | 'copyFailure'>>
@@ -104,6 +107,7 @@ const t = computed<ResolvedApiCodeLabels>(() => ({
   wrapOff: 'Turn off line wrap',
   emptyTitle: 'No example available',
   emptyHint: 'There is no sample here yet. Try another selection.',
+  codeRegion: 'Code sample',
   ...props.labels,
   // Preserve the existing localization surface: a caller that already supplied
   // `copied` gets the same complete sentence in both aria feedback and toast.
@@ -183,14 +187,18 @@ const wrap = useCodeWrap(props.defaultWrap)
            trigger to keep the row single-line, while the dropdown panel still
            opens to full content width. Icon buttons never shrink. The injected
            #controls (scenario/status) stay visible even in the empty state so
-           the reader can always switch back to a populated selection; only the
-           content-bound controls (language/wrap/copy) hide when there's no code. -->
+           the reader can always switch back to a populated selection. The
+           language select follows the same rule — it is a selection control,
+           so it stays visible whenever >1 languages exist even if the ACTIVE
+           variant has no code (otherwise a single empty variant would trap the
+           reader in the empty state its own hint says to switch away from);
+           only the content-bound controls (wrap/copy) hide with no code. -->
       <div class="flex min-w-0 items-center justify-end gap-1.5">
         <slot name="controls" />
 
         <!-- Language -->
         <USelect
-          v-if="hasContent && languageItems.length > 1"
+          v-if="languageItems.length > 1"
           v-model="activeLanguage"
           :items="languageItems"
           icon="i-lucide-code"
@@ -241,14 +249,21 @@ const wrap = useCodeWrap(props.defaultWrap)
     </div>
 
     <!-- Body — raw source by default; v-html is behind an explicit trust gate
-         for pre-sanitized build-time output only. Clipboard always uses code. -->
+         for pre-sanitized build-time output only. Clipboard always uses code.
+         The surface scrolls internally, so it must be reachable by keyboard
+         (tabindex=0 + named region + focus-visible ring), or keyboard users
+         could never read past maxHeight. translate="no": code is identifiers,
+         not prose — machine translation must leave it verbatim. -->
     <div
       v-if="hasContent"
-      class="code-surface bg-default"
+      class="code-surface bg-default focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
       :class="{ 'is-wrap': wrap }"
       :style="{ maxHeight }"
+      tabindex="0"
+      role="region"
+      :aria-label="title || t.codeRegion"
     >
-      <pre class="raw-pre"><code
+      <pre class="raw-pre" translate="no"><code
         v-if="trustedHighlightedHtml"
         class="font-mono text-sm leading-relaxed text-highlighted"
         v-html="trustedHighlightedHtml"
