@@ -164,6 +164,37 @@ test('updates and deletes managed files without churning the source SHA for iden
   )
 })
 
+test('resumes an interrupted update after a new source file reached the consumer', async () => {
+  const repoRoot = await mkdtemp(path.join(tmpdir(), 'geist-agent-source-'))
+  const consumer = await makeConsumer()
+  await writeSource(repoRoot)
+  await applyAgentSkillPlan(await planAgentSkill({
+    repoRoot,
+    consumerRoot: consumer,
+    sourceSha: '1'.repeat(40),
+  }))
+
+  const relative = 'references/new.md'
+  const content = '# New\n'
+  await writeFile(path.join(repoRoot, relative), content)
+  await writeFile(path.join(consumer, AGENT_SKILL_ROOT, relative), '# Local\n')
+  await assert.rejects(
+    planAgentSkill({ repoRoot, consumerRoot: consumer, sourceSha: '2'.repeat(40) }),
+    /unmanaged file: references\/new.md/,
+  )
+  await writeFile(path.join(consumer, AGENT_SKILL_ROOT, relative), content)
+
+  const resumed = await planAgentSkill({
+    repoRoot,
+    consumerRoot: consumer,
+    sourceSha: '2'.repeat(40),
+  })
+  assert.equal(resumed.operations.find(operation => operation.relative === relative)?.action, 'unchanged')
+  await applyAgentSkillPlan(resumed)
+  const lock = JSON.parse(await readFile(path.join(consumer, AGENT_SKILL_ROOT, AGENT_SKILL_LOCK), 'utf8'))
+  assert.ok(Object.hasOwn(lock.files, relative))
+})
+
 test('rejects unmanaged files, wrong adapters, and symlinked target ancestors', async () => {
   const repoRoot = await mkdtemp(path.join(tmpdir(), 'geist-agent-source-'))
   await writeSource(repoRoot)
@@ -174,6 +205,14 @@ test('rejects unmanaged files, wrong adapters, and symlinked target ancestors', 
   await assert.rejects(
     planAgentSkill({ repoRoot, consumerRoot: unmanaged, sourceSha: sourceSha }),
     /refusing to take ownership/,
+  )
+
+  const inheritedKey = await makeConsumer()
+  await applyAgentSkillPlan(await planAgentSkill({ repoRoot, consumerRoot: inheritedKey, sourceSha }))
+  await writeFile(path.join(inheritedKey, AGENT_SKILL_ROOT, 'toString'), 'private\n')
+  await assert.rejects(
+    planAgentSkill({ repoRoot, consumerRoot: inheritedKey, sourceSha }),
+    /unmanaged file: toString/,
   )
 
   const wrongAdapter = await makeConsumer()

@@ -52,7 +52,7 @@ pnpm geist:skill -- --target <consumer> --to <checkout-40-char-sha>
 pnpm geist:skill -- --target <consumer> --to <checkout-40-char-sha> --write
 ```
 
-第一条只输出同步 plan；确认后才运行带 `--write` 的第二条。`--to` 与 runtime 工具一样，只接受当前 checkout 的精确 SHA；`SKILL.md`、`agents/`、`references/` 或 `registry.json` 未提交时拒绝同步。结果写入消费项目 `.agents/skills/geist-nuxt/`，应随消费项目提交 Git。不要手改受管 skill 文件，也不要用同步 skill 代替 runtime copy / update。
+第一条只输出同步 plan；确认后才运行带 `--write` 的第二条。`--to` 与 runtime 工具一样，只接受当前 checkout 的精确 SHA；`SKILL.md`、`agents/openai.yaml`、`references/` 或 `registry.json` 未提交时拒绝同步。结果写入消费项目 `.agents/skills/geist-nuxt/`，应随消费项目提交 Git。不要手改受管 skill 文件，也不要用同步 skill 代替 runtime copy / update。
 
 ### 安装 / 更新 runtime 资产
 

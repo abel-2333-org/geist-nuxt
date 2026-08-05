@@ -231,10 +231,14 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
   }
 
   const installedFiles = skillRootExists ? await walkInstalled(consumerRoot) : []
+  const recoveries = new Set()
   for (const relative of installedFiles) {
     if (relative === AGENT_SKILL_LOCK) continue
-    if (installedLock && !installedLock.files[relative]) {
-      throw new RegistryError(`installed agent skill contains an unmanaged file: ${relative}`)
+    if (installedLock && !Object.hasOwn(installedLock.files, relative)) {
+      if (!desired.has(relative)) {
+        throw new RegistryError(`installed agent skill contains an unmanaged file: ${relative}`)
+      }
+      recoveries.add(relative)
     }
     if (!installedLock && !desired.has(relative)) {
       throw new RegistryError(`refusing to take ownership of unmanaged agent skill file: ${relative}`)
@@ -247,9 +251,14 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
     const target = `${AGENT_SKILL_ROOT}/${relative}`
     await assertNoSymlinkPath(consumerRoot, target)
     const targetState = await state(path.join(consumerRoot, target))
-    const lockedHash = installedLock?.files?.[relative]
-    // walkInstalled already rejected any on-disk file missing from the lock, so an
-    // existing target here is lock-managed (lockedHash set) or a lock-free adopt.
+    if (recoveries.has(relative) && targetState.hash !== source.hash) {
+      throw new RegistryError(`installed agent skill contains an unmanaged file: ${relative}`)
+    }
+    const lockedHash = installedLock && Object.hasOwn(installedLock.files, relative)
+      ? installedLock.files[relative]
+      : undefined
+    // walkInstalled already rejected untracked non-source or drifted files, so an
+    // existing target here is lock-managed, an interrupted create, or a lock-free adopt.
     let action = 'create'
     if (targetState.exists && targetState.hash === source.hash) action = 'unchanged'
     else if (targetState.exists && targetState.hash === lockedHash) action = 'update'
@@ -378,8 +387,9 @@ export async function applyAgentSkillPlan(plan) {
     // Not atomic across files: payload files are renamed/unlinked one by one and the
     // manifest (lock) is written last. A crash or mid-loop state-change throw can leave
     // a partial payload, but because the lock still reflects the pre-run state, a re-run
-    // re-plans against disk (matching source -> unchanged, matching lock -> update) and
-    // converges. Never write the manifest before the payload or this recovery breaks.
+    // re-plans against disk (matching source -> unchanged, including an interrupted create;
+    // matching lock -> update) and converges. Never write the manifest before the payload
+    // or this recovery breaks.
     for (const operation of plan.operations.filter(operation => !operation.manifest && !operation.adapter)) {
       const targetPath = path.join(plan.consumerRoot, operation.target)
       await assertNoSymlinkPath(plan.consumerRoot, operation.target)
