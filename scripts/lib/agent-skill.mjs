@@ -28,7 +28,11 @@ export const CLAUDE_SKILL_LINK = `.claude/skills/${AGENT_SKILL_NAME}`
 export const CLAUDE_SKILL_TARGET = `../../${AGENT_SKILL_ROOT}`
 
 const SOURCE_ENTRIES = ['SKILL.md', 'agents/openai.yaml', 'references', 'registry.json']
-const SOURCE_DIRTY_PATHS = ['SKILL.md', 'agents', 'references', 'registry.json']
+// Dirty check mirrors the synced entries so an unrelated uncommitted file under
+// agents/ can't block a sync that only ships agents/openai.yaml.
+const SOURCE_DIRTY_PATHS = SOURCE_ENTRIES
+// OS/editor artifacts that must never be treated as source or as managed skill files.
+const IGNORED_ENTRIES = new Set(['.DS_Store'])
 const HASH_RE = /^[0-9a-f]{64}$/
 
 async function state(filePath) {
@@ -62,7 +66,7 @@ async function walkSource(repoRoot, relative) {
   const files = []
   const entries = await readdir(absolute, { withFileTypes: true })
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
-    if (entry.name === '.DS_Store') continue
+    if (IGNORED_ENTRIES.has(entry.name)) continue
     files.push(...await walkSource(repoRoot, path.posix.join(relative, entry.name)))
   }
   return files
@@ -155,6 +159,7 @@ async function walkInstalled(consumerRoot, relative = AGENT_SKILL_ROOT) {
   }
   const files = []
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+    if (IGNORED_ENTRIES.has(entry.name)) continue
     const child = path.posix.join(relative, entry.name)
     if (entry.isSymbolicLink()) throw new RegistryError(`installed agent skill must not contain symbolic links: ${child}`)
     if (entry.isDirectory()) files.push(...await walkInstalled(consumerRoot, child))
@@ -243,10 +248,10 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
     await assertNoSymlinkPath(consumerRoot, target)
     const targetState = await state(path.join(consumerRoot, target))
     const lockedHash = installedLock?.files?.[relative]
+    // walkInstalled already rejected any on-disk file missing from the lock, so an
+    // existing target here is lock-managed (lockedHash set) or a lock-free adopt.
     let action = 'create'
-    if (targetState.exists && !lockedHash && installedLock) action = 'conflict'
-    else if (targetState.exists && !lockedHash && targetState.hash === source.hash) action = 'unchanged'
-    else if (targetState.exists && targetState.hash === source.hash) action = 'unchanged'
+    if (targetState.exists && targetState.hash === source.hash) action = 'unchanged'
     else if (targetState.exists && targetState.hash === lockedHash) action = 'update'
     else if (targetState.exists) action = 'conflict'
     if (action === 'conflict') conflicts.push(relative)
@@ -370,6 +375,11 @@ export async function applyAgentSkillPlan(plan) {
       await writeFile(path.join(staging, sha256(operation.target)), operation.content)
     }
 
+    // Not atomic across files: payload files are renamed/unlinked one by one and the
+    // manifest (lock) is written last. A crash or mid-loop state-change throw can leave
+    // a partial payload, but because the lock still reflects the pre-run state, a re-run
+    // re-plans against disk (matching source -> unchanged, matching lock -> update) and
+    // converges. Never write the manifest before the payload or this recovery breaks.
     for (const operation of plan.operations.filter(operation => !operation.manifest && !operation.adapter)) {
       const targetPath = path.join(plan.consumerRoot, operation.target)
       await assertNoSymlinkPath(plan.consumerRoot, operation.target)

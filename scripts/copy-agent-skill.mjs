@@ -24,8 +24,9 @@ try {
   }, {})
 
   if (!options.write) {
-    console.log(`Dry run (${sourceSha}): ${plan.operations.length} agent skill operations`)
-    for (const operation of plan.operations) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
+    const changed = plan.operations.filter(operation => operation.action !== 'unchanged')
+    console.log(`Dry run (${sourceSha}): ${changed.length} change(s) across ${plan.operations.length} agent skill operations`)
+    for (const operation of changed) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
     console.log('No files written. Re-run with --write to apply the complete agent skill batch.')
   }
   else {

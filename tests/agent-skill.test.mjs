@@ -100,6 +100,22 @@ test('installs the consumer skill through dry-run and remains idempotent', async
   assert.doesNotMatch(repeat.stdout, /^(?:create|update|delete)\s/m)
 })
 
+test('ignores OS artifacts like .DS_Store under the installed skill', async () => {
+  const consumer = await makeConsumer()
+  assert.equal(runCli(['--target', consumer, '--write']).status, 0)
+  await writeFile(path.join(consumer, AGENT_SKILL_ROOT, '.DS_Store'), 'junk\n')
+  await writeFile(path.join(consumer, AGENT_SKILL_ROOT, 'references/.DS_Store'), 'junk\n')
+
+  const repeat = runCli(['--target', consumer])
+  assert.equal(repeat.status, 0, repeat.stderr)
+  assert.doesNotMatch(repeat.stderr, /unmanaged/)
+  assert.doesNotMatch(repeat.stdout, /^(?:create|update|delete)\s/m)
+
+  const rewrite = runCli(['--target', consumer, '--write'])
+  assert.equal(rewrite.status, 0, rewrite.stderr)
+  assert.equal(await readFile(path.join(consumer, AGENT_SKILL_ROOT, '.DS_Store'), 'utf8'), 'junk\n')
+})
+
 test('stops the complete batch when an installed file drifted', async () => {
   const consumer = await makeConsumer()
   assert.equal(runCli(['--target', consumer, '--write']).status, 0)
