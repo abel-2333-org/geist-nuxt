@@ -1,7 +1,7 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-04T23:31:03.795Z",
+  "lastRunAt": "2026-08-05T07:22:02.849Z",
   "lastPicked": [
     "api-docs-operation-header",
     "api-docs-event-badge",
@@ -373,7 +373,7 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T23:31:03.795Z",
+      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
       "change": "none",
       "status": "verified",
       "evidence": {
@@ -385,10 +385,11 @@
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "42fe4e3aba39a6bdcd10a5aec01634410fcfdc7e12e7a345bed47608ba71326e"
+        "scopeDigest": "0457ebf62fed7994318c5ced6de67ce4784f613f91b6fef03bfd3544b92a7233"
       },
       "notes": "单值 preset 退化为内联常量符合 index.md 约定;neutral+subtle 校准、与 HttpMethodBadge 的 mono 同形态对齐核证;不新建 event-preset.ts 正确。",
       "findings": []
@@ -413,7 +414,7 @@
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T23:31:03.795Z",
+      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
       "change": "none",
       "status": "verified",
       "evidence": {
@@ -445,7 +446,7 @@
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T23:31:03.795Z",
+      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
       "change": "none",
       "status": "deferred",
       "evidence": {
@@ -462,13 +463,13 @@
         ],
         "scopeDigest": "2927e4368b378c086bef3479951e0a728333df175baaed738a8081d6b00b9380"
       },
-      "notes": "debounce/stale cleanup、hash 焦点交接、UModal 隐藏 DialogTitle、fuse defu 合并均核证;唯一遗留:面板加载/失败/零结果状态无 SR 播报,完整修复跨 Nuxt UI 契约边界,记 open finding 交人工决策。",
+      "notes": "debounce/stale cleanup、hash 焦点交接、UModal 隐藏 DialogTitle、fuse defu 合并均核证;唯一遗留:面板加载/失败/零结果缺少 SR 状态播报契约,完整修复跨 Nuxt UI 契约边界,记 open finding 交人工决策。",
       "findings": [
         {
-          "id": "f-e6ed313eb50d",
+          "id": "f-dd631c5b3977",
           "severity": "low",
           "claim": "references/kits/api-docs/index.md SiteSearch 契约:异步源失败且没有可用结果时,用 searchingLabel / searchErrorLabel 区分加载、失败与零结果",
-          "evidence": "打开 ⌘K 面板输入无匹配 query(或让 search() reject):searching/失败/零结果文案只渲染在 UCommandPalette 的 #empty 槽,该槽是普通 div(无 aria-live/role=status;grep @nuxt/ui CommandPalette.vue 与 reka-ui Listbox/Combobox 链路均无 live region),NVDA/VoiceOver 无任何播报——三态区分只对视觉用户成立,涉 WCAG 4.1.3 Status Messages,且与 SidebarNav/EnumTable 的 sr-only role=status 播报契约不一致。完整修复需 UCommandPalette 暴露过滤结果状态(upstream),或在 #empty 槽用挂载信号镜像到持久 live region(依赖上游 #empty 渲染时机);零结果计数在本组件不可知,半修会与文档化的视觉契约漂移,故整体交人工决策。",
+          "evidence": "打开 ⌘K 面板输入无匹配 query(或让 search() reject):searching/失败/零结果文案只渲染在 UCommandPalette 的 #empty 槽,该槽是普通 div(无 aria-live/role=status);本仓 @nuxt/ui 4.9.0 的 CommandPalette 使用 Reka Listbox 且未提供持久 live region,因此组件契约无法保证状态变化被 SR 播报——三态区分对视觉用户成立,但缺少 WCAG 4.1.3 Status Messages 所需的显式状态语义,且与 SidebarNav/EnumTable 的 sr-only role=status 播报契约不一致。完整修复需 UCommandPalette 暴露过滤结果状态(upstream),或在 #empty 槽用挂载信号镜像到持久 live region(依赖上游 #empty 渲染时机);零结果计数在本组件不可知,半修会与文档化的视觉契约漂移,故整体交人工决策。",
           "disposition": "open"
         }
       ]
