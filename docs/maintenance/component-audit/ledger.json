@@ -1,14 +1,19 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-06T07:09:32.836Z",
+  "lastRunAt": "2026-08-06T08:07:41.913Z",
   "lastPicked": [
-    "api-docs-lifecycle-notice",
-    "foundation-semantic-badge",
-    "api-docs-code-block",
+    "api-docs-webhook-protocol",
+    "api-docs-field-group",
+    "api-docs-response-example",
+    "api-docs-event-badge",
+    "api-docs-field-annotation",
     "api-docs-lifecycle-badge",
+    "api-docs-lifecycle-notice",
     "api-docs-method-badge",
-    "foundation-inline-markdown"
+    "api-docs-operation-header",
+    "api-docs-sidebar-nav",
+    "api-docs-site-search"
   ],
   "items": {
     "foundation-copy-button": {
@@ -248,23 +253,50 @@
       "findings": []
     },
     "api-docs-response-example": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "none",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
+        "scope": [
+          "app/components/demo/api-docs/DocsShellReference.vue",
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/utils/lang-preset.ts",
+          "references/kits/api-docs/index.md",
+          "references/kits/api-docs/project-setup.md",
+          "references/kits/api-docs/response-example.md",
+          "tests/component/response-example.spec.ts",
+          "tests/nuxt/response-example-contract.ts"
+        ],
+        "scopeDigest": "722f534e060e5429731c7e3f4514f7f9978909a65d9532052f9c42c7562258d0"
+      },
+      "notes": "三级稳定身份收敛、受控 scenario、内部 status/body、四种 body 语义、persistent live region、container-responsive controls、CodeBlock 委托、类型级 legacy 拒绝与 gallery 消费均核对；code body 的可选空 label 会绕过既定 fallback，产生无名 media 选项。",
+      "findings": [
+        {
+          "id": "f-985ff00a90aa",
+          "severity": "medium",
+          "claim": "code body 未提供可用 variant label 时回落到语言显示名或 codeBodyTitle，media 选择项保持可读。",
+          "evidence": "复现：一个 status 含两个 bodies，其中 code body 未传 mediaType，首个 variant 为 { language: 'json', label: '', code: '{}' }。codeBodyLabel 使用 variant.label ?? langLabel 接受空串，bodyItems 生成空 option label；宽屏 media USelect 与窄屏 URadioGroup 都出现无名选项，未按 reference 回落到语言显示名或 codeBodyTitle。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
-        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -285,20 +317,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "0d153983cc4f037b7d1cd8639d826ac67340bb79802a756537a3ad447844ec69"
+        "scopeDigest": "0738c3a0322f9eea5248b2165b03fdb74840a2308feea8e028ae5724c5aaa9c7"
       },
-      "notes": "共享 scope(foundation/components/SemanticBadge.vue)被 claim 收窄及复审注释修正命中,同批复审:LifecycleBadge 行为无变化,blank label 回落 preset 文案的实现与 chrome-labels.spec.ts 覆盖仍成立,preset 六态全有 icon+label,与收窄后的 atom 契约一致。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 原子单元、内容驱动回流与降级顺序发生变化，LifecycleBadge 的六态 preset、label 覆盖、FieldItem/OperationHeader 消费和类型契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
-        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -317,9 +349,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "3c036ce6f2a7d02efdd0aebf17684f970ef06d8c2829fd8c3b63938e70cff2b5"
+        "scopeDigest": "11ef5e8c8a43e77681062d8bf3d19cd4233604d4cc6636e23cf17563996cf862"
       },
-      "notes": "共享 scope(foundation/components/SemanticBadge.vue、references/components/data-display.md)被 claim 收窄及复审注释修正命中,同批复审:HttpMethodBadge 行为无变化,空输入回落 UNKNOWN 的实现继续支撑非空文本 claim,http-method-badge.spec.ts 仍绿。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，HttpMethodBadge 的 trim/uppercase、UNKNOWN/未知 token fallback、OperationHeader/SiteSearch/SidebarNav 消费契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -335,12 +367,25 @@
       "findings": []
     },
     "api-docs-field-group": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
+        "scope": [
+          "app/pages/kits/api-docs/index.vue",
+          "app/pages/kits/api-docs/webhook-protocol.vue",
+          "kits/api-docs/components/FieldGroup.vue",
+          "kits/api-docs/components/WebhookProtocol.vue",
+          "references/kits/api-docs/index.md"
+        ],
+        "scopeDigest": "db4e8fb2d9add52a6a910c5435fb0707e12ce3822579d9e386ae7d5a3e4c7210"
+      },
+      "notes": "clean：单一职责的语义 section；headingLevel 仅允许 h2-h4 并与固定视觉样式解耦，默认 h2、嵌套时由 consumer 传层级；count=0 正常呈现；无硬编码颜色/尺寸越界；WebhookProtocol 与 gallery 覆盖 standalone、嵌套、计数和不同 heading level；registry 仅依赖 foundation，消费边界完整。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -366,13 +411,13 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
-        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -381,9 +426,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "56ec5ecd89e9c94ae105ed8ff0da83ffdb5ad4b21b2f7099dc8d4b4773a747c4"
+        "scopeDigest": "c0e96491f573b72616319be2f3d825e7d1a21b0fe2dfccdeaa74602047047a45"
       },
-      "notes": "同族同类溢出修复：type span 的 shrink-0 把它钉在 max-content，长 union type 使面板 scrollWidth 288→498，且实测 panel 级与 span 级 overflow-wrap 都无效（498→498），必须允许收缩，故改为与 name / format 兄弟一致的 wrap-anywhere min-w-0（回到 288）；摘要 <p> 同步补 wrap-anywhere，并用组件 spec 锁定类契约。经人工复核并明确授权，f-fd7282669072 标记 wont-fix：四处 labels 的键集、默认值与 Required<Pick<Labels, …>> 类型约束不同，抽共享泛型 helper 只消除 spread 字面重复，却增加 kit → foundation 间接层并削弱当前类型推断。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，FieldAnnotation 的 source 解析、同页/跨页锚点、降级告警、wrap 与 requiredness 契约均未受影响；既有 wont-fix finding 由 recorder 自动保留，无 open finding。",
       "findings": [
         {
           "id": "f-fd7282669072",
@@ -396,13 +441,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
-        "headSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -412,20 +457,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "0457ebf62fed7994318c5ced6de67ce4784f613f91b6fef03bfd3544b92a7233"
+        "scopeDigest": "6eed2efd92d73f8d5082ad1f4463bf0642875877043a4041151d8f0d2a6acf98"
       },
-      "notes": "单值 preset 退化为内联常量符合 index.md 约定;neutral+subtle 校准、与 HttpMethodBadge 的 mono 同形态对齐核证;不新建 event-preset.ts 正确。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，WebhookBadge 的 EVENT neutral preset、mono 形态与 OperationHeader/导航过渡态契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
-        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -436,9 +481,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "2b22fb411fff117659097becfa3887ca6eff23edcc087e0c9aefcd92dd2da079"
+        "scopeDigest": "d81c54e8be427001d767fd2b7da622cc74922179b43a8314b604da2fa0ceace4"
       },
-      "notes": "clean:UAlert 薄包装职责单一;与 LifecycleBadge 共享 lifecyclePreset 词表/色调核证成立;blank title 回落 preset 有测试;icon + 非空 title 恒成立,不靠颜色单独传意;subtle 固定变体是横幅形态的合理校准。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与 main #67 更新后的当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，LifecycleNotice 的 UAlert 薄包装、共享 lifecyclePreset、blank title 回落、icon+title 语义及不可 dismiss 契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-operation-target": {
@@ -452,13 +497,13 @@
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
-        "headSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -468,9 +513,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "382805a1cc26724c224a31265169d5e35c299e241508eab83b63436699ae4ed9"
+        "scopeDigest": "b90be05f3502132e4035e86958d244d8f09ef54298a3f1c8713dd7bd89184ceb"
       },
-      "notes": "双形态 identity 头达标:discriminated union 使非法身份组合成为类型错误,min-w-0/truncate、heading-level 出口、lifecycle 徽章 icon+text 契约均核证;无 finding。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与当前 evidence scope；OperationTarget 仍只经默认槽正交装配，新的两原子单元与内容驱动回流不改变 OperationHeader 的 discriminated identity、heading/lifecycle、actions/description/default slot 或类型契约，无 open finding。",
       "findings": []
     },
     "api-docs-code-rail": {
@@ -484,13 +529,13 @@
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-05T07:22:02.849Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
-        "headSha": "f1c932b0ae1912a68084a71ac78a0c96e72759ec",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -499,9 +544,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "2927e4368b378c086bef3479951e0a728333df175baaed738a8081d6b00b9380"
+        "scopeDigest": "644c3e87fe3be03b76ef334ae1e02148cfc78868f9a4e4a6d3a395352d7a285c"
       },
-      "notes": "debounce/stale cleanup、hash 焦点交接、UModal 隐藏 DialogTitle、fuse defu 合并均核证;唯一遗留:面板加载/失败/零结果缺少 SR 状态播报契约,完整修复跨 Nuxt UI 契约边界,记 open finding 交人工决策。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，不影响 SiteSearch 的静态/异步 groups、debounce/stale cleanup、hash 焦点交接或 method badge 消费；保留既有 SR 状态播报 open finding。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -513,23 +558,48 @@
       ]
     },
     "api-docs-webhook-protocol": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
-      "findings": []
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "change": "none",
+      "status": "deferred",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "itemDigest": "68a2caa42b49a3553a9453c7da1869d8f5cfa46db9efa5db083e8c25ff30b16f",
+        "scope": [
+          "app/pages/kits/api-docs/webhook-protocol.vue",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/FieldGroup.vue",
+          "kits/api-docs/components/WebhookProtocol.vue",
+          "kits/api-docs/utils/webhook-protocol.ts",
+          "references/kits/api-docs/index.md",
+          "references/kits/api-docs/webhook-protocol.md",
+          "scripts/check-registry-consumer.mjs",
+          "tests/webhook-protocol.test.mjs"
+        ],
+        "scopeDigest": "4061b19fca3a09c3dfa7872531d4a2c600aeb6ba2fba150301fd22537c9c7eb8"
+      },
+      "notes": "registry 闭包、section 省略、ACK 三语义、schedule 折叠纯函数、语义 token、gallery 变体与 consumer runtime fixture 均核对成立；折叠按钮未提供 expandLabel 时缺少能描述动作目的的默认可访问名称。",
+      "findings": [
+        {
+          "id": "f-b1838c3b046a",
+          "severity": "medium",
+          "claim": "展开/收起按钮提供可覆盖的英文默认文案；展开按钮带可访问名。",
+          "evidence": "当 delivery.schedule.steps 超过阈值且调用方未传 expandLabel 时，折叠按钮的 aria-label 回退为“+N”（例如“+5”）；读屏焦点只得到“+5，按钮，已折叠”，无法从名称判断它会展开重试节奏，与组件注释“展开/收起按钮提供可覆盖的英文默认文案”和 reference“展开按钮带可访问名”不一致。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T03:57:42.013Z",
+      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
-        "headSha": "55458129ec809d4e6605ad5ca25b0d295826a633",
+        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
+        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
         "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
         "scope": [
           "AGENTS.md",
@@ -541,9 +611,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "6974c602e4175e3f76a2797666ddf871089a259ec31b66421952c858f4478b1b"
+        "scopeDigest": "a23c60f70588722a2dd080ecc350f78e6436d01ad90f5f7d66917add98bb920f"
       },
-      "notes": "按 2A 将 group eyebrow 从任意 11px/tracking 值归一到 foundation Label 12 Mono：text-xs + tracking-wide，并同步权威 reference；保留现有响应式、键盘与 scenario overflow 契约。",
+      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，不影响 SidebarNav 的树内过滤、active 语义、拖宽键盘契约、HttpMethodBadge fallback 或 SidebarScenarioTags 测量式溢出，无 open finding。",
       "findings": []
     }
   }
