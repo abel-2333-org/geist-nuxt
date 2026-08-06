@@ -265,6 +265,12 @@ describe('OperationTarget reading order', () => {
       expect(unit.classes()).toEqual(expect.arrayContaining(['flex', 'flex-nowrap', 'min-w-0']))
     }
 
+    // `auto` basis is part of the contract, not a styling detail: flex line
+    // collection must see each unit's intrinsic width. `flex-1` would replace
+    // that signal with a 0% basis and suppress the content-derived wrap.
+    expect(origin.classes()).toContain('flex-[0_1_auto]')
+    expect(operation.classes()).toContain('flex-[1_1_auto]')
+
     // Order is positional, never `order`: origin precedes operation in the DOM.
     expect(origin.element.nextElementSibling).toBe(operation.element)
 
@@ -286,11 +292,15 @@ describe('OperationTarget reading order', () => {
     // just never on a flex/width/display utility.
     expect(wrapper.findAll('span[aria-hidden="true"].w-full')).toHaveLength(0)
 
-    const layoutEscapes = wrapper.findAll('[class]')
+    const containerVariants = wrapper.findAll('[class]')
       .flatMap(el => el.classes())
-      .filter(c => /^@[a-z0-9[\]-]+\/target:(flex|w-|basis-|hidden|block|grid)/.test(c))
+      .filter(c => /^@[a-z0-9[\]-]+\/target:/.test(c))
 
-    expect(layoutEscapes).toEqual([])
+    expect([...new Set(containerVariants)].sort()).toEqual([
+      '@md/target:min-h-0',
+      '@md/target:px-1',
+      '@md/target:py-0',
+    ])
   })
 })
 
