@@ -19,17 +19,18 @@
 
 ### `ApiCodeLabels`（chrome 文案，用于 i18n）
 
-`language` · `copy` · `copied` · `copySuccess` · `copyFailure` · `wrapOn` · `wrapOff` · `emptyTitle` · `emptyHint`。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 只接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。组件不接受对象名并拼接句尾，因此消费项目不会产生混合语言。内容类文本（语言标签、标题、代码本身）来自 data props。
+`language` · `copy` · `copied` · `copySuccess` · `copyFailure` · `wrapOn` · `wrapOff` · `emptyTitle` · `emptyHint` · `codeRegion`（未传 `title` 时代码滚动区的可访问名，默认 `Code sample`）。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 只接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。组件不接受对象名并拼接句尾，因此消费项目不会产生混合语言。内容类文本（语言标签、标题、代码本身）来自 data props。
 
 ## 关键点
 
 - **无运行时语法高亮器**：默认用转义后的 `<pre><code>` 直出，不引入 Shiki runtime。消费项目可在构建期用 Shiki 等工具生成 `highlightedHtml`，但必须先消毒并显式传 `trust-highlighted-html`；用户输入、运行时 API 返回的 HTML 禁止直接传入。组件不负责解析 Markdown 或执行高亮。
 - **raw code 永远是真源**：复制按钮始终写入 `variant.code`，`highlightedHtml` 只影响展示；未开启信任或 HTML 缺失时自动回退到转义后的 `code`。
 - **多语言用 `variants`**（不是 `samples`；每个 variant 一个 `language`+`code`，可选 `label`）。空 `variants` 渲染空态。
-- **语言切换用 `USelect`**（不是 UTabs）——单行工具栏内与其它控件对齐，窄容器下可收缩+截断触发器，下拉面板仍开满内容宽度。
+- **语言切换用 `USelect`**（不是 UTabs）——单行工具栏内与其它控件对齐，窄容器下可收缩+截断触发器，下拉面板仍开满内容宽度。语言数 >1 时选择器**始终可见**（含当前语言暂无 code 的空态）——它和 `#controls` 一样是选择控件，读者永远能切回有内容的语言；只有内容相关控件（换行/复制）在无 code 时隐藏。
+- **代码滚动区键盘可达**：body 是 `tabindex="0"` 的命名 group（可访问名取 `title`，缺省 `labels.codeRegion`），带 focus-visible 描边——内部滚动的内容必须能被键盘用户滚到底，同时不会把每个代码块加入 landmark 导航。`<pre>` 标记 `translate="no"`，机器翻译不改写代码。
 - **换行状态共享+持久化**：所有 CodeBlock 共用 `useCodeWrap`（同一 `useState` key + cookie），切一个全联动，SSR 安全、无 localStorage。
 - **工具栏恒为单行**：左 icon·title·`#leading`（如状态 badge）；右 `#controls`（场景/状态选择器）·语言·换行·复制。标题优先截断，图标按钮不收缩。
-- **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；只有内容相关控件（语言/换行/复制）在无 code 时隐藏。
+- **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；语言选择器同样保持可见，只有换行/复制在无 code 时隐藏。
 - **`#notice` / `#body` 供包装组件注入语义面板**：`#notice` 在工具栏下渲染上下文条（如 status 级描述）；无 code 时 `#body` 替代通用空态，承载包装组件自有的语义面板（有意空正文 / 缺示例 / 文件 metadata，见 `ResponseExample`）。两个 slot 缺省不渲染任何东西，均非破坏性。CodeBlock 只提供框架 chrome，不理解这些语义。
 - **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报；`useCopy` 内部把写入交给 VueUse `useClipboard({ legacy: true })`，天然覆盖 iframe/insecure-context 的 execCommand 兜底 + toast。成功/失败 toast 均可通过完整消息注入，本地化不拼半句。
 

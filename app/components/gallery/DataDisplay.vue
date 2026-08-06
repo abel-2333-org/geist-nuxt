@@ -61,7 +61,7 @@ const columns = [
 
     <GalleryEntry
       name="SemanticBadge"
-      description="Tone atom over UBadge: a curated semantic tone (success/warning/neutral/error/info/secondary) paired with an icon + label. Domain→tone mapping stays in presets."
+      description="Tone atom over UBadge: a curated semantic tone (success/warning/neutral/error/info/secondary) carried by a non-blank label; an optional icon reinforces it. Domain→tone mapping stays in presets."
       :usage-href="`${DOC}#semanticbadge`"
     >
       <GalleryExample label="Tones">
