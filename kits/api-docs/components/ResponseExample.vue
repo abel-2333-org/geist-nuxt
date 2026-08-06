@@ -313,10 +313,14 @@ const statusItems = computed(() =>
 
 // Shares `langLabel` (kit utils/lang-preset.ts) with CodeBlock's language
 // select, so the same language id renders the same label in both controls.
+// Blank labels count as absent (same rule as statusText) so every option in
+// the media select / radio group keeps a readable name.
 function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
   const variant = body.variants[0]
   if (!variant) return t.value.codeBodyTitle
-  return variant.label ?? langLabel(variant.language, props.languageLabels)
+  const label = variant.label?.trim()
+  if (label) return label
+  return langLabel(variant.language, props.languageLabels).trim() || t.value.codeBodyTitle
 }
 
 // Media select labels: mediaType when given, otherwise a kind-specific label.
@@ -325,8 +329,8 @@ function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
 const bodyItems = computed(() =>
   bodies.value.map(b => ({
     label:
-      b.mediaType
-      ?? (b.kind === 'code'
+      b.mediaType?.trim()
+      || (b.kind === 'code'
         ? codeBodyLabel(b)
         : b.kind === 'empty'
           ? t.value.emptyBodyTitle
