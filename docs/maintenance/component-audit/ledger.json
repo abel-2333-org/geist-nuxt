@@ -1,11 +1,14 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-05T07:22:02.849Z",
+  "lastRunAt": "2026-08-06T07:09:32.836Z",
   "lastPicked": [
-    "api-docs-operation-header",
-    "api-docs-event-badge",
-    "api-docs-site-search"
+    "api-docs-lifecycle-notice",
+    "foundation-semantic-badge",
+    "api-docs-code-block",
+    "api-docs-lifecycle-badge",
+    "api-docs-method-badge",
+    "foundation-inline-markdown"
   ],
   "items": {
     "foundation-copy-button": {
@@ -31,13 +34,13 @@
     },
     "foundation-inline-markdown": {
       "round": 1,
-      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
-        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -46,9 +49,9 @@
           "references/components/data-display.md",
           "tests/component/inline-markdown.spec.ts"
         ],
-        "scopeDigest": "79103f034cf62074e7f658cddba383a96e569b19449b886c806d1b4bf22ef72a"
+        "scopeDigest": "1ff8bd420c106b022adf2cd3ce9362a0a3bbe996d2bca1f2878fa258900bb72b"
       },
-      "notes": "复核两条遗留 delimiter-run finding：均已被 b497e08 换用 marked Lexer.lexInline 的重写消除，实测 `**bold *em***` → <strong>bold <em>em</em></strong>、裸 `***` 保持字面，故按原 id 标 resolved。本轮只补证据不改实现：为 universal claim「Raw HTML is never rendered」与 registry 描述「Safe inline markdown subset」增加 8 例注入 payload 与 4 例不安全协议回归测试（原先仅 <kbd> 单例），并精确断言许可协议的 href 保真与 external 分类。",
+      "notes": "共享 scope(references/components/data-display.md、app/components/gallery/DataDisplay.vue)被 SemanticBadge claim 收窄命中,同批复审:InlineMarkdown 自身源码/adapter/spec 未变,重核证渲染白名单、intraword 星号降级、escape 保留与不使用 v-html 的契约均成立,gallery 改动仅触及 SemanticBadge 条目描述。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -68,27 +71,29 @@
     },
     "foundation-semantic-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T03:57:42.013Z",
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
-        "headSha": "55458129ec809d4e6605ad5ca25b0d295826a633",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
           "foundation/components/SemanticBadge.vue",
           "foundation/utils/badge.ts",
           "kits/api-docs/components/HttpMethodBadge.vue",
+          "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/WebhookBadge.vue",
           "references/components/data-display.md",
           "references/method/component-reflow.md",
+          "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "fa55626bc26fe8cb174554c76c9ee38840bb518a8cfe3b3a22575bc187e634b6"
+        "scopeDigest": "cbe7437c22723eb8861cca8af3898a21be1cc8ce065c7906898bac1b319c90bf"
       },
-      "notes": "HttpMethodBadge 的共享 scope 被本轮功能 diff 命中，按 recorder 要求同批复审并刷新证据。旧 finding 中关于 HttpMethodBadge 可空 label 的证据已由 UNKNOWN fallback 消除，显式关闭；reference 的 icon 可选与‘务必 icon + 文本’仍冲突，收窄为新的低优先级 open finding。",
+      "notes": "按「收窄公开 claim」解决冲突:data-display.md、组件注释、gallery 描述统一为「非空 label 必需、icon 可选强化」;复审进一步修正组件首段残留的 icon + text 旧注释。与 WebhookBadge、HttpMethodBadge、LifecycleBadge/LifecycleNotice 的回落行为一致且均有测试。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -102,7 +107,7 @@
           "severity": "low",
           "claim": "语义绝不只靠颜色，务必配 icon + 文本。",
           "evidence": "references/components/data-display.md 同时将 icon 标为可选并要求务必 icon + 文本；SemanticBadge props 仍允许省略 icon 且 label:string 可为空，WebhookBadge 也合法地只传非空文本、不传 icon。应收窄为非空文本必需、icon 可选，或在 API 层强制 icon + 非空文本。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
@@ -207,12 +212,30 @@
       "findings": []
     },
     "api-docs-code-block": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
+        "scope": [
+          "foundation/components/CopyButton.vue",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/RequestExample.vue",
+          "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/composables/useCodeWrap.ts",
+          "kits/api-docs/utils/lang-preset.ts",
+          "references/kits/api-docs/code-sample.md",
+          "tests/component/code-block.spec.ts",
+          "tests/component/request-example.spec.ts",
+          "tests/component/response-example.spec.ts"
+        ],
+        "scopeDigest": "b4ab7a38d8e24dc486cb6eb5a3005786f28a7ec2770b9a5e0d3c0e9c59617cc5"
+      },
+      "notes": "语言选择器不再被 hasContent 门控,多语言空态仍可切换。代码滚动区保留 tabindex=0、可访问名称与 focus-visible 描边,复审将重复的 region landmark 改为非 landmark 的命名 group,避免页面 landmark 过载;pre 加 translate=no。文档同步纠正空态下语言控件可见性,focused spec 覆盖 group、无 region 与键盘焦点。lang-preset 与 useCodeWrap 核证 clean。",
       "findings": []
     },
     "api-docs-request-example": {
@@ -235,13 +258,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T03:57:42.013Z",
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
-        "headSha": "55458129ec809d4e6605ad5ca25b0d295826a633",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -262,20 +285,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "43cee95e31cffafb8046c00cb3b5c1474fbc4da0b2ec18ddac6aebec2a728cfd"
+        "scopeDigest": "0d153983cc4f037b7d1cd8639d826ac67340bb79802a756537a3ad447844ec69"
       },
-      "notes": "共享 evidence scope 中的 HttpMethodBadge 被本轮功能 diff 命中，按 recorder 要求同批复审；LifecycleBadge/LifecycleNotice 自身 API、六态 preset、字段消费与类型兼容契约未受 UNKNOWN fallback 影响，完整 scope 在同一功能 HEAD 上重算通过。",
+      "notes": "共享 scope(foundation/components/SemanticBadge.vue)被 claim 收窄及复审注释修正命中,同批复审:LifecycleBadge 行为无变化,blank label 回落 preset 文案的实现与 chrome-labels.spec.ts 覆盖仍成立,preset 六态全有 icon+label,与收窄后的 atom 契约一致。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-04T03:57:42.013Z",
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "036ec0f938b2b75da3fa5655d4d266022b87c995",
-        "headSha": "55458129ec809d4e6605ad5ca25b0d295826a633",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -294,9 +317,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "32b5ea16df620dfab2f09566146fb24e99b156998040813cc50eb053d1d0098d"
+        "scopeDigest": "3c036ce6f2a7d02efdd0aebf17684f970ef06d8c2829fd8c3b63938e70cff2b5"
       },
-      "notes": "按 1A 修复空值语义：method 统一 trim + uppercase，空串或纯空白显示 neutral UNKNOWN，未知非空 token 保留规范化文本并使用 neutral fallback；新增 focused component spec 覆盖已知、未知、空串与纯空白。",
+      "notes": "共享 scope(foundation/components/SemanticBadge.vue、references/components/data-display.md)被 claim 收窄及复审注释修正命中,同批复审:HttpMethodBadge 行为无变化,空输入回落 UNKNOWN 的实现继续支撑非空文本 claim,http-method-badge.spec.ts 仍绿。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -395,12 +418,27 @@
       "findings": []
     },
     "api-docs-lifecycle-notice": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
+        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
+        "scope": [
+          "app/components/demo/api-docs/DocsShellReference.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/LifecycleNotice.vue",
+          "kits/api-docs/utils/lifecycle-preset.ts",
+          "references/kits/api-docs/index.md",
+          "tests/component/chrome-labels.spec.ts"
+        ],
+        "scopeDigest": "2b22fb411fff117659097becfa3887ca6eff23edcc087e0c9aefcd92dd2da079"
+      },
+      "notes": "clean:UAlert 薄包装职责单一;与 LifecycleBadge 共享 lifecyclePreset 词表/色调核证成立;blank title 回落 preset 有测试;icon + 非空 title 恒成立,不靠颜色单独传意;subtle 固定变体是横幅形态的合理校准。",
       "findings": []
     },
     "api-docs-operation-target": {
