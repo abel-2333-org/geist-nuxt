@@ -18,8 +18,24 @@
 | error text（错误文本） | | `UFormField` error |
 | affordance（可操作提示） | | chevron / caret / handle |
 | focus target（焦点目标） | | 实际可聚焦元素 |
+| atomic layout unit（原子布局单元） | | 包裹「必须同处一行」的部位的 `flex-nowrap` 容器 |
 
 未使用的部位标注"—"，不要臆造。
+
+### 原子布局单元：用关系语言写回流契约
+
+当会换行的组件包含「必须同处一行」的部位时，必须**显式声明哪些部位不可拆分**，并且用**关系**语言而非只写**位置**语言：
+
+| ❌ 位置语言 | ✅ 关系语言 |
+|---|---|
+| 「窄容器为两层」 | 「`(environment, host)` 与 `(path, primary copy)` 是两个原子单元，断行只能发生在单元之间」 |
+| 「宽屏时徽章跟在标题后面」 | 「`(必填标记, lifecycle 徽章)` 是一个原子单元，恒随字段身份簇换行」 |
+
+当阈值由可变内容决定、且部分元素必须同行时，只写位置语言无法表达「哪里才允许断行」，实现者很容易把它误译成固定像素阈值——**只要契约里出现「在某宽度下…」而真正约束其实是「A 与 B 不可拆」，就是写错了**。关系语言直接映射到 DOM 结构（一个 `flex-nowrap` 容器 + 一个 `data-*` 标记），既没有可写错的阈值，也让测试有稳定的断言对象。
+
+本规则不适用于各项本就可以独立换行的 chip/list/grid；这类布局可以继续使用普通 `flex-wrap`、Grid `auto-fit` / `minmax()` 等 intrinsic layout，不需要虚构原子单元。
+
+落地写法与反模式见 `references/foundations/responsiveness.md` →「② 内在换行分组」。
 
 ## 2. State model（状态模型）
 

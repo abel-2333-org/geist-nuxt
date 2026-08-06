@@ -5,7 +5,11 @@
 //     single explicit button while every segment stays individually copyable —
 //     including on touch, where the hover-revealed icons never existed.
 //   - visual and keyboard order must agree. The two-line layout relies on DOM
-//     order plus one full-width breaker, never CSS `order`.
+//     order alone, never CSS `order`.
+//   - the primary CopyButton once wrapped onto a line by itself, because path
+//     and copy were peer flex items and the row's break point was left to
+//     content width. The layout is now two `flex-nowrap` units, which is a
+//     STRUCTURAL invariant a test can hold — unlike the pixel band it replaced.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
@@ -174,8 +178,6 @@ describe('OperationTarget copy affordances', () => {
 
     expect(wrapper.findAllComponents(UTooltip).map(tooltip => tooltip.props('text')))
       .toEqual([zh.copyHost, zh.copyPath])
-    expect(segments[0]!.classes()).toContain('@md/target:flex-[0_3_auto]')
-    expect(segments[1]!.classes()).toContain('@md/target:flex-[0_1_auto]')
   })
 
   it('announces segment copies through exactly one polite live region', async () => {
@@ -244,17 +246,61 @@ describe('OperationTarget reading order', () => {
     expect(ordered).toEqual([])
   })
 
-  it('uses one responsive break between host and path', async () => {
-    const wrapper = await mountTarget({ props: base })
-    const breakers = wrapper.findAll('span[aria-hidden="true"].w-full')
-    const host = wrapper.get('button[aria-label="Copy host"]')
-    const path = wrapper.get('button[aria-label="Copy path"]')
+  // The reflow contract, stated as STRUCTURE rather than as a threshold. A
+  // pixel breakpoint cannot express "single line only when it actually fits",
+  // because host, path, label and font metrics are all variables — and the
+  // orphaned CopyButton regression proved it: the break landed wherever the
+  // content happened to run out, ~32px wide, at 534px for one fixture and
+  // 719px for another. Two `flex-nowrap` units make the row's only break point
+  // the boundary between them, so no width can strand the copy action.
+  it('splits the row into exactly two unbreakable layout units', async () => {
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+    const root = wrapper.get('.\\@container\\/target')
+    const origin = wrapper.get('[data-target-origin]')
+    const operation = wrapper.get('[data-target-operation]')
 
-    expect(breakers).toHaveLength(1)
-    expect(breakers[0]!.text()).toBe('')
-    expect(breakers[0]!.classes()).toContain('@md/target:hidden')
-    expect(breakers[0]!.element.previousElementSibling).toBe(host.element)
-    expect(breakers[0]!.element.nextElementSibling).toBe(path.element)
+    // The wrap lives on the root; the units themselves must never wrap.
+    expect(root.classes()).toContain('flex-wrap')
+    for (const unit of [origin, operation]) {
+      expect(unit.classes()).toEqual(expect.arrayContaining(['flex', 'flex-nowrap', 'min-w-0']))
+    }
+
+    // `auto` basis is part of the contract, not a styling detail: flex line
+    // collection must see each unit's intrinsic width. `flex-1` would replace
+    // that signal with a 0% basis and suppress the content-derived wrap.
+    expect(origin.classes()).toContain('flex-[0_1_auto]')
+    expect(operation.classes()).toContain('flex-[1_1_auto]')
+
+    // Order is positional, never `order`: origin precedes operation in the DOM.
+    expect(origin.element.nextElementSibling).toBe(operation.element)
+
+    // The pairing is the point: path travels with the action that copies the
+    // whole address, environment travels with the host it selects.
+    expect(origin.find('button[aria-label="选择环境"]').exists()).toBe(true)
+    expect(origin.find(`button[aria-label="${zh.copyHost}"]`).exists()).toBe(true)
+    expect(operation.find(`button[aria-label="${zh.copyPath}"]`).exists()).toBe(true)
+    expect(operation.findComponent({ name: 'CopyButton' }).exists()).toBe(true)
+  })
+
+  it('carries no breakpoint-bound layout escape hatch', async () => {
+    const wrapper = await mountTarget({ props: base })
+
+    // The old implementation forced the two layers with a full-width spacer and
+    // released them at a container breakpoint. Both are gone: reintroducing
+    // either would make the reflow width-driven again. The named container
+    // survives for segment DENSITY only, so `@md/target:` may still appear —
+    // just never on a flex/width/display utility.
+    expect(wrapper.findAll('span[aria-hidden="true"].w-full')).toHaveLength(0)
+
+    const containerVariants = wrapper.findAll('[class]')
+      .flatMap(el => el.classes())
+      .filter(c => /^@[a-z0-9[\]-]+\/target:/.test(c))
+
+    expect([...new Set(containerVariants)].sort()).toEqual([
+      '@md/target:min-h-0',
+      '@md/target:px-1',
+      '@md/target:py-0',
+    ])
   })
 })
 
@@ -265,7 +311,10 @@ describe('OperationTarget single-host degradation', () => {
     })
 
     expect(wrapper.findComponent({ name: 'USelect' }).exists()).toBe(false)
-    expect(wrapper.findAll('span[aria-hidden="true"].w-full')).toHaveLength(1)
+    // Dropping the picker leaves the origin unit holding the host alone; the
+    // two-unit split — and therefore the reflow contract — is unaffected.
+    expect(wrapper.get('[data-target-origin]').findAll('button')).toHaveLength(1)
+    expect(wrapper.find('[data-target-operation]').exists()).toBe(true)
     expect(wrapper.text()).toContain('https://api.example.com')
     expect(wrapper.text()).toContain('/v1/deployments')
   })
