@@ -68,7 +68,7 @@ geist-nuxt 用 Nuxt UI 的布局原语 + Tailwind 断点做响应式，**不写�
 - **`flex-basis` 必须是 `auto`**。flex 断行比较的是各 item 的 *hypothetical main size*；basis 为 `auto` 才让断行读到真实内容宽度。写成 `flex-1`（basis `0%`）会抹掉这个信号，行永远不断。
 - 每个单元加 `min-w-0`，让长内容在**单元内部**降级（truncate / 横向滚动），而不是把页面撑出横向滚动条。
 - **单元之间做不了装饰性分隔线**。分隔线断言「这两个此刻相邻」，而内容驱动的换行刻意不让 CSS 知道当前行况；硬做出来的分隔线会在换行态画在行首。用色阶或间距表达接缝。
-- 单元在 DOM 上打 `data-*` 标记，测试断言「单元存在且 `flex-nowrap`」，**不要断言断点类名**（见 `references/method/component-reflow.md` §2 回流带扫描）。
+- 单元在 DOM 上打 `data-*` 标记，测试断言「单元存在且 `flex-nowrap`」，**不要断言断点类名**——后者锁的是实现，而且它全绿的同时缺陷可以照样存在（`OperationTarget` 的旧测试断言 `@md/target:flex-[0_3_auto]`，孤立复制键在那期间一直在）。宽度验证要按**组件容器**宽度连续扫描、断言状态序列，固定宽度抽查只探端点，探不到中间那条带。
 
 实例：`OperationTarget`（`data-target-origin` / `data-target-operation` 两单元）、`FieldItem`（`data-field-qualifiers` 把必填标记与 lifecycle 徽章锁成一簇）。
 

@@ -519,48 +519,6 @@ const demoHosts = [
   { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
 ]
 
-const targetLabels = {
-  copy: '复制完整地址',
-  copied: '接口地址已复制',
-  copyFailed: '复制失败，请手动复制地址',
-  copyHost: '复制环境地址',
-  copiedHost: '环境地址已复制',
-  copyPath: '复制接口路径',
-  copiedPath: '接口路径已复制',
-}
-
-// OperationTarget 回流契约的取样矩阵。切换点由内容决定而非断点决定，所以这些
-// 宽度只是取样：每个格子要么是完整两层、要么是完整单行，复制键永远不落单。
-// 各 fixture 的切换点本就不同（短内容 380 前就单行，长 path 要到 620–720 之间），
-// 切换点随内容漂移是契约本身，不是缺陷；真正的回归是出现第三种状态。
-const targetReflowWidths = [380, 460, 540, 620, 720]
-
-const targetReflowFixtures = [
-  {
-    label: '短 host / 短 path',
-    hosts: [
-      { id: 'production', label: '生产', baseUrl: 'https://api.ex.com' },
-      { id: 'sandbox', label: '沙箱', baseUrl: 'https://sbx.ex.com' },
-    ],
-    path: '/v1/pay',
-  },
-  { label: '真实长度', hosts: demoHosts, path: '/v1/checkout/sessions' },
-  { label: '长 path', hosts: demoHosts, path: '/v1/checkout/sessions/{id}/line_items/refunds' },
-  {
-    label: '长 host + 长环境名',
-    hosts: [
-      { id: 'production', label: '生产（跨境收单）', baseUrl: 'https://gateway.payments.example-corp.com' },
-      { id: 'sandbox', label: '沙箱（跨境收单）', baseUrl: 'https://gateway-sandbox.payments.example-corp.com' },
-    ],
-    path: '/v1/pay',
-  },
-  {
-    label: '单 host（无 select）',
-    hosts: [{ id: 'production', label: '生产', baseUrl: 'https://api.example.com' }],
-    path: '/v1/checkout/sessions',
-  },
-]
-
 // FieldAnnotation demo — inline field references inside narrative prose.
 // The field source maps ids → { field, page? }; markdown-style narrative only
 // ever cites ids. Same-page entries omit `page` and deep-link via useFieldAnchor
@@ -741,7 +699,15 @@ onMounted(() => anchor.initFromHash())
                 :hosts="demoHosts"
                 path="/v1/checkout/sessions"
                 select-label="选择环境"
-                :labels="targetLabels"
+                :labels="{
+                  copy: '复制完整地址',
+                  copied: '接口地址已复制',
+                  copyFailed: '复制失败，请手动复制地址',
+                  copyHost: '复制环境地址',
+                  copiedHost: '环境地址已复制',
+                  copyPath: '复制接口路径',
+                  copiedPath: '接口路径已复制',
+                }"
               />
             </OperationHeader>
 
@@ -756,45 +722,6 @@ onMounted(() => anchor.initFromHash())
                 一笔支付被成功捕获后投递。先校验签名再处理，并以事件 id 幂等去重。
               </template>
             </OperationHeader>
-          </div>
-        </div>
-
-        <div>
-          <h3 class="mb-1 text-sm font-semibold text-highlighted">Target 回流契约</h3>
-          <p class="mb-4 max-w-2xl text-sm text-muted">
-            <code class="font-mono text-code">(environment, host)</code> 与
-            <code class="font-mono text-code">(path, 完整复制)</code>
-            是两个不可拆分的原子单元，断行只能发生在单元之间——所以切换点由<strong>内容</strong>决定，
-            不由断点决定。读法：每个格子要么是完整两层、要么是完整单行，
-            复制键在任何宽度上都不会独占一行。宽度作用于组件容器（可拖宽的分栏里就是栏宽），
-            不是视口。
-          </p>
-          <div class="space-y-6">
-            <div v-for="fixture in targetReflowFixtures" :key="fixture.label">
-              <p class="mb-2 text-xs font-medium uppercase tracking-wide text-dimmed">
-                {{ fixture.label }}
-              </p>
-              <!-- 取样宽度可能超出正文栏；滚动条留在这里，不外溢到页面。 -->
-              <div class="space-y-2 overflow-x-auto">
-                <div
-                  v-for="width in targetReflowWidths"
-                  :key="width"
-                  class="flex items-center gap-3"
-                >
-                  <span class="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-dimmed">
-                    {{ width }}
-                  </span>
-                  <div class="shrink-0" :style="{ width: `${width}px` }">
-                    <OperationTarget
-                      :hosts="fixture.hosts"
-                      :path="fixture.path"
-                      select-label="选择环境"
-                      :labels="targetLabels"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
