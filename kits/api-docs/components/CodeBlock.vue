@@ -25,7 +25,8 @@
 // A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
 //           owned by CopyButton; selects are labelled; :focus-visible rings
 //           are preserved. The scrollable code surface is a keyboard-focusable
-//           named region (tabindex=0) so keyboard users can scroll it.
+//           named group (tabindex=0) so keyboard users can scroll it without
+//           turning every code block into a page landmark.
 
 export interface CodeVariant {
   /** Language id used for selection, e.g. 'curl' | 'json' | 'node' | 'python' | 'go'. */
@@ -251,7 +252,7 @@ const wrap = useCodeWrap(props.defaultWrap)
     <!-- Body — raw source by default; v-html is behind an explicit trust gate
          for pre-sanitized build-time output only. Clipboard always uses code.
          The surface scrolls internally, so it must be reachable by keyboard
-         (tabindex=0 + named region + focus-visible ring), or keyboard users
+         (tabindex=0 + named group + focus-visible ring), or keyboard users
          could never read past maxHeight. translate="no": code is identifiers,
          not prose — machine translation must leave it verbatim. -->
     <div
@@ -260,7 +261,7 @@ const wrap = useCodeWrap(props.defaultWrap)
       :class="{ 'is-wrap': wrap }"
       :style="{ maxHeight }"
       tabindex="0"
-      role="region"
+      role="group"
       :aria-label="title || t.codeRegion"
     >
       <pre class="raw-pre" translate="no"><code

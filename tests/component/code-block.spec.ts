@@ -4,8 +4,9 @@
 //  1. the language select is a SELECTION control: with >1 languages it stays
 //     visible even when the active variant has no code, so a reader can always
 //     switch away from the empty state ("Try another selection.");
-//  2. the scrollable code surface is a keyboard-focusable named region
-//     (tabindex=0), so keyboard users can scroll past maxHeight.
+//  2. the scrollable code surface is a keyboard-focusable named group
+//     (tabindex=0), so keyboard users can scroll past maxHeight without adding
+//     one landmark per code block.
 import { describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
@@ -54,27 +55,28 @@ describe('CodeBlock language select visibility', () => {
 })
 
 describe('CodeBlock code surface a11y', () => {
-  it('is a keyboard-focusable region named by the title', async () => {
+  it('is a keyboard-focusable non-landmark group named by the title', async () => {
     const wrapper = await mountSuspended(CodeBlock, {
       props: { variants: twoLanguages, title: 'request.sh' },
     })
 
-    const region = wrapper.find('[role="region"]')
-    expect(region.exists()).toBe(true)
-    expect(region.attributes('tabindex')).toBe('0')
-    expect(region.attributes('aria-label')).toBe('request.sh')
-    expect(region.find('pre').attributes('translate')).toBe('no')
+    const group = wrapper.find('[role="group"]')
+    expect(group.exists()).toBe(true)
+    expect(wrapper.find('[role="region"]').exists()).toBe(false)
+    expect(group.attributes('tabindex')).toBe('0')
+    expect(group.attributes('aria-label')).toBe('request.sh')
+    expect(group.find('pre').attributes('translate')).toBe('no')
   })
 
   it('falls back to the localizable codeRegion label without a title', async () => {
     const english = await mountSuspended(CodeBlock, {
       props: { variants: twoLanguages },
     })
-    expect(english.find('[role="region"]').attributes('aria-label')).toBe('Code sample')
+    expect(english.find('[role="group"]').attributes('aria-label')).toBe('Code sample')
 
     const localized = await mountSuspended(CodeBlock, {
       props: { variants: twoLanguages, labels: { codeRegion: '代码示例' } },
     })
-    expect(localized.find('[role="region"]').attributes('aria-label')).toBe('代码示例')
+    expect(localized.find('[role="group"]').attributes('aria-label')).toBe('代码示例')
   })
 })
