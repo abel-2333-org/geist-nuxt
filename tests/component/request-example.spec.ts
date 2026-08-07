@@ -2,6 +2,7 @@
 // Covers issue #21 acceptance: optional v-model:scenario, standard events,
 // predictable parent updates, silent fallback (no write-back, no emit),
 // and the ≤1-scenario selector-hidden rule.
+import { defineComponent, reactive } from 'vue'
 import { describe, it, expect } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
@@ -34,6 +35,30 @@ describe('RequestExample scenario selection', () => {
     expect(scenarioSelect(wrapper)?.props('modelValue')).toBe('basic')
     expect(wrapper.text()).toContain('CODE-BASIC')
     expect(wrapper.text()).not.toContain('CODE-BATCH')
+  })
+
+  it('uncontrolled: discards a scenario id removed by an in-place update', async () => {
+    const liveScenarios = reactive(scenarios.map(s => ({ ...s, variants: [...s.variants] })))
+    const Host = defineComponent({
+      components: { RequestExample },
+      setup: () => ({ liveScenarios }),
+      template: '<RequestExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const request = wrapper.getComponent(RequestExample) as VueWrapper<InstanceType<typeof RequestExample>>
+
+    scenarioSelect(request)!.vm.$emit('update:modelValue', 'batch')
+    await wrapper.vm.$nextTick()
+    expect(request.text()).toContain('CODE-BATCH')
+
+    liveScenarios.splice(1, 1)
+    await wrapper.vm.$nextTick()
+    expect(request.text()).toContain('CODE-BASIC')
+
+    liveScenarios.push({ ...scenarios[1]!, variants: [...scenarios[1]!.variants] })
+    await wrapper.vm.$nextTick()
+    expect(scenarioSelect(request)?.props('modelValue')).toBe('basic')
+    expect(request.text()).toContain('CODE-BASIC')
   })
 
   it('controlled: renders the bound scenario and follows parent updates', async () => {

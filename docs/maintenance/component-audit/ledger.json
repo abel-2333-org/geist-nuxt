@@ -1,19 +1,13 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-06T08:07:41.913Z",
+  "lastRunAt": "2026-08-06T23:35:19.509Z",
   "lastPicked": [
     "api-docs-webhook-protocol",
-    "api-docs-field-group",
     "api-docs-response-example",
-    "api-docs-event-badge",
-    "api-docs-field-annotation",
-    "api-docs-lifecycle-badge",
-    "api-docs-lifecycle-notice",
-    "api-docs-method-badge",
-    "api-docs-operation-header",
-    "api-docs-sidebar-nav",
-    "api-docs-site-search"
+    "api-docs-request-example",
+    "api-docs-code-block",
+    "api-docs-field-group"
   ],
   "items": {
     "foundation-copy-button": {
@@ -218,13 +212,13 @@
     },
     "api-docs-code-block": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "lastAuditedAt": "2026-08-06T23:35:19.509Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
-        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
+        "headSha": "5fd038fbcf139b51a0779da3ae04e97f24550d05",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "foundation/components/CopyButton.vue",
@@ -238,29 +232,44 @@
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts"
         ],
-        "scopeDigest": "b4ab7a38d8e24dc486cb6eb5a3005786f28a7ec2770b9a5e0d3c0e9c59617cc5"
+        "scopeDigest": "aebcdcbc124ab8e48da52d16df04737de7ccd43804a39a596c308aa9d7646463"
       },
-      "notes": "语言选择器不再被 hasContent 门控,多语言空态仍可切换。代码滚动区保留 tabindex=0、可访问名称与 focus-visible 描边,复审将重复的 region landmark 改为非 landmark 的命名 group,避免页面 landmark 过载;pre 加 translate=no。文档同步纠正空态下语言控件可见性,focused spec 覆盖 group、无 region 与键盘焦点。lang-preset 与 useCodeWrap 核证 clean。",
+      "notes": "复审共享 scope：RequestExample/ResponseExample 的改动只在包装层（label 空白回落、场景收敛 watcher），CodeBlock 本体、useCodeWrap、lang-preset 与 CopyButton 未动，variants/labels 契约与语言选择器行为不变。",
       "findings": []
     },
     "api-docs-request-example": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-06T23:35:19.509Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
+        "headSha": "5fd038fbcf139b51a0779da3ae04e97f24550d05",
+        "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
+        "scope": [
+          "app/components/demo/api-docs/DocsShellReference.vue",
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/RequestExample.vue",
+          "references/kits/api-docs/index.md",
+          "references/kits/api-docs/request-example.md",
+          "tests/component/request-example.spec.ts"
+        ],
+        "scopeDigest": "bfe51294bdd7b6f49197de360025c2db120555aeec444ad3b5aa779b4640ebcf"
+      },
+      "notes": "首轮扫描：职责单一、a11y 与 token 达标；唯一问题是 uncontrolled 场景 watch 数组引用、对 reactive 原地增删不触发，已移除的 id 会在同名项重新加入时复活，与 ResponseExample 同一受控口的既有行为不一致——已改为 watch id 列表（flush: sync）并补原地增删 spec，本轮即修复故不留 open finding。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-06T23:35:19.509Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
+        "headSha": "5fd038fbcf139b51a0779da3ae04e97f24550d05",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -275,16 +284,16 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "722f534e060e5429731c7e3f4514f7f9978909a65d9532052f9c42c7562258d0"
+        "scopeDigest": "71ca8079404367920de6421d4e3fc214020978fbff2e7301a5479e18489961ba"
       },
-      "notes": "三级稳定身份收敛、受控 scenario、内部 status/body、四种 body 语义、persistent live region、container-responsive controls、CodeBlock 委托、类型级 legacy 拒绝与 gallery 消费均核对；code body 的可选空 label 会绕过既定 fallback，产生无名 media 选项。",
+      "notes": "修复 open finding：空白 variant label / mediaType 视为未提供（同 statusText 空白规则），media 选择项回落语言显示名或 codeBodyTitle，宽屏 USelect 与窄屏 URadioGroup 均不再出现无名选项；675 行单文件仍内聚，不做拆分 churn。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
           "severity": "medium",
           "claim": "code body 未提供可用 variant label 时回落到语言显示名或 codeBodyTitle，media 选择项保持可读。",
           "evidence": "复现：一个 status 含两个 bodies，其中 code body 未传 mediaType，首个 variant 为 { language: 'json', label: '', code: '{}' }。codeBodyLabel 使用 variant.label ?? langLabel 接受空串，bodyItems 生成空 option label；宽屏 media USelect 与窄屏 URadioGroup 都出现无名选项，未按 reference 回落到语言显示名或 codeBodyTitle。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
@@ -368,13 +377,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-06T23:35:19.509Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
+        "headSha": "5fd038fbcf139b51a0779da3ae04e97f24550d05",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -383,9 +392,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "db4e8fb2d9add52a6a910c5435fb0707e12ce3822579d9e386ae7d5a3e4c7210"
+        "scopeDigest": "644a4b8589c26088096c26ce3fe82a11e75aad38e5cddcbabc9ed054c42ae933"
       },
-      "notes": "clean：单一职责的语义 section；headingLevel 仅允许 h2-h4 并与固定视觉样式解耦，默认 h2、嵌套时由 consumer 传层级；count=0 正常呈现；无硬编码颜色/尺寸越界；WebhookProtocol 与 gallery 覆盖 standalone、嵌套、计数和不同 heading level；registry 仅依赖 foundation，消费边界完整。",
+      "notes": "复审共享 scope：WebhookProtocol.vue 的改动仅涉及其 slot 内按钮的可访问名回退，FieldGroup 本体与 headingLevel/count/label 契约未变，嵌套用法仍成立。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -559,13 +568,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-06T23:35:19.509Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
+        "headSha": "5fd038fbcf139b51a0779da3ae04e97f24550d05",
         "itemDigest": "68a2caa42b49a3553a9453c7da1869d8f5cfa46db9efa5db083e8c25ff30b16f",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -576,18 +585,19 @@
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/webhook-protocol.md",
           "scripts/check-registry-consumer.mjs",
+          "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "4061b19fca3a09c3dfa7872531d4a2c600aeb6ba2fba150301fd22537c9c7eb8"
+        "scopeDigest": "1448d2b3f2914c99ae76d0d4e8021c0ae911704d48b3cf970d0c780a8cd858bf"
       },
-      "notes": "registry 闭包、section 省略、ACK 三语义、schedule 折叠纯函数、语义 token、gallery 变体与 consumer runtime fixture 均核对成立；折叠按钮未提供 expandLabel 时缺少能描述动作目的的默认可访问名称。",
+      "notes": "修复 open finding：折叠展开按钮 aria-label 不再回退 '+N'，默认英文可访问名 'Show N more steps'（expandLabel/collapseLabel 注入仍优先），补组件级 spec 覆盖默认/注入/展开三态；其余维度达标。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
           "severity": "medium",
           "claim": "展开/收起按钮提供可覆盖的英文默认文案；展开按钮带可访问名。",
           "evidence": "当 delivery.schedule.steps 超过阈值且调用方未传 expandLabel 时，折叠按钮的 aria-label 回退为“+N”（例如“+5”）；读屏焦点只得到“+5，按钮，已折叠”，无法从名称判断它会展开重试节奏，与组件注释“展开/收起按钮提供可覆盖的英文默认文案”和 reference“展开按钮带可访问名”不一致。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },

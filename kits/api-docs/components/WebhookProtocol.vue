@@ -71,9 +71,9 @@ export interface WebhookProtocolSchedule {
   summary: string
   /** 逐次间隔的已本地化短文本（如 '5 分钟'），仅作视觉序列；省略则只显示总结句 */
   steps?: string[]
-  /** 折叠态展开按钮的可访问名（已本地化） */
+  /** 折叠态展开按钮的可访问名（已本地化）；省略时回退英文默认 'Show N more steps' */
   expandLabel?: (hidden: number) => string
-  /** 展开态收起按钮文案（已本地化） */
+  /** 展开态收起按钮文案（已本地化）；省略时可访问名回退英文默认 'Collapse' */
   collapseLabel?: string
 }
 
@@ -190,7 +190,8 @@ function toggleSchedule() {
                     :aria-expanded="scheduleExpanded"
                     :aria-label="scheduleExpanded
                       ? (schedule.collapseLabel ?? 'Collapse')
-                      : (schedule.expandLabel?.(collapsed.overflow) ?? `+${collapsed.overflow}`)"
+                      : (schedule.expandLabel?.(collapsed.overflow)
+                        ?? `Show ${collapsed.overflow} more steps`)"
                     @click="toggleSchedule"
                   >
                     {{ scheduleExpanded ? (schedule.collapseLabel ?? '−') : `+${collapsed.overflow}` }}

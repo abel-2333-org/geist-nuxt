@@ -321,6 +321,39 @@ describe('ResponseExample scenario selection', () => {
 })
 
 describe('ResponseExample body selection', () => {
+  it('falls back to language / codeBodyTitle for blank media and variant labels', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'blank-labels',
+          label: 'Blank labels',
+          statuses: [{
+            status: 200,
+            statusText: 'OK',
+            bodies: [
+              {
+                id: 'json',
+                kind: 'code' as const,
+                variants: [{ language: 'json', label: '', code: '{}' }],
+              },
+              {
+                id: 'mystery',
+                kind: 'code' as const,
+                mediaType: '   ',
+                variants: [{ language: '', label: '  ', code: 'raw' }],
+              },
+            ],
+          }],
+        }],
+      },
+    })
+
+    expect(selectByIcon(wrapper, 'i-lucide-file-type')?.props('items')).toEqual([
+      { label: 'JSON', value: 'json' },
+      { label: 'Code example', value: 'mystery' },
+    ])
+  })
+
   it('preserves the default body by id across same-context reorder', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: bodyScenarios },
