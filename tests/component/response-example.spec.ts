@@ -134,6 +134,28 @@ describe('ResponseExample scenario selection', () => {
     expect(wrapper.text()).not.toContain('BATCH-404')
   })
 
+  it('uncontrolled: preserves scenario and status across an in-place reorder', async () => {
+    const liveScenarios = reactive(scenarios.map(s => ({ ...s, statuses: [...s.statuses] })))
+    const Host = defineComponent({
+      components: { ResponseExample },
+      setup: () => ({ liveScenarios }),
+      template: '<ResponseExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const response = wrapper.getComponent(ResponseExample) as VueWrapper<InstanceType<typeof ResponseExample>>
+    const statusSelect = selectByIcon(response, 'i-lucide-activity')
+
+    statusSelect!.vm.$emit('update:modelValue', 400)
+    await wrapper.vm.$nextTick()
+    liveScenarios.reverse()
+    await wrapper.vm.$nextTick()
+
+    expect(selectByIcon(response, 'i-lucide-layers')?.props('modelValue')).toBe('basic')
+    expect(selectByIcon(response, 'i-lucide-activity')?.props('modelValue')).toBe(400)
+    expect(response.text()).toContain('BASIC-400')
+    expect(response.text()).not.toContain('BATCH-404')
+  })
+
   it('uncontrolled: discards a scenario id removed by an in-place update', async () => {
     const liveScenarios = reactive(scenarios.map(s => ({ ...s, statuses: [...s.statuses] })))
     const Host = defineComponent({

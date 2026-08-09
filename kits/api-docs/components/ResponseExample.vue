@@ -286,6 +286,8 @@ watch(
 )
 
 // Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+// Pre-flush batching evaluates reverse/sort after their final array state, while
+// an id absent at the end of an update is discarded before the next render.
 if (!controlled) {
   watch(
     () => scenarios.value.map(s => s.id),
@@ -294,7 +296,7 @@ if (!controlled) {
         localScenario.value = ids[0]
       }
     },
-    { flush: 'sync' },
+    { flush: 'pre' },
   )
 }
 

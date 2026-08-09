@@ -37,6 +37,24 @@ describe('RequestExample scenario selection', () => {
     expect(wrapper.text()).not.toContain('CODE-BATCH')
   })
 
+  it('uncontrolled: preserves the selected id across an in-place reorder', async () => {
+    const liveScenarios = reactive(scenarios.map(s => ({ ...s, variants: [...s.variants] })))
+    const Host = defineComponent({
+      components: { RequestExample },
+      setup: () => ({ liveScenarios }),
+      template: '<RequestExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const request = wrapper.getComponent(RequestExample) as VueWrapper<InstanceType<typeof RequestExample>>
+
+    liveScenarios.reverse()
+    await wrapper.vm.$nextTick()
+
+    expect(scenarioSelect(request)?.props('modelValue')).toBe('basic')
+    expect(request.text()).toContain('CODE-BASIC')
+    expect(request.text()).not.toContain('CODE-BATCH')
+  })
+
   it('uncontrolled: discards a scenario id removed by an in-place update', async () => {
     const liveScenarios = reactive(scenarios.map(s => ({ ...s, variants: [...s.variants] })))
     const Host = defineComponent({
