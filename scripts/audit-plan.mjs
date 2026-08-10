@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 组件审计排程 CLI。计划可绑定 main 基线;record 从该基线重算计划,
+// 组件审计排程 CLI。计划可绑定 main 基线;record 可执行排程或 affected 复审,
 // 并只为已经提交的功能快照生成证据。
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -66,6 +66,7 @@ function parseCli() {
         verify: { type: 'boolean', default: false },
         migrate: { type: 'boolean', default: false },
         record: { type: 'string' },
+        affected: { type: 'boolean', default: false },
         base: { type: 'string' },
         'allow-wont-fix': { type: 'boolean', default: false },
       },
@@ -87,6 +88,7 @@ function parseCli() {
   if (modes > 1) throw new AuditError('--verify、--migrate、--record 不能组合')
   if (values.record === '') throw new AuditError('--record 需要非空文件路径')
   if (values.record !== undefined && !values.base) throw new AuditError('--record 必须携带 --base <审计起点的 origin/main SHA>')
+  if (values.affected && values.record === undefined) throw new AuditError('--affected 只适用于 --record')
   if (values.json && (values.migrate || values.record !== undefined)) throw new AuditError('--json 只适用于 plan 或 --verify')
   if (values['allow-wont-fix'] && values.record === undefined) throw new AuditError('--allow-wont-fix 只适用于 --record')
   if (values.base && values.verify) throw new AuditError('--base 不适用于 --verify')
@@ -137,10 +139,16 @@ try {
       baseLedgerRaw: planState.raw,
       results,
       baseSha: planState.base,
+      affected: values.affected,
       allowWontFix: values['allow-wont-fix'],
     })
-    console.log(`已记录计划组件 ${outcome.picked.length} 个:${outcome.picked.join('、')}`)
-    if (outcome.coReviewed.length > 0) {
+    if (values.affected) {
+      console.log(`已复审受功能 diff 影响的 evidence owner ${outcome.coReviewed.length} 个:${outcome.coReviewed.join('、')}`)
+    }
+    else {
+      console.log(`已记录计划组件 ${outcome.picked.length} 个:${outcome.picked.join('、')}`)
+    }
+    if (!values.affected && outcome.coReviewed.length > 0) {
       console.log(`同批复审受影响 evidence owner ${outcome.coReviewed.length} 个:${outcome.coReviewed.join('、')}`)
     }
     console.log(`证据统一绑定功能提交 ${outcome.headSha};ledger 请作为第二个提交随 PR 交付。`)

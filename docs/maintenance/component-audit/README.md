@@ -64,6 +64,12 @@ evidence、当前 registry 与 `base..HEAD` 的已提交 Git diff 自动推导�
 `deferred` owner 也必须复审；`legacy-v1`
 与未审计条目没有可验证的 scope，不能借 co-review 扩入本批。
 
+普通功能 PR 不应为刷新 stale evidence 被迫执行当天的随机排程。此时使用 `--record --affected`：
+recorder 仍按同一规则自动推导 required owner，但 results 必须**恰好**等于该集合，不接收计划项、
+手工 owner 名单或额外条目。该模式只更新 owner 的审计结论、时间与 evidence；owner 原有 `round`
+和全局 `round` / `lastRunAt` / `lastPicked` 均保持不变，因此不会消费或扰动 scheduled audit 进度。
+若 diff 没有命中任何 `scope-v1` owner，命令会拒绝空记账；新增未审计组件本身也不会凭空成为 owner。
+
 v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来源；它不会把旧分支 SHA
 误称为 main SHA，也不会用当前树伪造过去的 scope，下一次审计该组件时再升级为 `scope-v1`。
 
@@ -97,6 +103,7 @@ v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来
 pnpm audit:plan                          # 人读
 node scripts/audit-plan.mjs --json --base <mainSha> # 机读，按该 Git 树生成计划
 node scripts/audit-plan.mjs --record <result.json> --base <mainSha>
+node scripts/audit-plan.mjs --record <result.json> --affected --base <mainSha>
 pnpm audit:verify                        # 重算 scope + item digest（CI 同款）
 node scripts/audit-plan.mjs --migrate    # 把磁盘上的 v1 ledger 原子迁移为 v2
 ```
@@ -136,6 +143,10 @@ planned item 不得标 `coReview`；计划外结果必须恰好等于 recorder �
 始终读取 base evidence scope）。旧路径若在 HEAD 已删除、rename 或不再是普通文件，可从新 scope
 移除，但 owner 仍必须复审。co-review 是完整复审，不是 digest refresh：recorder 不会自动生成 verdict，
 也不接受单独的 CLI owner 名单。禁止手改 ledger / digest 绕过该边界。
+
+`--affected` 面向普通功能 PR，其中每个 result 都隐式是完整 co-review，可省略 `coReview: true`；
+结果仍须完整提供 `change: "modified"`、`status`、非空 `notes`、非空 `scope` 与 `findings` 数组。
+它不会降低 finding、scope 或 Git blob 证据校验，只把“复审受影响 owner”与“推进每日排程”拆开。
 
 记录前必须先把组件、tests 与 references 等功能改动提交，且工作区完全干净。record 只读取
 `HEAD` Git blob 生成证据，然后修改 ledger；报告和 ledger 再作为第二个提交。这样 `headSha`
