@@ -343,6 +343,45 @@ describe('ResponseExample scenario selection', () => {
 })
 
 describe('ResponseExample body selection', () => {
+  it('preserves a selected body across an in-place scenario reorder', async () => {
+    const bodyScenario = bodyScenarios[0]!
+    const liveScenarios = reactive([
+      {
+        ...bodyScenario,
+        statuses: bodyScenario.statuses.map(status => ({
+          ...status,
+          bodies: [...status.bodies],
+        })),
+      },
+      {
+        id: 'other',
+        label: 'Other',
+        statuses: [{
+          status: 204,
+          statusText: 'No Content',
+          bodies: jsonBody('OTHER-204'),
+        }],
+      },
+    ])
+    const Host = defineComponent({
+      components: { ResponseExample },
+      setup: () => ({ liveScenarios }),
+      template: '<ResponseExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const response = wrapper.getComponent(ResponseExample) as VueWrapper<InstanceType<typeof ResponseExample>>
+    const bodySelect = selectByIcon(response, 'i-lucide-file-type')
+
+    bodySelect!.vm.$emit('update:modelValue', 'csv')
+    await wrapper.vm.$nextTick()
+    liveScenarios.reverse()
+    await wrapper.vm.$nextTick()
+
+    expect(selectByIcon(response, 'i-lucide-layers')?.props('modelValue')).toBe('body')
+    expect(selectByIcon(response, 'i-lucide-file-type')?.props('modelValue')).toBe('csv')
+    expect(response.text()).toContain('BODY-CSV')
+  })
+
   it('falls back to language / codeBodyTitle for blank media and variant labels', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: {

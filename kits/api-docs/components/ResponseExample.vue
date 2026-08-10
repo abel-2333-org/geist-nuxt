@@ -266,6 +266,8 @@ const selectedBody = computed<string | undefined>({
 
 // Discard an invalid body identity instead of only deriving a visual fallback;
 // otherwise removing and later re-adding the id would revive a stale selection.
+// Pre-flush keeps this downstream watcher on the same final-state boundary as
+// scenario convergence, so reverse/sort cannot leak an intermediate context.
 watch(
   () => bodies.value.map(body => body.id),
   (ids) => {
@@ -273,7 +275,7 @@ watch(
       localBodyId.value = ids[0]
     }
   },
-  { flush: 'sync', immediate: true },
+  { flush: 'pre', immediate: true },
 )
 
 // Body selection belongs to one effective scenario/status context. Data refreshes
@@ -282,7 +284,7 @@ watch(
 watch(
   [() => currentScenario.value?.id, () => currentStatus.value?.status],
   () => { localBodyId.value = bodies.value[0]?.id },
-  { flush: 'sync' },
+  { flush: 'pre' },
 )
 
 // Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.

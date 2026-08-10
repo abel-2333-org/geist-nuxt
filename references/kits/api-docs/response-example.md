@@ -60,7 +60,7 @@ interface ResponseScenario { id: string; label: string; statuses: ResponseStatus
 
 ## State
 
-- 三级选择：场景 → 状态 → body。scenario 与 body 都按稳定 `id` 收敛；切换场景时，当前 status 若在新场景仍有效则保留，否则回退首项。有效场景/status 上下文变化时 body 回到首项；同一上下文的数据替换或重排会保留仍有效的 body `id`，已移除的选择会被丢弃，之后重新加入同名项也不会复活旧选择。uncontrolled scenario 按每次 Vue 更新结束时的最终 id 列表收敛：原地重排保留仍存在的选择；一次更新结束时已移除的选择会被丢弃。
+- 三级选择：场景 → 状态 → body。scenario 与 body 都按稳定 `id` 收敛；切换场景时，当前 status 若在新场景仍有效则保留，否则回退首项。有效场景/status 上下文变化时 body 回到首项；同一有效上下文中，无论 scenario 数组或 body 列表原地重排，都会保留仍有效的 body `id`。已移除的选择会被丢弃，之后重新加入同名项也不会复活旧选择。uncontrolled scenario 按每次 Vue 更新结束时的最终 id 列表收敛：原地重排保留仍存在的选择；一次更新结束时已移除的选择会被丢弃。
 - 状态色：2xx `success` · 3xx `info` · 4xx `warning` · 5xx `error` · `'default'` `neutral`（**文本+颜色双通道**，不单靠颜色）。`'default'` badge 直接显示等宽 `default` 文本。
 - 状态码在彩色 badge（`#leading`）里；多 status 时下拉**选项**显示 `status + statusText`（多个状态共享同一文案也能独立辨认），而闭合触发器优先显示 `statusText`——code 已由相邻 badge 承担，不重复；`statusText` 为空或仅含空白时回退到 status code，避免空触发器。固定 status 没有选择器时，badge 自身同时显示 code 与 `statusText`。
 - media 选择器标签优先用 `mediaType`；未提供时（空白同 `statusText` 规则视为未提供），code body 回退到首个 variant 的 label / 语言显示名 / `codeBodyTitle`——语言显示名与 CodeBlock 语言选择器共用 `langLabel`（`utils/lang-preset.ts`，`languageLabels` 覆盖优先），同一语言 id 两处渲染一致；blank label 同样回落，选择项不会出现无名选项；其他 kind 回退到各自面板标题。显式 `bodies: []` 保持空列表。各维度 ≤1 时不渲染对应选择器。
