@@ -60,6 +60,7 @@ geist-nuxt 的组件全部来自 Nuxt UI v4（公共包 `@nuxt/ui`，共 122 个
 |---|---|
 | 主/次操作按钮 | `UButton`（`variant` 表强弱） |
 | 一组相关按钮 | `UButtonGroup` |
+| 复制一个值到剪贴板（copied 反馈 + toast + 播报） | `CopyButton`（foundation，见 `buttons.md`） |
 
 ### 展示原子 / 容器（无交互，见 `data-display.md`）
 | 需求 | 用 |
