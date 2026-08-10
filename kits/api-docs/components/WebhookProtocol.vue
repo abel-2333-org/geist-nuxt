@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { ApiCodeLabels } from './CodeBlock.vue'
+import FactList from '../internal/FactList.vue'
+import FactRow from '../internal/FactRow.vue'
 
 // Domain component (API docs): webhook protocol facts —— 连贯呈现一个 webhook
 // 的 Verification / Acknowledgement / Delivery 三段协议事实。它是 OperationHeader
@@ -129,82 +131,75 @@ function toggleSchedule() {
           {{ section.data.description }}
         </p>
 
-        <dl
+        <FactList
           v-if="section.data.facts?.length || (section.key === 'delivery' && schedule)"
-          class="divide-y divide-default"
         >
-          <div
+          <FactRow
             v-for="fact in section.data.facts"
             :key="fact.term"
-            class="flex flex-col gap-1 py-2.5 sm:flex-row sm:gap-4"
-          >
-            <dt class="shrink-0 text-sm text-muted sm:w-36">{{ fact.term }}</dt>
-            <dd class="min-w-0 space-y-1">
-              <InlineCode v-if="fact.code">{{ fact.value }}</InlineCode>
-              <span v-else class="text-sm text-highlighted">{{ fact.value }}</span>
-              <p v-if="fact.note" class="text-sm leading-relaxed text-muted">{{ fact.note }}</p>
-            </dd>
-          </div>
+            :fact="fact"
+          />
 
           <!-- Delivery 专属：schedule 行（总结句是可访问真源，chips 纯视觉） -->
-          <div
+          <FactRow
             v-if="section.key === 'delivery' && schedule"
-            class="flex flex-col gap-1 py-2.5 sm:flex-row sm:gap-4"
+            :fact="{ term: schedule.term, value: schedule.summary }"
           >
-            <dt class="shrink-0 text-sm text-muted sm:w-36">{{ schedule.term }}</dt>
-            <dd class="min-w-0 space-y-2">
-              <p class="text-sm text-highlighted">{{ schedule.summary }}</p>
-              <!-- 展开按钮可聚焦，故 aria-hidden 只落在纯视觉的 chip/箭头上 -->
-              <div
-                v-if="visibleSteps.length || collapsed.overflow > 0"
-                class="flex flex-wrap items-center gap-1.5"
-              >
-                <template v-for="(step, i) in visibleSteps" :key="i">
-                  <UIcon
-                    v-if="i > 0"
-                    name="i-lucide-arrow-right"
-                    class="size-3 shrink-0 text-dimmed"
-                    aria-hidden="true"
-                  />
-                  <UBadge
-                    color="neutral"
-                    variant="soft"
-                    class="font-mono tabular-nums"
-                    aria-hidden="true"
-                  >
-                    {{ step }}
-                  </UBadge>
-                </template>
-                <template v-if="collapsed.overflow > 0">
-                  <UIcon
-                    v-if="!scheduleExpanded && visibleSteps.length > 0"
-                    name="i-lucide-arrow-right"
-                    class="size-3 shrink-0 text-dimmed"
-                    aria-hidden="true"
-                  />
-                  <UButton
-                    color="neutral"
-                    variant="soft"
-                    size="xs"
-                    class="font-mono tabular-nums"
-                    :aria-expanded="scheduleExpanded"
-                    :aria-label="scheduleExpanded
-                      ? (schedule.collapseLabel ?? 'Collapse')
-                      : (schedule.expandLabel?.(collapsed.overflow)
-                        ?? `Show ${collapsed.overflow} more steps`)"
-                    @click="toggleSchedule"
-                  >
-                    {{ scheduleExpanded ? (schedule.collapseLabel ?? '−') : `+${collapsed.overflow}` }}
-                  </UButton>
-                </template>
+            <template #value>
+              <div class="min-w-0 space-y-2">
+                <p class="text-sm text-highlighted">{{ schedule.summary }}</p>
+                <!-- 展开按钮可聚焦，故 aria-hidden 只落在纯视觉的 chip/箭头上 -->
+                <div
+                  v-if="visibleSteps.length || collapsed.overflow > 0"
+                  class="flex flex-wrap items-center gap-1.5"
+                >
+                  <template v-for="(step, i) in visibleSteps" :key="i">
+                    <UIcon
+                      v-if="i > 0"
+                      name="i-lucide-arrow-right"
+                      class="size-3 shrink-0 text-dimmed"
+                      aria-hidden="true"
+                    />
+                    <UBadge
+                      color="neutral"
+                      variant="soft"
+                      class="font-mono tabular-nums"
+                      aria-hidden="true"
+                    >
+                      {{ step }}
+                    </UBadge>
+                  </template>
+                  <template v-if="collapsed.overflow > 0">
+                    <UIcon
+                      v-if="!scheduleExpanded && visibleSteps.length > 0"
+                      name="i-lucide-arrow-right"
+                      class="size-3 shrink-0 text-dimmed"
+                      aria-hidden="true"
+                    />
+                    <UButton
+                      color="neutral"
+                      variant="soft"
+                      size="xs"
+                      class="font-mono tabular-nums"
+                      :aria-expanded="scheduleExpanded"
+                      :aria-label="scheduleExpanded
+                        ? (schedule.collapseLabel ?? 'Collapse')
+                        : (schedule.expandLabel?.(collapsed.overflow)
+                          ?? `Show ${collapsed.overflow} more steps`)"
+                      @click="toggleSchedule"
+                    >
+                      {{ scheduleExpanded ? (schedule.collapseLabel ?? '−') : `+${collapsed.overflow}` }}
+                    </UButton>
+                  </template>
+                </div>
+                <!-- 展开时给 SR 一段可感知的全序列文本（chips 本身 aria-hidden） -->
+                <span v-if="scheduleExpanded && schedule.steps?.length" class="sr-only">
+                  {{ schedule.steps.join(' → ') }}
+                </span>
               </div>
-              <!-- 展开时给 SR 一段可感知的全序列文本（chips 本身 aria-hidden） -->
-              <span v-if="scheduleExpanded && schedule.steps?.length" class="sr-only">
-                {{ schedule.steps.join(' → ') }}
-              </span>
-            </dd>
-          </div>
-        </dl>
+            </template>
+          </FactRow>
+        </FactList>
 
         <!-- ACK 专属：literal body 示例（复用 CodeBlock，不强行建模为 ResponseExample） -->
         <CodeBlock

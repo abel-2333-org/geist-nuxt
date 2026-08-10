@@ -2,7 +2,7 @@
 
 连贯呈现一个 webhook 的 **Verification / Acknowledgement / Delivery** 三段协议事实，是 `OperationHeader`（`kind="webhook"`）的**正文伙伴**：header 管 identity（事件名、语义摘要），本件管「怎么验证、怎么确认、怎么投递重试」。三段共享同一套排版骨架（`FieldGroup` 段头 + `<dl>` 事实行），读者在一处顺序读完整套协议约定，而不是散落在三处各自发明的排版里。
 
-> 真源在 `kits/api-docs/components/WebhookProtocol.vue`（+ `kits/api-docs/utils/webhook-protocol.ts`）；registry 扁平复制到 `app/components/WebhookProtocol.vue`，所以模板名稳定为 `<WebhookProtocol>`。数据无关、locale-ready：label、term、value、总结句由调用方以**已本地化文本**注入（展开/收起按钮提供可覆盖的英文默认文案，结构 chrome 惯例）；组件不解析 Contract、不实现签名或重试逻辑。
+> 真源在 `kits/api-docs/components/WebhookProtocol.vue`（+ `kits/api-docs/utils/webhook-protocol.ts` 和 `kits/api-docs/internal/Fact*.vue`）；registry 将公共组件复制到 `app/components/WebhookProtocol.vue`，并将事实排版 helper 复制到 `app/internal/`。公共组件通过显式相对路径使用 internal helper，模板名仍稳定为 `<WebhookProtocol>`，helper 不形成可单独请求的公共 API。数据无关、locale-ready：label、term、value、总结句由调用方以**已本地化文本**注入（展开/收起按钮提供可覆盖的英文默认文案，结构 chrome 惯例）；组件不解析 Contract、不实现签名或重试逻辑。
 
 ## Anatomy（结构）
 
@@ -89,6 +89,6 @@ interface WebhookProtocolSchedule {
 pnpm geist:copy -- geist-foundation api-docs-webhook-protocol --target <consumer> --to <checkout-40-char-sha>
 ```
 
-切片含组件 + `webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖）。依赖闭包：`geist-foundation`、`foundation-inline-code`、`api-docs-field-group`、`api-docs-code-block`。
+切片含公共组件、`webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖），以及只负责 `<dl>/<dt>/<dd>` 结构和容器回流的 `FactList.vue` / `FactRow.vue` internal helper。后两者复制到 `app/internal/`，由 `WebhookProtocol.vue` 显式相对导入，不增加公共组件面。依赖闭包：`geist-foundation`、`foundation-inline-code`、`api-docs-field-group`、`api-docs-code-block`。
 
 Demo：`/kits/api-docs/webhook-protocol`（本页内联中性 fixture；变体演示省略规则、ACK 三语义与 schedule 边界）。

@@ -695,7 +695,7 @@ const field = {
     label: 'api-docs-webhook-protocol',
     item: 'api-docs-webhook-protocol',
     build: true,
-    cssMarker: 'sm\\:w-36',
+    cssMarker: '\\@sm\\/facts\\:w-36',
     page: `<script setup lang="ts">
 const verification = {
   label: 'VERIFICATION',

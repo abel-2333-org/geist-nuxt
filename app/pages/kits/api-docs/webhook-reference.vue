@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import FactList from '../../../../kits/api-docs/internal/FactList.vue'
+import FactRow from '../../../../kits/api-docs/internal/FactRow.vue'
+
 definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower', order: 2 } })
 
 // API 文档场景的「整页级 webhook 组合」demo（不是可分发切片，也不是通用组件）——
@@ -305,16 +308,13 @@ onMounted(() => anchor.initFromHash())
                  consumer 自己提供已解析、已本地化的内容。 -->
             <FieldGroup label="Requirements">
               <div class="space-y-4 pt-2">
-                <dl class="divide-y divide-default">
-                  <div
+                <FactList>
+                  <FactRow
                     v-for="item in requirements"
                     :key="item.term"
-                    class="flex flex-col gap-1 py-2.5 sm:flex-row sm:gap-4"
-                  >
-                    <dt class="shrink-0 text-sm text-muted sm:w-36">{{ item.term }}</dt>
-                    <dd class="text-sm text-highlighted">{{ item.value }}</dd>
-                  </div>
-                </dl>
+                    :fact="item"
+                  />
+                </FactList>
                 <ULink
                   to="/kits/api-docs/webhook-protocol"
                   class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -427,16 +427,13 @@ onMounted(() => anchor.initFromHash())
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Invoice finalized</h3>
           </header>
           <FieldGroup label="Requirements" :heading-level="4">
-            <dl class="divide-y divide-default pt-2">
-              <div
+            <FactList class="pt-2">
+              <FactRow
                 v-for="item in partialRequirements"
                 :key="item.term"
-                class="flex flex-col gap-1 py-2.5"
-              >
-                <dt class="text-sm text-muted">{{ item.term }}</dt>
-                <dd class="text-sm text-highlighted">{{ item.value }}</dd>
-              </div>
-            </dl>
+                :fact="item"
+              />
+            </FactList>
           </FieldGroup>
           <WebhookProtocol
             :verification="partialVerification"
