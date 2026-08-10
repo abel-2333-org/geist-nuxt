@@ -92,12 +92,20 @@ const selected = computed<string | undefined>({
 })
 
 // Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+// Watching the derived id list (not the array reference) keeps the seam aligned
+// with ResponseExample: in-place mutations of a reactive array are seen too.
+// Pre-flush batching evaluates reverse/sort after their final array state, while
+// an id absent at the end of an update is discarded before the next render.
 if (!controlled) {
-  watch(scenarios, (list) => {
-    if (!list.some(s => s.id === localScenario.value)) {
-      localScenario.value = list[0]?.id
-    }
-  })
+  watch(
+    () => scenarios.value.map(s => s.id),
+    (ids) => {
+      if (localScenario.value === undefined || !ids.includes(localScenario.value)) {
+        localScenario.value = ids[0]
+      }
+    },
+    { flush: 'pre' },
+  )
 }
 
 const scenarioItems = computed(() =>

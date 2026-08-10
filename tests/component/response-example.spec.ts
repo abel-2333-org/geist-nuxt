@@ -134,6 +134,28 @@ describe('ResponseExample scenario selection', () => {
     expect(wrapper.text()).not.toContain('BATCH-404')
   })
 
+  it('uncontrolled: preserves scenario and status across an in-place reorder', async () => {
+    const liveScenarios = reactive(scenarios.map(s => ({ ...s, statuses: [...s.statuses] })))
+    const Host = defineComponent({
+      components: { ResponseExample },
+      setup: () => ({ liveScenarios }),
+      template: '<ResponseExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const response = wrapper.getComponent(ResponseExample) as VueWrapper<InstanceType<typeof ResponseExample>>
+    const statusSelect = selectByIcon(response, 'i-lucide-activity')
+
+    statusSelect!.vm.$emit('update:modelValue', 400)
+    await wrapper.vm.$nextTick()
+    liveScenarios.reverse()
+    await wrapper.vm.$nextTick()
+
+    expect(selectByIcon(response, 'i-lucide-layers')?.props('modelValue')).toBe('basic')
+    expect(selectByIcon(response, 'i-lucide-activity')?.props('modelValue')).toBe(400)
+    expect(response.text()).toContain('BASIC-400')
+    expect(response.text()).not.toContain('BATCH-404')
+  })
+
   it('uncontrolled: discards a scenario id removed by an in-place update', async () => {
     const liveScenarios = reactive(scenarios.map(s => ({ ...s, statuses: [...s.statuses] })))
     const Host = defineComponent({
@@ -321,6 +343,78 @@ describe('ResponseExample scenario selection', () => {
 })
 
 describe('ResponseExample body selection', () => {
+  it('preserves a selected body across an in-place scenario reorder', async () => {
+    const bodyScenario = bodyScenarios[0]!
+    const liveScenarios = reactive([
+      {
+        ...bodyScenario,
+        statuses: bodyScenario.statuses.map(status => ({
+          ...status,
+          bodies: [...status.bodies],
+        })),
+      },
+      {
+        id: 'other',
+        label: 'Other',
+        statuses: [{
+          status: 204,
+          statusText: 'No Content',
+          bodies: jsonBody('OTHER-204'),
+        }],
+      },
+    ])
+    const Host = defineComponent({
+      components: { ResponseExample },
+      setup: () => ({ liveScenarios }),
+      template: '<ResponseExample :scenarios="liveScenarios" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    const response = wrapper.getComponent(ResponseExample) as VueWrapper<InstanceType<typeof ResponseExample>>
+    const bodySelect = selectByIcon(response, 'i-lucide-file-type')
+
+    bodySelect!.vm.$emit('update:modelValue', 'csv')
+    await wrapper.vm.$nextTick()
+    liveScenarios.reverse()
+    await wrapper.vm.$nextTick()
+
+    expect(selectByIcon(response, 'i-lucide-layers')?.props('modelValue')).toBe('body')
+    expect(selectByIcon(response, 'i-lucide-file-type')?.props('modelValue')).toBe('csv')
+    expect(response.text()).toContain('BODY-CSV')
+  })
+
+  it('falls back to language / codeBodyTitle for blank media and variant labels', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'blank-labels',
+          label: 'Blank labels',
+          statuses: [{
+            status: 200,
+            statusText: 'OK',
+            bodies: [
+              {
+                id: 'json',
+                kind: 'code' as const,
+                variants: [{ language: 'json', label: '', code: '{}' }],
+              },
+              {
+                id: 'mystery',
+                kind: 'code' as const,
+                mediaType: '   ',
+                variants: [{ language: '', label: '  ', code: 'raw' }],
+              },
+            ],
+          }],
+        }],
+      },
+    })
+
+    expect(selectByIcon(wrapper, 'i-lucide-file-type')?.props('items')).toEqual([
+      { label: 'JSON', value: 'json' },
+      { label: 'Code example', value: 'mystery' },
+    ])
+  })
+
   it('preserves the default body by id across same-context reorder', async () => {
     const wrapper = await mountSuspended(ResponseExample, {
       props: { scenarios: bodyScenarios },

@@ -26,7 +26,7 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
    - **literal**（固定字面 body）→ 传 `example`，用 CodeBlock 展示精确文本；
    - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`code: true` 呈现被回显的参数名；
    - **intentional empty**（约定就是空）→ facts 行明说「空。返回任何内容都会被忽略。」——明说，而不是留白。
-3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + `+N` 展开按钮（`aria-expanded`，可访问名由 `expandLabel`/`collapseLabel` 注入）。不传 `steps` 就只显示总结句（适合均匀间隔）。
+3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + `+N` 展开按钮（`aria-expanded`，可访问名由 `expandLabel`/`collapseLabel` 注入；未注入时回退英文默认 `Show N more steps` / `Collapse`，视觉文案保持 `+N` / `−`）。不传 `steps` 就只显示总结句（适合均匀间隔）。
 
 ## Props
 
@@ -62,8 +62,8 @@ interface WebhookProtocolSchedule {
   term: string                        // 行名（已本地化），如 '重试节奏'
   summary: string                     // 总结句——schedule 的可访问文本真源
   steps?: string[]                    // 逐次间隔短文本（如 '5 分钟'），纯视觉；省略则只显示总结句
-  expandLabel?: (hidden: number) => string  // 展开按钮可访问名（已本地化）
-  collapseLabel?: string              // 收起按钮文案（已本地化）
+  expandLabel?: (hidden: number) => string  // 展开按钮可访问名（已本地化）；默认 'Show N more steps'
+  collapseLabel?: string              // 收起按钮文案（已本地化）；默认可访问名 'Collapse'
 }
 ```
 

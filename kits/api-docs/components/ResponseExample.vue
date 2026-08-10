@@ -266,6 +266,8 @@ const selectedBody = computed<string | undefined>({
 
 // Discard an invalid body identity instead of only deriving a visual fallback;
 // otherwise removing and later re-adding the id would revive a stale selection.
+// Pre-flush keeps this downstream watcher on the same final-state boundary as
+// scenario convergence, so reverse/sort cannot leak an intermediate context.
 watch(
   () => bodies.value.map(body => body.id),
   (ids) => {
@@ -273,7 +275,7 @@ watch(
       localBodyId.value = ids[0]
     }
   },
-  { flush: 'sync', immediate: true },
+  { flush: 'pre', immediate: true },
 )
 
 // Body selection belongs to one effective scenario/status context. Data refreshes
@@ -282,10 +284,12 @@ watch(
 watch(
   [() => currentScenario.value?.id, () => currentStatus.value?.status],
   () => { localBodyId.value = bodies.value[0]?.id },
-  { flush: 'sync' },
+  { flush: 'pre' },
 )
 
 // Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
+// Pre-flush batching evaluates reverse/sort after their final array state, while
+// an id absent at the end of an update is discarded before the next render.
 if (!controlled) {
   watch(
     () => scenarios.value.map(s => s.id),
@@ -294,7 +298,7 @@ if (!controlled) {
         localScenario.value = ids[0]
       }
     },
-    { flush: 'sync' },
+    { flush: 'pre' },
   )
 }
 
@@ -313,10 +317,14 @@ const statusItems = computed(() =>
 
 // Shares `langLabel` (kit utils/lang-preset.ts) with CodeBlock's language
 // select, so the same language id renders the same label in both controls.
+// Blank labels count as absent (same rule as statusText) so every option in
+// the media select / radio group keeps a readable name.
 function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
   const variant = body.variants[0]
   if (!variant) return t.value.codeBodyTitle
-  return variant.label ?? langLabel(variant.language, props.languageLabels)
+  const label = variant.label?.trim()
+  if (label) return label
+  return langLabel(variant.language, props.languageLabels).trim() || t.value.codeBodyTitle
 }
 
 // Media select labels: mediaType when given, otherwise a kind-specific label.
@@ -325,8 +333,8 @@ function codeBodyLabel(body: Extract<ResponseBody, { kind: 'code' }>) {
 const bodyItems = computed(() =>
   bodies.value.map(b => ({
     label:
-      b.mediaType
-      ?? (b.kind === 'code'
+      b.mediaType?.trim()
+      || (b.kind === 'code'
         ? codeBodyLabel(b)
         : b.kind === 'empty'
           ? t.value.emptyBodyTitle
