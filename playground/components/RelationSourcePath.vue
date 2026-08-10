@@ -1,10 +1,65 @@
 <script setup lang="ts">
+// PLAYGROUND CANDIDATE — not promoted. See "Status" at the bottom of this note.
+//
+// Where a relation's value comes from, rendered as the FULL field hierarchy:
+//
+//   Request body › notification › callback_url
+//   Request body › recipients[0] › callback_url
+//   Response body › payment › id
+//
+// Why the full hierarchy and not a leaf name: #28's follow-up found that a leaf
+// name (or a hand-written sentence) cannot disambiguate — `notification/
+// callback_url` and `recipients/0/callback_url` share the leaf `callback_url` —
+// cannot link to the field schema, and leaves a screen reader unable to state
+// the source. The raw Runtime Expression is deliberately NOT rendered: the
+// hierarchy already carries scope, location and every segment, so printing the
+// expression again is the same fact in a notation nobody reads.
+//
+// Anatomy:  chain ── scope/location label · separator · segments…
+//           the last segment is the target field and carries the emphasis
+// States:   linked (same-page `field`, or cross-page `to`) / plain text
+//
+// Two contracts worth preserving verbatim on promotion:
+//
+// 1. ACCESSIBLE NAME IS BUILT FROM THE VISIBLE NODES. The `sr-only` prefix and
+//    connectors are interleaved BETWEEN the visible segments rather than
+//    duplicated into a separately composed sentence. A parallel spoken copy
+//    would be a second source of truth and would drift from what is on screen;
+//    interleaving makes drift structurally impossible. Chevrons stay
+//    `aria-hidden` because arrow glyphs do not announce reliably.
+//
+// 2. THREE-STATE DEGRADATION, NEVER A DEAD LINK. `to` → <ULink> (cross-page,
+//    router-aware); `field` → bare <a href="#…"> whose click is delegated to
+//    `useFieldAnchor.goTo(field, { focus: true })` so the kit's reveal + focus
+//    contract runs instead of a raw hash jump; neither → <span>, not focusable.
+//    The fragment is `encodeURIComponent`-ed to match `useFieldAnchor.urlFor`;
+//    DOM ids stay the decoded literal (see references/kits/api-docs/index.md,
+//    "FieldItem 的通用交互约束").
+//
+// Ownership: the consumer resolves Runtime Expressions and JSON Pointers,
+// validates the source field against its schema, decodes escapes (`~1` → `/`,
+// `~0` → `~`), composes array indices (`recipients[0]`) and supplies a stable
+// field id. This component only displays what it is handed — it never parses
+// OpenAPI, JSON Pointer or a consumer DSL. The scope × location label map is
+// chrome (a closed 8-entry vocabulary) so it ships a default and stays
+// overridable, mirroring the ApiTargetLabels convention.
+//
+// Status: still in `playground/` on purpose. Promotion freezes a public prop
+// contract, and the evidence is n=1 with that consumer not yet accepting the
+// presentation (Onerway is at its Stage 3 human gate). Decision, unlock
+// condition and the promotion target are tracked in issue #74; do not move this
+// file into `foundation/` or `kits/` before that issue is resolved.
+
 import { ULink } from '#components'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 
 export interface RelationSource {
   scope: 'request' | 'response'
   location: 'body' | 'path' | 'query' | 'header'
+  /**
+   * Decoded, reader-facing hierarchy. The consumer has already composed array
+   * indices and undone JSON Pointer escapes — this component does not parse.
+   */
   segments: string[]
   /** Same-page field identity. Navigation uses the kit's reveal/focus contract. */
   field?: string
