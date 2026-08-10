@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import FactList from '../../../../kits/api-docs/internal/FactList.vue'
+import FactRow from '../../../../kits/api-docs/internal/FactRow.vue'
+
 definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', order: 1 } })
 
 // API 文档场景的「整页级端点组合」demo（不是可分发切片，也不是通用组件）——
@@ -559,16 +562,13 @@ onMounted(() => anchor.initFromHash())
                  consumer 自己提供已解析、已本地化的内容。 -->
             <FieldGroup label="Requirements">
               <div class="space-y-4 pt-2">
-                <dl class="divide-y divide-default">
-                  <div
+                <FactList>
+                  <FactRow
                     v-for="item in requirements"
                     :key="item.term"
-                    class="flex flex-col gap-1 py-2.5 sm:flex-row sm:gap-4"
-                  >
-                    <dt class="shrink-0 text-sm text-muted sm:w-36">{{ item.term }}</dt>
-                    <dd class="text-sm text-highlighted">{{ item.value }}</dd>
-                  </div>
-                </dl>
+                    :fact="item"
+                  />
+                </FactList>
               </div>
             </FieldGroup>
 

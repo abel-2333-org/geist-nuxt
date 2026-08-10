@@ -394,6 +394,8 @@
       "registryDependencies": ["geist-foundation", "foundation-inline-code", "api-docs-field-group", "api-docs-code-block"],
       "files": [
         { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/WebhookProtocol.vue" },
+        { "path": "kits/api-docs/internal/FactList.vue", "target": "app/internal/FactList.vue" },
+        { "path": "kits/api-docs/internal/FactRow.vue", "target": "app/internal/FactRow.vue" },
         { "path": "kits/api-docs/utils/webhook-protocol.ts", "target": "app/utils/webhook-protocol.ts" }
       ]
     },
