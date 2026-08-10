@@ -26,7 +26,9 @@ describe('InlineMarkdown supported subset', () => {
     expect((await render('*em*')).find('em').text()).toBe('em')
     expect((await render('_em_')).find('em').text()).toBe('em')
     expect((await render('~~gone~~')).find('del').text()).toBe('gone')
-    expect((await render('`token`')).find('code').text()).toBe('token')
+    const code = (await render('`token`')).find('code')
+    expect(code.text()).toBe('token')
+    expect(code.attributes('translate')).toBe('no')
   })
 
   it('uses CommonMark delimiter semantics for nested and adjacent runs', async () => {
