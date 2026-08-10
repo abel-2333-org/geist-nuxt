@@ -876,12 +876,14 @@ export async function recordResults({
   baseLedgerRaw,
   results,
   baseSha,
+  affected = false,
   allowWontFix = false,
   now = new Date().toISOString(),
 }) {
   if (!Array.isArray(results)) {
     throw new AuditError('record 文件必须是数组:[{ item, change, status, notes?, scope?, findings? }]')
   }
+  if (typeof affected !== 'boolean') throw new AuditError('record affected 必须是 boolean')
   assertCleanWorktree(repoRoot)
   const evidenceHeadSha = headSha(repoRoot)
   const normalizedBaseSha = assertRecordBaseSha(repoRoot, baseSha)
@@ -889,28 +891,34 @@ export async function recordResults({
     throw new AuditError('当前 ledger 与 --base 上的 canonical ledger 不一致;请先 rebase,不要在旧记录上继续记账')
   }
 
-  // 计划从 --base 的 registry + ledger + Git blob LOC 重算,不受实现期间工作树变化影响。
-  const plan = planNext(planGraph, planLedger)
+  // 排程模式从 --base 的 registry + ledger + Git blob LOC 重算;
+  // affected 模式只复审功能 diff 命中的现有 evidence owner。
+  const plan = affected ? null : planNext(planGraph, planLedger)
   const resultNames = results.map(result => result?.item)
   if (new Set(resultNames).size !== resultNames.length) throw new AuditError('record 输入包含重复 item')
 
-  const planned = new Set(plan.picked)
+  const planned = new Set(plan?.picked ?? [])
   for (const result of results) {
     if (result?.coReview !== undefined && typeof result.coReview !== 'boolean') {
       throw new AuditError(`${result?.item ?? '未知 item'} 的 coReview 必须是 boolean`)
     }
+    if (affected && result?.coReview === false) {
+      throw new AuditError(`${result?.item ?? '未知 item'} 在 --affected 模式中不得标记 coReview: false`)
+    }
     if (planned.has(result?.item) && result.coReview === true) {
       throw new AuditError(`${result.item} 是当日计划组件,不得标记 coReview`)
     }
-    if (!planned.has(result?.item) && result?.coReview !== true) {
+    if (!affected && !planned.has(result?.item) && result?.coReview !== true) {
       throw new AuditError(`${result?.item ?? '未知 item'} 不在当日计划中,必须是 recorder 要求的 coReview owner`)
     }
   }
 
-  const expected = [...plan.picked].sort()
-  const received = results.filter(result => planned.has(result.item)).map(result => result.item).sort()
-  if (JSON.stringify(expected) !== JSON.stringify(received)) {
-    throw new AuditError(`record 输入必须与当日计划一致\n  计划:${expected.join('、')}\n  收到:${received.join('、')}`)
+  if (!affected) {
+    const expected = [...plan.picked].sort()
+    const received = results.filter(result => planned.has(result.item)).map(result => result.item).sort()
+    if (JSON.stringify(expected) !== JSON.stringify(received)) {
+      throw new AuditError(`record 输入必须与当日计划一致\n  计划:${expected.join('、')}\n  收到:${received.join('、')}`)
+    }
   }
 
   const impacts = impactedEvidenceOwners(
@@ -923,21 +931,28 @@ export async function recordResults({
   )
   const impacted = impacts.map(owner => owner.name)
   const impactByName = new Map(impacts.map(owner => [owner.name, owner.changed]))
-  const coReviewed = results.filter(result => result.coReview === true).map(result => result.item).sort()
+  const coReviewed = affected
+    ? [...resultNames].sort()
+    : results.filter(result => result.coReview === true).map(result => result.item).sort()
   const missingOwners = impacted.filter(name => !coReviewed.includes(name))
   if (missingOwners.length > 0) {
-    throw new AuditError(`record 输入缺少受当前功能 diff 影响的 evidence owner:${missingOwners.join('、')}`)
+    const label = affected ? '--affected 输入' : 'record 输入'
+    throw new AuditError(`${label}缺少受当前功能 diff 影响的 evidence owner:${missingOwners.join('、')}`)
   }
   const unrelatedOwners = coReviewed.filter(name => !impacted.includes(name))
   if (unrelatedOwners.length > 0) {
-    throw new AuditError(`coReview 只能包含 base evidence 被当前功能 diff 影响的 scope-v1 owner:${unrelatedOwners.join('、')}`)
+    const label = affected ? '--affected' : 'coReview'
+    throw new AuditError(`${label} 只能包含 base evidence 被当前功能 diff 影响的 scope-v1 owner:${unrelatedOwners.join('、')}`)
+  }
+  if (affected && impacted.length === 0) {
+    throw new AuditError('当前功能 diff 未影响任何 scope-v1 evidence owner,无需 --affected record')
   }
 
   const nextEntries = new Map()
   const resultByName = new Map(results.map(result => [result.item, result]))
-  for (const name of [...plan.picked, ...impacted]) {
+  for (const name of [...(plan?.picked ?? []), ...impacted]) {
     const result = resultByName.get(name)
-    const coReview = result.coReview === true
+    const coReview = affected || result.coReview === true
     if (coReview) {
       if (result.change !== 'modified') throw new AuditError(`${name} 的 coReview change 必须是 modified`)
       if (typeof result.notes !== 'string' || !result.notes.trim()) throw new AuditError(`${name} 的 coReview 必须提供非空 notes`)
@@ -969,7 +984,7 @@ export async function recordResults({
       throw new AuditError(`${name} 标记 modified,但 base 与功能提交之间的 registry/scope 没有变化`)
     }
     nextEntries.set(name, {
-      round: plan.round,
+      round: affected ? ledger.items[name].round : plan.round,
       lastAuditedAt: now,
       change: result.change,
       status: result.status,
@@ -988,18 +1003,19 @@ export async function recordResults({
 
   for (const [name, entry] of nextEntries) ledger.items[name] = entry
 
-  // 本轮全部审计完 → 进入下一轮
-  ledger.round = Math.max(ledger.round, plan.round)
-  const unaudited = graph.components.filter(name => (ledger.items[name]?.round ?? 0) < ledger.round)
-  if (unaudited.length === 0) ledger.round += 1
-
   ledger.version = LEDGER_VERSION
-  ledger.lastRunAt = now
-  ledger.lastPicked = [...nextEntries.keys()]
+  if (!affected) {
+    // 本轮全部审计完 → 进入下一轮
+    ledger.round = Math.max(ledger.round, plan.round)
+    const unaudited = graph.components.filter(name => (ledger.items[name]?.round ?? 0) < ledger.round)
+    if (unaudited.length === 0) ledger.round += 1
+    ledger.lastRunAt = now
+    ledger.lastPicked = [...nextEntries.keys()]
+  }
 
   await writeLedgerAtomic(ledgerPath, ledger, rawLedger)
   return {
-    picked: [...plan.picked],
+    picked: [...(plan?.picked ?? [])],
     coReviewed: impacted,
     recorded: [...nextEntries.keys()],
     round: ledger.round,

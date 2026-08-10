@@ -515,6 +515,79 @@ test('recordResults 要求显式完整 co-review 所有被功能 diff 命中的 
   assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
 })
 
+test('recordResults --affected 只刷新精确 owner 集合且不推进排程', async (t) => {
+  const state = await coReviewFixture(t)
+  const before = {
+    round: state.ledger.round,
+    lastRunAt: state.ledger.lastRunAt,
+    lastPicked: structuredClone(state.ledger.lastPicked),
+    ownerRound: state.ledger.items['comp-c'].round,
+    unrelated: structuredClone(state.ledger.items['comp-d']),
+  }
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+    affected: true,
+    now: '2026-07-29T00:00:00.000Z',
+  }
+  const owner = resultFor('comp-c', {
+    change: 'modified',
+    notes: '功能 PR 复审共享 A scope 后证据仍成立',
+    scope: state.ownerScope,
+    findings: [],
+  })
+
+  await assert.rejects(recordResults({ ...args, results: [] }), /--affected 输入缺少.*comp-c/)
+  await assert.rejects(recordResults({
+    ...args,
+    results: [owner, resultFor('comp-d', {
+      change: 'modified',
+      notes: '无关 owner',
+      scope: ['foundation/components/D.vue'],
+      findings: [],
+    })],
+  }), /--affected 只能包含.*comp-d/)
+  await assert.rejects(recordResults({ ...args, results: [{ ...owner, coReview: false }] }), /不得标记 coReview: false/)
+
+  const outcome = await recordResults({ ...args, results: [owner] })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+
+  assert.deepEqual(outcome.picked, [])
+  assert.deepEqual(outcome.coReviewed, ['comp-c'])
+  assert.deepEqual(outcome.recorded, ['comp-c'])
+  assert.equal(persisted.round, before.round)
+  assert.equal(persisted.lastRunAt, before.lastRunAt)
+  assert.deepEqual(persisted.lastPicked, before.lastPicked)
+  assert.equal(persisted.items['comp-c'].round, before.ownerRound)
+  assert.deepEqual(persisted.items['comp-d'], before.unrelated)
+  assert.equal(persisted.items['comp-c'].lastAuditedAt, args.now)
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
+})
+
+test('recordResults --affected 无 evidence owner 时拒绝空记账', async (t) => {
+  const state = await recordFixture(t)
+  await assert.rejects(recordResults({
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    results: [],
+    baseSha: state.baseSha,
+    affected: true,
+  }), /未影响任何 scope-v1 evidence owner/)
+})
+
 test('recordResults 允许 co-review 移除 HEAD 已删除的旧 scope 路径', async (t) => {
   const state = await coReviewFixture(t, { deleteScope: true })
   const results = [
@@ -824,4 +897,7 @@ test('CLI 对未知参数和混合模式 fail closed', () => {
   const duplicate = spawnSync(process.execPath, [cliPath, '--json', '--json'], { encoding: 'utf8' })
   assert.notEqual(duplicate.status, 0)
   assert.match(duplicate.stderr, /不可重复/)
+  const affected = spawnSync(process.execPath, [cliPath, '--affected'], { encoding: 'utf8' })
+  assert.notEqual(affected.status, 0)
+  assert.match(affected.stderr, /--affected 只适用于 --record/)
 })
