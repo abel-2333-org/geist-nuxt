@@ -1,22 +1,35 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-10T00:25:33.067Z",
+  "lastRunAt": "2026-08-10T23:49:46.480Z",
   "lastPicked": [
-    "api-docs-webhook-protocol",
-    "api-docs-response-example",
-    "api-docs-request-example",
-    "api-docs-code-block",
-    "api-docs-field-group"
+    "api-docs-operation-target",
+    "foundation-copy-button",
+    "foundation-split-pane-handle"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-10T23:49:46.480Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "720f378f06adaf1cd6275d3297af28dca37ef8f1",
+        "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
+        "scope": [
+          "app/components/gallery/Buttons.vue",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "references/architecture-decisions.md",
+          "references/components/buttons.md",
+          "references/components/index.md",
+          "tests/component/chrome-labels.spec.ts"
+        ],
+        "scopeDigest": "5a6d88e1f9bccb953f1b553975adaee7cb26a4698c5e6280396632c1e6119503"
+      },
+      "notes": "组件代码达标；补齐晋升约定欠账：references/components/buttons.md 新增 CopyButton 权威条目、index.md 动作决策表补行、gallery Buttons 组新增 GalleryEntry（含本地化示例）。多根组件 class 丢弃陷阱写入 Anatomy。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -193,12 +206,26 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-10T23:49:46.480Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "720f378f06adaf1cd6275d3297af28dca37ef8f1",
+        "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
+        "scope": [
+          "foundation/components/SplitPane.vue",
+          "foundation/components/SplitPaneHandle.vue",
+          "kits/api-docs/components/CodeRail.vue",
+          "references/components/index.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/split-pane-handle.spec.ts"
+        ],
+        "scopeDigest": "ad921f5c6757c86c436f72b1141c10100ae5904a197b83ccbe0634afe063024f"
+      },
+      "notes": "组件代码达标；新增 tests/component/split-pane-handle.spec.ts 钉住 window-splitter 键盘映射、仅吞已处理键（Tab 不被吞）、主键拖动、双击复位与 disabled 惰性化（无 role/tabindex/事件）等纯行为契约。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -496,12 +523,25 @@
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-10T23:49:46.480Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "720f378f06adaf1cd6275d3297af28dca37ef8f1",
+        "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
+        "scope": [
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "kits/api-docs/components/OperationTarget.vue",
+          "references/foundations/responsiveness.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/operation-target.spec.ts"
+        ],
+        "scopeDigest": "3ca65903a0f22dae4a84cd82c54c6a6bf28b25f3f4d8c03e55476279477b6b5b"
+      },
+      "notes": "行为、a11y、内容驱动回流与本地化契约全部达标且有测试与 references 双重锚定；分段复制的 selection 守卫、revision 竞态、单 live region 均有回归测试，无需改动。",
       "findings": []
     },
     "api-docs-operation-header": {
