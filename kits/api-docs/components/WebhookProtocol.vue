@@ -203,10 +203,12 @@ function toggleSchedule() {
                       class="size-3 shrink-0 text-dimmed"
                       aria-hidden="true"
                     />
-                    <!-- 可见文案即可访问名（Label in Name）；chevron 纯装饰 -->
+                    <!-- 可见文案即可访问名（Label in Name）；chevron 纯装饰。
+                         outline 而非 soft：与 aria-hidden 的 soft chips 在静止态就
+                         区分控件与数据，且 hover（bg-default → bg-elevated）可感知 -->
                     <UButton
                       color="neutral"
-                      variant="soft"
+                      variant="outline"
                       size="xs"
                       :trailing-icon="scheduleExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
                       :aria-expanded="scheduleExpanded"
