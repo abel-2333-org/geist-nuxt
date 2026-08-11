@@ -12,6 +12,11 @@ const webhookProtocol = {
       { term: '算法', value: 'HMAC-SHA256', code: true, note: '对原始请求体计算，编码为十六进制小写。' },
       { term: '密钥来源', value: 'Webhook 设置页生成的 signing secret。' },
       { term: '时效', value: '签名含时间戳，偏差超过 5 分钟应拒绝，防止重放。' },
+      {
+        term: '指南',
+        value: '详见 [Webhook 参考页](/kits/api-docs/webhook-reference) 中 `X-Example-Signature` 的完整校验示例。',
+        format: 'inline-markdown' as const,
+      },
     ],
   },
   acknowledgement: {
@@ -80,7 +85,36 @@ const emptyAck = {
   ],
 }
 
-// 变体 3：只有 delivery + 无 steps schedule —— 只显示总结句。
+// 变体 3：stress —— 窄容器下的长链接标签、长 path 与长本地化 toggle 文案；
+// 验证 rich fact 与按钮文案换行、不产生横向溢出。
+const stressVerification = {
+  label: 'VERIFICATION',
+  facts: [
+    {
+      term: '指南',
+      value: '完整签名校验流程与常见排错见 [Transfer result webhook delivery and signature verification guide](/kits/api-docs/webhook-reference)。',
+      format: 'inline-markdown' as const,
+    },
+    {
+      term: '长字面 path',
+      value: '`/transfer/api-reference/webhooks/transfer-result-with-a-very-long-resource-segment`',
+      format: 'inline-markdown' as const,
+      note: '同一行内 code 与链接混排时，均按 wrap-anywhere 规则在窄屏换行。',
+    },
+  ],
+}
+const stressDelivery = {
+  label: 'DELIVERY',
+  schedule: {
+    term: '重试节奏',
+    summary: '从 1 分钟起逐步退避到 12 小时，共 8 次。',
+    steps: ['1 分钟', '5 分钟', '30 分钟', '1 小时', '2 小时', '4 小时', '8 小时', '12 小时'],
+    expandLabel: (hidden: number) => `展开其余 ${hidden} 档重试间隔`,
+    collapseLabel: '收起重试间隔',
+  },
+}
+
+// 变体 4：只有 delivery + 无 steps schedule —— 只显示总结句。
 const uniformDelivery = {
   label: 'DELIVERY',
   facts: [
@@ -104,7 +138,10 @@ const uniformDelivery = {
           是 <code class="font-mono text-[0.8125rem]">OperationHeader</code>（kind="webhook"）的正文伙伴。
           三段各自独立省略——没写进契约的段<b class="font-medium text-toned">整段不出现</b>，绝不渲染空卡片；
           ACK body 语义由数据形状表达（字面值给 example、回显与刻意为空用 facts 行说明）；
-          重试节奏以<b class="font-medium text-toned">总结句为可访问真源</b>，chips 只是视觉序列，长序列折叠可展开。
+          fact value 支持 <code class="font-mono text-[0.8125rem]">format: 'inline-markdown'</code> 明确 opt-in
+          的安全富文本（链接、code 混排；默认仍纯文本，raw HTML 不渲染）；
+          重试节奏以<b class="font-medium text-toned">总结句为可访问真源</b>，chips 只是视觉序列，
+          长序列折叠为带动作文案的展开按钮。
           组件数据无关、locale-ready，所有文案由调用方注入。
         </p>
       </div>
@@ -144,6 +181,19 @@ const uniformDelivery = {
               只提供 Delivery、schedule 无 steps —— 其余两段整段省略，节奏只显示总结句
             </figcaption>
             <WebhookProtocol :delivery="uniformDelivery" :heading-level="4" />
+          </figure>
+          <figure class="space-y-3 rounded-lg border border-default p-6">
+            <figcaption class="text-sm font-medium text-toned">
+              窄屏 stress —— 长链接标签、长字面 path 与长本地化 toggle 文案在 320px 容器内换行，不横向溢出
+            </figcaption>
+            <div class="max-w-[320px] rounded-md border border-dashed border-accented p-4">
+              <WebhookProtocol
+                :verification="stressVerification"
+                :delivery="stressDelivery"
+                :heading-level="4"
+                :max-schedule-steps="4"
+              />
+            </div>
           </figure>
           <figure class="space-y-3 rounded-lg border border-default p-6">
             <figcaption class="text-sm font-medium text-toned">

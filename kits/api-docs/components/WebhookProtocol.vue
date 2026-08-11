@@ -16,16 +16,17 @@ import FactRow from '../internal/FactRow.vue'
 //   └─ section ×0..3（未提供的 section 整段省略——绝不渲染空卡片或 "none"）
 //      ├─ header       ── 复用 <FieldGroup>（mono 大写 label + headingLevel）
 //      ├─ description  ── 可选导语
-//      ├─ facts <dl>   ── term/value 行（value 可为 InlineCode token），可选 note
+//      ├─ facts <dl>   ── term/value 行（format 决定 value 呈现：text / code /
+//      │                   inline-markdown），可选 note
 //      ├─ ACK 专属     ── 可选 CodeBlock example（仅 literal 语义且确有文本 body）
 //      └─ Delivery 专属── 可选 schedule 行：调用方总结句是可访问真源，
-//                         chips 为视觉序列（长序列折叠 +N，可展开）
+//                         chips 为视觉序列（长序列折叠，按钮带动作文案可展开）
 //
 // States（纯展示件）:
 //   - section 省略：三段各自独立出现或省略；
 //   - ACK body 语义由数据形状表达：literal → example（CodeBlock）；echo /
 //     intentional empty → facts 行文字表达（value 可 code 呈现回显参数名）；
-//   - schedule：无 steps → 只有总结句；短序列全铺；长序列折叠 +N（aria-expanded）；
+//   - schedule：无 steps → 只有总结句；短序列全铺；长序列折叠（aria-expanded）；
 //   - 未知事实：不传即不渲染。
 //
 // A11y:
@@ -33,17 +34,28 @@ import FactRow from '../internal/FactRow.vue'
 //   - facts 用 <dl>/<dt>/<dd> 语义；
 //   - schedule chips / 箭头逐个 aria-hidden（视觉冗余，真源是总结句）；
 //     展开按钮可聚焦，故 aria-hidden 不落在容器上；
-//   - 展开按钮 aria-expanded + 可访问名；展开时 <dd> 内追加 sr-only 全序列
-//     文本，保证状态切换对 SR 有可感知变化；不用纯颜色传意。
+//   - 展开按钮 aria-expanded，可见文案即可访问名（WCAG 2.5.3 Label in Name），
+//     chevron 仅装饰；展开时 <dd> 内追加 sr-only 全序列文本，
+//     保证状态切换对 SR 有可感知变化；不用纯颜色传意。
+
+/** fact value 的呈现格式；渲染行为只由该字段驱动，绝不由 value 内容触发 */
+export type WebhookProtocolFactFormat = 'text' | 'code' | 'inline-markdown'
 
 export interface WebhookProtocolFact {
   /** 事实名（已本地化），如 '签名头' */
   term: string
-  /** 主值（已本地化文案或字面 token） */
+  /** 主值（已本地化文案或字面 token）；serializable string，不接受 raw HTML */
   value: string
-  /** value 以 InlineCode（mono token）呈现，用于 header 名、参数名等字面值 */
+  /**
+   * 呈现格式，默认 'text'（纯文本）。'code' 以 InlineCode（mono token）整值呈现，
+   * 用于 header 名、参数名等字面值；'inline-markdown' 为明确 opt-in，经
+   * InlineMarkdown 安全子集渲染（code / strong / em / del / internal & external
+   * link），unsafe scheme 与 raw HTML 不会被执行。
+   */
+  format?: WebhookProtocolFactFormat
+  /** @deprecated 等价于 format: 'code'；二者同给时 format 优先 */
   code?: boolean
-  /** 可选补充说明（已本地化） */
+  /** 可选补充说明（已本地化），始终纯文本 */
   note?: string
 }
 
@@ -73,9 +85,9 @@ export interface WebhookProtocolSchedule {
   summary: string
   /** 逐次间隔的已本地化短文本（如 '5 分钟'），仅作视觉序列；省略则只显示总结句 */
   steps?: string[]
-  /** 折叠态展开按钮的可访问名（已本地化）；省略时回退英文默认 'Show N more steps' */
+  /** 折叠态展开按钮可见文案兼可访问名（已本地化）；省略时回退英文默认 'Show N more' */
   expandLabel?: (hidden: number) => string
-  /** 展开态收起按钮文案（已本地化）；省略时可访问名回退英文默认 'Collapse' */
+  /** 展开态收起按钮可见文案兼可访问名（已本地化）；省略时回退英文默认 'Show less' */
   collapseLabel?: string
 }
 
@@ -103,6 +115,11 @@ const sections = computed(() => {
       hasWebhookProtocolContent(section.data),
   )
 })
+
+/** format 优先；legacy code: true 等价于 format: 'code'，默认纯文本 */
+function factFormat(fact: WebhookProtocolFact): WebhookProtocolFactFormat {
+  return fact.format ?? (fact.code ? 'code' : 'text')
+}
 
 /* schedule chips 折叠（视觉层；派生逻辑在 utils/webhook-protocol.ts，可测） */
 const scheduleExpanded = ref(false)
@@ -137,8 +154,18 @@ function toggleSchedule() {
           <FactRow
             v-for="fact in section.data.facts"
             :key="fact.term"
-            :fact="fact"
-          />
+            :fact="{ term: fact.term, value: fact.value, note: fact.note, code: factFormat(fact) === 'code' }"
+          >
+            <!-- rich fact：opt-in 时经 InlineMarkdown 安全子集渲染；note 保持纯文本 -->
+            <template v-if="factFormat(fact) === 'inline-markdown'" #value>
+              <span class="wrap-anywhere text-sm text-highlighted">
+                <InlineMarkdown :text="fact.value" />
+              </span>
+              <p v-if="fact.note" class="wrap-anywhere text-sm leading-relaxed text-muted">
+                {{ fact.note }}
+              </p>
+            </template>
+          </FactRow>
 
           <!-- Delivery 专属：schedule 行（总结句是可访问真源，chips 纯视觉） -->
           <FactRow
@@ -176,19 +203,20 @@ function toggleSchedule() {
                       class="size-3 shrink-0 text-dimmed"
                       aria-hidden="true"
                     />
+                    <!-- 可见文案即可访问名（Label in Name）；chevron 纯装饰。
+                         outline 而非 soft：与 aria-hidden 的 soft chips 在静止态就
+                         区分控件与数据，且 hover（bg-default → bg-elevated）可感知 -->
                     <UButton
                       color="neutral"
-                      variant="soft"
+                      variant="outline"
                       size="xs"
-                      class="font-mono tabular-nums"
+                      :trailing-icon="scheduleExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
                       :aria-expanded="scheduleExpanded"
-                      :aria-label="scheduleExpanded
-                        ? (schedule.collapseLabel ?? 'Collapse')
-                        : (schedule.expandLabel?.(collapsed.overflow)
-                          ?? `Show ${collapsed.overflow} more steps`)"
                       @click="toggleSchedule"
                     >
-                      {{ scheduleExpanded ? (schedule.collapseLabel ?? '−') : `+${collapsed.overflow}` }}
+                      {{ scheduleExpanded
+                        ? (schedule.collapseLabel ?? 'Show less')
+                        : (schedule.expandLabel?.(collapsed.overflow) ?? `Show ${collapsed.overflow} more`) }}
                     </UButton>
                   </template>
                 </div>

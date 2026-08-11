@@ -11,22 +11,24 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
 └─ section ×0..3（未提供的 section 整段省略——绝不渲染空卡片或 "none"）
    ├─ header       ── FieldGroup（mono 大写 label + headingLevel 接入大纲）
    ├─ description  ── 可选导语（text-muted）
-   ├─ facts <dl>   ── term/value 行；value 可为 InlineCode token；可选 note
+   ├─ facts <dl>   ── term/value 行；format 决定 value 呈现
+   │                  （text / code / inline-markdown）；可选 note（始终纯文本）
    ├─ ACK 专属     ── 可选 CodeBlock example（仅 literal 语义且确有文本 body）
    └─ Delivery 专属── 可选 schedule 行：总结句是可访问真源；
-                      chips 为视觉序列，长序列折叠 +N、可展开/收起
+                      chips 为视觉序列，长序列折叠为带动作文案的展开/收起按钮
 ```
 
 组件根不拥有边框、圆角或内边距——standalone demo / 参考页的父布局负责 chrome，嵌套时不产生双边框。
 
-## 三条核心呈现规则
+## 四条核心呈现规则
 
 1. **section 省略**：三段各自独立出现或省略。契约没写的段**整段不出现**，绝不渲染空卡片、占位符或 "none" 行——只传 `label` 或空 `facts` 也不算正文；至少要有 description、fact、ACK example 或 delivery schedule 才进入文档大纲。
 2. **ACK body 三语义**由数据形状表达，不靠额外的 mode 枚举：
    - **literal**（固定字面 body）→ 传 `example`，用 CodeBlock 展示精确文本；
    - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`code: true` 呈现被回显的参数名；
    - **intentional empty**（约定就是空）→ facts 行明说「空。返回任何内容都会被忽略。」——明说，而不是留白。
-3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + `+N` 展开按钮（`aria-expanded`，可访问名由 `expandLabel`/`collapseLabel` 注入；未注入时回退英文默认 `Show N more steps` / `Collapse`，视觉文案保持 `+N` / `−`）。不传 `steps` 就只显示总结句（适合均匀间隔）。
+3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + 展开按钮。按钮**可见文案即可访问名**（WCAG 2.5.3 Label in Name，不再有 `aria-label` 与视觉文案分裂）：由 `expandLabel`/`collapseLabel` 注入已本地化动作文案，未注入时回退英文默认 `Show N more` / `Show less`；chevron 图标纯装饰。不传 `steps` 就只显示总结句（适合均匀间隔）。
+4. **rich fact 明确 opt-in**：fact 渲染行为只由 `format` 字段驱动，**绝不由 value 内容触发**——默认 `'text'` 纯文本，任何 markdown 语法字面保留；`'code'` 整值 InlineCode；`'inline-markdown'` 经 `InlineMarkdown` 安全子集渲染（code / strong / em / del / internal & external link），internal link 走客户端路由并支持键盘 focus 与 Cmd/Ctrl-click，unsafe scheme 与 raw HTML 不会被执行。`note` 始终纯文本。legacy `code: boolean` 保留为 deprecated 别名（等价于 `format: 'code'`，二者同给时 `format` 优先），既有 `value + code` consumer 零回归。
 
 ## Props
 
@@ -41,11 +43,14 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
 ### 数据模型（内联，随切片走）
 
 ```ts
+type WebhookProtocolFactFormat = 'text' | 'code' | 'inline-markdown'
+
 interface WebhookProtocolFact {
   term: string    // 事实名（已本地化），如 '签名头'
-  value: string   // 主值（已本地化文案或字面 token）
-  code?: boolean  // value 以 InlineCode（mono token）呈现，用于 header 名、参数名等字面值
-  note?: string   // 可选补充说明
+  value: string   // 主值（已本地化文案或字面 token）；serializable string，不接受 raw HTML
+  format?: WebhookProtocolFactFormat // 默认 'text'；'inline-markdown' 为明确 opt-in 的安全富文本
+  code?: boolean  // @deprecated 等价于 format: 'code'；二者同给时 format 优先
+  note?: string   // 可选补充说明，始终纯文本
 }
 interface WebhookProtocolSectionData {
   label: string           // 段标题（已本地化），mono 大写呈现
@@ -62,8 +67,8 @@ interface WebhookProtocolSchedule {
   term: string                        // 行名（已本地化），如 '重试节奏'
   summary: string                     // 总结句——schedule 的可访问文本真源
   steps?: string[]                    // 逐次间隔短文本（如 '5 分钟'），纯视觉；省略则只显示总结句
-  expandLabel?: (hidden: number) => string  // 展开按钮可访问名（已本地化）；默认 'Show N more steps'
-  collapseLabel?: string              // 收起按钮文案（已本地化）；默认可访问名 'Collapse'
+  expandLabel?: (hidden: number) => string  // 展开按钮可见文案兼可访问名（已本地化）；默认 'Show N more'
+  collapseLabel?: string              // 收起按钮可见文案兼可访问名（已本地化）；默认 'Show less'
 }
 ```
 
@@ -72,7 +77,8 @@ interface WebhookProtocolSchedule {
 - `headingLevel` 接入文档大纲（`FieldGroup` 先例）；DOM 顺序 = 阅读顺序。
 - facts 用 `<dl>`/`<dt>`/`<dd>` 语义；schedule 行同样是一个 `<dt>`/`<dd>` 对。
 - schedule chips 与箭头**逐个** `aria-hidden`（视觉冗余，真源是总结句）；展开按钮可聚焦，故 `aria-hidden` 不落在容器上。
-- 展开按钮带 `aria-expanded` 与可访问名；**展开时 `<dd>` 内追加一段 `sr-only` 全序列文本**（以 ' → ' 连接 steps），保证 `aria-expanded` 状态切换对屏幕阅读器有可感知的内容变化——折叠态的可访问真源仍是总结句，不重复播报。不用纯颜色传意；`focus-visible` 由 UButton 提供。
+- 展开按钮带 `aria-expanded`，**可见文案即可访问名**（Label in Name，语音控制用户念出所见文字即可触发），chevron 图标纯装饰；**展开时 `<dd>` 内追加一段 `sr-only` 全序列文本**（以 ' → ' 连接 steps），保证 `aria-expanded` 状态切换对屏幕阅读器有可感知的内容变化——折叠态的可访问真源仍是总结句，不重复播报。不用纯颜色传意；`focus-visible` 由 UButton 提供。
+- rich fact（`format: 'inline-markdown'`）的链接由 `InlineMarkdown` → ProseA/ULink 提供键盘 focus、客户端路由与 Cmd/Ctrl-click；unsafe scheme 与 raw HTML 在解析层即被拒绝。
 
 ## 与相邻组件的分工
 
@@ -89,6 +95,6 @@ interface WebhookProtocolSchedule {
 pnpm geist:copy -- geist-foundation api-docs-webhook-protocol --target <consumer> --to <checkout-40-char-sha>
 ```
 
-切片含公共组件、`webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖），以及只负责 `<dl>/<dt>/<dd>` 结构和容器回流的 `FactList.vue` / `FactRow.vue` internal helper。后两者复制到 `app/internal/`，由 `WebhookProtocol.vue` 显式相对导入，不增加公共组件面。依赖闭包：`geist-foundation`、`foundation-inline-code`、`api-docs-field-group`、`api-docs-code-block`。
+切片含公共组件、`webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖），以及只负责 `<dl>/<dt>/<dd>` 结构和容器回流的 `FactList.vue` / `FactRow.vue` internal helper。后两者复制到 `app/internal/`，由 `WebhookProtocol.vue` 显式相对导入，不增加公共组件面。rich fact 的 `format` 判别刻意留在 WebhookProtocol（经 `#value` slot），不下沉 FactRow——避免所有含 FactRow 的切片连带 `foundation-inline-markdown` 依赖；待第二个已采纳组件真实需要 rich fact 时再评估下沉（见 #76）。依赖闭包：`geist-foundation`、`foundation-inline-code`、`foundation-inline-markdown`、`api-docs-field-group`、`api-docs-code-block`。
 
-Demo：`/kits/api-docs/webhook-protocol`（本页内联中性 fixture；变体演示省略规则、ACK 三语义与 schedule 边界）。
+Demo：`/kits/api-docs/webhook-protocol`（本页内联中性 fixture；变体演示省略规则、ACK 三语义、schedule 边界与窄屏长内容 stress）。

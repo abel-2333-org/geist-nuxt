@@ -391,7 +391,7 @@
       "type": "registry:component",
       "title": "WebhookProtocol",
       "description": "Webhook verification, acknowledgement, and delivery protocol facts.",
-      "registryDependencies": ["geist-foundation", "foundation-inline-code", "api-docs-field-group", "api-docs-code-block"],
+      "registryDependencies": ["geist-foundation", "foundation-inline-code", "foundation-inline-markdown", "api-docs-field-group", "api-docs-code-block"],
       "files": [
         { "path": "kits/api-docs/components/WebhookProtocol.vue", "target": "app/components/WebhookProtocol.vue" },
         { "path": "kits/api-docs/internal/FactList.vue", "target": "app/internal/FactList.vue" },
