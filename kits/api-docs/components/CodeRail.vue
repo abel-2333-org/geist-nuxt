@@ -52,7 +52,7 @@ const topId = `${id}-top`
 const storageKey = props.storageKey ?? `geist-api-rail-split-${id}`
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
-const MIN_PANE = 120 // never starve a pane below this in overflow mode
+const MIN_PANE = 120 // overflow-mode floor per pane (halves to ⌊H/2⌋ on rails shorter than 2×)
 const RATIO_MIN = 0.2 // useSplitPane clamp — also drives the aria bounds
 const RATIO_MAX = 0.8
 
@@ -61,7 +61,8 @@ const RATIO_MAX = 0.8
  * minus the handle) and both panes' natural, uncapped heights, return each
  * pane's height budget. ONLY called in the overflow branch (H < natTop +
  * natBottom); when both fit we render at natural height and never call it.
- * - Baseline splits H by ratio : 1-ratio, each pane no less than `minPane`.
+ * - Baseline splits H by ratio : 1-ratio, each pane no less than `minPane`
+ *   (capped to half of H, so a very short rail still splits instead of jamming).
  * - If a pane underuses its share → cap it to its natural height and give the
  *   slack to the overflowing pane, so a short snippet never leaves a void.
  */
@@ -152,6 +153,13 @@ function measure() {
   raf = 0
   const rail = railRef.value
   if (!rail) return
+  // A code card swapping between its empty panel and a real code surface
+  // (e.g. a 204 no-body scenario ↔ one with a body) recreates its <pre>, and
+  // the pre observed before the swap is gone from the DOM. The swap re-flows
+  // the observed pane wrapper, which lands here — re-attach observation now,
+  // or later content-only growth (wrapper pinned in overflow mode) goes unseen.
+  const pres = [topRef.value, botRef.value].map(wrap => wrap?.querySelector('pre.raw-pre') ?? null)
+  if (pres.some((pre, index) => pre !== observedPres[index])) syncTargets()
   H.value = Math.max(0, Math.round(rail.getBoundingClientRect().height) - HANDLE_PX)
   natTop.value = Math.round(paneNatural(topRef.value))
   natBottom.value = Math.round(paneNatural(botRef.value))
@@ -162,16 +170,18 @@ function measure() {
 // (Re)observe the rail, both pane wrappers, and the two <pre> nodes — the pres
 // are what grow when the user switches language/scenario (their content changes
 // while the wrapper height is pinned in overflow mode).
+const observedPres: (Element | null)[] = [null, null]
 function syncTargets() {
   if (!ro) return
   ro.disconnect()
   for (const el of [railRef.value, topRef.value, botRef.value]) {
     if (el) ro.observe(el)
   }
-  for (const wrap of [topRef.value, botRef.value]) {
-    const pre = wrap?.querySelector('pre.raw-pre')
-    if (pre) ro.observe(pre)
-  }
+  ;[topRef.value, botRef.value].forEach((wrap, index) => {
+    const pre = wrap?.querySelector('pre.raw-pre') ?? null
+    if (pre) ro?.observe(pre)
+    observedPres[index] = pre
+  })
 }
 
 onMounted(() => {

@@ -1,0 +1,232 @@
+// CodeRail structural behavior — the content-priority reallocation the kit
+// deliberately keeps OUT of the generic SplitPane. Covers the overflow budget
+// split (short pane capped to natural height, slack donated to the other),
+// the effective (post-reallocation) separator aria values, the natural-fit and
+// stacked fallbacks, and re-attaching resize observation when a code card
+// recreates its <pre> (empty panel ↔ real code surface).
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent, h, nextTick } from 'vue'
+import type { VueWrapper } from '@vue/test-utils'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
+import CodeRail from '../../kits/api-docs/components/CodeRail.vue'
+import SplitPaneHandle from '../../foundation/components/SplitPaneHandle.vue'
+
+let observers: TestResizeObserver[] = []
+let frames = new Map<number, FrameRequestCallback>()
+let nextFrame = 0
+
+class TestResizeObserver {
+  readonly targets = new Set<Element>()
+
+  constructor(private readonly callback: ResizeObserverCallback) {
+    observers.push(this)
+  }
+
+  observe(target: Element) {
+    this.targets.add(target)
+  }
+
+  unobserve(target: Element) {
+    this.targets.delete(target)
+  }
+
+  disconnect() {
+    this.targets.clear()
+  }
+
+  trigger() {
+    this.callback([], this as unknown as ResizeObserver)
+  }
+}
+
+let wrapper: VueWrapper | undefined
+
+function stubViewport(matches: boolean) {
+  vi.stubGlobal('matchMedia', vi.fn(() => ({
+    matches,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  })))
+}
+
+beforeEach(() => {
+  observers = []
+  frames = new Map()
+  nextFrame = 0
+  vi.stubGlobal('ResizeObserver', TestResizeObserver)
+  vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+    const id = ++nextFrame
+    frames.set(id, callback)
+    return id
+  }))
+  vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => {
+    frames.delete(id)
+  }))
+  stubViewport(true)
+  // The test DOM lays out nothing: every element reports the height it
+  // declares via `data-h`, so chrome/natural-height math runs on
+  // deterministic numbers.
+  vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+    return Number(this.dataset?.h ?? 0)
+  })
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    return { height: Number(this.dataset?.h ?? 0) } as DOMRect
+  })
+})
+
+afterEach(() => {
+  wrapper?.unmount()
+  wrapper = undefined
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
+
+function runFrames() {
+  const pending = [...frames.values()]
+  frames.clear()
+  for (const frame of pending) frame(0)
+}
+
+/** Mimics a kit code card: section chrome + capped scroll surface + full-height pre. */
+function card(section: number, surface: number, pre: number, label: string) {
+  return h('section', { 'data-h': String(section) }, [
+    h('div', { 'class': 'code-surface', 'data-h': String(surface) }, [
+      h('pre', { 'class': 'raw-pre', 'data-h': String(pre), 'data-pre': label }),
+    ]),
+  ])
+}
+
+/** Rail element + its ResizeObserver, resolved from the mounted wrapper.
+ * mountSuspended clones the component definition, so type-based findComponent
+ * misses direct mounts — walk up from the top card instead: pre → section →
+ * pane wrapper → rail. */
+function railParts(mounted: VueWrapper) {
+  const topSection = mounted.get('[data-pre="top"]').element.closest('section')
+  const rail = topSection?.parentElement?.parentElement as HTMLElement | null
+  if (!rail) throw new Error('CodeRail rail element not found')
+  const ro = observers.find(observer => observer.targets.has(rail))
+  if (!ro) throw new Error('CodeRail did not observe its rail element')
+  return { rail, ro }
+}
+
+async function resizeRail(mounted: VueWrapper, height: number) {
+  const { rail, ro } = railParts(mounted)
+  rail.dataset.h = String(height)
+  ro.trigger()
+  runFrames()
+  await nextTick()
+}
+
+describe('CodeRail', () => {
+  it('caps a short pane to natural height, donates slack, and reports effective aria bounds', async () => {
+    wrapper = await mountSuspended(CodeRail, {
+      props: { storageKey: 'code-rail-overflow' },
+      slots: {
+        // natTop = 320 - 300 + 480 = 500, chrome 20
+        top: ({ maxHeight }: { maxHeight: string }) => [
+          card(320, 300, 480, 'top'),
+          h('output', { 'data-budget': 'top' }, maxHeight),
+        ],
+        // natBottom = 320 - 300 + 130 = 150, chrome 20
+        bottom: ({ maxHeight }: { maxHeight: string }) => [
+          card(320, 300, 130, 'bottom'),
+          h('output', { 'data-budget': 'bottom' }, maxHeight),
+        ],
+      },
+    })
+    await nextTick()
+    // H = 412 - 12 (handle) = 400 < 500 + 150 → overflow. Ratio 0.5 asks for
+    // 200/200; the short bottom is capped to 150 and the slack goes up.
+    await resizeRail(wrapper, 412)
+
+    const { rail } = railParts(wrapper)
+    const topPane = rail.children[0] as HTMLElement
+    const bottomPane = rail.children[rail.children.length - 1] as HTMLElement
+    expect(topPane.style.height).toBe('250px')
+    expect(bottomPane.style.height).toBe('150px')
+    expect(wrapper.get('[data-budget="top"]').text()).toBe('230px')
+    expect(wrapper.get('[data-budget="bottom"]').text()).toBe('130px')
+
+    // Aria reflects the EFFECTIVE separator (250/400 = 63%), not the stored
+    // 50% ratio, and the reachable bounds account for natural-height capping
+    // (Home can't shrink the top below the capped bottom's leftovers).
+    const separator = wrapper.get('[role="separator"]')
+    expect(separator.attributes('aria-valuenow')).toBe('63')
+    expect(separator.attributes('aria-valuemin')).toBe('63')
+    expect(separator.attributes('aria-valuemax')).toBe('70')
+  })
+
+  it('renders natural heights with an inert handle when both panes fit', async () => {
+    wrapper = await mountSuspended(CodeRail, {
+      props: { storageKey: 'code-rail-fit' },
+      slots: {
+        // natTop = 200, natBottom = 150 → 350 ≤ 400 → fit.
+        top: ({ maxHeight }: { maxHeight: string }) => [
+          card(220, 200, 180, 'top'),
+          h('output', { 'data-budget': 'top' }, maxHeight),
+        ],
+        bottom: () => card(170, 150, 130, 'bottom'),
+      },
+    })
+    await nextTick()
+    await resizeRail(wrapper, 412)
+
+    const { rail } = railParts(wrapper)
+    expect((rail.children[0] as HTMLElement).style.height).toBe('')
+    expect(wrapper.get('[data-budget="top"]').text()).toBe('none')
+    // The handle stays as a disabled spacer: rendered, but no separator role.
+    expect(wrapper.findComponent(SplitPaneHandle).exists()).toBe(true)
+    expect(wrapper.find('[role="separator"]').exists()).toBe(false)
+  })
+
+  it('stacks below the breakpoint gate: no handle, self-scrolling cards', async () => {
+    stubViewport(false)
+    wrapper = await mountSuspended(CodeRail, {
+      props: { storageKey: 'code-rail-stacked' },
+      slots: {
+        top: ({ maxHeight }: { maxHeight: string }) => [
+          card(320, 300, 480, 'top'),
+          h('output', { 'data-budget': 'top' }, maxHeight),
+        ],
+        bottom: () => card(170, 150, 130, 'bottom'),
+      },
+    })
+    await nextTick()
+
+    expect(wrapper.findComponent(SplitPaneHandle).exists()).toBe(false)
+    expect(wrapper.get('[data-budget="top"]').text()).toBe('24rem')
+  })
+
+  it('re-observes a recreated pre after an empty panel swaps to a code surface', async () => {
+    const Host = defineComponent({
+      props: { bottomHasCode: { type: Boolean, default: false } },
+      setup(props) {
+        return () => h(CodeRail, { storageKey: 'code-rail-reobserve' }, {
+          top: () => card(320, 300, 480, 'top'),
+          bottom: () => props.bottomHasCode
+            ? card(170, 150, 130, 'bottom')
+            : h('section', { 'data-h': '48' }, 'No response body'),
+        })
+      },
+    })
+    wrapper = await mountSuspended(Host)
+    await nextTick()
+    await resizeRail(wrapper, 412)
+
+    const { ro } = railParts(wrapper)
+    expect(ro.targets.has(wrapper.get('[data-pre="top"]').element)).toBe(true)
+    expect(wrapper.find('[data-pre="bottom"]').exists()).toBe(false)
+
+    // The swap re-flows the pane wrapper; the resulting measure must pick up
+    // the new pre, or later content-only growth (wrapper pinned in overflow
+    // mode) would never re-trigger measurement.
+    await wrapper.setProps({ bottomHasCode: true })
+    await nextTick()
+    const { ro: after } = railParts(wrapper)
+    after.trigger()
+    runFrames()
+    await nextTick()
+
+    expect(after.targets.has(wrapper.get('[data-pre="bottom"]').element)).toBe(true)
+  })
+})
