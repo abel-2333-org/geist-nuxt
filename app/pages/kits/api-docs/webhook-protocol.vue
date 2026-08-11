@@ -186,7 +186,7 @@ const uniformDelivery = {
             <figcaption class="text-sm font-medium text-toned">
               窄屏 stress —— 长链接标签、长字面 path 与长本地化 toggle 文案在 320px 容器内换行，不横向溢出
             </figcaption>
-            <div class="max-w-[320px] overflow-hidden rounded-md border border-dashed border-accented p-4">
+            <div class="max-w-[320px] rounded-md border border-dashed border-accented p-4">
               <WebhookProtocol
                 :verification="stressVerification"
                 :delivery="stressDelivery"
