@@ -380,8 +380,10 @@ async function roundCoReviewFixture(t) {
   const fixture = await fixtureRepo(t, { git: true, ledger })
   const graph = await graphFor(fixture.repoRoot)
 
-  for (const name of ['comp-c', 'comp-d']) {
-    const scope = ['foundation/components/A.vue', `foundation/components/${name.at(-1).toUpperCase()}.vue`]
+  for (const name of ['comp-a', 'comp-c', 'comp-d']) {
+    const scope = name === 'comp-a'
+      ? ['foundation/components/A.vue']
+      : ['foundation/components/A.vue', `foundation/components/${name.at(-1).toUpperCase()}.vue`]
     ledger.items[name] = auditedEntry({
       round: 1,
       evidence: exactEvidence(
@@ -586,6 +588,66 @@ test('recordResults --affected 无 evidence owner 时拒绝空记账', async (t)
     baseSha: state.baseSha,
     affected: true,
   }), /未影响任何 scope-v1 evidence owner/)
+})
+
+test('recordResults --affected 接受 planned 与 affected 交集但拒绝未受影响计划项', async (t) => {
+  const state = await roundCoReviewFixture(t)
+  const plan = planNext(state.planGraph, state.planLedger)
+  assert.deepEqual(plan.picked, ['comp-b', 'comp-a'])
+
+  const before = {
+    round: state.ledger.round,
+    lastRunAt: state.ledger.lastRunAt,
+    lastPicked: structuredClone(state.ledger.lastPicked),
+    ownerRounds: Object.fromEntries(
+      ['comp-a', 'comp-c', 'comp-d'].map(name => [name, state.ledger.items[name].round]),
+    ),
+  }
+  const scope = name => name === 'comp-a'
+    ? ['foundation/components/A.vue']
+    : ['foundation/components/A.vue', `foundation/components/${name.at(-1).toUpperCase()}.vue`]
+  const owners = ['comp-a', 'comp-c', 'comp-d'].map(name => resultFor(name, {
+    change: 'modified',
+    notes: `${name} 受功能 diff 影响，按 affected owner 完整复审`,
+    scope: scope(name),
+    findings: [],
+  }))
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+    affected: true,
+    now: '2026-07-29T00:00:00.000Z',
+  }
+
+  await assert.rejects(recordResults({
+    ...args,
+    results: [...owners, resultFor('comp-b', {
+      change: 'modified',
+      notes: '只因当日排程加入，未受功能 diff 影响',
+      scope: ['foundation/components/B.vue'],
+      findings: [],
+    })],
+  }), /--affected 只能包含.*comp-b/)
+
+  const outcome = await recordResults({ ...args, results: owners })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+
+  assert.deepEqual(outcome.picked, [])
+  assert.deepEqual(outcome.coReviewed, ['comp-a', 'comp-c', 'comp-d'])
+  assert.equal(persisted.round, before.round)
+  assert.equal(persisted.lastRunAt, before.lastRunAt)
+  assert.deepEqual(persisted.lastPicked, before.lastPicked)
+  for (const [name, round] of Object.entries(before.ownerRounds)) {
+    assert.equal(persisted.items[name].round, round)
+  }
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
 })
 
 test('recordResults 允许 co-review 移除 HEAD 已删除的旧 scope 路径', async (t) => {

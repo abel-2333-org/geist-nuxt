@@ -65,9 +65,11 @@ evidence、当前 registry 与 `base..HEAD` 的已提交 Git diff 自动推导�
 与未审计条目没有可验证的 scope，不能借 co-review 扩入本批。
 
 普通功能 PR 不应为刷新 stale evidence 被迫执行当天的随机排程。此时使用 `--record --affected`：
-recorder 仍按同一规则自动推导 required owner，但 results 必须**恰好**等于该集合，不接收计划项、
-手工 owner 名单或额外条目。该模式只更新 owner 的审计结论、时间与 evidence；owner 原有 `round`
-和全局 `round` / `lastRunAt` / `lastPicked` 均保持不变，因此不会消费或扰动 scheduled audit 进度。
+recorder 仍按同一规则自动推导 required owner，但 results 必须**恰好**等于该集合，不接收手工 owner
+名单或额外条目。只因当日排程出现、却未受当前功能 diff 影响的 item 不属于该集合；若同一 item
+既在当日计划中、又是 required owner，则按 affected owner 复审。该模式只更新 owner 的
+审计结论、时间与 evidence；owner 原有 `round` 和全局 `round` / `lastRunAt` / `lastPicked` 均保持不变，
+因此不会消费或扰动 scheduled audit 进度。
 若 diff 没有命中任何 `scope-v1` owner，命令会拒绝空记账；新增未审计组件本身也不会凭空成为 owner。
 
 v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来源；它不会把旧分支 SHA
@@ -138,7 +140,8 @@ co-review 与普通结果使用同一状态机，但必须完整提供 `notes`�
 }
 ```
 
-planned item 不得标 `coReview`；计划外结果必须恰好等于 recorder 自动推导的 required owner 集合，
+scheduled record 中的 planned item 不得标 `coReview`；计划外结果必须恰好等于 recorder 自动推导的
+required owner 集合，
 不能漏项、夹带无关 owner，或从 result scope 删除 HEAD 中仍存在的受影响 base scope 路径（判定
 始终读取 base evidence scope）。旧路径若在 HEAD 已删除、rename 或不再是普通文件，可从新 scope
 移除，但 owner 仍必须复审。co-review 是完整复审，不是 digest refresh：recorder 不会自动生成 verdict，
@@ -147,6 +150,7 @@ planned item 不得标 `coReview`；计划外结果必须恰好等于 recorder �
 `--affected` 面向普通功能 PR，其中每个 result 都隐式是完整 co-review，可省略 `coReview: true`；
 结果仍须完整提供 `change: "modified"`、`status`、非空 `notes`、非空 `scope` 与 `findings` 数组。
 它不会降低 finding、scope 或 Git blob 证据校验，只把“复审受影响 owner”与“推进每日排程”拆开。
+item 即使同时出现在当日计划中，也只按 affected owner 更新 evidence，且不推进其审计 round。
 
 记录前必须先把组件、tests 与 references 等功能改动提交，且工作区完全干净。record 只读取
 `HEAD` Git blob 生成证据，然后修改 ledger；报告和 ledger 再作为第二个提交。这样 `headSha`
