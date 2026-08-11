@@ -144,9 +144,9 @@ export function useSplitPane(options: UseSplitPaneOptions) {
     document.body.style.cursor = ''
   }
 
-  /** Keyboard nudge by `step` value-units in `dir` (-1 | 1). */
-  function nudge(dir: number, step: number) {
-    value.value = raw.value + dir * step
+  /** Keyboard nudge by `step` value-units in `delta` (-1 | 1). */
+  function nudge(delta: -1 | 1, step: number) {
+    value.value = raw.value + delta * step
   }
 
   /** Reset to the seed value. */

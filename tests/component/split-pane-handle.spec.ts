@@ -9,24 +9,27 @@
 //     stop, no events, no grip — not merely a greyed-out control.
 import { describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import SplitPane from '../../foundation/components/SplitPane.vue'
 import SplitPaneHandle from '../../foundation/components/SplitPaneHandle.vue'
 
-const a11y = {
-  ariaLabel: 'Resize panels',
-  valueNow: 320,
-  valueMin: 240,
-  valueMax: 640,
+const handleProps = {
+  label: 'Resize panels',
+  controls: 'primary-pane',
+  value: 320,
+  min: 240,
+  max: 640,
 }
 
 describe('SplitPaneHandle separator surface', () => {
   it('exposes the window-splitter semantics for a vertical divider', async () => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+    const wrapper = await mountSuspended(SplitPaneHandle, { props: handleProps })
     const root = wrapper.get('div')
 
     expect(root.attributes('role')).toBe('separator')
     expect(root.attributes('aria-orientation')).toBe('vertical')
     expect(root.attributes('tabindex')).toBe('0')
     expect(root.attributes('aria-label')).toBe('Resize panels')
+    expect(root.attributes('aria-controls')).toBe('primary-pane')
     expect(root.attributes('aria-valuenow')).toBe('320')
     expect(root.attributes('aria-valuemin')).toBe('240')
     expect(root.attributes('aria-valuemax')).toBe('640')
@@ -35,7 +38,7 @@ describe('SplitPaneHandle separator surface', () => {
 
   it('switches orientation and resize cursor for a horizontal divider', async () => {
     const wrapper = await mountSuspended(SplitPaneHandle, {
-      props: { ...a11y, orientation: 'horizontal' as const },
+      props: { ...handleProps, orientation: 'horizontal' as const },
     })
     const root = wrapper.get('div')
 
@@ -46,17 +49,17 @@ describe('SplitPaneHandle separator surface', () => {
 
 describe('SplitPaneHandle keyboard map', () => {
   it.each([
-    { orientation: 'vertical', key: 'ArrowLeft', dir: -1 },
-    { orientation: 'vertical', key: 'ArrowRight', dir: 1 },
-    { orientation: 'horizontal', key: 'ArrowUp', dir: -1 },
-    { orientation: 'horizontal', key: 'ArrowDown', dir: 1 },
-  ] as const)('nudges $dir on $orientation $key', async ({ orientation, key, dir }) => {
+    { orientation: 'vertical', key: 'ArrowLeft', delta: -1 },
+    { orientation: 'vertical', key: 'ArrowRight', delta: 1 },
+    { orientation: 'horizontal', key: 'ArrowUp', delta: -1 },
+    { orientation: 'horizontal', key: 'ArrowDown', delta: 1 },
+  ] as const)('nudges $delta on $orientation $key', async ({ orientation, key, delta }) => {
     const wrapper = await mountSuspended(SplitPaneHandle, {
-      props: { ...a11y, orientation },
+      props: { ...handleProps, orientation },
     })
 
     await wrapper.get('div').trigger('keydown', { key })
-    expect(wrapper.emitted('step')).toEqual([[dir]])
+    expect(wrapper.emitted('step')).toEqual([[delta]])
     expect(wrapper.emitted('jump')).toBeUndefined()
   })
 
@@ -65,7 +68,7 @@ describe('SplitPaneHandle keyboard map', () => {
     { key: 'End', to: 'max' },
     { key: 'Enter', to: 'reset' },
   ])('jumps to $to on $key', async ({ key, to }) => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+    const wrapper = await mountSuspended(SplitPaneHandle, { props: handleProps })
 
     await wrapper.get('div').trigger('keydown', { key })
     expect(wrapper.emitted('jump')).toEqual([[to]])
@@ -78,7 +81,7 @@ describe('SplitPaneHandle keyboard map', () => {
     { orientation: 'vertical', key: 'Tab' },
   ] as const)('lets $key pass through a $orientation divider', async ({ orientation, key }) => {
     const wrapper = await mountSuspended(SplitPaneHandle, {
-      props: { ...a11y, orientation },
+      props: { ...handleProps, orientation },
     })
     const el = wrapper.get('div').element
 
@@ -92,25 +95,27 @@ describe('SplitPaneHandle keyboard map', () => {
 
 describe('SplitPaneHandle pointer intent', () => {
   it('starts a drag only for the primary button', async () => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+    const wrapper = await mountSuspended(SplitPaneHandle, { props: handleProps })
     const root = wrapper.get('div')
 
     await root.trigger('pointerdown', { button: 1 })
-    expect(wrapper.emitted('dragstart')).toBeUndefined()
+    expect(wrapper.emitted('dragStart')).toBeUndefined()
 
     await root.trigger('pointerdown', { button: 0 })
-    expect(wrapper.emitted('dragstart')).toHaveLength(1)
+    expect(wrapper.emitted('dragStart')).toHaveLength(1)
   })
 
   it('resets on double click', async () => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+    const wrapper = await mountSuspended(SplitPaneHandle, { props: handleProps })
 
     await wrapper.get('div').trigger('dblclick')
     expect(wrapper.emitted('jump')).toEqual([['reset']])
   })
 
-  it('keeps the grip lit while the parent reports an active drag', async () => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: { ...a11y, active: true } })
+  it('keeps the grip lit while the parent reports a drag', async () => {
+    const wrapper = await mountSuspended(SplitPaneHandle, {
+      props: { ...handleProps, dragging: true },
+    })
 
     // The grip is the SECOND aria-hidden span (track first); while dragging it
     // must stay visible even though the pointer may be outside the handle.
@@ -123,7 +128,7 @@ describe('SplitPaneHandle pointer intent', () => {
 describe('SplitPaneHandle disabled contract', () => {
   it('degrades to an inert spacer: no semantics, no focus stop, no events', async () => {
     const wrapper = await mountSuspended(SplitPaneHandle, {
-      props: { ...a11y, disabled: true },
+      props: { ...handleProps, disabled: true },
     })
     const root = wrapper.get('div')
 
@@ -132,6 +137,7 @@ describe('SplitPaneHandle disabled contract', () => {
     expect(root.attributes('role')).toBeUndefined()
     expect(root.attributes('tabindex')).toBeUndefined()
     expect(root.attributes('aria-label')).toBeUndefined()
+    expect(root.attributes('aria-controls')).toBeUndefined()
     expect(root.attributes('aria-valuenow')).toBeUndefined()
 
     // No resize affordance, no track, no grip — the box only keeps the layout.
@@ -142,7 +148,55 @@ describe('SplitPaneHandle disabled contract', () => {
     await root.trigger('pointerdown', { button: 0 })
     await root.trigger('dblclick')
     expect(wrapper.emitted('step')).toBeUndefined()
-    expect(wrapper.emitted('dragstart')).toBeUndefined()
+    expect(wrapper.emitted('dragStart')).toBeUndefined()
     expect(wrapper.emitted('jump')).toBeUndefined()
+  })
+})
+
+describe('SplitPane separator relationship', () => {
+  it.each([
+    { mode: 'fixed', fixedPane: 'start', controlledText: 'Start pane' },
+    { mode: 'fixed', fixedPane: 'end', controlledText: 'End pane' },
+    { mode: 'ratio', fixedPane: 'end', controlledText: 'Start pane' },
+  ] as const)('controls the primary pane in $mode/$fixedPane mode', async (props) => {
+    const wrapper = await mountSuspended(SplitPane, {
+      props: {
+        mode: props.mode,
+        fixedPane: props.fixedPane,
+        enabledFrom: 'always',
+        storageKey: `test-controls-${props.mode}-${props.fixedPane}`,
+      },
+      slots: {
+        start: 'Start pane',
+        end: 'End pane',
+      },
+    })
+    const separator = wrapper.get('[role="separator"]')
+    const controlled = wrapper.get(`[id="${separator.attributes('aria-controls')}"]`)
+
+    expect(controlled.text()).toBe(props.controlledText)
+  })
+
+  it('wires the drag-start event into the split state', async () => {
+    const wrapper = await mountSuspended(SplitPane, {
+      props: {
+        enabledFrom: 'always',
+        storageKey: 'test-drag-start-wiring',
+      },
+      slots: {
+        start: 'Start pane',
+        end: 'End pane',
+      },
+    })
+
+    await wrapper.get('[role="separator"]').trigger('pointerdown', {
+      button: 0,
+      pointerId: 1,
+      clientX: 320,
+    })
+    expect(document.body.style.userSelect).toBe('none')
+
+    wrapper.unmount()
+    expect(document.body.style.userSelect).toBe('')
   })
 })

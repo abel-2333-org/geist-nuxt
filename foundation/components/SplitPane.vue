@@ -82,6 +82,9 @@ const props = withDefaults(
 )
 
 const HANDLE_PX = 12 // the handle's cross size (w-3 / h-3)
+const id = useId()
+const startId = `${id}-start`
+const endId = `${id}-end`
 /* --- breakpoint gate ------------------------------------------------- *
  * Manual matchMedia (set up on mount): starts false on the server so SSR and
  * the first client render agree (stacked), then flips on the client. Mirrors
@@ -122,6 +125,9 @@ useResizeObserver(containerRef, (entries) => {
 onBeforeUnmount(() => cancelAnimationFrame(measureRaf))
 
 const isRatio = computed(() => props.mode === 'ratio')
+const controlledId = computed(() =>
+  isRatio.value || props.fixedPane === 'start' ? startId : endId,
+)
 
 // Effective bounds. Fixed mode also clamps the max against the container so the
 // flexing pane keeps `minOpposite` px; while unmeasured (size 0) fall back to
@@ -141,7 +147,7 @@ const {
   nudge,
   reset,
 } = useSplitPane({
-  key: props.storageKey || `split-${useId()}`,
+  key: props.storageKey || `split-${id}`,
   default: props.defaultSize ?? (isRatio.value ? 0.5 : 320),
   min: minClamp,
   max: maxClamp,
@@ -181,7 +187,7 @@ const handleStyle = computed<CSSProperties>(() => {
 })
 
 /* --- a11y values ----------------------------------------------------- */
-const ariaNow = computed(() => Math.round(isRatio.value ? size.value * 100 : size.value))
+const ariaValue = computed(() => Math.round(isRatio.value ? size.value * 100 : size.value))
 const ariaMin = computed(() => Math.round(isRatio.value ? toValue(minClamp) * 100 : toValue(minClamp)))
 const ariaMax = computed(() => Math.round(isRatio.value ? toValue(maxClamp) * 100 : toValue(maxClamp)))
 
@@ -198,9 +204,9 @@ function onDragStart(e: PointerEvent) {
     startDrag(e, { axis: axis.value, invert: props.fixedPane === 'end' })
   }
 }
-function onStep(dir: number) {
-  if (isRatio.value) nudge(dir, 0.04) // Down/Right grows the start pane
-  else nudge(props.fixedPane === 'end' ? -dir : dir, 24)
+function onStep(delta: -1 | 1) {
+  if (isRatio.value) nudge(delta, 0.04) // Down/Right grows the start pane
+  else nudge(props.fixedPane === 'end' ? (delta === -1 ? 1 : -1) : delta, 24)
 }
 function onJump(to: 'min' | 'max' | 'reset') {
   if (to === 'reset') reset()
@@ -213,10 +219,10 @@ function onJump(to: 'min' | 'max' | 'reset') {
        branch (enabled starts false) so hydration matches, then the client
        enhances to the flex split after mount. -->
   <div v-if="!enabled">
-    <div :class="stackedStart">
+    <div :id="startId" :class="stackedStart">
       <slot name="start" />
     </div>
-    <div>
+    <div :id="endId">
       <slot name="end" />
     </div>
   </div>
@@ -229,24 +235,25 @@ function onJump(to: 'min' | 'max' | 'reset') {
     class="flex"
     :class="direction === 'row' ? 'flex-row' : 'flex-col'"
   >
-    <div class="min-w-0 min-h-0" :style="startStyle">
+    <div :id="startId" class="min-w-0 min-h-0" :style="startStyle">
       <slot name="start" />
     </div>
 
     <SplitPaneHandle
       :orientation="direction === 'row' ? 'vertical' : 'horizontal'"
-      :active="dragging"
-      :aria-label="label"
-      :value-now="ariaNow"
-      :value-min="ariaMin"
-      :value-max="ariaMax"
+      :dragging="dragging"
+      :label="label"
+      :controls="controlledId"
+      :value="ariaValue"
+      :min="ariaMin"
+      :max="ariaMax"
       :style="handleStyle"
-      @dragstart="onDragStart"
+      @drag-start="onDragStart"
       @step="onStep"
       @jump="onJump"
     />
 
-    <div class="min-w-0 min-h-0" :style="endStyle">
+    <div :id="endId" class="min-w-0 min-h-0" :style="endStyle">
       <slot name="end" />
     </div>
   </div>
