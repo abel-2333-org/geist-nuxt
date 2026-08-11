@@ -1,22 +1,41 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-10T00:25:33.067Z",
+  "lastRunAt": "2026-08-11T02:48:02.728Z",
   "lastPicked": [
-    "api-docs-webhook-protocol",
-    "api-docs-response-example",
-    "api-docs-request-example",
-    "api-docs-code-block",
-    "api-docs-field-group"
+    "api-docs-operation-target",
+    "foundation-copy-button",
+    "foundation-split-pane-handle",
+    "api-docs-code-block"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T02:48:02.728Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "ae440ca173b29325e4377e2e285b94d7300979e0",
+        "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
+        "scope": [
+          "app/components/gallery/Buttons.vue",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/OperationTarget.vue",
+          "references/architecture-decisions.md",
+          "references/components/buttons.md",
+          "references/components/index.md",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
+          "tests/component/operation-target.spec.ts"
+        ],
+        "scopeDigest": "43a9af66422bb9b82887924cfb46bb5b746b9553e7ab8ea4d3b52e41bc039e4b"
+      },
+      "notes": "补齐 CopyButton 权威选型与 gallery；固定多根组件 attrs 路由并以测试覆盖 tooltip/非 tooltip 分支，将 CodeBlock、OperationTarget 及对应 focused specs 纳入 evidence，两个直接消费者的布局与复制契约均保持成立，无 open finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -193,12 +212,28 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T02:48:02.728Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "ae440ca173b29325e4377e2e285b94d7300979e0",
+        "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
+        "scope": [
+          "foundation/components/SplitPane.vue",
+          "foundation/components/SplitPaneHandle.vue",
+          "foundation/composables/useSplitPane.ts",
+          "kits/api-docs/components/CodeRail.vue",
+          "references/components/index.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/split-pane-handle.spec.ts",
+          "tests/component/use-split-pane.spec.ts"
+        ],
+        "scopeDigest": "766c335ce505db61b4e4a1cd15805bc5494777c2f045684d87848d40bf4b5efd"
+      },
+      "notes": "键盘只处理 orientation 主轴方向键，enabled separator 始终具备 aria-valuenow；useSplitPane 绑定发起 pointerId 并过滤异源 move/up/cancel。把手、composable、两个直接消费者与 focused specs 已作为同一行为链复审，无 open finding。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -212,13 +247,13 @@
     },
     "api-docs-code-block": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T00:25:33.067Z",
+      "lastAuditedAt": "2026-08-11T02:48:02.728Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
-        "headSha": "57b42f8ca6183196a9c253f1398d1224e7116fc6",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "ae440ca173b29325e4377e2e285b94d7300979e0",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "foundation/components/CopyButton.vue",
@@ -232,9 +267,9 @@
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts"
         ],
-        "scopeDigest": "9fb80d2bd5465268bf3ccf010208c886b9addb45ef68dcee794be19470e081ad"
+        "scopeDigest": "98e278361b43f50c56481501d75b45c836da01db7ec4d7dd92c9167491e22fbc"
       },
-      "notes": "复审共享 scope：RequestExample/ResponseExample 的改动仍在包装层（label 空白回落、三级收敛 watcher 与对应 spec/reference），CodeBlock 本体、useCodeWrap、lang-preset 与 CopyButton 未动，variants/labels 契约与语言选择器行为不变。",
+      "notes": "复审共享 CopyButton 依赖：attrs fallthrough 现已显式关闭，但 CodeBlock 本就通过外层容器持有布局，复制值、语言选择、换行与状态播报契约均未改变；focused spec 继续覆盖，无 open finding。",
       "findings": []
     },
     "api-docs-request-example": {
@@ -496,12 +531,25 @@
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T02:48:02.728Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "ae440ca173b29325e4377e2e285b94d7300979e0",
+        "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
+        "scope": [
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "kits/api-docs/components/OperationTarget.vue",
+          "references/foundations/responsiveness.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/operation-target.spec.ts"
+        ],
+        "scopeDigest": "3ca65903a0f22dae4a84cd82c54c6a6bf28b25f3f4d8c03e55476279477b6b5b"
+      },
+      "notes": "行为、a11y、内容驱动回流与本地化契约仍由源码、focused spec 与权威 references 共同锚定；本轮 CopyButton attrs 修复未改变 OperationTarget 的两原子布局、分段复制、单 live region 或降级顺序，无 open finding。",
       "findings": []
     },
     "api-docs-operation-header": {
