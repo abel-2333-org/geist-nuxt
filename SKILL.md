@@ -31,7 +31,7 @@ description: geist-nuxt 是基于 Nuxt UI v4（Vue）的 Geist 风格 Source-fir
 3. 候选源码放 `playground/`，在根 `/playground` 用真实状态数据验证 HMR。
 4. 验证明暗、390px 到宽屏、键盘、focus、loading / empty / error / disabled / 长内容等相关状态。
 5. 人工决定归属：跨场景 → `foundation/`；单领域 → `kits/<kit>/`；未采纳则留在消费项目或删除。
-6. 采纳后同步根 `registry.json` 与正式 gallery；运行 `pnpm test:agent && pnpm registry:validate && pnpm test:registry && pnpm test:component && pnpm typecheck && pnpm build && pnpm test:consumer`。
+6. 采纳后同步根 `registry.json` 与正式 gallery；运行 `pnpm test:agent && pnpm registry:validate && pnpm test:registry && pnpm test:component && pnpm audit:verify && pnpm typecheck && pnpm build && pnpm test:consumer`。
 
 完整晋升与 playground 收尾见 `references/method/component-reflow.md`。
 

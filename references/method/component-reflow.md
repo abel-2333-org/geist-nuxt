@@ -90,6 +90,7 @@ pnpm test:agent
 pnpm registry:validate
 pnpm test:registry
 pnpm test:component
+pnpm audit:verify
 pnpm typecheck
 pnpm build
 pnpm test:consumer
