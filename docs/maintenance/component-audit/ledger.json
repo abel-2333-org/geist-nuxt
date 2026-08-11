@@ -225,13 +225,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -243,9 +243,9 @@
           "tests/component/split-pane-handle.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "cc4489351376918079ade61df87d04f39934752a8db4e26bf5280cff02721cbb"
+        "scopeDigest": "3ebeca6aa15f38ade9c1183dedc36c820c3f4ada5e2c92cbe6eae1f9d1791255"
       },
-      "notes": "收敛 SplitPaneHandle public API：dragging、label、value/min/max、controls 与 dragStart、delta 事件命名统一；controls 映射 aria-controls 并指向当前值所控制的 primary pane。SplitPane、CodeRail 生成 SSR 稳定的实例内 pane ID 并完整迁移，既有键盘主轴、必填当前值、多指针生命周期与 disabled 契约继续由 focused specs 覆盖，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SplitPaneHandle 的 pointer/keyboard/ARIA 与 CodeRail consumer 契约未受影响。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -286,13 +286,13 @@
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -303,20 +303,20 @@
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts"
         ],
-        "scopeDigest": "c9fe8b2e54f1a4e54ed1664934cafb063d57c6cdc62d21122cd493c9997f2790"
+        "scopeDigest": "65101b5cdb0f76961c03bec31cdd58df98412c0f8b49488b3c4e9efcf605b390"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,RequestExample 的 scenario、CodeBlock 装配与选择契约未受影响。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -331,9 +331,9 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "ed9abcb901d8d9234dc0fd16088d21c26d796fdf0f2fdcf0d39323083f22f8ff"
+        "scopeDigest": "ff0ce7e023eb46620e80249a0cdfc0cfa03f1bb01da79f1633e857552e8f54ee"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,ResponseExample 的 scenario/status/body 选择与既有修复未受影响。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -346,13 +346,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -373,20 +373,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "12a0c35384455e4213a6c0d917418cf728307f96d1391570c9b9aed66c5bdadf"
+        "scopeDigest": "5a5d9f17785b1e484f20f3cc8875bae89a2bb7f1838557e836e08bf5d9ec3699"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,LifecycleBadge 的 preset、label 覆盖和既有 consumers 未受影响。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -405,9 +405,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "cda5288dfb1a6c545e34f47ef84a139fa6ed273fbd2c24120675e49d00c21564"
+        "scopeDigest": "8e44b61241348cc3bfa2dfc7a03628597dad31ae12d3b0c2126cfc1324b2436b"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,HttpMethodBadge 的规范化、fallback 与 consumers 未受影响。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -424,13 +424,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -439,9 +439,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "c92ffa0227a9e4c77a607a58d65c6bbdb64189f667719e6c57958cf5b0cbda51"
+        "scopeDigest": "8ea744ba54e5f78a20759f6f0f230f7bb2c36c03f15cc090feb0ce9712a55f55"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:WebhookProtocol rich fact 与窄屏 stress 仍按既有 label/heading-level 契约使用 FieldGroup,本次移除验收容器裁剪不改变 FieldGroup。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -467,13 +467,13 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -482,9 +482,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "7ce52bd15192615c533111e6f29979a157b7d0198361cb2dd9e1e6847450ac60"
+        "scopeDigest": "d6b5c7d90d221cb224449cd0667b2e388397556d650fb48f185a1a3db6ba0655"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,FieldAnnotation 的 source 解析、锚点与降级契约未受影响;既有 wont-fix finding 原样保留。",
       "findings": [
         {
           "id": "f-fd7282669072",
@@ -497,13 +497,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -513,20 +513,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "7f9d74ed50e2051a926d652cadeb6ebc30b35d62047892691e937564176ba227"
+        "scopeDigest": "27469cd0dbac165f52c596d01120ba9e724f4a1252e949cad4e5b636dbbd1226"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 references/kits/api-docs/index.md 的 WebhookProtocol 契约行,WebhookBadge 与 OperationHeader 的 EVENT identity 契约未受影响。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -537,20 +537,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "5b2bf443dd7ccb334df95c55fe7201d0c62830e184f958b83a9b41cbcb6ed938"
+        "scopeDigest": "225a77966f0170c8f0cc2e494d2a9dc3fd8ff24a887a64589b83b2b5d4da40fa"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,LifecycleNotice 的 UAlert 包装与 lifecycle preset 契约未受影响。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -559,20 +559,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "43b8e368e2866d04f22fa26a2a46ea8981aad3810a988f64763bfb5e07a510a6"
+        "scopeDigest": "c3e447f308ec6d98f1a747fe6a8eaae1b5f32d8f118d49cf5ad416768effa06a"
       },
-      "notes": "OperationTarget 的两原子布局、分段复制、单 live region、selection 守卫、revision 竞态、降级顺序与本地化契约保持成立；共享 API Docs index 仅更新 SplitPaneHandle public API 段落，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,OperationTarget 的环境、原子地址与复制契约未受影响。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -582,9 +582,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "b1193d22d17299dadcc4aadbdf41eb3ccb2e1448afc98597808300da66543732"
+        "scopeDigest": "7b9da340067b4dc00ddb01354b4484b08e93095113019326961bdb15830f16c1"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:WebhookProtocol 的 fact format 扩展不改变 OperationHeader 的 identity、heading、lifecycle、actions 与正文分工。",
       "findings": []
     },
     "api-docs-code-rail": {
@@ -598,13 +598,13 @@
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -613,9 +613,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "f216b405a95beb18cd9ab335493bb39207b2342f24dfa1f8f0185d8115ca1eaa"
+        "scopeDigest": "3e4e550f7622a86ebb8794801595fc6bbb89ddf943285ee9cef1f88fbfb90846"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；SiteSearch 的静态／异步 groups、debounce、stale cleanup、hash 焦点交接与 method badge 消费均未受影响；保留既有 SR 状态播报 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SiteSearch 搜索契约未受影响;既有 live region open finding 原样保留。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -628,14 +628,14 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
-        "itemDigest": "162c8732395d43e39c3940acbc9abbad7ba1c254377cb8b5bb2c4f5d7e315928",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
+        "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
           "kits/api-docs/components/CodeBlock.vue",
@@ -651,9 +651,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "b5583bcc16498e378cfe19ee9aecd332d57d24436cce028e0fa8edbad6288742"
+        "scopeDigest": "7280f0a0ea051e838d7e96c5efdf943e1c055ca9526d4bfd8eff3ea006be7296"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "Issue 76:fact 新增显式 format 判别并复用 InlineMarkdown 安全子集;schedule toggle 改为可见动作标签与 outline 控件;registry 闭包、focused tests、窄屏 stress 已同步;移除 stress 容器裁剪以暴露真实溢出;既有 finding 保持 resolved。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -666,13 +666,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
-        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
         "scope": [
           "AGENTS.md",
@@ -684,9 +684,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "569191155ce6eecb03df4d364d01b7ff23810db4dc11e19501f18372d35c7f50"
+        "scopeDigest": "8858972af965808a109e2b6c06276ef8f773add94251289187ac4cf5b957d0c0"
       },
-      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SidebarNav 的过滤、active、拖宽和 tags 溢出契约未受影响。",
       "findings": []
     }
   }
