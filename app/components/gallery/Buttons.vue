@@ -56,5 +56,34 @@ const DOC = 'https://github.com/abel-2333-org/geist-nuxt/blob/main/references/co
         </UButtonGroup>
       </GalleryExample>
     </GalleryEntry>
+
+    <GalleryEntry
+      name="CopyButton"
+      description="Copy-to-clipboard action (foundation): copied pulse, toast, and a polite announcement via useCopy."
+      :usage-href="`${DOC}#copybutton`"
+    >
+      <GalleryExample label="Default (ghost, icon-only)">
+        <CopyButton value="pnpm add @nuxt/ui" label="Copy install command" copied-label="Install command copied to clipboard" />
+      </GalleryExample>
+
+      <GalleryExample label="With tooltip">
+        <CopyButton
+          value="https://api.example.com/v1/deployments"
+          tooltip
+          label="Copy endpoint"
+          copied-label="Endpoint copied to clipboard"
+        />
+      </GalleryExample>
+
+      <GalleryExample label="Localized, outline">
+        <CopyButton
+          value="NUXT_PUBLIC_SITE_URL=https://example.com"
+          variant="outline"
+          size="md"
+          label="复制环境变量"
+          copied-label="环境变量已复制"
+        />
+      </GalleryExample>
+    </GalleryEntry>
   </section>
 </template>

@@ -7,9 +7,9 @@
 // component only reports intent through events.
 //
 // Anatomy:  focusable separator → centered hairline (track) + grip pill
-// State:    rest / hover / active (dragging) / focus-visible / disabled
+// State:    rest / hover / dragging / focus-visible / disabled
 // A11y:     role="separator", aria-orientation, aria-valuenow/min/max,
-//           aria-label; keyboard: Arrows nudge, Home/End jump to bounds,
+//           aria-label; keyboard: axis arrows nudge, Home/End jump to bounds,
 //           Enter resets. focus-visible ring is the primary outline (never
 //           removed). State is never color-only — grip shape + resize cursor
 //           carry it too.
@@ -24,44 +24,56 @@ const props = withDefaults(
     disabled?: boolean
     /** Reflects the parent's live drag state so the grip stays lit while the
      *  pointer is outside the element. */
-    active?: boolean
-    ariaLabel?: string
-    ariaValueNow?: number
-    ariaValueMin?: number
-    ariaValueMax?: number
+    dragging?: boolean
+    /** Accessible name for the primary pane controlled by this separator. */
+    label: string
+    /** ID of the primary pane controlled by this separator. */
+    controls: string
+    /** Current splitter position. Required whenever the handle is focusable. */
+    value: number
+    min?: number
+    max?: number
   }>(),
   {
     orientation: 'vertical',
     disabled: false,
-    active: false,
+    dragging: false,
   },
 )
 
 const emit = defineEmits<{
   /** Pointer drag begins — parent wires this into useSplitPane.startDrag. */
-  (e: 'dragstart', event: PointerEvent): void
-  /** Keyboard nudge; dir is -1 (Left/Up) or +1 (Right/Down). */
-  (e: 'step', dir: number): void
+  (e: 'dragStart', event: PointerEvent): void
+  /** Keyboard nudge; delta is -1 (Left/Up) or +1 (Right/Down). */
+  (e: 'step', delta: -1 | 1): void
   /** Jump to a bound or reset (Home / End / Enter). */
   (e: 'jump', to: 'min' | 'max' | 'reset'): void
 }>()
 
 function onPointerdown(e: PointerEvent) {
   if (props.disabled || e.button !== 0) return
-  emit('dragstart', e)
+  emit('dragStart', e)
+}
+
+function arrowStep(key: string): -1 | 1 | undefined {
+  if (props.orientation === 'vertical') {
+    if (key === 'ArrowLeft') return -1
+    if (key === 'ArrowRight') return 1
+    return
+  }
+  if (key === 'ArrowUp') return -1
+  if (key === 'ArrowDown') return 1
 }
 
 function onKeydown(e: KeyboardEvent) {
   if (props.disabled) return
+  const delta = arrowStep(e.key)
+  if (delta !== undefined) {
+    emit('step', delta)
+    e.preventDefault()
+    return
+  }
   switch (e.key) {
-    case 'ArrowLeft':
-    case 'ArrowUp':
-      emit('step', -1)
-      break
-    case 'ArrowRight':
-    case 'ArrowDown':
-      emit('step', 1)
-      break
     case 'Home':
       emit('jump', 'min')
       break
@@ -82,10 +94,11 @@ function onKeydown(e: KeyboardEvent) {
   <div
     :role="disabled ? undefined : 'separator'"
     :aria-orientation="disabled ? undefined : orientation"
-    :aria-label="disabled ? undefined : ariaLabel"
-    :aria-valuenow="disabled ? undefined : ariaValueNow"
-    :aria-valuemin="disabled ? undefined : ariaValueMin"
-    :aria-valuemax="disabled ? undefined : ariaValueMax"
+    :aria-label="disabled ? undefined : label"
+    :aria-controls="disabled ? undefined : controls"
+    :aria-valuenow="disabled ? undefined : value"
+    :aria-valuemin="disabled ? undefined : min"
+    :aria-valuemax="disabled ? undefined : max"
     :tabindex="disabled ? undefined : 0"
     class="group relative flex shrink-0 touch-none items-center justify-center rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="[
@@ -109,11 +122,11 @@ function onKeydown(e: KeyboardEvent) {
       class="absolute transition-colors duration-150 ease-out"
       :class="[
         orientation === 'vertical' ? 'h-full border-l' : 'w-full border-t',
-        active ? 'border-primary' : 'border-default',
+        dragging ? 'border-primary' : 'border-default',
       ]"
     />
     <!-- Grip pill (Tailwind 4px scale, rounded-full from --ui-radius family).
-         Hidden at rest; revealed on hover, while dragging (active), and on
+         Hidden at rest; revealed on hover, while dragging, and on
          keyboard focus (group-focus-visible) so keyboard users still see the
          affordance. -->
     <span
@@ -122,7 +135,7 @@ function onKeydown(e: KeyboardEvent) {
       class="relative rounded-full opacity-0 transition duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
       :class="[
         orientation === 'vertical' ? 'h-6 w-1' : 'h-1 w-6',
-        active ? 'bg-primary opacity-100' : 'bg-accented group-hover:bg-primary',
+        dragging ? 'bg-primary opacity-100' : 'bg-accented group-hover:bg-primary',
       ]"
     />
   </div>

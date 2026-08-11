@@ -1,22 +1,53 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-10T00:25:33.067Z",
+  "lastRunAt": "2026-08-11T06:19:50.331Z",
   "lastPicked": [
-    "api-docs-webhook-protocol",
-    "api-docs-response-example",
-    "api-docs-request-example",
+    "api-docs-operation-target",
+    "foundation-copy-button",
+    "foundation-split-pane-handle",
     "api-docs-code-block",
-    "api-docs-field-group"
+    "api-docs-event-badge",
+    "api-docs-field-annotation",
+    "api-docs-field-group",
+    "api-docs-lifecycle-badge",
+    "api-docs-lifecycle-notice",
+    "api-docs-method-badge",
+    "api-docs-operation-header",
+    "api-docs-request-example",
+    "api-docs-response-example",
+    "api-docs-sidebar-nav",
+    "api-docs-site-search",
+    "api-docs-webhook-protocol"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
+        "scope": [
+          "app/components/gallery/Buttons.vue",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "kits/api-docs/components/CodeBlock.vue",
+          "kits/api-docs/components/OperationTarget.vue",
+          "references/architecture-decisions.md",
+          "references/components/buttons.md",
+          "references/components/index.md",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
+          "tests/component/operation-target.spec.ts"
+        ],
+        "scopeDigest": "43a9af66422bb9b82887924cfb46bb5b746b9553e7ab8ea4d3b52e41bc039e4b"
+      },
+      "notes": "CopyButton 继续以 inheritAttrs: false 固定关闭 tooltip／非 tooltip 分支的 attrs fallthrough；CodeBlock、OperationTarget 两个直接消费者及 focused specs 保持成立，本轮 SplitPaneHandle public API 调整与复制契约正交，无 open finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -193,12 +224,28 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
+        "scope": [
+          "foundation/components/SplitPane.vue",
+          "foundation/components/SplitPaneHandle.vue",
+          "foundation/composables/useSplitPane.ts",
+          "kits/api-docs/components/CodeRail.vue",
+          "references/components/index.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/split-pane-handle.spec.ts",
+          "tests/component/use-split-pane.spec.ts"
+        ],
+        "scopeDigest": "cc4489351376918079ade61df87d04f39934752a8db4e26bf5280cff02721cbb"
+      },
+      "notes": "收敛 SplitPaneHandle public API：dragging、label、value/min/max、controls 与 dragStart、delta 事件命名统一；controls 映射 aria-controls 并指向当前值所控制的 primary pane。SplitPane、CodeRail 生成 SSR 稳定的实例内 pane ID 并完整迁移，既有键盘主轴、必填当前值、多指针生命周期与 disabled 契约继续由 focused specs 覆盖，无 open finding。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -212,13 +259,13 @@
     },
     "api-docs-code-block": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T00:25:33.067Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "4b0d9ea5c950f450a69021c469e88d0b749cff56",
-        "headSha": "57b42f8ca6183196a9c253f1398d1224e7116fc6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "foundation/components/CopyButton.vue",
@@ -232,20 +279,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts"
         ],
-        "scopeDigest": "9fb80d2bd5465268bf3ccf010208c886b9addb45ef68dcee794be19470e081ad"
+        "scopeDigest": "98e278361b43f50c56481501d75b45c836da01db7ec4d7dd92c9167491e22fbc"
       },
-      "notes": "复审共享 scope：RequestExample/ResponseExample 的改动仍在包装层（label 空白回落、三级收敛 watcher 与对应 spec/reference），CodeBlock 本体、useCodeWrap、lang-preset 与 CopyButton 未动，variants/labels 契约与语言选择器行为不变。",
+      "notes": "复审累计 CopyButton public contract 变化：attrs fallthrough 已显式关闭，CodeBlock 仍由自身工具栏容器持有布局，复制值、语言选择、换行与状态播报契约均保持成立，无 open finding。",
       "findings": []
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -256,20 +303,20 @@
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts"
         ],
-        "scopeDigest": "d42c3e10b7700ebc4434e5a6849335c642f7a21da70fec8b381bb04c3368955f"
+        "scopeDigest": "c9fe8b2e54f1a4e54ed1664934cafb063d57c6cdc62d21122cd493c9997f2790"
       },
-      "notes": "复审 endpoint reference 的 Requirements 事实行重构：RequestExample 本体、CodeBlock 装配、选择保持与 pre-flush watcher 契约未改变，既有组件测试继续通过，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -284,9 +331,9 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "78559302fae928ff6788f603a49644db4d4f7a545efe3e045e89f239e8eba14c"
+        "scopeDigest": "ed9abcb901d8d9234dc0fd16088d21c26d796fdf0f2fdcf0d39323083f22f8ff"
       },
-      "notes": "复审 endpoint reference 的 Requirements 事实行重构：ResponseExample 的 scenario/status/body 选择、空白 label 回退与 CodeBlock 契约未改变，既有组件及 Nuxt contract 测试继续成立，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -299,13 +346,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -326,20 +373,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "0738c3a0322f9eea5248b2165b03fdb74840a2308feea8e028ae5724c5aaa9c7"
+        "scopeDigest": "12a0c35384455e4213a6c0d917418cf728307f96d1391570c9b9aed66c5bdadf"
       },
-      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 原子单元、内容驱动回流与降级顺序发生变化，LifecycleBadge 的六态 preset、label 覆盖、FieldItem/OperationHeader 消费和类型契约均未受影响，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -358,9 +405,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "7a599305763dd195bd1d877cfecbba829a10a12cd64c4bb4ab5871db23a587c4"
+        "scopeDigest": "cda5288dfb1a6c545e34f47ef84a139fa6ed273fbd2c24120675e49d00c21564"
       },
-      "notes": "复审 endpoint reference 的 Requirements 事实行重构：HttpMethodBadge 的 trim/uppercase、UNKNOWN fallback，以及 OperationHeader、SiteSearch、SidebarNav 消费契约均未受影响，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -377,13 +424,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -392,9 +439,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "0d760c3bf0ea1a7aab92a36b31ae39dfcd5bcde16369248d498a36f3771c0bcc"
+        "scopeDigest": "c92ffa0227a9e4c77a607a58d65c6bbdb64189f667719e6c57958cf5b0cbda51"
       },
-      "notes": "复审 WebhookProtocol 的事实行重构：FactList/FactRow 仍作为 FieldGroup 正文内容，headingLevel、count、label 与嵌套语义均未改变，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -420,13 +467,13 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -435,9 +482,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "c0e96491f573b72616319be2f3d825e7d1a21b0fe2dfccdeaa74602047047a45"
+        "scopeDigest": "7ce52bd15192615c533111e6f29979a157b7d0198361cb2dd9e1e6847450ac60"
       },
-      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，FieldAnnotation 的 source 解析、同页/跨页锚点、降级告警、wrap 与 requiredness 契约均未受影响；既有 wont-fix finding 由 recorder 自动保留，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": [
         {
           "id": "f-fd7282669072",
@@ -450,13 +497,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -466,20 +513,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "0730e0cd657b9dcdc9ac8e1f5a2147c6f6e816e2b0865588df168e2ad2f175bd"
+        "scopeDigest": "7f9d74ed50e2051a926d652cadeb6ebc30b35d62047892691e937564176ba227"
       },
-      "notes": "复审 webhook reference 的事实行重构：WebhookBadge 的 EVENT neutral preset、mono 形态及其在 OperationHeader 中的 identity 契约未变，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -490,29 +537,42 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "d81c54e8be427001d767fd2b7da622cc74922179b43a8314b604da2fa0ceace4"
+        "scopeDigest": "5b2bf443dd7ccb334df95c55fe7201d0c62830e184f958b83a9b41cbcb6ed938"
       },
-      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与 main #67 更新后的当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，LifecycleNotice 的 UAlert 薄包装、共享 lifecyclePreset、blank title 回落、icon+title 语义及不可 dismiss 契约均未受影响，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
+        "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
+        "scope": [
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "kits/api-docs/components/OperationTarget.vue",
+          "references/foundations/responsiveness.md",
+          "references/kits/api-docs/index.md",
+          "tests/component/operation-target.spec.ts"
+        ],
+        "scopeDigest": "43b8e368e2866d04f22fa26a2a46ea8981aad3810a988f64763bfb5e07a510a6"
+      },
+      "notes": "OperationTarget 的两原子布局、分段复制、单 live region、selection 守卫、revision 竞态、降级顺序与本地化契约保持成立；共享 API Docs index 仅更新 SplitPaneHandle public API 段落，无 open finding。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -522,9 +582,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "31a688604ce094c5b8bdb1ea1dc48fd78c50206b72d3b212388fc1e3c508581d"
+        "scopeDigest": "b1193d22d17299dadcc4aadbdf41eb3ccb2e1448afc98597808300da66543732"
       },
-      "notes": "复审 endpoint reference 的正文事实行重构：OperationHeader 的 discriminated identity、heading、lifecycle、actions、description 与默认槽契约均未改变，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     },
     "api-docs-code-rail": {
@@ -538,13 +598,13 @@
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -553,9 +613,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "644c3e87fe3be03b76ef334ae1e02148cfc78868f9a4e4a6d3a395352d7a285c"
+        "scopeDigest": "f216b405a95beb18cd9ab335493bb39207b2342f24dfa1f8f0185d8115ca1eaa"
       },
-      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry file 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，不影响 SiteSearch 的静态/异步 groups、debounce/stale cleanup、hash 焦点交接或 method badge 消费；保留既有 SR 状态播报 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；SiteSearch 的静态／异步 groups、debounce、stale cleanup、hash 焦点交接与 method badge 消费均未受影响；保留既有 SR 状态播报 open finding。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -568,13 +628,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "162c8732395d43e39c3940acbc9abbad7ba1c254377cb8b5bb2c4f5d7e315928",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -591,9 +651,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "f1c595158f7f535c575d2dae833d2c3f9ebc5034562b7437545d77f19a60774a"
+        "scopeDigest": "b5583bcc16498e378cfe19ee9aecd332d57d24436cce028e0fa8edbad6288742"
       },
-      "notes": "完整复审 registry topology 与事实行重构：FactList/FactRow 仅承载 dl/dt/dd 和容器回流，WebhookProtocol 的三段协议、schedule 展开可访问名、ACK 示例及 locale-ready 数据契约均保持；新增 focused helper spec 与 consumer CSS marker 覆盖，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -606,13 +666,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T08:07:41.913Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b86c04e76d1f9ece3ffafb9f6ebaf35d5051a429",
-        "headSha": "82c1dd403295d728834bb3395d29dc2bb80531f6",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
         "scope": [
           "AGENTS.md",
@@ -624,9 +684,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "a23c60f70588722a2dd080ecc350f78e6436d01ad90f5f7d66917add98bb920f"
+        "scopeDigest": "569191155ce6eecb03df4d364d01b7ff23810db4dc11e19501f18372d35c7f50"
       },
-      "notes": "基于 base b86c04e 与功能 HEAD 82c1dd4 完整复审 registry files 与当前 evidence scope；scope 内仅 references/kits/api-docs/index.md 的 OperationTarget 契约变化，不影响 SidebarNav 的树内过滤、active 语义、拖宽键盘契约、HttpMethodBadge fallback 或 SidebarScenarioTags 测量式溢出，无 open finding。",
+      "notes": "复审共享 API Docs index 的 SplitPaneHandle public API 段落；本条目源码、直接消费面、focused tests 与自身公开契约均未受影响，无 open finding。",
       "findings": []
     }
   }

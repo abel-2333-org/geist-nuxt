@@ -47,7 +47,9 @@ const props = withDefaults(defineProps<{
 // Per-instance fallback: useId() is SSR-stable within a render, so hydration
 // agrees, but it is NOT stable across reloads — persistence across visits
 // requires an explicit `storageKey` from the caller.
-const storageKey = props.storageKey ?? `geist-api-rail-split-${useId()}`
+const id = useId()
+const topId = `${id}-top`
+const storageKey = props.storageKey ?? `geist-api-rail-split-${id}`
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
 const MIN_PANE = 120 // never starve a pane below this in overflow mode
@@ -262,23 +264,23 @@ function onDragStart(e: PointerEvent) {
     startDrag(e, { axis: 'y', scale: 1 / H.value })
   }
 }
-function onStep(dir: number) {
+function onStep(delta: -1 | 1) {
   alignRatio()
-  nudge(dir, 0.04)
+  nudge(delta, 0.04)
 }
 function onJump(to: 'min' | 'max' | 'reset') {
   if (to === 'reset') reset()
   else ratio.value = to === 'min' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
 }
 
-const ariaNow = computed(() => Math.round(effectiveRatio.value * 100))
+const ariaValue = computed(() => Math.round(effectiveRatio.value * 100))
 const ariaMin = computed(() => Math.round(effectiveBounds.value.min * 100))
 const ariaMax = computed(() => Math.round(effectiveBounds.value.max * 100))
 </script>
 
 <template>
   <div ref="railRef" class="flex min-h-0 flex-col">
-    <div ref="topRef" class="min-h-0" :style="topStyle">
+    <div :id="topId" ref="topRef" class="min-h-0" :style="topStyle">
       <slot name="top" :max-height="topMaxHeight" />
     </div>
 
@@ -289,13 +291,14 @@ const ariaMax = computed(() => Math.round(effectiveBounds.value.max * 100))
     <SplitPaneHandle
       v-if="enabled"
       orientation="horizontal"
-      :active="dragging"
+      :dragging="dragging"
       :disabled="handleDisabled"
-      :aria-value-now="ariaNow"
-      :aria-value-min="ariaMin"
-      :aria-value-max="ariaMax"
-      :aria-label="props.resizeLabel"
-      @dragstart="onDragStart"
+      :label="props.resizeLabel"
+      :controls="topId"
+      :value="ariaValue"
+      :min="ariaMin"
+      :max="ariaMax"
+      @drag-start="onDragStart"
       @step="onStep"
       @jump="onJump"
     />

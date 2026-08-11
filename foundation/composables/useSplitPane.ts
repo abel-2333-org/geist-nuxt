@@ -79,6 +79,7 @@ export function useSplitPane(options: UseSplitPaneOptions) {
   let scale = 1
   let sign = 1
   let axis: 'x' | 'y' = 'x'
+  let pointerId: number | undefined
   let pending: number | null = null
   let raf = 0
 
@@ -89,8 +90,13 @@ export function useSplitPane(options: UseSplitPaneOptions) {
   }
 
   function onMove(e: PointerEvent) {
+    if (e.pointerId !== pointerId) return
     pending = axis === 'x' ? e.clientX : e.clientY
     if (!raf) raf = requestAnimationFrame(apply)
+  }
+
+  function onEnd(e: PointerEvent) {
+    if (e.pointerId === pointerId) stop()
   }
 
   function onKey(e: KeyboardEvent) {
@@ -102,16 +108,18 @@ export function useSplitPane(options: UseSplitPaneOptions) {
   }
 
   function startDrag(e: PointerEvent, opts: StartDragOptions) {
+    if (dragging.value) return
     axis = opts.axis
     sign = opts.invert ? -1 : 1
     scale = opts.scale ?? 1
     startPos = axis === 'x' ? e.clientX : e.clientY
     startVal = raw.value
+    pointerId = e.pointerId
     dragging.value = true
 
     window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', stop)
-    window.addEventListener('pointercancel', stop)
+    window.addEventListener('pointerup', onEnd)
+    window.addEventListener('pointercancel', onEnd)
     window.addEventListener('keydown', onKey)
     // Lock selection + show the resize cursor globally while dragging.
     document.body.style.userSelect = 'none'
@@ -126,18 +134,19 @@ export function useSplitPane(options: UseSplitPaneOptions) {
       cancelAnimationFrame(raf)
       raf = 0
     }
+    pointerId = undefined
     pending = null
     window.removeEventListener('pointermove', onMove)
-    window.removeEventListener('pointerup', stop)
-    window.removeEventListener('pointercancel', stop)
+    window.removeEventListener('pointerup', onEnd)
+    window.removeEventListener('pointercancel', onEnd)
     window.removeEventListener('keydown', onKey)
     document.body.style.userSelect = ''
     document.body.style.cursor = ''
   }
 
-  /** Keyboard nudge by `step` value-units in `dir` (-1 | 1). */
-  function nudge(dir: number, step: number) {
-    value.value = raw.value + dir * step
+  /** Keyboard nudge by `step` value-units in `delta` (-1 | 1). */
+  function nudge(delta: -1 | 1, step: number) {
+    value.value = raw.value + delta * step
   }
 
   /** Reset to the seed value. */
