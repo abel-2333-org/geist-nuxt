@@ -13,9 +13,9 @@ import SplitPaneHandle from '../../foundation/components/SplitPaneHandle.vue'
 
 const a11y = {
   ariaLabel: 'Resize panels',
-  ariaValueNow: 320,
-  ariaValueMin: 240,
-  ariaValueMax: 640,
+  valueNow: 320,
+  valueMin: 240,
+  valueMax: 640,
 }
 
 describe('SplitPaneHandle separator surface', () => {
@@ -46,12 +46,14 @@ describe('SplitPaneHandle separator surface', () => {
 
 describe('SplitPaneHandle keyboard map', () => {
   it.each([
-    { key: 'ArrowLeft', dir: -1 },
-    { key: 'ArrowUp', dir: -1 },
-    { key: 'ArrowRight', dir: 1 },
-    { key: 'ArrowDown', dir: 1 },
-  ])('nudges $dir on $key', async ({ key, dir }) => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+    { orientation: 'vertical', key: 'ArrowLeft', dir: -1 },
+    { orientation: 'vertical', key: 'ArrowRight', dir: 1 },
+    { orientation: 'horizontal', key: 'ArrowUp', dir: -1 },
+    { orientation: 'horizontal', key: 'ArrowDown', dir: 1 },
+  ] as const)('nudges $dir on $orientation $key', async ({ orientation, key, dir }) => {
+    const wrapper = await mountSuspended(SplitPaneHandle, {
+      props: { ...a11y, orientation },
+    })
 
     await wrapper.get('div').trigger('keydown', { key })
     expect(wrapper.emitted('step')).toEqual([[dir]])
@@ -70,18 +72,20 @@ describe('SplitPaneHandle keyboard map', () => {
     expect(wrapper.emitted('step')).toBeUndefined()
   })
 
-  it('swallows only the keys it handles, so Tab keeps moving focus', async () => {
-    const wrapper = await mountSuspended(SplitPaneHandle, { props: a11y })
+  it.each([
+    { orientation: 'vertical', key: 'ArrowDown' },
+    { orientation: 'horizontal', key: 'ArrowRight' },
+    { orientation: 'vertical', key: 'Tab' },
+  ] as const)('lets $key pass through a $orientation divider', async ({ orientation, key }) => {
+    const wrapper = await mountSuspended(SplitPaneHandle, {
+      props: { ...a11y, orientation },
+    })
     const el = wrapper.get('div').element
 
-    const handled = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true, bubbles: true })
-    el.dispatchEvent(handled)
-    expect(handled.defaultPrevented).toBe(true)
-
-    const passthrough = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true, bubbles: true })
+    const passthrough = new KeyboardEvent('keydown', { key, cancelable: true, bubbles: true })
     el.dispatchEvent(passthrough)
     expect(passthrough.defaultPrevented).toBe(false)
-    expect(wrapper.emitted('step')).toEqual([[1]])
+    expect(wrapper.emitted('step')).toBeUndefined()
     expect(wrapper.emitted('jump')).toBeUndefined()
   })
 })

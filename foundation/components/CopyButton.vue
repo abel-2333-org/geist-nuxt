@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ButtonProps } from '@nuxt/ui'
 
+defineOptions({ inheritAttrs: false })
+
 // Shared copy-to-clipboard button. The single UI home for "copy this value":
 // wraps a UButton with icon + color state, an optional tooltip, and a polite
 // live-region announcement, all driven by the useCopy composable (which owns

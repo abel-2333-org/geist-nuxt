@@ -9,7 +9,7 @@
 // Anatomy:  focusable separator → centered hairline (track) + grip pill
 // State:    rest / hover / active (dragging) / focus-visible / disabled
 // A11y:     role="separator", aria-orientation, aria-valuenow/min/max,
-//           aria-label; keyboard: Arrows nudge, Home/End jump to bounds,
+//           aria-label; keyboard: axis arrows nudge, Home/End jump to bounds,
 //           Enter resets. focus-visible ring is the primary outline (never
 //           removed). State is never color-only — grip shape + resize cursor
 //           carry it too.
@@ -26,9 +26,10 @@ const props = withDefaults(
      *  pointer is outside the element. */
     active?: boolean
     ariaLabel?: string
-    ariaValueNow?: number
-    ariaValueMin?: number
-    ariaValueMax?: number
+    /** Current splitter position. Required whenever the handle is focusable. */
+    valueNow: number
+    valueMin?: number
+    valueMax?: number
   }>(),
   {
     orientation: 'vertical',
@@ -51,17 +52,25 @@ function onPointerdown(e: PointerEvent) {
   emit('dragstart', e)
 }
 
+function arrowStep(key: string): -1 | 1 | undefined {
+  if (props.orientation === 'vertical') {
+    if (key === 'ArrowLeft') return -1
+    if (key === 'ArrowRight') return 1
+    return
+  }
+  if (key === 'ArrowUp') return -1
+  if (key === 'ArrowDown') return 1
+}
+
 function onKeydown(e: KeyboardEvent) {
   if (props.disabled) return
+  const dir = arrowStep(e.key)
+  if (dir !== undefined) {
+    emit('step', dir)
+    e.preventDefault()
+    return
+  }
   switch (e.key) {
-    case 'ArrowLeft':
-    case 'ArrowUp':
-      emit('step', -1)
-      break
-    case 'ArrowRight':
-    case 'ArrowDown':
-      emit('step', 1)
-      break
     case 'Home':
       emit('jump', 'min')
       break
@@ -83,9 +92,9 @@ function onKeydown(e: KeyboardEvent) {
     :role="disabled ? undefined : 'separator'"
     :aria-orientation="disabled ? undefined : orientation"
     :aria-label="disabled ? undefined : ariaLabel"
-    :aria-valuenow="disabled ? undefined : ariaValueNow"
-    :aria-valuemin="disabled ? undefined : ariaValueMin"
-    :aria-valuemax="disabled ? undefined : ariaValueMax"
+    :aria-valuenow="disabled ? undefined : valueNow"
+    :aria-valuemin="disabled ? undefined : valueMin"
+    :aria-valuemax="disabled ? undefined : valueMax"
     :tabindex="disabled ? undefined : 0"
     class="group relative flex shrink-0 touch-none items-center justify-center rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="[

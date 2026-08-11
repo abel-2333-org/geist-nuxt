@@ -50,7 +50,7 @@
 
 **何时用**：任何「点击把一个字符串放进剪贴板」的动作。若按钮除复制外还有别的副作用（如复制深链接并滚动定位），保持调用方自建按钮 + `useCopy`，不往本组件加旁效（见 api-docs kit 的 FieldItem anchor）。
 
-**Anatomy**：`[UTooltip?] > UButton`(icon 随 idle/copied 切换) + sr-only `role="status"` live region。**多根组件**——传给它的 `class` 会被 Vue 静默丢弃，需要布局类时在外面包一层元素（`OperationTarget` 的行尾包装是参考做法）。
+**Anatomy**：`[UTooltip?] > UButton`(icon 随 idle/copied 切换) + sr-only `role="status"` live region。组件用 `inheritAttrs: false` 固定关闭 fallthrough，避免 tooltip / 非 tooltip 分支把 `class` 落到不同根上；需要布局类时一律在外面包一层元素（`OperationTarget` 的行尾包装是参考做法）。
 
 **关键 props**：
 - `value`（必填）：写入剪贴板的文本
