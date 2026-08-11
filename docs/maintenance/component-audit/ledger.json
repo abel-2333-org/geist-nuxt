@@ -70,13 +70,13 @@
     },
     "foundation-semantic-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-06T07:09:32.836Z",
+      "lastAuditedAt": "2026-08-11T02:10:58.988Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "e187e4ce65461ffe3b8e800128a108304df5b2df",
-        "headSha": "2bfcc952d9b578806bb1078fa39903aa3714e948",
+        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
+        "headSha": "e7f7b9726f0d380c1c241ff1b10297f9737f8e27",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -90,9 +90,9 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "cbe7437c22723eb8861cca8af3898a21be1cc8ce065c7906898bac1b319c90bf"
+        "scopeDigest": "cc26a4d8ccfad2c08dbcd896a483e7122d8caba1a124286ab44088157eb479c3"
       },
-      "notes": "按「收窄公开 claim」解决冲突:data-display.md、组件注释、gallery 描述统一为「非空 label 必需、icon 可选强化」;复审进一步修正组件首段残留的 icon + text 旧注释。与 WebhookBadge、HttpMethodBadge、LifecycleBadge/LifecycleNotice 的回落行为一致且均有测试。",
+      "notes": "完整复审 SemanticBadge 源码、tone 映射、preset 消费、focused tests、gallery 与权威 reference；本次 component-reflow 仅把既已执行的 audit:verify 补入晋升 gate，不改变组件契约、行为或既有 resolved findings，scope-v1 证据继续成立。",
       "findings": [
         {
           "id": "f-304490421051",
