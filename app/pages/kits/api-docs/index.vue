@@ -42,6 +42,82 @@ deployment = res.json()`,
   },
 ]
 
+// #79 双主题高亮 fixture：模拟构建期 Shiki 双主题（defaultColor:'light'）输出——
+// 无 `.shiki` / `<pre>` wrapper，每个 token span 内联浅色 `color` 并携带
+// `--shiki-dark`。palette 与 issue #79 复现一致：暗色 token 在代码背景上的
+// 对比度 ≥ 10:1（验收线 4.5:1）。raw `code` 与渲染文本一致，仍是复制真源。
+const highlightedRequestScenarios = [
+  {
+    id: 'create',
+    label: '创建部署',
+    variants: [
+      {
+        language: 'bash',
+        label: 'cURL',
+        code: `curl --request POST https://api.example.com/v1/deployments \\
+  --header "Content-Type: application/json" \\
+  --data '{ "name": "my-app" }'`,
+        highlightedHtml:
+          '<span class="line">'
+          + '<span style="color:#A0111F;--shiki-dark:#89DDFF">curl</span>'
+          + '<span style="color:#023B95;--shiki-dark:#C3E88D"> --request</span>'
+          + '<span style="color:#032563;--shiki-dark:#BABED8"> POST https://api.example.com/v1/deployments</span>'
+          + '<span style="color:#A0111F;--shiki-dark:#89DDFF"> \\</span></span>\n'
+          + '<span class="line">'
+          + '<span style="color:#023B95;--shiki-dark:#C3E88D">  --header</span>'
+          + '<span style="color:#032563;--shiki-dark:#BABED8"> "Content-Type: application/json"</span>'
+          + '<span style="color:#A0111F;--shiki-dark:#89DDFF"> \\</span></span>\n'
+          + '<span class="line">'
+          + '<span style="color:#023B95;--shiki-dark:#C3E88D">  --data</span>'
+          + '<span style="color:#032563;--shiki-dark:#BABED8"> \'{ "name": "my-app" }\'</span></span>',
+      },
+    ],
+  },
+]
+
+const highlightedResponseScenarios = [
+  {
+    id: 'create',
+    label: '创建部署',
+    statuses: [
+      {
+        status: 200,
+        statusText: 'OK',
+        bodies: [
+          {
+            id: 'json',
+            kind: 'code' as const,
+            mediaType: 'application/json',
+            variants: [
+              {
+                language: 'json',
+                code: `{
+  "id": "dpl_8Kx2fQ",
+  "state": "READY"
+}`,
+                highlightedHtml:
+                  '<span class="line">'
+                  + '<span style="color:#032563;--shiki-dark:#BABED8">{</span></span>\n'
+                  + '<span class="line">'
+                  + '<span style="color:#023B95;--shiki-dark:#89DDFF">  "id"</span>'
+                  + '<span style="color:#032563;--shiki-dark:#BABED8">: </span>'
+                  + '<span style="color:#A0111F;--shiki-dark:#C3E88D">"dpl_8Kx2fQ"</span>'
+                  + '<span style="color:#032563;--shiki-dark:#BABED8">,</span></span>\n'
+                  + '<span class="line">'
+                  + '<span style="color:#023B95;--shiki-dark:#89DDFF">  "state"</span>'
+                  + '<span style="color:#032563;--shiki-dark:#BABED8">: </span>'
+                  + '<span style="color:#A0111F;--shiki-dark:#C3E88D">"READY"</span></span>\n'
+                  + '<span class="line">'
+                  + '<span style="color:#032563;--shiki-dark:#BABED8">}</span></span>',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
+
 // 响应示例：覆盖 body 语义全形态——numeric / 'default' 状态、code（多 media
 // type：JSON + text/plain + CSV）、empty（204 有意空正文）、unavailable（有正文缺示例）、
 // file（二进制：metadata + 可选下载）。所有状态一律使用显式 `bodies`。
@@ -586,6 +662,22 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">请求示例</h3>
           <CodeBlock :variants="requestSamples" />
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">双主题高亮 fragment</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            构建期 Shiki 双主题输出（内联浅色 <code class="font-mono text-[0.8125rem]">color</code> +
+            <code class="font-mono text-[0.8125rem]">--shiki-dark</code>）经
+            <code class="font-mono text-[0.8125rem]">trust-highlighted-html</code>
+            显式信任后，由组件 CSS 在 <code class="font-mono text-[0.8125rem]">.dark</code>
+            祖先下把 token 颜色切到暗色变量——不解析重写 HTML、无运行时 watcher；
+            复制仍取 raw <code class="font-mono text-[0.8125rem]">code</code> 真源。
+          </p>
+          <div class="space-y-4">
+            <RequestExample :scenarios="highlightedRequestScenarios" trust-highlighted-html />
+            <ResponseExample :scenarios="highlightedResponseScenarios" trust-highlighted-html />
+          </div>
         </div>
 
         <div>
