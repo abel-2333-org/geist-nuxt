@@ -1,7 +1,7 @@
 // <WebhookProtocol> — rich fact contract 与 schedule 折叠按钮的呈现契约。
 // 折叠派生逻辑本身在 tests/webhook-protocol.test.mjs（纯函数）；这里验组件层：
-// 1) fact format 判别：默认纯文本、'inline-markdown' 明确 opt-in（unsafe scheme /
-//    raw HTML 不执行）、legacy code: true 兼容且 format 优先；
+// 1) fact format 判别：默认纯文本、'code' / 'inline-markdown' 明确 opt-in
+//    （unsafe scheme / raw HTML 不执行）；
 // 2) 展开按钮可见文案即可访问名（Label in Name），aria-expanded 与 sr-only
 //    全序列的状态切换。
 import { describe, it, expect } from 'vitest'
@@ -66,16 +66,15 @@ describe('WebhookProtocol fact format', () => {
     expect(wrapper.text()).toContain('[x](javascript:alert(1))')
   })
 
-  it('supports legacy code: true, and format wins when both are given', async () => {
+  it('renders code only through the explicit format contract', async () => {
     const wrapper = await mountFacts([
-      { term: 'Header', value: 'X-Example-Signature', code: true },
-      { term: 'Mixed', value: '[Guide](/g)', code: true, format: 'inline-markdown' },
+      { term: 'Header', value: 'X-Example-Signature', format: 'code' },
+      { term: 'Guide', value: '[Guide](/g)', format: 'inline-markdown' },
       { term: 'Enum code', value: 'HMAC-SHA256', format: 'code' },
     ])
     const codes = wrapper.findAll('dd code')
     expect(codes.some(c => c.text() === 'X-Example-Signature')).toBe(true)
     expect(codes.some(c => c.text() === 'HMAC-SHA256')).toBe(true)
-    // format 优先：作为链接渲染，而不是整值 InlineCode
     expect(wrapper.get('dd a').attributes('href')).toBe('/g')
   })
 })

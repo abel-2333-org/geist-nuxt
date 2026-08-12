@@ -25,10 +25,10 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
 1. **section 省略**：三段各自独立出现或省略。契约没写的段**整段不出现**，绝不渲染空卡片、占位符或 "none" 行——只传 `label` 或空 `facts` 也不算正文；至少要有 description、fact、ACK example 或 delivery schedule 才进入文档大纲。
 2. **ACK body 三语义**由数据形状表达，不靠额外的 mode 枚举：
    - **literal**（固定字面 body）→ 传 `example`，用 CodeBlock 展示精确文本；
-   - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`code: true` 呈现被回显的参数名；
+   - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`format: 'code'` 呈现被回显的参数名；
    - **intentional empty**（约定就是空）→ facts 行明说「空。返回任何内容都会被忽略。」——明说，而不是留白。
 3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + 展开按钮。按钮**可见文案即可访问名**（WCAG 2.5.3 Label in Name，不再有 `aria-label` 与视觉文案分裂）：由 `expandLabel`/`collapseLabel` 注入已本地化动作文案，未注入时回退英文默认 `Show N more` / `Show less`；chevron 图标纯装饰。不传 `steps` 就只显示总结句（适合均匀间隔）。
-4. **rich fact 明确 opt-in**：fact 渲染行为只由 `format` 字段驱动，**绝不由 value 内容触发**——默认 `'text'` 纯文本，任何 markdown 语法字面保留；`'code'` 整值 InlineCode；`'inline-markdown'` 经 `InlineMarkdown` 安全子集渲染（code / strong / em / del / internal & external link），internal link 走客户端路由并支持键盘 focus 与 Cmd/Ctrl-click，unsafe scheme 与 raw HTML 不会被执行。`note` 始终纯文本。legacy `code: boolean` 保留为 deprecated 别名（等价于 `format: 'code'`，二者同给时 `format` 优先），既有 `value + code` consumer 零回归。
+4. **rich fact 明确 opt-in**：fact 渲染行为只由 `format` 字段驱动，**绝不由 value 内容触发**——默认 `'text'` 纯文本，任何 markdown 语法字面保留；`'code'` 整值 InlineCode；`'inline-markdown'` 经 `InlineMarkdown` 安全子集渲染（code / strong / em / del / internal & external link），internal link 走客户端路由并支持键盘 focus 与 Cmd/Ctrl-click，unsafe scheme 与 raw HTML 不会被执行。`note` 始终纯文本。不提供旧字段别名，避免两套输入契约长期并存。
 
 ## Props
 
@@ -49,7 +49,6 @@ interface WebhookProtocolFact {
   term: string    // 事实名（已本地化），如 '签名头'
   value: string   // 主值（已本地化文案或字面 token）；serializable string，不接受 raw HTML
   format?: WebhookProtocolFactFormat // 默认 'text'；'inline-markdown' 为明确 opt-in 的安全富文本
-  code?: boolean  // @deprecated 等价于 format: 'code'；二者同给时 format 优先
   note?: string   // 可选补充说明，始终纯文本
 }
 interface WebhookProtocolSectionData {
