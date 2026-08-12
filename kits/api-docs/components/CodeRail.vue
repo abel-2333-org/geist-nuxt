@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// `geistMinWidthQuery` (value) and `GeistBreakpoint` (type) live in the
-// foundation breakpoints utility and are exposed through Nuxt auto-import.
-// The registry installs it in the consumer's standard app/utils root
-// (`foundation-breakpoints` slice) — same pattern as lifecycle-preset.
+// `GeistBreakpoint` (type) lives in the foundation breakpoints utility and is
+// exposed through Nuxt auto-import; the registry installs it in the consumer's
+// standard app/utils root (`foundation-breakpoints` slice) — same pattern as
+// lifecycle-preset. The gate itself is the shared `useBreakpointGate`
+// composable (`foundation-use-breakpoint-gate` slice).
 
 // Domain component (API docs): the vertical dual-example code rail — a top
 // pane and a bottom pane split by a draggable horizontal handle, with the
@@ -88,14 +89,10 @@ function computeSplitBudgets(
   return { top, bottom }
 }
 
-/* --- breakpoint gate (manual matchMedia, SSR-safe) -------------------- *
- * Starts false so SSR + first client render agree (stacked), then flips on the
- * client after mount — mirrors <SplitPane>. */
-const enabled = ref(false)
-let mql: MediaQueryList | undefined
-function onBp(e: MediaQueryListEvent | MediaQueryList) {
-  enabled.value = e.matches
-}
+/* --- breakpoint gate (shared foundation composable, SSR-safe) ---------- *
+ * Starts false so SSR + first client render agree (stacked), then flips on
+ * the client after mount — the same gate as <SplitPane>. */
+const enabled = useBreakpointGate(() => props.enabledFrom)
 
 /* --- ratio state (top pane's fraction of H) --------------------------- */
 const { value: ratio, dragging, startDrag, nudge, reset } = useSplitPane({
@@ -185,10 +182,6 @@ function syncTargets() {
 }
 
 onMounted(() => {
-  mql = window.matchMedia(geistMinWidthQuery(props.enabledFrom))
-  enabled.value = mql.matches
-  mql.addEventListener('change', onBp)
-
   ro = new ResizeObserver(scheduleMeasure)
   nextTick(() => {
     syncTargets()
@@ -196,7 +189,6 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  mql?.removeEventListener('change', onBp)
   cancelAnimationFrame(raf)
   ro?.disconnect()
 })
