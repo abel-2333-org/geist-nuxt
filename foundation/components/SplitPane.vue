@@ -2,7 +2,7 @@
 import type { CSSProperties } from 'vue'
 import { toValue } from 'vue'
 import { useResizeObserver } from '@vueuse/core'
-import { geistMinWidthQuery, type GeistBreakpoint } from '../utils/breakpoints'
+import type { GeistBreakpoint } from '../utils/breakpoints'
 
 // Self-contained, declarative two-pane split — the reusable layout primitive on
 // top of `useSplitPane` (drag state + persistence) and `<SplitPaneHandle>` (the
@@ -85,22 +85,11 @@ const HANDLE_PX = 12 // the handle's cross size (w-3 / h-3)
 const id = useId()
 const startId = `${id}-start`
 const endId = `${id}-end`
-/* --- breakpoint gate ------------------------------------------------- *
- * Manual matchMedia (set up on mount): starts false on the server so SSR and
- * the first client render agree (stacked), then flips on the client. Mirrors
- * the approach used elsewhere — VueUse useMediaQuery didn't sync reliably here. */
-const enabled = ref(props.enabledFrom === 'always')
-let mql: MediaQueryList | undefined
-function onBp(e: MediaQueryListEvent | MediaQueryList) {
-  enabled.value = e.matches
-}
-onMounted(() => {
-  if (props.enabledFrom === 'always') return
-  mql = window.matchMedia(geistMinWidthQuery(props.enabledFrom))
-  enabled.value = mql.matches
-  mql.addEventListener('change', onBp)
-})
-onBeforeUnmount(() => mql?.removeEventListener('change', onBp))
+/* --- breakpoint gate (shared foundation composable) -------------------- *
+ * SSR-safe: renders stacked until the client flips it after mount, and
+ * follows runtime `enabledFrom` changes. The manual-matchMedia rationale
+ * (VueUse useMediaQuery didn't sync reliably here) lives with the composable. */
+const enabled = useBreakpointGate(() => props.enabledFrom)
 
 /* --- container measurement (for ratio scale + fixed max clamp) -------- *
  * We only need the container's MAIN-axis size. Crucially, the reactive write

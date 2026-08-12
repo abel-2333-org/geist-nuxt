@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// `geistMinWidthQuery` (value) and `GeistBreakpoint` (type) live in the
-// foundation breakpoints utility and are exposed through Nuxt auto-import.
-// The registry installs it in the consumer's standard app/utils root
-// (`foundation-breakpoints` slice) — same pattern as lifecycle-preset.
+// `GeistBreakpoint` (type) lives in the foundation breakpoints utility and is
+// exposed through Nuxt auto-import; the registry installs it in the consumer's
+// standard app/utils root (`foundation-breakpoints` slice) — same pattern as
+// lifecycle-preset. The gate itself is the shared `useBreakpointGate`
+// composable (`foundation-use-breakpoint-gate` slice).
 
 // Domain component (API docs): the vertical dual-example code rail — a top
 // pane and a bottom pane split by a draggable horizontal handle, with the
@@ -52,7 +53,7 @@ const topId = `${id}-top`
 const storageKey = props.storageKey ?? `geist-api-rail-split-${id}`
 
 const HANDLE_PX = 12 // the handle's cross size (h-3)
-const MIN_PANE = 120 // never starve a pane below this in overflow mode
+const MIN_PANE = 120 // overflow-mode floor per pane (halves to ⌊H/2⌋ on rails shorter than 2×)
 const RATIO_MIN = 0.2 // useSplitPane clamp — also drives the aria bounds
 const RATIO_MAX = 0.8
 
@@ -61,7 +62,8 @@ const RATIO_MAX = 0.8
  * minus the handle) and both panes' natural, uncapped heights, return each
  * pane's height budget. ONLY called in the overflow branch (H < natTop +
  * natBottom); when both fit we render at natural height and never call it.
- * - Baseline splits H by ratio : 1-ratio, each pane no less than `minPane`.
+ * - Baseline splits H by ratio : 1-ratio, each pane no less than `minPane`
+ *   (capped to half of H, so a very short rail still splits instead of jamming).
  * - If a pane underuses its share → cap it to its natural height and give the
  *   slack to the overflowing pane, so a short snippet never leaves a void.
  */
@@ -87,14 +89,10 @@ function computeSplitBudgets(
   return { top, bottom }
 }
 
-/* --- breakpoint gate (manual matchMedia, SSR-safe) -------------------- *
- * Starts false so SSR + first client render agree (stacked), then flips on the
- * client after mount — mirrors <SplitPane>. */
-const enabled = ref(false)
-let mql: MediaQueryList | undefined
-function onBp(e: MediaQueryListEvent | MediaQueryList) {
-  enabled.value = e.matches
-}
+/* --- breakpoint gate (shared foundation composable, SSR-safe) ---------- *
+ * Starts false so SSR + first client render agree (stacked), then flips on
+ * the client after mount — the same gate as <SplitPane>. */
+const enabled = useBreakpointGate(() => props.enabledFrom)
 
 /* --- ratio state (top pane's fraction of H) --------------------------- */
 const { value: ratio, dragging, startDrag, nudge, reset } = useSplitPane({
@@ -119,13 +117,15 @@ const natBottom = ref(0)
 // Natural (uncapped) height of a pane: total chrome + the FULL <pre> height.
 // The scroll surface caps its own box, but the inner <pre> still lays out at
 // full content height, so (section - surface + pre) is what the pane WOULD be
-// with no cap. Falls back to the raw wrapper height (empty state / no code).
+// with no cap. Semantic body panels have no code surface, so their section is
+// already the natural card height; the wrapper may be pinned to an old budget.
 function paneNatural(wrap: HTMLElement | undefined): number {
   if (!wrap) return 0
   const section = wrap.querySelector('section') as HTMLElement | null
   const surface = wrap.querySelector('.code-surface') as HTMLElement | null
   const pre = wrap.querySelector('pre.raw-pre') as HTMLElement | null
-  if (!section || !surface || !pre) return wrap.offsetHeight
+  if (!section) return wrap.offsetHeight
+  if (!surface || !pre) return section.offsetHeight
   return section.offsetHeight - surface.offsetHeight + pre.offsetHeight
 }
 
@@ -143,6 +143,7 @@ const chromeTop = ref(0)
 const chromeBottom = ref(0)
 
 let ro: ResizeObserver | undefined
+let mo: MutationObserver | undefined
 let raf = 0
 function scheduleMeasure() {
   cancelAnimationFrame(raf)
@@ -152,6 +153,10 @@ function measure() {
   raf = 0
   const rail = railRef.value
   if (!rail) return
+  // Keep this defensive sync as the final authority for the frame. The
+  // MutationObserver normally catches identity changes first, but multiple DOM
+  // swaps may be coalesced before this scheduled measurement runs.
+  syncContentTargets()
   H.value = Math.max(0, Math.round(rail.getBoundingClientRect().height) - HANDLE_PX)
   natTop.value = Math.round(paneNatural(topRef.value))
   natBottom.value = Math.round(paneNatural(botRef.value))
@@ -159,35 +164,62 @@ function measure() {
   chromeBottom.value = Math.round(paneChrome(botRef.value))
 }
 
-// (Re)observe the rail, both pane wrappers, and the two <pre> nodes — the pres
-// are what grow when the user switches language/scenario (their content changes
-// while the wrapper height is pinned in overflow mode).
-function syncTargets() {
+// The stable rail/wrappers report allocated layout changes. Current sections
+// report semantic-panel growth; current <pre> nodes report natural code growth
+// while their wrappers/surfaces are pinned. Both pairs can be replaced by slot
+// content, so maintain them incrementally instead of reconnecting the RO.
+const observedSections: (Element | null)[] = [null, null]
+const observedPres: (Element | null)[] = [null, null]
+function observeLayoutTargets() {
   if (!ro) return
-  ro.disconnect()
   for (const el of [railRef.value, topRef.value, botRef.value]) {
     if (el) ro.observe(el)
   }
-  for (const wrap of [topRef.value, botRef.value]) {
-    const pre = wrap?.querySelector('pre.raw-pre')
-    if (pre) ro.observe(pre)
-  }
+}
+
+function syncPair(selector: string, observed: (Element | null)[]): boolean {
+  if (!ro) return false
+  let changed = false
+  ;[topRef.value, botRef.value].forEach((wrap, index) => {
+    const next = wrap?.querySelector(selector) ?? null
+    const previous = observed[index]
+    if (next === previous) return
+    if (previous) ro?.unobserve(previous)
+    if (next) ro?.observe(next)
+    observed[index] = next
+    changed = true
+  })
+  return changed
+}
+
+function syncContentTargets(): boolean {
+  const sectionsChanged = syncPair('section', observedSections)
+  const presChanged = syncPair('pre.raw-pre', observedPres)
+  return sectionsChanged || presChanged
 }
 
 onMounted(() => {
-  mql = window.matchMedia(geistMinWidthQuery(props.enabledFrom))
-  enabled.value = mql.matches
-  mql.addEventListener('change', onBp)
-
   ro = new ResizeObserver(scheduleMeasure)
+  // A body-kind switch can replace a semantic section and/or <pre> without
+  // changing any allocated box: overflow mode pins both pane wrappers. Any
+  // structural mutation may alter natural height, so coalesce one measurement;
+  // text/attributes and later geometry remain ResizeObserver responsibilities.
+  mo = new MutationObserver(() => {
+    syncContentTargets()
+    scheduleMeasure()
+  })
   nextTick(() => {
-    syncTargets()
+    observeLayoutTargets()
+    for (const wrap of [topRef.value, botRef.value]) {
+      if (wrap) mo?.observe(wrap, { childList: true, subtree: true })
+    }
+    syncContentTargets()
     measure()
   })
 })
 onBeforeUnmount(() => {
-  mql?.removeEventListener('change', onBp)
   cancelAnimationFrame(raf)
+  mo?.disconnect()
   ro?.disconnect()
 })
 
