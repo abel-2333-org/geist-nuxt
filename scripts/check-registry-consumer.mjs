@@ -922,6 +922,9 @@ try {
             if (!builtCss.includes('--breakpoint-sm:401px')) {
               throw new Error(`${scenario.label}: built output did not compile the Geist @theme tokens from main.css`)
             }
+            if (scenario.all && !builtCss.includes('var(--shiki-dark')) {
+              throw new Error(`${scenario.label}: built CSS did not contain the CodeBlock dark token switch (#79)`)
+            }
             if (scenario.cssMarker && !builtCss.includes(scenario.cssMarker)) {
               throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
             }

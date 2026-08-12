@@ -23,7 +23,7 @@
 
 ## 关键点
 
-- **无运行时语法高亮器**：默认用转义后的 `<pre><code>` 直出，不引入 Shiki runtime。消费项目可在构建期用 Shiki 等工具生成 `highlightedHtml`，但必须先消毒并显式传 `trust-highlighted-html`；用户输入、运行时 API 返回的 HTML 禁止直接传入。组件不负责解析 Markdown 或执行高亮。
+- **无运行时语法高亮器**：默认用转义后的 `<pre><code>` 直出，不引入 Shiki runtime。消费项目可在构建期用 Shiki 等工具生成 `highlightedHtml`，但必须先消毒并显式传 `trust-highlighted-html`；用户输入、运行时 API 返回的 HTML 禁止直接传入。组件不负责解析 Markdown 或执行高亮。双主题 fragment 的暗色切换见下方「双主题高亮 fragment」。
 - **raw code 永远是真源**：复制按钮始终写入 `variant.code`，`highlightedHtml` 只影响展示；未开启信任或 HTML 缺失时自动回退到转义后的 `code`。
 - **多语言用 `variants`**（不是 `samples`；每个 variant 一个 `language`+`code`，可选 `label`）。空 `variants` 渲染空态。
 - **语言切换用 `USelect`**（不是 UTabs）——单行工具栏内与其它控件对齐，窄容器下可收缩+截断触发器，下拉面板仍开满内容宽度。语言数 >1 时选择器**始终可见**（含当前语言暂无 code 的空态）——它和 `#controls` 一样是选择控件，读者永远能切回有内容的语言；只有内容相关控件（换行/复制）在无 code 时隐藏。
@@ -33,6 +33,22 @@
 - **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；语言选择器同样保持可见，只有换行/复制在无 code 时隐藏。
 - **`#notice` / `#body` 供包装组件注入语义面板**：`#notice` 在工具栏下渲染上下文条（如 status 级描述）；无 code 时 `#body` 替代通用空态，承载包装组件自有的语义面板（有意空正文 / 缺示例 / 文件 metadata，见 `ResponseExample`）。两个 slot 缺省不渲染任何东西，均非破坏性。CodeBlock 只提供框架 chrome，不理解这些语义。
 - **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报；`useCopy` 内部把写入交给 VueUse `useClipboard({ legacy: true })`，天然覆盖 iframe/insecure-context 的 execCommand 兜底 + toast。成功/失败 toast 均可通过完整消息注入，本地化不拼半句。
+
+## 双主题高亮 fragment（dark token 切换，#79）
+
+`CodeBlock` 对**一种**受信 fragment 约定负责明暗 token 切换——Shiki 双主题 `defaultColor: 'light'` 的缺省输出：
+
+- fragment 不含 `.shiki` / `<pre>` wrapper，只包含 `<span class="line">…</span>` 行；
+- 每个 token span 内联浅色 `color`，并同时携带 `--shiki-dark` 暗色变量，如 `<span style="color:#023B95;--shiki-dark:#C3E88D">`。
+
+选该约定为契约，因为它是双主题生成器的默认格式，且 light 模式下 fragment 依赖内联 `color` 零 CSS 自足。light 下直接用内联色；`.dark` ancestor（Nuxt UI color-mode class）下由组件 scoped CSS 把 token 颜色切到 `var(--shiki-dark)`——`!important` 是不重写 HTML 前提下压过内联样式的唯一手段。规则随 registry copy-in 分发，消费项目**不需要**补 global selector，也不得手改 managed target。
+
+边界与已知后果：
+
+- 切换由 CSS 属性选择器对 token 做能力检测：仅携带 `--shiki-dark` 的 span 在 dark 下切换；不带该变量的其他可信高亮 HTML 保留自身 inline / class 样式，继续遵循通用 `highlightedHtml` 契约。
+- 只切 `color`：代码背景由组件的 `bg-default` 拥有；`--shiki-dark-font-style` 等主题化排版变量不消费，dark 下保持浅色主题的 font style（未来契约扩展，非缺陷）。
+- 组件**不校正 palette**：暗色 token 与代码背景的对比度（验收线 `4.5:1`）由生成管线 / consumer adapter 负责。
+- `--shiki-light` / `--shiki-dim` / `light-dark()` 等其他输出模式不在本契约内，支持时单独扩展。
 
 ## 用法
 
