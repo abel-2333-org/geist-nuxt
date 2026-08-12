@@ -1,24 +1,35 @@
 {
   "version": 2,
   "round": 1,
-  "lastRunAt": "2026-08-12T02:02:09.533Z",
+  "lastRunAt": "2026-08-11T06:19:50.331Z",
   "lastPicked": [
-    "api-docs-site-search",
-    "api-docs-schema-composition",
-    "api-docs-code-rail",
+    "api-docs-operation-target",
     "foundation-copy-button",
-    "foundation-split-pane-handle"
+    "foundation-split-pane-handle",
+    "api-docs-code-block",
+    "api-docs-event-badge",
+    "api-docs-field-annotation",
+    "api-docs-field-group",
+    "api-docs-lifecycle-badge",
+    "api-docs-lifecycle-notice",
+    "api-docs-method-badge",
+    "api-docs-operation-header",
+    "api-docs-request-example",
+    "api-docs-response-example",
+    "api-docs-sidebar-nav",
+    "api-docs-site-search",
+    "api-docs-webhook-protocol"
   ],
   "items": {
     "foundation-copy-button": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T02:02:09.533Z",
+      "lastAuditedAt": "2026-08-11T06:19:50.331Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "70a3cd0efd555f47cbefd1d01558a12cdbec5df1",
+        "baseSha": "6fb4651ff662ac5a3f8c100611d864153313fe5a",
+        "headSha": "a99c7a378cc72bbce566aa99b0a248ee9111f7e6",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
@@ -34,9 +45,9 @@
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "b6cda36909700e9c64d9e8d7c46cc34244f2e58a2d9b834a35ae549747167060"
+        "scopeDigest": "43a9af66422bb9b82887924cfb46bb5b746b9553e7ab8ea4d3b52e41bc039e4b"
       },
-      "notes": "复审受影响 scope:本次仅在 references/components/index.md 的可拖动分栏段补 useBreakpointGate 家族成员描述,CopyButton/useCopy 契约段未触碰;复核 useCopy 成功结果权威、完整句反馈、CopyButton 动态 aria-label+polite live region、OperationTarget 双 useCopy 单 live region 装配均与契约一致,focused specs 全绿。",
+      "notes": "CopyButton 继续以 inheritAttrs: false 固定关闭 tooltip／非 tooltip 分支的 attrs fallthrough；CodeBlock、OperationTarget 两个直接消费者及 focused specs 保持成立，本轮 SplitPaneHandle public API 调整与复制契约正交，无 open finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -214,30 +225,27 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T02:02:09.533Z",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "70a3cd0efd555f47cbefd1d01558a12cdbec5df1",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
           "foundation/components/SplitPaneHandle.vue",
-          "foundation/composables/useBreakpointGate.ts",
           "foundation/composables/useSplitPane.ts",
           "kits/api-docs/components/CodeRail.vue",
           "references/components/index.md",
           "references/kits/api-docs/index.md",
-          "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts",
-          "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "62550aee784935db9db4301d911a7d65d53c2b70fd0a88fdaf0659a839bda087"
+        "scopeDigest": "3ebeca6aa15f38ade9c1183dedc36c820c3f4ada5e2c92cbe6eae1f9d1791255"
       },
-      "notes": "完整复审受影响 scope:共享 useBreakpointGate 抽取及 CodeRail 的 DOM 身份观察/自然高度修复均不改变 SplitPaneHandle 的 pointer、keyboard、ARIA、disabled spacer 或 ratio contract;新增 CodeRail 测试继续从消费侧覆盖 active 与 inert 两态,既有 focused tests 全绿。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SplitPaneHandle 的 pointer/keyboard/ARIA 与 CodeRail consumer 契约未受影响。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -449,25 +457,12 @@
       "findings": []
     },
     "api-docs-schema-composition": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-12T02:02:09.533Z",
-      "change": "none",
-      "status": "verified",
-      "evidence": {
-        "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "70a3cd0efd555f47cbefd1d01558a12cdbec5df1",
-        "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
-        "scope": [
-          "app/pages/kits/api-docs/schema-composition.vue",
-          "kits/api-docs/components/SchemaComposition.vue",
-          "kits/api-docs/utils/field.ts",
-          "references/kits/api-docs/schema-composition.md",
-          "tests/component/schema-composition.spec.ts"
-        ],
-        "scopeDigest": "ee38233da6f830516ee08cc3114d30fcc4a4e9a4518243aa463b41a9745f7a0e"
-      },
-      "notes": "首次审计判 clean:三种 kind 形态、discriminator 合成/合并、opaque anchor 精确匹配与 revision 重放均与 schema-composition.md 契约一致且被 focused tests 覆盖;a11y(anyOf 真按钮 aria-expanded/controls、heading outline 封顶 h6、focus-visible)与语义 token 无违规,未发现值得改动的点。",
+      "round": 0,
+      "lastAuditedAt": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
+      "notes": null,
       "findings": []
     },
     "api-docs-field-annotation": {
@@ -593,43 +588,23 @@
       "findings": []
     },
     "api-docs-code-rail": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-12T02:02:09.533Z",
-      "change": "modified",
-      "status": "verified",
-      "evidence": {
-        "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "70a3cd0efd555f47cbefd1d01558a12cdbec5df1",
-        "itemDigest": "8f04fc495c02a83a336bf41f7b161337042b40bb901e52e9865ee1f1eb73cc18",
-        "scope": [
-          "app/components/demo/api-docs/DocsShellReference.vue",
-          "app/pages/kits/api-docs/endpoint-reference.vue",
-          "app/pages/kits/api-docs/webhook-reference.vue",
-          "foundation/components/SplitPane.vue",
-          "foundation/composables/useBreakpointGate.ts",
-          "kits/api-docs/components/CodeBlock.vue",
-          "kits/api-docs/components/CodeRail.vue",
-          "kits/api-docs/components/RequestExample.vue",
-          "kits/api-docs/components/ResponseExample.vue",
-          "references/kits/api-docs/index.md",
-          "tests/component/code-rail.spec.ts",
-          "tests/component/use-breakpoint-gate.spec.ts"
-        ],
-        "scopeDigest": "afcd0f81370f0b02e162b627acd93efcd0c8f5f51488e93b454378ebc3fd1f08"
-      },
-      "notes": "修复并完整复审 CodeRail:(1)empty/code 双向切换改由局部 MutationObserver 捕获 DOM 身份变化,ResizeObserver 增量重绑 pre,测量继续合并到单个 rAF;(2)语义 body panel 的自然高度改取 section,不再误用固定预算 wrapper;(3)断点门控抽为 useBreakpointGate 并支持 enabledFrom 运行时变化;(4)收窄 MIN_PANE 的 universal claim。组件测试覆盖无 resize 通知的双向切换;真实浏览器 1280x500 下 200→204→200 的 aria bounds 由 32/68→38/68→32/68 即时收敛。",
+      "round": 0,
+      "lastAuditedAt": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
+      "notes": null,
       "findings": []
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T02:02:09.533Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
+      "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "70a3cd0efd555f47cbefd1d01558a12cdbec5df1",
+        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
+        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
         "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -640,7 +615,7 @@
         ],
         "scopeDigest": "3e4e550f7622a86ebb8794801595fc6bbb89ddf943285ee9cef1f88fbfb90846"
       },
-      "notes": "复核 open finding 前提仍成立:@nuxt/ui 仍为 4.9.0,UCommandPalette #empty 槽仍是普通 div、无持久 live region,三态文案对 SR 不可达的反例未消除,原样保留交人工决策;组件本体、DocsShell/gallery 装配与 hash 焦点交接测试复审无新 finding。",
+      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SiteSearch 搜索契约未受影响;既有 live region open finding 原样保留。",
       "findings": [
         {
           "id": "f-dd631c5b3977",

@@ -156,7 +156,7 @@ function measure() {
   // Keep this defensive sync as the final authority for the frame. The
   // MutationObserver normally catches identity changes first, but multiple DOM
   // swaps may be coalesced before this scheduled measurement runs.
-  syncPres()
+  syncContentTargets()
   H.value = Math.max(0, Math.round(rail.getBoundingClientRect().height) - HANDLE_PX)
   natTop.value = Math.round(paneNatural(topRef.value))
   natBottom.value = Math.round(paneNatural(botRef.value))
@@ -164,9 +164,11 @@ function measure() {
   chromeBottom.value = Math.round(paneChrome(botRef.value))
 }
 
-// The stable rail/wrappers report layout changes. The <pre> nodes report natural
-// code growth while their wrappers are pinned in overflow mode, so update only
-// that dynamic pair when a body-kind switch replaces the rendered surface.
+// The stable rail/wrappers report allocated layout changes. Current sections
+// report semantic-panel growth; current <pre> nodes report natural code growth
+// while their wrappers/surfaces are pinned. Both pairs can be replaced by slot
+// content, so maintain them incrementally instead of reconnecting the RO.
+const observedSections: (Element | null)[] = [null, null]
 const observedPres: (Element | null)[] = [null, null]
 function observeLayoutTargets() {
   if (!ro) return
@@ -175,35 +177,43 @@ function observeLayoutTargets() {
   }
 }
 
-function syncPres(): boolean {
+function syncPair(selector: string, observed: (Element | null)[]): boolean {
   if (!ro) return false
   let changed = false
   ;[topRef.value, botRef.value].forEach((wrap, index) => {
-    const pre = wrap?.querySelector('pre.raw-pre') ?? null
-    const previous = observedPres[index]
-    if (pre === previous) return
+    const next = wrap?.querySelector(selector) ?? null
+    const previous = observed[index]
+    if (next === previous) return
     if (previous) ro?.unobserve(previous)
-    if (pre) ro?.observe(pre)
-    observedPres[index] = pre
+    if (next) ro?.observe(next)
+    observed[index] = next
     changed = true
   })
   return changed
 }
 
+function syncContentTargets(): boolean {
+  const sectionsChanged = syncPair('section', observedSections)
+  const presChanged = syncPair('pre.raw-pre', observedPres)
+  return sectionsChanged || presChanged
+}
+
 onMounted(() => {
   ro = new ResizeObserver(scheduleMeasure)
-  // A body-kind switch can replace <pre> without changing any observed box:
-  // overflow mode pins both pane wrappers. Observe child identity only; text,
-  // attributes, and geometry remain ResizeObserver/Vue responsibilities.
+  // A body-kind switch can replace a semantic section and/or <pre> without
+  // changing any allocated box: overflow mode pins both pane wrappers. Any
+  // structural mutation may alter natural height, so coalesce one measurement;
+  // text/attributes and later geometry remain ResizeObserver responsibilities.
   mo = new MutationObserver(() => {
-    if (syncPres()) scheduleMeasure()
+    syncContentTargets()
+    scheduleMeasure()
   })
   nextTick(() => {
     observeLayoutTargets()
     for (const wrap of [topRef.value, botRef.value]) {
       if (wrap) mo?.observe(wrap, { childList: true, subtree: true })
     }
-    syncPres()
+    syncContentTargets()
     measure()
   })
 })

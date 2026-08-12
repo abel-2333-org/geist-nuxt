@@ -269,4 +269,35 @@ describe('CodeRail', () => {
     expect(bottomPane.style.height).toBe('120px')
     expect(wrapper.find('[role="separator"]').exists()).toBe(false)
   })
+
+  it('remeasures when one semantic body panel replaces another without creating a pre', async () => {
+    const Host = defineComponent({
+      props: { detailed: { type: Boolean, default: false } },
+      setup(props) {
+        return () => h(CodeRail, { storageKey: 'code-rail-semantic-swap' }, {
+          top: () => card(320, 300, 480, 'top'),
+          bottom: () => h('section', { 'data-h': props.detailed ? '150' : '48' }, [
+            props.detailed
+              ? h('article', { key: 'file' }, 'File response metadata')
+              : h('p', { key: 'empty' }, 'No response body'),
+          ]),
+        })
+      },
+    })
+    wrapper = await mountSuspended(Host)
+    await nextTick()
+    await resizeRail(wrapper, 412)
+
+    const { rail, ro } = railParts(wrapper)
+    const bottomPane = rail.children[rail.children.length - 1] as HTMLElement
+    expect(bottomPane.style.height).toBe('120px')
+    expect(wrapper.find('[data-pre="bottom"]').exists()).toBe(false)
+
+    await wrapper.setProps({ detailed: true })
+    await runMutationFrames()
+
+    expect(bottomPane.style.height).toBe('150px')
+    expect(wrapper.find('[data-pre="bottom"]').exists()).toBe(false)
+    expect(ro.targets.has(bottomPane.querySelector('section')!)).toBe(true)
+  })
 })
