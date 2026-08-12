@@ -117,13 +117,15 @@ const natBottom = ref(0)
 // Natural (uncapped) height of a pane: total chrome + the FULL <pre> height.
 // The scroll surface caps its own box, but the inner <pre> still lays out at
 // full content height, so (section - surface + pre) is what the pane WOULD be
-// with no cap. Falls back to the raw wrapper height (empty state / no code).
+// with no cap. Semantic body panels have no code surface, so their section is
+// already the natural card height; the wrapper may be pinned to an old budget.
 function paneNatural(wrap: HTMLElement | undefined): number {
   if (!wrap) return 0
   const section = wrap.querySelector('section') as HTMLElement | null
   const surface = wrap.querySelector('.code-surface') as HTMLElement | null
   const pre = wrap.querySelector('pre.raw-pre') as HTMLElement | null
-  if (!section || !surface || !pre) return wrap.offsetHeight
+  if (!section) return wrap.offsetHeight
+  if (!surface || !pre) return section.offsetHeight
   return section.offsetHeight - surface.offsetHeight + pre.offsetHeight
 }
 
@@ -141,6 +143,7 @@ const chromeTop = ref(0)
 const chromeBottom = ref(0)
 
 let ro: ResizeObserver | undefined
+let mo: MutationObserver | undefined
 let raf = 0
 function scheduleMeasure() {
   cancelAnimationFrame(raf)
@@ -150,13 +153,10 @@ function measure() {
   raf = 0
   const rail = railRef.value
   if (!rail) return
-  // A code card swapping between its empty panel and a real code surface
-  // (e.g. a 204 no-body scenario ↔ one with a body) recreates its <pre>, and
-  // the pre observed before the swap is gone from the DOM. The swap re-flows
-  // the observed pane wrapper, which lands here — re-attach observation now,
-  // or later content-only growth (wrapper pinned in overflow mode) goes unseen.
-  const pres = [topRef.value, botRef.value].map(wrap => wrap?.querySelector('pre.raw-pre') ?? null)
-  if (pres.some((pre, index) => pre !== observedPres[index])) syncTargets()
+  // Keep this defensive sync as the final authority for the frame. The
+  // MutationObserver normally catches identity changes first, but multiple DOM
+  // swaps may be coalesced before this scheduled measurement runs.
+  syncPres()
   H.value = Math.max(0, Math.round(rail.getBoundingClientRect().height) - HANDLE_PX)
   natTop.value = Math.round(paneNatural(topRef.value))
   natBottom.value = Math.round(paneNatural(botRef.value))
@@ -164,32 +164,52 @@ function measure() {
   chromeBottom.value = Math.round(paneChrome(botRef.value))
 }
 
-// (Re)observe the rail, both pane wrappers, and the two <pre> nodes — the pres
-// are what grow when the user switches language/scenario (their content changes
-// while the wrapper height is pinned in overflow mode).
+// The stable rail/wrappers report layout changes. The <pre> nodes report natural
+// code growth while their wrappers are pinned in overflow mode, so update only
+// that dynamic pair when a body-kind switch replaces the rendered surface.
 const observedPres: (Element | null)[] = [null, null]
-function syncTargets() {
+function observeLayoutTargets() {
   if (!ro) return
-  ro.disconnect()
   for (const el of [railRef.value, topRef.value, botRef.value]) {
     if (el) ro.observe(el)
   }
+}
+
+function syncPres(): boolean {
+  if (!ro) return false
+  let changed = false
   ;[topRef.value, botRef.value].forEach((wrap, index) => {
     const pre = wrap?.querySelector('pre.raw-pre') ?? null
+    const previous = observedPres[index]
+    if (pre === previous) return
+    if (previous) ro?.unobserve(previous)
     if (pre) ro?.observe(pre)
     observedPres[index] = pre
+    changed = true
   })
+  return changed
 }
 
 onMounted(() => {
   ro = new ResizeObserver(scheduleMeasure)
+  // A body-kind switch can replace <pre> without changing any observed box:
+  // overflow mode pins both pane wrappers. Observe child identity only; text,
+  // attributes, and geometry remain ResizeObserver/Vue responsibilities.
+  mo = new MutationObserver(() => {
+    if (syncPres()) scheduleMeasure()
+  })
   nextTick(() => {
-    syncTargets()
+    observeLayoutTargets()
+    for (const wrap of [topRef.value, botRef.value]) {
+      if (wrap) mo?.observe(wrap, { childList: true, subtree: true })
+    }
+    syncPres()
     measure()
   })
 })
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf)
+  mo?.disconnect()
   ro?.disconnect()
 })
 

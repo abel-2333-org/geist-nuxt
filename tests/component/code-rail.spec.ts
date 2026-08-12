@@ -87,6 +87,14 @@ function runFrames() {
   for (const frame of pending) frame(0)
 }
 
+async function runMutationFrames() {
+  await vi.waitFor(() => {
+    expect(frames.size).toBeGreaterThan(0)
+  })
+  runFrames()
+  await nextTick()
+}
+
 /** Mimics a kit code card: section chrome + capped scroll surface + full-height pre. */
 function card(section: number, surface: number, pre: number, label: string) {
   return h('section', { 'data-h': String(section) }, [
@@ -197,7 +205,7 @@ describe('CodeRail', () => {
     expect(wrapper.get('[data-budget="top"]').text()).toBe('24rem')
   })
 
-  it('re-observes a recreated pre after an empty panel swaps to a code surface', async () => {
+  it('remeasures and observes a recreated pre without a resize notification', async () => {
     const Host = defineComponent({
       props: { bottomHasCode: { type: Boolean, default: false } },
       setup(props) {
@@ -217,16 +225,48 @@ describe('CodeRail', () => {
     expect(ro.targets.has(wrapper.get('[data-pre="top"]').element)).toBe(true)
     expect(wrapper.find('[data-pre="bottom"]').exists()).toBe(false)
 
-    // The swap re-flows the pane wrapper; the resulting measure must pick up
-    // the new pre, or later content-only growth (wrapper pinned in overflow
-    // mode) would never re-trigger measurement.
+    const { rail } = railParts(wrapper)
+    const bottomPane = rail.children[rail.children.length - 1] as HTMLElement
+    expect(bottomPane.style.height).toBe('120px')
+
+    // Overflow pins the wrapper, so no ResizeObserver notification is
+    // guaranteed. The real DOM mutation must schedule the measurement itself.
     await wrapper.setProps({ bottomHasCode: true })
-    await nextTick()
+    await runMutationFrames()
     const { ro: after } = railParts(wrapper)
-    after.trigger()
-    runFrames()
-    await nextTick()
 
     expect(after.targets.has(wrapper.get('[data-pre="bottom"]').element)).toBe(true)
+    expect(bottomPane.style.height).toBe('150px')
+    expect(wrapper.get('[role="separator"]').attributes('aria-valuenow')).toBe('63')
+  })
+
+  it('uses a semantic body section instead of the pinned wrapper as its natural height', async () => {
+    const Host = defineComponent({
+      props: { bottomHasCode: { type: Boolean, default: true } },
+      setup(props) {
+        return () => h(CodeRail, { storageKey: 'code-rail-empty-natural' }, {
+          top: () => card(320, 300, 480, 'top'),
+          bottom: () => props.bottomHasCode
+            ? card(170, 150, 130, 'bottom')
+            : h('section', { 'data-h': '48' }, 'No response body'),
+        })
+      },
+    })
+    wrapper = await mountSuspended(Host)
+    await nextTick()
+    await resizeRail(wrapper, 412)
+
+    const { rail } = railParts(wrapper)
+    const bottomPane = rail.children[rail.children.length - 1] as HTMLElement
+    expect(bottomPane.style.height).toBe('150px')
+
+    // Model the browser's pinned wrapper box: after the code surface leaves,
+    // its 150px budget is stale while the semantic section is naturally 48px.
+    bottomPane.dataset.h = '150'
+    await wrapper.setProps({ bottomHasCode: false })
+    await runMutationFrames()
+
+    expect(bottomPane.style.height).toBe('120px')
+    expect(wrapper.find('[role="separator"]').exists()).toBe(false)
   })
 })
