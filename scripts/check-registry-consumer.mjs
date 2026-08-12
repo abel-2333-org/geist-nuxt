@@ -700,11 +700,11 @@ const field = {
 const verification = {
   label: 'VERIFICATION',
   description: 'Verify the signature before processing the event.',
-  facts: [{ term: 'Header', value: 'X-Example-Signature', code: true }],
+  facts: [{ term: 'Header', value: 'X-Example-Signature', format: 'code' }],
 }
 const acknowledgement = {
   label: 'ACKNOWLEDGEMENT',
-  facts: [{ term: 'HTTP status', value: '200', code: true }],
+  facts: [{ term: 'HTTP status', value: '200', format: 'code' }],
   example: {
     code: '{\\n  "received": true\\n}',
     language: 'json',

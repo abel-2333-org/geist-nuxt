@@ -71,6 +71,22 @@ interface WebhookProtocolSchedule {
 }
 ```
 
+### 迁移：`code` 布尔别名已删除（breaking change）
+
+早期版本允许 fact 使用 `{ code: true }` 请求整值 InlineCode，并在同时提供
+`format` 时让 `format` 优先。该兼容入口已删除，`format` 是唯一的呈现判别字段：
+
+```ts
+// 旧写法
+{ term: 'Header', value: 'Webhook-Signature', code: true }
+
+// 新写法
+{ term: 'Header', value: 'Webhook-Signature', format: 'code' }
+```
+
+未提供 `format` 的 fact 始终按纯文本渲染。消费项目应迁移自己的 adapter 与数据，
+再通过 registry update 同步受管组件；不要增加 wrapper、字段别名或 compatibility transform。
+
 ## A11y
 
 - `headingLevel` 接入文档大纲（`FieldGroup` 先例）；DOM 顺序 = 阅读顺序。
