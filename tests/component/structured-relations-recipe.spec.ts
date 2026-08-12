@@ -3,7 +3,9 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import PlaygroundPage from '../../app/pages/playground.vue'
 
 describe('structured relations playground recipe', () => {
-  it('resolves every field link to one real FieldItem target', async () => {
+  // First mount of the full playground page pays the cold-worker SFC
+  // transform cost and can exceed Vitest's 5s default under CPU load.
+  it('resolves every field link to one real FieldItem target', { timeout: 15_000 }, async () => {
     const wrapper = await mountSuspended(PlaygroundPage)
     const fields = [
       'req_callback_url',
