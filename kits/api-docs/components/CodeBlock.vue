@@ -5,9 +5,11 @@
 // samples that come from an API spec. Per the Geist code aesthetic it is
 // deliberately near-monochrome and carries NO runtime syntax highlighter or
 // content pipeline. It can render explicitly trusted, pre-sanitized build-time
-// highlighted HTML; otherwise it escapes the raw code. The component owns UI,
-// interaction (language switch, wrap), responsive layout, and a11y; copy always
-// uses the raw source and is delegated to the shared <CopyButton>.
+// highlighted HTML; otherwise it escapes the raw code. For trusted dual-theme
+// Shiki fragments (inline light `color` + `--shiki-dark` per token span) it
+// also owns the dark-mode token switch — see the style block. The component
+// owns UI, interaction (language switch, wrap), responsive layout, and a11y;
+// copy always uses the raw source and is delegated to the shared <CopyButton>.
 //
 // Composed only from Nuxt UI primitives (USelect, UButton, UIcon) + CopyButton
 // + Geist semantic tokens. It is the reusable base that RequestExample and
@@ -312,5 +314,18 @@ const wrap = useCodeWrap(props.defaultWrap)
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
+}
+
+/* Trusted dual-theme Shiki fragments (defaultColor:'light' output): each token
+   span carries its light color inline plus a `--shiki-dark` variable. The
+   fragment has no `.shiki` wrapper for consumer CSS to target, and dark mode
+   must beat the generator's inline style — `!important` is the only lever that
+   does so without rewriting the HTML. Color only by contract: background stays
+   with the surface, `--shiki-dark-font-style` etc. are a future contract.
+   Spans without the variable fall back to the inherited neutral foreground
+   (unpromised, out-of-contract input). `.dark` is the Nuxt UI color-mode
+   class; v-html content needs :deep(). */
+.dark .raw-pre :deep(span) {
+  color: var(--shiki-dark, inherit) !important;
 }
 </style>
