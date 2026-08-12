@@ -116,7 +116,7 @@
       "name": "foundation-theme-toggle",
       "type": "registry:component",
       "title": "ThemeToggle",
-      "description": "System/light/dark theme toggle.",
+      "description": "Light/dark theme toggle.",
       "registryDependencies": ["geist-foundation"],
       "files": [
         { "path": "foundation/components/ThemeToggle.vue", "target": "app/components/ThemeToggle.vue" }
