@@ -322,10 +322,10 @@ const wrap = useCodeWrap(props.defaultWrap)
    must beat the generator's inline style — `!important` is the only lever that
    does so without rewriting the HTML. Color only by contract: background stays
    with the surface, `--shiki-dark-font-style` etc. are a future contract.
-   Spans without the variable fall back to the inherited neutral foreground
-   (unpromised, out-of-contract input). `.dark` is the Nuxt UI color-mode
-   class; v-html content needs :deep(). */
-.dark .raw-pre :deep(span) {
+   Spans without the variable keep their existing inline/class-based styling,
+   preserving the general trusted-highlightedHtml contract. `.dark` is the
+   Nuxt UI color-mode class; v-html content needs :deep(). */
+.dark .raw-pre :deep(span[style*="--shiki-dark"]) {
   color: var(--shiki-dark, inherit) !important;
 }
 </style>

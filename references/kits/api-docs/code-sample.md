@@ -45,7 +45,7 @@
 
 边界与已知后果：
 
-- 切换是**无条件 CSS**，组件不检测 fragment 是否合约。缺少 `--shiki-dark` 的 span 在 dark 下回退到继承的中性前景色；该行为不做承诺，属合约外输入。
+- 切换由 CSS 属性选择器对 token 做能力检测：仅携带 `--shiki-dark` 的 span 在 dark 下切换；不带该变量的其他可信高亮 HTML 保留自身 inline / class 样式，继续遵循通用 `highlightedHtml` 契约。
 - 只切 `color`：代码背景由组件的 `bg-default` 拥有；`--shiki-dark-font-style` 等主题化排版变量不消费，dark 下保持浅色主题的 font style（未来契约扩展，非缺陷）。
 - 组件**不校正 palette**：暗色 token 与代码背景的对比度（验收线 `4.5:1`）由生成管线 / consumer adapter 负责。
 - `--shiki-light` / `--shiki-dim` / `light-dark()` 等其他输出模式不在本契约内，支持时单独扩展。

@@ -103,6 +103,9 @@ const highlightedVariants = [
   { language: 'bash', code: 'curl --request', highlightedHtml: dualThemeFragment },
 ]
 
+const singleThemeFragment
+  = '<span style="color:#C3E88D" data-highlight-token="boolean">true</span>'
+
 describe('CodeBlock trusted dual-theme fragments', () => {
   it('renders trusted fragments as elements with token styles intact', async () => {
     const wrapper = await mountSuspended(CodeBlock, {
@@ -130,6 +133,23 @@ describe('CodeBlock trusted dual-theme fragments', () => {
     expect(wrapper.find('pre').text()).toBe('curl --request')
   })
 
+  it('preserves trusted token styles that do not opt into the dual-theme contract', async () => {
+    const wrapper = await mountSuspended(CodeBlock, {
+      props: {
+        variants: [{
+          language: 'json',
+          code: 'true',
+          highlightedHtml: singleThemeFragment,
+        }],
+        trustHighlightedHtml: true,
+      },
+    })
+
+    const token = wrapper.find('[data-highlight-token="boolean"]')
+    expect(token.attributes('style')).toContain('color:#C3E88D')
+    expect(token.attributes('style')).not.toContain('--shiki-dark')
+  })
+
   it('ships the scoped dark-token switch rule with the component', async () => {
     // Resolved from the repo root (vitest cwd): the Nuxt test environment does
     // not expose file:// module URLs, so import.meta.url cannot anchor this.
@@ -138,7 +158,8 @@ describe('CodeBlock trusted dual-theme fragments', () => {
       'utf8',
     )
     const style = source.slice(source.indexOf('<style'))
-    expect(style).toContain('.dark .raw-pre :deep(span)')
+    expect(style).toContain('.dark .raw-pre :deep(span[style*="--shiki-dark"])')
+    expect(style).not.toContain('.dark .raw-pre :deep(span)')
     expect(style).toContain('color: var(--shiki-dark, inherit) !important')
   })
 })
