@@ -53,8 +53,6 @@ export interface WebhookProtocolFact {
    * link），unsafe scheme 与 raw HTML 不会被执行。
    */
   format?: WebhookProtocolFactFormat
-  /** @deprecated 等价于 format: 'code'；二者同给时 format 优先 */
-  code?: boolean
   /** 可选补充说明（已本地化），始终纯文本 */
   note?: string
 }
@@ -116,9 +114,9 @@ const sections = computed(() => {
   )
 })
 
-/** format 优先；legacy code: true 等价于 format: 'code'，默认纯文本 */
+/** 未指定 format 时使用纯文本。 */
 function factFormat(fact: WebhookProtocolFact): WebhookProtocolFactFormat {
-  return fact.format ?? (fact.code ? 'code' : 'text')
+  return fact.format ?? 'text'
 }
 
 /* schedule chips 折叠（视觉层；派生逻辑在 utils/webhook-protocol.ts，可测） */
