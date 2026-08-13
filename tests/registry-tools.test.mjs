@@ -22,6 +22,7 @@ import {
   parseShard,
   planCopy,
   planDocumentDigest,
+  printPlanError,
   readLock,
   resolveCopyRequest,
   resolveItems,
@@ -648,6 +649,17 @@ test('apply result echoes the plan digest and per-operation outcomes', () => {
     'applied',
     'skipped',
   ])
+})
+
+test('json mode structures every error, including unexpected ones', (t) => {
+  const lines = []
+  t.mock.method(console, 'log', message => lines.push(message))
+  printPlanError(Object.assign(new Error('permission denied'), { code: 'EACCES' }), true)
+  assert.deepEqual(JSON.parse(lines[0]).error, { code: 'EACCES', message: 'permission denied', details: [] })
+  printPlanError(new Error('boom'), true)
+  assert.equal(JSON.parse(lines[1]).error.code, 'UNEXPECTED')
+  printPlanError(new RegistryError('drifted', ['app/a.vue'], { code: 'PLAN_CHANGED' }), true)
+  assert.deepEqual(JSON.parse(lines[2]).error, { code: 'PLAN_CHANGED', message: 'drifted', details: ['app/a.vue'] })
 })
 
 test('apply re-verifies every planned before-state and stops with zero writes on drift', async () => {

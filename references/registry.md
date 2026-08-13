@@ -124,9 +124,9 @@ delete operation 的 tags 按序解析：当前 registry item → lock 记录的
 
 `--write --expect-plan <planDigest>` 执行 guarded apply：write 调用会从磁盘完整重算 plan（target、lock 与全部 consumer input 都参与 digest），重算 digest 与期望值不一致时以 `PLAN_CHANGED` 失败且零写入。apply 在首个 mutation 前还会逐 target 复核 plan 记录的 before-state，dry-run 与 apply 之间任何 target 变化同样 `PLAN_CHANGED` 零写入。`--expect-plan` 只能与 `--write` 组合，取值必须是 64 位 sha256 plan digest。
 
-`--write --json` 输出 apply result：在重算的 plan 文档上追加 `apply` 段——`expectedPlanDigest`（未传 `--expect-plan` 时为 `null`）、写后 lock 的 `lockSourceSha`、以及每个 operation 的实际 `outcome`（`applied` = 发生文件系统变更；`skipped` = 无需变更，即 planned `unchanged` 或 target 已缺失的 delete）。consumer 校验 apply result 的 `planDigest` 等于评审过的 dry-run digest，即证明 plan 与最终写入结果一致。
+`--write --json` 输出 apply result：在重算的 plan 文档上追加 `apply` 段——`expectedPlanDigest`（未传 `--expect-plan` 时为 `null`）、写后 lock 的 `lockSourceSha`、以及每个 operation 的实际 `outcome`（`applied` = 发生文件系统变更；`skipped` = 无需变更，即 planned `unchanged` 或 target 已缺失的 delete）。注意 skill sync 在 payload 无变化时保留 installed sourceSha（`.geist-skill.json` 语义），此时 `apply.lockSourceSha` 可以早于本次 `sourceSha`，consumer 不应把两者强行画等号。consumer 校验 apply result 的 `planDigest` 等于评审过的 dry-run digest，即证明 plan 与最终写入结果一致。
 
-`--json` 模式下所有 registry 工具错误输出结构化 JSON `{ "error": { "code", "message", "details" } }` 到 stdout 并以非零退出；`code` 为 `PLAN_CHANGED` 或缺省 `REGISTRY_ERROR`。orchestrator 推荐流程：`--json` 出 plan → 审阅/选择验证集 → `--write --expect-plan <digest> --json` → 校验 apply result → 再次 `--json` 确认收敛零变化。
+`--json` 模式下所有错误（含意外异常）输出结构化 JSON `{ "error": { "code", "message", "details" } }` 到 stdout 并以非零退出；`code` 为 `PLAN_CHANGED`、缺省 `REGISTRY_ERROR`，意外异常透传原生 code（如 `EACCES`）或 `UNEXPECTED`。orchestrator 推荐流程：`--json` 出 plan → 审阅/选择验证集 → `--write --expect-plan <digest> --json` → 校验 apply result → 再次 `--json` 确认收敛零变化。
 
 ## `geist.lock.json` 契约
 

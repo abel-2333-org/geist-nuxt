@@ -128,17 +128,21 @@ export function buildApplyResult(document, { expectedPlanDigest = null, lockSour
 }
 
 export function printPlanError(error, jsonMode) {
-  if (jsonMode && error instanceof RegistryError) {
-    console.log(JSON.stringify({
-      error: {
-        code: error.code ?? 'REGISTRY_ERROR',
-        message: error.message,
-        details: error.details ?? [],
-      },
-    }, null, 2))
+  if (!jsonMode) {
+    printRegistryError(error)
     return
   }
-  printRegistryError(error)
+  // In --json mode stdout must stay machine-parseable for every failure, so
+  // unexpected errors are structured too (native fs codes pass through).
+  console.log(JSON.stringify({
+    error: {
+      code: error instanceof RegistryError
+        ? error.code ?? 'REGISTRY_ERROR'
+        : error?.code ?? 'UNEXPECTED',
+      message: error?.message ?? String(error),
+      details: error instanceof RegistryError ? error.details ?? [] : [],
+    },
+  }, null, 2))
 }
 
 export function assertExactSha(value, label = 'source SHA') {
