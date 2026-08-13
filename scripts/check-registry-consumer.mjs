@@ -699,9 +699,18 @@ const field = {
     page: `<script setup lang="ts">
 import type {
   WebhookProtocolAckExample,
+  WebhookProtocolFact,
   WebhookProtocolSchedule,
   WebhookProtocolSectionData,
 } from '~/components/WebhookProtocol.vue'
+
+const legacyFact: WebhookProtocolFact = {
+  term: 'Header',
+  value: 'X-Example-Signature',
+  // @ts-expect-error breaking change: code was removed; use format
+  code: true,
+}
+void legacyFact
 
 const verification = {
   label: 'VERIFICATION',
