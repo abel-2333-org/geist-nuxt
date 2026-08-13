@@ -14,6 +14,7 @@ import {
   assertSafeTarget,
   buildRuntimePlanDocument,
   checkConsumer,
+  compareCodeUnits,
   loadRegistry,
   parseArgs,
   parseShard,
@@ -38,6 +39,14 @@ test('accepts the pnpm argument separator', () => {
   assert.equal(options.target, '../consumer')
   assert.equal(options.to, SOURCE_SHA)
   assert.equal(parseArgs(['--json', '--target', '../consumer']).json, true)
+})
+
+test('canonical plan ordering is independent of the process locale', () => {
+  assert.deepEqual(['ä', 'z', 'A'].sort(compareCodeUnits), ['A', 'z', 'ä'])
+  assert.equal(
+    planDocumentDigest({ z: 1, ä: 2 }),
+    sha256(JSON.stringify({ z: 1, ä: 2 })),
+  )
 })
 
 test('partitions consumer scenarios into complete deterministic shards', () => {
@@ -579,6 +588,28 @@ test('emits a versioned machine-readable runtime plan with deterministic digest'
   assert.deepEqual(document.summary, { create: 2, update: 0, delete: 0, unchanged: 0, verification: ['visual', 'dependency'] })
   assert.equal(document.planDigest, planDocumentDigest(document))
   assert.deepEqual(await buildDocument(), document)
+})
+
+test('sorts runtime plan operations by locale-independent code-unit order', () => {
+  const operation = target => ({
+    action: 'create',
+    item: 'feature',
+    path: target,
+    sourceHash: '1'.repeat(64),
+    target,
+  })
+  const document = buildRuntimePlanDocument({
+    registry: {
+      name: 'fixture',
+      repository: 'https://example.test/fixture.git',
+      items: [{ name: 'feature', verification: ['visual'] }],
+    },
+    resolution: { externalRequirements: { packages: {}, consumerSetup: [] } },
+    sourceSha: SOURCE_SHA,
+    operations: [operation('ä.vue'), operation('z.vue')],
+  })
+
+  assert.deepEqual(document.operations.map(entry => entry.target), ['z.vue', 'ä.vue'])
 })
 
 test('sourceSha-only rewrite keeps operations unchanged and creates no runtime impact', async () => {

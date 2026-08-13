@@ -56,6 +56,13 @@ export function sha256(content) {
   return createHash('sha256').update(content).digest('hex')
 }
 
+// Protocol documents must sort identically across machines. String relational
+// comparison follows ECMAScript UTF-16 code-unit order and does not consult the
+// process locale, unlike localeCompare().
+export function compareCodeUnits(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0
+}
+
 // Known tags first in vocabulary order, unknown lock-recorded tags after them in
 // lexical order: emitted rather than dropped so a stale vocabulary fails closed
 // on the consumer side instead of silently shrinking the verification set.
@@ -72,7 +79,7 @@ function canonicalize(value) {
   if (value && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([left], [right]) => left.localeCompare(right))
+        .sort(([left], [right]) => compareCodeUnits(left, right))
         .map(([key, child]) => [key, canonicalize(child)]),
     )
   }
@@ -202,7 +209,7 @@ async function walkFiles(root, relativeRoot) {
     throw error
   }
   const files = []
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of entries.sort((a, b) => compareCodeUnits(a.name, b.name))) {
     if (entry.name === '.DS_Store') continue
     const relative = path.posix.join(relativeRoot, entry.name)
     if (entry.isDirectory()) files.push(...await walkFiles(root, relative))
@@ -326,7 +333,7 @@ function validRange(value) {
 function packageMap(value, label, { optional = false } = {}) {
   if (value === undefined && optional) return {}
   if (!isPlainObject(value)) throw new RegistryError(`${label} must be an object`)
-  const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
+  const entries = Object.entries(value).sort(([left], [right]) => compareCodeUnits(left, right))
   for (const [name, range] of entries) {
     if (!PACKAGE_NAME_RE.test(name)) throw new RegistryError(`${label} contains an invalid package name: ${name}`)
     if (!validRange(range)) {
@@ -373,7 +380,7 @@ function resolveExternalRequirements(registry, items) {
     }
   }
   return {
-    packages: Object.fromEntries([...packages].sort(([left], [right]) => left.localeCompare(right))),
+    packages: Object.fromEntries([...packages].sort(([left], [right]) => compareCodeUnits(left, right))),
     consumerSetup: structuredClone(registry.externalRequirements.consumerSetup),
   }
 }
@@ -919,7 +926,7 @@ function collectMigrations(operations) {
   }
   return [...byOwner.entries()]
     .filter(([, record]) => record.from.length > 0 && record.to.length > 0)
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => compareCodeUnits(left, right))
     .map(([owner, record]) => ({ owner, from: [...record.from].sort(), to: [...record.to].sort() }))
 }
 
@@ -970,7 +977,7 @@ export function buildRuntimePlanDocument(plan) {
     }
     if (action === 'delete') document.verificationSource = verificationSource
     return document
-  }).sort((left, right) => left.target.localeCompare(right.target))
+  }).sort((left, right) => compareCodeUnits(left.target, right.target))
 
   const lockPackages = plan.lock?.registry?.externalRequirements?.packages ?? {}
   const lockSetup = plan.lock?.registry?.externalRequirements?.consumerSetup ?? []

@@ -16,6 +16,7 @@ import path from 'node:path'
 import {
   assertExactSha,
   assertSafeRelative,
+  compareCodeUnits,
   PLAN_SCHEMA_VERSION,
   planDocumentDigest,
   RegistryError,
@@ -67,7 +68,7 @@ async function walkSource(repoRoot, relative) {
 
   const files = []
   const entries = await readdir(absolute, { withFileTypes: true })
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (IGNORED_ENTRIES.has(entry.name)) continue
     files.push(...await walkSource(repoRoot, path.posix.join(relative, entry.name)))
   }
@@ -160,7 +161,7 @@ async function walkInstalled(consumerRoot, relative = AGENT_SKILL_ROOT) {
     throw error
   }
   const files = []
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (IGNORED_ENTRIES.has(entry.name)) continue
     const child = path.posix.join(relative, entry.name)
     if (entry.isSymbolicLink()) throw new RegistryError(`installed agent skill must not contain symbolic links: ${child}`)
@@ -214,7 +215,7 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
 
   const sourceFiles = []
   for (const entry of SOURCE_ENTRIES) sourceFiles.push(...await walkSource(repoRoot, entry))
-  sourceFiles.sort((left, right) => left.localeCompare(right))
+  sourceFiles.sort(compareCodeUnits)
 
   const registry = JSON.parse(await readFile(path.join(repoRoot, 'registry.json'), 'utf8'))
   if (typeof registry.repository !== 'string' || !registry.repository) {
@@ -367,7 +368,7 @@ export function buildAgentSkillPlanDocument(plan) {
       afterHash: action === 'delete' ? null : sha256(operation.content),
       verification: ['reference'],
     }
-  }).sort((left, right) => left.target.localeCompare(right.target))
+  }).sort((left, right) => compareCodeUnits(left.target, right.target))
 
   const summary = { create: 0, update: 0, delete: 0, unchanged: 0, verification: [] }
   for (const operation of operations) {
