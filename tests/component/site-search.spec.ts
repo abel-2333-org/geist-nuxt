@@ -100,8 +100,20 @@ describe('SiteSearch status announcements', () => {
     const observer = new MutationObserver(() => changes.push(status().text()))
     observer.observe(status().element, { childList: true, characterData: true, subtree: true })
 
+    const frames: FrameRequestCallback[] = []
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback)
+      return frames.length
+    }))
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+    vi.useFakeTimers()
+
     await query('Authentication')
+    await vi.advanceTimersByTimeAsync(17)
+    while (frames.length) frames.shift()!(17)
     await flushPromises()
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
     observer.disconnect()
 
     expect(palette().text()).toContain('Authentication')
@@ -129,6 +141,29 @@ describe('SiteSearch status announcements', () => {
     expect(palette().text()).toContain('Billing shortcut')
     expect(palette().text()).not.toContain('Team shortcut')
     expect(postFilter).toHaveBeenLastCalledWith('Billing', [expect.objectContaining({ label: 'Billing shortcut' })])
+  })
+
+  it('keeps source group order, a global limit and explicitly unfiltered groups', async () => {
+    await mountSearch({
+      resultLimit: 1,
+      groups: [
+        { id: 'first', label: 'First', items: [{ label: 'Alpha guide', to: '/alpha' }] },
+        { id: 'second', label: 'Second', items: [{ label: 'Alpha reference', to: '/reference' }] },
+      ],
+      extraGroups: [{
+        id: 'pinned',
+        label: 'Pinned',
+        ignoreFilter: true,
+        items: [{ label: 'Always available', to: '/pinned' }],
+      }],
+    })
+
+    await query('Alpha')
+    await flushPromises()
+
+    const options = palette().findAll('[role="option"]').map(option => option.text())
+    expect(options.filter(label => label.startsWith('Alpha'))).toHaveLength(1)
+    expect(options.at(-1)).toContain('Always available')
   })
 
   it('announces async loading, empty, failure and successful-result transitions', async () => {

@@ -56,8 +56,8 @@
 - `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入；结构性文案
   内置英文默认值，消费项目只在需要本地化或改写时覆盖。
 
-registry item 为 `api-docs-site-search`，只声明
-`api-docs-method-badge` 依赖；后者的 closure 自动带入 foundation。完整文档站装配看
+registry item `api-docs-site-search` 的 `packageDependencies` 声明 `fuse.js`，
+`registryDependencies` 只声明 `api-docs-method-badge`；后者的 closure 自动带入 foundation。完整文档站装配看
 `/kits/api-docs/docs-shell`，但该 shell 是 gallery-private recipe，不属于 copy-in 切片。
 
 > **公共组件名与消费配置解耦**：registry 将入口扁平复制到 `app/components/<Name>.vue`，所以默认 component scan 与 `pathPrefix: false` 都得到同一模板名。kit 归属由稳定 item id（`api-docs-*`）、真源目录与 lock 表达，不再泄漏为 `ApiDocs` 组件前缀。命名冲突在 copy plan 阶段作为原子 target conflict 报告。
