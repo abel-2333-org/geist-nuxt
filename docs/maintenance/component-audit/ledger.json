@@ -706,13 +706,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-13T08:22:21.464Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "2a0970bec630cc2bfbfbf0c94011ce91cbc349ec",
+        "headSha": "20a870bd7acfe41aeb36e6e64fcf5cd3a26d2cb1",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -730,9 +730,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "ced220e7de3ee60ded50dc53e10785a0454a2cfc6fd67b1e68d80e29878b6d5d"
+        "scopeDigest": "85c4b984047406dbeef52fcd157c0f61462a31e9548cbdf084009d769d3852e8"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "PR2(#84) 在 check-registry-consumer.mjs 的每个 runtime 场景为 copy CLI 增加 --json 冒烟:--write 前断言 fresh-install plan 为全归属 create operations,--write 后断言 plan 收敛零变化。webhook-protocol 场景的安装、typecheck、build 与既有断言路径不变;组件源码、internal helpers、utils、tests 与 references 均未改动。复审确认冒烟为行为中性的编排追加,不触及组件公开 claims。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
