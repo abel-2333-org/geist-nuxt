@@ -270,10 +270,11 @@ test('keeps the real public component surface flat, neutral, and unique', async 
   const result = await validateRegistry(registry, { repoRoot: PROJECT_ROOT })
   const publicNames = [...result.publicComponentOwners.keys()]
 
-  assert.equal(publicNames.length, 29)
+  assert.equal(publicNames.length, 30)
   assert.equal(new Set(publicNames).size, publicNames.length)
   assert.equal(publicNames.includes('HttpMethodBadge'), true)
   assert.equal(publicNames.includes('WebhookBadge'), true)
+  assert.equal(publicNames.includes('RelationSourcePath'), true)
   assert.equal(publicNames.includes('AppHeader'), true)
   assert.deepEqual(publicNames.filter(name => /^(?:ApiDocs|Composition)/.test(name)), [])
 })

@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import RelationSourcePath from '../../playground/components/RelationSourcePath.vue'
+import RelationSourcePath from '../../kits/api-docs/components/RelationSourcePath.vue'
 
 afterEach(() => vi.restoreAllMocks())
 
-describe('RelationSourcePath playground candidate', () => {
+describe('RelationSourcePath', () => {
   it('links a resolved field and exposes one locale-consistent spoken path', async () => {
     const wrapper = await mountSuspended(RelationSourcePath, {
       props: {

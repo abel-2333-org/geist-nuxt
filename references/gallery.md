@@ -20,6 +20,7 @@ app/pages/
     sidebar-nav.vue                 SidebarNav 专项响应式样例
     webhook-protocol.vue            Webhook 协议事实专项
     schema-composition.vue          Schema composition 专项
+    structured-relations.vue        Callback / Next Operation 结构化关系 recipe
     docs-shell/
       index.vue                     重定向到默认域
       [domain]/index.vue            多域文档站外壳（域首页 = 参考长滚动）

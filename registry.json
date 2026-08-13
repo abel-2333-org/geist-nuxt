@@ -337,6 +337,16 @@
       ]
     },
     {
+      "name": "api-docs-relation-source-path",
+      "type": "registry:component",
+      "title": "RelationSourcePath",
+      "description": "Resolved request/response field hierarchy for callbacks and next-operation mappings, with same-page reveal/focus navigation, cross-page links, and honest plain-text fallback.",
+      "registryDependencies": ["api-docs-field-item"],
+      "files": [
+        { "path": "kits/api-docs/components/RelationSourcePath.vue", "target": "app/components/RelationSourcePath.vue" }
+      ]
+    },
+    {
       "name": "api-docs-event-badge",
       "type": "registry:component",
       "title": "WebhookBadge",

@@ -5,7 +5,8 @@ definePageMeta({ nav: { label: '组件目录', icon: 'i-lucide-file-code', order
 // 数据无关积木」的分层，这里用内联假 ViewModel 驱动 kit 的数据无关组件：代码块 /
 // 请求 / 响应（CodeBlock、ResponseExample）+ method / lifecycle 徽章
 // + enum 值表（HttpMethodBadge、LifecycleBadge、EnumTable）+ 字段树
-// （FieldGroup、FieldItem，含递归子字段与 useFieldAnchor 深链接）。
+// （FieldGroup、FieldItem，含递归子字段与 useFieldAnchor 深链接）+ 已解析的
+// relation source hierarchy（RelationSourcePath）。
 const requestSamples = [
   {
     label: 'cURL',
@@ -647,7 +648,8 @@ onMounted(() => anchor.initFromHash())
           <code class="font-mono text-[0.8125rem]">EnumTable</code>，
           以及字段树
           <code class="font-mono text-[0.8125rem]">FieldGroup</code> /
-          <code class="font-mono text-[0.8125rem]">FieldItem</code>（递归子字段 + 深链接）。
+          <code class="font-mono text-[0.8125rem]">FieldItem</code>（递归子字段 + 深链接）与
+          <code class="font-mono text-[0.8125rem]">RelationSourcePath</code>（已解析来源层级 + 字段导航）。
           Operation 身份层由
           <code class="font-mono text-[0.8125rem]">OperationHeader</code>（端点 / webhook 同构头部）、
           <code class="font-mono text-[0.8125rem]">OperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
@@ -828,6 +830,36 @@ onMounted(() => anchor.initFromHash())
           <div class="grid gap-6 lg:grid-cols-2">
             <EnumTable :values="enumValues" />
             <EnumTable :variants="enumVariants" default-value="READY" />
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-1 text-sm font-semibold text-highlighted">Relation source path</h3>
+          <p class="mb-4 max-w-2xl text-sm text-muted">
+            consumer 提供已解析、已本地化的 scope、location 与完整字段层级；同页 field
+            委托 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> reveal / focus，
+            跨页使用 router link，没有稳定目标时降级为纯文本。完整 Callback / Next Operation
+            装配见「结构化关系」正式 recipe。
+          </p>
+          <div class="grid gap-4 rounded-lg border border-default p-5 md:grid-cols-3">
+            <div class="space-y-1.5">
+              <p class="text-xs font-medium uppercase tracking-widest text-dimmed">Same page</p>
+              <RelationSourcePath
+                :source="{ scope: 'request', location: 'body', segments: ['gitSource', 'repoId'], field: 'body_gitSource_repoId' }"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-xs font-medium uppercase tracking-widest text-dimmed">Cross page</p>
+              <RelationSourcePath
+                :source="{ scope: 'response', location: 'body', segments: ['state'], to: '/kits/api-docs/endpoint-reference#res_state' }"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-xs font-medium uppercase tracking-widest text-dimmed">No anchor</p>
+              <RelationSourcePath
+                :source="{ scope: 'response', location: 'header', segments: ['Location'] }"
+              />
+            </div>
           </div>
         </div>
 

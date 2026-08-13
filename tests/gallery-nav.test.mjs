@@ -11,7 +11,7 @@ test('builds a stable two-level tree from static visible routes', () => {
   const items = buildGalleryNav([
     route('/compositions', { label: 'Compositions', order: 2 }),
     route('/kits/zeta/guide'),
-    route('/kits/api-docs/docs-shell', { label: '文档站外壳', order: 6 }),
+    route('/kits/api-docs/docs-shell', { label: '文档站外壳', order: 7 }),
     route('/playground', false),
     route('/kits/api-docs/:domain'),
     route('/kits/api-docs/endpoint-reference', { label: '端点参考页', order: 1 }),
@@ -22,6 +22,7 @@ test('builds a stable two-level tree from static visible routes', () => {
     route('/kits/api-docs/sidebar-nav', { label: '侧边栏导航', order: 3 }),
     route('/kits/api-docs/webhook-protocol', { label: 'Webhook 协议', order: 4 }),
     route('/kits/api-docs/schema-composition', { label: 'Schema 组合', order: 5 }),
+    route('/kits/api-docs/structured-relations', { label: '结构化关系', order: 6 }),
     route('/kits/api-docs/deep/topic', { order: 7 }),
     route('/internal/deep'),
   ], '/components')
@@ -42,8 +43,9 @@ test('builds a stable two-level tree from static visible routes', () => {
     '侧边栏导航',
     'Webhook 协议',
     'Schema 组合',
-    '文档站外壳',
+    '结构化关系',
     'Topic',
+    '文档站外壳',
   ])
   assert.equal(apiDocs.children?.some(item => item.children), false)
   assert.equal(apiDocs.active, false)
