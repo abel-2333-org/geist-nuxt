@@ -24,6 +24,7 @@ import {
   recordResults,
   registryItemDigest,
   resolveScope,
+  resolveLockedDependencies,
   verifyLedger,
   writeLedgerAtomic,
 } from '../scripts/lib/audit.mjs'
@@ -31,6 +32,27 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url))
 const cliPath = path.resolve(here, '../scripts/audit-plan.mjs')
 const SHA1_RE = /^[0-9a-f]{40}$/
+
+function lockfile({ nuxtUi = '4.9.0', nuxtUiPatch, vueuse = '14.3.0', colorMode = '4.0.1', reka = '2.9.10' } = {}) {
+  const patch = nuxtUiPatch ? `(patch_hash=${nuxtUiPatch})` : ''
+  return `lockfileVersion: '9.0'
+importers:
+  .:
+    dependencies:
+      '@nuxt/ui':
+        specifier: '*'
+        version: ${nuxtUi}${patch}(peer-context)
+    devDependencies:
+      '@vueuse/core':
+        specifier: '*'
+        version: ${vueuse}
+packages:
+  '@nuxt/ui@${nuxtUi}${patch}': {}
+  '@nuxtjs/color-mode@${colorMode}': {}
+  '@vueuse/core@${vueuse}': {}
+  'reka-ui@${reka}': {}
+`
+}
 
 const FIXTURE_REGISTRY = {
   schemaVersion: 1,
@@ -76,6 +98,7 @@ async function fixtureRepo(t, { git = false, ledger = v2Ledger() } = {}) {
   }
   await writeFile(path.join(repoRoot, 'tests/component/a.spec.ts'), 'export {}\n')
   await writeFile(path.join(repoRoot, 'registry.json'), `${JSON.stringify(FIXTURE_REGISTRY, null, 2)}\n`)
+  await writeFile(path.join(repoRoot, 'pnpm-lock.yaml'), lockfile())
   await writeFile(path.join(repoRoot, '.gitignore'), '*.lock.owner-*\n')
   const ledgerPath = path.join(repoRoot, 'docs/maintenance/component-audit/ledger.json')
   await writeFile(ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`)
@@ -160,6 +183,74 @@ test('ledger 状态机拒绝 verified+open、deferred 无 open、重复 finding 
     },
   })
   assert.throws(() => assertLedgerV2(emptyScope), /非空/)
+
+  const invalidDependencies = v2Ledger()
+  invalidDependencies.items['comp-a'] = auditedEntry({
+    evidence: {
+      kind: 'scope-v1',
+      baseSha: 'a'.repeat(40),
+      headSha: 'b'.repeat(40),
+      itemDigest: 'c'.repeat(64),
+      scope: ['foundation/components/A.vue'],
+      scopeDigest: 'd'.repeat(64),
+      dependencies: [
+        { name: '@vueuse/core', version: '14.3.0', reason: 'VueUse behavior' },
+        { name: '@nuxt/ui', version: '4.9.0', reason: 'Nuxt UI behavior' },
+      ],
+    },
+  })
+  assert.throws(() => assertLedgerV2(invalidDependencies), /按 package name 排序/)
+  invalidDependencies.items['comp-a'].evidence.dependencies = [
+    { name: '@nuxt/ui', version: '^4.9.0', reason: 'Nuxt UI behavior' },
+  ]
+  assert.throws(() => assertLedgerV2(invalidDependencies), /精确 semver/)
+  invalidDependencies.items['comp-a'].evidence.dependencies = [
+    { name: '@nuxt/ui', version: '4.9.0', patchHash: 'bad/hash', reason: 'Nuxt UI behavior' },
+  ]
+  assert.throws(() => assertLedgerV2(invalidDependencies), /patchHash 非法/)
+})
+
+test('dependency evidence 解析直接或唯一传递 resolution 并 fail closed', () => {
+  assert.deepEqual(resolveLockedDependencies(lockfile(), [
+    { name: '@vueuse/core', reason: 'VueUse behavior' },
+    { name: '@nuxt/ui', reason: 'Nuxt UI behavior' },
+    { name: '@nuxtjs/color-mode', reason: 'color mode behavior' },
+  ]), [
+    { name: '@nuxt/ui', version: '4.9.0', reason: 'Nuxt UI behavior' },
+    { name: '@nuxtjs/color-mode', version: '4.0.1', reason: 'color mode behavior' },
+    { name: '@vueuse/core', version: '14.3.0', reason: 'VueUse behavior' },
+  ])
+  assert.deepEqual(resolveLockedDependencies(lockfile({ nuxtUiPatch: 'aaa' }), [
+    { name: '@nuxt/ui', reason: 'patched behavior' },
+  ]), [
+    { name: '@nuxt/ui', version: '4.9.0', patchHash: 'aaa', reason: 'patched behavior' },
+  ])
+  for (const malformed of ['(patch_hash=)', '(patch_hash)']) {
+    assert.throws(() => resolveLockedDependencies(lockfile().replace('(peer-context)', `${malformed}(peer-context)`), [
+      { name: '@nuxt/ui', reason: 'malformed patch marker' },
+    ]), /patch_hash 非法/)
+  }
+  assert.deepEqual(resolveLockedDependencies(lockfile().replace(
+    '(peer-context)',
+    '(peer@2.0.0(patch_hash=peer-patch))',
+  ), [{ name: '@nuxt/ui', reason: 'nested peer patch' }]), [
+    { name: '@nuxt/ui', version: '4.9.0', reason: 'nested peer patch' },
+  ])
+  assert.throws(() => resolveLockedDependencies(lockfile(), [
+    { name: '@nuxt/ui', version: '4.9.0', reason: 'caller must not pin' },
+  ]), /不得手填 version/)
+  assert.throws(() => resolveLockedDependencies(lockfile(), [
+    { name: 'missing', reason: 'missing package' },
+  ]), /缺少 dependency resolution/)
+  assert.throws(() => resolveLockedDependencies(lockfile().replace("lockfileVersion: '9.0'", "lockfileVersion: '8.0'"), [
+    { name: '@nuxt/ui', reason: 'unsupported lock' },
+  ]), /lockfileVersion 不受支持/)
+  assert.throws(() => resolveLockedDependencies(lockfile().replace("  '@nuxt/ui@4.9.0': {}\n", ''), [
+    { name: '@nuxt/ui', reason: 'missing snapshot' },
+  ]), /缺少 @nuxt\/ui@4.9.0 匹配的 package snapshot/)
+  assert.throws(() => resolveLockedDependencies(`${lockfile()}  'reka-ui@2.10.0': {}\n`, [
+    { name: 'reka-ui', reason: 'ambiguous transitive package' },
+  ]), /解析到多个内容版本/)
 })
 
 test('loadLedger 对缺失、损坏和未知版本 fail closed', async (t) => {
@@ -372,6 +463,56 @@ async function topologyCoReviewFixture(t) {
   }
 }
 
+async function dependencyCoReviewFixture(t, { fromPatch, toVersion = '4.10.0', toPatch } = {}) {
+  const ledger = v2Ledger()
+  ledger.items['comp-c'] = auditedEntry()
+  ledger.items['comp-d'] = auditedEntry()
+  const fixture = await fixtureRepo(t, { git: true, ledger })
+  const graph = await graphFor(fixture.repoRoot)
+  const scope = ['foundation/components/C.vue']
+
+  ledger.items['comp-c'] = auditedEntry({
+    evidence: {
+      ...exactEvidence(
+        fixture.repoRoot,
+        graph,
+        'comp-c',
+        fixture.baseSha,
+        fixture.baseSha,
+        scope,
+      ),
+      dependencies: [{
+        name: '@nuxt/ui',
+        version: '4.9.0',
+        ...(fromPatch ? { patchHash: fromPatch } : {}),
+        reason: 'UCommandPalette empty-state semantics',
+      }],
+    },
+  })
+  await writeFile(fixture.ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`)
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'canonical dependency evidence')
+  const baseSha = fixture.run('rev-parse', 'HEAD').trim()
+  fixture.run('update-ref', 'refs/remotes/origin/main', baseSha)
+
+  await writeFile(path.join(fixture.repoRoot, 'pnpm-lock.yaml'), lockfile({ nuxtUi: toVersion, nuxtUiPatch: toPatch }))
+  fixture.run('add', '-A')
+  fixture.run('commit', '-q', '-m', 'upgrade nuxt ui')
+
+  const loaded = await loadLedger(fixture.ledgerPath, graph)
+  return {
+    ...fixture,
+    baseSha,
+    graph,
+    ledger: loaded.ledger,
+    raw: loaded.raw,
+    planGraph: graph,
+    planLedger: structuredClone(loaded.ledger),
+    baseLedgerRaw: loaded.raw,
+    scope,
+  }
+}
+
 async function roundCoReviewFixture(t) {
   const ledger = v2Ledger({ round: 2, lastPicked: ['comp-a'] })
   for (const name of ['comp-a', 'comp-b', 'comp-c', 'comp-d']) {
@@ -427,7 +568,11 @@ function resultFor(item, overrides = {}) {
 test('recordResults 从 base 计划记账,证据绑定 Git HEAD、item 与 scope', async (t) => {
   const state = await recordFixture(t)
   const results = [
-    resultFor('comp-a', { change: 'modified', scope: ['tests/component/a.spec.ts'] }),
+    resultFor('comp-a', {
+      change: 'modified',
+      scope: ['tests/component/a.spec.ts'],
+      dependencies: [{ name: '@nuxt/ui', reason: 'UColorModeButton behavior' }],
+    }),
     resultFor('comp-b'),
   ]
   const outcome = await recordResults({
@@ -451,6 +596,9 @@ test('recordResults 从 base 计划记账,证据绑定 Git HEAD、item 与 scope
   assert.equal(evidence.headSha, outcome.headSha)
   assert.equal(evidence.itemDigest, registryItemDigest(state.graph.byName.get('comp-a')))
   assert.equal(evidence.scopeDigest, computeGitScopeDigest(state.repoRoot, outcome.headSha, evidence.scope))
+  assert.deepEqual(evidence.dependencies, [
+    { name: '@nuxt/ui', version: '4.9.0', reason: 'UColorModeButton behavior' },
+  ])
 })
 
 test('recordResults 要求显式完整 co-review 所有被功能 diff 命中的 evidence owner', async (t) => {
@@ -717,6 +865,90 @@ test('recordResults 对仅 registry itemDigest 变化的 owner 也要求 co-revi
   assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
 })
 
+test('dependency-only 升级只要求绑定 owner co-review,且 recorder 自动更新版本', async (t) => {
+  const state = await dependencyCoReviewFixture(t)
+  const owner = resultFor('comp-c', {
+    change: 'modified',
+    notes: '复审 Nuxt UI 升级后的 UCommandPalette 行为',
+    scope: state.scope,
+    dependencies: [{ name: '@nuxt/ui', reason: 'UCommandPalette empty-state semantics' }],
+    findings: [],
+  })
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+    affected: true,
+  }
+
+  await assert.rejects(recordResults({ ...args, results: [] }), /--affected 输入缺少.*comp-c/)
+  await assert.rejects(recordResults({
+    ...args,
+    results: [{ ...owner, dependencies: [] }],
+  }), /不得静默移除既有 dependency evidence:@nuxt\/ui/)
+
+  await writeFile(path.join(state.repoRoot, 'tests/component/a.spec.ts'), 'export const unrelated = true\n')
+  state.run('add', '-A')
+  state.run('commit', '-q', '-m', 'change unrelated scope candidate')
+  await assert.rejects(recordResults({
+    ...args,
+    results: [{
+      ...owner,
+      scope: [...state.scope, 'tests/component/a.spec.ts'],
+      dependencies: [],
+    }],
+  }), /不得静默移除既有 dependency evidence:@nuxt\/ui/)
+
+  const outcome = await recordResults({ ...args, results: [owner] })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+  assert.deepEqual(outcome.coReviewed, ['comp-c'])
+  assert.deepEqual(persisted.items['comp-c'].evidence.dependencies, [
+    { name: '@nuxt/ui', version: '4.10.0', reason: 'UCommandPalette empty-state semantics' },
+  ])
+  assert.deepEqual((await verifyLedger({ repoRoot: state.repoRoot, ledger: persisted, graph: state.graph })).stale, [])
+})
+
+test('dependency patch_hash 变化也要求 owner co-review,且 recorder 自动更新内容标识', async (t) => {
+  const state = await dependencyCoReviewFixture(t, {
+    fromPatch: 'aaa',
+    toVersion: '4.9.0',
+    toPatch: 'bbb',
+  })
+  const args = {
+    repoRoot: state.repoRoot,
+    ledgerPath: state.ledgerPath,
+    graph: state.graph,
+    ledger: state.ledger,
+    rawLedger: state.raw,
+    planGraph: state.planGraph,
+    planLedger: state.planLedger,
+    baseLedgerRaw: state.baseLedgerRaw,
+    baseSha: state.baseSha,
+    affected: true,
+  }
+  await assert.rejects(recordResults({ ...args, results: [] }), /--affected 输入缺少.*comp-c/)
+  await recordResults({
+    ...args,
+    results: [resultFor('comp-c', {
+      change: 'modified',
+      notes: '复审补丁后的 UCommandPalette 行为',
+      scope: state.scope,
+      dependencies: [{ name: '@nuxt/ui', reason: 'UCommandPalette empty-state semantics' }],
+      findings: [],
+    })],
+  })
+  const persisted = JSON.parse(await readFile(state.ledgerPath, 'utf8'))
+  assert.deepEqual(persisted.items['comp-c'].evidence.dependencies, [
+    { name: '@nuxt/ui', version: '4.9.0', patchHash: 'bbb', reason: 'UCommandPalette empty-state semantics' },
+  ])
+})
+
 test('recordResults 将完整 co-review 计入当前 round 并正常 rollover', async (t) => {
   const state = await roundCoReviewFixture(t)
   const plan = planNext(state.planGraph, state.planLedger)
@@ -947,6 +1179,67 @@ test('verifyLedger 把 registry 删除或改名判为 stale,包括 deferred 条�
   deleted.items = deleted.items.filter(item => item.name !== 'comp-a')
   const report = await verifyLedger({ repoRoot, ledger, graph: await graphFor(repoRoot, deleted) })
   assert.match(report.stale[0].reason, /删除、改名/)
+})
+
+test('verifyLedger 只让 dependency version 变化的绑定 owner stale', async (t) => {
+  const { repoRoot, baseSha } = await fixtureRepo(t, { git: true })
+  const graph = await graphFor(repoRoot)
+  const ledger = v2Ledger()
+  ledger.items['comp-a'] = auditedEntry({
+    evidence: {
+      ...exactEvidence(repoRoot, graph, 'comp-a', baseSha, baseSha, ['foundation/components/A.vue']),
+      dependencies: [{ name: '@nuxt/ui', version: '4.9.0', reason: 'UColorModeButton behavior' }],
+    },
+  })
+  ledger.items['comp-b'] = auditedEntry({
+    evidence: exactEvidence(repoRoot, graph, 'comp-b', baseSha, baseSha, ['foundation/components/B.vue']),
+  })
+  ledger.items['comp-c'] = auditedEntry({
+    status: 'deferred',
+    evidence: {
+      ...exactEvidence(repoRoot, graph, 'comp-c', baseSha, baseSha, ['foundation/components/C.vue']),
+      dependencies: [{ name: '@nuxt/ui', version: '4.9.0', reason: 'UCommandPalette live-region behavior' }],
+    },
+    findings: [{ id: 'f-1', severity: 'low', claim: null, evidence: 'x', disposition: 'open' }],
+  })
+  ledger.items['comp-d'] = auditedEntry({
+    evidence: {
+      ...exactEvidence(repoRoot, graph, 'comp-d', baseSha, baseSha, ['foundation/components/D.vue']),
+      dependencies: [{ name: '@vueuse/core', version: '14.3.0', reason: 'VueUse behavior' }],
+    },
+  })
+
+  await writeFile(path.join(repoRoot, 'pnpm-lock.yaml'), lockfile({ nuxtUi: '4.10.0' }))
+  const report = await verifyLedger({ repoRoot, ledger, graph })
+  assert.deepEqual(report.stale, [
+    { name: 'comp-a', reason: 'dependency @nuxt/ui 已从 4.9.0 变为 4.10.0' },
+    { name: 'comp-c', reason: 'dependency @nuxt/ui 已从 4.9.0 变为 4.10.0' },
+  ])
+  assert.deepEqual(report.holds, ['comp-b', 'comp-d'])
+  assert.deepEqual(report.deferred, [{ name: 'comp-c', openFindings: 1 }])
+
+  await writeFile(path.join(repoRoot, 'pnpm-lock.yaml'), 'not: [valid')
+  const malformed = await verifyLedger({ repoRoot, ledger, graph })
+  assert.deepEqual(malformed.stale.map(item => item.name), ['comp-a', 'comp-c', 'comp-d'])
+  assert.deepEqual(malformed.holds, ['comp-b'])
+})
+
+test('verifyLedger 将同 semver 的 dependency patch_hash 变化判为 stale', async (t) => {
+  const { repoRoot, baseSha } = await fixtureRepo(t, { git: true })
+  const graph = await graphFor(repoRoot)
+  const ledger = v2Ledger()
+  ledger.items['comp-a'] = auditedEntry({
+    evidence: {
+      ...exactEvidence(repoRoot, graph, 'comp-a', baseSha, baseSha, ['foundation/components/A.vue']),
+      dependencies: [{ name: '@nuxt/ui', version: '4.9.0', patchHash: 'aaa', reason: 'patched behavior' }],
+    },
+  })
+  await writeFile(path.join(repoRoot, 'pnpm-lock.yaml'), lockfile({ nuxtUiPatch: 'bbb' }))
+  const report = await verifyLedger({ repoRoot, ledger, graph })
+  assert.deepEqual(report.stale, [{
+    name: 'comp-a',
+    reason: 'dependency @nuxt/ui 已从 4.9.0(patch_hash=aaa) 变为 4.9.0(patch_hash=bbb)',
+  }])
 })
 
 test('CLI 对未知参数和混合模式 fail closed', () => {

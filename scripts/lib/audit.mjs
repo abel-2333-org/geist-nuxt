@@ -12,6 +12,8 @@ import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import semver from 'semver'
+import { parse as parseYaml } from 'yaml'
 import { sha256 } from './registry.mjs'
 
 export const LEDGER_VERSION = 2
@@ -35,6 +37,8 @@ const SCORE_NAMESPACE = 1 // 同命名空间(foundation-* / api-docs-*)
 const SHA_RE = /^[0-9a-f]{40}$/i
 const DIGEST_RE = /^[0-9a-f]{64}$/
 const EVIDENCE_KINDS = ['legacy-v1', 'scope-v1']
+const LOCKFILE_PATH = 'pnpm-lock.yaml'
+const PATCH_HASH_RE = /^[a-z0-9_-]+$/i
 
 export class AuditError extends Error {
   constructor(message, details = []) {
@@ -42,6 +46,152 @@ export class AuditError extends Error {
     this.name = 'AuditError'
     this.details = details
   }
+}
+
+function normalizedDependencyList(dependencies, { resolved = false, label = 'dependencies' } = {}) {
+  if (dependencies === undefined) return []
+  if (!Array.isArray(dependencies)) throw new AuditError(`${label} 必须是数组`)
+  const normalized = dependencies.map((dependency) => {
+    if (!dependency || typeof dependency !== 'object' || Array.isArray(dependency)) {
+      throw new AuditError(`${label} 存在损坏条目`)
+    }
+    const name = typeof dependency.name === 'string' ? dependency.name.trim() : ''
+    const reason = typeof dependency.reason === 'string' ? dependency.reason.trim() : ''
+    if (!name || /\s/.test(name)) throw new AuditError(`${label} 的 package name 非法:${dependency.name ?? '<缺失>'}`)
+    if (!reason) throw new AuditError(`${label} 的 ${name} 缺少 reason`)
+    if (!resolved && (dependency.version !== undefined || dependency.patchHash !== undefined)) {
+      throw new AuditError(`${label} 的 ${name} 不得手填 version/patchHash;由 recorder 从 lockfile 解析`)
+    }
+    if (resolved && (typeof dependency.version !== 'string' || semver.valid(dependency.version) !== dependency.version)) {
+      throw new AuditError(`${label} 的 ${name} version 必须是精确 semver:${dependency.version ?? '<缺失>'}`)
+    }
+    if (resolved && dependency.patchHash !== undefined
+      && (typeof dependency.patchHash !== 'string' || !PATCH_HASH_RE.test(dependency.patchHash))) {
+      throw new AuditError(`${label} 的 ${name} patchHash 非法:${dependency.patchHash}`)
+    }
+    return resolved
+      ? { name, version: dependency.version, ...(dependency.patchHash ? { patchHash: dependency.patchHash } : {}), reason }
+      : { name, reason }
+  }).sort((a, b) => a.name.localeCompare(b.name))
+  const duplicate = normalized.find((dependency, index) => index > 0 && normalized[index - 1].name === dependency.name)
+  if (duplicate) throw new AuditError(`${label} 的 package 重复:${duplicate.name}`)
+  return normalized
+}
+
+function parseLockfile(lockText) {
+  let lock
+  try {
+    lock = parseYaml(lockText)
+  }
+  catch (error) {
+    throw new AuditError(`无法解析 ${LOCKFILE_PATH}:${error.message}`)
+  }
+  if (!lock || typeof lock !== 'object' || Array.isArray(lock)) {
+    throw new AuditError(`${LOCKFILE_PATH} 根必须是对象`)
+  }
+  if (!['9', '9.0'].includes(String(lock.lockfileVersion))) {
+    throw new AuditError(`${LOCKFILE_PATH} lockfileVersion 不受支持:${lock.lockfileVersion ?? '<缺失>'}`)
+  }
+  const importer = lock.importers?.['.']
+  if (!importer || typeof importer !== 'object' || Array.isArray(importer)) {
+    throw new AuditError(`${LOCKFILE_PATH} 缺少根 importer`)
+  }
+  if (!lock.packages || typeof lock.packages !== 'object' || Array.isArray(lock.packages)) {
+    throw new AuditError(`${LOCKFILE_PATH} 缺少 packages snapshots`)
+  }
+  return { importer, packages: lock.packages }
+}
+
+export function resolveLockedDependencies(lockText, declarations) {
+  const normalized = normalizedDependencyList(declarations)
+  if (normalized.length === 0) return []
+  const { importer, packages } = parseLockfile(lockText)
+  const groups = ['dependencies', 'devDependencies', 'optionalDependencies']
+
+  const parseResolution = (name, raw) => {
+    if (typeof raw !== 'string') throw new AuditError(`${LOCKFILE_PATH} 的 ${name} 缺少解析版本`)
+    const suffix = raw.indexOf('(')
+    const version = suffix === -1 ? raw : raw.slice(0, suffix)
+    if (semver.valid(version) !== version) {
+      throw new AuditError(`${LOCKFILE_PATH} 的 ${name} 不是受支持的精确 semver:${raw}`)
+    }
+    const context = suffix === -1 ? '' : raw.slice(suffix)
+    const patch = /^\(patch_hash=([^()]+)\)/.exec(context)?.[1]
+    if ((context.startsWith('(patch_hash') && !patch) || (patch && !PATCH_HASH_RE.test(patch))) {
+      throw new AuditError(`${LOCKFILE_PATH} 的 ${name} patch_hash 非法:${raw}`)
+    }
+    return { version, ...(patch ? { patchHash: patch } : {}) }
+  }
+  const identityOf = resolution => `${resolution.version}\0${resolution.patchHash ?? ''}`
+  const packageResolutions = (name) => {
+    const prefix = `${name}@`
+    const resolutions = Object.keys(packages)
+      .filter(key => key.startsWith(prefix))
+      .map(key => parseResolution(name, key.slice(prefix.length)))
+    return [...new Map(resolutions.map(resolution => [identityOf(resolution), resolution])).values()]
+  }
+
+  return normalized.map(({ name, reason }) => {
+    const matches = groups
+      .map(group => importer[group]?.[name])
+      .filter(value => value !== undefined)
+    const rawVersions = matches.map(value => typeof value === 'string' ? value : value?.version)
+    const resolutions = matches.length > 0
+      ? rawVersions.map(version => parseResolution(name, version))
+      : packageResolutions(name)
+    const unique = [...new Map(resolutions.map(resolution => [identityOf(resolution), resolution])).values()]
+    if (unique.length === 0) {
+      throw new AuditError(`${LOCKFILE_PATH} 缺少 dependency resolution ${name}`)
+    }
+    if (unique.length !== 1) {
+      throw new AuditError(`${LOCKFILE_PATH} 的 ${name} 解析到多个内容版本:${unique.map(identityOf).join('、')}`)
+    }
+    const [resolution] = unique
+    const snapshots = packageResolutions(name)
+    if (!snapshots.some(snapshot => identityOf(snapshot) === identityOf(resolution))) {
+      throw new AuditError(`${LOCKFILE_PATH} 缺少 ${name}@${resolution.version} 匹配的 package snapshot`)
+    }
+    return { name, ...resolution, reason }
+  })
+}
+
+function resolveGitDependencies(repoRoot, revision, declarations) {
+  const normalized = normalizedDependencyList(declarations)
+  return normalized.length === 0
+    ? []
+    : resolveLockedDependencies(readGitFile(repoRoot, revision, LOCKFILE_PATH), normalized)
+}
+
+async function resolveCurrentDependencies(repoRoot, declarations) {
+  const normalized = normalizedDependencyList(declarations)
+  if (normalized.length === 0) return []
+  let lockText
+  try {
+    const absolute = path.join(repoRoot, LOCKFILE_PATH)
+    const info = await fs.lstat(absolute)
+    if (info.isSymbolicLink() || !info.isFile()) throw new AuditError(`${LOCKFILE_PATH} 必须是普通文件`)
+    lockText = await fs.readFile(absolute, 'utf8')
+  }
+  catch (error) {
+    if (error instanceof AuditError) throw error
+    throw new AuditError(`${LOCKFILE_PATH} 不可读:${error?.code ?? error?.message}`)
+  }
+  return resolveLockedDependencies(lockText, normalized)
+}
+
+function changedDependencies(previous, current) {
+  const currentByName = new Map(current.map(dependency => [dependency.name, dependency]))
+  return (previous ?? []).filter((dependency) => {
+    const next = currentByName.get(dependency.name)
+    return next?.version !== dependency.version || (next?.patchHash ?? null) !== (dependency.patchHash ?? null)
+  })
+}
+
+function dependencyResolutionLabel(dependency) {
+  if (!dependency) return '<缺失>'
+  return dependency.patchHash
+    ? `${dependency.version}(patch_hash=${dependency.patchHash})`
+    : dependency.version
 }
 
 function namespaceOf(name) {
@@ -353,6 +503,19 @@ export function assertLedgerV2(ledger) {
           || normalized.some((value, index) => value !== evidence.scope[index])
           || sorted.some((value, index) => value !== normalized[index])) {
           fail(`${name}.evidence.scope 必须规范化、唯一且有序`)
+        }
+        let dependencies
+        try {
+          dependencies = normalizedDependencyList(evidence.dependencies, {
+            resolved: true,
+            label: `${name}.evidence.dependencies`,
+          })
+        }
+        catch (error) {
+          fail(error.message)
+        }
+        if (evidence.dependencies !== undefined && JSON.stringify(dependencies) !== JSON.stringify(evidence.dependencies)) {
+          fail(`${name}.evidence.dependencies 必须规范化、唯一且按 package name 排序`)
         }
       }
     }
@@ -858,10 +1021,21 @@ function impactedEvidenceOwners(repoRoot, baseSha, headSha, ledger, graph, plann
     .map(([name, entry]) => ({
       name,
       changed: entry.evidence.scope.filter(scope => hasCommittedScopeChange(repoRoot, baseSha, headSha, [scope])),
+      changedDependencies: (() => {
+        const previous = entry.evidence.dependencies ?? []
+        if (previous.length === 0) return []
+        try {
+          const current = resolveGitDependencies(repoRoot, headSha, previous.map(({ name, reason }) => ({ name, reason })))
+          return changedDependencies(previous, current)
+        }
+        catch {
+          return previous
+        }
+      })(),
       topologyChanged: !graph.byName.has(name)
         || registryItemDigest(graph.byName.get(name)) !== entry.evidence.itemDigest,
     }))
-    .filter(owner => owner.changed.length > 0 || owner.topologyChanged)
+    .filter(owner => owner.changed.length > 0 || owner.changedDependencies.length > 0 || owner.topologyChanged)
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
@@ -931,6 +1105,7 @@ export async function recordResults({
   )
   const impacted = impacts.map(owner => owner.name)
   const impactByName = new Map(impacts.map(owner => [owner.name, owner.changed]))
+  const dependencyImpactByName = new Map(impacts.map(owner => [owner.name, owner.changedDependencies]))
   const coReviewed = affected
     ? [...resultNames].sort()
     : results.filter(result => result.coReview === true).map(result => result.item).sort()
@@ -972,6 +1147,38 @@ export async function recordResults({
       throw new AuditError(`${name} 标记 verified 却仍有 open finding`)
     }
     const scope = resolveScope(item, result.scope ?? [])
+    const dependencies = resolveGitDependencies(repoRoot, evidenceHeadSha, result.dependencies)
+    const previousEvidence = ledger.items[name]?.evidence?.kind === 'scope-v1'
+      ? ledger.items[name].evidence
+      : null
+    const previousDependencies = previousEvidence?.dependencies ?? []
+    let dependencyChanges = dependencyImpactByName.get(name) ?? []
+    if (!coReview && previousDependencies.length > 0) {
+      try {
+        const currentPrevious = resolveGitDependencies(
+          repoRoot,
+          evidenceHeadSha,
+          previousDependencies.map(({ name, reason }) => ({ name, reason })),
+        )
+        dependencyChanges = changedDependencies(previousDependencies, currentPrevious)
+      }
+      catch {
+        dependencyChanges = previousDependencies
+      }
+    }
+    const missingDependencies = previousDependencies.filter(
+      dependency => !dependencies.some(current => current.name === dependency.name),
+    )
+    const baseItem = planGraph.byName.get(name)
+    const owningContractChanged = (previousEvidence?.scope.length > 0
+      && hasCommittedScopeChange(repoRoot, normalizedBaseSha, evidenceHeadSha, previousEvidence.scope))
+      || !baseItem
+      || registryItemDigest(baseItem) !== registryItemDigest(item)
+    const explicitlyRemovesDependency = result.dependencies !== undefined
+      && owningContractChanged
+    if (missingDependencies.length > 0 && !explicitlyRemovesDependency) {
+      throw new AuditError(`${name} 不得静默移除既有 dependency evidence:${missingDependencies.map(item => item.name).join('、')}`)
+    }
     if (coReview) {
       const dropped = impactByName.get(name)
         .filter(path => isGitScopeFile(repoRoot, evidenceHeadSha, path))
@@ -980,22 +1187,26 @@ export async function recordResults({
         throw new AuditError(`${name} 的 coReview scope 不得移除受影响的 base scope 路径:${dropped.join('、')}`)
       }
     }
-    if (result.change === 'modified' && !hasCommittedChange(repoRoot, normalizedBaseSha, evidenceHeadSha, scope)) {
+    if (result.change === 'modified'
+      && dependencyChanges.length === 0
+      && !hasCommittedChange(repoRoot, normalizedBaseSha, evidenceHeadSha, scope)) {
       throw new AuditError(`${name} 标记 modified,但 base 与功能提交之间的 registry/scope 没有变化`)
     }
+    const evidence = {
+      kind: 'scope-v1',
+      baseSha: normalizedBaseSha,
+      headSha: evidenceHeadSha,
+      itemDigest: registryItemDigest(item),
+      scope,
+      scopeDigest: computeGitScopeDigest(repoRoot, evidenceHeadSha, scope),
+    }
+    if (dependencies.length > 0) evidence.dependencies = dependencies
     nextEntries.set(name, {
       round: affected ? ledger.items[name].round : plan.round,
       lastAuditedAt: now,
       change: result.change,
       status: result.status,
-      evidence: {
-        kind: 'scope-v1',
-        baseSha: normalizedBaseSha,
-        headSha: evidenceHeadSha,
-        itemDigest: registryItemDigest(item),
-        scope,
-        scopeDigest: computeGitScopeDigest(repoRoot, evidenceHeadSha, scope),
-      },
+      evidence,
       notes: result.notes ?? null,
       findings,
     })
@@ -1052,6 +1263,29 @@ export async function verifyLedger({ repoRoot, ledger, graph }) {
     if (registryItemDigest(item) !== entry.evidence.itemDigest) {
       report.stale.push({ name, reason: 'registry item 拓扑或公开 metadata 已变化' })
       continue
+    }
+    const dependencies = entry.evidence.dependencies ?? []
+    if (dependencies.length > 0) {
+      let current
+      try {
+        current = await resolveCurrentDependencies(
+          repoRoot,
+          dependencies.map(({ name, reason }) => ({ name, reason })),
+        )
+      }
+      catch (error) {
+        report.stale.push({ name, reason: `dependency evidence 不可解析:${error.message}` })
+        continue
+      }
+      const changed = changedDependencies(dependencies, current)
+      if (changed.length > 0) {
+        const currentByName = new Map(current.map(dependency => [dependency.name, dependency]))
+        report.stale.push({
+          name,
+          reason: changed.map(dependency => `dependency ${dependency.name} 已从 ${dependencyResolutionLabel(dependency)} 变为 ${dependencyResolutionLabel(currentByName.get(dependency.name))}`).join(';'),
+        })
+        continue
+      }
     }
     let digest = null
     try {
