@@ -66,7 +66,7 @@ pnpm geist:update -- --target <consumer> --to <checkout-40-char-sha> --write
 pnpm geist:check -- --target <consumer>
 ```
 
-前一条 copy / update 命令都是 dry-run；确认 plan 后才运行带 `--write` 的后一条。两条 runtime 命令与 `geist:skill` 均支持 `--json` 输出 versioned machine-readable plan（schema 见 `references/registry.md`），供下游 sync orchestrator 消费。`--to` 必须是当前 clean checkout `HEAD` 的精确 40 位 SHA，它只做一致性断言；foundation / kit / registry 未提交时工具会拒绝生成 lock。工具会解析 `registryDependencies` 与所选闭包的 `packageDependencies`，整切片复制 component + composable + util + config / CSS，并在 `geist.lock.json` 记录来源、文件闭包与待安装 package requirements；copy-in 不修改消费项目 `package.json`。参数和冲突策略见 `references/registry.md`；不要绕过工具手抄。
+前一条 copy / update 命令都是 dry-run；确认 plan 后才运行带 `--write` 的后一条。两条 runtime 命令与 `geist:skill` 均支持 `--json` 输出 versioned machine-readable plan，`--write --expect-plan <planDigest>` 执行 guarded apply（plan 漂移以 `PLAN_CHANGED` 零写入失败），`--write --json` 输出 apply result；schema 见 `references/registry.md`，供下游 sync orchestrator 消费。`--to` 必须是当前 clean checkout `HEAD` 的精确 40 位 SHA，它只做一致性断言；foundation / kit / registry 未提交时工具会拒绝生成 lock。工具会解析 `registryDependencies` 与所选闭包的 `packageDependencies`，整切片复制 component + composable + util + config / CSS，并在 `geist.lock.json` 记录来源、文件闭包与待安装 package requirements；copy-in 不修改消费项目 `package.json`。参数和冲突策略见 `references/registry.md`；不要绕过工具手抄。
 
 ## 硬规则
 

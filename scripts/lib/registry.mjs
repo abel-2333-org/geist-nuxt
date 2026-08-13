@@ -45,10 +45,11 @@ const PROTECTED_TARGETS = new Set([
 const MANAGED_MAIN_CSS_TARGET = 'app/assets/css/main.css'
 
 export class RegistryError extends Error {
-  constructor(message, details = []) {
+  constructor(message, details = [], { code } = {}) {
     super(message)
     this.name = 'RegistryError'
     this.details = details
+    if (code) this.code = code
   }
 }
 
@@ -89,6 +90,55 @@ function canonicalize(value) {
 export function planDocumentDigest(document) {
   const { planDigest: _planDigest, ...rest } = document
   return sha256(JSON.stringify(canonicalize(rest)))
+}
+
+export function assertExpectedPlanDigest(document, expected) {
+  const normalized = String(expected).toLowerCase()
+  if (!/^[0-9a-f]{64}$/.test(normalized)) {
+    throw new RegistryError(`--expect-plan must be a 64-character sha256 plan digest, received: ${expected}`)
+  }
+  if (normalized !== document.planDigest) {
+    throw new RegistryError(
+      `plan changed between dry-run and apply: expected plan digest ${normalized}, current plan is ${document.planDigest}; no files were written`,
+      [],
+      { code: 'PLAN_CHANGED' },
+    )
+  }
+  return normalized
+}
+
+// Apply result (issue #84): the recomputed plan document plus what actually
+// happened per operation. `skipped` covers operations that need no filesystem
+// mutation (planned unchanged, or delete of an already-missing target).
+export function buildApplyResult(document, { expectedPlanDigest = null, lockSourceSha = null } = {}) {
+  return {
+    ...document,
+    apply: {
+      expectedPlanDigest,
+      lockSourceSha,
+      operations: document.operations.map(operation => ({
+        target: operation.target,
+        action: operation.action,
+        outcome: operation.action === 'unchanged' || (operation.action === 'delete' && operation.beforeHash === null)
+          ? 'skipped'
+          : 'applied',
+      })),
+    },
+  }
+}
+
+export function printPlanError(error, jsonMode) {
+  if (jsonMode && error instanceof RegistryError) {
+    console.log(JSON.stringify({
+      error: {
+        code: error.code ?? 'REGISTRY_ERROR',
+        message: error.message,
+        details: error.details ?? [],
+      },
+    }, null, 2))
+    return
+  }
+  printRegistryError(error)
 }
 
 export function assertExactSha(value, label = 'source SHA') {
@@ -1056,6 +1106,22 @@ export async function applyCopyPlan(plan) {
   await assertNoSymlinkTarget(plan.consumerRoot, LOCK_FILE)
   for (const operation of plan.operations) {
     await assertNoSymlinkTarget(plan.consumerRoot, operation.target)
+  }
+  // Every planned before-state must still hold before the first mutation, so a
+  // target edited between planning and applying fails closed with zero writes
+  // instead of being silently overwritten or deleted (issue #84 PLAN_CHANGED).
+  for (const operation of plan.operations) {
+    const current = await fileHash(operation.targetPath)
+    if (
+      current.exists !== (operation.targetHash !== undefined)
+      || (current.exists && current.hash !== operation.targetHash)
+    ) {
+      throw new RegistryError(
+        `consumer target changed after planning: ${operation.target}; no files were written`,
+        [operation.target],
+        { code: 'PLAN_CHANGED' },
+      )
+    }
   }
   for (const operation of plan.operations) {
     if (operation.action === 'delete') {

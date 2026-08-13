@@ -72,8 +72,9 @@ test('parses only the narrow geist:skill CLI contract', () => {
   assert.throws(() => parseAgentSkillArgs(['item']), /does not accept positional/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--all']), /unsupported/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--write', '--dry-run']), /cannot be combined/)
-  assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--json', '--write']), /dry-run output mode/)
   assert.equal(parseAgentSkillArgs(['--target', 'app', '--json']).json, true)
+  assert.equal(parseAgentSkillArgs(['--target', 'app', '--write', '--expect-plan', 'a'.repeat(64)])['expect-plan'], 'a'.repeat(64))
+  assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--expect-plan', 'a'.repeat(64)]), /--expect-plan requires --write/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--consumer', 'other']), /cannot be combined/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--to', sourceSha, '--sha', sourceSha]), /cannot be combined/)
 })
@@ -139,10 +140,47 @@ test('emits a versioned machine-readable skill plan without writing files', asyn
   assert.equal(converged.summary.create + converged.summary.update + converged.summary.delete, 0)
   assert.deepEqual(converged.summary.verification, [])
   assert.deepEqual(converged.consumer, { lockPresent: true, lockSourceSha: sourceSha })
+})
 
-  const combined = runCli(['--target', consumer, '--json', '--write'])
-  assert.notEqual(combined.status, 0)
-  assert.match(combined.stderr, /dry-run output mode/)
+test('guarded skill apply verifies the expected digest and fails closed on PLAN_CHANGED', async () => {
+  const consumer = await makeConsumer()
+  const staleDigest = JSON.parse(runCli(['--target', consumer, '--json']).stdout).planDigest
+
+  // Materializing one target with exact source content flips its planned action
+  // to unchanged, so the recomputed plan legitimately differs from the dry-run.
+  await mkdir(path.join(consumer, AGENT_SKILL_ROOT), { recursive: true })
+  await writeFile(
+    path.join(consumer, AGENT_SKILL_ROOT, 'SKILL.md'),
+    await readFile(path.join(root, 'SKILL.md')),
+  )
+
+  const changed = runCli(['--target', consumer, '--write', '--expect-plan', staleDigest, '--json'])
+  assert.notEqual(changed.status, 0)
+  const failure = JSON.parse(changed.stdout)
+  assert.equal(failure.error.code, 'PLAN_CHANGED')
+  assert.match(failure.error.message, /no files were written/)
+  await assert.rejects(
+    readFile(path.join(consumer, AGENT_SKILL_ROOT, AGENT_SKILL_LOCK)),
+    error => error?.code === 'ENOENT',
+  )
+  await assert.rejects(lstat(path.join(consumer, CLAUDE_SKILL_LINK)), error => error?.code === 'ENOENT')
+
+  const malformed = runCli(['--target', consumer, '--write', '--expect-plan', 'not-a-digest'])
+  assert.notEqual(malformed.status, 0)
+  assert.match(malformed.stderr, /64-character sha256 plan digest/)
+
+  const current = JSON.parse(runCli(['--target', consumer, '--json']).stdout)
+  const write = runCli(['--target', consumer, '--write', '--expect-plan', current.planDigest, '--json'])
+  assert.equal(write.status, 0, write.stderr)
+  const result = JSON.parse(write.stdout)
+  assert.equal(result.planDigest, current.planDigest)
+  assert.equal(result.apply.expectedPlanDigest, current.planDigest)
+  assert.equal(result.apply.lockSourceSha, sourceSha)
+  const outcomes = new Map(result.apply.operations.map(operation => [operation.target, operation.outcome]))
+  assert.equal(outcomes.get(`${AGENT_SKILL_ROOT}/SKILL.md`), 'skipped')
+  assert.equal(outcomes.get(CLAUDE_SKILL_LINK), 'applied')
+  assert.equal(result.apply.operations.every(operation => ['applied', 'skipped'].includes(operation.outcome)), true)
+  assert.match(await readFile(path.join(consumer, AGENT_SKILL_ROOT, AGENT_SKILL_LOCK), 'utf8'), /"sourceSha"/)
 })
 
 test('ignores OS artifacts like .DS_Store under the installed skill', async () => {

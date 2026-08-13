@@ -3,12 +3,15 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   applyCopyPlan,
+  assertExpectedPlanDigest,
+  buildApplyResult,
   buildRuntimePlanDocument,
   loadRegistry,
   parseArgs,
   planCopy,
-  printRegistryError,
+  printPlanError,
   readLock,
+  RegistryError,
   resolveCopyRequest,
   resolveSourceSha,
   validateRegistry,
@@ -16,20 +19,21 @@ import {
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
+let options
 try {
-  const options = parseArgs(process.argv.slice(2))
-  if (options.json && options.write) {
-    throw new Error('--json is a dry-run output mode; guarded apply output ships with the plan digest contract')
+  options = parseArgs(process.argv.slice(2))
+  if (options.expect_plan !== undefined && !options.write) {
+    throw new RegistryError('--expect-plan requires --write')
   }
   const consumerRoot = path.resolve(options.target ?? options.consumer ?? '')
-  if (!options.target && !options.consumer) throw new Error('--target <consumer-directory> is required')
+  if (!options.target && !options.consumer) throw new RegistryError('--target <consumer-directory> is required')
   const registryPath = path.resolve(options.registry ?? path.join(repoRoot, 'registry.json'))
   const registry = await loadRegistry(registryPath)
   await validateRegistry(registry, { repoRoot, checkFiles: true })
 
   const requested = options.all ? registry.items.map(item => item.name) : options.items
   const lock = await readLock(consumerRoot)
-  if (options.update && !lock) throw new Error('--update requires an existing geist.lock.json')
+  if (options.update && !lock) throw new RegistryError('--update requires an existing geist.lock.json')
   const resolution = resolveCopyRequest(registry, requested, { lock, update: options.update })
   const sourceSha = resolveSourceSha(repoRoot, options.sha ?? options.to, {
     allowDirty: process.env.GEIST_REGISTRY_TEST_ALLOW_DIRTY === '1',
@@ -45,23 +49,38 @@ try {
     sourceSha,
     update: Boolean(lock),
   })
-  const counts = plan.operations.reduce((result, operation) => {
-    result[operation.action] = (result[operation.action] ?? 0) + 1
-    return result
-  }, {})
+  const document = buildRuntimePlanDocument(plan)
+  const expectedPlanDigest = options.expect_plan !== undefined
+    ? assertExpectedPlanDigest(document, options.expect_plan)
+    : null
 
-  if (options.json) {
-    console.log(JSON.stringify(buildRuntimePlanDocument(plan), null, 2))
-  }
-  else if (!options.write) {
-    console.log(`Dry run (${sourceSha}): ${resolution.items.length} items, ${resolution.files.length} files`)
-    for (const operation of plan.operations) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
-    console.log('No files written. Re-run with --write to apply the complete batch.')
+  if (!options.write) {
+    if (options.json) {
+      console.log(JSON.stringify(document, null, 2))
+    }
+    else {
+      console.log(`Dry run (${sourceSha}): ${resolution.items.length} items, ${resolution.files.length} files`)
+      for (const operation of plan.operations) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
+      console.log('No files written. Re-run with --write to apply the complete batch.')
+    }
   }
   else {
-    await applyCopyPlan(plan)
-    console.log(`Copied registry batch (${sourceSha}): ${JSON.stringify(counts)}`)
-    console.log(`Lock written: ${path.join(consumerRoot, 'geist.lock.json')}`)
+    const nextLock = await applyCopyPlan(plan)
+    if (options.json) {
+      console.log(JSON.stringify(buildApplyResult(document, {
+        expectedPlanDigest,
+        lockSourceSha: nextLock.registry.lastSourceSha,
+      }), null, 2))
+    }
+    else {
+      const counts = plan.operations.reduce((result, operation) => {
+        result[operation.action] = (result[operation.action] ?? 0) + 1
+        return result
+      }, {})
+      if (expectedPlanDigest) console.log(`Plan digest verified: ${expectedPlanDigest}`)
+      console.log(`Copied registry batch (${sourceSha}): ${JSON.stringify(counts)}`)
+      console.log(`Lock written: ${path.join(consumerRoot, 'geist.lock.json')}`)
+    }
   }
   if (!options.json) {
     console.log('Resolved external packages:')
@@ -71,6 +90,6 @@ try {
   }
 }
 catch (error) {
-  printRegistryError(error)
+  printPlanError(error, Boolean(options?.json))
   process.exitCode = 1
 }

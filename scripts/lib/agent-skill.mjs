@@ -337,6 +337,7 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
     sourceSha,
     operations,
     installedLock,
+    nextLockSourceSha: nextLock.sourceSha,
     registry: { name: registry.name, repository: registry.repository },
   }
 }
@@ -428,13 +429,13 @@ export async function applyAgentSkillPlan(plan) {
         || current.exists !== operation.before.exists
         || current.target !== operation.before.target
       ) {
-        throw new RegistryError(`agent skill target changed after planning: ${operation.target}`)
+        throw new RegistryError(`agent skill target changed after planning: ${operation.target}`, [operation.target], { code: 'PLAN_CHANGED' })
       }
       continue
     }
     const current = await state(path.join(plan.consumerRoot, operation.target))
     if (current.exists !== operation.before.exists || current.hash !== operation.before.hash) {
-      throw new RegistryError(`agent skill target changed after planning: ${operation.target}`)
+      throw new RegistryError(`agent skill target changed after planning: ${operation.target}`, [operation.target], { code: 'PLAN_CHANGED' })
     }
   }
 
@@ -462,7 +463,7 @@ export async function applyAgentSkillPlan(plan) {
       await assertNoSymlinkPath(plan.consumerRoot, operation.target)
       const current = await state(targetPath)
       if (current.exists !== operation.before.exists || current.hash !== operation.before.hash) {
-        throw new RegistryError(`agent skill target changed before mutation: ${operation.target}`)
+        throw new RegistryError(`agent skill target changed before mutation: ${operation.target}`, [operation.target], { code: 'PLAN_CHANGED' })
       }
       if (operation.action === 'delete') {
         await unlink(targetPath)
@@ -481,7 +482,7 @@ export async function applyAgentSkillPlan(plan) {
       await assertNoSymlinkPath(plan.consumerRoot, manifest.target)
       const current = await state(manifestPath)
       if (current.exists !== manifest.before.exists || current.hash !== manifest.before.hash) {
-        throw new RegistryError(`agent skill target changed before mutation: ${manifest.target}`)
+        throw new RegistryError(`agent skill target changed before mutation: ${manifest.target}`, [manifest.target], { code: 'PLAN_CHANGED' })
       }
       const staged = path.join(staging, sha256(manifest.target))
       await rename(staged, manifestPath)
@@ -492,7 +493,7 @@ export async function applyAgentSkillPlan(plan) {
       const adapterPath = path.join(plan.consumerRoot, adapter.target)
       const current = await adapterState(plan.consumerRoot)
       if (current.exists || current.conflict) {
-        throw new RegistryError(`agent skill target changed before mutation: ${adapter.target}`)
+        throw new RegistryError(`agent skill target changed before mutation: ${adapter.target}`, [adapter.target], { code: 'PLAN_CHANGED' })
       }
       await mkdir(path.dirname(adapterPath), { recursive: true })
       await assertNoSymlinkPath(plan.consumerRoot, adapter.target, { allowLeafSymlink: true })
@@ -515,7 +516,7 @@ export async function applyAgentSkillPlan(plan) {
 
 export function parseAgentSkillArgs(argv) {
   const options = {}
-  const allowedValues = new Set(['--consumer', '--sha', '--target', '--to'])
+  const allowedValues = new Set(['--consumer', '--expect-plan', '--sha', '--target', '--to'])
   const allowedFlags = new Set(['--dry-run', '--json', '--write'])
   for (let index = 0; index < argv.length; index++) {
     const argument = argv[index]
@@ -539,8 +540,8 @@ export function parseAgentSkillArgs(argv) {
       : 'geist:skill does not accept positional items')
   }
   if (options.write && options.dry_run) throw new RegistryError('--write and --dry-run cannot be combined')
-  if (options.write && options.json) {
-    throw new RegistryError('--json is a dry-run output mode; guarded apply output ships with the plan digest contract')
+  if (options['expect-plan'] !== undefined && !options.write) {
+    throw new RegistryError('--expect-plan requires --write')
   }
   if (!options.target && !options.consumer) throw new RegistryError('--target <consumer-directory> is required')
   if (options.target && options.consumer) throw new RegistryError('--target and --consumer cannot be combined')

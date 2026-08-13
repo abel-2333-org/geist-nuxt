@@ -479,15 +479,23 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
     }
     await checkConsumer({ registry: baseRegistry, repoRoot: sourceRoot, consumerRoot })
 
-    run(process.execPath, [
+    const headUpdateArgs = [
       path.join(repoRoot, 'scripts/copy-registry.mjs'),
       '--update',
       '--target',
       consumerRoot,
       '--to',
       headSha,
-      '--write',
-    ], repoRoot)
+    ]
+    const headPlan = JSON.parse(capture(process.execPath, [...headUpdateArgs, '--json'], repoRoot))
+    const headApply = JSON.parse(capture(
+      process.execPath,
+      [...headUpdateArgs, '--write', '--expect-plan', headPlan.planDigest, '--json'],
+      repoRoot,
+    ))
+    if (headApply.planDigest !== headPlan.planDigest || headApply.apply.expectedPlanDigest !== headPlan.planDigest) {
+      throw new Error('consumer upgrade: guarded apply result does not echo the reviewed plan digest')
+    }
     const updated = await snapshot()
     if (JSON.stringify(before) !== JSON.stringify(updated)) {
       throw new Error('HEAD update modified a protected consumer file')
@@ -917,7 +925,21 @@ try {
           ) {
             throw new Error(`${scenario.label}: fresh-install plan must be fully attributed create operations`)
           }
-          run(process.execPath, [...copyArgs, '--write'], repoRoot, copyEnv)
+          const applyResult = JSON.parse(capture(
+            process.execPath,
+            [...copyArgs, '--write', '--expect-plan', planDocument.planDigest, '--json'],
+            repoRoot,
+            copyEnv,
+          ))
+          if (applyResult.planDigest !== planDocument.planDigest) {
+            throw new Error(`${scenario.label}: guarded apply result does not echo the expected plan digest`)
+          }
+          if (!applyResult.apply.operations.every(operation => operation.outcome === 'applied')) {
+            throw new Error(`${scenario.label}: fresh-install guarded apply must apply every operation`)
+          }
+          if (applyResult.apply.lockSourceSha !== sourceSha) {
+            throw new Error(`${scenario.label}: guarded apply did not record the expected lock source SHA`)
+          }
 
           const after = await protectedHashes(consumerRoot)
           if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error(`${scenario.label}: copy-in modified a protected consumer file`)
