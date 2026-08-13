@@ -102,13 +102,13 @@ pnpm geist:copy -- geist-foundation <item...> \
 
 ## 机器可读 sync plan（`--json`）
 
-`geist:copy` / `geist:update` / `geist:skill` 接受 `--json`，把 dry-run plan 以 versioned JSON 输出到 stdout；这是给下游 sync orchestrator 的机器契约，人工流程继续用默认文本输出。`--json` 是纯 dry-run 输出模式，不写任何文件，不能与 `--write` 组合（guarded apply 与 apply result 输出随 expected plan digest 契约交付）。
+`geist:copy` / `geist:update` / `geist:skill` 接受 `--json`，把 dry-run plan 以 versioned JSON 输出到 stdout；这是给下游 sync orchestrator 的机器契约，人工流程继续用默认文本输出。`--json` 单独使用时是纯 dry-run 输出模式，不写任何文件；与 `--write` 组合时执行 guarded apply 并输出 apply result（见下文）。
 
 runtime 与 skill plan 共用同一 schema family（`planSchemaVersion: 1`），`kind` 分别为 `runtime` / `skill`：
 
 - `registry`：`name` 与 `repository`，绑定 plan 所属 registry；
 - `sourceSha`：与 `--to` 同语义的精确 40 位 checkout SHA；runtime 与 skill plan 必须绑定同一 SHA；
-- `consumer.lockPresent` / `consumer.lockSourceSha`：consumer 受管状态摘要；
+- `consumer.lockPresent` / `consumer.lockSourceSha` / `consumer.lockHash`：consumer 受管状态摘要；runtime 的 `lockHash` 是 plan 读取到的 raw `geist.lock.json` sha256（lock 缺失时为 `null`），参与 `planDigest` 与 apply 前置校验；
 - `operations[]`：按 `target` 排序。每条含 `action`（`create` / `update` / `delete` / `unchanged`）、稳定 `owner`（`item:<name>` 或 `skill:geist-nuxt`）、repo 相对 `source`（无源侧为 `null`）、consumer 相对 `target`、`beforeHash` / `afterHash`（缺失侧为 `null`）与 canonical 顺序的 `verification` tags；skill adapter symlink 以 `link` 表达且两侧 hash 为 `null`；
 - `packageOperations[]` / `consumerSetupOperations[]`：相对 lock 记录 requirements 的结构化 diff（`add` / `remove` / `change`）；
 - `configMigrations[]`：同一 owner 在一个 plan 内同时 create 与 delete target 即视为受管文件迁移，`from` / `to` 列出两侧 target；
@@ -119,6 +119,14 @@ runtime 与 skill plan 共用同一 schema family（`planSchemaVersion: 1`），
 文档不含绝对路径与时间戳；同一 checkout、consumer state 与参数下，输出与 digest 确定性一致。仅 `sourceSha` 重写、内容 hash 未变化的 target 保持 `unchanged`，不贡献 `summary.verification`。
 
 delete operation 的 tags 按序解析：当前 registry item → lock 记录的 `verification` → 全量词表保守 fallback（宁可过度验证，不猜测）；`verificationSource`（`registry` / `lock` / `vocabulary-fallback`）标记来源。
+
+### Guarded apply 与 apply result
+
+`--write --expect-plan <planDigest>` 执行 guarded apply：write 调用会从磁盘完整重算 plan（target、lock 与全部 consumer input 都参与 digest），重算 digest 与期望值不一致时以 `PLAN_CHANGED` 失败且零写入。apply 在首个 mutation 前还会复核 plan 记录的全部 target before-state 与 raw lock hash，dry-run 与 apply 之间任何 target 或 lock 变化同样 `PLAN_CHANGED` 零写入。`--expect-plan` 只能与 `--write` 组合，取值必须是 64 位 sha256 plan digest。
+
+`--write --json` 输出 apply result：在重算的 plan 文档上追加 `apply` 段——`expectedPlanDigest`（未传 `--expect-plan` 时为 `null`）、写后 lock 的 `lockSourceSha`、以及每个 operation 的实际 `outcome`（`applied` = 发生文件系统变更；`skipped` = 无需变更，即 planned `unchanged` 或 target 已缺失的 delete）。注意 skill sync 在 payload 无变化时保留 installed sourceSha（`.geist-skill.json` 语义），此时 `apply.lockSourceSha` 可以早于本次 `sourceSha`，consumer 不应把两者强行画等号。consumer 校验 apply result 的 `planDigest` 等于评审过的 dry-run digest，即证明 plan 与最终写入结果一致。
+
+`--json` 模式下所有错误（含意外异常）输出结构化 JSON `{ "error": { "code", "message", "details" } }` 到 stdout 并以非零退出；`code` 为 `PLAN_CHANGED`、缺省 `REGISTRY_ERROR`，意外异常透传原生 code（如 `EACCES`）或 `UNEXPECTED`。orchestrator 推荐流程：`--json` 出 plan → 审阅/选择验证集 → `--write --expect-plan <digest> --json` → 校验 apply result → 再次 `--json` 确认收敛零变化。
 
 ## `geist.lock.json` 契约
 

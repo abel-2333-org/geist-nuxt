@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -11,7 +11,9 @@ import {
   VERIFICATION_TAGS,
   applyCopyPlan,
   assertExactSha,
+  assertExpectedPlanDigest,
   assertSafeTarget,
+  buildApplyResult,
   buildRuntimePlanDocument,
   checkConsumer,
   compareCodeUnits,
@@ -20,6 +22,7 @@ import {
   parseShard,
   planCopy,
   planDocumentDigest,
+  printPlanError,
   readLock,
   resolveCopyRequest,
   resolveItems,
@@ -557,7 +560,7 @@ test('emits a versioned machine-readable runtime plan with deterministic digest'
   assert.equal(document.kind, 'runtime')
   assert.deepEqual(document.registry, { name: 'fixture', repository: 'https://example.test/fixture.git' })
   assert.equal(document.sourceSha, SOURCE_SHA)
-  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null })
+  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null, lockHash: null })
   assert.deepEqual(
     document.operations.map(operation => [operation.action, operation.owner, operation.target]),
     [
@@ -610,6 +613,149 @@ test('sorts runtime plan operations by locale-independent code-unit order', () =
   })
 
   assert.deepEqual(document.operations.map(entry => entry.target), ['z.vue', 'ä.vue'])
+})
+
+test('expected plan digest gate validates format and fails closed on drift', () => {
+  const document = { planDigest: 'a'.repeat(64) }
+  assert.equal(assertExpectedPlanDigest(document, 'A'.repeat(64)), 'a'.repeat(64))
+  assert.throws(() => assertExpectedPlanDigest(document, 'main'), /64-character sha256 plan digest/)
+  assert.throws(
+    () => assertExpectedPlanDigest(document, 'b'.repeat(64)),
+    error => error instanceof RegistryError
+      && error.code === 'PLAN_CHANGED'
+      && /no files were written/.test(error.message),
+  )
+})
+
+test('apply result echoes the plan digest and per-operation outcomes', () => {
+  const document = {
+    planDigest: 'c'.repeat(64),
+    operations: [
+      { action: 'create', target: 'a', beforeHash: null },
+      { action: 'update', target: 'b', beforeHash: '1'.repeat(64) },
+      { action: 'unchanged', target: 'c', beforeHash: '2'.repeat(64) },
+      { action: 'delete', target: 'd', beforeHash: '3'.repeat(64) },
+      { action: 'delete', target: 'e', beforeHash: null },
+    ],
+  }
+  const result = buildApplyResult(document, { expectedPlanDigest: 'c'.repeat(64), lockSourceSha: SOURCE_SHA })
+  assert.equal(result.planDigest, document.planDigest)
+  assert.equal(result.apply.expectedPlanDigest, 'c'.repeat(64))
+  assert.equal(result.apply.lockSourceSha, SOURCE_SHA)
+  assert.deepEqual(result.apply.operations.map(operation => operation.outcome), [
+    'applied',
+    'applied',
+    'skipped',
+    'applied',
+    'skipped',
+  ])
+})
+
+test('json mode structures every error, including unexpected ones', (t) => {
+  const lines = []
+  t.mock.method(console, 'log', message => lines.push(message))
+  printPlanError(Object.assign(new Error('permission denied'), { code: 'EACCES' }), true)
+  assert.deepEqual(JSON.parse(lines[0]).error, { code: 'EACCES', message: 'permission denied', details: [] })
+  printPlanError(new Error('boom'), true)
+  assert.equal(JSON.parse(lines[1]).error.code, 'UNEXPECTED')
+  printPlanError(new RegistryError('drifted', ['app/a.vue'], { code: 'PLAN_CHANGED' }), true)
+  assert.deepEqual(JSON.parse(lines[2]).error, { code: 'PLAN_CHANGED', message: 'drifted', details: ['app/a.vue'] })
+})
+
+test('apply re-verifies every planned before-state and stops with zero writes on drift', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const plan = await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['feature']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  })
+  await mkdir(path.join(consumerRoot, 'app/components'), { recursive: true })
+  await writeFile(path.join(consumerRoot, 'app/components/Feature.vue'), '<template>raced in</template>\n')
+
+  await assert.rejects(
+    applyCopyPlan(plan),
+    error => error instanceof RegistryError
+      && error.code === 'PLAN_CHANGED'
+      && /consumer target changed after planning: app\/components\/Feature\.vue/.test(error.message),
+  )
+  await assert.rejects(readFile(path.join(consumerRoot, 'app/components/Dependency.vue')), /ENOENT/)
+  await assert.rejects(readFile(path.join(consumerRoot, 'geist.lock.json')), /ENOENT/)
+})
+
+test('apply re-verifies the planned lock before mutating or overwriting it', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+
+  const installedLock = await readLock(consumerRoot)
+  const plan = await planCopy({
+    registry,
+    resolution: resolveCopyRequest(registry, [], { lock: installedLock, update: true }),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+    update: true,
+  })
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  assert.equal(buildRuntimePlanDocument(plan).consumer.lockHash, sha256(await readFile(lockPath)))
+
+  const concurrentLock = structuredClone(installedLock)
+  concurrentLock.requestedItems = ['concurrent-change']
+  const concurrentContent = `${JSON.stringify(concurrentLock, null, 2)}\n`
+  await writeFile(lockPath, concurrentContent)
+
+  await assert.rejects(
+    applyCopyPlan(plan),
+    error => error instanceof RegistryError
+      && error.code === 'PLAN_CHANGED'
+      && /geist\.lock\.json changed after planning/.test(error.message),
+  )
+  assert.equal(await readFile(lockPath, 'utf8'), concurrentContent)
+})
+
+test('runtime CLI performs guarded apply end to end against the real registry', async () => {
+  const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-guarded-consumer-'))
+  const cli = path.join(PROJECT_ROOT, 'scripts/copy-registry.mjs')
+  const env = { ...process.env, GEIST_REGISTRY_TEST_ALLOW_DIRTY: '1' }
+  const runCli = args => spawnSync(process.execPath, [cli, 'geist-foundation', '--target', consumerRoot, ...args], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+    env,
+  })
+
+  const document = JSON.parse(runCli(['--json']).stdout)
+  assert.equal(document.kind, 'runtime')
+
+  const changed = runCli(['--write', '--expect-plan', 'f'.repeat(64), '--json'])
+  assert.notEqual(changed.status, 0)
+  assert.equal(JSON.parse(changed.stdout).error.code, 'PLAN_CHANGED')
+  await assert.rejects(readFile(path.join(consumerRoot, 'geist.lock.json')), /ENOENT/)
+
+  const parseFailure = spawnSync(process.execPath, [cli, '--json', '--bogus'], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+    env,
+  })
+  assert.notEqual(parseFailure.status, 0)
+  assert.equal(parseFailure.stderr, '')
+  assert.equal(JSON.parse(parseFailure.stdout).error.code, 'REGISTRY_ERROR')
+
+  const rejected = runCli(['--expect-plan', document.planDigest])
+  assert.notEqual(rejected.status, 0)
+  assert.match(rejected.stderr, /--expect-plan requires --write/)
+
+  const write = runCli(['--write', '--expect-plan', document.planDigest, '--json'])
+  assert.equal(write.status, 0, write.stderr)
+  const result = JSON.parse(write.stdout)
+  assert.equal(result.planDigest, document.planDigest)
+  assert.equal(result.apply.expectedPlanDigest, document.planDigest)
+  assert.equal(result.apply.operations.every(operation => operation.outcome === 'applied'), true)
+  assert.equal(result.apply.lockSourceSha, result.sourceSha)
+
+  const converged = JSON.parse(runCli(['--json']).stdout)
+  assert.equal(converged.summary.create + converged.summary.update + converged.summary.delete, 0)
 })
 
 test('sourceSha-only rewrite keeps operations unchanged and creates no runtime impact', async () => {
