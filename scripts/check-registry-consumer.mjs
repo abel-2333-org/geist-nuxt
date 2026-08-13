@@ -904,16 +904,33 @@ try {
           const copyArgs = [path.join(repoRoot, 'scripts/copy-registry.mjs')]
           if (scenario.all) copyArgs.push('--all')
           else copyArgs.push(scenario.item)
-          copyArgs.push('--target', consumerRoot, '--sha', sourceSha, '--write')
-          run(process.execPath, copyArgs, repoRoot, {
-            ...process.env,
-            GEIST_REGISTRY_TEST_ALLOW_DIRTY: '1',
-          })
+          copyArgs.push('--target', consumerRoot, '--sha', sourceSha)
+          const copyEnv = { ...process.env, GEIST_REGISTRY_TEST_ALLOW_DIRTY: '1' }
+
+          const planDocument = JSON.parse(capture(process.execPath, [...copyArgs, '--json'], repoRoot, copyEnv))
+          if (planDocument.planSchemaVersion !== 1 || planDocument.kind !== 'runtime' || planDocument.sourceSha !== sourceSha) {
+            throw new Error(`${scenario.label}: machine-readable plan header mismatch`)
+          }
+          if (
+            planDocument.summary.create !== planDocument.operations.length
+            || planDocument.operations.some(operation => !operation.owner || !(operation.verification?.length > 0))
+          ) {
+            throw new Error(`${scenario.label}: fresh-install plan must be fully attributed create operations`)
+          }
+          run(process.execPath, [...copyArgs, '--write'], repoRoot, copyEnv)
 
           const after = await protectedHashes(consumerRoot)
           if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error(`${scenario.label}: copy-in modified a protected consumer file`)
           const lock = await checkConsumer({ registry, repoRoot, consumerRoot })
           assertPackageRequirements(manifest, lock, scenario.label)
+
+          const converged = JSON.parse(capture(process.execPath, [...copyArgs, '--json'], repoRoot, copyEnv))
+          if (
+            converged.summary.create + converged.summary.update + converged.summary.delete !== 0
+            || converged.summary.verification.length !== 0
+          ) {
+            throw new Error(`${scenario.label}: post-write plan did not converge to zero changes`)
+          }
           if (!scenario.all && JSON.stringify(lock.requestedItems) !== JSON.stringify([scenario.item])) {
             throw new Error(`${scenario.label}: lock did not preserve the requested leaf item`)
           }

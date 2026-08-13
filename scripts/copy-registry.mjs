@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   applyCopyPlan,
+  buildRuntimePlanDocument,
   loadRegistry,
   parseArgs,
   planCopy,
@@ -17,6 +18,9 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 
 try {
   const options = parseArgs(process.argv.slice(2))
+  if (options.json && options.write) {
+    throw new Error('--json is a dry-run output mode; guarded apply output ships with the plan digest contract')
+  }
   const consumerRoot = path.resolve(options.target ?? options.consumer ?? '')
   if (!options.target && !options.consumer) throw new Error('--target <consumer-directory> is required')
   const registryPath = path.resolve(options.registry ?? path.join(repoRoot, 'registry.json'))
@@ -46,7 +50,10 @@ try {
     return result
   }, {})
 
-  if (!options.write) {
+  if (options.json) {
+    console.log(JSON.stringify(buildRuntimePlanDocument(plan), null, 2))
+  }
+  else if (!options.write) {
     console.log(`Dry run (${sourceSha}): ${resolution.items.length} items, ${resolution.files.length} files`)
     for (const operation of plan.operations) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
     console.log('No files written. Re-run with --write to apply the complete batch.')
@@ -56,10 +63,12 @@ try {
     console.log(`Copied registry batch (${sourceSha}): ${JSON.stringify(counts)}`)
     console.log(`Lock written: ${path.join(consumerRoot, 'geist.lock.json')}`)
   }
-  console.log('Resolved external packages:')
-  for (const [name, range] of Object.entries(resolution.externalRequirements.packages)) console.log(`- ${name}@${range}`)
-  console.log('Consumer setup (protected entrypoints are never overwritten automatically):')
-  for (const instruction of resolution.externalRequirements.consumerSetup) console.log(`- ${instruction}`)
+  if (!options.json) {
+    console.log('Resolved external packages:')
+    for (const [name, range] of Object.entries(resolution.externalRequirements.packages)) console.log(`- ${name}@${range}`)
+    console.log('Consumer setup (protected entrypoints are never overwritten automatically):')
+    for (const instruction of resolution.externalRequirements.consumerSetup) console.log(`- ${instruction}`)
+  }
 }
 catch (error) {
   printRegistryError(error)

@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   applyAgentSkillPlan,
+  buildAgentSkillPlanDocument,
   parseAgentSkillArgs,
   planAgentSkill,
   resolveAgentSkillSourceSha,
@@ -23,7 +24,10 @@ try {
     return result
   }, {})
 
-  if (!options.write) {
+  if (options.json) {
+    console.log(JSON.stringify(buildAgentSkillPlanDocument(plan), null, 2))
+  }
+  else if (!options.write) {
     const changed = plan.operations.filter(operation => operation.action !== 'unchanged')
     console.log(`Dry run (${sourceSha}): ${changed.length} change(s) across ${plan.operations.length} agent skill operations`)
     for (const operation of changed) console.log(`${operation.action.padEnd(9)} ${operation.target}`)
