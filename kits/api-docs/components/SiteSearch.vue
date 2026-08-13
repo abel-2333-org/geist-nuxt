@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
 
+defineOptions({ inheritAttrs: false })
+
 /** A site-wide search destination. Content adapters should resolve their own
  * source model into this display-only shape before it reaches the kit. */
 export interface SiteSearchItem {
@@ -33,6 +35,8 @@ const props = withDefaults(
     emptyLabel?: string
     searchingLabel?: string
     searchErrorLabel?: string
+    /** Polite live-region text when a query yields no available option. */
+    noResultsAnnouncement?: (query: string) => string
     scenarioSeparator?: string
     shortcut?: string
     resultLimit?: number
@@ -49,6 +53,7 @@ const props = withDefaults(
     emptyLabel: 'No matching documentation',
     searchingLabel: 'Searching documentation…',
     searchErrorLabel: 'Search is temporarily unavailable. Try again later.',
+    noResultsAnnouncement: (query: string) => `No results for “${query}”`,
     scenarioSeparator: ', ',
     shortcut: 'meta_k',
     resultLimit: 12,
@@ -67,6 +72,8 @@ const asyncItems = shallowRef<SiteSearchItem[]>([])
 const searching = shallowRef(false)
 const searchFailed = shallowRef(false)
 const pendingHashId = shallowRef<string | null>(null)
+const emptyRef = useTemplateRef<HTMLDivElement>('empty')
+const announcement = shallowRef('')
 
 const shortcutKeys = computed(() => props.shortcut
   .split('_')
@@ -122,6 +129,32 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
     clearTimeout(timer)
   })
 })
+
+const emptyStateLabel = computed(() => searching.value
+  ? props.searchingLabel
+  : searchFailed.value
+    ? props.searchErrorLabel
+    : props.emptyLabel)
+
+// UCommandPalette owns the only trustworthy view of its filtered options.
+// Observe its empty-slot lifecycle instead of copying Fuse internals here;
+// flush post so an arriving async result can remove the slot before we speak.
+watch(
+  [open, searchTerm, searching, searchFailed, emptyRef],
+  () => {
+    const query = searchTerm.value.trim()
+    if (!open.value || !query || !emptyRef.value) {
+      announcement.value = ''
+      return
+    }
+    announcement.value = searching.value
+      ? props.searchingLabel
+      : searchFailed.value
+        ? props.searchErrorLabel
+        : props.noResultsAnnouncement(query)
+  },
+  { flush: 'post', immediate: true },
+)
 
 if (import.meta.dev) {
   watchEffect(() => {
@@ -211,6 +244,7 @@ const fuse = computed(() => ({
 
 <template>
   <UModal
+    v-bind="$attrs"
     v-model:open="open"
     :title="props.modalTitle"
     :content="{ onCloseAutoFocus }"
@@ -255,11 +289,15 @@ const fuse = computed(() => ({
         </template>
 
         <template #empty>
-          <div class="py-6 text-center text-sm text-muted">
-            {{ searching ? props.searchingLabel : searchFailed ? props.searchErrorLabel : props.emptyLabel }}
+          <div ref="empty" class="py-6 text-center text-sm text-muted">
+            {{ emptyStateLabel }}
           </div>
         </template>
       </UCommandPalette>
     </template>
   </UModal>
+
+  <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+    {{ announcement }}
+  </p>
 </template>

@@ -47,7 +47,9 @@
   `label / to / method? / scenarios? / icon? / suffix?`；
 - `search(query)` + `searchGroupLabel`：可选异步正文结果，组件负责 debounce 与
   stale response cleanup，数据源排序不再被 Fuse 重排；异步源失败且没有可用结果时，
-  用 `searchingLabel` / `searchErrorLabel` 区分加载、失败与零结果；
+  用 `searchingLabel` / `searchErrorLabel` 区分加载、失败与零结果；持久挂载的
+  `role="status" aria-live="polite"` 同步播报三态，零结果文本由
+  `noResultsAnnouncement(query)` 生成；有任何可用 option、查询为空或面板关闭时保持静默；
 - `extraGroups`：消费项目自己的快捷入口；
 - `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入；结构性文案
   内置英文默认值，消费项目只在需要本地化或改写时覆盖。
