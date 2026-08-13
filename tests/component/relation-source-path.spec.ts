@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import RelationSourcePath from '../../playground/components/RelationSourcePath.vue'
+import RelationSourcePath from '../../kits/api-docs/components/RelationSourcePath.vue'
 
 afterEach(() => vi.restoreAllMocks())
 
-describe('RelationSourcePath playground candidate', () => {
+describe('RelationSourcePath', () => {
   it('links a resolved field and exposes one locale-consistent spoken path', async () => {
     const wrapper = await mountSuspended(RelationSourcePath, {
       props: {
@@ -26,6 +26,31 @@ describe('RelationSourcePath playground candidate', () => {
     expect(location.hash).toBe('#res_payment_id')
     wrapper.unmount()
     history.replaceState(history.state, '', '/')
+  })
+
+  it.each([
+    { metaKey: true },
+    { ctrlKey: true },
+    { shiftKey: true },
+    { altKey: true },
+    { button: 1 },
+  ])('preserves native anchor behavior for modified clicks (%o)', async (eventInit) => {
+    const wrapper = await mountSuspended(RelationSourcePath, {
+      props: {
+        source: {
+          scope: 'response',
+          location: 'body',
+          segments: ['payment', 'id'],
+          field: 'res_payment_id',
+        },
+      },
+    })
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true, ...eventInit })
+    wrapper.get('a').element.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(false)
+    wrapper.unmount()
   })
 
   it('falls back to text when the consumer cannot provide a stable anchor', async () => {

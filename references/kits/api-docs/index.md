@@ -31,6 +31,7 @@
 | `components/FieldItem.vue` | `<FieldItem>` | 递归字段行：summary 按开发者扫描顺序拆为 signature（名/type/format/Required 或 Conditional/lifecycle）与 trailing fallback facts（默认值）两区，必填标记经 `fieldRequiredState({ required, condition })` 派生（`condition` 即蕴含 conditional，`required: true` 冲突时胜出）；lifecycle 始终跟随字段身份簇换行，避免在窄容器形成孤立徽章行，按字段容器自身宽度而非 viewport 回流，长字段名与深层递归优先保住 identity 宽度；可选缺省不标。详情保持 developer call-time 顺序：deprecated 迁移提示 → conditional rule → description → caveat → enum/constraints/examples/lifecycle；普通事实统一为 label/value definition grid，长值可断行，≥2 条 constraint 才升级为带计数表。条件行只用 `inline-start` 琥珀边框、不带 lead-in（summary 的 `CONDITIONAL` 由 `fieldRequiredState` 从 `condition` 派生，词只出现一次），caveat 用 `inline-start` 琥珀边框 + `bg-warning/10` + label lead-in；`SINCE` 恒中性。子字段由 `UCollapsible` 揭示，窄容器收紧缩进；深链接由 `useFieldAnchor` 驱动。字段值是 oneOf/anyOf/allOf 时，`composition` 在子字段后委托 `<SchemaComposition>`。数据模型与 labels 继续由 `utils/field.ts` 提供，全部 chrome（含递归子行）经单个 `labels` 对象本地化，见「Display-model seam → FieldItem 的通用交互约束」 | — |
 | `components/SchemaComposition.vue` | `<SchemaComposition>` | 忠实呈现 OpenAPI / JSON Schema 的 `oneOf`/`anyOf`/`allOf`:oneOf 用 `UTabs`(`unmount-on-hide=false` 保留隐藏 panel DOM,深链接可揭示)、anyOf 用可折叠分区、allOf 全展开;discriminator 合成为每个 variant 的**首行真实字段**(而非扁平化丢失语义);variant 递归(variant 内可再嵌 composition),`heading-level` 定标题层级;chrome 文案(kind 眉标 / hint / discriminator 描述工厂 / 空态)经 `labels` 本地化,`field-labels` 透传给内部字段行。字段行渲染委托 `FieldItem`,故切片依赖它 | `schema-composition.md` |
 | `components/FieldAnnotation.vue` | `<FieldAnnotation>` | Annotation 家族的**字段形态**(壳在 foundation `AnnotationPopover`,与概念形态 `TermAnnotation` / 文档形态 `DocAnnotation` 同族;字段形态因绑 `FieldNode`+`useFieldAnchor` 落本 kit):把字段引用嵌进叙事文本,hover/click 预览字段摘要(名/类型/format/必填/描述,必填标记与字段行共用 `fieldRequiredState` 派生,孤儿 condition 在 popover 同样出标签),动作深链接到字段行。两种绑定——`field` 直传 `FieldNode`,或 `field-ref` 经 `useFieldSource`(随切片分发的 provide/inject)解析(叙事 markdown 只引 id);同页 ref 省略 `page`,委托 `useFieldAnchor` 滚动+展开祖先+高亮;跨页 ref 声明 `page`,渲染为 `{page}#{path}` 链接,目标页 `initFromHash()` 接管。未命中 ref **降级为纯文本**(同 TermAnnotation 策略;dev 下同步 `console.warn` 指出未登记的 `field-ref`——降级是对读者的正确运行时行为,但对作者必须留下诊断,家族两形态共用这套「降级 + 告警」),chrome 文案经 `labels`(继承 `AnnotationPopoverLabels`)本地化。依赖 `api-docs-field-item`(带入 `FieldNode`+`useFieldAnchor` 闭包)+ 三个 foundation item | 本页「Display-model seam」 |
+| `components/RelationSourcePath.vue` | `<RelationSourcePath>` | callback address source 与 next-operation parameter/value mapping 的已解析字段层级：`scope + location + decoded segments` 组成 reader-facing 主层级，末段是目标字段；同页 `field` 委托 `useFieldAnchor.goTo(..., { focus: true })` 完成 reveal/focus，跨页 `to` 使用 router link，两者都缺失时降级为纯文本而非死链。accessible name 由同一组可见 segment 节点间插入 `sr-only` connector 组成，不维护第二份 spoken string；chrome 通过 `labels` 本地化。consumer 仍负责 Runtime Expression / OpenAPI / JSON Pointer 解析、schema 校验、转义还原、数组下标、稳定 field id 与 raw expression 保真 | 本页「RelationSourcePath 的解析边界」 |
 | `components/SiteSearch.vue` | `<SiteSearch>` | app 顶栏的 `⌘K` 全站搜索：静态导航 groups 始终可用，可选异步 `search(query)` 接正文索引；结果支持 method/scenario facet、额外 groups、可配置快捷键与同页 hash 焦点交接。只认 display model，不绑定 `@nuxt/content` | 本页「SiteSearch 契约」 |
 | `components/SidebarNav.vue` | `<SidebarNav>` | 文档/门户侧边栏导航：一个菜单容纳多个可折叠板块（指南文字链接 vs 按用途命名的接口链接）。接口不严格遵循 REST、一个接口常服务多个业务场景，故它只出现一次：行首前置请求方法色标（单个动词，「怎么调」）、中间用途名、行尾中性场景标签（订阅/授权…，「用在哪」）。分组层（eyebrow 标题 + 分隔线）+ 板块 `kind`（guide 柔和 sans / endpoints 大写等宽 mono，chrome 中性、颜色只交给 active 态与方法色标）让两类界限分明；多板块可同时展开、各带计数，顶部单一树内过滤（`/` 聚焦，同时匹配用途名、方法与场景标签）。侧栏宽度可拖拽右边缘调整（键盘可操作、双击复位），宽度记入 localStorage。全站搜索由 `SiteSearch` 放在 app 顶栏；侧栏本身是全高无外框列，边框/圆角/高度由父布局拥有。数据模型 `SidebarNavGroup`/`SidebarNavSection`/`SidebarNavItem` 内联，接口行复用兄弟切片 `HttpMethodBadge` | `sidebar-nav.md` |
 
@@ -214,7 +215,7 @@ export function computeSplitBudgets(
 ## 组合示例（demo 在 gallery，不在 kit）
 
 组合方式是 demo/story，按 geist-nuxt「demo 归 gallery、kit 只 ship 数据无关积木」的分层。
-gallery 有**七个 api-docs demo 页，职责互补**：
+gallery 有**八个 api-docs demo 页，职责互补**：
 
 | 页面 | nav 标签 | 定位 | 演示什么 |
 |---|---|---|---|
@@ -224,6 +225,7 @@ gallery 有**七个 api-docs demo 页，职责互补**：
 | `app/pages/kits/api-docs/sidebar-nav.vue` | 侧边栏导航 | **导航交互专项** | 多分组导航、method/scenario 过滤、折叠、拖拽宽度、窄屏与 app 顶栏全站搜索的职责边界 |
 | `app/pages/kits/api-docs/webhook-protocol.vue` | Webhook 协议 | **协议事实专项** | 三段齐全的内联中性 fixture + 变体区：section 省略规则、ACK 三语义（literal/echo/intentional empty）、无 steps schedule 与 `maxScheduleSteps=1` 边界 |
 | `app/pages/kits/api-docs/schema-composition.vue` | Schema 组合 | **composition 专项** | 三种 kind（oneOf/anyOf/allOf)、带 discriminator 的 oneOf、字段级 composition 委托(payment-method 风格)、嵌套 composition、空态；deep link 揭示隐藏 variant 与 anchor 唯一性压力用例 |
+| `app/pages/kits/api-docs/structured-relations.vue` | 结构化关系 | **relation recipe 专项** | `Callback Delivery`、`Next Operation` 与 `Related Resources` 的正式 copy-and-adapt recipe；完整字段层级、same/cross-page links、无 anchor 降级、full/stress/minimal/coverage 以及 384px/576px 容器回流；页面关系模型与 fixtures 保持 consumer-owned，只有 `<RelationSourcePath>` 进入 registry |
 | `app/pages/kits/api-docs/docs-shell/`（`index.vue` 重定向、`[domain]/index.vue` 域首页、`[domain]/[slug].vue` 指南子页） | 文档站外壳 | **文档门户外壳 recipe（最小示范）** | gallery-private 的 header、domain switcher、`SiteSearch`、`SidebarNav` 与 reference-style 正文装配，路径分段路由 + 指南分页；**未覆盖多资源参考子页**（见 `project-setup.md`「域内怎么拆页」与 ADR-009 投入边界）；用于组合验证，不是 registry 切片 |
 
 > 各页都由 gallery 的假 ViewModel 驱动，数据不写进 kit。**新增单组件陈列进 `index.vue`；整页参考布局进 `endpoint-reference.vue`（端点）/ `webhook-reference.vue`（webhook）；组件的交互/状态边界多到需要独立变体压力区时开专项页（先例：`sidebar-nav.vue`、`webhook-protocol.vue`）；整站壳层组合进 `docs-shell/` 路由树**。
@@ -308,6 +310,14 @@ await copyLink(path, {
 - 跳转委托兄弟 `useFieldAnchor`，**不渲染** `<FieldItem>`——故与 field-item 只有 composable 依赖、无组件环。同页深链接目标即页面自身的字段树；跨页时 `page` 拼成 `{page}#{path}`，落地由目标页 `initFromHash()` 处理。
 - registry item `api-docs-field-annotation` 经 `registryDependencies` 引入 `api-docs-field-item`（带来 `field.ts` 与 `useFieldAnchor`）与三个 foundation item；`useFieldSource` 随本组件切片分发，**不**在 `files[]` 重列已由依赖闭包传入的共享文件。
 
+### RelationSourcePath 的解析边界
+
+- `RelationSourcePath` 只接收已解析 display data：`scope`、`location`、decoded `segments`，以及可选的同页 `field` 或跨页 `to`。consumer 负责解析 Runtime Expression / OpenAPI / JSON Pointer、验证 schema、还原 `~0` / `~1`、合成数组下标、生成稳定 field id，并在自己的 contract 中保留 raw expression；组件不提供解析或 raw-expression 展示通道。
+- reader-facing 主层级必须包含完整 hierarchy，不能退化成 leaf name 或人工摘要。同名 leaf、nested object、array index 与 dynamic key 由 consumer 提供的 segment 自然消歧；技术标识段统一 `translate="no"`。
+- 链接严格三态：跨页 `to` 优先并渲染 router link；同页 `field` 生成一次 URL-encoded fragment，并阻止原生跳转后委托 `useFieldAnchor.goTo(field, { focus: true })`；两者都缺失时渲染不可聚焦的纯文本。不得输出无法 reveal/focus 的假 hash 或死链。
+- accessible name 不保存独立 sentence。`prefix` 与 `connector` 作为 `sr-only` 文本直接插在可见 scope / segment 节点之间；视觉与 spoken hierarchy 共用一组节点，因此本地化不会产生两份路径真源。
+- registry item `api-docs-relation-source-path` 依赖 `api-docs-field-item`，由后者带入 `useFieldAnchor`；自身切片只分发 `RelationSourcePath.vue`。完整 `Callback Delivery / Next Operation / Related Resources` 装配留在正式 Gallery recipe 和消费项目，不进入 registry。
+
 ## 为什么不用 @nuxt/content 走内容管线？
 
 试过——content v3 靠构建时生成、运行时导入的 SQLite dump 建表，在部分托管 preview 中重启后不能稳定 re-seed（`decompressSQLDump ... Received undefined` / `no such table`），会让 Source-first v0 snapshot 时好时坏。根 gallery 因此保持纯组件 preview；真实消费项目仍可按需引入 content 作为数据源。
@@ -320,6 +330,7 @@ await copyLink(path, {
 - `kits/api-docs/components/WebhookProtocol.vue` + `kits/api-docs/utils/webhook-protocol.ts`
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition 显示模型,kit auto-import）
 - `kits/api-docs/components/FieldAnnotation.vue` + `kits/api-docs/composables/useFieldSource.ts`（Annotation 家族字段形态；壳复用 foundation `AnnotationPopover`）
+- `kits/api-docs/components/RelationSourcePath.vue`（已解析 relation source hierarchy；同页导航复用 `useFieldAnchor`）
 - `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
 - 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`endpoint-reference.vue`、`webhook-reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`schema-composition.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/{badge,breakpoints}.ts`

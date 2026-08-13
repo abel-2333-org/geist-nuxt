@@ -239,13 +239,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -260,9 +260,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "14848a16b4b52ca51bcd1deacef386d0f9aaf3c0a3dd84fe6ee26542a62b4f62"
+        "scopeDigest": "91a2eef83808db9bfa05cb24703c8e24f052128d3694fe522f2815c5a5b0a9be"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;foundation-split-pane-handle 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -319,13 +319,13 @@
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -336,20 +336,20 @@
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts"
         ],
-        "scopeDigest": "2722234bf46b7ea5654dd2ba97427fcab6086efc0a94e2d85c0afccfe5efee02"
+        "scopeDigest": "8e3a0317315665806552eaa33b74a20868c55dcffe3cae97d58a50e6091ed70f"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-request-example 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -364,9 +364,9 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "f19f6271c69b70075d4da1fdc4bb7938fe6116eff57edf50916bd791063948d9"
+        "scopeDigest": "3023932ceb6685c1a9dc31bed003772d09f5d92d12b0643ffe4728f4d1ef742e"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-response-example 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -379,13 +379,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -406,20 +406,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "4a6b3a2f9252dde231c092f7e9b23ba8650c2fc99ee9a7d69538b6cf4ce20533"
+        "scopeDigest": "e2d8d0d3079b3dbc15b8abecdb45cbeb4b62f76236564659d1b51e6a95a0b65a"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-lifecycle-badge 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -438,9 +438,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "c72f502c3c9e57f2ded601f7a84dd8bf9903d0a774f6504fd6b9ad199c09c770"
+        "scopeDigest": "54bcd22852601b9a47ba5e223c4bcfc39a52a7b8fbb72a4de4924e09b13ea722"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-method-badge 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -457,13 +457,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -472,9 +472,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "22da985a641720a43f14b6af352bd76f66ee7706f7565df2ca0dcc9bea1cfe06"
+        "scopeDigest": "2e15e27b14edf006da4bffaa514fec93a4fa9810b47197b86e0ae7d84b3f0d4e"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-field-group 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -513,13 +513,13 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -528,9 +528,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "703225477129cbdd1b3099c5ed5b60bc8f978a1b9cb36915125cdac431d328ba"
+        "scopeDigest": "faa37a1f2c4d4ebd983159f6c4626cb094d4893d5fff908a67a163b370922fb4"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-field-annotation 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": [
         {
           "id": "f-fd7282669072",
@@ -543,13 +543,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -559,20 +559,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "61c186b05e48aef284fb84fc40bbe18b7f4497300484832fa5cf17cd2b8f5f8f"
+        "scopeDigest": "e2fb25f99cdd6d35403bb03b479c6a99d9423c87194344e99034e54e30b259e5"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-event-badge 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -583,20 +583,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "a0e2e1960685ef0d3ce45939bfaee5fe13537cdc387ccf39aaf248836e7d6313"
+        "scopeDigest": "96bf57b7226523f2048e76699db9b2bc5654cf40eb64d22a91e3e4a08a58eee2"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-lifecycle-notice 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -605,20 +605,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "5e0b0c6f5ca1c93ae7e78a01a373142a28c8d51d59b581dec6cbd7af98bf7cb7"
+        "scopeDigest": "cef537fa8da57f3a8cc360d17be25b1dfbaec2e5e7088bd8d499914e3586ade2"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-operation-target 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -628,20 +628,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "68fc30040179fc43c38a0886632505a1793fc0a0587711f7a6d506237e6744d9"
+        "scopeDigest": "867d36f224d70136ba6e10674f94a179e08cf5e51899a95fcc1492315d11ebca"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-operation-header 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "8f04fc495c02a83a336bf41f7b161337042b40bb901e52e9865ee1f1eb73cc18",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -657,20 +657,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts"
         ],
-        "scopeDigest": "2e98ebe7998991cc6db2c33d6ad9cb1660eb8350d90c1b53022b017796213754"
+        "scopeDigest": "2190203e8ece3d68f35e5f50ab697101083ca59dfd9823859fc5b0bf3606163f"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-code-rail 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -679,7 +679,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "cc311908f5e96380ceee74e6a4f6c3b88d167273c4f6f98a358920fbd9e193c3",
+        "scopeDigest": "f6a869df62ff67e2ae6cd321b1f3eae518bbea5ad76945525be41f963804d725",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -693,7 +693,7 @@
           }
         ]
       },
-      "notes": "修复 f-dd631c5b3977:新增始终挂载的 polite live region;以 fuse.js 同步过滤并通过 UCommandPalette ignoreFilter 交付确定结果,#empty 槽因此与当前查询共享同一快照;完整播报 searching/error/no-results,有结果、空查询或关闭时静默;focused 黑盒测试覆盖异步、关闭竞态及消费方扩展组;reka-ui 缺少 live region 已不再是结论前提.",
+      "notes": "完整复审 #74 对共享 API Docs reference 的增量；SiteSearch 源码、搜索与状态播报契约未改变，主线已解决的 screen-reader status finding 保持 resolved，现有 focused 黑盒测试全绿。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -706,13 +706,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -730,9 +730,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "6fc7f0fe70c06cf53920f99ebac90fd89ef6f1b61e8267969e227b22f6d85813"
+        "scopeDigest": "ced220e7de3ee60ded50dc53e10785a0454a2cfc6fd67b1e68d80e29878b6d5d"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-webhook-protocol 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -745,13 +745,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
-        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
+        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
         "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
         "scope": [
           "AGENTS.md",
@@ -763,9 +763,18 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "b5bd8f4625ec638da3b27d2bd580f5a45ea2af377c2516a6a4269715f3126ff9"
+        "scopeDigest": "14f727174c6c24eb94d5bae0186afd1e9d7d29979fb0d5476e285c7a5b77005c"
       },
-      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-sidebar-nav 自身契约、源码与既有 finding 未变化。",
+      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "findings": []
+    },
+    "api-docs-relation-source-path": {
+      "round": 0,
+      "lastAuditedAt": null,
+      "change": null,
+      "status": null,
+      "evidence": null,
+      "notes": null,
       "findings": []
     }
   }

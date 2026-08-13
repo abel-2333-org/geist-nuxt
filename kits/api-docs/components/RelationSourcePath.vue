@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PLAYGROUND CANDIDATE — not promoted. See "Status" at the bottom of this note.
+// Public API Docs kit component promoted by #74 after real-consumer acceptance.
 //
 // Where a relation's value comes from, rendered as the FULL field hierarchy:
 //
@@ -19,7 +19,7 @@
 //           the last segment is the target field and carries the emphasis
 // States:   linked (same-page `field`, or cross-page `to`) / plain text
 //
-// Two contracts worth preserving verbatim on promotion:
+// Two public contracts:
 //
 // 1. ACCESSIBLE NAME IS BUILT FROM THE VISIBLE NODES. The `sr-only` prefix and
 //    connectors are interleaved BETWEEN the visible segments rather than
@@ -44,14 +44,13 @@
 // chrome (a closed 8-entry vocabulary) so it ships a default and stays
 // overridable, mirroring the ApiTargetLabels convention.
 //
-// Status: still in `playground/` on purpose. Promotion freezes a public prop
-// contract, and the evidence is n=1 with that consumer not yet accepting the
-// presentation (Onerway is at its Stage 3 human gate). Decision, unlock
-// condition and the promotion target are tracked in issue #74; do not move this
-// file into `foundation/` or `kits/` before that issue is resolved.
+// Promotion boundary: this component owns only the resolved display and
+// navigation contract. Runtime Expression/OpenAPI/JSON Pointer parsing, schema
+// validation, decoded segments and stable field identities remain consumer
+// responsibilities and must not move into this component.
 
 import { ULink } from '#components'
-import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
+import { useFieldAnchor } from '../composables/useFieldAnchor'
 
 export interface RelationSource {
   scope: 'request' | 'response'
@@ -111,6 +110,7 @@ const events = computed(() => href.value ? { click: jump } : {})
 
 function jump(event: MouseEvent) {
   if (!props.source.field || props.source.to) return
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
   event.preventDefault()
   void anchor.goTo(props.source.field, { focus: true })
 }

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import PlaygroundPage from '../../app/pages/playground.vue'
+import StructuredRelationsPage from '../../app/pages/kits/api-docs/structured-relations.vue'
 
-describe('structured relations playground recipe', () => {
-  // First mount of the full playground page pays the cold-worker SFC
+describe('structured relations gallery recipe', () => {
+  // First mount of the full gallery page pays the cold-worker SFC
   // transform cost and can exceed Vitest's 5s default under CPU load.
   it('resolves every field link to one real FieldItem target', { timeout: 15_000 }, async () => {
-    const wrapper = await mountSuspended(PlaygroundPage)
+    const wrapper = await mountSuspended(StructuredRelationsPage)
     const fields = [
       'req_callback_url',
       'req_notification_callback_url',
@@ -37,7 +37,7 @@ describe('structured relations playground recipe', () => {
   })
 
   it('keeps a next operation while omitting its absent parameter mapping', async () => {
-    const wrapper = await mountSuspended(PlaygroundPage)
+    const wrapper = await mountSuspended(StructuredRelationsPage)
     const operation = wrapper.findAll('li').find(node => node.text().includes('List deployment events'))
 
     expect(operation).toBeDefined()

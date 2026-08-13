@@ -22,6 +22,7 @@ pnpm dev
 - `/kits/api-docs`：API Docs kit
 - `/kits/api-docs/endpoint-reference`：完整 Endpoint 参考页
 - `/kits/api-docs/webhook-reference`：完整 Webhook 参考页
+- `/kits/api-docs/structured-relations`：Callback / Next Operation 结构化关系 recipe
 - `/playground`：候选组件草稿面，不进入正式导航
 
 设计中源码放 `playground/`；人工采纳后再移动到 `foundation/` 或 `kits/<kit>/`，补根 registry 与正式 gallery。详细流程见 `references/method/component-reflow.md`。
