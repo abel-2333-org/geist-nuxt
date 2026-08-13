@@ -143,7 +143,7 @@ describe('SiteSearch status announcements', () => {
     expect(postFilter).toHaveBeenLastCalledWith('Billing', [expect.objectContaining({ label: 'Billing shortcut' })])
   })
 
-  it('keeps source group order, a global limit and explicitly unfiltered groups', async () => {
+  it('keeps a global limit and explicitly unfiltered groups', async () => {
     await mountSearch({
       resultLimit: 1,
       groups: [
@@ -164,6 +164,25 @@ describe('SiteSearch status announcements', () => {
     const options = palette().findAll('[role="option"]').map(option => option.text())
     expect(options.filter(label => label.startsWith('Alpha'))).toHaveLength(1)
     expect(options.at(-1)).toContain('Always available')
+  })
+
+  it('keeps source group order and renders Fuse match highlights', async () => {
+    await mountSearch({
+      resultLimit: 2,
+      groups: [
+        { id: 'first', label: 'First', items: [{ label: 'Guide to Alpha authentication', to: '/guide' }] },
+        { id: 'second', label: 'Second', items: [{ label: 'Alpha', to: '/alpha' }] },
+      ],
+    })
+
+    await query('Alpha')
+    await flushPromises()
+
+    const renderedGroups = palette().findAll('[data-slot="group"]')
+    expect(renderedGroups).toHaveLength(2)
+    expect(renderedGroups[0]!.text()).toContain('First')
+    expect(renderedGroups[1]!.text()).toContain('Second')
+    expect(palette().findAll('mark').map(mark => mark.text())).toContain('Alpha')
   })
 
   it('announces async loading, empty, failure and successful-result transitions', async () => {
