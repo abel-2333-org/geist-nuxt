@@ -239,13 +239,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T02:12:43.019Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "7aaa034d4f69f949ac5b421014ce6fa447ef24f7",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -260,9 +260,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "b9bdf24f65c3d7285150ae013ac668f99b3835ee28e97fd6d8525eefb2e227c8"
+        "scopeDigest": "14848a16b4b52ca51bcd1deacef386d0f9aaf3c0a3dd84fe6ee26542a62b4f62"
       },
-      "notes": "完整复审受影响 scope:共享 useBreakpointGate 抽取及 CodeRail 的 DOM 身份观察/自然高度修复均不改变 SplitPaneHandle 的 pointer、keyboard、ARIA、disabled spacer 或 ratio contract;新增 CodeRail 测试继续从消费侧覆盖 active 与 inert 两态,既有 focused tests 全绿。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;foundation-split-pane-handle 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -319,13 +319,13 @@
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -336,20 +336,20 @@
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts"
         ],
-        "scopeDigest": "03accb985f1a58ec1e47b059bbd0d8ac53b737f1c0d7e536ea6dd4d1a869f0a8"
+        "scopeDigest": "2722234bf46b7ea5654dd2ba97427fcab6086efc0a94e2d85c0afccfe5efee02"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-request-example 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -364,9 +364,9 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "93a55ac8dd054391833e9b90a3bcbf1e1dc5ecca61a7093c2e5b4385c2ebf909"
+        "scopeDigest": "f19f6271c69b70075d4da1fdc4bb7938fe6116eff57edf50916bd791063948d9"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-response-example 自身契约、源码与既有 finding 未变化。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -379,13 +379,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -406,20 +406,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "1ebb81f263952b3c5291ed4517ae3dd4a552ab5d04f8d53b932eebfaba24f828"
+        "scopeDigest": "4a6b3a2f9252dde231c092f7e9b23ba8650c2fc99ee9a7d69538b6cf4ce20533"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-lifecycle-badge 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -438,9 +438,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "be9e616d8adfdbd61ec586592fed1e1172df41271401717ddf458b66962e43df"
+        "scopeDigest": "c72f502c3c9e57f2ded601f7a84dd8bf9903d0a774f6504fd6b9ad199c09c770"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-method-badge 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -457,13 +457,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
-        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -472,9 +472,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "e909b4152f40bbcf47b37bfe8088d56aaed65534ef6fe62dd171213c62267649"
+        "scopeDigest": "22da985a641720a43f14b6af352bd76f66ee7706f7565df2ca0dcc9bea1cfe06"
       },
-      "notes": "复审 WebhookProtocol 公开 fact 输入收口及 gallery 数据迁移；FieldGroup 仍只承担段头与正文容器，heading、count、slot 和布局契约均未改变。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-field-group 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -513,13 +513,13 @@
     },
     "api-docs-field-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -528,9 +528,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "b9667d74ed9ee4196eb67dd2dcf5af22f918c56520857d630a48c35ebcce1e7a"
+        "scopeDigest": "703225477129cbdd1b3099c5ed5b60bc8f978a1b9cb36915125cdac431d328ba"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-field-annotation 自身契约、源码与既有 finding 未变化。",
       "findings": [
         {
           "id": "f-fd7282669072",
@@ -543,13 +543,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
-        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -559,20 +559,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "a820661d7d4387ed87071716411a1f9503475ce6aec0b5ff5c1defb8aa27d4bc"
+        "scopeDigest": "61c186b05e48aef284fb84fc40bbe18b7f4497300484832fa5cf17cd2b8f5f8f"
       },
-      "notes": "复审 webhook-reference 的 fact 数据迁移；OperationHeader 与 WebhookBadge 源码、EVENT identity、tone、标题层级和 action slot 契约均未改变。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-event-badge 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -583,20 +583,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "7fe9a6275da148aa49128c063785215d5eede01cd93c461c78f9df4abea0bc67"
+        "scopeDigest": "a0e2e1960685ef0d3ce45939bfaee5fe13537cdc387ccf39aaf248836e7d6313"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-lifecycle-notice 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
-        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -605,20 +605,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "c3e447f308ec6d98f1a747fe6a8eaae1b5f32d8f118d49cf5ad416768effa06a"
+        "scopeDigest": "5e0b0c6f5ca1c93ae7e78a01a373142a28c8d51d59b581dec6cbd7af98bf7cb7"
       },
-      "notes": "复审:本次仅更新 WebhookProtocol 契约行,OperationTarget 的环境、原子地址与复制契约未受影响。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-operation-target 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -628,20 +628,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "32f058b48acd1be5958103e9b68f4c849f7cb229c87196e8bceca7e06caf9010"
+        "scopeDigest": "68fc30040179fc43c38a0886632505a1793fc0a0587711f7a6d506237e6744d9"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-operation-header 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
-        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "8f04fc495c02a83a336bf41f7b161337042b40bb901e52e9865ee1f1eb73cc18",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -657,21 +657,21 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts"
         ],
-        "scopeDigest": "77fa4ee4d3406f7b9242cf037ba83c43517fbbdcba7b6c01fccc11a313628b8d"
+        "scopeDigest": "2e98ebe7998991cc6db2c33d6ad9cb1660eb8350d90c1b53022b017796213754"
       },
-      "notes": "复审 webhook-reference 的 fact 数据迁移；CodeRail 的 pane 结构、动态内容观测、溢出测量、把手接线与 Request/Response 委托契约均未改变。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-code-rail 自身契约、源码与既有 finding 未变化。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
-        "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
+        "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
           "app/pages/kits/api-docs/sidebar-nav.vue",
@@ -679,40 +679,40 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "3e4e550f7622a86ebb8794801595fc6bbb89ddf943285ee9cef1f88fbfb90846",
+        "scopeDigest": "cc311908f5e96380ceee74e6a4f6c3b88d167273c4f6f98a358920fbd9e193c3",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UCommandPalette #empty 槽的渲染行为"
+            "reason": "依赖 UCommandPalette ignoreFilter 接受自定义过滤结果且 #empty 槽只在无可用 option 时挂载的公开契约"
           },
           {
-            "name": "reka-ui",
-            "version": "2.9.10",
-            "reason": "依赖 Listbox 组合层未提供持久 live region 的行为"
+            "name": "fuse.js",
+            "version": "7.4.2",
+            "reason": "依赖 Fuse 7.4 的多字段模糊搜索、全局 resultLimit 与 matches 结果契约"
           }
         ]
       },
-      "notes": "复核 open finding 前提仍成立:@nuxt/ui 仍为 4.9.0,UCommandPalette #empty 槽仍是普通 div(无 aria-live/role=status、无持久 live region),三态文案对 SR 不可达的反例未消除;修复路径依旧依赖上游或与文档化视觉契约有漂移风险,维持交人工决策;外部行为前提绑定 @nuxt/ui 与 reka-ui 精确内容 resolution。",
+      "notes": "修复 f-dd631c5b3977:新增始终挂载的 polite live region;以 fuse.js 同步过滤并通过 UCommandPalette ignoreFilter 交付确定结果,#empty 槽因此与当前查询共享同一快照;完整播报 searching/error/no-results,有结果、空查询或关闭时静默;focused 黑盒测试覆盖异步、关闭竞态及消费方扩展组;reka-ui 缺少 live region 已不再是结论前提.",
       "findings": [
         {
           "id": "f-dd631c5b3977",
           "severity": "low",
           "claim": "references/kits/api-docs/index.md SiteSearch 契约:异步源失败且没有可用结果时,用 searchingLabel / searchErrorLabel 区分加载、失败与零结果",
           "evidence": "打开 ⌘K 面板输入无匹配 query(或让 search() reject):searching/失败/零结果文案只渲染在 UCommandPalette 的 #empty 槽,该槽是普通 div(无 aria-live/role=status);本仓 @nuxt/ui 4.9.0 的 CommandPalette 使用 Reka Listbox 且未提供持久 live region,因此组件契约无法保证状态变化被 SR 播报——三态区分对视觉用户成立,但缺少 WCAG 4.1.3 Status Messages 所需的显式状态语义,且与 SidebarNav/EnumTable 的 sr-only role=status 播报契约不一致。完整修复需 UCommandPalette 暴露过滤结果状态(upstream),或在 #empty 槽用挂载信号镜像到持久 live region(依赖上游 #empty 渲染时机);零结果计数在本组件不可知,半修会与文档化的视觉契约漂移,故整体交人工决策。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
-        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -730,9 +730,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "ab2fe89e059089224c014794c45c0f088dc4753ff38c6d78d01824e9afb3f465"
+        "scopeDigest": "6fc7f0fe70c06cf53920f99ebac90fd89ef6f1b61e8267969e227b22f6d85813"
       },
-      "notes": "移除 WebhookProtocolFact.code 布尔别名并完整迁移 gallery 与 registry consumer fixture；reference 保留 code: true 到 format: 'code' 的单向 breaking migration，不增加 compatibility transform；既有 rich fact 安全、schedule 与 a11y 契约保持成立。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-webhook-protocol 自身契约、源码与既有 finding 未变化。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -745,13 +745,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-11T10:17:38.592Z",
+      "lastAuditedAt": "2026-08-13T04:42:14.281Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b3f71b0f32d2a2975c4c7eb1bebc37285b9d60c3",
-        "headSha": "99013e972a68d3ac8893dec44195618ddb231598",
+        "baseSha": "b6f60054425e3a065e34bb7ffb83e2688367d511",
+        "headSha": "225005636f90843a422161b364cd6249f4e33310",
         "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
         "scope": [
           "AGENTS.md",
@@ -763,9 +763,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "8858972af965808a109e2b6c06276ef8f773add94251289187ac4cf5b957d0c0"
+        "scopeDigest": "b5bd8f4625ec638da3b27d2bd580f5a45ea2af377c2516a6a4269715f3126ff9"
       },
-      "notes": "复审:本次仅更新 WebhookProtocol 契约行,SidebarNav 的过滤、active、拖宽和 tags 溢出契约未受影响。",
+      "notes": "复审 references/kits/api-docs/index.md 仅补充 SiteSearch 状态播报契约;api-docs-sidebar-nav 自身契约、源码与既有 finding 未变化。",
       "findings": []
     }
   }

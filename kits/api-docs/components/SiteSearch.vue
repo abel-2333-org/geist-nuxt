@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
+import Fuse from 'fuse.js'
+
+defineOptions({ inheritAttrs: false })
 
 /** A site-wide search destination. Content adapters should resolve their own
  * source model into this display-only shape before it reaches the kit. */
@@ -33,6 +36,8 @@ const props = withDefaults(
     emptyLabel?: string
     searchingLabel?: string
     searchErrorLabel?: string
+    /** Polite live-region text when a query yields no available option. */
+    noResultsAnnouncement?: (query: string) => string
     scenarioSeparator?: string
     shortcut?: string
     resultLimit?: number
@@ -49,6 +54,7 @@ const props = withDefaults(
     emptyLabel: 'No matching documentation',
     searchingLabel: 'Searching documentation…',
     searchErrorLabel: 'Search is temporarily unavailable. Try again later.',
+    noResultsAnnouncement: (query: string) => `No results for “${query}”`,
     scenarioSeparator: ', ',
     shortcut: 'meta_k',
     resultLimit: 12,
@@ -67,6 +73,8 @@ const asyncItems = shallowRef<SiteSearchItem[]>([])
 const searching = shallowRef(false)
 const searchFailed = shallowRef(false)
 const pendingHashId = shallowRef<string | null>(null)
+const emptyRef = useTemplateRef<HTMLDivElement>('empty')
+const announcement = shallowRef('')
 
 const shortcutKeys = computed(() => props.shortcut
   .split('_')
@@ -123,6 +131,31 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
   })
 })
 
+const emptyStateLabel = computed(() => searching.value
+  ? props.searchingLabel
+  : searchFailed.value
+    ? props.searchErrorLabel
+    : props.emptyLabel)
+
+// The empty slot and the rendered options consume the same synchronously
+// filtered groups. Observing that slot therefore reports the current query,
+// without depending on UCommandPalette's internal debounce or throttle.
+watch(
+  [open, searchTerm, searching, searchFailed, emptyRef],
+  () => {
+    announcement.value = ''
+    const query = searchTerm.value.trim()
+    if (!open.value || !query || !emptyRef.value) return
+
+    announcement.value = searching.value
+      ? props.searchingLabel
+      : searchFailed.value
+        ? props.searchErrorLabel
+        : props.noResultsAnnouncement(query)
+  },
+  { flush: 'post', immediate: true },
+)
+
 if (import.meta.dev) {
   watchEffect(() => {
     if (props.search && !props.searchGroupLabel) {
@@ -178,7 +211,7 @@ function toPaletteItem(item: SiteSearchItem): SiteSearchPaletteItem {
   }
 }
 
-const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
+const sourceGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
   const groups: CommandPaletteGroup<SiteSearchPaletteItem>[] = props.groups.map(group => ({
     id: group.id,
     label: group.label,
@@ -197,13 +230,48 @@ const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() 
   return groups.concat(props.extraGroups)
 })
 
+const fuseOptions = {
+  ignoreLocation: true,
+  includeMatches: true,
+  threshold: 0.1,
+  keys: ['label', 'suffix', 'method', 'scenarios'],
+}
+
+const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
+  const query = searchTerm.value.trim()
+  const groups = sourceGroups.value
+  const results = new Map<string, SiteSearchPaletteItem[]>()
+
+  if (query) {
+    const items = groups
+      .filter(group => !group.ignoreFilter)
+      .flatMap(group => (group.items ?? []).map(item => ({ ...item, group: group.id })))
+
+    for (const result of new Fuse(items, fuseOptions).search(query, { limit: props.resultLimit })) {
+      const groupItems = results.get(result.item.group) ?? []
+      groupItems.push({ ...result.item, matches: result.matches })
+      results.set(result.item.group, groupItems)
+    }
+  }
+
+  return groups.map((group) => {
+    const { postFilter, ...rest } = group
+    const items = query && !group.ignoreFilter
+      ? results.get(group.id) ?? []
+      : group.items ?? []
+
+    return {
+      ...rest,
+      ignoreFilter: true,
+      items: postFilter ? postFilter(query, items) : items,
+    }
+  })
+})
+
 const fuse = computed(() => ({
   fuseOptions: {
-    ignoreLocation: true,
-    includeMatches: true,
+    ...fuseOptions,
     useTokenSearch: true,
-    threshold: 0.1,
-    keys: ['label', 'suffix', 'method', 'scenarios'],
   },
   resultLimit: props.resultLimit,
 }))
@@ -211,6 +279,7 @@ const fuse = computed(() => ({
 
 <template>
   <UModal
+    v-bind="$attrs"
     v-model:open="open"
     :title="props.modalTitle"
     :content="{ onCloseAutoFocus }"
@@ -255,11 +324,15 @@ const fuse = computed(() => ({
         </template>
 
         <template #empty>
-          <div class="py-6 text-center text-sm text-muted">
-            {{ searching ? props.searchingLabel : searchFailed ? props.searchErrorLabel : props.emptyLabel }}
+          <div ref="empty" class="py-6 text-center text-sm text-muted">
+            {{ emptyStateLabel }}
           </div>
         </template>
       </UCommandPalette>
     </template>
   </UModal>
+
+  <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+    {{ announcement }}
+  </p>
 </template>
