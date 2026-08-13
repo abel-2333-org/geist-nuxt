@@ -100,6 +100,26 @@ pnpm geist:copy -- geist-foundation <item...> \
 
 不要只复制 `.vue`：切片里的 composable、util、CSS 和 config 都是运行契约的一部分。
 
+## 机器可读 sync plan（`--json`）
+
+`geist:copy` / `geist:update` / `geist:skill` 接受 `--json`，把 dry-run plan 以 versioned JSON 输出到 stdout；这是给下游 sync orchestrator 的机器契约，人工流程继续用默认文本输出。`--json` 是纯 dry-run 输出模式，不写任何文件，不能与 `--write` 组合（guarded apply 与 apply result 输出随 expected plan digest 契约交付）。
+
+runtime 与 skill plan 共用同一 schema family（`planSchemaVersion: 1`），`kind` 分别为 `runtime` / `skill`：
+
+- `registry`：`name` 与 `repository`，绑定 plan 所属 registry；
+- `sourceSha`：与 `--to` 同语义的精确 40 位 checkout SHA；runtime 与 skill plan 必须绑定同一 SHA；
+- `consumer.lockPresent` / `consumer.lockSourceSha`：consumer 受管状态摘要；
+- `operations[]`：按 `target` 排序。每条含 `action`（`create` / `update` / `delete` / `unchanged`）、稳定 `owner`（`item:<name>` 或 `skill:geist-nuxt`）、repo 相对 `source`（无源侧为 `null`）、consumer 相对 `target`、`beforeHash` / `afterHash`（缺失侧为 `null`）与 canonical 顺序的 `verification` tags；skill adapter symlink 以 `link` 表达且两侧 hash 为 `null`；
+- `packageOperations[]` / `consumerSetupOperations[]`：相对 lock 记录 requirements 的结构化 diff（`add` / `remove` / `change`）；
+- `configMigrations[]`：同一 owner 在一个 plan 内同时 create 与 delete target 即视为受管文件迁移，`from` / `to` 列出两侧 target；
+- `requirements`：解析后的完整 `packages` 与 `consumerSetup`；
+- `summary`：各 action 计数与 changed operations 的 verification tags 并集；
+- `planDigest`：对 canonical 化文档（排除 `planDigest` 自身）的 sha256。
+
+文档不含绝对路径与时间戳；同一 checkout、consumer state 与参数下，输出与 digest 确定性一致。仅 `sourceSha` 重写、内容 hash 未变化的 target 保持 `unchanged`，不贡献 `summary.verification`。
+
+delete operation 的 tags 按序解析：当前 registry item → lock 记录的 `verification` → 全量词表保守 fallback（宁可过度验证，不猜测）；`verificationSource`（`registry` / `lock` / `vocabulary-fallback`）标记来源。
+
 ## `geist.lock.json` 契约
 
 成功写入后，目标项目根目录的 lock 会记录：
@@ -107,7 +127,7 @@ pnpm geist:copy -- geist-foundation <item...> \
 - registry 名称、仓库、最后一次 source SHA；
 - `compatibility` 与本次解析闭包的 `externalRequirements`，包括根基础包、所选 item 的额外包和消费项目必须人工合并的 setup；
 - 用户直接请求的 items，以及解析后的完整依赖闭包；
-- 每个 resolved item 的 `registryDependencies`、`packageDependencies`、source SHA 和目标文件列表；
+- 每个 resolved item 的 `verification` tags（供后续 plan 为已移除 item 的 delete operation 解析 tags）、`registryDependencies`、`packageDependencies`、source SHA 和目标文件列表；
 - 每个受管文件的 source、target、source SHA、source hash 与 target hash。
 
 lock 是 update / check 的受管状态真源，不是依赖安装器；copy-in 不修改消费项目的 `package.json` 或 lockfile。消费项目必须安装 `geist.lock.json.registry.externalRequirements.packages` 中的解析结果。尤其 `geist-foundation` 会把 app config fragment 放到 `app/config/foundation/app.ts`；消费项目还必须按 `externalRequirements.consumerSetup` 将它的 default export 显式合并进自己拥有的 `app/app.config.ts`，并把 `app/config/foundation/nuxt.ts` 的 default export 合并进根 `nuxt.config.ts`。不要手改 lock，也不要把 lock 中的依赖范围当成已自动满足。

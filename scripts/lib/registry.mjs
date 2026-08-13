@@ -13,6 +13,7 @@ import ts from 'typescript'
 export const LOCK_FILE = 'geist.lock.json'
 export const LOCK_VERSION = 1
 export const SOURCE_FILE = '.geist-source.json'
+export const PLAN_SCHEMA_VERSION = 1
 // Stable consumer verification vocabulary (issue #84). Order is canonical for
 // plan emission; consumers must treat unknown tags as a contract violation.
 export const VERIFICATION_TAGS = Object.freeze([
@@ -53,6 +54,41 @@ export class RegistryError extends Error {
 
 export function sha256(content) {
   return createHash('sha256').update(content).digest('hex')
+}
+
+// Protocol documents must sort identically across machines. String relational
+// comparison follows ECMAScript UTF-16 code-unit order and does not consult the
+// process locale, unlike localeCompare().
+export function compareCodeUnits(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0
+}
+
+// Known tags first in vocabulary order, unknown lock-recorded tags after them in
+// lexical order: emitted rather than dropped so a stale vocabulary fails closed
+// on the consumer side instead of silently shrinking the verification set.
+export function canonicalVerification(tags) {
+  const unique = [...new Set(tags ?? [])]
+  return [
+    ...VERIFICATION_TAGS.filter(tag => unique.includes(tag)),
+    ...unique.filter(tag => !VERIFICATION_TAGS.includes(tag)).sort(),
+  ]
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => compareCodeUnits(left, right))
+        .map(([key, child]) => [key, canonicalize(child)]),
+    )
+  }
+  return value
+}
+
+export function planDocumentDigest(document) {
+  const { planDigest: _planDigest, ...rest } = document
+  return sha256(JSON.stringify(canonicalize(rest)))
 }
 
 export function assertExactSha(value, label = 'source SHA') {
@@ -173,7 +209,7 @@ async function walkFiles(root, relativeRoot) {
     throw error
   }
   const files = []
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of entries.sort((a, b) => compareCodeUnits(a.name, b.name))) {
     if (entry.name === '.DS_Store') continue
     const relative = path.posix.join(relativeRoot, entry.name)
     if (entry.isDirectory()) files.push(...await walkFiles(root, relative))
@@ -297,7 +333,7 @@ function validRange(value) {
 function packageMap(value, label, { optional = false } = {}) {
   if (value === undefined && optional) return {}
   if (!isPlainObject(value)) throw new RegistryError(`${label} must be an object`)
-  const entries = Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
+  const entries = Object.entries(value).sort(([left], [right]) => compareCodeUnits(left, right))
   for (const [name, range] of entries) {
     if (!PACKAGE_NAME_RE.test(name)) throw new RegistryError(`${label} contains an invalid package name: ${name}`)
     if (!validRange(range)) {
@@ -344,7 +380,7 @@ function resolveExternalRequirements(registry, items) {
     }
   }
   return {
-    packages: Object.fromEntries([...packages].sort(([left], [right]) => left.localeCompare(right))),
+    packages: Object.fromEntries([...packages].sort(([left], [right]) => compareCodeUnits(left, right))),
     consumerSetup: structuredClone(registry.externalRequirements.consumerSetup),
   }
 }
@@ -755,6 +791,11 @@ export async function readLock(consumerRoot) {
       || !Object.values(lock.items).every(record => (
         isPlainObject(record)
         && typeof record.sourceSha === 'string'
+        && (record.verification === undefined || (
+          Array.isArray(record.verification)
+          && record.verification.length > 0
+          && record.verification.every(tag => typeof tag === 'string')
+        ))
         && Array.isArray(record.registryDependencies)
         && record.registryDependencies.every(dependency => typeof dependency === 'string')
         && (record.packageDependencies === undefined || isPackageMap(record.packageDependencies))
@@ -848,6 +889,122 @@ export async function planCopy({ registry, resolution, repoRoot, consumerRoot, s
   return { registry, resolution, sourceSha, consumerRoot, lock, operations, update }
 }
 
+function diffPackageMaps(before, after) {
+  const names = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort()
+  const operations = []
+  for (const name of names) {
+    if (before[name] === after[name]) continue
+    operations.push({
+      action: before[name] === undefined ? 'add' : after[name] === undefined ? 'remove' : 'change',
+      name,
+      before: before[name] ?? null,
+      after: after[name] ?? null,
+    })
+  }
+  return operations
+}
+
+function diffConsumerSetup(before, after) {
+  return [
+    ...after.filter(instruction => !before.includes(instruction))
+      .map(instruction => ({ action: 'add', instruction })),
+    ...before.filter(instruction => !after.includes(instruction))
+      .map(instruction => ({ action: 'remove', instruction })),
+  ]
+}
+
+// Owners that both create and delete targets in one plan relocated managed
+// files (typically config fragments). Surfaced separately so consumers see the
+// migration without pairing operations themselves.
+function collectMigrations(operations) {
+  const byOwner = new Map()
+  for (const operation of operations) {
+    if (operation.action !== 'create' && operation.action !== 'delete') continue
+    const record = byOwner.get(operation.owner) ?? { from: [], to: [] }
+    record[operation.action === 'delete' ? 'from' : 'to'].push(operation.target)
+    byOwner.set(operation.owner, record)
+  }
+  return [...byOwner.entries()]
+    .filter(([, record]) => record.from.length > 0 && record.to.length > 0)
+    .sort(([left], [right]) => compareCodeUnits(left, right))
+    .map(([owner, record]) => ({ owner, from: [...record.from].sort(), to: [...record.to].sort() }))
+}
+
+function planSummary(operations) {
+  const summary = { create: 0, update: 0, delete: 0, unchanged: 0, verification: [] }
+  const changedTags = new Set()
+  for (const operation of operations) {
+    summary[operation.action] += 1
+    if (operation.action === 'unchanged') continue
+    for (const tag of operation.verification) changedTags.add(tag)
+  }
+  summary.verification = canonicalVerification([...changedTags])
+  return summary
+}
+
+// Machine-readable sync plan (issue #84). Every field is contract surface for
+// downstream orchestrators: no absolute paths, no timestamps, deterministic
+// ordering, and planDigest covers the canonicalized document.
+export function buildRuntimePlanDocument(plan) {
+  const itemsByName = new Map(plan.registry.items.map(item => [item.name, item]))
+  const lockItems = plan.lock?.items ?? {}
+  const operations = plan.operations.map((operation) => {
+    const action = operation.action === 'stale-missing' ? 'delete' : operation.action
+    const registryItem = itemsByName.get(operation.item)
+    let verification
+    let verificationSource = 'registry'
+    if (registryItem) {
+      verification = canonicalVerification(registryItem.verification)
+    }
+    else if (Array.isArray(lockItems[operation.item]?.verification)) {
+      verification = canonicalVerification(lockItems[operation.item].verification)
+      verificationSource = 'lock'
+    }
+    else {
+      // Owning item is gone and the lock predates recorded tags: fall back to
+      // the full vocabulary (conservative over-verification, never guessing).
+      verification = [...VERIFICATION_TAGS]
+      verificationSource = 'vocabulary-fallback'
+    }
+    const document = {
+      action,
+      owner: `item:${operation.item}`,
+      source: operation.path ?? null,
+      target: operation.target,
+      beforeHash: operation.targetHash ?? null,
+      afterHash: action === 'delete' ? null : operation.sourceHash ?? null,
+      verification,
+    }
+    if (action === 'delete') document.verificationSource = verificationSource
+    return document
+  }).sort((left, right) => compareCodeUnits(left.target, right.target))
+
+  const lockPackages = plan.lock?.registry?.externalRequirements?.packages ?? {}
+  const lockSetup = plan.lock?.registry?.externalRequirements?.consumerSetup ?? []
+  const requirements = plan.resolution.externalRequirements
+  const document = {
+    planSchemaVersion: PLAN_SCHEMA_VERSION,
+    kind: 'runtime',
+    registry: { name: plan.registry.name, repository: plan.registry.repository },
+    sourceSha: plan.sourceSha,
+    consumer: {
+      lockPresent: Boolean(plan.lock),
+      lockSourceSha: plan.lock?.registry?.lastSourceSha ?? null,
+    },
+    operations,
+    packageOperations: diffPackageMaps(lockPackages, requirements.packages),
+    consumerSetupOperations: diffConsumerSetup(lockSetup, requirements.consumerSetup),
+    configMigrations: collectMigrations(operations),
+    requirements: {
+      packages: structuredClone(requirements.packages),
+      consumerSetup: structuredClone(requirements.consumerSetup),
+    },
+    summary: planSummary(operations),
+  }
+  document.planDigest = planDocumentDigest(document)
+  return document
+}
+
 function nextLock(plan) {
   const lock = plan.lock
     ? structuredClone(plan.lock)
@@ -870,6 +1027,9 @@ function nextLock(plan) {
   for (const item of plan.resolution.items) {
     lock.items[item.name] = {
       sourceSha: plan.sourceSha,
+      // Recorded so a later plan can still resolve tags for delete operations
+      // after the owning item leaves the registry (issue #84).
+      verification: canonicalVerification(item.verification),
       registryDependencies: [...(item.registryDependencies ?? [])],
       packageDependencies: packageMap(item.packageDependencies, `item ${item.name} packageDependencies`, { optional: true }),
       files: item.files.map(file => file.target),
@@ -964,6 +1124,14 @@ export async function checkConsumer({ registry, repoRoot, consumerRoot }) {
     for (const item of expectedResolution.items) {
       const itemRecord = lock.items[item.name]
       if (!itemRecord) continue
+      // Legacy locks predate recorded tags; any lock written at the current
+      // checkout records them, so a defined mismatch means the lock was edited.
+      if (
+        itemRecord.verification !== undefined
+        && !isDeepStrictEqual(itemRecord.verification, canonicalVerification(item.verification))
+      ) {
+        errors.push(`locked item verification differs from registry: ${item.name}`)
+      }
       const expectedDependencies = [...(item.registryDependencies ?? [])].sort()
       const lockedDependencies = [...itemRecord.registryDependencies].sort()
       if (!isDeepStrictEqual(lockedDependencies, expectedDependencies)) {
@@ -1039,7 +1207,7 @@ export function parseArgs(argv) {
       options.items.push(argument)
       continue
     }
-    if (['--write', '--dry-run', '--update', '--all', '--keep-temp', '--skip-install'].includes(argument)) {
+    if (['--write', '--dry-run', '--update', '--all', '--json', '--keep-temp', '--skip-install'].includes(argument)) {
       options[argument.slice(2).replaceAll('-', '_')] = true
       continue
     }

@@ -16,6 +16,9 @@ import path from 'node:path'
 import {
   assertExactSha,
   assertSafeRelative,
+  compareCodeUnits,
+  PLAN_SCHEMA_VERSION,
+  planDocumentDigest,
   RegistryError,
   resolveSourceSha,
   sha256,
@@ -65,7 +68,7 @@ async function walkSource(repoRoot, relative) {
 
   const files = []
   const entries = await readdir(absolute, { withFileTypes: true })
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (IGNORED_ENTRIES.has(entry.name)) continue
     files.push(...await walkSource(repoRoot, path.posix.join(relative, entry.name)))
   }
@@ -158,7 +161,7 @@ async function walkInstalled(consumerRoot, relative = AGENT_SKILL_ROOT) {
     throw error
   }
   const files = []
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (IGNORED_ENTRIES.has(entry.name)) continue
     const child = path.posix.join(relative, entry.name)
     if (entry.isSymbolicLink()) throw new RegistryError(`installed agent skill must not contain symbolic links: ${child}`)
@@ -212,11 +215,14 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
 
   const sourceFiles = []
   for (const entry of SOURCE_ENTRIES) sourceFiles.push(...await walkSource(repoRoot, entry))
-  sourceFiles.sort((left, right) => left.localeCompare(right))
+  sourceFiles.sort(compareCodeUnits)
 
   const registry = JSON.parse(await readFile(path.join(repoRoot, 'registry.json'), 'utf8'))
   if (typeof registry.repository !== 'string' || !registry.repository) {
     throw new RegistryError('registry.json repository is required for the agent skill manifest')
+  }
+  if (typeof registry.name !== 'string' || !registry.name) {
+    throw new RegistryError('registry.json name is required for the agent skill plan')
   }
   if (installedLock && installedLock.repository !== registry.repository) {
     throw new RegistryError(
@@ -325,7 +331,68 @@ export async function planAgentSkill({ repoRoot, consumerRoot, sourceSha }) {
   if (conflicts.length) {
     throw new RegistryError(`agent skill sync stopped: ${conflicts.length} conflicting target(s); no files were written`, conflicts)
   }
-  return { consumerRoot, repoRoot, sourceSha, operations }
+  return {
+    consumerRoot,
+    repoRoot,
+    sourceSha,
+    operations,
+    installedLock,
+    registry: { name: registry.name, repository: registry.repository },
+  }
+}
+
+// Skill counterpart of buildRuntimePlanDocument: same schema family, one stable
+// owner, and every operation verifies as `reference` (skill payloads never
+// change consumer runtime behavior).
+export function buildAgentSkillPlanDocument(plan) {
+  const operations = plan.operations.map((operation) => {
+    if (operation.adapter) {
+      return {
+        action: operation.action,
+        owner: `skill:${AGENT_SKILL_NAME}`,
+        source: null,
+        target: operation.target,
+        link: CLAUDE_SKILL_TARGET,
+        beforeHash: null,
+        afterHash: null,
+        verification: ['reference'],
+      }
+    }
+    const action = operation.action === 'stale-missing' ? 'delete' : operation.action
+    return {
+      action,
+      owner: `skill:${AGENT_SKILL_NAME}`,
+      source: operation.manifest ? null : operation.relative,
+      target: operation.target,
+      beforeHash: operation.before.exists ? operation.before.hash : null,
+      afterHash: action === 'delete' ? null : sha256(operation.content),
+      verification: ['reference'],
+    }
+  }).sort((left, right) => compareCodeUnits(left.target, right.target))
+
+  const summary = { create: 0, update: 0, delete: 0, unchanged: 0, verification: [] }
+  for (const operation of operations) {
+    summary[operation.action] += 1
+    if (operation.action !== 'unchanged') summary.verification = ['reference']
+  }
+  const document = {
+    planSchemaVersion: PLAN_SCHEMA_VERSION,
+    kind: 'skill',
+    registry: { name: plan.registry.name, repository: plan.registry.repository },
+    sourceSha: plan.sourceSha,
+    consumer: {
+      lockPresent: Boolean(plan.installedLock),
+      lockSourceSha: plan.installedLock?.sourceSha ?? null,
+    },
+    operations,
+    packageOperations: [],
+    consumerSetupOperations: [],
+    configMigrations: [],
+    requirements: { packages: {}, consumerSetup: [] },
+    summary,
+  }
+  document.planDigest = planDocumentDigest(document)
+  return document
 }
 
 async function pruneEmptyDirectories(root) {
@@ -449,7 +516,7 @@ export async function applyAgentSkillPlan(plan) {
 export function parseAgentSkillArgs(argv) {
   const options = {}
   const allowedValues = new Set(['--consumer', '--sha', '--target', '--to'])
-  const allowedFlags = new Set(['--dry-run', '--write'])
+  const allowedFlags = new Set(['--dry-run', '--json', '--write'])
   for (let index = 0; index < argv.length; index++) {
     const argument = argv[index]
     if (argument === '--') continue
@@ -472,6 +539,9 @@ export function parseAgentSkillArgs(argv) {
       : 'geist:skill does not accept positional items')
   }
   if (options.write && options.dry_run) throw new RegistryError('--write and --dry-run cannot be combined')
+  if (options.write && options.json) {
+    throw new RegistryError('--json is a dry-run output mode; guarded apply output ships with the plan digest contract')
+  }
   if (!options.target && !options.consumer) throw new RegistryError('--target <consumer-directory> is required')
   if (options.target && options.consumer) throw new RegistryError('--target and --consumer cannot be combined')
   if (options.to && options.sha) throw new RegistryError('--to and --sha cannot be combined')

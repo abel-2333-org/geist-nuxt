@@ -12,11 +12,14 @@ import {
   applyCopyPlan,
   assertExactSha,
   assertSafeTarget,
+  buildRuntimePlanDocument,
   checkConsumer,
+  compareCodeUnits,
   loadRegistry,
   parseArgs,
   parseShard,
   planCopy,
+  planDocumentDigest,
   readLock,
   resolveCopyRequest,
   resolveItems,
@@ -35,6 +38,15 @@ test('accepts the pnpm argument separator', () => {
   assert.deepEqual(options.items, ['geist-foundation'])
   assert.equal(options.target, '../consumer')
   assert.equal(options.to, SOURCE_SHA)
+  assert.equal(parseArgs(['--json', '--target', '../consumer']).json, true)
+})
+
+test('canonical plan ordering is independent of the process locale', () => {
+  assert.deepEqual(['ä', 'z', 'A'].sort(compareCodeUnits), ['A', 'z', 'ä'])
+  assert.equal(
+    planDocumentDigest({ z: 1, ä: 2 }),
+    sha256(JSON.stringify({ z: 1, ä: 2 })),
+  )
 })
 
 test('partitions consumer scenarios into complete deterministic shards', () => {
@@ -529,6 +541,228 @@ void example
     )
     await assert.rejects(validateRegistry(registry, { repoRoot }), /without declaring a dependency/)
   })
+})
+
+test('emits a versioned machine-readable runtime plan with deterministic digest', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const buildDocument = async () => buildRuntimePlanDocument(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['feature']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const document = await buildDocument()
+  assert.equal(document.planSchemaVersion, 1)
+  assert.equal(document.kind, 'runtime')
+  assert.deepEqual(document.registry, { name: 'fixture', repository: 'https://example.test/fixture.git' })
+  assert.equal(document.sourceSha, SOURCE_SHA)
+  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null })
+  assert.deepEqual(
+    document.operations.map(operation => [operation.action, operation.owner, operation.target]),
+    [
+      ['create', 'item:dependency', 'app/components/Dependency.vue'],
+      ['create', 'item:feature', 'app/components/Feature.vue'],
+    ],
+  )
+  for (const operation of document.operations) {
+    assert.equal(operation.beforeHash, null)
+    assert.match(operation.afterHash, /^[0-9a-f]{64}$/)
+    assert.deepEqual(operation.verification, ['visual', 'dependency'])
+    assert.equal(operation.verificationSource, undefined)
+    assert.equal(path.posix.isAbsolute(operation.source) || path.posix.isAbsolute(operation.target), false)
+  }
+  assert.deepEqual(
+    document.packageOperations.map(operation => [operation.action, operation.name]),
+    [
+      ['add', '@nuxt/ui'],
+      ['add', '@vueuse/core'],
+      ['add', 'dependency-package'],
+      ['add', 'feature-package'],
+      ['add', 'nuxt'],
+      ['add', 'tailwindcss'],
+    ],
+  )
+  assert.deepEqual(document.consumerSetupOperations, [{ action: 'add', instruction: 'Wrap the app in UApp.' }])
+  assert.deepEqual(document.configMigrations, [])
+  assert.deepEqual(document.summary, { create: 2, update: 0, delete: 0, unchanged: 0, verification: ['visual', 'dependency'] })
+  assert.equal(document.planDigest, planDocumentDigest(document))
+  assert.deepEqual(await buildDocument(), document)
+})
+
+test('sorts runtime plan operations by locale-independent code-unit order', () => {
+  const operation = target => ({
+    action: 'create',
+    item: 'feature',
+    path: target,
+    sourceHash: '1'.repeat(64),
+    target,
+  })
+  const document = buildRuntimePlanDocument({
+    registry: {
+      name: 'fixture',
+      repository: 'https://example.test/fixture.git',
+      items: [{ name: 'feature', verification: ['visual'] }],
+    },
+    resolution: { externalRequirements: { packages: {}, consumerSetup: [] } },
+    sourceSha: SOURCE_SHA,
+    operations: [operation('ä.vue'), operation('z.vue')],
+  })
+
+  assert.deepEqual(document.operations.map(entry => entry.target), ['z.vue', 'ä.vue'])
+})
+
+test('sourceSha-only rewrite keeps operations unchanged and creates no runtime impact', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+  const document = buildRuntimePlanDocument(await planCopy({
+    registry,
+    resolution: resolveCopyRequest(registry, [], { lock: await readLock(consumerRoot), update: true }),
+    repoRoot,
+    consumerRoot,
+    sourceSha: OTHER_SOURCE_SHA,
+    update: true,
+  }))
+  assert.deepEqual(document.summary, { create: 0, update: 0, delete: 0, unchanged: 2, verification: [] })
+  assert.deepEqual(document.packageOperations, [])
+  assert.deepEqual(document.consumerSetupOperations, [])
+  for (const operation of document.operations) {
+    assert.equal(operation.action, 'unchanged')
+    assert.equal(operation.beforeHash, operation.afterHash)
+  }
+})
+
+test('resolves delete operation verification from registry, then lock, then vocabulary fallback', async (t) => {
+  await t.test('config migration keeps registry-resolved tags and reports the relocation', async () => {
+    const { repoRoot, consumerRoot, registry } = await configFixture()
+    await applyCopyPlan(await planCopy({
+      registry,
+      resolution: resolveItems(registry, ['foundation-config']),
+      repoRoot,
+      consumerRoot,
+      sourceSha: SOURCE_SHA,
+    }))
+    const { current } = await migrateConfigFixture(registry, repoRoot)
+    const document = buildRuntimePlanDocument(await planCopy({
+      registry: current,
+      resolution: resolveCopyRequest(current, [], { lock: await readLock(consumerRoot), update: true }),
+      repoRoot,
+      consumerRoot,
+      sourceSha: OTHER_SOURCE_SHA,
+      update: true,
+    }))
+    const deletes = document.operations.filter(operation => operation.action === 'delete')
+    assert.equal(deletes.length, 2)
+    for (const operation of deletes) {
+      assert.deepEqual(operation.verification, ['config'])
+      assert.equal(operation.verificationSource, 'registry')
+      assert.equal(operation.afterHash, null)
+    }
+    assert.deepEqual(document.configMigrations, [{
+      owner: 'item:foundation-config',
+      from: ['app/config/geist-app.ts', 'app/config/geist-nuxt.ts'],
+      to: ['app/config/foundation/app.ts', 'app/config/foundation/nuxt.ts'],
+    }])
+    assert.deepEqual(document.summary.verification, ['config'])
+  })
+
+  await t.test('removed item falls back to lock-recorded tags, then the full vocabulary', async () => {
+    const { repoRoot, consumerRoot, registry } = await fixture()
+    await applyCopyPlan(await planCopy({
+      registry,
+      resolution: resolveItems(registry, ['feature']),
+      repoRoot,
+      consumerRoot,
+      sourceSha: SOURCE_SHA,
+    }))
+
+    const withoutDependency = structuredClone(registry)
+    withoutDependency.items = [withoutDependency.items.find(item => item.name === 'feature')]
+    withoutDependency.items[0].registryDependencies = []
+    const buildDocument = async () => buildRuntimePlanDocument(await planCopy({
+      registry: withoutDependency,
+      resolution: resolveItems(withoutDependency, ['feature']),
+      repoRoot,
+      consumerRoot,
+      sourceSha: SOURCE_SHA,
+      update: true,
+    }))
+    const fromLock = (await buildDocument()).operations.find(operation => operation.action === 'delete')
+    assert.equal(fromLock.owner, 'item:dependency')
+    assert.deepEqual(fromLock.verification, ['visual', 'dependency'])
+    assert.equal(fromLock.verificationSource, 'lock')
+
+    const lockPath = path.join(consumerRoot, 'geist.lock.json')
+    const legacy = JSON.parse(await readFile(lockPath, 'utf8'))
+    for (const record of Object.values(legacy.items)) delete record.verification
+    await writeFile(lockPath, `${JSON.stringify(legacy, null, 2)}\n`)
+    const fallback = (await buildDocument()).operations.find(operation => operation.action === 'delete')
+    assert.deepEqual(fallback.verification, [...VERIFICATION_TAGS])
+    assert.equal(fallback.verificationSource, 'vocabulary-fallback')
+  })
+})
+
+test('package and consumer setup changes surface as typed plan operations', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['feature']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const current = structuredClone(registry)
+  current.items[1].packageDependencies = { 'feature-package': '^3.0.0' }
+  delete current.items[0].packageDependencies
+  current.externalRequirements.consumerSetup = ['Wrap the application in UApp.']
+  const document = buildRuntimePlanDocument(await planCopy({
+    registry: current,
+    resolution: resolveCopyRequest(current, [], { lock: await readLock(consumerRoot), update: true }),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+    update: true,
+  }))
+  assert.deepEqual(document.packageOperations, [
+    { action: 'remove', name: 'dependency-package', before: '^1.0.0', after: null },
+    { action: 'change', name: 'feature-package', before: '^2.0.0', after: '^3.0.0' },
+  ])
+  assert.deepEqual(document.consumerSetupOperations, [
+    { action: 'add', instruction: 'Wrap the application in UApp.' },
+    { action: 'remove', instruction: 'Wrap the app in UApp.' },
+  ])
+})
+
+test('lock records canonical verification tags and check flags tampering', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  registry.items[1].verification = ['dependency', 'visual']
+  await applyCopyPlan(await planCopy({
+    registry,
+    resolution: resolveItems(registry, ['feature']),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+  }))
+  const lock = await readLock(consumerRoot)
+  assert.deepEqual(lock.items.feature.verification, ['visual', 'dependency'])
+  await checkConsumer({ registry, repoRoot, consumerRoot })
+
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  const tampered = structuredClone(lock)
+  tampered.items.feature.verification = ['interaction']
+  await writeFile(lockPath, `${JSON.stringify(tampered, null, 2)}\n`)
+  await assert.rejects(checkConsumer({ registry, repoRoot, consumerRoot }), /locked item verification differs from registry: feature/)
+
+  const legacy = structuredClone(lock)
+  for (const record of Object.values(legacy.items)) delete record.verification
+  await writeFile(lockPath, `${JSON.stringify(legacy, null, 2)}\n`)
+  await checkConsumer({ registry, repoRoot, consumerRoot })
+
+  const malformed = structuredClone(lock)
+  malformed.items.feature.verification = []
+  await writeFile(lockPath, `${JSON.stringify(malformed, null, 2)}\n`)
+  await assert.rejects(readLock(consumerRoot), /unsupported format/)
 })
 
 test('rejects unsafe paths and protected consumer files while allowing the managed foundation main.css', () => {

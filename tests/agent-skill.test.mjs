@@ -72,6 +72,8 @@ test('parses only the narrow geist:skill CLI contract', () => {
   assert.throws(() => parseAgentSkillArgs(['item']), /does not accept positional/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--all']), /unsupported/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--write', '--dry-run']), /cannot be combined/)
+  assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--json', '--write']), /dry-run output mode/)
+  assert.equal(parseAgentSkillArgs(['--target', 'app', '--json']).json, true)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--consumer', 'other']), /cannot be combined/)
   assert.throws(() => parseAgentSkillArgs(['--target', 'app', '--to', sourceSha, '--sha', sourceSha]), /cannot be combined/)
 })
@@ -98,6 +100,49 @@ test('installs the consumer skill through dry-run and remains idempotent', async
   const repeat = runCli(['--target', consumer])
   assert.equal(repeat.status, 0, repeat.stderr)
   assert.doesNotMatch(repeat.stdout, /^(?:create|update|delete)\s/m)
+})
+
+test('emits a versioned machine-readable skill plan without writing files', async () => {
+  const consumer = await makeConsumer()
+  const json = runCli(['--target', consumer, '--json'])
+  assert.equal(json.status, 0, json.stderr)
+  const document = JSON.parse(json.stdout)
+  assert.equal(document.planSchemaVersion, 1)
+  assert.equal(document.kind, 'skill')
+  assert.equal(document.registry.name, 'geist-nuxt')
+  assert.equal(document.sourceSha, sourceSha)
+  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null })
+  assert.ok(document.operations.length > 0)
+  for (const operation of document.operations) {
+    assert.equal(operation.owner, 'skill:geist-nuxt')
+    assert.deepEqual(operation.verification, ['reference'])
+    assert.equal(operation.action, 'create')
+    assert.equal(operation.beforeHash, null)
+  }
+  const adapter = document.operations.find(operation => operation.target === CLAUDE_SKILL_LINK)
+  assert.equal(adapter.link, CLAUDE_SKILL_TARGET)
+  assert.equal(adapter.afterHash, null)
+  const skillFile = document.operations.find(operation => operation.target === `${AGENT_SKILL_ROOT}/SKILL.md`)
+  assert.equal(skillFile.source, 'SKILL.md')
+  assert.match(skillFile.afterHash, /^[0-9a-f]{64}$/)
+  assert.deepEqual(document.packageOperations, [])
+  assert.deepEqual(document.summary.verification, ['reference'])
+  assert.equal(document.summary.create, document.operations.length)
+  assert.match(document.planDigest, /^[0-9a-f]{64}$/)
+  await assert.rejects(lstat(path.join(consumer, AGENT_SKILL_ROOT)), error => error?.code === 'ENOENT')
+
+  const again = runCli(['--target', consumer, '--json'])
+  assert.equal(JSON.parse(again.stdout).planDigest, document.planDigest)
+
+  assert.equal(runCli(['--target', consumer, '--write']).status, 0)
+  const converged = JSON.parse(runCli(['--target', consumer, '--json']).stdout)
+  assert.equal(converged.summary.create + converged.summary.update + converged.summary.delete, 0)
+  assert.deepEqual(converged.summary.verification, [])
+  assert.deepEqual(converged.consumer, { lockPresent: true, lockSourceSha: sourceSha })
+
+  const combined = runCli(['--target', consumer, '--json', '--write'])
+  assert.notEqual(combined.status, 0)
+  assert.match(combined.stderr, /dry-run output mode/)
 })
 
 test('ignores OS artifacts like .DS_Store under the installed skill', async () => {
