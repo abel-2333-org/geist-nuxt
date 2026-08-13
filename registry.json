@@ -391,6 +391,9 @@
       "type": "registry:component",
       "title": "SiteSearch",
       "description": "Data-agnostic site-wide documentation search command palette.",
+      "packageDependencies": {
+        "fuse.js": "^7.4.2"
+      },
       "registryDependencies": ["api-docs-method-badge"],
       "files": [
         { "path": "kits/api-docs/components/SiteSearch.vue", "target": "app/components/SiteSearch.vue" }

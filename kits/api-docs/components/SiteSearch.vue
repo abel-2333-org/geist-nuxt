@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CommandPaletteGroup, CommandPaletteItem } from '@nuxt/ui'
+import Fuse from 'fuse.js'
 
 defineOptions({ inheritAttrs: false })
 
@@ -136,17 +137,16 @@ const emptyStateLabel = computed(() => searching.value
     ? props.searchErrorLabel
     : props.emptyLabel)
 
-// UCommandPalette owns the only trustworthy view of its filtered options.
-// Observe its empty-slot lifecycle instead of copying Fuse internals here;
-// flush post so an arriving async result can remove the slot before we speak.
+// The empty slot and the rendered options consume the same synchronously
+// filtered groups. Observing that slot therefore reports the current query,
+// without depending on UCommandPalette's internal debounce or throttle.
 watch(
   [open, searchTerm, searching, searchFailed, emptyRef],
   () => {
+    announcement.value = ''
     const query = searchTerm.value.trim()
-    if (!open.value || !query || !emptyRef.value) {
-      announcement.value = ''
-      return
-    }
+    if (!open.value || !query || !emptyRef.value) return
+
     announcement.value = searching.value
       ? props.searchingLabel
       : searchFailed.value
@@ -211,7 +211,7 @@ function toPaletteItem(item: SiteSearchItem): SiteSearchPaletteItem {
   }
 }
 
-const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
+const sourceGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
   const groups: CommandPaletteGroup<SiteSearchPaletteItem>[] = props.groups.map(group => ({
     id: group.id,
     label: group.label,
@@ -230,13 +230,48 @@ const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() 
   return groups.concat(props.extraGroups)
 })
 
+const fuseOptions = {
+  ignoreLocation: true,
+  includeMatches: true,
+  threshold: 0.1,
+  keys: ['label', 'suffix', 'method', 'scenarios'],
+}
+
+const paletteGroups = computed<CommandPaletteGroup<SiteSearchPaletteItem>[]>(() => {
+  const query = searchTerm.value.trim()
+  const groups = sourceGroups.value
+  const results = new Map<string, SiteSearchPaletteItem[]>()
+
+  if (query) {
+    const items = groups
+      .filter(group => !group.ignoreFilter)
+      .flatMap(group => (group.items ?? []).map(item => ({ ...item, group: group.id })))
+
+    for (const result of new Fuse(items, fuseOptions).search(query, { limit: props.resultLimit })) {
+      const groupItems = results.get(result.item.group) ?? []
+      groupItems.push({ ...result.item, matches: result.matches })
+      results.set(result.item.group, groupItems)
+    }
+  }
+
+  return groups.map((group) => {
+    const { postFilter, ...rest } = group
+    const items = query && !group.ignoreFilter
+      ? results.get(group.id) ?? []
+      : group.items ?? []
+
+    return {
+      ...rest,
+      ignoreFilter: true,
+      items: postFilter ? postFilter(query, items) : items,
+    }
+  })
+})
+
 const fuse = computed(() => ({
   fuseOptions: {
-    ignoreLocation: true,
-    includeMatches: true,
+    ...fuseOptions,
     useTokenSearch: true,
-    threshold: 0.1,
-    keys: ['label', 'suffix', 'method', 'scenarios'],
   },
   resultLimit: props.resultLimit,
 }))

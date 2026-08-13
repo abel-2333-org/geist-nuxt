@@ -88,6 +88,49 @@ describe('SiteSearch status announcements', () => {
     await vi.waitFor(() => expect(status().text()).toBe('No docs for second-miss'))
   })
 
+  it('never announces a matching query while replacing a previous empty state', async () => {
+    await mountSearch({
+      noResultsAnnouncement: (value: string) => `No docs for ${value}`,
+    })
+
+    await query('missing')
+    await vi.waitFor(() => expect(status().text()).toBe('No docs for missing'))
+
+    const changes: string[] = []
+    const observer = new MutationObserver(() => changes.push(status().text()))
+    observer.observe(status().element, { childList: true, characterData: true, subtree: true })
+
+    await query('Authentication')
+    await flushPromises()
+    observer.disconnect()
+
+    expect(palette().text()).toContain('Authentication')
+    expect(status().text()).toBe('')
+    expect(changes).not.toContain('No docs for Authentication')
+  })
+
+  it('filters consumer groups with the current query before applying postFilter', async () => {
+    const postFilter = vi.fn((_query: string, items: { label?: string }[]) => items)
+    await mountSearch({
+      extraGroups: [{
+        id: 'extra',
+        label: 'Extra',
+        postFilter,
+        items: [
+          { label: 'Billing shortcut', to: '/billing' },
+          { label: 'Team shortcut', to: '/team' },
+        ],
+      }],
+    })
+
+    await query('Billing')
+    await flushPromises()
+
+    expect(palette().text()).toContain('Billing shortcut')
+    expect(palette().text()).not.toContain('Team shortcut')
+    expect(postFilter).toHaveBeenLastCalledWith('Billing', [expect.objectContaining({ label: 'Billing shortcut' })])
+  })
+
   it('announces async loading, empty, failure and successful-result transitions', async () => {
     const empty = deferred<never[]>()
     const failed = deferred<never[]>()

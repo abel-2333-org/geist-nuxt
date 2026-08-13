@@ -44,13 +44,15 @@
 主要输入：
 
 - `groups: { id, label, items[] }[]`：静态指南/端点索引；item 接受
-  `label / to / method? / scenarios? / icon? / suffix?`；
+  `label / to / method? / scenarios? / icon? / suffix?`；组件通过 `fuse.js` 同步过滤这些
+  静态项，再用 `UCommandPalette.ignoreFilter` 交付已确定的结果，使列表与状态播报共享同一查询快照；
 - `search(query)` + `searchGroupLabel`：可选异步正文结果，组件负责 debounce 与
   stale response cleanup，数据源排序不再被 Fuse 重排；异步源失败且没有可用结果时，
   用 `searchingLabel` / `searchErrorLabel` 区分加载、失败与零结果；持久挂载的
   `role="status" aria-live="polite"` 同步播报三态，零结果文本由
   `noResultsAnnouncement(query)` 生成；有任何可用 option、查询为空或面板关闭时保持静默；
-- `extraGroups`：消费项目自己的快捷入口；
+- `extraGroups`：消费项目自己的快捷入口；未声明 `ignoreFilter` 的组与静态索引一起过滤，
+  `postFilter` 收到当前查询及已过滤结果，声明 `ignoreFilter` 的组保持消费方排序；
 - `shortcut` / `resultLimit` / `scenarioSeparator` 与全部可见文案：均可注入；结构性文案
   内置英文默认值，消费项目只在需要本地化或改写时覆盖。
 
