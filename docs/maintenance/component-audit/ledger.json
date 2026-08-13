@@ -1,13 +1,14 @@
 {
   "version": 2,
-  "round": 1,
-  "lastRunAt": "2026-08-12T02:12:43.019Z",
+  "round": 2,
+  "lastRunAt": "2026-08-13T02:07:43.078Z",
   "lastPicked": [
+    "foundation-split-pane",
+    "foundation-theme-toggle",
+    "foundation-term-annotation",
     "api-docs-site-search",
-    "api-docs-schema-composition",
-    "api-docs-code-rail",
-    "foundation-copy-button",
-    "foundation-split-pane-handle"
+    "foundation-annotation-popover",
+    "foundation-doc-annotation"
   ],
   "items": {
     "foundation-copy-button": {
@@ -131,23 +132,47 @@
       ]
     },
     "foundation-theme-toggle": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
+      "change": "modified",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
+        "scope": [
+          "app/layouts/default.vue",
+          "foundation/components/ThemeToggle.vue",
+          "references/compositions/page-shell.md",
+          "references/foundations/focus-a11y.md"
+        ],
+        "scopeDigest": "8cf2131b51f9bc29644470a6f466afe71bba40c56203f3754b0826e3909e482a",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 UColorModeButton 的 light/dark 切换、图标与可访问名称行为"
+          },
+          {
+            "name": "@nuxtjs/color-mode",
+            "version": "4.0.1",
+            "reason": "依赖 useColorMode 的 SSR 状态与 preference/value 行为"
+          }
+        ]
+      },
+      "notes": "组件本体为 UColorModeButton 的稳定命名壳,行为、a11y、SSR 均由 Nuxt UI/color-mode 维护且 references 描述准确;registry item description 原文「System/light/dark theme toggle.」与 UColorModeButton@4.9.0 的二态 light/dark 切换(preference 永不回写 system)不符,已收窄为「Light/dark theme toggle.」;外部行为前提绑定 @nuxt/ui 与 @nuxtjs/color-mode 精确内容 resolution。",
       "findings": []
     },
     "foundation-annotation-popover": {
       "round": 1,
-      "lastAuditedAt": "2026-07-31T20:12:56.379Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
-        "headSha": "dfb883e18d23c0817fa845439de72ab2550ca7d6",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -156,20 +181,20 @@
           "references/components/overlays.md",
           "tests/component/annotation-popover.spec.ts"
         ],
-        "scopeDigest": "beb2628f060403b0d74955c5a80cc927436850ce62dec67f82f9fa33a70e03d4"
+        "scopeDigest": "ea76805b31795d6c7d818236670983192489a095c5001e4ac40b07ebe9d80bfc"
       },
-      "notes": "壳组件实现与 overlays.md 契约逐条一致；381 行 focused suite 覆盖核心 click/hover、焦点、disabled、loading/error journey，静态 a11y、token 与响应式类由源码核对。",
+      "notes": "复审受影响 scope(overlays.md 仅 TermAnnotation props 行补记 entry,AnnotationPopover 契约段未触碰):壳的 click 骨架 + mouse-only hover、openSource 焦点管理(keyboard 进面板/hover 不夺焦/close 焦点丢失才回 trigger)、loading sr-only role=status 与 error aria-live 均与 overlays.md 契约一致,381 行 focused spec 全绿。",
       "findings": []
     },
     "foundation-term-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-08-03T05:48:46.585Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bb4e144295a3cfa2de300815edbb5e85a822e0e6",
-        "headSha": "c9ec47f3dd3cc5947026d2a759a81992f99b2549",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -178,28 +203,28 @@
           "tests/component/annotation-forms.spec.ts",
           "tests/component/term-annotation.spec.ts"
         ],
-        "scopeDigest": "856b62fd56ade3db4832d3f72e9b7dd29891e7d0e241eed5bb6f956e21937f81"
+        "scopeDigest": "3d4cee55c6e103a110c0412e221988358af4fc2943055eccb7d55ae73f48839f"
       },
-      "notes": "组件本体复核达标(源码未变);entry prop 的 reference drift 修复面 overlays.md 仍在 foundation-doc-annotation 与 foundation-annotation-popover 的 verified scope 内,二者不在本轮计划,继续 deferred 待同批修复。",
+      "notes": "修复 open finding:references/components/overlays.md 的 TermAnnotation props 行补记公开的 entry prop(直接传 GlossaryEntry、绕过 glossary、给定时 id 被忽略),契约与组件 JSDoc 及 term-annotation.spec.ts 对齐;组件本体复审无新 finding。",
       "findings": [
         {
           "id": "f-084ace82f441",
           "severity": "low",
           "claim": null,
           "evidence": "TermAnnotation.vue 自晋升（#39）起公开 entry prop（直接传 GlossaryEntry 绕过 glossary；tests/component/term-annotation.spec.ts 亦以 entry 挂载），但 references/components/overlays.md 的 TermAnnotation props 仅记录 id/labels，权威契约漏记 entry。修复需编辑 overlays.md，而该文件同时属于 foundation-doc-annotation 的 verified scope；当前计划不含后者，无法经官方 --record 流程刷新其 evidence，须待两项同批重审。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "foundation-doc-annotation": {
       "round": 1,
-      "lastAuditedAt": "2026-07-30T01:14:41.410Z",
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cbaf02cfd440ad86d91ddf77e85e8633f2e86807",
-        "headSha": "cb71a613553a94d4f8e731c5ff2c6d4948f0e860",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
         "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -207,9 +232,9 @@
           "references/components/overlays.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "ba8c4d2bb080c607cc6e549283a497b73561cb70997ba5bdec611c303ddef689"
+        "scopeDigest": "8bbe68267cd46d033a6078a520cb99b5570f34963f14e7aefcda1ff611ce43fc"
       },
-      "notes": "首次审计。修复固定宽面板的长 token 溢出：标题 <p> 缺 wrap-anywhere，作者内容带不可断 token（长 URL / 长标识符）时面板 scrollWidth 288→502（375px 视口实测），文字溢出面板右边界并被视口裁掉，违反 overlays.md「浮层宽度受限且不超视口」契约；标题与被 line-clamp 的摘要同时补 wrap-anywhere 后回到 288，并用组件 spec 锁定类契约。浏览器实测明暗双主题、375px、error 态仍保留「Open page」动作（href=/components），惰性加载 / 缓存 / stale-response 守卫与既有 3 例 spec 一致。",
+      "notes": "复审受影响 scope(overlays.md 本次仅 TermAnnotation 段变化,DocAnnotation 契约段未触碰):load 管线无关、per-instance 缓存 + requestToken 陈旧响应防护、to 变化重取、error 态保留打开页面动作,与契约及 annotation-forms.spec.ts 一致,无新 finding。",
       "findings": []
     },
     "foundation-split-pane-handle": {
@@ -241,12 +266,28 @@
       "findings": []
     },
     "foundation-split-pane": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 1,
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "itemDigest": "c15d6b3f8f8603e0918fa232a9caabee3dcfe7da4559f723ba0e793f7c0dfa01",
+        "scope": [
+          "foundation/components/SplitPane.vue",
+          "foundation/components/SplitPaneHandle.vue",
+          "foundation/composables/useBreakpointGate.ts",
+          "foundation/composables/useSplitPane.ts",
+          "references/components/index.md",
+          "tests/component/split-pane-handle.spec.ts",
+          "tests/component/use-breakpoint-gate.spec.ts",
+          "tests/component/use-split-pane.spec.ts"
+        ],
+        "scopeDigest": "d406d88044cdaf978d9044684d28a0ed4463316265dc038d6f1cb1acc559eb97"
+      },
+      "notes": "首审 clean:props/emits 契约、SSR 门控水合一致性、fixed/ratio 双模式钳制、键盘方向映射(含 fixedPane=end 反转)、separator aria 值与 min/max 逐一核证;@vueuse/core 由 registry externalRequirements 全局声明,消费闭包无缺口;不为产出制造 churn。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -623,13 +664,13 @@
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T02:12:43.019Z",
+      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
       "change": "none",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "7aaa034d4f69f949ac5b421014ce6fa447ef24f7",
+        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
+        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
         "itemDigest": "54cac850933ed00ca3b9dc587ad6f726a43e42f16fb6b1d3a1a3eddb3a822110",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -638,9 +679,21 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "3e4e550f7622a86ebb8794801595fc6bbb89ddf943285ee9cef1f88fbfb90846"
+        "scopeDigest": "3e4e550f7622a86ebb8794801595fc6bbb89ddf943285ee9cef1f88fbfb90846",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 UCommandPalette #empty 槽的渲染行为"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "依赖 Listbox 组合层未提供持久 live region 的行为"
+          }
+        ]
       },
-      "notes": "复核 open finding 前提仍成立:@nuxt/ui 仍为 4.9.0,UCommandPalette #empty 槽仍是普通 div、无持久 live region,三态文案对 SR 不可达的反例未消除,原样保留交人工决策;组件本体、DocsShell/gallery 装配与 hash 焦点交接测试复审无新 finding。",
+      "notes": "复核 open finding 前提仍成立:@nuxt/ui 仍为 4.9.0,UCommandPalette #empty 槽仍是普通 div(无 aria-live/role=status、无持久 live region),三态文案对 SR 不可达的反例未消除;修复路径依旧依赖上游或与文档化视觉契约有漂移风险,维持交人工决策;外部行为前提绑定 @nuxt/ui 与 reka-ui 精确内容 resolution。",
       "findings": [
         {
           "id": "f-dd631c5b3977",

@@ -48,6 +48,8 @@ finding 是结构化对象：`{ id, severity(critical/high/medium/low), claim, e
 - `headSha`：已提交的功能快照；`--record` 从这个 commit 的 Git blob 计算证据；
 - `itemDigest`：registry item 的名称、类型、公开 metadata、`files[]`、registry/package dependencies；
 - `scope` / `scopeDigest`：owning files、相关 tests、gallery、权威 references 的内容摘要。
+- 可选 `dependencies`：当结论依赖上游 package 的具体行为时，记录 package name、lockfile
+  解析出的精确内容标识与复审原因；没有这类前提的条目不记录。
 
 scope 强制并入该 item 当前的全部 registry `files[]`，拒绝非规范路径、symlink 与
 `docs/maintenance/component-audit/**`。CI 在 PR synthetic merge tree 上重算 scope 与 item digest：
@@ -56,8 +58,17 @@ commit SHA，但内容和 item 拓扑相同，证据仍成立。
 `scope-v1` digest 对 `verified` 与 `deferred` 都会重算；`deferred` 只表示仍有 open finding，
 不能让已记录的 evidence 绕过 stale 检查。
 
+外部依赖证据只绑定**直接依赖或唯一传递依赖的精确内容标识**，不会把整个 `pnpm-lock.yaml`
+纳入 scope，避免无关依赖更新让所有组件一起 stale。record result 只声明 `{ name, reason }`，不得手填
+解析结果；recorder 从已提交功能 `HEAD` 的 `pnpm-lock.yaml` Git blob 自动解析。证据始终记录
+`version`；若 pnpm resolution 含 `patch_hash`，还会记录 `patchHash`，但会忽略不代表 package 内容的 peer context。
+版本或 patch 变化、传递依赖出现多个 resolution、package 缺失或 lockfile 无法解析时，仅绑定该
+package 的 owner stale；
+`reason` 负责把下一次人/AI 复审路由到具体上游行为，不把“版本变化”直接等同于运行时 bug。
+
 当计划内的功能改动命中其他条目在 base ledger 中已记录的 `scope-v1` scope，或改变其 registry
-item topology / 公开 metadata 时，这些条目会成为 **required co-review owner**。recorder 从 base
+item topology / 公开 metadata，或改变其已绑定的外部依赖内容标识时，这些条目会成为
+**required co-review owner**。recorder 从 base
 evidence、当前 registry 与 `base..HEAD` 的已提交 Git diff 自动推导完整 owner 集合；调用方必须在
 同一 results JSON 中为每个 owner 提交带 `coReview: true` 的完整复审结果。
 计划项与 required owner 共用同一个 evidence `headSha`，并一同计入当前审计 round 与 `lastPicked`。
@@ -122,9 +133,13 @@ node scripts/audit-plan.mjs --migrate    # 把磁盘上的 v1 ledger 原子迁�
   "status": "deferred | verified",
   "notes": "一句话结论",
   "scope": ["tests/component/x.spec.ts", "app/components/gallery/X.vue", "references/components/…"],
+  "dependencies": [{ "name": "@nuxt/ui", "reason": "依赖 UExample 的具体行为" }],
   "findings": [{ "id": "既有 finding 必填", "severity": "high", "claim": "被违反的公开声明(可选)", "evidence": "复现输入/反例", "disposition": "open | resolved" }]
 }]
 ```
+
+`dependencies` 可省略或为空。已有 dependency evidence 在本次 resolution 变化时不得靠省略静默删除；若组件
+已通过 owning scope / registry 的真实功能改动解除上游依赖，result 必须显式提交空数组后重录。
 
 co-review 与普通结果使用同一状态机，但必须完整提供 `notes`、`scope` 与 `findings`：
 
