@@ -697,14 +697,29 @@ const field = {
     build: true,
     cssMarker: '\\@sm\\/facts\\:w-36',
     page: `<script setup lang="ts">
+import type {
+  WebhookProtocolAckExample,
+  WebhookProtocolFact,
+  WebhookProtocolSchedule,
+  WebhookProtocolSectionData,
+} from '~/components/WebhookProtocol.vue'
+
+const legacyFact: WebhookProtocolFact = {
+  term: 'Header',
+  value: 'X-Example-Signature',
+  // @ts-expect-error breaking change: code was removed; use format
+  code: true,
+}
+void legacyFact
+
 const verification = {
   label: 'VERIFICATION',
   description: 'Verify the signature before processing the event.',
-  facts: [{ term: 'Header', value: 'X-Example-Signature', code: true }],
-}
+  facts: [{ term: 'Header', value: 'X-Example-Signature', format: 'code' }],
+} satisfies WebhookProtocolSectionData
 const acknowledgement = {
   label: 'ACKNOWLEDGEMENT',
-  facts: [{ term: 'HTTP status', value: '200', code: true }],
+  facts: [{ term: 'HTTP status', value: '200', format: 'code' }],
   example: {
     code: '{\\n  "received": true\\n}',
     language: 'json',
@@ -719,7 +734,7 @@ const acknowledgement = {
       emptyHint: 'No literal body is required.',
     },
   },
-}
+} satisfies WebhookProtocolSectionData & { example: WebhookProtocolAckExample }
 const delivery = {
   label: 'DELIVERY',
   facts: [
@@ -733,7 +748,7 @@ const delivery = {
     expandLabel: (hidden: number) => \`Show \${hidden} retry intervals\`,
     collapseLabel: 'Hide retry intervals',
   },
-}
+} satisfies WebhookProtocolSectionData & { schedule: WebhookProtocolSchedule }
 </script>
 <template>
   <WebhookProtocol

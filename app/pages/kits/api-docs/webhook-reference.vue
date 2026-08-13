@@ -76,8 +76,8 @@ const verification = {
   label: 'VERIFICATION',
   description: '每次投递都带签名头。用你的 signing secret 对原始请求体重算并比对，通过后再处理事件。',
   facts: [
-    { term: '签名头', value: 'Webhook-Signature', code: true },
-    { term: '算法', value: 'HMAC-SHA256', code: true, note: '对原始请求体计算，输出十六进制小写。' },
+    { term: '签名头', value: 'Webhook-Signature', format: 'code' as const },
+    { term: '算法', value: 'HMAC-SHA256', format: 'code' as const, note: '对原始请求体计算，输出十六进制小写。' },
     { term: '密钥来源', value: '控制台 Webhook 设置页生成的 signing secret。' },
     { term: '时效', value: '签名含时间戳，偏差超过 5 分钟应拒绝，防止重放。' },
   ],
@@ -90,8 +90,8 @@ const acknowledgement = {
   label: 'ACKNOWLEDGEMENT',
   description: '返回下列响应即视为确认成功；其它任何响应都会触发重试。',
   facts: [
-    { term: 'HTTP status', value: '200', code: true },
-    { term: 'Media type', value: 'application/json', code: true },
+    { term: 'HTTP status', value: '200', format: 'code' as const },
+    { term: 'Media type', value: 'application/json', format: 'code' as const },
     { term: '响应体', value: '固定 JSON 字面量，见本页 Acknowledgement 示例。' },
   ],
 }
@@ -242,8 +242,8 @@ const ackExample = {
 const partialVerification = {
   label: 'VERIFICATION',
   facts: [
-    { term: '签名头', value: 'Webhook-Signature', code: true },
-    { term: '算法', value: 'HMAC-SHA256', code: true },
+    { term: '签名头', value: 'Webhook-Signature', format: 'code' as const },
+    { term: '算法', value: 'HMAC-SHA256', format: 'code' as const },
   ],
 }
 const partialDelivery = {

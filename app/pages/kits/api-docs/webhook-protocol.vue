@@ -8,8 +8,8 @@ const webhookProtocol = {
     label: 'VERIFICATION',
     description: '每次投递都携带签名头。用密钥重新计算并比对签名，再处理事件。',
     facts: [
-      { term: '签名头', value: 'X-Example-Signature', code: true },
-      { term: '算法', value: 'HMAC-SHA256', code: true, note: '对原始请求体计算，编码为十六进制小写。' },
+      { term: '签名头', value: 'X-Example-Signature', format: 'code' as const },
+      { term: '算法', value: 'HMAC-SHA256', format: 'code' as const, note: '对原始请求体计算，编码为十六进制小写。' },
       { term: '密钥来源', value: 'Webhook 设置页生成的 signing secret。' },
       { term: '时效', value: '签名含时间戳，偏差超过 5 分钟应拒绝，防止重放。' },
       {
@@ -23,8 +23,8 @@ const webhookProtocol = {
     label: 'ACKNOWLEDGEMENT',
     description: '返回下列响应即视为确认成功；其它响应触发重试。',
     facts: [
-      { term: 'HTTP status', value: '200', code: true },
-      { term: 'Media type', value: 'application/json', code: true },
+      { term: 'HTTP status', value: '200', format: 'code' as const },
+      { term: 'Media type', value: 'application/json', format: 'code' as const },
       { term: '响应体', value: '固定 JSON 字面量，字段与示例完全一致。' },
     ],
     example: {
@@ -67,9 +67,9 @@ const echoAck = {
   label: 'ACKNOWLEDGEMENT',
   description: '响应体须原样回显请求中的挑战参数。',
   facts: [
-    { term: 'HTTP status', value: '200', code: true },
+    { term: 'HTTP status', value: '200', format: 'code' as const },
     { term: '响应体', value: '原样返回请求 query 中的 challenge 参数值。' },
-    { term: '回显参数', value: 'challenge', code: true },
+    { term: '回显参数', value: 'challenge', format: 'code' as const },
   ],
 }
 
@@ -80,7 +80,7 @@ const omittedVerification = { label: '不应出现', facts: [] }
 const emptyAck = {
   label: 'ACKNOWLEDGEMENT',
   facts: [
-    { term: 'HTTP status', value: '204', code: true },
+    { term: 'HTTP status', value: '204', format: 'code' as const },
     { term: '响应体', value: '空。返回任何内容都会被忽略。' },
   ],
 }

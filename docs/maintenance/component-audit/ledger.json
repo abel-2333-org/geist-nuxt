@@ -416,13 +416,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
+        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -431,9 +431,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "89d017b403c181e60a88cf7d2ae2cc82248250b16397d46a0af10a5141507a50"
+        "scopeDigest": "e909b4152f40bbcf47b37bfe8088d56aaed65534ef6fe62dd171213c62267649"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 WebhookProtocol 公开 fact 输入收口及 gallery 数据迁移；FieldGroup 仍只承担段头与正文容器，heading、count、slot 和布局契约均未改变。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -502,13 +502,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
+        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -518,9 +518,9 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "30724d7e9e2d95ae4376ffa5cfad8c9568849a025724b0fd82b73283ef364ba1"
+        "scopeDigest": "a820661d7d4387ed87071716411a1f9503475ce6aec0b5ff5c1defb8aa27d4bc"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 webhook-reference 的 fact 数据迁移；OperationHeader 与 WebhookBadge 源码、EVENT identity、tone、标题层级和 action slot 契约均未改变。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
@@ -594,13 +594,13 @@
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
+        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
         "itemDigest": "8f04fc495c02a83a336bf41f7b161337042b40bb901e52e9865ee1f1eb73cc18",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -616,9 +616,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts"
         ],
-        "scopeDigest": "dcbbe9fc3cdda130bb8ad0dcab5635b7ad9c0adaa48c68662e8a6bed4ae8d53f"
+        "scopeDigest": "77fa4ee4d3406f7b9242cf037ba83c43517fbbdcba7b6c01fccc11a313628b8d"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "复审 webhook-reference 的 fact 数据迁移；CodeRail 的 pane 结构、动态内容观测、溢出测量、把手接线与 Request/Response 委托契约均未改变。",
       "findings": []
     },
     "api-docs-site-search": {
@@ -653,16 +653,17 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-13T00:55:50.930Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "104271ccad154f499b2cd851922d38cde15fd5fe",
+        "headSha": "f3dce6018f77abc36510480fe2c5d5b3a3a470e6",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
+          "app/pages/kits/api-docs/webhook-reference.vue",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/FieldGroup.vue",
           "kits/api-docs/components/WebhookProtocol.vue",
@@ -676,9 +677,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "4b20725dcd4ecb94669457321f5c6d059d2166264f09d9e4cd571abf1c2233b6"
+        "scopeDigest": "ab2fe89e059089224c014794c45c0f088dc4753ff38c6d78d01824e9afb3f465"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "移除 WebhookProtocolFact.code 布尔别名并完整迁移 gallery 与 registry consumer fixture；reference 保留 code: true 到 format: 'code' 的单向 breaking migration，不增加 compatibility transform；既有 rich fact 安全、schedule 与 a11y 契约保持成立。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
