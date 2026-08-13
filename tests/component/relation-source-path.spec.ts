@@ -28,6 +28,31 @@ describe('RelationSourcePath', () => {
     history.replaceState(history.state, '', '/')
   })
 
+  it.each([
+    { metaKey: true },
+    { ctrlKey: true },
+    { shiftKey: true },
+    { altKey: true },
+    { button: 1 },
+  ])('preserves native anchor behavior for modified clicks (%o)', async (eventInit) => {
+    const wrapper = await mountSuspended(RelationSourcePath, {
+      props: {
+        source: {
+          scope: 'response',
+          location: 'body',
+          segments: ['payment', 'id'],
+          field: 'res_payment_id',
+        },
+      },
+    })
+
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true, ...eventInit })
+    wrapper.get('a').element.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(false)
+    wrapper.unmount()
+  })
+
   it('falls back to text when the consumer cannot provide a stable anchor', async () => {
     const add = vi.spyOn(EventTarget.prototype, 'addEventListener')
     const wrapper = await mountSuspended(RelationSourcePath, {

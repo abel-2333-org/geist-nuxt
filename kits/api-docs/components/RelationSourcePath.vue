@@ -110,6 +110,7 @@ const events = computed(() => href.value ? { click: jump } : {})
 
 function jump(event: MouseEvent) {
   if (!props.source.field || props.source.to) return
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
   event.preventDefault()
   void anchor.goTo(props.source.field, { focus: true })
 }
