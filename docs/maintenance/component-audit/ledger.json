@@ -706,13 +706,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T08:22:21.464Z",
+      "lastAuditedAt": "2026-08-13T10:14:19.849Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2a0970bec630cc2bfbfbf0c94011ce91cbc349ec",
-        "headSha": "20a870bd7acfe41aeb36e6e64fcf5cd3a26d2cb1",
+        "baseSha": "18105fd73d09f804dba53af75ae4bb26b8427dca",
+        "headSha": "e16bbc2f8cc67273e4da6678e42cb48592b78cec",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -730,9 +730,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "85c4b984047406dbeef52fcd157c0f61462a31e9548cbdf084009d769d3852e8"
+        "scopeDigest": "242aeebd0eaddf21a977ac95b007a6f10d2dd6d64103fa1da9f7a6bfa6cfcae9"
       },
-      "notes": "PR2(#84) 在 check-registry-consumer.mjs 的每个 runtime 场景为 copy CLI 增加 --json 冒烟:--write 前断言 fresh-install plan 为全归属 create operations,--write 后断言 plan 收敛零变化。webhook-protocol 场景的安装、typecheck、build 与既有断言路径不变;组件源码、internal helpers、utils、tests 与 references 均未改动。复审确认冒烟为行为中性的编排追加,不触及组件公开 claims。",
+      "notes": "PR3(#84) 把 check-registry-consumer.mjs 每个 runtime 场景的 --write 换为 guarded apply(--expect-plan + --json apply result 断言),upgrade smoke 的 head update 同样走 plan → guarded apply。webhook-protocol 场景的安装内容、typecheck、build 与既有断言不变;组件源码、internal helpers、utils、tests 与 references 均未改动。复审确认改动仅收紧编排层的写入门禁,不触及组件公开 claims。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
