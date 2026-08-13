@@ -560,7 +560,7 @@ test('emits a versioned machine-readable runtime plan with deterministic digest'
   assert.equal(document.kind, 'runtime')
   assert.deepEqual(document.registry, { name: 'fixture', repository: 'https://example.test/fixture.git' })
   assert.equal(document.sourceSha, SOURCE_SHA)
-  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null })
+  assert.deepEqual(document.consumer, { lockPresent: false, lockSourceSha: null, lockHash: null })
   assert.deepEqual(
     document.operations.map(operation => [operation.action, operation.owner, operation.target]),
     [
@@ -684,6 +684,37 @@ test('apply re-verifies every planned before-state and stops with zero writes on
   await assert.rejects(readFile(path.join(consumerRoot, 'geist.lock.json')), /ENOENT/)
 })
 
+test('apply re-verifies the planned lock before mutating or overwriting it', async () => {
+  const { repoRoot, consumerRoot, registry } = await fixture()
+  const resolution = resolveItems(registry, ['feature'])
+  await applyCopyPlan(await planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha: SOURCE_SHA }))
+
+  const installedLock = await readLock(consumerRoot)
+  const plan = await planCopy({
+    registry,
+    resolution: resolveCopyRequest(registry, [], { lock: installedLock, update: true }),
+    repoRoot,
+    consumerRoot,
+    sourceSha: SOURCE_SHA,
+    update: true,
+  })
+  const lockPath = path.join(consumerRoot, 'geist.lock.json')
+  assert.equal(buildRuntimePlanDocument(plan).consumer.lockHash, sha256(await readFile(lockPath)))
+
+  const concurrentLock = structuredClone(installedLock)
+  concurrentLock.requestedItems = ['concurrent-change']
+  const concurrentContent = `${JSON.stringify(concurrentLock, null, 2)}\n`
+  await writeFile(lockPath, concurrentContent)
+
+  await assert.rejects(
+    applyCopyPlan(plan),
+    error => error instanceof RegistryError
+      && error.code === 'PLAN_CHANGED'
+      && /geist\.lock\.json changed after planning/.test(error.message),
+  )
+  assert.equal(await readFile(lockPath, 'utf8'), concurrentContent)
+})
+
 test('runtime CLI performs guarded apply end to end against the real registry', async () => {
   const consumerRoot = await mkdtemp(path.join(tmpdir(), 'geist-guarded-consumer-'))
   const cli = path.join(PROJECT_ROOT, 'scripts/copy-registry.mjs')
@@ -701,6 +732,15 @@ test('runtime CLI performs guarded apply end to end against the real registry', 
   assert.notEqual(changed.status, 0)
   assert.equal(JSON.parse(changed.stdout).error.code, 'PLAN_CHANGED')
   await assert.rejects(readFile(path.join(consumerRoot, 'geist.lock.json')), /ENOENT/)
+
+  const parseFailure = spawnSync(process.execPath, [cli, '--json', '--bogus'], {
+    cwd: PROJECT_ROOT,
+    encoding: 'utf8',
+    env,
+  })
+  assert.notEqual(parseFailure.status, 0)
+  assert.equal(parseFailure.stderr, '')
+  assert.equal(JSON.parse(parseFailure.stdout).error.code, 'REGISTRY_ERROR')
 
   const rejected = runCli(['--expect-plan', document.planDigest])
   assert.notEqual(rejected.status, 0)

@@ -144,6 +144,11 @@ test('emits a versioned machine-readable skill plan without writing files', asyn
 
 test('guarded skill apply verifies the expected digest and fails closed on PLAN_CHANGED', async () => {
   const consumer = await makeConsumer()
+  const parseFailure = runCli(['--json', '--bogus'])
+  assert.notEqual(parseFailure.status, 0)
+  assert.equal(parseFailure.stderr, '')
+  assert.equal(JSON.parse(parseFailure.stdout).error.code, 'REGISTRY_ERROR')
+
   const staleDigest = JSON.parse(runCli(['--target', consumer, '--json']).stdout).planDigest
 
   // Materializing one target with exact source content flips its planned action

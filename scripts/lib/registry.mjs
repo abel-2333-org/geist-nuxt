@@ -829,11 +829,13 @@ export function assertLockRegistryIdentity(registry, lock) {
   }
 }
 
-export async function readLock(consumerRoot) {
+async function readLockState(consumerRoot) {
   await assertNoSymlinkTarget(consumerRoot, LOCK_FILE)
   const lockPath = path.join(consumerRoot, LOCK_FILE)
+  const state = await fileHash(lockPath)
+  if (!state.exists) return { exists: false, hash: null, lock: undefined }
   try {
-    const lock = JSON.parse(await readFile(lockPath, 'utf8'))
+    const lock = JSON.parse(state.content.toString('utf8'))
     if (
       !isPlainObject(lock)
       || lock.lockVersion !== LOCK_VERSION
@@ -865,13 +867,16 @@ export async function readLock(consumerRoot) {
     ) {
       throw new RegistryError(`${LOCK_FILE} has an unsupported format`)
     }
-    return lock
+    return { exists: true, hash: state.hash, lock }
   }
   catch (error) {
-    if (error?.code === 'ENOENT') return undefined
     if (error instanceof SyntaxError) throw new RegistryError(`${LOCK_FILE} is not valid JSON`)
     throw error
   }
+}
+
+export async function readLock(consumerRoot) {
+  return (await readLockState(consumerRoot)).lock
 }
 
 async function fileHash(filePath) {
@@ -886,7 +891,8 @@ async function fileHash(filePath) {
 }
 
 export async function planCopy({ registry, resolution, repoRoot, consumerRoot, sourceSha, update = false }) {
-  const lock = await readLock(consumerRoot)
+  const lockState = await readLockState(consumerRoot)
+  const { lock } = lockState
   if (update && !lock) throw new RegistryError(`--update requires an existing ${LOCK_FILE}`)
   assertLockRegistryIdentity(registry, lock)
   const conflicts = []
@@ -940,7 +946,16 @@ export async function planCopy({ registry, resolution, repoRoot, consumerRoot, s
     }
   }
   if (conflicts.length) throw new RegistryError(`copy stopped: ${conflicts.length} conflicting target(s); no files were written`, conflicts.map(conflict => conflict.target))
-  return { registry, resolution, sourceSha, consumerRoot, lock, operations, update }
+  return {
+    registry,
+    resolution,
+    sourceSha,
+    consumerRoot,
+    lock,
+    lockState: { exists: lockState.exists, hash: lockState.hash },
+    operations,
+    update,
+  }
 }
 
 function diffPackageMaps(before, after) {
@@ -1044,6 +1059,7 @@ export function buildRuntimePlanDocument(plan) {
     consumer: {
       lockPresent: Boolean(plan.lock),
       lockSourceSha: plan.lock?.registry?.lastSourceSha ?? null,
+      lockHash: plan.lockState?.hash ?? null,
     },
     operations,
     packageOperations: diffPackageMaps(lockPackages, requirements.packages),
@@ -1127,6 +1143,18 @@ export async function applyCopyPlan(plan) {
       )
     }
   }
+  const lockPath = path.join(plan.consumerRoot, LOCK_FILE)
+  const currentLock = await fileHash(lockPath)
+  if (
+    currentLock.exists !== plan.lockState.exists
+    || (currentLock.exists && currentLock.hash !== plan.lockState.hash)
+  ) {
+    throw new RegistryError(
+      `${LOCK_FILE} changed after planning; no files were written`,
+      [LOCK_FILE],
+      { code: 'PLAN_CHANGED' },
+    )
+  }
   for (const operation of plan.operations) {
     if (operation.action === 'delete') {
       await unlink(operation.targetPath)
@@ -1140,7 +1168,6 @@ export async function applyCopyPlan(plan) {
     await rename(tempPath, operation.targetPath)
   }
   const lock = nextLock(plan)
-  const lockPath = path.join(plan.consumerRoot, LOCK_FILE)
   const temporaryLock = `${lockPath}.geist-tmp-${process.pid}`
   await writeFile(temporaryLock, `${JSON.stringify(lock, null, 2)}\n`)
   await rename(temporaryLock, lockPath)

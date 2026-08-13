@@ -18,6 +18,7 @@ import {
 } from './lib/registry.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const jsonMode = process.argv.slice(2).includes('--json')
 
 let options
 try {
@@ -90,6 +91,6 @@ try {
   }
 }
 catch (error) {
-  printPlanError(error, Boolean(options?.json))
+  printPlanError(error, jsonMode)
   process.exitCode = 1
 }
