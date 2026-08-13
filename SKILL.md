@@ -19,7 +19,7 @@ description: geist-nuxt 是基于 Nuxt UI v4（Vue）的 Geist 风格 Source-fir
 - `kits/<kit>/`：领域增量；只依赖 foundation 或本 kit，禁止 kit → kit。
 - `playground/`：未采纳候选，不属于分发资产。
 - `app/`：根 gallery / v0 preview；demo、fixture、adapter 和页面私有 recipe 留在这里。
-- `registry.json`：唯一机器可读 manifest，描述 source、target 和依赖闭包。
+- `registry.json`：唯一机器可读 manifest，描述 source、target、依赖闭包和每个 item 的 consumer verification tags。
 - `references/`：AI 读取的设计与操作契约；视觉实现不得反向覆盖文字规则。
 
 不存在 `@geist-nuxt/core` npm 包、Nuxt layer、workspace package 或 starter 分发边界。旧架构仅保留在 Git 历史中，不得恢复为现行边界。

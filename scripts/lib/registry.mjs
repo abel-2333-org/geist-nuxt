@@ -13,6 +13,17 @@ import ts from 'typescript'
 export const LOCK_FILE = 'geist.lock.json'
 export const LOCK_VERSION = 1
 export const SOURCE_FILE = '.geist-source.json'
+// Stable consumer verification vocabulary (issue #84). Order is canonical for
+// plan emission; consumers must treat unknown tags as a contract violation.
+export const VERIFICATION_TAGS = Object.freeze([
+  'reference',
+  'visual',
+  'interaction',
+  'responsive',
+  'foundation',
+  'config',
+  'dependency',
+])
 
 const EXACT_SHA_RE = /^[0-9a-f]{40}$/i
 const ITEM_NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -451,6 +462,15 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
     if (typeof item.type !== 'string' || !item.type) fail(`${prefix}.type must be a non-empty string`)
     if (typeof item.title !== 'string' || !item.title) fail(`${prefix}.title must be a non-empty string`)
     if (typeof item.description !== 'string' || !item.description) fail(`${prefix}.description must be a non-empty string`)
+    if (!Array.isArray(item.verification) || item.verification.length === 0) {
+      fail(`${prefix}.verification must be a non-empty array of verification tags`)
+    }
+    else {
+      if (new Set(item.verification).size !== item.verification.length) fail(`${prefix}.verification contains duplicates`)
+      for (const tag of item.verification) {
+        if (!VERIFICATION_TAGS.includes(tag)) fail(`${prefix}.verification contains an unknown tag: ${JSON.stringify(tag)}`)
+      }
+    }
     if (item.registryDependencies !== undefined && !Array.isArray(item.registryDependencies)) fail(`${prefix}.registryDependencies must be an array`)
     if (new Set(item.registryDependencies ?? []).size !== (item.registryDependencies ?? []).length) fail(`${prefix}.registryDependencies contains duplicates`)
     if (item.packageDependencies !== undefined) {
@@ -459,6 +479,9 @@ export async function validateRegistry(registry, { repoRoot, checkFiles = true }
       }
       catch (error) {
         fail(error.message)
+      }
+      if (!Array.isArray(item.verification) || !item.verification.includes('dependency')) {
+        fail(`${prefix}.verification must include "dependency" when packageDependencies are declared`)
       }
     }
     if (!Array.isArray(item.files) || item.files.length === 0) {
