@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import {
   RegistryError,
+  VERIFICATION_TAGS,
   applyCopyPlan,
   assertExactSha,
   assertSafeTarget,
@@ -93,6 +94,7 @@ async function fixture() {
         type: 'registry:component',
         title: 'Dependency',
         description: 'Dependency component.',
+        verification: ['visual', 'dependency'],
         packageDependencies: { 'dependency-package': '^1.0.0' },
         files: [{ path: 'foundation/components/Dependency.vue', target: 'app/components/Dependency.vue' }],
       },
@@ -101,6 +103,7 @@ async function fixture() {
         type: 'registry:component',
         title: 'Feature',
         description: 'Feature component.',
+        verification: ['visual', 'dependency'],
         packageDependencies: { 'feature-package': '^2.0.0' },
         registryDependencies: ['dependency'],
         files: [{ path: 'foundation/components/Feature.vue', target: 'app/components/Feature.vue' }],
@@ -134,6 +137,7 @@ async function configFixture() {
     type: 'registry:style',
     title: 'Foundation config',
     description: 'Managed Nuxt and App config fragments.',
+    verification: ['config'],
     files: oldFiles.map(({ path: source, target }) => ({ path: source, target })),
   })
   return { ...result, oldFiles }
@@ -177,6 +181,78 @@ test('validates a complete registry and resolves dependency-first closure', asyn
     nuxt: '>=4.4.0 <5',
     tailwindcss: '>=4.3.0 <5',
   })
+})
+
+test('fails closed on missing, empty, unknown, or duplicate verification metadata', async (t) => {
+  await t.test('missing verification', async () => {
+    const { repoRoot, registry } = await fixture()
+    delete registry.items[0].verification
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /items\[0\]\.verification must be a non-empty array/)
+  })
+
+  await t.test('empty verification', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = []
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification must be a non-empty array/)
+  })
+
+  await t.test('non-array verification', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = 'visual'
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification must be a non-empty array/)
+  })
+
+  await t.test('unknown tag', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = ['visual', 'made-up']
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification contains an unknown tag: "made-up"/)
+  })
+
+  await t.test('non-string tag', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = [['visual']]
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification contains an unknown tag/)
+  })
+
+  await t.test('duplicate tags', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = ['visual', 'visual']
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification contains duplicates/)
+  })
+
+  await t.test('package dependencies without dependency verification', async () => {
+    const { repoRoot, registry } = await fixture()
+    registry.items[0].verification = ['visual']
+    await assert.rejects(validateRegistry(registry, { repoRoot }), /verification must include "dependency" when packageDependencies are declared/)
+  })
+})
+
+test('real registry items declare complete verification metadata from the stable vocabulary', async () => {
+  const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
+  for (const item of registry.items) {
+    assert.equal(Array.isArray(item.verification) && item.verification.length > 0, true, `${item.name} must declare verification tags`)
+    for (const tag of item.verification) {
+      assert.equal(VERIFICATION_TAGS.includes(tag), true, `${item.name} declares unknown tag ${tag}`)
+    }
+    if (item.packageDependencies) {
+      assert.equal(item.verification.includes('dependency'), true, `${item.name} must verify package dependency integration`)
+    }
+  }
+  const foundation = registry.items.find(item => item.name === 'geist-foundation')
+  assert.deepEqual(foundation.verification, ['visual', 'foundation', 'config'])
+
+  const expectedBehaviorTags = {
+    'api-docs-code-block': ['visual', 'interaction', 'responsive'],
+    'api-docs-response-example': ['visual', 'interaction', 'responsive'],
+    'api-docs-field-item': ['visual', 'interaction', 'responsive'],
+    'api-docs-relation-source-path': ['visual', 'interaction', 'responsive'],
+    'api-docs-operation-target': ['visual', 'interaction', 'responsive'],
+    'api-docs-code-rail': ['visual', 'interaction', 'responsive'],
+    'api-docs-site-search': ['visual', 'interaction', 'responsive', 'dependency'],
+  }
+  for (const [name, tags] of Object.entries(expectedBehaviorTags)) {
+    assert.deepEqual(registry.items.find(item => item.name === name)?.verification, tags)
+  }
 })
 
 test('keeps compatibility and external package requirements equivalent', async (t) => {
@@ -401,6 +477,7 @@ void example
       type: 'registry:style',
       title: 'Styles',
       description: 'Style imports.',
+      verification: ['visual', 'dependency'],
       packageDependencies: { 'style-package': '^1.0.0' },
       files: [{ path: 'foundation/components/imports.css', target: 'app/assets/css/imports.css' }],
     })
@@ -782,6 +859,7 @@ test('copy into an existing lock reconciles the full request set and prunes remo
     type: 'registry:component',
     title: 'New feature',
     description: 'New feature component.',
+    verification: ['visual'],
     registryDependencies: ['dependency'],
     files: [{ path: newSource, target: newTarget }],
   })
@@ -884,6 +962,7 @@ test('consumer check detects registry metadata and dependency-closure drift', as
     type: 'registry:component',
     title: 'New dependency',
     description: 'Newly required component.',
+    verification: ['visual'],
     files: [{
       path: 'foundation/components/NewDependency.vue',
       target: 'app/components/NewDependency.vue',

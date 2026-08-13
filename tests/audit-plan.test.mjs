@@ -1256,3 +1256,19 @@ test('CLI 对未知参数和混合模式 fail closed', () => {
   assert.notEqual(affected.status, 0)
   assert.match(affected.stderr, /--affected 只适用于 --record/)
 })
+
+test('itemDigest 忽略 verification tags,新增或调整 tags 不使既有 evidence 失效', () => {
+  const item = {
+    name: 'comp-a',
+    type: 'registry:component',
+    title: 'CompA',
+    description: 'Component A.',
+    registryDependencies: ['comp-b'],
+    files: [{ path: 'foundation/components/CompA.vue', target: 'app/components/CompA.vue' }],
+  }
+  const withTags = { ...item, verification: ['visual', 'interaction'] }
+  const retagged = { ...item, verification: ['visual'] }
+  assert.equal(registryItemDigest(withTags), registryItemDigest(item))
+  assert.equal(registryItemDigest(retagged), registryItemDigest(item))
+  assert.notEqual(registryItemDigest({ ...withTags, description: 'Changed.' }), registryItemDigest(item))
+})

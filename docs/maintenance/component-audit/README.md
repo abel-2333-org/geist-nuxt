@@ -47,6 +47,8 @@ finding 是结构化对象：`{ id, severity(critical/high/medium/low), claim, e
 - `baseSha`：审计计划来源的精确 main SHA；
 - `headSha`：已提交的功能快照；`--record` 从这个 commit 的 Git blob 计算证据；
 - `itemDigest`：registry item 的名称、类型、公开 metadata、`files[]`、registry/package dependencies；
+  `verification` tags 不参与（它描述消费端如何验证 sync operation，不属于被审计组件面；
+  真实行为变化仍由 `scopeDigest` 判 stale）；
 - `scope` / `scopeDigest`：owning files、相关 tests、gallery、权威 references 的内容摘要。
 - 可选 `dependencies`：当结论依赖上游 package 的具体行为时，记录 package name、lockfile
   解析出的精确内容标识与复审原因；没有这类前提的条目不记录。

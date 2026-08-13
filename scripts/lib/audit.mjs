@@ -917,6 +917,9 @@ export function registryItemDigest(item) {
       .sort((a, b) => a.path.localeCompare(b.path) || String(a.target).localeCompare(String(b.target))),
     registryDependencies: [...(item.registryDependencies ?? [])].sort(),
   }
+  // verification tags 描述消费端如何验证 sync operation,不属于被审计的组件面;
+  // 真实行为变化仍会通过 scopeDigest 判 stale,所以 tags 不参与 evidence digest。
+  delete normalized.verification
   const canonicalize = value => Array.isArray(value)
     ? value.map(canonicalize)
     : value && typeof value === 'object'
