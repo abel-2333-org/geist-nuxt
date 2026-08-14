@@ -1,14 +1,10 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-13T02:07:43.078Z",
+  "lastRunAt": "2026-08-14T00:09:10.802Z",
   "lastPicked": [
-    "foundation-split-pane",
-    "foundation-theme-toggle",
-    "foundation-term-annotation",
-    "api-docs-site-search",
-    "foundation-annotation-popover",
-    "foundation-doc-annotation"
+    "api-docs-field-annotation",
+    "api-docs-field-item"
   ],
   "items": {
     "foundation-copy-button": {
@@ -478,15 +474,29 @@
       "findings": []
     },
     "api-docs-field-item": {
-      "round": 1,
-      "lastAuditedAt": "2026-07-28T16:29:35.909Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-14T00:09:10.802Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
-        "kind": "legacy-v1",
-        "sha": "c5a73094643e378d75a84a64bbb36f53dca2771c"
+        "kind": "scope-v1",
+        "baseSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
+        "headSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
+        "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
+        "scope": [
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "kits/api-docs/components/FieldItem.vue",
+          "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/utils/field.ts",
+          "references/kits/api-docs/index.md",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/field-anchor.spec.ts",
+          "tests/component/field-item-structure.spec.ts"
+        ],
+        "scopeDigest": "177cc3866b64ad292e46e04a63f5836cb4a27a6c6fa2f46bda1e99965cbedc94"
       },
-      "notes": "补齐 deprecated lifecycle 描述漏掉的 wrap-anywhere 溢出守卫（与 new/beta 镜像分支已漂移），并加测试锁住两个位置；订正三处把 auto-expand 写成 prefix match 的注释——实现是 collectFieldPaths 集合成员判定，公开 FieldNode.path 契约据此放宽。",
+      "notes": "全量复审四维度均达标:数据模型单一真源、a11y(焦点环/aria-label/boxShadow cue/reduced-motion)与琥珀阶梯符合 references、universal claims(copyLink 不导航、stale positioning token 防护、空 path 拒绝)均有测试反例防护;模板内重复为有意设计且有 parity 测试,不制造 churn。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -512,14 +522,14 @@
       "findings": []
     },
     "api-docs-field-annotation": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
-      "change": "modified",
-      "status": "verified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-14T00:09:10.802Z",
+      "change": "none",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
+        "headSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -530,8 +540,15 @@
         ],
         "scopeDigest": "faa37a1f2c4d4ebd983159f6c4626cb094d4893d5fff908a67a163b370922fb4"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "复审通过:降级+dev 告警、fieldRequiredState 共享派生、跨页编码往返均达标;反向横扫命中与 SidebarNav 的 trailing-slash 归一化簇外重复,记 low finding 交人工(倾向 wont-fix,见 issue #93 候选 2)。",
       "findings": [
+        {
+          "id": "f-31f690a2dbaa",
+          "severity": "low",
+          "claim": null,
+          "evidence": "FieldAnnotation.vue:82 normalizePath 与 SidebarNav.vue:207 stripSlash 各自实现 trailing-slash 归一化;复现输入 '//':前者返回 '/'(replace 后空串回落 '/'),后者返回 ''(length>1 直接剥离)。同 kit 内同意图逻辑重复且边界不一致;两处当前互不交互,行为风险低。建议统一为 kit util(utils/route-path.ts)或人工判 wont-fix;抽取会触及 api-docs-sidebar-nav scope,需 co-review,交人工决策。",
+          "disposition": "open"
+        },
         {
           "id": "f-fd7282669072",
           "severity": "low",
