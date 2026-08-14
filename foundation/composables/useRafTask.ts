@@ -35,12 +35,12 @@ export interface UseRafTaskReturn<Args extends unknown[]> {
 export function useRafTask<Args extends unknown[] = []>(
   task: (...args: Args) => void,
 ): UseRafTaskReturn<Args> {
-  let frame = 0
+  let frame: number | undefined
 
   function cancel() {
-    if (!frame) return
+    if (frame === undefined) return
     cancelAnimationFrame(frame)
-    frame = 0
+    frame = undefined
   }
 
   function schedule(...args: Args) {
@@ -50,7 +50,7 @@ export function useRafTask<Args extends unknown[] = []>(
     }
     cancel()
     frame = requestAnimationFrame(() => {
-      frame = 0
+      frame = undefined
       task(...args)
     })
   }

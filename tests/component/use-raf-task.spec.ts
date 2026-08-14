@@ -17,7 +17,9 @@ let cafSpy: ReturnType<typeof vi.fn>
 
 function stubRaf() {
   frames = new Map()
-  let nextId = 1
+  // A browser may legally return 0, so the scheduler cannot use it as the
+  // sentinel for "no pending frame".
+  let nextId = 0
   rafSpy = vi.fn((callback: FrameRequestCallback) => {
     const id = nextId++
     frames.set(id, callback)
