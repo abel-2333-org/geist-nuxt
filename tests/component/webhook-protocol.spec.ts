@@ -1,6 +1,7 @@
 // <WebhookProtocol> — rich fact contract 与 schedule 折叠按钮的呈现契约。
 // 折叠派生逻辑本身在 tests/webhook-protocol.test.mjs（纯函数）；这里验组件层：
-// 1) fact format 判别：默认纯文本、'code' / 'inline-markdown' 明确 opt-in
+// 1) supporting copy 与 fact format 判别：description/note 始终纯文本，
+//    value 默认纯文本、'code' / 'inline-markdown' 明确 opt-in
 //    （unsafe scheme / raw HTML 不执行）；
 // 2) 展开按钮可见文案即可访问名（Label in Name），aria-expanded 与 sr-only
 //    全序列的状态切换。
@@ -30,6 +31,20 @@ function toggleButton(wrapper: Awaited<ReturnType<typeof mountSuspended>>) {
 }
 
 describe('WebhookProtocol fact format', () => {
+  it('keeps section descriptions plain text', async () => {
+    const wrapper = await mountSuspended(WebhookProtocol, {
+      props: {
+        verification: {
+          label: 'VERIFICATION',
+          description: 'Read [the guide](/webhooks) before **processing**.',
+        },
+      },
+    })
+    expect(wrapper.find('a').exists()).toBe(false)
+    expect(wrapper.find('strong').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Read [the guide](/webhooks) before **processing**.')
+  })
+
   it('defaults to plain text: markdown syntax in value stays literal', async () => {
     const wrapper = await mountFacts([
       { term: 'Guide', value: '[Guide](/webhooks/transfer-result)' },
