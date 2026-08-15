@@ -144,13 +144,10 @@ const chromeBottom = ref(0)
 
 let ro: ResizeObserver | undefined
 let mo: MutationObserver | undefined
-let raf = 0
-function scheduleMeasure() {
-  cancelAnimationFrame(raf)
-  raf = requestAnimationFrame(measure)
-}
+// Coalesce observer bursts into one next-frame measurement; useRafTask owns
+// the frame lifecycle (cancel-on-reschedule, unmount cleanup, loop rationale).
+const { schedule: scheduleMeasure } = useRafTask(measure)
 function measure() {
-  raf = 0
   const rail = railRef.value
   if (!rail) return
   // Keep this defensive sync as the final authority for the frame. The
@@ -218,7 +215,6 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  cancelAnimationFrame(raf)
   mo?.disconnect()
   ro?.disconnect()
 })

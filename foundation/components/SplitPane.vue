@@ -93,25 +93,21 @@ const enabled = useBreakpointGate(() => props.enabledFrom)
 
 /* --- container measurement (for ratio scale + fixed max clamp) -------- *
  * We only need the container's MAIN-axis size. Crucially, the reactive write
- * is deferred to rAF rather than done synchronously inside the RO callback:
- * clamping `size` changes the panes' flex-basis, which resizes the code cards,
- * which the page's own content-priority ResizeObserver reacts to — writing
- * heights that shift layout again. Doing our write inside the callback closes
- * that loop within a single delivery cycle and the browser throws
- * "ResizeObserver loop completed with undelivered notifications". Deferring to
- * the next frame breaks the synchronous chain. */
+ * is deferred via `useRafTask` rather than done synchronously inside the RO
+ * callback: clamping `size` changes the panes' flex-basis, which resizes the
+ * code cards, which the page's own content-priority ResizeObserver reacts to —
+ * writing heights that shift layout again, so the browser would throw
+ * "ResizeObserver loop completed with undelivered notifications". The next
+ * frame breaks the synchronous chain, and the latest observed box wins. */
 const containerRef = ref<HTMLElement>()
 const mainSize = ref(0)
-let measureRaf = 0
+const { schedule: scheduleMeasure } = useRafTask((box: DOMRectReadOnly) => {
+  mainSize.value = Math.round(props.direction === 'row' ? box.width : box.height)
+})
 useResizeObserver(containerRef, (entries) => {
   const box = entries[0]?.contentRect
-  if (!box) return
-  cancelAnimationFrame(measureRaf)
-  measureRaf = requestAnimationFrame(() => {
-    mainSize.value = Math.round(props.direction === 'row' ? box.width : box.height)
-  })
+  if (box) scheduleMeasure(box)
 })
-onBeforeUnmount(() => cancelAnimationFrame(measureRaf))
 
 const isRatio = computed(() => props.mode === 'ratio')
 const controlledId = computed(() =>

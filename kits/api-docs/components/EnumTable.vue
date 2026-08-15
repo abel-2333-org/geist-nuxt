@@ -156,7 +156,6 @@ const bounded = computed(() => activeTotalCount.value >= props.filterThreshold)
 const scrollBox = useTemplateRef<HTMLElement>('scrollBox')
 const scrollable = shallowRef(false)
 const focusable = computed(() => bounded.value && scrollable.value)
-let measureFrame = 0
 
 function measureOverflow() {
   const el = scrollBox.value
@@ -167,26 +166,15 @@ function measureOverflow() {
   )
 }
 
-function scheduleOverflowMeasure() {
-  if (typeof requestAnimationFrame === 'undefined') {
-    measureOverflow()
-    return
-  }
-  if (measureFrame) cancelAnimationFrame(measureFrame)
-  measureFrame = requestAnimationFrame(() => {
-    measureFrame = 0
-    measureOverflow()
-  })
-}
+// Coalesce resize bursts into one next-frame measurement; useRafTask owns the
+// frame lifecycle (cancel-on-reschedule, unmount cleanup, sync test fallback).
+const { schedule: scheduleOverflowMeasure } = useRafTask(measureOverflow)
 
 useResizeObserver(scrollBox, scheduleOverflowMeasure)
 onMounted(scheduleOverflowMeasure)
 watch([visibleValues, bounded], () => scheduleOverflowMeasure(), {
   deep: true,
   flush: 'post',
-})
-onBeforeUnmount(() => {
-  if (measureFrame) cancelAnimationFrame(measureFrame)
 })
 
 // Never retain a filter the reader can no longer see or clear.

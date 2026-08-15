@@ -9,13 +9,13 @@
   "items": {
     "foundation-copy-button": {
       "round": 1,
-      "lastAuditedAt": "2026-08-12T08:04:14.946Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d3ae1ef1db28eff0b7ebd049e2655ca6e0b01f8f",
-        "headSha": "eab85a271edc7a75e2cd61a986c644d5b7cd57ff",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
@@ -31,9 +31,9 @@
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "47eb3872658c71a4d1b3d13cdc316f7d81261faf93a63c85f89538c2d4b90194"
+        "scopeDigest": "3a68532ce9aa093285163963ae48ddb70048a95173f2946199f17c5d82921261"
       },
-      "notes": "复审 #79 的 CodeBlock selector 收窄：仅修复共享高亮 CSS 与契约测试，不改变本 owner 的组件 API、交互或既有 finding。",
+      "notes": "完整复审 #95 对共享组件目录 reference 的增量（SplitPane 词条补充 useRafTask 组成说明）；本组件源码与复制契约未改变，focused tests 全绿。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -235,13 +235,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -256,34 +256,36 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "91a2eef83808db9bfa05cb24703c8e24f052128d3694fe522f2815c5a5b0a9be"
+        "scopeDigest": "b55244e840a0ab7e2626be8cb96dabbeda965da22724b199ba26bbd0b229472f"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对 SplitPane 内部调度与共享 reference 的增量；handle 自身源码、分隔条 a11y 与交互契约未改变，focused tests 全绿。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
-        "itemDigest": "c15d6b3f8f8603e0918fa232a9caabee3dcfe7da4559f723ba0e793f7c0dfa01",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "foundation/components/SplitPane.vue",
           "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useBreakpointGate.ts",
+          "foundation/composables/useRafTask.ts",
           "foundation/composables/useSplitPane.ts",
           "references/components/index.md",
           "tests/component/split-pane-handle.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts",
+          "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "d406d88044cdaf978d9044684d28a0ed4463316265dc038d6f1cb1acc559eb97"
+        "scopeDigest": "84dca2819c935b68ea3848c3a1b95394e01b122d12bfd7b48c9429ab2879ad3f"
       },
-      "notes": "首审 clean:props/emits 契约、SSR 门控水合一致性、fixed/ratio 双模式钳制、键盘方向映射(含 fixedPane=end 反转)、separator aria 值与 min/max 逐一核证;@vueuse/core 由 registry externalRequirements 全局声明,消费闭包无缺口;不为产出制造 churn。",
+      "notes": "完整复审 #95：容器测量的 rAF 合帧调度收敛到共享 useRafTask，最新 box 参数语义与原实现一致，新增的无 rAF 同步 fallback 仅影响无观察者环境；公开 props/slots、拖动与断点契约未变，focused tests 与新增 use-raf-task 测试全绿。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -315,13 +317,13 @@
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -332,20 +334,20 @@
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts"
         ],
-        "scopeDigest": "8e3a0317315665806552eaa33b74a20868c55dcffe3cae97d58a50e6091ed70f"
+        "scopeDigest": "53e9ff1cfb4096dde25ebea0890f8b1894a171cf80e95774eb3e7d3b4ea3027d"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -360,9 +362,9 @@
           "tests/component/response-example.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "3023932ceb6685c1a9dc31bed003772d09f5d92d12b0643ffe4728f4d1ef742e"
+        "scopeDigest": "99773af517d56f10df703bc3946b6766585555ff11463fd57dcb31ba9e2eef07"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。既有 finding 保持 resolved。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -375,13 +377,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -402,20 +404,20 @@
           "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "e2d8d0d3079b3dbc15b8abecdb45cbeb4b62f76236564659d1b51e6a95a0b65a"
+        "scopeDigest": "2623854daa1e218bf45b2969685c0998bcf638330168ff0d5c403d9059046b0c"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -434,9 +436,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "54bcd22852601b9a47ba5e223c4bcfc39a52a7b8fbb72a4de4924e09b13ea722"
+        "scopeDigest": "a52d43c8159e4bc540e307ec1e2f63df221c1d847562c30f5b154a1e195fd794"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -453,13 +455,13 @@
     },
     "api-docs-field-group": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -468,20 +470,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "2e15e27b14edf006da4bffaa514fec93a4fa9810b47197b86e0ae7d84b3f0d4e"
+        "scopeDigest": "c3a7c48d203029e9f43908a41e36a576cd99d99b39352680932b950115ced7c8"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 2,
-      "lastAuditedAt": "2026-08-14T00:09:10.802Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
-        "headSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -494,9 +496,9 @@
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-item-structure.spec.ts"
         ],
-        "scopeDigest": "177cc3866b64ad292e46e04a63f5836cb4a27a6c6fa2f46bda1e99965cbedc94"
+        "scopeDigest": "ecd63d0c8fa29e1ba763a98237f6b09dc1413a4aebfbb89510e051a590ec7903"
       },
-      "notes": "全量复审四维度均达标:数据模型单一真源、a11y(焦点环/aria-label/boxShadow cue/reduced-motion)与琥珀阶梯符合 references、universal claims(copyLink 不导航、stale positioning token 防护、空 path 拒绝)均有测试反例防护;模板内重复为有意设计且有 parity 测试,不制造 churn。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -523,13 +525,13 @@
     },
     "api-docs-field-annotation": {
       "round": 2,
-      "lastAuditedAt": "2026-08-14T00:09:10.802Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
-        "headSha": "f56dd74c6126052dfcf77a2c50d9f376e086fe53",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -538,9 +540,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "faa37a1f2c4d4ebd983159f6c4626cb094d4893d5fff908a67a163b370922fb4"
+        "scopeDigest": "963f33f22a8594106d0155c116e130f85edb36a65d36747677425f077fa1ee94"
       },
-      "notes": "复审通过:降级+dev 告警、fieldRequiredState 共享派生、跨页编码往返均达标;反向横扫命中与 SidebarNav 的 trailing-slash 归一化簇外重复,记 low finding 交人工(倾向 wont-fix,见 issue #93 候选 2)。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变。开放 finding f-31f690a2dbaa（trailing-slash 归一化重复）与本次增量无关，按原 id 保留，状态维持 deferred。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -560,13 +562,13 @@
     },
     "api-docs-event-badge": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -576,20 +578,20 @@
           "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "e2fb25f99cdd6d35403bb03b479c6a99d9423c87194344e99034e54e30b259e5"
+        "scopeDigest": "9290d11e143726a90412184dfa0becde93cd892a4e8cb0ff9c9dbde5e60d8279"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -600,20 +602,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "96bf57b7226523f2048e76699db9b2bc5654cf40eb64d22a91e3e4a08a58eee2"
+        "scopeDigest": "3758963e42d85a045d0873717191cc4b24df2c98830ff91bc39e3d0045841fff"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -622,20 +624,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "cef537fa8da57f3a8cc360d17be25b1dfbaec2e5e7088bd8d499914e3586ade2"
+        "scopeDigest": "68b0cd8dd52b170470088d722b175cd72f98d78aafe7c430acea3aa2c4c6b8b2"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -645,49 +647,51 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "867d36f224d70136ba6e10674f94a179e08cf5e51899a95fcc1492315d11ebca"
+        "scopeDigest": "96e25a8ef15ddb7e97a637ae4eae728676169f07d00d73f657003be6cebc1b21"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
-        "itemDigest": "8f04fc495c02a83a336bf41f7b161337042b40bb901e52e9865ee1f1eb73cc18",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
           "foundation/components/SplitPane.vue",
           "foundation/composables/useBreakpointGate.ts",
+          "foundation/composables/useRafTask.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/CodeRail.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
           "references/kits/api-docs/index.md",
           "tests/component/code-rail.spec.ts",
-          "tests/component/use-breakpoint-gate.spec.ts"
+          "tests/component/use-breakpoint-gate.spec.ts",
+          "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "2190203e8ece3d68f35e5f50ab697101083ca59dfd9823859fc5b0bf3606163f"
+        "scopeDigest": "652dd02ba3522ce3a070461460af680e2b397f01ad66969fd742aba71728a196"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95：RO/MO 触发的合帧测量收敛到共享 useRafTask，删除本地 frame id 与重复卸载清理，新增的无 rAF 同步 fallback 仅影响无观察者环境；内容优先重分配与公开契约未变，kit reference 坑位说明改指 useRafTask，focused tests 全绿。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -696,7 +700,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "f6a869df62ff67e2ae6cd321b1f3eae518bbea5ad76945525be41f963804d725",
+        "scopeDigest": "743bc50d60f800f27d536cf9200d0b42ec3a0734cee59bd3d1d823a55506b554",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -710,7 +714,7 @@
           }
         ]
       },
-      "notes": "完整复审 #74 对共享 API Docs reference 的增量；SiteSearch 源码、搜索与状态播报契约未改变，主线已解决的 screen-reader status finding 保持 resolved，现有 focused 黑盒测试全绿。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。既有 finding 保持 resolved。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -723,13 +727,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T10:14:19.849Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "18105fd73d09f804dba53af75ae4bb26b8427dca",
-        "headSha": "e16bbc2f8cc67273e4da6678e42cb48592b78cec",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -747,9 +751,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "242aeebd0eaddf21a977ac95b007a6f10d2dd6d64103fa1da9f7a6bfa6cfcae9"
+        "scopeDigest": "fc05460628758951b0b729b1f6f7534af76599b36fe0b541a1cd9ac627486d3e"
       },
-      "notes": "PR3(#84) 把 check-registry-consumer.mjs 每个 runtime 场景的 --write 换为 guarded apply(--expect-plan + --json apply result 断言),upgrade smoke 的 head update 同样走 plan → guarded apply。webhook-protocol 场景的安装内容、typecheck、build 与既有断言不变;组件源码、internal helpers、utils、tests 与 references 均未改动。复审确认改动仅收紧编排层的写入门禁,不触及组件公开 claims。",
+      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。既有 finding 保持 resolved。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -762,27 +766,29 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-13T06:45:58.380Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8f601df9fe86ee24b7199f110a96d392841f5060",
-        "headSha": "98ad2850b1b2a817747199f85a685ff7a3e88303",
-        "itemDigest": "ca0a871b244d48c4d04fb39e19bf309474433954e89c6ecf8c448b8e674d9bbe",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "itemDigest": "984c56c7dde590b6eb72f30dd6ef596a751726e0f3d8cebf0075f07355c262a4",
         "scope": [
           "AGENTS.md",
           "app/pages/kits/api-docs/sidebar-nav.vue",
+          "foundation/composables/useRafTask.ts",
           "kits/api-docs/components/SidebarNav.vue",
           "kits/api-docs/internal/SidebarScenarioTags.vue",
           "references/foundations/typography.md",
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/sidebar-nav.md",
-          "tests/component/sidebar-scenario-tags.spec.ts"
+          "tests/component/sidebar-scenario-tags.spec.ts",
+          "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "14f727174c6c24eb94d5bae0186afd1e9d7d29979fb0d5476e285c7a5b77005c"
+        "scopeDigest": "b0159556a58009b9bdd8562bc3e1b4106e5a6216d6f8f6cb16a9d4db6d4a3d93"
       },
-      "notes": "完整复审 #74 对共享 API Docs 目录与 reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，新增 RelationSourcePath 与正式结构化关系 recipe 为独立增量，既有 focused tests 全绿。",
+      "notes": "完整复审 #95：SidebarScenarioTags 场景标签的合帧重算收敛到共享 useRafTask，保留原测试/SSR 同步 fallback 语义；标签折叠测量与公开契约未变，focused tests 全绿。",
       "findings": []
     },
     "api-docs-relation-source-path": {

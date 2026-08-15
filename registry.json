@@ -206,6 +206,16 @@
       ]
     },
     {
+      "name": "foundation-use-raf-task",
+      "type": "registry:hook",
+      "title": "useRafTask",
+      "description": "Frame-coalesced task scheduling shared by measurement-driven components.",
+      "verification": ["responsive"],
+      "files": [
+        { "path": "foundation/composables/useRafTask.ts", "target": "app/composables/useRafTask.ts" }
+      ]
+    },
+    {
       "name": "foundation-split-pane-handle",
       "type": "registry:component",
       "title": "SplitPaneHandle",
@@ -222,7 +232,7 @@
       "title": "SplitPane",
       "description": "Responsive draggable two-pane layout primitive.",
       "verification": ["visual", "interaction", "responsive"],
-      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-breakpoint-gate", "foundation-use-split-pane", "foundation-split-pane-handle"],
+      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-breakpoint-gate", "foundation-use-split-pane", "foundation-use-raf-task", "foundation-split-pane-handle"],
       "files": [
         { "path": "foundation/components/SplitPane.vue", "target": "app/components/SplitPane.vue" }
       ]
@@ -312,7 +322,7 @@
       "title": "EnumTable",
       "description": "Filterable allowed-values table.",
       "verification": ["visual", "interaction"],
-      "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown"],
+      "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-raf-task"],
       "files": [
         { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/EnumTable.vue" },
         { "path": "kits/api-docs/utils/enum.ts", "target": "app/utils/enum.ts" }
@@ -426,7 +436,7 @@
       "title": "CodeRail",
       "description": "Vertical dual-example code rail with content-priority reallocation.",
       "verification": ["visual", "interaction", "responsive"],
-      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-breakpoint-gate", "foundation-use-split-pane", "foundation-split-pane-handle"],
+      "registryDependencies": ["geist-foundation", "foundation-breakpoints", "foundation-use-breakpoint-gate", "foundation-use-split-pane", "foundation-use-raf-task", "foundation-split-pane-handle"],
       "files": [
         { "path": "kits/api-docs/components/CodeRail.vue", "target": "app/components/CodeRail.vue" }
       ]
@@ -465,7 +475,7 @@
       "title": "SidebarNav",
       "description": "Searchable, resizable API documentation sidebar with width-aware scenario tags.",
       "verification": ["visual", "interaction", "responsive"],
-      "registryDependencies": ["geist-foundation", "api-docs-method-badge"],
+      "registryDependencies": ["geist-foundation", "api-docs-method-badge", "foundation-use-raf-task"],
       "files": [
         { "path": "kits/api-docs/components/SidebarNav.vue", "target": "app/components/SidebarNav.vue" },
         { "path": "kits/api-docs/internal/SidebarScenarioTags.vue", "target": "app/internal/SidebarScenarioTags.vue" }
