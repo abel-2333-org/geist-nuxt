@@ -10,7 +10,7 @@
 root（无外框列，space-y 分段；外框/留白归页面布局）
 └─ section ×0..3（未提供的 section 整段省略——绝不渲染空卡片或 "none"）
    ├─ header       ── FieldGroup（mono 大写 label + headingLevel 接入大纲）
-   ├─ description  ── 可选导语（text-muted）
+   ├─ description  ── 可选导语（text-muted，始终纯文本）
    ├─ facts <dl>   ── term/value 行；format 决定 value 呈现
    │                  （text / code / inline-markdown）；可选 note（始终纯文本）
    ├─ ACK 专属     ── 可选 CodeBlock example（仅 literal 语义且确有文本 body）
@@ -28,7 +28,7 @@ root（无外框列，space-y 分段；外框/留白归页面布局）
    - **echo**（回显请求参数）→ 不传 `example`，用 facts 行文字说明、`format: 'code'` 呈现被回显的参数名；
    - **intentional empty**（约定就是空）→ facts 行明说「空。返回任何内容都会被忽略。」——明说，而不是留白。
 3. **schedule 双层呈现**：调用方给的**总结句**（如「从 1 分钟起逐步退避到 12 小时，共 8 次」）是屏幕阅读器与拷贝场景的**真源**；`steps` chips 只是视觉序列（逐个 `aria-hidden`），超过 `maxScheduleSteps` 折叠为前 N-1 个 + 展开按钮。按钮**可见文案即可访问名**（WCAG 2.5.3 Label in Name，不再有 `aria-label` 与视觉文案分裂）：由 `expandLabel`/`collapseLabel` 注入已本地化动作文案，未注入时回退英文默认 `Show N more` / `Show less`；chevron 图标纯装饰。不传 `steps` 就只显示总结句（适合均匀间隔）。
-4. **rich fact 明确 opt-in**：fact 渲染行为只由 `format` 字段驱动，**绝不由 value 内容触发**——默认 `'text'` 纯文本，任何 markdown 语法字面保留；`'code'` 整值 InlineCode；`'inline-markdown'` 经 `InlineMarkdown` 安全子集渲染（code / strong / em / del / internal & external link），internal link 走客户端路由并支持键盘 focus 与 Cmd/Ctrl-click，unsafe scheme 与 raw HTML 不会被执行。`note` 始终纯文本。不提供旧字段别名，避免两套输入契约长期并存。
+4. **rich fact 明确 opt-in**：fact 渲染行为只由 `format` 字段驱动，**绝不由 value 内容触发**——默认 `'text'` 纯文本，任何 markdown 语法字面保留；`'code'` 整值 InlineCode；`'inline-markdown'` 经 `InlineMarkdown` 安全子集渲染（code / strong / em / del / internal & external link），internal link 走客户端路由并支持键盘 focus 与 Cmd/Ctrl-click，unsafe scheme 与 raw HTML 不会被执行。`description` 与 `note` 是辅助说明层，始终按纯文本呈现；需要链接、行内代码或强调时，将内容建模为 `fact.value` 并显式使用 `format: 'inline-markdown'`。若未来出现必须在辅助说明中承载富文本的真实需求，应新增显式 format opt-in，而不是改变现有字符串的默认解释。不提供旧字段别名，避免两套输入契约长期并存。
 
 ## Props
 
@@ -53,7 +53,7 @@ interface WebhookProtocolFact {
 }
 interface WebhookProtocolSectionData {
   label: string           // 段标题（已本地化），mono 大写呈现
-  description?: string    // 可选导语
+  description?: string    // 可选导语，始终纯文本
   facts?: WebhookProtocolFact[]  // 未知事实直接不传对应行
 }
 interface WebhookProtocolAckExample {

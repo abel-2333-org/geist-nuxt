@@ -1,10 +1,12 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-14T00:09:10.802Z",
+  "lastRunAt": "2026-08-15T15:23:52.928Z",
   "lastPicked": [
-    "api-docs-field-annotation",
-    "api-docs-field-item"
+    "api-docs-enum-table",
+    "foundation-inline-markdown",
+    "api-docs-webhook-protocol",
+    "api-docs-field-group"
   ],
   "items": {
     "foundation-copy-button": {
@@ -49,14 +51,14 @@
       "findings": []
     },
     "foundation-inline-markdown": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-10T12:02:50.794Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "30fcec1d756cd73f74d4a8c06450b3b814f988c5",
-        "headSha": "a12c25df6c0149db6955205242e60e42f5e6a438",
+        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
+        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -65,9 +67,16 @@
           "references/components/data-display.md",
           "tests/component/inline-markdown.spec.ts"
         ],
-        "scopeDigest": "3d32913dddfec5276c837afa8d9617bb27c68cdcabe93be161e74d69558be57e"
+        "scopeDigest": "3d32913dddfec5276c837afa8d9617bb27c68cdcabe93be161e74d69558be57e",
+        "dependencies": [
+          {
+            "name": "marked",
+            "version": "17.0.6",
+            "reason": "parse.ts 直接消费 marked Lexer.lexInline 的 Token 形状与 CommonMark delimiter 语义；版本变化需复核 emphasis/escape/link token 行为与 pinned 测试矩阵。"
+          }
+        ]
       },
-      "notes": "复审 InlineMarkdown 的 code token 输出：InlineCode 现在显式 translate=no，parser 白名单、delimiter-run 修复、escape 保留与无 v-html 契约未改变；focused spec 覆盖新增属性，无 open finding。",
+      "notes": "复审协议白名单、CommonMark delimiter-run、intraword 星号降级、escape 保留、无 v-html 与 injection matrix；gallery/reference/tests 同步。补记 marked dependency evidence，结论绑定其 inline tokenization 与 Token 形状。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -442,26 +451,39 @@
       "findings": []
     },
     "api-docs-enum-table": {
-      "round": 1,
-      "lastAuditedAt": "2026-07-29T14:39:47.783Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
-        "kind": "legacy-v1",
-        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+        "kind": "scope-v1",
+        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
+        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
+        "itemDigest": "5ce9c202a58449c2bdb7f0273772d39cab26a7c3312728264663a1bb7952464a",
+        "scope": [
+          "app/pages/kits/api-docs/index.vue",
+          "foundation/composables/useRafTask.ts",
+          "kits/api-docs/components/EnumTable.vue",
+          "kits/api-docs/utils/enum.ts",
+          "references/kits/api-docs/index.md",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/enum-table.spec.ts",
+          "tests/component/use-raf-task.spec.ts"
+        ],
+        "scopeDigest": "d076e850de4d9ebb365700fdc7cce212ca4091ebb184bfa949121979c9686d15"
       },
-      "notes": "补渲染 EnumVariant.when；分组筛选 live region 同时明确全部选项聚合命中数与当前本地化分组命中数；按未过滤 active group 稳定保留滚动上限，再由 ResizeObserver 的真实溢出结果控制键盘滚动入口；单次 filteredVariants 保证 tab badge、body 与播报计数同源；以必填、非空、同表唯一且 locale-neutral 的 EnumVariant.id 作为唯一分组身份并直接绑定 UTabs，语言切换与重排保持选中，分组消失则回落首项；dev/test 对缺失、空白和重复 id 告警；默认 filterThreshold 调整为 8，并用 7/8 成对边界测试与 390px 浏览器预览验证。",
+      "notes": "升级 legacy-v1 → scope-v1。基于 #96 合并后的 useRafTask 集成复审 variant 身份、同源筛选计数、live-region、真实溢出驱动 tab stop、7/8 阈值与 i18n 契约；registry dependency、reference 与 tests 一致，无 open finding。",
       "findings": []
     },
     "api-docs-field-group": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
+        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -470,9 +492,9 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "c3a7c48d203029e9f43908a41e36a576cd99d99b39352680932b950115ced7c8"
+        "scopeDigest": "e949bc7fcce591dedc8c433dd1cd78d17cfaf0c85d29a310add2b98f7102f1a4"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "复审共享 scope 中 WebhookProtocolSectionData 的 description 纯文本类型注释；FieldGroup 源码、公开 API、布局与 a11y 行为未改变，既有结论继续成立。",
       "findings": []
     },
     "api-docs-field-item": {
@@ -726,14 +748,14 @@
       ]
     },
     "api-docs-webhook-protocol": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
+        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -751,9 +773,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "fc05460628758951b0b729b1f6f7534af76599b36fe0b541a1cd9ac627486d3e"
+        "scopeDigest": "7d9d3a8453cc67d541d7c29933d5a07e18dfa20381c9b18c728629007a5de09b"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。既有 finding 保持 resolved。",
+      "notes": "复审三段省略、ACK 三语义、schedule a11y 与 rich fact 显式 opt-in。人工确认 description/note 作为辅助说明始终纯文本，富文本经 fact.value format 显式开启；reference、类型注释与黑盒测试已固化该契约，无 open finding。",
       "findings": [
         {
           "id": "f-b1838c3b046a",

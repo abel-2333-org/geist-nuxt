@@ -60,7 +60,7 @@ export interface WebhookProtocolFact {
 export interface WebhookProtocolSectionData {
   /** section 标题（已本地化），mono 大写呈现 */
   label: string
-  /** 可选导语（已本地化） */
+  /** 可选导语（已本地化），始终纯文本 */
   description?: string
   /** term/value 事实行；未知事实直接不传对应行 */
   facts?: WebhookProtocolFact[]
