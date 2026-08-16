@@ -40,11 +40,14 @@ const resolved = computed<GlossaryEntry | undefined>(
   () => props.entry ?? (props.id ? glossary[props.id] : undefined),
 )
 
-if (import.meta.dev) {
+// Degrade diagnostics, shared with FieldAnnotation: warn only for an
+// unresolved *id* — a direct `entry` that is absent is the caller's own
+// business. `import.meta.test` keeps the warning assertable in the component
+// suite (import.meta.dev is false there), matching the family's other form.
+if (import.meta.dev || import.meta.test) {
   watchEffect(() => {
-    if (!resolved.value) {
-      console.warn(`[TermAnnotation] no glossary entry for id "${props.id ?? ''}" — rendering plain text`)
-    }
+    if (!props.id || resolved.value) return
+    console.warn(`[TermAnnotation] no glossary entry for id "${props.id}" — rendering plain text`)
   })
 }
 </script>

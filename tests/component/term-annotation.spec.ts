@@ -10,6 +10,7 @@ let wrapper: VueWrapper | undefined
 afterEach(() => {
   wrapper?.unmount()
   wrapper = undefined
+  vi.restoreAllMocks()
   document.body.innerHTML = ''
 })
 
@@ -39,5 +40,32 @@ describe('TermAnnotation overflow', () => {
     expect([...termElement!.classList]).toContain('wrap-anywhere')
     expect(definitionElement).toBeDefined()
     expect([...definitionElement!.classList]).toContain('wrap-anywhere')
+  })
+})
+
+describe('TermAnnotation degrade diagnostics', () => {
+  // Same policy as FieldAnnotation: degrading is the right runtime behavior,
+  // but an unresolved *id* must leave a diagnostic for the author.
+  it('warns through the mounted component when a glossary id is unresolved', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    wrapper = await mountSuspended(TermAnnotation, {
+      props: { id: 'missing' },
+      slots: { default: () => 'Legacy term' },
+    })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn).toHaveBeenCalledWith(
+      '[TermAnnotation] no glossary entry for id "missing" — rendering plain text',
+    )
+  })
+
+  it('stays silent when no id is involved, even while nothing resolves', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    wrapper = await mountSuspended(TermAnnotation, {
+      slots: { default: () => 'Plain phrase' },
+    })
+
+    expect(wrapper.text()).toBe('Plain phrase')
+    expect(warn).not.toHaveBeenCalled()
   })
 })
