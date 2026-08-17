@@ -1,12 +1,11 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-15T15:23:52.928Z",
+  "lastRunAt": "2026-08-17T02:38:47.574Z",
   "lastPicked": [
-    "api-docs-enum-table",
-    "foundation-inline-markdown",
-    "api-docs-webhook-protocol",
-    "api-docs-field-group"
+    "api-docs-field-annotation",
+    "foundation-doc-annotation",
+    "foundation-term-annotation"
   ],
   "items": {
     "foundation-copy-button": {
@@ -192,14 +191,14 @@
       "findings": []
     },
     "foundation-term-annotation": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
+        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -208,9 +207,9 @@
           "tests/component/annotation-forms.spec.ts",
           "tests/component/term-annotation.spec.ts"
         ],
-        "scopeDigest": "3d4cee55c6e103a110c0412e221988358af4fc2943055eccb7d55ae73f48839f"
+        "scopeDigest": "eb521a0d3e6004c7e866923d48898b9d0a65e8c5ecf2b67bec7b74c3a0c5e9e4"
       },
-      "notes": "修复 open finding:references/components/overlays.md 的 TermAnnotation props 行补记公开的 entry prop(直接传 GlossaryEntry、绕过 glossary、给定时 id 被忽略),契约与组件 JSDoc 及 term-annotation.spec.ts 对齐;组件本体复审无新 finding。",
+      "notes": "修复家族诊断策略分歧:references/kits/api-docs/index.md 声称 Term/Field 共用「降级 + 告警」,但 TermAnnotation 告警注册在 import.meta.dev 下(组件测试环境 dev=false,不可断言),且对未传 id 的直传 entry 未命中场景也发误导性 glossary 告警。对齐 FieldAnnotation:仅未解析 id 告警、注册条件 dev || test,补两条策略测试(未解析 id 告警一次、无 id 静默);组件其余四维复审无问题。",
       "findings": [
         {
           "id": "f-084ace82f441",
@@ -222,14 +221,14 @@
       ]
     },
     "foundation-doc-annotation": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
+        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
         "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -239,7 +238,7 @@
         ],
         "scopeDigest": "8bbe68267cd46d033a6078a520cb99b5570f34963f14e7aefcda1ff611ce43fc"
       },
-      "notes": "复审受影响 scope(overlays.md 本次仅 TermAnnotation 段变化,DocAnnotation 契约段未触碰):load 管线无关、per-instance 缓存 + requestToken 陈旧响应防护、to 变化重取、error 态保留打开页面动作,与契约及 annotation-forms.spec.ts 一致,无新 finding。",
+      "notes": "复审全部四维:load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts 一致;a11y/token/明暗依托壳组件,无硬编码;无 finding,达标记 clean。",
       "findings": []
     },
     "foundation-split-pane-handle": {
@@ -547,13 +546,13 @@
     },
     "api-docs-field-annotation": {
       "round": 2,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
-      "change": "modified",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
+      "change": "none",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
+        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -564,14 +563,14 @@
         ],
         "scopeDigest": "963f33f22a8594106d0155c116e130f85edb36a65d36747677425f077fa1ee94"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量；该 owner 的源码、公开 API、交互与 a11y 契约均未改变。开放 finding f-31f690a2dbaa（trailing-slash 归一化重复）与本次增量无关，按原 id 保留，状态维持 deferred。",
+      "notes": "复审全部四维:绑定/降级/跨页链接契约、fieldRequiredState 共享派生、a11y 与 token 均达标,无新 finding。f-31f690a2dbaa 经人工明确授权判 wont-fix:全仓仅 FieldAnnotation 与 SidebarNav 两处 trailing-slash 归一化,唯一差异限于病态输入 '//',两组件无真实交互路径;抽 kit util 需新增 micro registry item 或跨组件依赖边,拓扑与维护成本高于一致性收益。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
           "severity": "low",
           "claim": null,
           "evidence": "FieldAnnotation.vue:82 normalizePath 与 SidebarNav.vue:207 stripSlash 各自实现 trailing-slash 归一化;复现输入 '//':前者返回 '/'(replace 后空串回落 '/'),后者返回 ''(length>1 直接剥离)。同 kit 内同意图逻辑重复且边界不一致;两处当前互不交互,行为风险低。建议统一为 kit util(utils/route-path.ts)或人工判 wont-fix;抽取会触及 api-docs-sidebar-nav scope,需 co-review,交人工决策。",
-          "disposition": "open"
+          "disposition": "wont-fix"
         },
         {
           "id": "f-fd7282669072",
