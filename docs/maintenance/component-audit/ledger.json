@@ -1,11 +1,13 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-17T02:38:47.574Z",
+  "lastRunAt": "2026-08-18T00:46:33.959Z",
   "lastPicked": [
-    "api-docs-field-annotation",
-    "foundation-doc-annotation",
-    "foundation-term-annotation"
+    "foundation-annotation-popover",
+    "foundation-inline-code",
+    "foundation-semantic-badge",
+    "api-docs-method-badge",
+    "foundation-inline-markdown"
   ],
   "items": {
     "foundation-copy-button": {
@@ -38,26 +40,47 @@
       "findings": []
     },
     "foundation-inline-code": {
-      "round": 1,
-      "lastAuditedAt": "2026-07-29T14:39:47.783Z",
-      "change": "none",
+      "round": 2,
+      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
-        "kind": "legacy-v1",
-        "sha": "6600dc9a238a26ac6864f0beb61a886759faeafb"
+        "kind": "scope-v1",
+        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
+        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
+        "scope": [
+          "app/components/gallery/DataDisplay.vue",
+          "foundation/components/InlineCode.vue",
+          "references/components/data-display.md",
+          "tests/component/inline-code.spec.ts"
+        ],
+        "scopeDigest": "6d7db0dbd0df6f7b3895fec92b5624c11b4aaeadc8cf4245a7c3d3d0ac3ae4ec",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 ProseCode 的单一 <code> 根节点、class/全局 attrs 转发与 ui.prose 主题行为。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "依赖 Vue 3 单根组件的 fallthrough attr 合并顺序，使调用方 translate 覆盖组件静态默认值。"
+          }
+        ]
       },
-      "notes": "18 行单一职责原子，位置符合 component-reflow 第 3 节的跨场景裸名规则；两处主题偏离（rounded-sm 控件档圆角、text-code 13px）均有源码内依据，无硬编码；换行策略刻意交由调用方经 attrs fallthrough 决定，比内建 wrap prop 更对。gallery 新增内联代码也已统一改用 text-code。四维度逐条过完无可做改动，不制造 churn。",
+      "notes": "把 translate=\"no\" 纳入原子契约:内容是字面值(标识符/示例值/枚举成员),与 CodeBlock 同因不该被机器翻译;此前 InlineMarkdown 与 FactRow 各自外置补丁、而 EnumTable/FieldItem 直连消费点无保护,行为不一致。原子内建后消费者仍可经 fallthrough translate 覆盖;收敛 InlineMarkdown 的冗余传参;新增 inline-code.spec.ts 锁默认、覆盖与主题校准三条契约;data-display.md 同步补契约描述。",
       "findings": []
     },
     "foundation-inline-markdown": {
       "round": 2,
-      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
-        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
+        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
+        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -66,16 +89,16 @@
           "references/components/data-display.md",
           "tests/component/inline-markdown.spec.ts"
         ],
-        "scopeDigest": "3d32913dddfec5276c837afa8d9617bb27c68cdcabe93be161e74d69558be57e",
+        "scopeDigest": "799f4a94643b19060dac9fced07245b2d0eb694b56fd2dcf84d4d97f6261007d",
         "dependencies": [
           {
             "name": "marked",
             "version": "17.0.6",
-            "reason": "parse.ts 直接消费 marked Lexer.lexInline 的 Token 形状与 CommonMark delimiter 语义；版本变化需复核 emphasis/escape/link token 行为与 pinned 测试矩阵。"
+            "reason": "parse.ts 直接消费 marked Lexer.lexInline 的 Token 形状与 CommonMark delimiter 语义;版本变化需复核 emphasis/escape/link token 行为与 pinned 测试矩阵。"
           }
         ]
       },
-      "notes": "复审协议白名单、CommonMark delimiter-run、intraword 星号降级、escape 保留、无 v-html 与 injection matrix；gallery/reference/tests 同步。补记 marked dependency evidence，结论绑定其 inline tokenization 与 Token 形状。",
+      "notes": "co-review:本次改动移除 InlineMarkdown 对 InlineCode 的冗余 translate 外置传参,行为不变——inline-markdown.spec.ts:31 仍断言 code token 渲染 translate=\"no\"(现经原子默认满足)。parse.ts 的协议白名单、intraword 星号降级与反斜杠保留逻辑复核无回归;data-display.md 的 InlineMarkdown 段未触碰。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -94,14 +117,14 @@
       ]
     },
     "foundation-semantic-badge": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-11T02:10:58.988Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "81464cbcf82813181a49043c5437a25eb8e12d45",
-        "headSha": "e7f7b9726f0d380c1c241ff1b10297f9737f8e27",
+        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
+        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -115,9 +138,9 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "cc26a4d8ccfad2c08dbcd896a483e7122d8caba1a124286ab44088157eb479c3"
+        "scopeDigest": "a61a4ac162fd2be12c36131095d907766e97f651c83866686bc4a38c2464eab4"
       },
-      "notes": "完整复审 SemanticBadge 源码、tone 映射、preset 消费、focused tests、gallery 与权威 reference；本次 component-reflow 仅把既已执行的 audit:verify 补入晋升 gate，不改变组件契约、行为或既有 resolved findings，scope-v1 证据继续成立。",
+      "notes": "复审 tone 词汇与 BADGE_TONE_COLOR 唯一权威(Record 穷尽映射)、三个 preset 包装层(HttpMethodBadge/LifecycleBadge/WebhookBadge)的非空 label 兜底与分层、data-display.md 契约(上轮 resolved findings 的收窄仍成立)。横扫直接 UBadge 使用点(SidebarNav/SidebarScenarioTags/WebhookProtocol/ResponseExample)均为计数、步骤号或 HTTP status chip,不属语义 tone 词汇,分层正确。无回归,记 clean。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -169,14 +192,14 @@
       "findings": []
     },
     "foundation-annotation-popover": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
+        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -187,7 +210,7 @@
         ],
         "scopeDigest": "ea76805b31795d6c7d818236670983192489a095c5001e4ac40b07ebe9d80bfc"
       },
-      "notes": "复审受影响 scope(overlays.md 仅 TermAnnotation props 行补记 entry,AnnotationPopover 契约段未触碰):壳的 click 骨架 + mouse-only hover、openSource 焦点管理(keyboard 进面板/hover 不夺焦/close 焦点丢失才回 trigger)、loading sr-only role=status 与 error aria-live 均与 overlays.md 契约一致,381 行 focused spec 全绿。",
+      "notes": "复审壳的 click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权(keyboard 进面板 / hover 不夺焦 / 关闭仅在焦点确实丢失时归还 trigger)、disabled 定时器卫生与 loading/error chrome,与 overlays.md 契约逐条一致;381 行 focused spec 全绿;横扫无簇外重复(SiteSearch 的 setTimeout 是搜索 debounce,与 hover 开合所有权不同形)。无回归,记 clean。",
       "findings": []
     },
     "foundation-term-annotation": {
@@ -418,14 +441,14 @@
       "findings": []
     },
     "api-docs-method-badge": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
+        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -444,9 +467,9 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "a52d43c8159e4bc540e307ec1e2f63df221c1d847562c30f5b154a1e195fd794"
+        "scopeDigest": "9cf3145f98e81d859b5ef49f0fa01aadaa46fbb84eee466183767fadd1b8bb18"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "co-review:本次 diff 命中其 scope 仅 data-display.md 的 InlineCode 段(SemanticBadge 段未动);HttpMethodBadge 源码、method-preset、OperationHeader/SidebarNav/SiteSearch 消费面与 focused tests 均无变化,http-method-badge.spec.ts 随 test:component 全绿,复审无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
