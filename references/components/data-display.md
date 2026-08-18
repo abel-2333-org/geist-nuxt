@@ -43,7 +43,7 @@
 
 ## InlineCode
 
-行内代码 token（foundation），落在浅色 tonal 表面。委托 Nuxt UI 的 `ProseCode`（`ui.prose: true`，无需 @nuxt/content），仅覆盖两处回到 Geist 基础：圆角回控件档（`rounded-sm`，6px）、字号 Copy 13 Mono。用于正文里的示例值 / 默认值 / 允许值。
+行内代码 token（foundation），落在浅色 tonal 表面。委托 Nuxt UI 的 `ProseCode`（`ui.prose: true`，无需 @nuxt/content），仅覆盖两处回到 Geist 基础：圆角回控件档（`rounded-sm`，6px）、字号 Copy 13 Mono。用于正文里的示例值 / 默认值 / 允许值。内容按字面值对待：组件默认输出 `translate="no"`（与 CodeBlock 同因——标识符和字面值不该被机器翻译），调用方可经 attrs 透传 `translate` 覆盖单个实例。
 ```vue
 将 <InlineCode>timeout_ms</InlineCode> 设为如 <InlineCode>3000</InlineCode>。
 ```

@@ -42,7 +42,7 @@ export default defineComponent({
     function render(nodes: Node[]): VNodeChild[] {
       return nodes.map((node) => {
         if (node.type === 'text') return node.value
-        if (node.type === 'code') return h(InlineCode, { translate: 'no' }, () => node.value)
+        if (node.type === 'code') return h(InlineCode, () => node.value)
         if (node.type === 'strong') return h(ProseStrong, () => render(node.children))
         if (node.type === 'em') return h(ProseEm, () => render(node.children))
         if (node.type === 'del') return h('del', render(node.children))
