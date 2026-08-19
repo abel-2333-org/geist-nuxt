@@ -1,13 +1,13 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-18T00:46:33.959Z",
+  "lastRunAt": "2026-08-19T02:06:34.943Z",
   "lastPicked": [
-    "foundation-annotation-popover",
-    "foundation-inline-code",
-    "foundation-semantic-badge",
+    "api-docs-lifecycle-badge",
+    "api-docs-operation-header",
+    "api-docs-event-badge",
     "api-docs-method-badge",
-    "foundation-inline-markdown"
+    "foundation-semantic-badge"
   ],
   "items": {
     "foundation-copy-button": {
@@ -118,13 +118,13 @@
     },
     "foundation-semantic-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
-        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
+        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -138,9 +138,21 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "a61a4ac162fd2be12c36131095d907766e97f651c83866686bc4a38c2464eab4"
+        "scopeDigest": "0c6d9903b7104c687f263f34c70a9dde04a71d82bd31d4483fbb0d3349699be8",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 wrapper 属性落到可见 badge。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 SemanticBadge 接收的 translate 属性到达 UBadge。"
+          }
+        ]
       },
-      "notes": "复审 tone 词汇与 BADGE_TONE_COLOR 唯一权威(Record 穷尽映射)、三个 preset 包装层(HttpMethodBadge/LifecycleBadge/WebhookBadge)的非空 label 兜底与分层、data-display.md 契约(上轮 resolved findings 的收窄仍成立)。横扫直接 UBadge 使用点(SidebarNav/SidebarScenarioTags/WebhookProtocol/ResponseExample)均为计数、步骤号或 HTTP status chip,不属语义 tone 词汇,分层正确。无回归,记 clean。",
+      "notes": "co-review：HttpMethodBadge/WebhookBadge 新增 translate=no 后复核 SemanticBadge 单根 UBadge 的 attrs 透传；两个 wrapper 的最终 DOM 断言通过，tone 映射、非空 label 与既有 resolved findings 均无回归。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -407,14 +419,14 @@
       ]
     },
     "api-docs-lifecycle-badge": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
+        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -422,33 +434,29 @@
           "app/utils/demo/api-docs/docs-shell-data.ts",
           "foundation/components/SemanticBadge.vue",
           "foundation/utils/badge.ts",
-          "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/LifecycleNotice.vue",
-          "kits/api-docs/components/OperationHeader.vue",
-          "kits/api-docs/utils/field.ts",
           "kits/api-docs/utils/lifecycle-preset.ts",
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/field-item-structure.spec.ts",
-          "tests/component/http-method-badge.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "2623854daa1e218bf45b2969685c0998bcf638330168ff0d5c403d9059046b0c"
+        "scopeDigest": "c16341cdad1130465d4782b2abe502de07bb9a1c3b82c35ef364aa3e8ef3ed64"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "复审 preset 包装层与词表契约；本次同步收敛其镜像 HttpMethodBadge 的 literal token 翻译保护，既有 tone、label fallback、LifecycleNotice 共词表与 focused tests 均保持成立，无 open finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
-        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
+        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -467,9 +475,21 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "9cf3145f98e81d859b5ef49f0fa01aadaa46fbb84eee466183767fadd1b8bb18"
+        "scopeDigest": "181efe13017c1b8ac98339ec8c05a397887f217de84280b59a33a8fe0d4c276d",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 translate 属性落到可见 method badge。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 HttpMethodBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
+          }
+        ]
       },
-      "notes": "co-review:本次 diff 命中其 scope 仅 data-display.md 的 InlineCode 段(SemanticBadge 段未动);HttpMethodBadge 源码、method-preset、OperationHeader/SidebarNav/SiteSearch 消费面与 focused tests 均无变化,http-method-badge.spec.ts 随 test:component 全绿,复审无回归。",
+      "notes": "co-review：为 HTTP method/UNKNOWN literal token 增加 translate=no，并复核 OperationHeader endpoint identifier 接线；最终 DOM 属性与既有 method tone/fallback tests 全部通过，无 open finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -605,26 +625,41 @@
       ]
     },
     "api-docs-event-badge": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
+        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/components/SemanticBadge.vue",
+          "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/WebhookBadge.vue",
-          "references/kits/api-docs/index.md"
+          "references/kits/api-docs/index.md",
+          "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "9290d11e143726a90412184dfa0becde93cd892a4e8cb0ff9c9dbde5e60d8279"
+        "scopeDigest": "60fbe6f1b351602bc6d38b3ef1b7974bb1eb360a10abbf7554ceacf55b019d6d",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 translate 属性落到可见 badge。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 WebhookBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
+          }
+        ]
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "修复 EVENT 固定域 token 缺少 translate=no 的漏审项；属性经 SemanticBadge/UBadge 落到最终 DOM，focused test 锁定，neutral tone、镜像排版与单值词表边界保持成立，无 open finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
@@ -674,26 +709,31 @@
       "findings": []
     },
     "api-docs-operation-header": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
+        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "app/pages/kits/api-docs/webhook-reference.vue",
+          "kits/api-docs/components/HttpMethodBadge.vue",
+          "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/OperationHeader.vue",
+          "kits/api-docs/components/WebhookBadge.vue",
           "references/kits/api-docs/index.md",
-          "tests/component/chrome-labels.spec.ts"
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "96e25a8ef15ddb7e97a637ae4eae728676169f07d00d73f657003be6cebc1b21"
+        "scopeDigest": "5ce1ca70c129cbd5bc828dfdcbc403ce71129d4bfc2b25dda75a3e4dea11ac0e"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "修复 endpoint path 与 webhook event identifier 缺少 translate=no 的漏审项；原生 code 节点直接保护 literal token，endpoint/webhook 两形态最终 DOM 属性测试通过，其余类型、outline、响应式与 a11y 契约无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
