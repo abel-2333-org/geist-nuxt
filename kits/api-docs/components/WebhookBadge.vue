@@ -37,6 +37,7 @@ const EVENT_BADGE = { tone: 'neutral', variant: 'subtle', label: 'EVENT' } as co
     :variant="EVENT_BADGE.variant"
     :size="props.size"
     :label="EVENT_BADGE.label"
+    translate="no"
     class="font-mono tracking-wide tabular-nums"
   />
 </template>

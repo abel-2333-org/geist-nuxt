@@ -33,6 +33,7 @@ const meta = computed(() => methodPreset[method.value as HttpMethod] ?? methodFa
     :variant="meta.variant"
     :size="props.size"
     :label="method"
+    translate="no"
     class="font-mono tracking-wide tabular-nums"
   />
 </template>
