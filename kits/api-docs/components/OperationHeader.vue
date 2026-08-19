@@ -72,7 +72,7 @@ const identifier = computed(() =>
       <HttpMethodBadge v-if="props.kind === 'endpoint'" :method="props.method" />
       <WebhookBadge v-else />
 
-      <code class="min-w-0 truncate font-mono text-sm text-highlighted">
+      <code translate="no" class="min-w-0 truncate font-mono text-sm text-highlighted">
         {{ identifier }}
       </code>
 
