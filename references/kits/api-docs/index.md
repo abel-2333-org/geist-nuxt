@@ -331,7 +331,7 @@ await copyLink(path, {
 - `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition 显示模型,kit auto-import）
 - `kits/api-docs/components/FieldAnnotation.vue` + `kits/api-docs/composables/useFieldSource.ts`（Annotation 家族字段形态；壳复用 foundation `AnnotationPopover`）
 - `kits/api-docs/components/RelationSourcePath.vue`（已解析 relation source hierarchy；同页导航复用 `useFieldAnchor`）
-- `kits/api-docs/composables/{useCodeWrap,useFieldAnchor}.ts`
+- `kits/api-docs/composables/{useCodeWrap,useExampleScenarioSelection,useFieldAnchor}.ts`
 - 组合演示（demo，不在 kit）：`app/pages/kits/api-docs/index.vue`、`endpoint-reference.vue`、`webhook-reference.vue`、`sidebar-nav.vue`、`webhook-protocol.vue`、`schema-composition.vue`、`docs-shell/`（`index.vue` + `[domain]/index.vue` + `[domain]/[slug].vue`）；页面 recipe 在 `app/components/demo/api-docs/`，fixture/adapter 在 `app/utils/demo/api-docs/`（均 gallery-private）
 - foundation 依赖：`foundation/components/{CopyButton,SemanticBadge,InlineCode,InlineMarkdown,SplitPane,SplitPaneHandle}.vue`、`foundation/composables/{useCopy,useSplitPane}.ts`、`foundation/utils/{badge,breakpoints}.ts`
 
