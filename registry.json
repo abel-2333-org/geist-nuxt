@@ -259,6 +259,16 @@
       ]
     },
     {
+      "name": "api-docs-use-example-scenario-selection",
+      "type": "registry:hook",
+      "title": "useExampleScenarioSelection",
+      "description": "Controlled and uncontrolled scenario identity selection for API examples.",
+      "verification": ["interaction"],
+      "files": [
+        { "path": "kits/api-docs/composables/useExampleScenarioSelection.ts", "target": "app/composables/useExampleScenarioSelection.ts" }
+      ]
+    },
+    {
       "name": "api-docs-code-block",
       "type": "registry:component",
       "title": "CodeBlock",
@@ -276,7 +286,7 @@
       "title": "RequestExample",
       "description": "Scenario-aware request example.",
       "verification": ["visual", "interaction"],
-      "registryDependencies": ["api-docs-code-block"],
+      "registryDependencies": ["api-docs-code-block", "api-docs-use-example-scenario-selection"],
       "files": [
         { "path": "kits/api-docs/components/RequestExample.vue", "target": "app/components/RequestExample.vue" }
       ]
@@ -287,7 +297,7 @@
       "title": "ResponseExample",
       "description": "Scenario and status-aware response example with explicit body semantics (code, empty, unavailable, file).",
       "verification": ["visual", "interaction", "responsive"],
-      "registryDependencies": ["api-docs-code-block"],
+      "registryDependencies": ["api-docs-code-block", "api-docs-use-example-scenario-selection"],
       "files": [
         { "path": "kits/api-docs/components/ResponseExample.vue", "target": "app/components/ResponseExample.vue" }
       ]

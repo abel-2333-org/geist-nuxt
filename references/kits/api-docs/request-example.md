@@ -52,4 +52,4 @@ const scenario = ref('checkout')
 
 ## 源码
 
-- `kits/api-docs/components/RequestExample.vue`（依赖同目录 `CodeBlock.vue` + `kits/api-docs/composables/useCodeWrap.ts`，由根 registry 展开）。
+- `kits/api-docs/components/RequestExample.vue`（依赖同目录 `CodeBlock.vue` + `kits/api-docs/composables/{useCodeWrap,useExampleScenarioSelection}.ts`，由根 registry 展开）。

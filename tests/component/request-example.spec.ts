@@ -90,6 +90,19 @@ describe('RequestExample scenario selection', () => {
     expect(wrapper.text()).not.toContain('CODE-BATCH')
   })
 
+  it('treats an explicitly bound undefined scenario as controlled', async () => {
+    const wrapper = await mountSuspended(RequestExample, {
+      props: { scenarios, scenario: undefined },
+    })
+
+    scenarioSelect(wrapper)!.vm.$emit('update:modelValue', 'batch')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.emitted('update:scenario')).toEqual([['batch']])
+    expect(wrapper.text()).toContain('CODE-BASIC')
+    expect(wrapper.text()).not.toContain('CODE-BATCH')
+  })
+
   it('emits update:scenario exactly once when the user picks a scenario', async () => {
     const wrapper = await mountSuspended(RequestExample, { props: { scenarios } })
     const select = scenarioSelect(wrapper)

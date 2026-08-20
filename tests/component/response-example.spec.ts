@@ -192,6 +192,19 @@ describe('ResponseExample scenario selection', () => {
     expect(wrapper.text()).toContain('BASIC-200')
   })
 
+  it('treats an explicitly bound undefined scenario as controlled', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: { scenarios, scenario: undefined },
+    })
+
+    selectByIcon(wrapper, 'i-lucide-layers')!.vm.$emit('update:modelValue', 'batch')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.emitted('update:scenario')).toEqual([['batch']])
+    expect(wrapper.text()).toContain('BASIC-200')
+    expect(wrapper.text()).not.toContain('BATCH-404')
+  })
+
   it('emits update:scenario exactly once when the user picks a scenario', async () => {
     const wrapper = await mountSuspended(ResponseExample, { props: { scenarios } })
     const select = selectByIcon(wrapper, 'i-lucide-layers')

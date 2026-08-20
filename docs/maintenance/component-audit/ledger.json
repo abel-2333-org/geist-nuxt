@@ -276,13 +276,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -297,9 +297,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "b55244e840a0ab7e2626be8cb96dabbeda965da22724b199ba26bbd0b229472f"
+        "scopeDigest": "f3ce4159bcaf79b278bc7dad41ff49c7d7efcd6a0f9e25c6bbe3990e89e7a9d0"
       },
-      "notes": "完整复审 #95 对 SplitPane 内部调度与共享 reference 的增量；handle 自身源码、分隔条 a11y 与交互契约未改变，focused tests 全绿。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -354,48 +354,54 @@
     },
     "api-docs-request-example": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
-        "itemDigest": "b329d0ccec957b48d57d2c4c1fbf8f69f670678bfe4444dba5cc34faa05cb82b",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
+          "kits/api-docs/composables/useExampleScenarioSelection.ts",
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
-          "tests/component/request-example.spec.ts"
+          "tests/component/request-example.spec.ts",
+          "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "53e9ff1cfb4096dde25ebea0890f8b1894a171cf80e95774eb3e7d3b4ea3027d"
+        "scopeDigest": "59d5342d3bc735d78a2cae3a34e1c847b04cfd1907b00f9f8027ff95943e3131"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "scenario identity seam 已收敛到 kit composable；挂载时 prop presence 判定、未知受控 id 静默首项 fallback、非受控重排保留与移除后丢弃、显式选择单次 emit 均由 composable 与组件黑盒测试锁定。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T23:24:05.756Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
-        "headSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
-        "itemDigest": "09057ef6261bc471d005bce1d1827aac06cbdc3d4f1a12d7ed2e3f369f417f9d",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/composables/useExampleScenarioSelection.ts",
+          "references/kits/api-docs/request-example.md",
           "references/kits/api-docs/response-example.md",
-          "tests/component/response-example.spec.ts"
+          "tests/component/request-example.spec.ts",
+          "tests/component/response-example.spec.ts",
+          "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "60b6de8bb16d1e858c76a842b2c18d642bf94b8c4e9af660c2ddea3888bc2fb7"
+        "scopeDigest": "0477bb69b1854c2ed67f3facbf62d3365860b3ef700172645fc5d60c448c9f53"
       },
-      "notes": "round 2 复审:三级收敛选择、身份键去重告警、常驻 live region、容器查询窄化 popover 等契约与 focused tests 全部一致;反向横扫发现 scenario 受控 seam 与簇外 RequestExample 逐行同构,记 low finding 交人工决策是否抽 composable。",
+      "notes": "已按人工采纳结论解决共享 scenario seam 重复；仅抽取 scenario identity 状态，status/body 的上下文收敛仍留在 ResponseExample，三级选择、label fallback、live region 与响应式控件契约无回归。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -409,19 +415,19 @@
           "severity": "low",
           "claim": null,
           "evidence": "复现:对比 kits/api-docs/components/RequestExample.vue(scenario seam,约 66-108 行)与 ResponseExample.vue(约 163-303 行)——controlled 检测(Object.hasOwn(vnode.props, 'scenario'))、localScenario shallowRef、收敛 computed(find ?? first)、仅用户显式选择才 emit 的 setter、pre-flush id 列表收敛 watch,两处逐行同构,且靠注释人工纪律维持对齐(RequestExample: 'keeps the seam aligned with ResponseExample');ResponseExample 内部 status/body 两维再重复同一收敛形状。建议抽成 kit composable(如 kits/api-docs/composables/ 下的 useConvergedSelection,归属 api-docs kit,由新 registry item 或并入 api-docs-code-block 闭包),两个 example 组件共享;涉及两个组件与 registry 依赖闭包的破坏性变更,超出当日簇,留人工决策。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-lifecycle-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
-        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -438,20 +444,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "c16341cdad1130465d4782b2abe502de07bb9a1c3b82c35ef364aa3e8ef3ed64"
+        "scopeDigest": "b89ab4bde01fb2faffacbdff4256bc3df4d0ae8d4b008fcc5af57491337194c3"
       },
-      "notes": "复审 preset 包装层与词表契约；本次同步收敛其镜像 HttpMethodBadge 的 literal token 翻译保护，既有 tone、label fallback、LifecycleNotice 共词表与 focused tests 均保持成立，无 open finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
-        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -470,7 +476,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "181efe13017c1b8ac98339ec8c05a397887f217de84280b59a33a8fe0d4c276d",
+        "scopeDigest": "8f1d6c6aaa05126559ca54d8e7208611f691c033c50b9205dbc390028ba97ca8",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -484,18 +490,18 @@
           }
         ]
       },
-      "notes": "co-review：为 HTTP method/UNKNOWN literal token 增加 translate=no，并复核 OperationHeader endpoint identifier 接线；最终 DOM 属性与既有 method tone/fallback tests 全部通过，无 open finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 2,
-      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
-        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "5ce9c202a58449c2bdb7f0273772d39cab26a7c3312728264663a1bb7952464a",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -507,20 +513,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "d076e850de4d9ebb365700fdc7cce212ca4091ebb184bfa949121979c9686d15"
+        "scopeDigest": "c151fd0e9c225c6c01d6683b4d6a8d3592b23d447a775fb6e75db7fcca558a56"
       },
-      "notes": "升级 legacy-v1 → scope-v1。基于 #96 合并后的 useRafTask 集成复审 variant 身份、同源筛选计数、live-region、真实溢出驱动 tab stop、7/8 阈值与 i18n 契约；registry dependency、reference 与 tests 一致，无 open finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 2,
-      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
-        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -529,20 +535,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "e949bc7fcce591dedc8c433dd1cd78d17cfaf0c85d29a310add2b98f7102f1a4"
+        "scopeDigest": "6ae728f1c5db49c985e0e25466211cb4e30ee2c1edff5f3ff0a0814221a9579e"
       },
-      "notes": "复审共享 scope 中 WebhookProtocolSectionData 的 description 纯文本类型注释；FieldGroup 源码、公开 API、布局与 a11y 行为未改变，既有结论继续成立。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 2,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -555,9 +561,9 @@
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-item-structure.spec.ts"
         ],
-        "scopeDigest": "ecd63d0c8fa29e1ba763a98237f6b09dc1413a4aebfbb89510e051a590ec7903"
+        "scopeDigest": "781ad06fd7c15ec4f37233e275c9c90aa53f8f865d5d1fae7f177be3112996a3"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -584,13 +590,13 @@
     },
     "api-docs-field-annotation": {
       "round": 2,
-      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
-        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -599,9 +605,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "963f33f22a8594106d0155c116e130f85edb36a65d36747677425f077fa1ee94"
+        "scopeDigest": "ad22290544b6c23f3e0cc657e4347f8d4fadd8b8d05491bbbc36008cef0f5614"
       },
-      "notes": "复审全部四维:绑定/降级/跨页链接契约、fieldRequiredState 共享派生、a11y 与 token 均达标,无新 finding。f-31f690a2dbaa 经人工明确授权判 wont-fix:全仓仅 FieldAnnotation 与 SidebarNav 两处 trailing-slash 归一化,唯一差异限于病态输入 '//',两组件无真实交互路径;抽 kit util 需新增 micro registry item 或跨组件依赖边,拓扑与维护成本高于一致性收益。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -621,13 +627,13 @@
     },
     "api-docs-event-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
-        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -640,7 +646,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "60fbe6f1b351602bc6d38b3ef1b7974bb1eb360a10abbf7554ceacf55b019d6d",
+        "scopeDigest": "65cce0116d92c14c9b729d4ea01a9b14b5ce0c7993bbf6438688e0943eb9b02b",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -654,18 +660,18 @@
           }
         ]
       },
-      "notes": "修复 EVENT 固定域 token 缺少 translate=no 的漏审项；属性经 SemanticBadge/UBadge 落到最终 DOM，focused test 锁定，neutral tone、镜像排版与单值词表边界保持成立，无 open finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T23:24:05.756Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
-        "headSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "kits/api-docs/components/LifecycleNotice.vue",
@@ -674,20 +680,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "d04c4f15c53f98577489430e789775c46e69d2debff99aa064fe5b41389c1147"
+        "scopeDigest": "d56424d39aff2d80bf0322cae90039c523784ef3926ac705ecc1db4adec87035"
       },
-      "notes": "round 2 复审:50 行 UAlert 薄包装契约稳定——preset 派生 color/icon/label、空白 title 回落 preset 文案、不可 dismiss、copy-agnostic;chrome-labels.spec.ts 锁定与 LifecycleBadge 的共词表行为,无 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -696,20 +702,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "68b0cd8dd52b170470088d722b175cd72f98d78aafe7c430acea3aa2c4c6b8b2"
+        "scopeDigest": "8916f572851efbc00cbc129e6d3d6f37ec483845703d408fc7b2f4c06d87f59b"
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
-        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -724,20 +730,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "5ce1ca70c129cbd5bc828dfdcbc403ce71129d4bfc2b25dda75a3e4dea11ac0e"
+        "scopeDigest": "ab40fb40fed6c0ecad9eb1fffd48969cd2a6ecb8a6cfd9b18a5504548ced5d30"
       },
-      "notes": "修复 endpoint path 与 webhook event identifier 缺少 translate=no 的漏审项；原生 code 节点直接保护 literal token，endpoint/webhook 两形态最终 DOM 属性测试通过，其余类型、outline、响应式与 a11y 契约无回归。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -750,25 +756,31 @@
           "kits/api-docs/components/CodeRail.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/composables/useExampleScenarioSelection.ts",
           "references/kits/api-docs/index.md",
+          "references/kits/api-docs/request-example.md",
+          "references/kits/api-docs/response-example.md",
           "tests/component/code-rail.spec.ts",
+          "tests/component/request-example.spec.ts",
+          "tests/component/response-example.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts",
+          "tests/component/use-example-scenario-selection.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "652dd02ba3522ce3a070461460af680e2b397f01ad66969fd742aba71728a196"
+        "scopeDigest": "f5c1bc4c5d6b87b9d364a2cb61bb4021c52646e9f0cf63f60b6ad2b73749586b"
       },
-      "notes": "完整复审 #95：RO/MO 触发的合帧测量收敛到共享 useRafTask，删除本地 frame id 与重复卸载清理，新增的无 rAF 同步 fallback 仅影响无观察者环境；内容优先重分配与公开契约未变，kit reference 坑位说明改指 useRafTask，focused tests 全绿。",
+      "notes": "复审 RequestExample / ResponseExample 的共享场景选择抽取：CodeRail 布局、内容优先重分配与响应式边界未改；两个示例组件保持相同受控/非受控契约，focused、全量 component、typecheck、build 与精确 consumer closure 均通过。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -777,7 +789,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "743bc50d60f800f27d536cf9200d0b42ec3a0734cee59bd3d1d823a55506b554",
+        "scopeDigest": "d1b38a3765448b062a46d7310ce73a86812b0c211d85e9b15f8cce3cd135194d",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -791,7 +803,7 @@
           }
         ]
       },
-      "notes": "完整复审 #95 对共享 API Docs reference 的增量（rAF 合帧坑位改写为指向共享 useRafTask）；该 owner 的源码、公开 API、交互与 a11y 契约均未改变，既有 focused tests 全绿。既有 finding 保持 resolved。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -804,13 +816,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 2,
-      "lastAuditedAt": "2026-08-15T15:23:52.928Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "14ef6e980878f46da867ca77abfb71ce40f62f33",
-        "headSha": "123dd7211ee239cc5ae3e4822f97ec922afb73a2",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -828,9 +840,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "7d9d3a8453cc67d541d7c29933d5a07e18dfa20381c9b18c728629007a5de09b"
+        "scopeDigest": "8db6ba99f0f591734debb257c1ee968b1034ed24abf1397539f432d85812cee9"
       },
-      "notes": "复审三段省略、ACK 三语义、schedule a11y 与 rich fact 显式 opt-in。人工确认 description/note 作为辅助说明始终纯文本，富文本经 fact.value format 显式开启；reference、类型注释与黑盒测试已固化该契约，无 open finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -843,13 +855,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "984c56c7dde590b6eb72f30dd6ef596a751726e0f3d8cebf0075f07355c262a4",
         "scope": [
           "AGENTS.md",
@@ -863,9 +875,9 @@
           "tests/component/sidebar-scenario-tags.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "b0159556a58009b9bdd8562bc3e1b4106e5a6216d6f8f6cb16a9d4db6d4a3d93"
+        "scopeDigest": "f0fa786da852e06e1f9ecb1ee1be973ea3a133e12e7be4c192d8262daf10cc09"
       },
-      "notes": "完整复审 #95：SidebarScenarioTags 场景标签的合帧重算收敛到共享 useRafTask，保留原测试/SSR 同步 fallback 语义；标签折叠测量与公开契约未变，focused tests 全绿。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-relation-source-path": {

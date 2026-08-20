@@ -68,45 +68,16 @@ const scenarios = computed(() => props.scenarios ?? [])
 // Prop presence distinguishes controlled usage from standalone usage, including
 // an explicitly bound undefined value. Decided once at mount (React-style):
 // switching between controlled and uncontrolled at runtime is not supported.
-// Uncontrolled state keeps the selected id stable across list reordering and
-// only resets when that id disappears.
 const controlled = Object.hasOwn(getCurrentInstance()?.vnode.props ?? {}, 'scenario')
-const localScenario = shallowRef<string | undefined>(scenarios.value[0]?.id)
-const scenario = computed(() => controlled ? props.scenario : localScenario.value)
-
-// The effective scenario is fully DERIVED: an unknown/missing id converges to
-// the first scenario without writing back or emitting — no update loops, no
-// duplicate events, SSR-safe (fallback is never persisted into the model).
-const current = computed<RequestScenario | undefined>(
-  () => scenarios.value.find(s => s.id === scenario.value) ?? scenarios.value[0],
-)
-
-// The select shows the CONVERGED id but only emits explicit user choices.
-const selected = computed<string | undefined>({
-  get: () => current.value?.id,
-  set: (id) => {
-    if (id === undefined) return
-    if (!controlled) localScenario.value = id
-    emit('update:scenario', id)
-  },
+const {
+  currentScenario: current,
+  selectedScenario: selected,
+} = useExampleScenarioSelection({
+  scenarios,
+  scenario: () => props.scenario,
+  controlled,
+  onSelect: id => emit('update:scenario', id),
 })
-
-// Only uncontrolled usage consumes localScenario; skip the bookkeeping otherwise.
-// Watching the derived id list (not the array reference) keeps the seam aligned
-// with ResponseExample: in-place mutations of a reactive array are seen too.
-// Pre-flush batching evaluates reverse/sort after their final array state, while
-// an id absent at the end of an update is discarded before the next render.
-if (!controlled) {
-  watch(
-    () => scenarios.value.map(s => s.id),
-    (ids) => {
-      if (localScenario.value === undefined || !ids.includes(localScenario.value)) {
-        localScenario.value = ids[0]
-      }
-    },
-    { flush: 'pre' },
-  )
-}
 
 const scenarioItems = computed(() =>
   scenarios.value.map(s => ({ label: s.label, value: s.id })),
