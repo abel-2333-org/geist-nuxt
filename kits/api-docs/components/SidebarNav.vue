@@ -344,6 +344,15 @@ function clear() {
   searchRef.value?.inputRef?.blur()
 }
 
+// Esc during IME composition cancels the composition, not the query. WebKit
+// fires that keydown with key 'Escape' and `isComposing: true`, so without the
+// guard a CJK user cancelling a candidate word would lose the whole query and
+// the field's focus along with it.
+function onSearchEsc(e: KeyboardEvent) {
+  if (e.isComposing) return
+  clear()
+}
+
 // --- Width resize ----------------------------------------------------------
 // The right-edge affordance mirrors the anatomy of Nuxt UI's own resize handle
 // (role="separator", ew-resize cursor, wide hit area) but is rendered locally:
@@ -491,7 +500,7 @@ onMounted(() => {
         variant="soft"
         class="w-full"
         :ui="{ base: 'rounded-sm' }"
-        @keydown.esc="clear"
+        @keydown.esc="onSearchEsc"
       >
         <template #trailing>
           <UButton
