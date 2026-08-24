@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-19T23:24:05.756Z",
+  "lastRunAt": "2026-08-20T23:25:41.600Z",
   "lastPicked": [
-    "api-docs-lifecycle-notice",
-    "api-docs-code-block",
-    "api-docs-response-example"
+    "api-docs-request-example",
+    "api-docs-sidebar-nav",
+    "api-docs-method-badge"
   ],
   "items": {
     "foundation-copy-button": {
@@ -353,29 +353,27 @@
       "findings": []
     },
     "api-docs-request-example": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
-        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
+        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
-          "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
-          "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "59d5342d3bc735d78a2cae3a34e1c847b04cfd1907b00f9f8027ff95943e3131"
+        "scopeDigest": "5f480e5770e3c48b4f01778ec5281b2a9e1f098e932e0e89091309248868af55"
       },
-      "notes": "scenario identity seam 已收敛到 kit composable；挂载时 prop presence 判定、未知受控 id 静默首项 fallback、非受控重排保留与移除后丢弃、显式选择单次 emit 均由 composable 与组件黑盒测试锁定。",
+      "notes": "Round 2 复审:场景选择已收敛到 useExampleScenarioSelection,受控/非受控契约、fallback 只派生不回写、单次 emit 均有黑盒测试锁定;USelect 带 aria-label,≤1 场景隐藏选择器;与 CodeBlock 契约(CodeVariant/ApiCodeLabels)及 reference 文档一致,无新 finding。",
       "findings": []
     },
     "api-docs-response-example": {
@@ -451,13 +449,13 @@
     },
     "api-docs-method-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
-        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
+        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -476,21 +474,21 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "8f1d6c6aaa05126559ca54d8e7208611f691c033c50b9205dbc390028ba97ca8",
+        "scopeDigest": "9952aa64e731754de90fed93fc7ae435692e6955ca61e9b04affaf836aa5a172",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 translate 属性落到可见 method badge。"
+            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发,使 translate 属性落到可见 method badge。"
           },
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 HttpMethodBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
+            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传,使 HttpMethodBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
           }
         ]
       },
-      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
+      "notes": "co-review:本轮功能改动触及其 scope 内的 SidebarNav.vue(搜索框 Esc 的 isComposing 守卫)与 sidebar-nav.md(对应 a11y 措辞),均不涉及 HttpMethodBadge 的归一化(trim+uppercase、空串 UNKNOWN)、methodPreset 色调映射、SemanticBadge 透传或 translate=no 链路;组件实现、registry 拓扑与公开行为不变,既有结论继续成立,无新 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -854,31 +852,38 @@
       ]
     },
     "api-docs-sidebar-nav": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
       "change": "modified",
-      "status": "verified",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
-        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
+        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
         "itemDigest": "984c56c7dde590b6eb72f30dd6ef596a751726e0f3d8cebf0075f07355c262a4",
         "scope": [
-          "AGENTS.md",
           "app/pages/kits/api-docs/sidebar-nav.vue",
+          "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useRafTask.ts",
+          "foundation/composables/useSplitPane.ts",
           "kits/api-docs/components/SidebarNav.vue",
           "kits/api-docs/internal/SidebarScenarioTags.vue",
-          "references/foundations/typography.md",
-          "references/kits/api-docs/index.md",
           "references/kits/api-docs/sidebar-nav.md",
-          "tests/component/sidebar-scenario-tags.spec.ts",
-          "tests/component/use-raf-task.spec.ts"
+          "tests/component/sidebar-nav.spec.ts",
+          "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "f0fa786da852e06e1f9ecb1ee1be973ea3a133e12e7be4c192d8262daf10cc09"
+        "scopeDigest": "be9c20b71286636efaad069887bf49ee4ad12ee8dbc741abd02cef0f0bec033a"
       },
-      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
-      "findings": []
+      "notes": "修复搜索框 Esc 缺 isComposing 守卫(IME 组字中按 Esc 会连整个查询一起清空并失焦,WebKit 组字取消的 keydown 带 key='Escape' + isComposing);同步 reference a11y 契约;新增 sidebar-nav.spec.ts 锁定此前无测试的文档化行为契约(搜索三轴匹配与命中/总数计数、live-region 播报、active 单源规则、CJK 板块 label slug 回退、aria-label 剥省略号、键盘调宽 clamp 与双击复位、resizable=false)。遗留 open finding:内联 resize 逻辑与 foundation useSplitPane/SplitPaneHandle 重复且持久化机制不一致,收敛属破坏性,交人工决策。",
+      "findings": [
+        {
+          "id": "f-12d73e8bc49d",
+          "severity": "medium",
+          "claim": null,
+          "evidence": "SidebarNav.vue 的 width resize(拖拽数学、clampWidth、键盘 ←/→/Home/End 步进、双击复位、持久化)与 foundation 的 useSplitPane + SplitPaneHandle 能力重复,且行为不一致:① 持久化用 localStorage 且在 onMounted 后读取——lg+ 桌面端持久宽度 ≠ defaultWidth 时,每次刷新先渲染 288px 再跳到持久宽度(useSplitPane 用 cookie 种子 useState,SSR 首帧即正确、无跳变,useCodeWrap 同款约定);② 内联版缺少 useSplitPane 已有的 Esc 取消拖拽回滚。收敛到 useSplitPane(视觉可保留局部 1px rule 手柄)是破坏性改动:widthStorageKey prop 公开语义即 localStorage(reference 与 gallery 文案均明言)、消费端已存宽度需迁移、registry 拓扑需新增 foundation-use-split-pane 依赖,故记 deferred 交人工决策。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-relation-source-path": {
       "round": 0,
