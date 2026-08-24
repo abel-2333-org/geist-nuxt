@@ -1,9 +1,9 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-20T23:25:41.600Z",
+  "lastRunAt": "2026-08-24T23:25:38.667Z",
   "lastPicked": [
-    "api-docs-request-example",
+    "api-docs-site-search",
     "api-docs-sidebar-nav",
     "api-docs-method-badge"
   ],
@@ -449,13 +449,13 @@
     },
     "api-docs-method-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
+      "lastAuditedAt": "2026-08-24T23:25:38.667Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
-        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "11b559c3fa03011c1dbed4c1d0511ef55e1bca34",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -474,7 +474,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "9952aa64e731754de90fed93fc7ae435692e6955ca61e9b04affaf836aa5a172",
+        "scopeDigest": "65fb5076af2e6ba03fcc4223b094c684619114c482da7b21fae314b121fdaa80",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -488,7 +488,7 @@
           }
         ]
       },
-      "notes": "co-review:本轮功能改动触及其 scope 内的 SidebarNav.vue(搜索框 Esc 的 isComposing 守卫)与 sidebar-nav.md(对应 a11y 措辞),均不涉及 HttpMethodBadge 的归一化(trim+uppercase、空串 UNKNOWN)、methodPreset 色调映射、SemanticBadge 透传或 translate=no 链路;组件实现、registry 拓扑与公开行为不变,既有结论继续成立,无新 finding。",
+      "notes": "co-review:本轮功能改动触及其 scope 内的 SiteSearch.vue(默认 placeholder 补结尾省略号),不涉及 HttpMethodBadge 的归一化(trim+uppercase、空串 UNKNOWN)、methodPreset 色调映射、SemanticBadge 透传或 translate=no 链路;组件实现、registry 拓扑与公开行为不变,既有结论继续成立,无新 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -771,14 +771,14 @@
       "findings": []
     },
     "api-docs-site-search": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-24T23:25:38.667Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
-        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "11b559c3fa03011c1dbed4c1d0511ef55e1bca34",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -787,7 +787,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "d1b38a3765448b062a46d7310ce73a86812b0c211d85e9b15f8cce3cd135194d",
+        "scopeDigest": "c8ede7a294109a0dd29595517f71d9a6bc2ddd5d864cbfb7af4db23452ade063",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -801,7 +801,7 @@
           }
         ]
       },
-      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
+      "notes": "默认 placeholder 'Search guides and endpoints' 补齐结尾省略号:web-design-guidelines Typography 要求 placeholder 以 … 结尾,Nuxt UI CommandPalette 自身默认文案(en locale 'Type a command or search…')、姊妹组件 SidebarNav 默认 'Search…' 与 gallery 用法均带省略号,该默认值是簇内唯一偏离;UCommandPalette input 无独立 aria-label、placeholder 即可访问名,与上游默认同形态,无读屏回归。评估后不改:Fuse 索引逐键重建(文档站语料规模下构建开销可忽略,且 search prop 存在时 asyncItems 引用逐键变化会使 memoization 失效,复杂度不划算);与 gallery-private DocsShell 共享的 tabindex 焦点交接三行微模式(用途与生命周期不同,抽取属投机抽象)。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -853,13 +853,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 2,
-      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
-      "change": "modified",
+      "lastAuditedAt": "2026-08-24T23:25:38.667Z",
+      "change": "none",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
-        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "11b559c3fa03011c1dbed4c1d0511ef55e1bca34",
         "itemDigest": "984c56c7dde590b6eb72f30dd6ef596a751726e0f3d8cebf0075f07355c262a4",
         "scope": [
           "app/pages/kits/api-docs/sidebar-nav.vue",
@@ -874,7 +874,7 @@
         ],
         "scopeDigest": "be9c20b71286636efaad069887bf49ee4ad12ee8dbc741abd02cef0f0bec033a"
       },
-      "notes": "修复搜索框 Esc 缺 isComposing 守卫(IME 组字中按 Esc 会连整个查询一起清空并失焦,WebKit 组字取消的 keydown 带 key='Escape' + isComposing);同步 reference a11y 契约;新增 sidebar-nav.spec.ts 锁定此前无测试的文档化行为契约(搜索三轴匹配与命中/总数计数、live-region 播报、active 单源规则、CJK 板块 label slug 回退、aria-label 剥省略号、键盘调宽 clamp 与双击复位、resizable=false)。遗留 open finding:内联 resize 逻辑与 foundation useSplitPane/SplitPaneHandle 重复且持久化机制不一致,收敛属破坏性,交人工决策。",
+      "notes": "open finding 重入复审:f-12d73e8bc49d(width resize 与 foundation useSplitPane/SplitPaneHandle 重复且持久化机制不一致)在本 base 上仍成立(localStorage 且 onMounted 后读取,lg+ 持久宽度 ≠ defaultWidth 时刷新先渲染 288px 再跳变;内联版缺 Esc 取消回滚)。修复已在 PR #105(abel/refactor-sidebar-nav-split-pane)在途:收敛到 useSplitPane、cookie-seeded useState、补 Escape 回滚并经官方 recorder 关闭该 finding,等人工评审合并;本轮不重复修复以免与在途 PR 冲突,finding 保持 open。其余文档化行为契约(搜索三轴过滤与命中/总数计数、active 单源规则、IME Esc 守卫、键盘调宽 clamp 与双击复位、场景标签测量式溢出)复核无回归。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
