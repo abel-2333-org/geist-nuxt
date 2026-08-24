@@ -50,7 +50,7 @@ const props = withDefaults(
     triggerLabel: 'Search docs',
     ariaLabel: undefined,
     modalTitle: 'Search documentation',
-    placeholder: 'Search guides and endpoints',
+    placeholder: 'Search guides and endpoints…',
     emptyLabel: 'No matching documentation',
     searchingLabel: 'Searching documentation…',
     searchErrorLabel: 'Search is temporarily unavailable. Try again later.',
