@@ -485,7 +485,7 @@
       "title": "SidebarNav",
       "description": "Searchable, resizable API documentation sidebar with width-aware scenario tags.",
       "verification": ["visual", "interaction", "responsive"],
-      "registryDependencies": ["geist-foundation", "api-docs-method-badge", "foundation-use-raf-task"],
+      "registryDependencies": ["geist-foundation", "api-docs-method-badge", "foundation-use-split-pane", "foundation-use-raf-task"],
       "files": [
         { "path": "kits/api-docs/components/SidebarNav.vue", "target": "app/components/SidebarNav.vue" },
         { "path": "kits/api-docs/internal/SidebarScenarioTags.vue", "target": "app/internal/SidebarScenarioTags.vue" }

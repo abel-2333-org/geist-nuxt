@@ -155,7 +155,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
           接口不严格遵循 REST、一个接口常服务多个业务场景，所以它<b class="font-medium text-toned">只出现一次</b>，
           行首是<b class="font-medium text-toned">请求方法色标</b>（GET/POST…，「怎么调」）、中间是用途名、行尾是<b class="font-medium text-toned">场景标签</b>（订阅、授权…，「用在哪」）。
           板块可同时展开、各带计数；顶部单一全局搜索跨所有板块过滤（聚焦时按 <UKbd value="/" /> 快速定位，同时匹配用途名、请求方法与场景标签），命中板块自动展开，
-          让子项很多的大板块（如 <span class="font-mono">DIRECT API</span>）也能被快速检索到。侧栏还可<b class="font-medium text-toned">拖拽右边缘调整宽度</b>，宽度记入 localStorage、刷新仍保留。
+          让子项很多的大板块（如 <span class="font-mono">DIRECT API</span>）也能被快速检索到。侧栏还可<b class="font-medium text-toned">拖拽右边缘调整宽度</b>，宽度通过 cookie 持久化、刷新仍保留且首屏稳定。
         </p>
       </div>
 
@@ -230,7 +230,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-move-horizontal" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">拖拽侧栏右边缘</b>可调整宽度（悬停边缘变紫、光标变双向箭头）；也可聚焦手柄后用 <UKbd value="←" /><UKbd value="→" /> 微调、双击复位。宽度记入 <code class="font-mono text-[0.8125rem]">localStorage</code>，刷新/重进仍保留。</span>
+                <span><b class="font-medium text-toned">拖拽侧栏右边缘</b>可调整宽度（悬停边缘变紫、光标变双向箭头）；拖拽时按 <UKbd value="esc" /> 可撤销，也可聚焦手柄后用 <UKbd value="←" /><UKbd value="→" /> 微调、双击复位。宽度通过 cookie 持久化，刷新/重进仍保留且不会在客户端挂载后跳宽。</span>
               </li>
             </ul>
           </div>

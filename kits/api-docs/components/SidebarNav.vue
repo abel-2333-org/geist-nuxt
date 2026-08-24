@@ -36,10 +36,10 @@ import SidebarScenarioTags from '../internal/SidebarScenarioTags.vue'
 //
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
-// to localStorage so a reader's preferred width survives reloads. Pointer drag
-// (mouse/touch/pen) + keyboard (←/→, Shift, Home/End) on a role="separator" affordance; double-click
-// resets to the default. Below lg the nav takes full container width. Opt out
-// with :resizable=false.
+// through the shared SSR-safe split-pane state. Pointer drag (mouse/touch/pen)
+// + keyboard (←/→, Shift, Home/End) on a role="separator" affordance;
+// double-click resets to the default and Escape cancels an active drag. Below
+// lg the nav takes full container width. Opt out with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's HttpMethodBadge:
 //   root        <nav> — chrome-less, full-height column; the owning layout sets
@@ -50,7 +50,7 @@ import SidebarScenarioTags from '../internal/SidebarScenarioTags.vue'
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (leading method badge
 //                       + purpose label + width-adaptive trailing scenario tags)
-//   resizer     right-edge separator, lg+ (pointer + keyboard, dbl-click resets), width → localStorage
+//   resizer     right-edge separator, lg+ (pointer + keyboard, dbl-click resets), width → cookie/useState
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -147,7 +147,7 @@ const props = withDefaults(
     minWidth?: number
     maxWidth?: number
     defaultWidth?: number
-    /** localStorage key the chosen width persists under. */
+    /** Cookie + useState key the chosen width persists under. */
     widthStorageKey?: string
     /** Accessible label for the resize handle. */
     resizeLabel?: string
@@ -354,69 +354,36 @@ function onSearchEsc(e: KeyboardEvent) {
 }
 
 // --- Width resize ----------------------------------------------------------
-// The right-edge affordance mirrors the anatomy of Nuxt UI's own resize handle
-// (role="separator", ew-resize cursor, wide hit area) but is rendered locally:
-// Nuxt UI's UDashboardResizeHandle is a reka-ui Primitive that does not forward
-// the pointer listeners our drag math needs, and its useResizable composable is
-// bound to the Dashboard SSR context. So the drag→width math lives here — kept
-// minimal: pointer drag, clamp, localStorage persistence, double-click reset.
-// SSR-safe: `width` starts at the default (server/client match), the persisted
-// value is read after mount.
-const width = ref(props.defaultWidth)
-const isResizing = ref(false)
+// The right-edge affordance mirrors the anatomy of Nuxt UI's resize handle
+// (role="separator", ew-resize cursor, wide hit area) but stays local so the kit
+// keeps its quiet 1px visual treatment. Behaviour belongs to the foundation
+// composable: cookie-seeded useState gives SSR and hydration the same width,
+// while one shared state machine owns clamp, drag cleanup and Escape rollback.
+const {
+  value: width,
+  dragging: isResizing,
+  startDrag,
+  nudge,
+  reset,
+} = useSplitPane({
+  key: props.widthStorageKey,
+  default: props.defaultWidth,
+  min: () => props.minWidth,
+  max: () => props.maxWidth,
+})
 
-function clampWidth(n: number): number {
-  return Math.min(props.maxWidth, Math.max(props.minWidth, Math.round(n)))
-}
-
-function persistWidth() {
-  try {
-    localStorage.setItem(props.widthStorageKey, String(width.value))
-  }
-  catch {
-    // Private mode / disabled storage — width just won't persist.
-  }
-}
-
-// Pointer Events (not mouse*) so the drag also works on touch/pen devices that
-// hit the lg+ breakpoint (e.g. an iPad in landscape). Pointer capture pins the
-// stream to the handle, so a fast drag that outruns the narrow hit area keeps
-// resizing until release; pointercancel (e.g. the browser reclaiming a touch
-// gesture) ends the drag cleanly through the same path.
+// Pointer Events (not mouse*) keep mouse/touch/pen on one path. useSplitPane's
+// window listeners retain the drag outside the narrow handle without pointer
+// capture and release all global listeners on up, cancel or scope disposal.
 function onResizeStart(e: PointerEvent) {
   if (!props.resizable) return
   if (e.pointerType === 'mouse' && e.button !== 0) return
-  e.preventDefault()
-  const handle = e.currentTarget as HTMLElement
-  isResizing.value = true
-  const startX = e.clientX
-  const startW = width.value
-  const onMove = (ev: PointerEvent) => {
-    width.value = clampWidth(startW + (ev.clientX - startX))
-  }
-  const onEnd = () => {
-    isResizing.value = false
-    persistWidth()
-    handle.removeEventListener('pointermove', onMove)
-    handle.removeEventListener('pointerup', onEnd)
-    handle.removeEventListener('pointercancel', onEnd)
-  }
-  try {
-    handle.setPointerCapture(e.pointerId)
-  }
-  catch {
-    // Capture can fail if the pointer is already gone; the drag just won't
-    // survive leaving the handle, which is a graceful degradation.
-  }
-  handle.addEventListener('pointermove', onMove)
-  handle.addEventListener('pointerup', onEnd)
-  handle.addEventListener('pointercancel', onEnd)
+  startDrag(e, { axis: 'x' })
 }
 
 // Double-click the handle to reset to the default width.
 function onResizeReset() {
-  width.value = props.defaultWidth
-  persistWidth()
+  reset()
 }
 
 // Keyboard resize on the focused separator: ←/→ nudge, Shift for a coarse
@@ -427,41 +394,24 @@ const RESIZE_STEP = 16
 const RESIZE_STEP_COARSE = 48
 function onResizeKey(e: KeyboardEvent) {
   if (!props.resizable) return
-  let next: number | null = null
   switch (e.key) {
     case 'ArrowLeft':
-      next = width.value - (e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
+      nudge(-1, e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
       break
     case 'ArrowRight':
-      next = width.value + (e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
+      nudge(1, e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
       break
     case 'Home':
-      next = props.minWidth
+      width.value = props.minWidth
       break
     case 'End':
-      next = props.maxWidth
+      width.value = props.maxWidth
       break
     default:
       return
   }
   e.preventDefault()
-  width.value = clampWidth(next)
-  persistWidth()
 }
-
-onMounted(() => {
-  if (!props.resizable) return
-  try {
-    const saved = localStorage.getItem(props.widthStorageKey)
-    if (saved !== null) {
-      const n = Number.parseInt(saved, 10)
-      if (Number.isFinite(n)) width.value = clampWidth(n)
-    }
-  }
-  catch {
-    // Ignore storage read failures.
-  }
-})
 </script>
 
 <template>
