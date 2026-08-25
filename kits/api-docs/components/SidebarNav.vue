@@ -372,7 +372,7 @@ const {
   reset,
 } = useSplitPane({
   key: props.widthStorageKey,
-  default: props.defaultWidth,
+  default: () => props.defaultWidth,
   min: () => props.minWidth,
   max: () => props.maxWidth,
 })
@@ -382,7 +382,6 @@ const {
 // capture and release all global listeners on up, cancel or scope disposal.
 function onResizeStart(e: PointerEvent) {
   if (!props.resizable) return
-  if (e.pointerType === 'mouse' && e.button !== 0) return
   startDrag(e, { axis: 'x' })
 }
 
@@ -409,7 +408,7 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
     :id="navId"
     :aria-label="ariaLabel"
     class="relative flex h-full min-h-0 flex-col overflow-hidden bg-elevated/40"
-    :class="[{ 'select-none': isResizing }, resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '']"
+    :class="resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : ''"
     :style="resizable ? { '--api-docs-nav-w': `${width}px` } : undefined"
   >
     <!-- Fixed column header; the menu body scrolls below it. The optional

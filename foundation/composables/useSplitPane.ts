@@ -19,8 +19,9 @@ import { toValue, type MaybeRefOrGetter } from 'vue'
 export interface UseSplitPaneOptions {
   /** Cookie + useState key, e.g. 'geist-api-rail-width'. */
   key: string
-  /** First-visit seed value. */
-  default: number
+  /** First-visit seed value; also the Enter/double-click reset target
+   *  (reactive allowed, so a prop-driven default stays live). */
+  default: MaybeRefOrGetter<number>
   /** Lower clamp (reactive allowed). */
   min?: MaybeRefOrGetter<number>
   /** Upper clamp (reactive allowed). */
@@ -39,9 +40,14 @@ export interface StartDragOptions {
 export function useSplitPane(options: UseSplitPaneOptions) {
   const cookie = useCookie<number | undefined>(options.key)
   // useState is the single source of truth; the cookie only seeds the very
-  // first initialization (matches the useCodeWrap pattern).
+  // first initialization (matches the useCodeWrap pattern). isFinite guards
+  // tampered cookies: useCookie's destr decode turns "nan"/"infinity" into
+  // real numbers, and NaN would survive clamping (NaN comparisons are false,
+  // and Object.is(NaN, NaN) keeps the re-clamp watcher from correcting it).
   const raw = useState<number>(options.key, () =>
-    typeof cookie.value === 'number' ? cookie.value : options.default,
+    typeof cookie.value === 'number' && Number.isFinite(cookie.value)
+      ? cookie.value
+      : toValue(options.default),
   )
 
   const clampValue = (v: number) => {
@@ -149,9 +155,9 @@ export function useSplitPane(options: UseSplitPaneOptions) {
     value.value = raw.value + delta * step
   }
 
-  /** Reset to the seed value. */
+  /** Reset to the (current) default value. */
   function reset() {
-    value.value = options.default
+    value.value = toValue(options.default)
   }
 
   onScopeDispose(stop)
