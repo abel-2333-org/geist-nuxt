@@ -230,7 +230,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-move-horizontal" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">拖拽侧栏右边缘</b>可调整宽度（悬停边缘变紫、光标变双向箭头）；拖拽时按 <UKbd value="esc" /> 可撤销，也可聚焦手柄后用 <UKbd value="←" /><UKbd value="→" /> 微调、双击复位。宽度通过 cookie 持久化，刷新/重进仍保留且不会在客户端挂载后跳宽。</span>
+                <span><b class="font-medium text-toned">拖拽侧栏右边缘</b>可调整宽度（悬停边缘变紫、光标变双向箭头）；拖拽时按 <UKbd value="esc" /> 可撤销，也可聚焦共用手柄后用 <UKbd value="←" /><UKbd value="→" /> 微调、按 <UKbd value="enter" /> 或双击复位。宽度通过 cookie 持久化，刷新/重进仍保留且不会在客户端挂载后跳宽。</span>
               </li>
             </ul>
           </div>

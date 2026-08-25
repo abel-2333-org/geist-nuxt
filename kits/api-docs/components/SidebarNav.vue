@@ -37,9 +37,9 @@ import SidebarScenarioTags from '../internal/SidebarScenarioTags.vue'
 // The nav is width-resizable (lg+ progressive enhancement): a drag handle on
 // the right edge sets the width, clamped to [minWidth, maxWidth] and persisted
 // through the shared SSR-safe split-pane state. Pointer drag (mouse/touch/pen)
-// + keyboard (←/→, Shift, Home/End) on a role="separator" affordance;
-// double-click resets to the default and Escape cancels an active drag. Below
-// lg the nav takes full container width. Opt out with :resizable=false.
+// + keyboard (←/→, Shift, Home/End, Enter) on the shared SplitPaneHandle;
+// Enter/double-click reset to the default and Escape cancels an active drag.
+// Below lg the nav takes full container width. Opt out with :resizable=false.
 //
 // Composed from Nuxt UI primitives + this kit's HttpMethodBadge:
 //   root        <nav> — chrome-less, full-height column; the owning layout sets
@@ -50,7 +50,7 @@ import SidebarScenarioTags from '../internal/SidebarScenarioTags.vue'
 //                              → content (a stack of item rows)
 //   item        ULink — guide (icon + label) or endpoint (leading method badge
 //                       + purpose label + width-adaptive trailing scenario tags)
-//   resizer     right-edge separator, lg+ (pointer + keyboard, dbl-click resets), width → cookie/useState
+//   resizer     SplitPaneHandle edge appearance, lg+ (pointer + keyboard), width → cookie/useState
 //
 // Self-contained per the kit slice convention: the nav data model travels
 // inline with the component; all copy is passed in via props (content-agnostic,
@@ -174,6 +174,13 @@ const props = withDefaults(
     resizeLabel: 'Resize sidebar',
   },
 )
+
+// `aria-controls` on the shared resize handle points back to the nav whose
+// width it changes. Preserve a consumer-provided root id; otherwise use Vue's
+// SSR-stable id so server HTML and hydration agree.
+const attrs = useAttrs()
+const generatedNavId = `${useId()}-sidebar-nav`
+const navId = computed(() => typeof attrs.id === 'string' && attrs.id ? attrs.id : generatedNavId)
 
 // ASCII slugs read nicely in ids, but a fully non-latin label (e.g. "批处理")
 // would slug to '' — colliding every such section on one empty id (duplicate
@@ -354,11 +361,9 @@ function onSearchEsc(e: KeyboardEvent) {
 }
 
 // --- Width resize ----------------------------------------------------------
-// The right-edge affordance mirrors the anatomy of Nuxt UI's resize handle
-// (role="separator", ew-resize cursor, wide hit area) but stays local so the kit
-// keeps its quiet 1px visual treatment. Behaviour belongs to the foundation
-// composable: cookie-seeded useState gives SSR and hydration the same width,
-// while one shared state machine owns clamp, drag cleanup and Escape rollback.
+// The foundation handle owns separator DOM, ARIA and keyboard intent; its edge
+// appearance preserves this kit's quiet 1px right rule. useSplitPane owns the
+// value, cookie persistence, clamp, drag cleanup and Escape rollback.
 const {
   value: width,
   dragging: isResizing,
@@ -381,36 +386,18 @@ function onResizeStart(e: PointerEvent) {
   startDrag(e, { axis: 'x' })
 }
 
-// Double-click the handle to reset to the default width.
-function onResizeReset() {
-  reset()
-}
-
-// Keyboard resize on the focused separator: ←/→ nudge, Shift for a coarse
-// step, Home/End jump to the min/max bounds. Mirrors the ARIA slider pattern
-// the separator advertises (aria-valuenow/min/max), so the handle is fully
-// operable without a pointer.
+// The shared handle reports semantic keyboard intent. SidebarNav keeps the
+// domain-specific pixel steps and bounds: Shift requests a coarse nudge;
+// Home/End jump to bounds; Enter and double-click both reset.
 const RESIZE_STEP = 16
 const RESIZE_STEP_COARSE = 48
-function onResizeKey(e: KeyboardEvent) {
-  if (!props.resizable) return
-  switch (e.key) {
-    case 'ArrowLeft':
-      nudge(-1, e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
-      break
-    case 'ArrowRight':
-      nudge(1, e.shiftKey ? RESIZE_STEP_COARSE : RESIZE_STEP)
-      break
-    case 'Home':
-      width.value = props.minWidth
-      break
-    case 'End':
-      width.value = props.maxWidth
-      break
-    default:
-      return
-  }
-  e.preventDefault()
+function onResizeStep(delta: -1 | 1, coarse: boolean) {
+  nudge(delta, coarse ? RESIZE_STEP_COARSE : RESIZE_STEP)
+}
+
+function onResizeJump(to: 'min' | 'max' | 'reset') {
+  if (to === 'reset') reset()
+  else width.value = to === 'min' ? props.minWidth : props.maxWidth
 }
 </script>
 
@@ -419,6 +406,7 @@ function onResizeKey(e: KeyboardEvent) {
        chrome-less lets the same component fill a docs shell or sit inside a
        framed standalone demo without double borders. -->
   <nav
+    :id="navId"
     :aria-label="ariaLabel"
     class="relative flex h-full min-h-0 flex-col overflow-hidden bg-elevated/40"
     :class="[{ 'select-none': isResizing }, resizable ? 'w-full lg:w-[var(--api-docs-nav-w)]' : '']"
@@ -621,37 +609,24 @@ function onResizeKey(e: KeyboardEvent) {
       </p>
     </div>
 
-    <!-- Right-edge resize handle. A wide invisible hit area (cursor-ew-resize,
-         matching Nuxt UI's own resize handle) wraps a 1px rule that thickens to
-         primary on hover / focus / while dragging; double-click resets.
-         role="separator" + aria-valuenow/min/max + tabindex give it the
-         accessible slider anatomy of UDashboardResizeHandle, but we render the
-         node ourselves because that component (a reka-ui Primitive) does not
-         forward the pointer listeners our drag math needs. Operable by pointer
-         drag (mouse/touch/pen via Pointer Events) and keyboard (←/→, Shift for
-         a coarse step, Home/End to the bounds). Pointer and keyboard share one
-         focus/interaction indicator —
-         the single rule thickens to primary — so there's never a second stray
-         outline line next to it. Colour only appears on interaction / focus, so
-         the resting edge stays as quiet as the rest of the chrome. -->
-    <div
+    <!-- Shared foundation separator in its quiet edge appearance. It owns the
+         ARIA surface and keyboard map; this kit supplies width values, pixel
+         steps and its lg+ absolute-edge placement. `max-lg:hidden` overrides
+         the handle's base flex display without duplicating its internals. -->
+    <SplitPaneHandle
       v-if="resizable"
-      role="separator"
-      aria-orientation="vertical"
-      :aria-label="resizeLabel"
-      :aria-valuenow="width"
-      :aria-valuemin="minWidth"
-      :aria-valuemax="maxWidth"
-      tabindex="0"
-      class="group/resize absolute inset-y-0 right-0 z-20 hidden w-2 cursor-ew-resize touch-none justify-end outline-none lg:flex"
-      @pointerdown="onResizeStart"
-      @dblclick="onResizeReset"
-      @keydown="onResizeKey"
-    >
-      <span
-        class="h-full w-px transition-colors group-hover/resize:w-0.5 group-hover/resize:bg-primary group-focus-visible/resize:w-0.5 group-focus-visible/resize:bg-primary"
-        :class="isResizing ? 'w-0.5 bg-primary' : 'bg-transparent'"
-      />
-    </div>
+      appearance="edge"
+      orientation="vertical"
+      :dragging="isResizing"
+      :label="resizeLabel"
+      :controls="navId"
+      :value="width"
+      :min="minWidth"
+      :max="maxWidth"
+      class="absolute inset-y-0 right-0 z-20 max-lg:hidden"
+      @drag-start="onResizeStart"
+      @step="onResizeStep"
+      @jump="onResizeJump"
+    />
   </nav>
 </template>

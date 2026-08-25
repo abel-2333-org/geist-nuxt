@@ -196,9 +196,14 @@ describe('SidebarNav resize handle', () => {
     await mountNav({ widthStorageKey: 'sidebar-nav-spec-resize' })
     const sep = wrapper!.find('[role="separator"]')
     expect(sep.attributes('aria-valuenow')).toBe('288')
+    const controlled = wrapper!.get(`[id="${sep.attributes('aria-controls')}"]`)
+    expect(controlled.element.tagName).toBe('NAV')
 
     await sep.trigger('keydown', { key: 'ArrowRight' })
     expect(sep.attributes('aria-valuenow')).toBe('304')
+
+    await sep.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+    expect(sep.attributes('aria-valuenow')).toBe('352')
 
     await sep.trigger('keydown', { key: 'End' })
     expect(sep.attributes('aria-valuenow')).toBe('460')
@@ -208,6 +213,10 @@ describe('SidebarNav resize handle', () => {
     await sep.trigger('keydown', { key: 'Home' })
     expect(sep.attributes('aria-valuenow')).toBe('220')
 
+    await sep.trigger('keydown', { key: 'Enter' })
+    expect(sep.attributes('aria-valuenow')).toBe('288')
+
+    await sep.trigger('keydown', { key: 'End' })
     await sep.trigger('dblclick')
     expect(sep.attributes('aria-valuenow')).toBe('288')
   })
