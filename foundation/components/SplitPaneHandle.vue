@@ -6,19 +6,25 @@
 // drag math and value ownership live in the parent (via `useSplitPane`); this
 // component only reports intent through events.
 //
-// Anatomy:  focusable separator → centered hairline (track) + grip pill
+// Anatomy:  focusable separator → hairline track + optional grip pill
 // State:    rest / hover / dragging / focus-visible / disabled
 // A11y:     role="separator", aria-orientation, aria-valuenow/min/max,
 //           aria-label; keyboard: axis arrows nudge, Home/End jump to bounds,
 //           Enter resets. focus-visible ring is the primary outline (never
-//           removed). State is never color-only — grip shape + resize cursor
+//           removed) in the default grip appearance. The quiet edge appearance
+//           uses its own 1px→2px primary rule as the single focus indicator.
+//           State is never color-only — thickness/grip shape + resize cursor
 //           carry it too.
+
+type HandleAppearance = 'grip' | 'edge'
 
 const props = withDefaults(
   defineProps<{
     /** Orientation of the divider LINE: 'vertical' separates left/right,
      *  'horizontal' separates top/bottom. */
     orientation?: 'vertical' | 'horizontal'
+    /** `grip` = centered divider + pill; `edge` = quiet outer-edge hairline. */
+    appearance?: HandleAppearance
     /** Inert spacer (no grip, no cursor, not focusable) — used when the split
      *  has no room to move (content fits). */
     disabled?: boolean
@@ -36,6 +42,7 @@ const props = withDefaults(
   }>(),
   {
     orientation: 'vertical',
+    appearance: 'grip',
     disabled: false,
     dragging: false,
   },
@@ -44,8 +51,8 @@ const props = withDefaults(
 const emit = defineEmits<{
   /** Pointer drag begins — parent wires this into useSplitPane.startDrag. */
   (e: 'dragStart', event: PointerEvent): void
-  /** Keyboard nudge; delta is -1 (Left/Up) or +1 (Right/Down). */
-  (e: 'step', delta: -1 | 1): void
+  /** Keyboard nudge; `coarse` reflects the Shift modifier. */
+  (e: 'step', delta: -1 | 1, coarse: boolean): void
   /** Jump to a bound or reset (Home / End / Enter). */
   (e: 'jump', to: 'min' | 'max' | 'reset'): void
 }>()
@@ -69,7 +76,7 @@ function onKeydown(e: KeyboardEvent) {
   if (props.disabled) return
   const delta = arrowStep(e.key)
   if (delta !== undefined) {
-    emit('step', delta)
+    emit('step', delta, e.shiftKey)
     e.preventDefault()
     return
   }
@@ -100,13 +107,21 @@ function onKeydown(e: KeyboardEvent) {
     :aria-valuemin="disabled ? undefined : min"
     :aria-valuemax="disabled ? undefined : max"
     :tabindex="disabled ? undefined : 0"
-    class="group relative flex shrink-0 touch-none items-center justify-center rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    class="group/handle flex shrink-0 touch-none outline-none"
     :class="[
       // Cross-axis size is fixed; the MAIN axis (height for vertical, width for
       // horizontal) is left to the consumer so it can fill its track OR be a
       // pinned viewport-height strip. Vertical defaults to self-stretch (fills
       // the flex row) unless the consumer passes its own height/self-*.
-      orientation === 'vertical' ? 'w-3' : 'h-3 w-full',
+      appearance === 'edge'
+        ? orientation === 'vertical'
+          ? 'w-2 items-center justify-end'
+          : 'h-2 w-full items-end justify-center'
+        : [
+            'relative',
+            orientation === 'vertical' ? 'w-3' : 'h-3 w-full',
+            'items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+          ],
       disabled ? '' : orientation === 'vertical' ? 'cursor-col-resize' : 'cursor-row-resize',
     ]"
     @pointerdown="onPointerdown"
@@ -117,7 +132,7 @@ function onKeydown(e: KeyboardEvent) {
          (Nuxt UI has no bg-border; --ui-border is a border color). Hidden when
          inert. -->
     <span
-      v-if="!disabled"
+      v-if="!disabled && appearance === 'grip'"
       aria-hidden="true"
       class="absolute transition-colors duration-150 ease-out"
       :class="[
@@ -130,12 +145,28 @@ function onKeydown(e: KeyboardEvent) {
          keyboard focus (group-focus-visible) so keyboard users still see the
          affordance. -->
     <span
-      v-if="!disabled"
+      v-if="!disabled && appearance === 'grip'"
       aria-hidden="true"
-      class="relative rounded-full opacity-0 transition duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+      class="relative rounded-full opacity-0 transition duration-150 ease-out group-hover/handle:opacity-100 group-focus-visible/handle:opacity-100"
       :class="[
         orientation === 'vertical' ? 'h-6 w-1' : 'h-1 w-6',
-        dragging ? 'bg-primary opacity-100' : 'bg-accented group-hover:bg-primary',
+        dragging ? 'bg-primary opacity-100' : 'bg-accented group-hover/handle:bg-primary',
+      ]"
+    />
+    <!-- Quiet edge appearance — used when the owning surface already supplies
+         its own frame. The rule is transparent at rest, then becomes primary
+         and doubles in thickness for hover, focus-visible and active drag. -->
+    <span
+      v-if="!disabled && appearance === 'edge'"
+      aria-hidden="true"
+      class="transition-colors duration-150 ease-out"
+      :class="[
+        orientation === 'vertical'
+          ? 'h-full w-px group-hover/handle:w-0.5 group-focus-visible/handle:w-0.5'
+          : 'h-px w-full group-hover/handle:h-0.5 group-focus-visible/handle:h-0.5',
+        dragging
+          ? orientation === 'vertical' ? 'w-0.5 bg-primary' : 'h-0.5 bg-primary'
+          : 'bg-transparent group-hover/handle:bg-primary group-focus-visible/handle:bg-primary',
       ]"
     />
   </div>

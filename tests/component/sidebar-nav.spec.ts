@@ -6,7 +6,7 @@
 // labels fall back to the label itself instead of colliding on an empty slug,
 // Esc clears the query but never while an IME composition is being cancelled,
 // and the resize separator is keyboard-operable within [min, max].
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { nextTick } from 'vue'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
@@ -17,7 +17,24 @@ let wrapper: VueWrapper | undefined
 afterEach(() => {
   wrapper?.unmount()
   wrapper = undefined
+  vi.unstubAllGlobals()
 })
+
+function pointer(type: string, pointerId: number, clientX: number): PointerEvent {
+  let event: Event
+  try {
+    event = new PointerEvent(type, { pointerId, clientX, bubbles: true, cancelable: true })
+  }
+  catch {
+    event = new Event(type, { bubbles: true, cancelable: true })
+  }
+  for (const [key, value] of Object.entries({ pointerId, clientX })) {
+    if ((event as unknown as Record<string, unknown>)[key] !== value) {
+      Object.defineProperty(event, key, { value })
+    }
+  }
+  return event as PointerEvent
+}
 
 const groups = [
   {
@@ -179,9 +196,14 @@ describe('SidebarNav resize handle', () => {
     await mountNav({ widthStorageKey: 'sidebar-nav-spec-resize' })
     const sep = wrapper!.find('[role="separator"]')
     expect(sep.attributes('aria-valuenow')).toBe('288')
+    const controlled = wrapper!.get(`[id="${sep.attributes('aria-controls')}"]`)
+    expect(controlled.element.tagName).toBe('NAV')
 
     await sep.trigger('keydown', { key: 'ArrowRight' })
     expect(sep.attributes('aria-valuenow')).toBe('304')
+
+    await sep.trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+    expect(sep.attributes('aria-valuenow')).toBe('352')
 
     await sep.trigger('keydown', { key: 'End' })
     expect(sep.attributes('aria-valuenow')).toBe('460')
@@ -191,6 +213,10 @@ describe('SidebarNav resize handle', () => {
     await sep.trigger('keydown', { key: 'Home' })
     expect(sep.attributes('aria-valuenow')).toBe('220')
 
+    await sep.trigger('keydown', { key: 'Enter' })
+    expect(sep.attributes('aria-valuenow')).toBe('288')
+
+    await sep.trigger('keydown', { key: 'End' })
     await sep.trigger('dblclick')
     expect(sep.attributes('aria-valuenow')).toBe('288')
   })
@@ -198,5 +224,27 @@ describe('SidebarNav resize handle', () => {
   it('renders no separator when resizable is off', async () => {
     await mountNav({ resizable: false })
     expect(wrapper!.find('[role="separator"]').exists()).toBe(false)
+  })
+
+  it('restores the pre-drag width when Escape cancels a pointer resize', async () => {
+    let frame: FrameRequestCallback | undefined
+    vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
+      frame = callback
+      return 1
+    }))
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+
+    await mountNav({ widthStorageKey: 'sidebar-nav-spec-escape' })
+    const sep = wrapper!.find('[role="separator"]')
+    sep.element.dispatchEvent(pointer('pointerdown', 1, 288))
+    window.dispatchEvent(pointer('pointermove', 1, 336))
+    frame?.(0)
+    await nextTick()
+    expect(sep.attributes('aria-valuenow')).toBe('336')
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+    expect(sep.attributes('aria-valuenow')).toBe('288')
+    expect(document.body.style.cursor).toBe('')
   })
 })

@@ -59,8 +59,15 @@ describe('SplitPaneHandle keyboard map', () => {
     })
 
     await wrapper.get('div').trigger('keydown', { key })
-    expect(wrapper.emitted('step')).toEqual([[delta]])
+    expect(wrapper.emitted('step')).toEqual([[delta, false]])
     expect(wrapper.emitted('jump')).toBeUndefined()
+  })
+
+  it('reports Shift as a coarse nudge without owning the step size', async () => {
+    const wrapper = await mountSuspended(SplitPaneHandle, { props: handleProps })
+
+    await wrapper.get('div').trigger('keydown', { key: 'ArrowRight', shiftKey: true })
+    expect(wrapper.emitted('step')).toEqual([[1, true]])
   })
 
   it.each([
@@ -122,6 +129,25 @@ describe('SplitPaneHandle pointer intent', () => {
     const grip = wrapper.findAll('span[aria-hidden="true"]').at(-1)!
     expect(grip.classes()).toContain('bg-primary')
     expect(grip.classes()).toContain('opacity-100')
+  })
+})
+
+describe('SplitPaneHandle edge appearance', () => {
+  it('keeps one quiet edge rule and no grip pill', async () => {
+    const wrapper = await mountSuspended(SplitPaneHandle, {
+      props: { ...handleProps, appearance: 'edge' as const },
+    })
+    const root = wrapper.get('div')
+    const rules = wrapper.findAll('span[aria-hidden="true"]')
+
+    expect(root.classes()).toContain('w-2')
+    expect(root.classes()).not.toContain('relative')
+    expect(rules).toHaveLength(1)
+    expect(rules[0]!.classes()).toContain('bg-transparent')
+
+    await wrapper.setProps({ dragging: true })
+    expect(rules[0]!.classes()).toContain('w-0.5')
+    expect(rules[0]!.classes()).toContain('bg-primary')
   })
 })
 

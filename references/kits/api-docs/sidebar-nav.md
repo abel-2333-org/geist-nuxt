@@ -1,6 +1,6 @@
 # SidebarNav `<SidebarNav>`
 
-文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块可按用途命名端点链接。同一接口若服务多个通用场景（例如批处理、实时查询），在导航中**只出现一次**：行首是**请求方法色标**（单个动词，「怎么调」）、中间是用途名、行尾是**场景标签**（「用在哪」）——菜单同时讲清「这个接口怎么调、用来干什么」，而不必按场景把它拆成多条。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽（mono）。分型只靠排版承载，chrome 颜色留给 active 态（方法色标自带其 tone），避免整列喧闹。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦，**同时匹配用途名、请求方法与场景标签**，输入场景名或方法名即可浮出对应接口），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。侧栏还**可拖拽右边缘调整宽度**，宽度记入 localStorage、刷新仍保留。至于**全站全文搜索**（`⌘K`）则属于 app 顶栏、与侧栏就地过滤不同层级，不并排堆在侧栏里（见下方「就地过滤 vs 全站搜索」）。
+文档 / 开发者门户的**侧边栏导航**：一个菜单容纳多个**可折叠板块**，而各板块指向的页面性质差异很大——「指南」板块是文字链接，「接口」板块可按用途命名端点链接。同一接口若服务多个通用场景（例如批处理、实时查询），在导航中**只出现一次**：行首是**请求方法色标**（单个动词，「怎么调」）、中间是用途名、行尾是**场景标签**（「用在哪」）——菜单同时讲清「这个接口怎么调、用来干什么」，而不必按场景把它拆成多条。**两条正交手段让两个世界界限分明**：① **分组层**把板块归入带 eyebrow 小标题的分组（如「文档」「API 参考」），组间有分隔线；② **板块分型**（`kind`）驱动板块头样式——`guide` 型是柔和 sans 句式，`endpoints` 型是大写等宽（mono）。分型只靠排版承载，chrome 颜色留给 active 态（方法色标自带其 tone），避免整列喧闹。板块可**同时展开**、各带一个**计数**，顶部**单一全局搜索**跨所有板块过滤（`/` 聚焦，**同时匹配用途名、请求方法与场景标签**，输入场景名或方法名即可浮出对应接口），因此某个子项很多的大板块也能被快速检索到、不必滚动翻找。侧栏还**可拖拽右边缘调整宽度**，宽度通过 cookie 持久化、刷新仍保留且服务端首屏与客户端状态一致。至于**全站全文搜索**（`⌘K`）则属于 app 顶栏、与侧栏就地过滤不同层级，不并排堆在侧栏里（见下方「就地过滤 vs 全站搜索」）。
 
 > 真源在 `kits/api-docs/components/SidebarNav.vue`；registry 扁平复制公共入口到 `app/components/SidebarNav.vue`，内部场景标签 helper 复制到 `app/internal/SidebarScenarioTags.vue` 并由入口显式导入。模板名稳定为 `<SidebarNav>`。数据无关：导航数据模型内联随组件走，所有 chrome 文案经 props 注入（i18n-ready）。本文所说“全局搜索”仅指跨本侧栏全部板块的树内过滤；整站搜索统一称为 `SiteSearch`。
 
@@ -20,7 +20,7 @@ nav (landmark, 全高无外框列 + 自身滚动区，可拖拽调宽)
 │        └─ content  ── item 列表（stretched-link：ULink 覆盖层 + pointer-events-none 内容层为兄弟），左侧一条中性 border 缩进
 │           ├─ 指南项：可选 icon + label
 │           └─ 接口项：前置方法色标（HttpMethodBadge，定宽槽对齐）+ 用途名 label（sans）+ 后置场景标签簇（SidebarScenarioTags：测量真溢出，能放几个铺几个、余下折 +N/计数 chip，溢出触发器是浮回可点的 popover button）（+ 可选尾部 badge）
-└─ resizer  ── 右边缘 role="separator" 拖拽手柄（lg+ 显示；悬停/聚焦/拖拽时变紫 1px→2px；指针拖拽（鼠标/触控/触控笔）、键盘 ←→/Home/End、双击复位）
+└─ resizer  ── SplitPaneHandle edge 形态（lg+ 显示；悬停/聚焦/拖拽时变紫 1px→2px；指针拖拽、键盘 ←→/Home/End、Enter/双击复位）
 ```
 
 板块**多开**（各自独立开合，适合边看边对照）；菜单再长也只在 `nav` 内部滚动，不影响页面布局。搜索时空分组自动隐藏。组件根只提供 `h-full` 列和内部表面，不拥有外框、圆角或视口高度；standalone demo / docs shell 的父布局负责这些 chrome，避免嵌套时出现双边框。
@@ -47,7 +47,7 @@ nav (landmark, 全高无外框列 + 自身滚动区，可拖拽调宽)
 | `resizable` | `boolean` | 是否允许拖拽右边缘调宽，默认 `true`。为 `false` 时不加宽度、不渲染手柄 |
 | `minWidth` / `maxWidth` | `number` | 宽度上下限（px），默认 `220` / `460`，拖拽与键盘都会 clamp 到此区间 |
 | `defaultWidth` | `number` | 无持久值时的初始宽度（px），默认 `288`；双击手柄复位到它 |
-| `widthStorageKey` | `string` | 宽度持久化的 localStorage 键，默认 `api-docs-sidebar-width` |
+| `widthStorageKey` | `string` | 宽度持久化 key（cookie + `useState`），默认 `api-docs-sidebar-width` |
 | `resizeLabel` | `string` | 拖拽手柄的 aria-label，默认 `Resize sidebar` |
 
 ## Slots
@@ -96,7 +96,7 @@ interface SidebarNavGroup {
 - **就地过滤 vs 全站搜索是两件正交的事，靠层级区分而非并排堆叠**：本组件只做**导航树内就地过滤**（顶部 `UInput`，收窄结构化的导航项 label、method 与 scenario）。全站 `⌘K` 搜索由 `<SiteSearch>` 在 app 顶栏承担：静态 groups 可由本导航 ViewModel 派生，异步 `search` 可接消费项目自己的正文索引。消费项目也可在 app 层改用 Content 原生搜索；两种方式都不应焊进 SidebarNav 或塞进其 `#header`。
 - **菜单自身是滚动区，外部决定高度**：`nav` 用 `h-full min-h-0`，顶部 search 固定、下方 `overflow-y-auto`。父布局必须给侧栏区域明确高度或让它处于可解析的全高 grid/flex track；边框与圆角也由父布局拥有。
 - **方法色标前置定宽、用途名让路、场景标签测量式溢出后置**：方法色标放在 `w-14` 定宽槽里 leading，故不论动词是 `GET` 还是 `DELETE`，各行用途名的起始 x 都对齐；用途名是 `shrink truncate` 且有 `min-w-16` 保底——它**让路**给标签而非独占剩余空间，同时保住可读地板；场景标签簇 `SidebarScenarioTags` 是 `flex-1`，接住用途名让出的空间。**标签簇做测量式溢出（responsive overflow），而非按断点猜**：组件内一个 `aria-hidden` 的隐藏测量层渲染全部标签取其真实像素宽，配合 `ResizeObserver` 观察自身分到的宽度，贪心算出「能放几个整标签」——放不下的折 `+N`（按隐藏数量的数字位数测量并预留其真实宽度），连一个都放不下才收成**计数 chip**（`i-lucide-tag` + 场景总数）。**fit 数学与渲染共用自然宽度**：隐藏测量层不设 `max-w-28`（否则超长标签的 `offsetWidth` 被夹到 112px，贪心以为它「放得下」、折叠判定失真），已完成测量的可见标签同样按自然宽度渲染——贪心已证明它放得下，整体平铺、不截断；`max-w-28` 只在测量完成前的确定性默认（SSR/首帧）兜底，防止极端长标签在预算未知时撑破行。两侧口径一致后，超长标签要么整个放得下、完整平铺，要么折进 `+N`/计数 chip——绝不平铺成被截断的省略号标签（那种 chip 信息为零，且因「放下了」而没有 popover 可揭示全文），其全名经 popover 与 `sr-only` 仍可达。因此它**与数据无关**：2 个短标签还是 8 个长标签、中文还是拉丁文都精确自适应；侧栏够宽时全部场景平铺，拖窄时逐个让位、绝不出现被 `truncate` 挤成零字符的空标签，和拖拽调宽形成正反馈。**折叠项的揭示用 `click` 态 `UPopover` 而非 tooltip**：`+N` / 计数 chip 是一个可聚焦的 `<button>` 触发器，tap / 点击 / Enter 三端都能打开列出全部场景的浮层（tooltip 在触摸端不触发、且套在非交互 badge 上键盘也够不到，故不合适——见 `components/overlays.md`）；`sr-only` 全量列表再兜底屏幕阅读器。**SSR 安全**：测量前渲染确定性默认（首标签 + `+N`），`onMounted` 后再测量精修，无 hydration 失配。指南行无方法时改由 `icon` 占前置位。
-- **宽度可拖拽、记 localStorage（lg+ 渐进增强）**：右边缘一个 `role="separator"` 手柄，走 **Pointer Events**（鼠标/触控/触控笔统一，lg+ 的 iPad 横屏也能拖），`pointerdown` 后 `setPointerCapture` 把指针流钉在手柄上（快速拖拽甩出命中区也不断开），`pointerup`/`pointercancel` 落定并写入 `localStorage`。宽度经 `clampWidth` 夹在 `[minWidth, maxWidth]`。键盘等价可操作（`←/→` 微调、`Shift` 粗调、`Home/End` 跳到上下限），双击复位。手柄静息透明、仅在 hover/focus/拖拽时显紫，静息边缘和其余 chrome 一样安静。**调宽是桌面(`lg+`)的渐进增强**：手柄 `hidden lg:flex`，宽度也只在 `lg+` 应用——根节点用 `w-full lg:w-[var(--api-docs-nav-w)]`（`width` 经 CSS 变量注入），故小屏侧栏取**满宽跟随父容器、绝不横向溢出**,桌面才吃固定像素宽。**SSR 安全**：`width` 初值 = `defaultWidth`（服务端/客户端一致，无 hydration 失配），持久值在 `onMounted` 后读取。`:resizable="false"` 可整体关闭（不加宽度、不渲染手柄）。
+- **宽度可拖拽、cookie 持久化（lg+ 渐进增强）**：右边缘复用 foundation `<SplitPaneHandle appearance="edge">`，由它统一提供 `role="separator"`、ARIA 关系与 pointer/keyboard intent；`SidebarNav` 只定义像素步长与桌面布局。`useSplitPane` 的 window 级 pointer listeners 让快速拖拽离开窄命中区后仍连续，`pointerup` / `pointercancel` 统一清理；拖拽时按 `Escape` 会回滚到拖拽前宽度。宽度夹在 `[minWidth, maxWidth]`，键盘等价可操作（`←/→` 微调、`Shift` 粗调、`Home/End` 跳到上下限、`Enter` 复位），双击同样复位。手柄静息透明、仅在 hover/focus/拖拽时显紫，静息边缘和其余 chrome 一样安静。**调宽是桌面(`lg+`)的渐进增强**：手柄在 `lg` 以下隐藏，宽度也只在 `lg+` 应用——根节点用 `w-full lg:w-[var(--api-docs-nav-w)]`，故小屏侧栏取**满宽跟随父容器、绝不横向溢出**。**SSR 安全**：`useCookie` 在服务端播种共享 `useState`，同一持久值参与服务端首屏与客户端 hydration；handle 的 `aria-controls` 指向 SSR-stable 的 nav id。`:resizable="false"` 可整体关闭。从旧版 copy-in 升级时，原 localStorage 宽度不会迁移，用户会一次性回到 `defaultWidth`，之后由 cookie 继续持久化。
 - **折叠动画走 Nuxt UI `UCollapsible` 默认**：不覆盖 `ui.content`，直接复用主题内建的 `collapsible-down/up` 动画，`prefers-reduced-motion` 由 foundation 全局样式处理。
 
 ## 状态（state model）
@@ -105,7 +105,7 @@ interface SidebarNavGroup {
 - item：default / hover / **active（`aria-current="page"`）** / `focus-visible`。active 由组件内 `effectiveActive` 单源计算并同时驱动背景、文字与 `aria-current`：显式 `item.active` 最优先；缺省时纯内部路径按 `route.path` 精确匹配自推断；**任何含 `#` 的 `to`（裸 hash 或路径+hash）缺省时一律不自推断**——它们仍是正常的内部/页内链接（跳转不受影响），但 router 的 active 匹配不比较 hash，若放任自推断，路径+hash 的 item 会整页同亮、裸 hash 的 item 永远不亮，所以锚点类导航（docs-shell 形态）必须由页面层按 `route.hash`/`route.params` 计算并显式传 `item.active`。
 - 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
 - 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
-- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
+- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `useSplitPane` 在 `document.body` 锁定文本选择和 resize cursor，结束、取消或 scope dispose 时统一恢复。
 
 ## Accessibility（无障碍）
 
@@ -114,7 +114,7 @@ interface SidebarNavGroup {
 - **过滤结果用 `aria-live="polite"` 播报**：过滤是静默重写列表，故一个 `role="status"` 的 `sr-only` 区域播报「找到 N 个匹配结果」或「没有与"…"匹配的结果」；空 query 时不播报，闲时浏览保持安静。
 - 方法色标（`HttpMethodBadge`）文字即动词（GET/POST…），颜色只是**强化**、非唯一信号；输入会先 trim + uppercase，空串/纯空白显示 neutral `UNKNOWN`，未知非空 token（如过渡态 `EVENT`）保留规范化后的 token 文本并走 neutral fallback。场景标签文字（批处理/实时查询…）本身即可访问名，`sr-only` 再兜底全量场景，折叠项的 popover 触发器有 `aria-label`（文案由 `scenarioOverflowLabel` 注入，默认 `View all N scenarios`）。
 - 站内链接一律 `ULink`（客户端路由 + 预取），**不手写 `<a>`**；`aria-current="page"` 不依赖 ULink 自动生成，而是由组件内 `effectiveActive` 显式绑定（与背景、文字同源，见「State model」）。**行采用 stretched-link 结构**：`ULink` 是铺满整行的绝对定位覆盖层（承载点击/焦点/hover 背景、`aria-label` = 接口名），可见行内容是它的**兄弟**、`pointer-events-none` 浮于其上，仅场景簇的 popover 触发器 `pointer-events-auto` 浮回可点。这样 `<button>` 不再嵌在 `<a>` 内（非法 HTML + 会误触发导航），整行可点导航、点 `+N` 只开浮层。
-- 调宽手柄是 `role="separator"` + `aria-orientation="vertical"` + `aria-label`，并暴露 `aria-valuenow/min/max`（当前/上/下限宽度）；`tabindex="0"` 可聚焦，`←/→/Home/End` 键盘操作，与拖拽等价。
+- 调宽手柄由 `SplitPaneHandle` 提供 `role="separator"` + `aria-orientation="vertical"` + `aria-label` + 指向 nav 的 `aria-controls`，并暴露 `aria-valuenow/min/max`；`tabindex="0"` 可聚焦，`←/→/Home/End/Enter` 键盘操作，与拖拽等价。
 - 键盘：`/` 聚焦搜索（正在输入 / IME 组字时不抢焦），`Esc` 清空并失焦（IME 组字中按 `Esc` 只取消组字、不动查询——WebKit 会带 `isComposing` 触发该 keydown，组件已守卫）；交互元素 `focus-visible` 显示紫环。**例外**：调宽手柄不套紫环——它复用自身那条竖线作为唯一的聚焦/交互指示（focus 时与 hover/拖拽一样变粗变紫），因此鼠标与键盘不会在边缘各画一条线。
 
 ## 用法

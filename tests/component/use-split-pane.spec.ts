@@ -28,6 +28,44 @@ function pointer(type: string, pointerId: number, clientX: number): PointerEvent
   return event as PointerEvent
 }
 
+describe('useSplitPane persisted seed', () => {
+  it('falls back to the default when the cookie is not a finite number', async () => {
+    // useCookie's destr decode turns a tampered "nan" cookie into a real NaN,
+    // which would otherwise survive clamping and poison the width.
+    document.cookie = 'test-nan-seed=nan'
+
+    let pane: ReturnType<typeof useSplitPane> | undefined
+    const Host = defineComponent({
+      setup() {
+        pane = useSplitPane({ key: 'test-nan-seed', default: 288, min: 220, max: 460 })
+        return () => h('div')
+      },
+    })
+    wrapper = await mountSuspended(Host)
+
+    expect(pane!.value.value).toBe(288)
+    document.cookie = 'test-nan-seed=; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  })
+
+  it('resets to the current value of a getter default', async () => {
+    let currentDefault = 300
+    let pane: ReturnType<typeof useSplitPane> | undefined
+    const Host = defineComponent({
+      setup() {
+        pane = useSplitPane({ key: 'test-getter-default', default: () => currentDefault })
+        return () => h('div')
+      },
+    })
+    wrapper = await mountSuspended(Host)
+
+    expect(pane!.value.value).toBe(300)
+    pane!.value.value = 320
+    currentDefault = 260
+    pane!.reset()
+    expect(pane!.value.value).toBe(260)
+  })
+})
+
 describe('useSplitPane pointer ownership', () => {
   it('keeps one pointer in control until its drag ends', async () => {
     let frame: FrameRequestCallback | undefined
