@@ -50,7 +50,7 @@ const props = withDefaults(
     triggerLabel: 'Search docs',
     ariaLabel: undefined,
     modalTitle: 'Search documentation',
-    placeholder: 'Search guides and endpoints',
+    placeholder: 'Search guides and endpoints…',
     emptyLabel: 'No matching documentation',
     searchingLabel: 'Searching documentation…',
     searchErrorLabel: 'Search is temporarily unavailable. Try again later.',
@@ -275,6 +275,11 @@ const fuse = computed(() => ({
   },
   resultLimit: props.resultLimit,
 }))
+
+const paletteInput = computed(() => ({
+  'aria-label': props.modalTitle,
+  'autocomplete': 'off',
+}))
 </script>
 
 <template>
@@ -307,6 +312,7 @@ const fuse = computed(() => ({
         v-model:search-term="searchTerm"
         :groups="paletteGroups"
         :placeholder="props.placeholder"
+        :input="paletteInput"
         :fuse="fuse"
         :loading="searching"
         close

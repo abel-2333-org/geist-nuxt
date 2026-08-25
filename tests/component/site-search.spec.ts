@@ -50,6 +50,21 @@ async function query(value: string) {
   await palette().get('input').setValue(value)
 }
 
+describe('SiteSearch accessible naming', () => {
+  it('labels the search input independently from its placeholder', async () => {
+    await mountSearch({
+      modalTitle: 'Search all documentation',
+      placeholder: 'Try an endpoint name…',
+    })
+
+    expect(palette().get('input').attributes()).toMatchObject({
+      'aria-label': 'Search all documentation',
+      'autocomplete': 'off',
+      'placeholder': 'Try an endpoint name…',
+    })
+  })
+})
+
 describe('SiteSearch status announcements', () => {
   it('keeps one persistent polite region silent while idle and after close', async () => {
     wrapper = await mountSuspended(SiteSearch, {
