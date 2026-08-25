@@ -276,13 +276,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 1,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -297,20 +297,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "26b758f1d186e5e4613fce9a7363561d63eb77b2420f64d72da39732a2f9816a"
+        "scopeDigest": "f3ce4159bcaf79b278bc7dad41ff49c7d7efcd6a0f9e25c6bbe3990e89e7a9d0"
       },
-      "notes": "完整复审共用调宽手柄：新增 grip/edge appearance 以复用行为而不强迫 DOM 视觉一致；aria-controls、value/min/max 与 jump 契约保持，step(delta, coarse) 明确 Shift 粗步进意图，命名 group 避免祖先 hover 泄漏；默认 grip 与 CodeRail 兼容，edge 覆盖 idle/focus/drag 状态，focused tests、全量 component、registry 与 typecheck 通过，无新 finding。复审追加:useSplitPane 种子守卫与 getter default 不涉及 handle 的 DOM/ARIA/事件契约;新增测试覆盖种子回退与 getter 复位。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 1,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
+        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -324,9 +324,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "40daf76fb412e96106f105ef24a2069adb284f5d66be859770cdc4a824f354b2"
+        "scopeDigest": "84dca2819c935b68ea3848c3a1b95394e01b122d12bfd7b48c9429ab2879ad3f"
       },
-      "notes": "affected co-review：SplitPaneHandle 新增向后兼容的 appearance 与 coarse step 事件参数，默认 grip DOM、drag/jump 契约和 SplitPane 消费方式保持不变；focused tests、全量 component 与 typecheck 通过，无新 finding。复审追加:useSplitPane 种子增加非有限值守卫、default 支持 MaybeRefOrGetter(纯数字入参向后兼容,SplitPane 消费方式不变);新增种子回退与 getter 复位测试。",
+      "notes": "完整复审 #95：容器测量的 rAF 合帧调度收敛到共享 useRafTask，最新 box 参数语义与原实现一致，新增的无 rAF 同步 fallback 仅影响无观察者环境；公开 props/slots、拖动与断点契约未变，focused tests 与新增 use-raf-task 测试全绿。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -419,13 +419,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -442,20 +442,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "f6d371fbaec3529b2b357d0fcf080b56c3ac03452fd44df38928eef449819a85"
+        "scopeDigest": "b89ab4bde01fb2faffacbdff4256bc3df4d0ae8d4b008fcc5af57491337194c3"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-24T23:59:54.190Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "cdf30fda33a26e1f2c65edf116258a2ae181c138",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -474,7 +474,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "1be171f8f2b9d8e2b86943d9fa0792d07894b79b0a34a4c4632b36e63b004b72",
+        "scopeDigest": "de7b1c5a492e29e2224c7bf517d3b92f61c3ad713654206d65c8112c3a3803ac",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -488,18 +488,18 @@
           }
         ]
       },
-      "notes": "affected co-review：共享 scope 中 SidebarNav 改用 SplitPaneHandle edge appearance，gallery/reference 同步键盘与持久化说明；HttpMethodBadge 的归一化、色调、attrs 与 translate=no 链路均未改变，无新 finding。复审追加:SidebarNav 删除 handle 已覆盖的 pointer 死守卫与冗余 select-none、default 改传 getter,不触及 HttpMethodBadge 任何链路。",
+      "notes": "co-review:SiteSearch 补 placeholder 省略号与 input aria-label，不涉及 HttpMethodBadge 归一化、methodPreset、SemanticBadge 透传或 translate=no 链路；公开行为与 registry topology 无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "5ce9c202a58449c2bdb7f0273772d39cab26a7c3312728264663a1bb7952464a",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -511,20 +511,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "0b2444562d3063755b18e2cb3ce6aac5be268e38c9a9b2a2f14e41878069738a"
+        "scopeDigest": "c151fd0e9c225c6c01d6683b4d6a8d3592b23d447a775fb6e75db7fcca558a56"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -533,20 +533,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "a842d53d9fd2e49d85fab3f8831b20e15d8417facdef3259d1e6ac75ca9d13dc"
+        "scopeDigest": "6ae728f1c5db49c985e0e25466211cb4e30ee2c1edff5f3ff0a0814221a9579e"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -559,9 +559,9 @@
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-item-structure.spec.ts"
         ],
-        "scopeDigest": "2780ccd8b93a4d0b5971627ac722c427ff9ae50be76d54b21bb8e4781658e80a"
+        "scopeDigest": "781ad06fd7c15ec4f37233e275c9c90aa53f8f865d5d1fae7f177be3112996a3"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -588,13 +588,13 @@
     },
     "api-docs-field-annotation": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -603,9 +603,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "eb53d2db0bc27ca87aea89537ffea9636bcd608e5124c2aedd45376d087aeed3"
+        "scopeDigest": "ad22290544b6c23f3e0cc657e4347f8d4fadd8b8d05491bbbc36008cef0f5614"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -625,13 +625,13 @@
     },
     "api-docs-event-badge": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -644,7 +644,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "7fceed243b10572d5c1f1f9317fda1b9904ddda76b1454ae79af59331aa920bb",
+        "scopeDigest": "65cce0116d92c14c9b729d4ea01a9b14b5ce0c7993bbf6438688e0943eb9b02b",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -658,18 +658,18 @@
           }
         ]
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "kits/api-docs/components/LifecycleNotice.vue",
@@ -678,20 +678,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "3b94d24ec560f852169cff9100c1c145fbcc93a7a7393ecdb9615f6da7d566ff"
+        "scopeDigest": "d56424d39aff2d80bf0322cae90039c523784ef3926ac705ecc1db4adec87035"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 1,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -700,20 +700,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "31ee54bb334e18230cc870b93e70c778208849d72752f3656ad0ffa3c9dd356b"
+        "scopeDigest": "8916f572851efbc00cbc129e6d3d6f37ec483845703d408fc7b2f4c06d87f59b"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -728,20 +728,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "6aed6253ba7b669ced18dc549a4e07de4be86cf632ed84f74fdfa435614f496e"
+        "scopeDigest": "ab40fb40fed6c0ecad9eb1fffd48969cd2a6ecb8a6cfd9b18a5504548ced5d30"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 1,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -765,20 +765,20 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "9e74ee9de7992637e27a495bc2692113169aa18c602579f644d3e42d6226da90"
+        "scopeDigest": "f5c1bc4c5d6b87b9d364a2cb61bb4021c52646e9f0cf63f60b6ad2b73749586b"
       },
-      "notes": "affected co-review：SplitPaneHandle 默认 grip appearance、单步键盘事件与 CodeRail 消费方式保持兼容；新增 coarse 参数不会改变现有只读取 delta 的监听器，focused tests、全量 component 与 typecheck 通过，无新 finding。",
+      "notes": "复审 RequestExample / ResponseExample 的共享场景选择抽取：CodeRail 布局、内容优先重分配与响应式边界未改；两个示例组件保持相同受控/非受控契约，focused、全量 component、typecheck、build 与精确 consumer closure 均通过。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-24T23:59:54.190Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "cdf30fda33a26e1f2c65edf116258a2ae181c138",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -787,7 +787,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "75e023f672a8d026f5d985d936aaea31a0c9eb3d1614d0d26ce60efbb4af549e",
+        "scopeDigest": "f806ec22a4658078734508b350e2a6c0a393fbe81ee80d73764a63861e0a2145",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -801,7 +801,7 @@
           }
         ]
       },
-      "notes": "affected co-review：共享 gallery/reference 只更新 SidebarNav 共用 handle、键盘与持久化说明；SiteSearch 的同步/异步搜索、Fuse 过滤、状态文案和依赖行为均未改变，既有 resolved finding 保持关闭，无新 finding。",
+      "notes": "默认 placeholder 补齐结尾省略号；复审补齐 UCommandPalette 搜索 input 的独立 aria-label，以可本地化 modalTitle 为单一命名来源并显式关闭 autocomplete。异步搜索、live region、hash 焦点交接、Fuse 过滤与 registry topology 无回归。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -814,13 +814,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
+      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
+        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
+        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -838,9 +838,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "03c4dc0bb8fa90d6feb2a9ae5eceb1b3a69d5c98618ead7b9ede4d8333fbcab6"
+        "scopeDigest": "8db6ba99f0f591734debb257c1ee968b1034ed24abf1397539f432d85812cee9"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。",
+      "notes": "复审 API Docs kit 权威源码索引新增 useExampleScenarioSelection：该 owner 的实现、registry topology 与公开行为未改变；全量 316 个 component tests 和 131 个 registry tests 通过，既有结论继续成立，无新 finding。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -853,14 +853,14 @@
     },
     "api-docs-sidebar-nav": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T02:07:35.758Z",
-      "change": "modified",
-      "status": "verified",
+      "lastAuditedAt": "2026-08-24T23:59:54.190Z",
+      "change": "none",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "051c054838d69822ab86a292a74822b1c7ef84ba",
-        "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
+        "baseSha": "37301e3a92e814edb0c492a7958fd0fd385d6ffd",
+        "headSha": "cdf30fda33a26e1f2c65edf116258a2ae181c138",
+        "itemDigest": "984c56c7dde590b6eb72f30dd6ef596a751726e0f3d8cebf0075f07355c262a4",
         "scope": [
           "app/pages/kits/api-docs/sidebar-nav.vue",
           "foundation/components/SplitPaneHandle.vue",
@@ -872,16 +872,16 @@
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "c5bcf69c27b0206b582c8eacabcc154bad0f3aa5812ebeeaab70239e14f072ab"
+        "scopeDigest": "be9c20b71286636efaad069887bf49ee4ad12ee8dbc741abd02cef0f0bec033a"
       },
-      "notes": "采纳并完成原 deferred finding，并进一步共用 foundation SplitPaneHandle：SidebarNav 使用 appearance=edge 保留安静的边缘视觉，aria-controls 绑定真实 nav id，普通/Shift 键步进继续为 16/48px，Home/End、Enter/双击复位与 Escape 拖拽回滚保持完整；useSplitPane 继续统一 cookie-seeded SSR 状态与拖拽行为，registry copy-in 闭包补齐 handle 依赖。focused、全量 component、registry 与 typecheck 通过，原 finding 保持 resolved，无新增 finding。复审追加:useSplitPane cookie 种子加 Number.isFinite 守卫(destr 会把 \"nan\"/\"infinity\" 解析成数字,NaN 可穿透 clamp),恢复旧内联实现的健壮性;default 改 getter 使 Enter/双击复位跟随当前 defaultWidth;删除 handle 已过滤的 pointer 死守卫与被 body userSelect 锁覆盖的 select-none。focused + 全量 component + typecheck 通过,原 finding 保持 resolved。",
+      "notes": "open finding 重入复审:f-12d73e8bc49d 在本 base 上仍成立；修复已在 PR #105 在途，本轮不重复修改。其余搜索、active、IME Escape、键盘调宽与场景标签契约无回归。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
           "severity": "medium",
           "claim": null,
           "evidence": "SidebarNav.vue 的 width resize(拖拽数学、clampWidth、键盘 ←/→/Home/End 步进、双击复位、持久化)与 foundation 的 useSplitPane + SplitPaneHandle 能力重复,且行为不一致:① 持久化用 localStorage 且在 onMounted 后读取——lg+ 桌面端持久宽度 ≠ defaultWidth 时,每次刷新先渲染 288px 再跳到持久宽度(useSplitPane 用 cookie 种子 useState,SSR 首帧即正确、无跳变,useCodeWrap 同款约定);② 内联版缺少 useSplitPane 已有的 Esc 取消拖拽回滚。收敛到 useSplitPane(视觉可保留局部 1px rule 手柄)是破坏性改动:widthStorageKey prop 公开语义即 localStorage(reference 与 gallery 文案均明言)、消费端已存宽度需迁移、registry 拓扑需新增 foundation-use-split-pane 依赖,故记 deferred 交人工决策。",
-          "disposition": "resolved"
+          "disposition": "open"
         }
       ]
     },

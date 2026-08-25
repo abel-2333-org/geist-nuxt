@@ -105,7 +105,7 @@ interface SidebarNavGroup {
 - item：default / hover / **active（`aria-current="page"`）** / `focus-visible`。active 由组件内 `effectiveActive` 单源计算并同时驱动背景、文字与 `aria-current`：显式 `item.active` 最优先；缺省时纯内部路径按 `route.path` 精确匹配自推断；**任何含 `#` 的 `to`（裸 hash 或路径+hash）缺省时一律不自推断**——它们仍是正常的内部/页内链接（跳转不受影响），但 router 的 active 匹配不比较 hash，若放任自推断，路径+hash 的 item 会整页同亮、裸 hash 的 item 永远不亮，所以锚点类导航（docs-shell 形态）必须由页面层按 `route.hash`/`route.params` 计算并显式传 `item.active`。
 - 搜索：empty / has-query（命中板块强制展开 + 计数转 `命中/总数`，空分组整组隐藏、只留有命中的领地）/ no-results（空态文案）。搜索中的手动开合记在随查询重置的临时 map 里；**清空搜索恢复搜索前的开合状态**。
 - 方法色标 / 场景标签：均为静态展示、无交互态（不可点选、不参与过滤）——方法色标标「怎么调」、场景标签标「用在哪」，检索一律走顶部搜索。
-- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `nav` 加 `select-none` 防误选文本。
+- 调宽手柄：idle（透明）/ hover / `focus-visible` / dragging（`isResizing`），后三态显紫、1px→2px；拖拽时 `useSplitPane` 在 `document.body` 锁定文本选择和 resize cursor，结束、取消或 scope dispose 时统一恢复。
 
 ## Accessibility（无障碍）
 
