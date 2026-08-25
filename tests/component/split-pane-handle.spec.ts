@@ -203,6 +203,42 @@ describe('SplitPane separator relationship', () => {
     expect(controlled.text()).toBe(props.controlledText)
   })
 
+  it('honors Shift as a 3× coarse keyboard step in fixed mode', async () => {
+    const wrapper = await mountSuspended(SplitPane, {
+      props: {
+        enabledFrom: 'always',
+        storageKey: 'test-coarse-step',
+        defaultSize: 320,
+      },
+      slots: { start: 'Start pane', end: 'End pane' },
+    })
+    const separator = wrapper.get('[role="separator"]')
+    expect(separator.attributes('aria-valuenow')).toBe('320')
+
+    // fixedPane defaults to 'end': ArrowLeft grows the end pane by the fine step.
+    await separator.trigger('keydown', { key: 'ArrowLeft' })
+    expect(separator.attributes('aria-valuenow')).toBe('344')
+
+    await separator.trigger('keydown', { key: 'ArrowLeft', shiftKey: true })
+    expect(separator.attributes('aria-valuenow')).toBe('416')
+  })
+
+  it('reports the current value as aria-valuemax while the clamp is unbounded', async () => {
+    // No maxSize and no delivered container measurement → the fixed-mode max
+    // clamp is Infinity, which must never surface as aria-valuemax="Infinity".
+    const wrapper = await mountSuspended(SplitPane, {
+      props: {
+        enabledFrom: 'always',
+        storageKey: 'test-unbounded-max',
+      },
+      slots: { start: 'Start pane', end: 'End pane' },
+    })
+    const separator = wrapper.get('[role="separator"]')
+
+    expect(separator.attributes('aria-valuemax')).toBe(separator.attributes('aria-valuenow'))
+    expect(Number.isFinite(Number(separator.attributes('aria-valuemax')))).toBe(true)
+  })
+
   it('wires the drag-start event into the split state', async () => {
     const wrapper = await mountSuspended(SplitPane, {
       props: {

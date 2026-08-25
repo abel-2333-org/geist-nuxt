@@ -164,6 +164,44 @@ describe('CodeRail', () => {
     expect(separator.attributes('aria-valuemax')).toBe('70')
   })
 
+  it('honors Shift as a 3× coarse keyboard step on the rail separator', async () => {
+    const slots = {
+      // natTop = 500 / natBottom = 150, same rig as the overflow test: budgets
+      // start at 250/150 (effective 63) with reachable bounds 63..70.
+      top: () => card(320, 300, 480, 'top'),
+      bottom: () => card(320, 300, 130, 'bottom'),
+    }
+    wrapper = await mountSuspended(CodeRail, {
+      props: { storageKey: 'code-rail-fine-step' },
+      slots,
+    })
+    await nextTick()
+    await resizeRail(wrapper, 412)
+    const fine = wrapper.get('[role="separator"]')
+    expect(fine.attributes('aria-valuenow')).toBe('63')
+
+    // Fine step: +0.04 from the re-anchored 0.625 → 266px top → 67.
+    await fine.trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+    expect(fine.attributes('aria-valuenow')).toBe('67')
+    wrapper.unmount()
+
+    wrapper = await mountSuspended(CodeRail, {
+      props: { storageKey: 'code-rail-coarse-step' },
+      slots,
+    })
+    await nextTick()
+    await resizeRail(wrapper, 412)
+    const coarse = wrapper.get('[role="separator"]')
+    expect(coarse.attributes('aria-valuenow')).toBe('63')
+
+    // Coarse step: +0.12 in one keypress overshoots the natural cap and lands
+    // on the effective max (70) instead of the fine step's 67.
+    await coarse.trigger('keydown', { key: 'ArrowDown', shiftKey: true })
+    await nextTick()
+    expect(coarse.attributes('aria-valuenow')).toBe('70')
+  })
+
   it('renders natural heights with an inert handle when both panes fit', async () => {
     wrapper = await mountSuspended(CodeRail, {
       props: { storageKey: 'code-rail-fit' },
