@@ -141,6 +141,7 @@ describe('SplitPaneHandle edge appearance', () => {
     const rules = wrapper.findAll('span[aria-hidden="true"]')
 
     expect(root.classes()).toContain('w-2')
+    expect(root.classes()).not.toContain('relative')
     expect(rules).toHaveLength(1)
     expect(rules[0]!.classes()).toContain('bg-transparent')
 

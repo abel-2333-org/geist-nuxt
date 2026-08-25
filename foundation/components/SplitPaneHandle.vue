@@ -107,7 +107,7 @@ function onKeydown(e: KeyboardEvent) {
     :aria-valuemin="disabled ? undefined : min"
     :aria-valuemax="disabled ? undefined : max"
     :tabindex="disabled ? undefined : 0"
-    class="group/handle relative flex shrink-0 touch-none outline-none"
+    class="group/handle flex shrink-0 touch-none outline-none"
     :class="[
       // Cross-axis size is fixed; the MAIN axis (height for vertical, width for
       // horizontal) is left to the consumer so it can fill its track OR be a
@@ -118,6 +118,7 @@ function onKeydown(e: KeyboardEvent) {
           ? 'w-2 items-center justify-end'
           : 'h-2 w-full items-end justify-center'
         : [
+            'relative',
             orientation === 'vertical' ? 'w-3' : 'h-3 w-full',
             'items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
           ],
