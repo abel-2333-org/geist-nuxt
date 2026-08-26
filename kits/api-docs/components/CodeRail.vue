@@ -65,7 +65,8 @@ const RATIO_MAX = 0.8
  * - Baseline splits H by ratio : 1-ratio, each pane no less than `minPane`
  *   (capped to half of H, so a very short rail still splits instead of jamming).
  * - If a pane underuses its share → cap it to its natural height and give the
- *   slack to the overflowing pane, so a short snippet never leaves a void.
+ *   slack to the overflowing pane, so a short snippet leaves no void beyond
+ *   the `minPane` floor (content shorter than the floor still gets `minPane`).
  */
 function computeSplitBudgets(
   H: number,
@@ -292,9 +293,10 @@ function onDragStart(e: PointerEvent) {
     startDrag(e, { axis: 'y', scale: 1 / H.value })
   }
 }
-function onStep(delta: -1 | 1) {
+// Shift = coarse nudge at 3× the fine step (SidebarNav / SplitPane convention).
+function onStep(delta: -1 | 1, coarse: boolean) {
   alignRatio()
-  nudge(delta, 0.04)
+  nudge(delta, coarse ? 0.12 : 0.04)
 }
 function onJump(to: 'min' | 'max' | 'reset') {
   if (to === 'reset') reset()

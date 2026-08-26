@@ -174,7 +174,13 @@ const handleStyle = computed<CSSProperties>(() => {
 /* --- a11y values ----------------------------------------------------- */
 const ariaValue = computed(() => Math.round(isRatio.value ? size.value * 100 : size.value))
 const ariaMin = computed(() => Math.round(isRatio.value ? toValue(minClamp) * 100 : toValue(minClamp)))
-const ariaMax = computed(() => Math.round(isRatio.value ? toValue(maxClamp) * 100 : toValue(maxClamp)))
+// Fixed mode with no `maxSize` is unbounded until the container is measured;
+// "Infinity" is not a valid aria-valuemax, so report the current value (the
+// only bound we can vouch for) until a real clamp exists.
+const ariaMax = computed(() => {
+  const bound = isRatio.value ? toValue(maxClamp) * 100 : toValue(maxClamp)
+  return Number.isFinite(bound) ? Math.round(bound) : ariaValue.value
+})
 
 /* --- handle event wiring --------------------------------------------- */
 const axis = computed<'x' | 'y'>(() => (props.direction === 'row' ? 'x' : 'y'))
@@ -189,13 +195,21 @@ function onDragStart(e: PointerEvent) {
     startDrag(e, { axis: axis.value, invert: props.fixedPane === 'end' })
   }
 }
-function onStep(delta: -1 | 1) {
-  if (isRatio.value) nudge(delta, 0.04) // Down/Right grows the start pane
-  else nudge(props.fixedPane === 'end' ? (delta === -1 ? 1 : -1) : delta, 24)
+// Shift = coarse nudge at 3× the fine step (same convention as SidebarNav's
+// 16/48 px), so the handle's modifier behaves consistently system-wide.
+function onStep(delta: -1 | 1, coarse: boolean) {
+  if (isRatio.value) nudge(delta, coarse ? 0.12 : 0.04) // Down/Right grows the start pane
+  else nudge(props.fixedPane === 'end' ? (delta === -1 ? 1 : -1) : delta, coarse ? 72 : 24)
 }
 function onJump(to: 'min' | 'max' | 'reset') {
   if (to === 'reset') reset()
-  else size.value = to === 'min' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
+  else {
+    const bound = to === 'min' ? toValue(minClamp) : toValue(maxClamp)
+    // Before ResizeObserver delivers a container size, an unconstrained fixed
+    // pane has no truthful maximum. Keep End inert until that bound is finite
+    // instead of persisting Infinity into the pane size and its ARIA surface.
+    if (Number.isFinite(bound)) size.value = bound
+  }
 }
 </script>
 
