@@ -203,7 +203,13 @@ function onStep(delta: -1 | 1, coarse: boolean) {
 }
 function onJump(to: 'min' | 'max' | 'reset') {
   if (to === 'reset') reset()
-  else size.value = to === 'min' ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY
+  else {
+    const bound = to === 'min' ? toValue(minClamp) : toValue(maxClamp)
+    // Before ResizeObserver delivers a container size, an unconstrained fixed
+    // pane has no truthful maximum. Keep End inert until that bound is finite
+    // instead of persisting Infinity into the pane size and its ARIA surface.
+    if (Number.isFinite(bound)) size.value = bound
+  }
 }
 </script>
 

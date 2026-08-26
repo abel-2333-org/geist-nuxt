@@ -223,7 +223,7 @@ describe('SplitPane separator relationship', () => {
     expect(separator.attributes('aria-valuenow')).toBe('416')
   })
 
-  it('reports the current value as aria-valuemax while the clamp is unbounded', async () => {
+  it('keeps the pane finite when End is pressed while the clamp is unbounded', async () => {
     // No maxSize and no delivered container measurement → the fixed-mode max
     // clamp is Infinity, which must never surface as aria-valuemax="Infinity".
     const wrapper = await mountSuspended(SplitPane, {
@@ -234,9 +234,15 @@ describe('SplitPane separator relationship', () => {
       slots: { start: 'Start pane', end: 'End pane' },
     })
     const separator = wrapper.get('[role="separator"]')
+    const controlled = wrapper.get(`[id="${separator.attributes('aria-controls')}"]`)
 
     expect(separator.attributes('aria-valuemax')).toBe(separator.attributes('aria-valuenow'))
     expect(Number.isFinite(Number(separator.attributes('aria-valuemax')))).toBe(true)
+
+    await separator.trigger('keydown', { key: 'End' })
+    expect(separator.attributes('aria-valuenow')).toBe('320')
+    expect(separator.attributes('aria-valuemax')).toBe('320')
+    expect(controlled.attributes('style')).not.toContain('Infinity')
   })
 
   it('wires the drag-start event into the split state', async () => {
