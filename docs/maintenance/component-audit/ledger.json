@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-24T23:59:54.190Z",
+  "lastRunAt": "2026-08-26T01:53:55.505Z",
   "lastPicked": [
-    "api-docs-site-search",
-    "api-docs-sidebar-nav",
-    "api-docs-method-badge"
+    "api-docs-code-rail",
+    "foundation-split-pane",
+    "foundation-split-pane-handle"
   ],
   "items": {
     "foundation-copy-button": {
@@ -275,44 +275,43 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
+        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
           "foundation/components/SplitPaneHandle.vue",
-          "foundation/composables/useBreakpointGate.ts",
           "foundation/composables/useSplitPane.ts",
           "kits/api-docs/components/CodeRail.vue",
+          "kits/api-docs/components/SidebarNav.vue",
           "references/components/index.md",
           "references/kits/api-docs/index.md",
           "tests/component/code-rail.spec.ts",
-          "tests/component/split-pane-handle.spec.ts",
-          "tests/component/use-breakpoint-gate.spec.ts",
-          "tests/component/use-split-pane.spec.ts"
+          "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "fbda82b5567c9c2ef86564eb58cf9da5687a653a16fa078d2321f89137cf56d0"
+        "scopeDigest": "229aac6b7dfd5b1f414715ee9cfd4711033c3528151fd042621ed5f28f5d03c8"
       },
-      "notes": "完整复审共用调宽手柄：新增 grip/edge appearance 以复用行为而不强迫 DOM 视觉一致；aria-controls、value/min/max 与 jump 契约保持，step(delta, coarse) 明确 Shift 粗步进意图，命名 group 避免祖先 hover 泄漏；默认 grip 与 CodeRail 兼容，edge 覆盖 idle/focus/drag 状态，focused tests、全量 component、registry 与 typecheck 通过，无新 finding。复审追加:useSplitPane 种子守卫与 getter default 不涉及 handle 的 DOM/ARIA/事件契约;新增测试覆盖种子回退与 getter 复位。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "Round 2 复审:handle 自身零改动——window-splitter 语义、键盘映射(仅吞已处理键)、disabled 惰性 spacer、grip/edge 双形态与命名 group 防泄漏均与测试和 reference 一致;其发出的 coarse 意图经本轮 SplitPane/CodeRail 修改后被全部三个消费方(含 SidebarNav)以 3× 惯例统一消费,'具体步长由父组件决定'的公开 claim 保持准确。",
       "findings": []
     },
     "foundation-split-pane": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
+        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
+          "app/components/demo/api-docs/DocsShellReference.vue",
           "foundation/components/SplitPane.vue",
           "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useBreakpointGate.ts",
@@ -324,9 +323,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "40daf76fb412e96106f105ef24a2069adb284f5d66be859770cdc4a824f354b2"
+        "scopeDigest": "cfa328e095687400b7a9385dd691ffdd2cbc72eca5b4dd448fc8559f335d20a2"
       },
-      "notes": "affected co-review：SplitPaneHandle 新增向后兼容的 appearance 与 coarse step 事件参数，默认 grip DOM、drag/jump 契约和 SplitPane 消费方式保持不变；focused tests、全量 component 与 typecheck 通过，无新 finding。复审追加:useSplitPane 种子增加非有限值守卫、default 支持 MaybeRefOrGetter(纯数字入参向后兼容,SplitPane 消费方式不变);新增种子回退与 getter 复位测试。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "Round 2 复审:消费 step(delta, coarse) 支持 Shift 3× 粗步进(ratio 0.04→0.12、fixed 24→72px);修复 fixed 模式无 maxSize 且容器未测量时的非法 Infinity ARIA/布局值,未测量时 aria-valuemax 回退当前值且 End 暂不跳转,待真实 clamp 测得后再启用上界跳转;断点门控、SSR 水合、sticky 把手、min/max 钳制与 MDC 友好 prop 契约复核无回归,DOM 黑盒测试覆盖静态与键盘路径,gate 全绿。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -734,40 +733,33 @@
       "findings": []
     },
     "api-docs-code-rail": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
+        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
           "foundation/components/SplitPane.vue",
+          "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useBreakpointGate.ts",
           "foundation/composables/useRafTask.ts",
-          "kits/api-docs/components/CodeBlock.vue",
+          "foundation/composables/useSplitPane.ts",
           "kits/api-docs/components/CodeRail.vue",
-          "kits/api-docs/components/RequestExample.vue",
-          "kits/api-docs/components/ResponseExample.vue",
-          "kits/api-docs/composables/useExampleScenarioSelection.ts",
           "references/kits/api-docs/index.md",
-          "references/kits/api-docs/request-example.md",
-          "references/kits/api-docs/response-example.md",
           "tests/component/code-rail.spec.ts",
-          "tests/component/request-example.spec.ts",
-          "tests/component/response-example.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts",
-          "tests/component/use-example-scenario-selection.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "954cd683eaff003523590298d896853c9b080b6951841e05743d43d669935c5d"
+        "scopeDigest": "119ea38a7fce2d2a5d7c72aecacc412723c39f56bdccd25f2fb5ad112e27d8df"
       },
-      "notes": "affected co-review：SplitPaneHandle 默认 grip appearance、单步键盘事件与 CodeRail 消费方式保持兼容；新增 coarse 参数不会改变现有只读取 delta 的监听器，focused tests、全量 component 与 typecheck 通过，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "Round 2 复审:消费 SplitPaneHandle 的 step(delta, coarse),Shift 以 3× 步长(0.04→0.12)粗调,与 SidebarNav/SplitPane 惯例一致;收窄重分配注释的 universal claim(无空洞承诺以 minPane 地板为界,自身测试即断言 48px 自然高仍获 120px 预算);内容优先重分配、有效 aria 边界、观察目标增量同步与 stacked/fit/overflow 三态契约复核无回归,focused + 全量 gate 通过。",
       "findings": []
     },
     "api-docs-site-search": {
