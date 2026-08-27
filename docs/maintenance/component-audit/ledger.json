@@ -1,40 +1,39 @@
 {
   "version": 2,
   "round": 2,
-  "lastRunAt": "2026-08-26T01:53:55.505Z",
+  "lastRunAt": "2026-08-27T02:07:23.748Z",
   "lastPicked": [
-    "api-docs-code-rail",
-    "foundation-split-pane",
-    "foundation-split-pane-handle"
+    "foundation-copy-button",
+    "api-docs-operation-target",
+    "foundation-theme-toggle",
+    "api-docs-code-block"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-14T10:34:46.808Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "08f58ab09cd71ee75fe30935f6ff763ec4841c69",
-        "headSha": "d9e557464c5bf7d08bee077cd9dcad88c61c1ba0",
+        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
+        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
-          "kits/api-docs/components/CodeBlock.vue",
-          "kits/api-docs/components/OperationTarget.vue",
           "references/architecture-decisions.md",
           "references/components/buttons.md",
           "references/components/index.md",
+          "references/kits/api-docs/code-sample.md",
           "tests/component/chrome-labels.spec.ts",
-          "tests/component/code-block.spec.ts",
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "3a68532ce9aa093285163963ae48ddb70048a95173f2946199f17c5d82921261"
+        "scopeDigest": "4053c4e58e40e3744eea020dfef73007d8a6d68c643505cb555f3bd41a3b7dc5"
       },
-      "notes": "完整复审 #95 对共享组件目录 reference 的增量（SplitPane 词条补充 useRafTask 组成说明）；本组件源码与复制契约未改变，focused tests 全绿。",
+      "notes": "逐条核对复制契约、attrs fallthrough、polite live region 与完整句 toast 约定；修正 code-sample.md 对 useCopy 的过时 VueUse 描述并将该 reference 纳入 evidence scope；全仓反查无重复剪贴板实现，无新增 finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -169,14 +168,14 @@
       ]
     },
     "foundation-theme-toggle": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-13T02:07:43.078Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c6ed6930f64ab102296d2a2a6c1407c1bb2bbe12",
-        "headSha": "cfa0e6a6797814f1f4cf7a3fe5f470af6d570de3",
+        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
+        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
           "app/layouts/default.vue",
@@ -198,7 +197,7 @@
           }
         ]
       },
-      "notes": "组件本体为 UColorModeButton 的稳定命名壳,行为、a11y、SSR 均由 Nuxt UI/color-mode 维护且 references 描述准确;registry item description 原文「System/light/dark theme toggle.」与 UColorModeButton@4.9.0 的二态 light/dark 切换(preference 永不回写 system)不符,已收窄为「Light/dark theme toggle.」;外部行为前提绑定 @nuxt/ui 与 @nuxtjs/color-mode 精确内容 resolution。",
+      "notes": "UColorModeButton 稳定命名壳行为未变，registry description 与二态 light/dark 行为一致；上游 @nuxt/ui 4.9.0 与 @nuxtjs/color-mode 4.0.1 resolution 未漂移，重新绑定依赖前提。",
       "findings": []
     },
     "foundation-annotation-popover": {
@@ -330,13 +329,13 @@
     },
     "api-docs-code-block": {
       "round": 2,
-      "lastAuditedAt": "2026-08-19T23:24:05.756Z",
-      "change": "none",
+      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
-        "headSha": "3c079e678acea2fce11fe0d18ace831ece73bfa3",
+        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
+        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -346,9 +345,9 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "d035acbdb5983fd04873b2d93989ce77a048b218cb9a944f207d98eef2f2c55a"
+        "scopeDigest": "42c02564bef80fd7ea7797665d73addc7b836034deef15495aba8f3334629792"
       },
-      "notes": "round 2 复审:语言选择器空态可见性、tabindex=0 命名 group、translate=no、trust gate 与 #79 双主题 token 切换均由 focused tests 锁定;labels 合并与 copySuccess/copied 兼容层、langLabel 回退链与 reference 一致,无 finding。",
+      "notes": "co-review：修正 code-sample.md 对共享 useCopy 的过时 VueUse 描述；CodeBlock 仍只委托 CopyButton，公开 props、运行时行为与复制本地化契约未变，focused tests 全绿，无新增 finding。",
       "findings": []
     },
     "api-docs-request-example": {
@@ -683,25 +682,27 @@
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 2,
+      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
+        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
           "kits/api-docs/components/OperationTarget.vue",
           "references/foundations/responsiveness.md",
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "441315a610430f4b90fff45589e1d64355a0a130f654efa30b9fd05ec293c01e"
+        "scopeDigest": "b6186099d0a7eb732963557d8456029532df2fcae6433d476e86cedf91c08d68"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "两原子单元回流契约、三种复制可供性、选区守卫与单一 segment live region 均与权威 reference 及测试一致；@vueuse/core 由 registry 顶层 externalRequirements 声明，依赖闭包无缺口；无新增 finding。",
       "findings": []
     },
     "api-docs-operation-header": {
