@@ -1,12 +1,10 @@
 {
   "version": 2,
-  "round": 2,
-  "lastRunAt": "2026-08-27T02:07:23.748Z",
+  "round": 3,
+  "lastRunAt": "2026-08-27T23:21:08.509Z",
   "lastPicked": [
-    "foundation-copy-button",
-    "api-docs-operation-target",
-    "foundation-theme-toggle",
-    "api-docs-code-block"
+    "api-docs-schema-composition",
+    "api-docs-relation-source-path"
   ],
   "items": {
     "foundation-copy-button": {
@@ -563,14 +561,14 @@
       "findings": []
     },
     "api-docs-schema-composition": {
-      "round": 1,
-      "lastAuditedAt": "2026-08-12T02:12:43.019Z",
+      "round": 2,
+      "lastAuditedAt": "2026-08-27T23:21:08.509Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "1e2c0b198910e6a339210e702d35aa75a27a32bf",
-        "headSha": "7aaa034d4f69f949ac5b421014ce6fa447ef24f7",
+        "baseSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
+        "headSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
@@ -581,7 +579,7 @@
         ],
         "scopeDigest": "ee38233da6f830516ee08cc3114d30fcc4a4e9a4518243aa463b41a9745f7a0e"
       },
-      "notes": "首次审计判 clean:三种 kind 形态、discriminator 合成/合并、opaque anchor 精确匹配与 revision 重放均与 schema-composition.md 契约一致且被 focused tests 覆盖;a11y(anyOf 真按钮 aria-expanded/controls、heading outline 封顶 h6、focus-visible)与语义 token 无违规,未发现值得改动的点。",
+      "notes": "复审判 clean:三种 kind 形态、discriminator 合成/聚合、opaque anchor 精确匹配与 revision 重放、anyOf 按钮 aria-expanded/aria-controls、heading 封顶 h6 均与 schema-composition.md 契约一致且被 focused tests 断言;自 2026-08-12 verified 以来组件源码零变更。",
       "findings": []
     },
     "api-docs-field-annotation": {
@@ -879,12 +877,26 @@
       ]
     },
     "api-docs-relation-source-path": {
-      "round": 0,
-      "lastAuditedAt": null,
-      "change": null,
-      "status": null,
-      "evidence": null,
-      "notes": null,
+      "round": 2,
+      "lastAuditedAt": "2026-08-27T23:21:08.509Z",
+      "change": "none",
+      "status": "verified",
+      "evidence": {
+        "kind": "scope-v1",
+        "baseSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
+        "headSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
+        "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
+        "scope": [
+          "app/pages/kits/api-docs/structured-relations.vue",
+          "kits/api-docs/components/RelationSourcePath.vue",
+          "kits/api-docs/composables/useFieldAnchor.ts",
+          "references/kits/api-docs/index.md",
+          "tests/component/relation-source-path.spec.ts",
+          "tests/component/structured-relations-recipe.spec.ts"
+        ],
+        "scopeDigest": "7889eaea0683c49ce81ad2d3dff81a1cb2855f45efe2637425a17a4bcbfde453"
+      },
+      "notes": "首次审计判 clean:三态降级(to→ULink / field→委托 goTo(focus) 的 a / 均缺→不可聚焦 span)、可见节点插入 sr-only connector 的单真源 accessible name、fragment 单次编码、modified-click 保留原生行为、技术段 translate=no,均与 index.md「RelationSourcePath 的解析边界」一致;tests 与 384/576px gallery 回流覆盖完整。",
       "findings": []
     }
   }
