@@ -249,10 +249,11 @@ describe('useFieldAnchor', () => {
       setup() {
         goTo = useFieldAnchor().goTo
       },
-      template: '<div id="amount">Amount</div>',
+      template: '<div id="amount">Amount<span data-field-arrival-cue /></div>',
     })
     const wrapper = await mountSuspended(Host, { attachTo: document.body })
     const target = wrapper.find('#amount').element as HTMLElement
+    const cue = wrapper.find('[data-field-arrival-cue]').element as HTMLElement
     target.getBoundingClientRect = vi.fn(() => ({
       bottom: 120,
       height: 20,
@@ -271,7 +272,7 @@ describe('useFieldAnchor', () => {
     const animate = vi.fn()
       .mockReturnValueOnce(first.animation)
       .mockReturnValueOnce(second.animation)
-    Object.defineProperty(target, 'animate', { configurable: true, value: animate })
+    Object.defineProperty(cue, 'animate', { configurable: true, value: animate })
 
     await goTo('amount', { updateHash: false })
     await goTo('amount', { updateHash: false })
@@ -279,20 +280,16 @@ describe('useFieldAnchor', () => {
     expect(first.cancel).toHaveBeenCalledOnce()
     expect(animate).toHaveBeenCalledTimes(2)
     const [frames, options] = animate.mock.calls[0]!
-    // Outline belongs to the persistent focus ring, so the cue must never
-    // animate it (a cue passing through transparent would blink a keyboard
-    // user's focus indicator out).
-    expect(JSON.stringify(frames)).not.toMatch(/outline|borderRadius/)
+    // The overlay owns the static ring/wash; animation stays compositor-only
+    // and never overrides the row's persistent focus outline.
+    expect(JSON.stringify(frames)).not.toMatch(/outline|borderRadius|boxShadow|backgroundColor/)
     // It breathes: the cue alternates off → on → … → off within one pass rather
     // than ending lit, so both ends must rest transparent.
     expect(frames.length).toBeGreaterThan(2)
-    expect(JSON.stringify(frames[0])).toMatch(/transparent/)
-    expect(JSON.stringify(frames.at(-1))).toMatch(/transparent/)
-    // Discriminate on boxShadow, not the whole frame: a lit frame's background
-    // is a `color-mix(… , transparent)`, so matching "transparent" anywhere
-    // would count every frame as unlit.
+    expect(frames[0]?.opacity).toBe(0)
+    expect(frames.at(-1)?.opacity).toBe(0)
     const peaks = frames
-      .filter((frame: Keyframe) => !/transparent/.test(String(frame.boxShadow)))
+      .filter((frame: Keyframe) => frame.opacity === 1)
       .map((frame: Keyframe) => frame.offset as number)
     // Assert the CONTRACT, not the tuning. Pinning the breath count or the
     // literal duration fails a legitimate retune while proving nothing about how
@@ -344,6 +341,7 @@ describe('useFieldAnchor', () => {
     const makeHost = (animate: () => Animation) => defineComponent({
       setup() {
         const target = shallowRef<HTMLElement>()
+        const cue = shallowRef<HTMLElement>()
         const anchor = useFieldAnchor()
         onMounted(() => {
           const el = target.value!
@@ -360,12 +358,12 @@ describe('useFieldAnchor', () => {
           }))
           el.scrollIntoView = vi.fn()
           scrollMocks.push(el.scrollIntoView as ReturnType<typeof vi.fn>)
-          Object.defineProperty(el, 'animate', { configurable: true, value: animate })
+          Object.defineProperty(cue.value!, 'animate', { configurable: true, value: animate })
           anchor.initFromHash()
         })
-        return { target }
+        return { cue, target }
       },
-      template: '<div id="amount" ref="target">Amount</div>',
+      template: '<div id="amount" ref="target">Amount<span ref="cue" data-field-arrival-cue /></div>',
     })
 
     const oldRoute = await mountSuspended(makeHost(firstAnimate), { attachTo: document.body })

@@ -193,34 +193,15 @@ export function useFieldAnchor() {
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1
       el.focus({ preventScroll: true })
     }
-    // Arrival cue: the row BREATHES (see BREATHS below) — a primary ring plus a faint
-    // wash fade in and out, repeated, in one continuous pass. A slow alternation
-    // (rather than a fast blink) draws the eye to a row that may already be on
-    // screen without strobing. This is a SINGLE keyframe sequence, so the
-    // alternation comes from the alternating off/on offsets themselves; there is
-    // no `iterations` replay and therefore no hard jump at an iteration
-    // boundary. `ease-in-out` makes every rise and fall symmetric, and both ends
-    // rest on the transparent frame so the cue arrives and departs softly.
-    //
-    // The ring is a `boxShadow`, NOT an outline: outline belongs exclusively to
-    // the persistent focus ring. Animating outline here would override that ring
-    // for the whole cue and, because the cue passes through transparent, would
-    // make a keyboard user's focus indicator blink out entirely (WCAG 2.4.7).
-    // box-shadow also follows the row's own border-radius, so no inline radius
-    // is needed. Runs without `fill`, so every property reverts to its CSS state
-    // when the cue ends. Respects reduced-motion.
+    // Arrival cue: a dedicated overlay owns the static ring/wash while Web
+    // Animations changes opacity only. That keeps the persistent focus outline
+    // untouched and follows the compositor-only motion contract. Runs without
+    // `fill`, so opacity returns to its CSS state when the cue ends.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!reduced && typeof el.animate === 'function') {
-      const on = (offset: number) => ({
-        offset,
-        boxShadow: '0 0 0 1px var(--ui-primary)',
-        backgroundColor: 'color-mix(in oklch, var(--ui-primary) 10%, transparent)',
-      })
-      const off = (offset: number) => ({
-        offset,
-        boxShadow: '0 0 0 1px transparent',
-        backgroundColor: 'transparent',
-      })
+    const cue = el.querySelector<HTMLElement>('[data-field-arrival-cue]')
+    if (!reduced && cue && typeof cue.animate === 'function') {
+      const on = (offset: number) => ({ offset, opacity: 1 })
+      const off = (offset: number) => ({ offset, opacity: 0 })
       // BREATHS breaths of BREATH_MS each. Offsets are derived rather than
       // written out, so retuning either constant keeps every breath an equal
       // slice peaking at its own midpoint (symmetric rise and fall).
@@ -230,7 +211,7 @@ export function useFieldAnchor() {
       for (let i = 0; i < BREATHS; i++) {
         frames.push(on((i + 0.5) / BREATHS), off((i + 1) / BREATHS))
       }
-      const animation = el.animate(
+      const animation = cue.animate(
         frames,
         { duration: BREATHS * BREATH_MS, easing: 'ease-in-out' },
       )

@@ -5,7 +5,7 @@ export type { EnumValue, EnumVariant } from '#imports'
 
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
-import { useResizeObserver } from '@vueuse/core'
+import EnumTablePanel from '../internal/EnumTablePanel.vue'
 
 // Domain component (API docs): renders a field's allowed values. Composed from
 // Nuxt UI primitives + core atoms (InlineCode, InlineMarkdown, both supplied by
@@ -149,34 +149,6 @@ const filterable = computed(() => totalCount.value >= props.filterThreshold)
 // threshold while typing would remove max-height and expand a long table.
 const bounded = computed(() => activeTotalCount.value >= props.filterThreshold)
 
-// `bounded` keeps the page layout stable while filtering, but keyboard chrome
-// belongs only on a box that genuinely scrolls. Measure the rendered element
-// instead of using row count as a second proxy: descriptions and viewport width
-// both change its real height.
-const scrollBox = useTemplateRef<HTMLElement>('scrollBox')
-const scrollable = shallowRef(false)
-const focusable = computed(() => bounded.value && scrollable.value)
-
-function measureOverflow() {
-  const el = scrollBox.value
-  scrollable.value = Boolean(
-    bounded.value
-    && el
-    && el.scrollHeight > el.clientHeight + 1,
-  )
-}
-
-// Coalesce resize bursts into one next-frame measurement; useRafTask owns the
-// frame lifecycle (cancel-on-reschedule, unmount cleanup, sync test fallback).
-const { schedule: scheduleOverflowMeasure } = useRafTask(measureOverflow)
-
-useResizeObserver(scrollBox, scheduleOverflowMeasure)
-onMounted(scheduleOverflowMeasure)
-watch([visibleValues, bounded], () => scheduleOverflowMeasure(), {
-  deep: true,
-  flush: 'post',
-})
-
 // Never retain a filter the reader can no longer see or clear.
 watch(filterable, (value) => {
   if (!value) query.value = ''
@@ -227,85 +199,38 @@ const filterAnnouncement = computed(() => {
       {{ filterAnnouncement }}
     </p>
 
-    <!-- Variant selector: one click to any group, so nothing is buried below a
-         long list. Badges carry per-variant counts. `id` is both the public
-         variant identity and UTabs value; title changes never reset selection. -->
+    <!-- Keep the body in UTabs' content slot so Reka owns the tab/tabpanel ids
+         and ARIA relationship. `id` remains the public selection identity. -->
     <UTabs
       v-if="isVariant"
       v-model="activeId"
       :items="variantTabs"
-      :content="false"
       color="neutral"
       variant="pill"
       size="xs"
       class="w-full"
+    >
+      <template #content>
+        <EnumTablePanel
+          :values="visibleValues"
+          :when="activeVariant?.when"
+          :bounded="bounded"
+          :label="label"
+          :default-value="defaultValue"
+          :default-label="defaultLabel"
+          :empty-label="emptyLabel"
+        />
+      </template>
+    </UTabs>
+
+    <EnumTablePanel
+      v-else
+      :values="visibleValues"
+      :bounded="bounded"
+      :label="label"
+      :default-value="defaultValue"
+      :default-label="defaultLabel"
+      :empty-label="emptyLabel"
     />
-
-    <!-- Applicability caption: the tab title names the group, this sentence
-         says when you are in it. Neutral, never amber — the warning ladder
-         belongs to the field row this table nests inside, and one more amber
-         object there would flatten that grading. -->
-    <p
-      v-if="activeVariant?.when"
-      data-enum-when
-      class="wrap-anywhere min-w-0 text-xs leading-relaxed text-muted"
-    >
-      <InlineMarkdown :text="activeVariant.when" />
-    </p>
-
-    <!-- The authored active list controls the stable max-height; DOM overflow
-         controls keyboard chrome. Filtering therefore never expands a long
-         table, while a now-short/non-scrolling result leaves the tab order.
-         Nothing inside a genuinely scrolling box is focusable, so that region
-         itself takes a named, focus-ringed tab stop. -->
-    <div
-      ref="scrollBox"
-      data-enum-scroll
-      class="overflow-hidden rounded-lg border border-default"
-      :class="bounded
-        ? [
-          'max-h-80 overflow-y-auto',
-          focusable
-            ? 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
-            : '',
-        ]
-        : ''"
-      :tabindex="focusable ? 0 : undefined"
-      :role="focusable ? 'group' : undefined"
-      :aria-label="focusable ? label : undefined"
-    >
-      <!-- One shared grid for the whole table: the value column is sized once,
-           to the widest code across all rows (capped at 12rem), so every row's
-           description starts at the same x. Rows use subgrid to inherit that
-           single column track instead of each computing its own fit-content. -->
-      <dl
-        v-if="visibleValues.length"
-        class="grid grid-cols-[fit-content(12rem)_1fr] gap-x-4 divide-y divide-default"
-      >
-        <div
-          v-for="item in visibleValues"
-          :key="item.value"
-          class="col-span-2 grid grid-cols-subgrid items-baseline gap-y-1 bg-muted/40 px-3 py-2.5"
-        >
-          <dt class="min-w-0">
-            <InlineCode class="break-all">{{ item.value }}</InlineCode>
-            <!-- Default marker — same uppercase tag language as the field
-                 row's DEFAULT lead-in, so scanning the table answers "which
-                 one do I get if I omit this?" without looking back up. -->
-            <span
-              v-if="defaultValue !== undefined && item.value === defaultValue"
-              class="ms-2 text-xs font-medium uppercase tracking-wide text-dimmed"
-            >{{ defaultLabel }}</span>
-          </dt>
-          <dd v-if="item.description" class="min-w-0 text-sm leading-relaxed text-muted">
-            <InlineMarkdown :text="item.description" />
-          </dd>
-        </div>
-      </dl>
-
-      <p v-else class="bg-muted/40 px-3 py-4 text-sm text-dimmed">
-        {{ emptyLabel }}
-      </p>
-    </div>
   </div>
 </template>
