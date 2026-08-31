@@ -1,12 +1,11 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-08-31T03:27:54.412Z",
+  "lastRunAt": "2026-08-31T23:22:00.297Z",
   "lastPicked": [
-    "api-docs-field-item",
-    "api-docs-enum-table",
-    "api-docs-lifecycle-badge",
-    "api-docs-relation-source-path"
+    "api-docs-field-annotation",
+    "foundation-inline-markdown",
+    "api-docs-webhook-protocol"
   ],
   "items": {
     "foundation-copy-button": {
@@ -70,14 +69,14 @@
       "findings": []
     },
     "foundation-inline-markdown": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
-        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -95,7 +94,7 @@
           }
         ]
       },
-      "notes": "co-review:本次改动移除 InlineMarkdown 对 InlineCode 的冗余 translate 外置传参,行为不变——inline-markdown.spec.ts:31 仍断言 code token 渲染 translate=\"no\"(现经原子默认满足)。parse.ts 的协议白名单、intraword 星号降级与反斜杠保留逻辑复核无回归;data-display.md 的 InlineMarkdown 段未触碰。",
+      "notes": "round 3 复审 clean:安全白名单(协议 allowlist、raw HTML 不渲染)、intraword 星号降级、反斜杠保留均有 pinned 测试矩阵;marked 仍解析为 17.0.6,dependency evidence 前提未变;universal claim「Safe inline markdown subset」核证通过,无新 finding。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -586,14 +585,14 @@
       "findings": []
     },
     "api-docs-field-annotation": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -604,7 +603,7 @@
         ],
         "scopeDigest": "84c01ca8c21833a19aaabe149f4150c436dd4f93085660d61df7318fab0f9178"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审 clean:双绑定(field/field-ref)、跨页 {page}#{path} 链接、未命中降级+dev 告警、fieldRequiredState 共享派生均与 reference 契约一致且有测试锚定;两条 wont-fix finding(trailing-slash 归一化重复、labels spread 惯例)维持人工判定,无新 finding。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -807,34 +806,31 @@
       ]
     },
     "api-docs-webhook-protocol": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
-          "kits/api-docs/components/CodeBlock.vue",
-          "kits/api-docs/components/FieldGroup.vue",
           "kits/api-docs/components/WebhookProtocol.vue",
           "kits/api-docs/internal/FactList.vue",
           "kits/api-docs/internal/FactRow.vue",
           "kits/api-docs/utils/webhook-protocol.ts",
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/webhook-protocol.md",
-          "scripts/check-registry-consumer.mjs",
           "tests/component/fact-list.spec.ts",
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "d96f04c17f68eba56f4d7953a2f2ef173cc92c728aec6f85f858ab9f97f17e2d"
+        "scopeDigest": "d3a4f2e0111417f3df1dc95a7a4f55c47743b6c49cea412a93580ab810314c78"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审 clean:section 省略、ACK 三语义、fact format 明确 opt-in、schedule 折叠(含阈值 1/非法值退化)与 Label in Name + sr-only 全序列均有测试与 demo 变体锚定;「绝不渲染空卡片」「绝不由 value 内容触发」两条 universal claim 核证通过,无新 finding。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
