@@ -216,6 +216,11 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     class="@container/field relative rounded-md border-b border-default py-3.5 outline-hidden last:border-b-0 focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
     :class="anchor.SCROLL_MARGIN_CLASS"
   >
+    <span
+      data-field-arrival-cue
+      class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
+      aria-hidden="true"
+    />
     <!-- The summary follows the developer's scan order: identity answers what
          the field is, whether it may be omitted and how mature it is; the
          trailing fact covers fallback behavior (default). Container queries
@@ -225,7 +230,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         v-if="path"
         type="button"
         :aria-label="anchorLabel"
-        class="absolute -start-6 top-0 hidden h-5 items-center rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:flex"
+        class="absolute -start-6 top-0 hidden h-5 touch-manipulation items-center rounded-sm p-0.5 text-dimmed opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary group-hover/field:opacity-100 lg:pointer-fine:flex"
         :class="{ 'opacity-100': isActive || anchor.copied.value, 'text-primary': anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -247,9 +252,10 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           <code
             class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
             :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
+            translate="no"
           >{{ name }}</code>
-          <span class="shrink-0 font-mono text-xs text-muted">{{ type }}</span>
-          <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ format }}</span>
+          <span class="shrink-0 font-mono text-xs text-muted" translate="no">{{ type }}</span>
+          <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed" translate="no">{{ format }}</span>
           <span
             v-if="requiredState || lifecycle"
             data-field-qualifiers
@@ -288,7 +294,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         v-if="path"
         type="button"
         :aria-label="anchorLabel"
-        class="-mt-1.5 -me-1 inline-flex shrink-0 items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
+        class="-mt-1.5 -me-1 inline-flex shrink-0 touch-manipulation items-center rounded-sm p-2 text-dimmed transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:pointer-fine:hidden"
         :class="{ 'text-primary': isActive || anchor.copied.value }"
         @click="onCopyLink"
       >
@@ -493,7 +499,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <template #default="{ open }">
         <button
           type="button"
-          class="flex items-center gap-1.5 rounded-sm text-sm font-medium text-primary transition-colors hover:text-primary/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary transition-colors hover:text-primary/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"

@@ -293,6 +293,28 @@ describe('filter live region', () => {
 })
 
 describe('variant selection', () => {
+  it('links every tab to its tabpanel', async () => {
+    const wrapper = await mountSuspended(EnumTable, { props: { variants } })
+    await wrapper.vm.$nextTick()
+
+    const tabs = wrapper.findAll('[role="tab"]')
+    const panels = wrapper.findAll('[role="tabpanel"]')
+
+    expect(tabs).toHaveLength(2)
+    expect(panels).toHaveLength(2)
+    for (const [index, tab] of tabs.entries()) {
+      expect(tab.attributes('aria-controls')).toBe(panels[index]?.attributes('id'))
+      expect(panels[index]?.attributes('aria-labelledby')).toBe(tab.attributes('id'))
+    }
+  })
+
+  it('does not warn when authored ids are valid', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSuspended(EnumTable, { props: { variants } })
+
+    expect(warn).not.toHaveBeenCalled()
+  })
+
   it('warns when authored ids are duplicated', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     await mountSuspended(EnumTable, {
@@ -351,7 +373,7 @@ describe('variant selection', () => {
     // A reused instance whose field data shrank to a single group would
     // otherwise strand the selector on a gone tab and show the empty state.
     await wrapper.setProps({ variants: [variants[0]] })
-    expect(wrapper.text()).toContain('BUILDING')
+    await vi.waitFor(() => expect(wrapper.text()).toContain('BUILDING'))
     expect(wrapper.text()).not.toContain('No matching values')
 
     // The raw selection is reset, not merely hidden by a computed fallback.

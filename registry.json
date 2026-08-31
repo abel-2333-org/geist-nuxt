@@ -335,6 +335,7 @@
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-raf-task"],
       "files": [
         { "path": "kits/api-docs/components/EnumTable.vue", "target": "app/components/EnumTable.vue" },
+        { "path": "kits/api-docs/internal/EnumTablePanel.vue", "target": "app/internal/EnumTablePanel.vue" },
         { "path": "kits/api-docs/utils/enum.ts", "target": "app/utils/enum.ts" }
       ]
     },

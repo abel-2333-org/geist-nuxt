@@ -44,6 +44,34 @@ describe('FieldItem summary layout', () => {
     expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
+  it('protects API identifiers and keeps actions usable across pointer types', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'merchantAccountId',
+        type: 'string',
+        format: 'uuid',
+        path: 'merchantAccountId',
+        children: [{ name: 'nested', type: 'string' }],
+      },
+    })
+
+    expect(wrapper.get('[data-field-identity]').findAll('[translate="no"]').map(node => node.text()))
+      .toEqual(['merchantAccountId', 'string', 'uuid'])
+
+    const actions = wrapper.findAll('button')
+    expect(actions).toHaveLength(3)
+    actions.forEach(action => expect(action.classes()).toContain('touch-manipulation'))
+
+    const gutterAnchor = actions.find(action => action.classes().includes('absolute'))
+    const trailingAnchor = actions.find(action => action.classes().includes('-mt-1.5'))
+    expect(gutterAnchor?.classes()).toContain('lg:pointer-fine:flex')
+    expect(trailingAnchor?.classes()).toContain('lg:pointer-fine:hidden')
+
+    const cue = wrapper.get('[data-field-arrival-cue]')
+    expect(cue.attributes('aria-hidden')).toBe('true')
+    expect(cue.classes()).toEqual(expect.arrayContaining(['opacity-0', 'ring-primary']))
+  })
+
   it('keeps requiredness beside the type when no trailing facts exist', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: { name: 'amount', type: 'integer', required: true },
