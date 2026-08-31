@@ -1,9 +1,11 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-08-27T23:21:08.509Z",
+  "lastRunAt": "2026-08-31T03:27:54.412Z",
   "lastPicked": [
-    "api-docs-schema-composition",
+    "api-docs-field-item",
+    "api-docs-enum-table",
+    "api-docs-lifecycle-badge",
     "api-docs-relation-source-path"
   ],
   "items": {
@@ -414,14 +416,14 @@
       ]
     },
     "api-docs-lifecycle-badge": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
+        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -438,9 +440,9 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "88b6769959abca80ccdd877f96448acee3436a502d8949792ac4cd32c5bcbd6d"
+        "scopeDigest": "841dcb8e9c4b6863658e3638c71c396630b88ca26f578b48738e80fbf86e1e5b"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "affected co-review：FieldItem 的结构测试新增技术标识、pointer modality 与 arrival cue 契约；LifecycleBadge 实现、公开契约和 registry topology 未改变，既有 verified 结论保持，无新增 finding。",
       "findings": []
     },
     "api-docs-method-badge": {
@@ -488,28 +490,29 @@
       "findings": []
     },
     "api-docs-enum-table": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
-        "itemDigest": "5ce9c202a58449c2bdb7f0273772d39cab26a7c3312728264663a1bb7952464a",
+        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
+        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
+        "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
           "foundation/composables/useRafTask.ts",
           "kits/api-docs/components/EnumTable.vue",
+          "kits/api-docs/internal/EnumTablePanel.vue",
           "kits/api-docs/utils/enum.ts",
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "b7410400b50d49ff9b25e2647a1c884b6e0ebecc1d340b999a27ef5e18820e2b"
+        "scopeDigest": "f9b32bb1aa9e6ca5917fa2f95676cce270b086a8d0bad4b4e70c9dbc8d3bb04b"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "Round 3 复审修复 UTabs tab 与 tabpanel 的 ARIA 关系；面板抽为同一 registry item 内部实现并保留真实 overflow 探测、筛选与默认值语义。补齐合法 variant id 不告警测试及 tab/panel 关联测试，独立复审无新增 finding。",
       "findings": []
     },
     "api-docs-field-group": {
@@ -535,14 +538,14 @@
       "findings": []
     },
     "api-docs-field-item": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
+        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
         "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -555,9 +558,9 @@
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-item-structure.spec.ts"
         ],
-        "scopeDigest": "3e5b07417f0014f2f2951fd6f49a523e6ee87d25729f664eee42812171806cba"
+        "scopeDigest": "eda896e4c9f611718f0059aac3ef6784e5cd72dd7bf7f8b8f53e8be9eafe762a"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "Round 3 复审修复字段标识翻译保护、粗指针宽屏锚点可达性与触控操作提示；到达 cue 改由独立 overlay 承载静态 ring/wash，Web Animations 仅改变 opacity，保留行级 focus outline。focused tests、全量 component tests、typecheck 与 build 均通过。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -877,14 +880,14 @@
       ]
     },
     "api-docs-relation-source-path": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-27T23:21:08.509Z",
-      "change": "none",
+      "round": 3,
+      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
-        "headSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
+        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
+        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -894,9 +897,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "7889eaea0683c49ce81ad2d3dff81a1cb2855f45efe2637425a17a4bcbfde453"
+        "scopeDigest": "57aea9b84600b45ccc075984d3fad7c1fd221a1b372f85e3900ea6a5a7ed5173"
       },
-      "notes": "首次审计判 clean:三态降级(to→ULink / field→委托 goTo(focus) 的 a / 均缺→不可聚焦 span)、可见节点插入 sr-only connector 的单真源 accessible name、fragment 单次编码、modified-click 保留原生行为、技术段 translate=no,均与 index.md「RelationSourcePath 的解析边界」一致;tests 与 384/576px gallery 回流覆盖完整。",
+      "notes": "affected co-review：共享 useFieldAnchor 的到达动画改为独立 cue overlay 上的 opacity 动画；RelationSourcePath 的三态降级、fragment 编码、modified-click 与 focus 行为保持，focused tests 通过，无新增 finding。",
       "findings": []
     }
   }
