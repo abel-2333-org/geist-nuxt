@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-08-31T23:22:00.297Z",
+  "lastRunAt": "2026-09-01T23:19:27.521Z",
   "lastPicked": [
-    "api-docs-field-annotation",
-    "foundation-inline-markdown",
-    "api-docs-webhook-protocol"
+    "foundation-inline-code",
+    "foundation-annotation-popover",
+    "foundation-doc-annotation"
   ],
   "items": {
     "foundation-copy-button": {
@@ -36,14 +36,14 @@
       "findings": []
     },
     "foundation-inline-code": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
-        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -65,7 +65,7 @@
           }
         ]
       },
-      "notes": "把 translate=\"no\" 纳入原子契约:内容是字面值(标识符/示例值/枚举成员),与 CodeBlock 同因不该被机器翻译;此前 InlineMarkdown 与 FactRow 各自外置补丁、而 EnumTable/FieldItem 直连消费点无保护,行为不一致。原子内建后消费者仍可经 fallthrough translate 覆盖;收敛 InlineMarkdown 的冗余传参;新增 inline-code.spec.ts 锁默认、覆盖与主题校准三条契约;data-display.md 同步补契约描述。",
+      "notes": "round 3 复审:原子自 round 2 内建 translate=\"no\" 契约后零变更;ProseCode 委托 + 两处 Geist 校准(rounded-sm / text-code)与 data-display.md 契约一致,inline-code.spec.ts 三条契约全绿;structured-relations 消费点经 fallthrough class/translate 正常扩展;横扫无簇外重复,记 clean。",
       "findings": []
     },
     "foundation-inline-markdown": {
@@ -200,14 +200,14 @@
       "findings": []
     },
     "foundation-annotation-popover": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-18T00:46:33.959Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "220f7f370d5c72d592345808764453c883c273d1",
-        "headSha": "8239970b935e6d9f724c276c3bf849b0832ee1e0",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -218,7 +218,7 @@
         ],
         "scopeDigest": "ea76805b31795d6c7d818236670983192489a095c5001e4ac40b07ebe9d80bfc"
       },
-      "notes": "复审壳的 click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权(keyboard 进面板 / hover 不夺焦 / 关闭仅在焦点确实丢失时归还 trigger)、disabled 定时器卫生与 loading/error chrome,与 overlays.md 契约逐条一致;381 行 focused spec 全绿;横扫无簇外重复(SiteSearch 的 setTimeout 是搜索 debounce,与 hover 开合所有权不同形)。无回归,记 clean。",
+      "notes": "round 3 复审:壳自 round 2 零变更;click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权(keyboard 进面板/hover 不夺焦/关闭仅在焦点确实丢失时归还)、forward-Tab 接管、disabled 定时器卫生与 loading/error chrome 逐条对照 overlays.md 契约与 381 行 focused spec,无回归;源码内 universal claims(never yank focus 等)均有对应测试反证路径;横扫确认 hover 开合定时器模式全仓唯一;labels spread 合并模式属家族惯例,已由 wont-fix finding f-fd7282669072(api-docs-field-annotation)覆盖,不重复记录,记 clean。",
       "findings": []
     },
     "foundation-term-annotation": {
@@ -252,14 +252,14 @@
       ]
     },
     "foundation-doc-annotation": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
-        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -269,7 +269,7 @@
         ],
         "scopeDigest": "8bbe68267cd46d033a6078a520cb99b5570f34963f14e7aefcda1ff611ce43fc"
       },
-      "notes": "复审全部四维:load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts 一致;a11y/token/明暗依托壳组件,无硬编码;无 finding,达标记 clean。",
+      "notes": "round 3 复审:自 round 2 零变更;load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化即时重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts(缓存复用/stale 响应/retry 恢复/wrap-anywhere)一致;requestToken 与 useFieldAnchor 的 navigationToken 同为 token 失效概念但形状不同(fetch 结果守卫 vs 多步导航中止),两处抽取属投机性抽象,不记 finding;a11y/token/明暗依托壳组件,记 clean。",
       "findings": []
     },
     "foundation-split-pane-handle": {
