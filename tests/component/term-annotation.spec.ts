@@ -3,9 +3,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick, reactive } from 'vue'
 import TermAnnotation from '../../foundation/components/TermAnnotation.vue'
-import { provideGlossary } from '../../foundation/composables/useGlossary'
+import { provideGlossary, type GlossaryMap } from '../../foundation/composables/useGlossary'
 
 let wrapper: VueWrapper | undefined
 
@@ -94,5 +94,26 @@ describe('TermAnnotation glossary lookup', () => {
     expect(warn).toHaveBeenCalledWith(
       '[TermAnnotation] no glossary entry for id "constructor" — rendering plain text',
     )
+  })
+
+  it('resolves when a missing id is added to a reactive glossary', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const glossary = reactive<GlossaryMap>({})
+    const Host = defineComponent({
+      components: { TermAnnotation },
+      setup() {
+        provideGlossary(glossary)
+      },
+      template: '<TermAnnotation id="late">Late term</TermAnnotation>',
+    })
+    wrapper = await mountSuspended(Host)
+
+    expect(wrapper.find('button').exists()).toBe(false)
+    expect(warn).toHaveBeenCalledOnce()
+
+    glossary.late = { term: 'Late term', definition: 'Added after mount.' }
+    await nextTick()
+
+    expect(wrapper.get('button').text()).toBe('Late term')
   })
 })

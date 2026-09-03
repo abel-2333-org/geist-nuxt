@@ -41,7 +41,11 @@ const glossary = useGlossary()
 // otherwise resolve to the inherited function and render a live trigger with
 // no entry behind it instead of degrading to plain text.
 const resolved = computed<GlossaryEntry | undefined>(
-  () => props.entry ?? (props.id && Object.hasOwn(glossary, props.id) ? glossary[props.id] : undefined),
+  () => props.entry ?? (
+    props.id && Reflect.has(glossary, props.id) && Object.hasOwn(glossary, props.id)
+      ? glossary[props.id]
+      : undefined
+  ),
 )
 
 // Degrade diagnostics, shared with FieldAnnotation: warn only for an
