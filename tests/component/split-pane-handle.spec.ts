@@ -223,6 +223,27 @@ describe('SplitPane separator relationship', () => {
     expect(separator.attributes('aria-valuenow')).toBe('416')
   })
 
+  it('resets to the live defaultSize after the prop changes', async () => {
+    // useSplitPane re-reads a getter default on every reset; a snapshot would
+    // keep Enter / double-click pinned to the mount-time value.
+    const wrapper = await mountSuspended(SplitPane, {
+      props: {
+        enabledFrom: 'always',
+        storageKey: 'test-live-default',
+        defaultSize: 320,
+      },
+      slots: { start: 'Start pane', end: 'End pane' },
+    })
+    const separator = wrapper.get('[role="separator"]')
+
+    await separator.trigger('keydown', { key: 'ArrowLeft' })
+    expect(separator.attributes('aria-valuenow')).toBe('344')
+
+    await wrapper.setProps({ defaultSize: 400 })
+    await separator.trigger('keydown', { key: 'Enter' })
+    expect(separator.attributes('aria-valuenow')).toBe('400')
+  })
+
   it('keeps the pane finite when End is pressed while the clamp is unbounded', async () => {
     // No maxSize and no delivered container measurement → the fixed-mode max
     // clamp is Infinity, which must never surface as aria-valuemax="Infinity".

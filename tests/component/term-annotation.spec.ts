@@ -3,7 +3,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
+import { defineComponent, nextTick, reactive } from 'vue'
 import TermAnnotation from '../../foundation/components/TermAnnotation.vue'
+import { provideGlossary, type GlossaryMap } from '../../foundation/composables/useGlossary'
 
 let wrapper: VueWrapper | undefined
 
@@ -67,5 +69,51 @@ describe('TermAnnotation degrade diagnostics', () => {
 
     expect(wrapper.text()).toBe('Plain phrase')
     expect(warn).not.toHaveBeenCalled()
+  })
+})
+
+describe('TermAnnotation glossary lookup', () => {
+  // The glossary is a plain object: an id that names an Object.prototype
+  // member must still count as unresolved, not resolve to the inherited
+  // function and render a trigger with no entry behind it.
+  it('degrades an id that only matches an inherited object member', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const Host = defineComponent({
+      components: { TermAnnotation },
+      setup() {
+        provideGlossary({
+          'sliding-window': { term: 'Sliding window', definition: 'Rolling interval.' },
+        })
+      },
+      template: '<TermAnnotation id="constructor">constructor</TermAnnotation>',
+    })
+    wrapper = await mountSuspended(Host)
+
+    expect(wrapper.text()).toBe('constructor')
+    expect(wrapper.find('button').exists()).toBe(false)
+    expect(warn).toHaveBeenCalledWith(
+      '[TermAnnotation] no glossary entry for id "constructor" — rendering plain text',
+    )
+  })
+
+  it('resolves when a missing id is added to a reactive glossary', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const glossary = reactive<GlossaryMap>({})
+    const Host = defineComponent({
+      components: { TermAnnotation },
+      setup() {
+        provideGlossary(glossary)
+      },
+      template: '<TermAnnotation id="late">Late term</TermAnnotation>',
+    })
+    wrapper = await mountSuspended(Host)
+
+    expect(wrapper.find('button').exists()).toBe(false)
+    expect(warn).toHaveBeenCalledOnce()
+
+    glossary.late = { term: 'Late term', definition: 'Added after mount.' }
+    await nextTick()
+
+    expect(wrapper.get('button').text()).toBe('Late term')
   })
 })

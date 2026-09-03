@@ -1,11 +1,12 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-01T23:19:27.521Z",
+  "lastRunAt": "2026-09-03T02:07:57.687Z",
   "lastPicked": [
-    "foundation-inline-code",
-    "foundation-annotation-popover",
-    "foundation-doc-annotation"
+    "foundation-term-annotation",
+    "foundation-split-pane-handle",
+    "foundation-split-pane",
+    "api-docs-code-rail"
   ],
   "items": {
     "foundation-copy-button": {
@@ -222,25 +223,26 @@
       "findings": []
     },
     "foundation-term-annotation": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-17T02:38:47.574Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "0df36f091517d1e173b50075d0ee6bb38c4aa087",
-        "headSha": "68913a70b34a614262bc5de3bc57e7b0174031a9",
+        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
+        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
           "foundation/components/TermAnnotation.vue",
+          "foundation/composables/useGlossary.ts",
           "references/components/overlays.md",
           "tests/component/annotation-forms.spec.ts",
           "tests/component/term-annotation.spec.ts"
         ],
-        "scopeDigest": "eb521a0d3e6004c7e866923d48898b9d0a65e8c5ecf2b67bec7b74c3a0c5e9e4"
+        "scopeDigest": "0df849eef4f0d09f2fcca4a06bc2ca3e274688980cbea93c3cbb57d96d80a29c"
       },
-      "notes": "修复家族诊断策略分歧:references/kits/api-docs/index.md 声称 Term/Field 共用「降级 + 告警」,但 TermAnnotation 告警注册在 import.meta.dev 下(组件测试环境 dev=false,不可断言),且对未传 id 的直传 entry 未命中场景也发误导性 glossary 告警。对齐 FieldAnnotation:仅未解析 id 告警、注册条件 dev || test,补两条策略测试(未解析 id 告警一次、无 id 静默);组件其余四维复审无问题。",
+      "notes": "Round 3 复审：修复 glossary 原型链查找并保留 reactive late-add 响应性——先用 Reflect.has 订阅 key 存在性，再用 Object.hasOwn 过滤继承成员；补充 constructor 降级与缺失条目动态注入两条 DOM 回归测试。entry 直传、labels 合并、to 深链接关闭后导航、wrap-anywhere 溢出与家族诊断策略复核无回归。",
       "findings": [
         {
           "id": "f-084ace82f441",
@@ -273,14 +275,14 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
-        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
+        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
+        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -293,20 +295,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "229aac6b7dfd5b1f414715ee9cfd4711033c3528151fd042621ed5f28f5d03c8"
+        "scopeDigest": "ace97508ec782c7f4099c56232f0005e5c2e5f13254271b1ddf084af68b35d96"
       },
-      "notes": "Round 2 复审:handle 自身零改动——window-splitter 语义、键盘映射(仅吞已处理键)、disabled 惰性 spacer、grip/edge 双形态与命名 group 防泄漏均与测试和 reference 一致;其发出的 coarse 意图经本轮 SplitPane/CodeRail 修改后被全部三个消费方(含 SidebarNav)以 3× 惯例统一消费,'具体步长由父组件决定'的公开 claim 保持准确。",
+      "notes": "Round 3 复审：handle 自身零改动——window-splitter ARIA 面、键盘映射只吞已处理键、disabled 惰性 spacer、grip/edge 双形态、命名 group 防泄漏与 step(delta, coarse)/jump 意图事件均与 focused spec 及 references 一致；三个消费方的变更未造成 handle 回归。",
       "findings": []
     },
     "foundation-split-pane": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
-        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
+        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
+        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -321,9 +323,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "cfa328e095687400b7a9385dd691ffdd2cbc72eca5b4dd448fc8559f335d20a2"
+        "scopeDigest": "d38c5e39e8eb1521932da3a95880abf36f203856b355ab53bd1b4385dba7e271"
       },
-      "notes": "Round 2 复审:消费 step(delta, coarse) 支持 Shift 3× 粗步进(ratio 0.04→0.12、fixed 24→72px);修复 fixed 模式无 maxSize 且容器未测量时的非法 Infinity ARIA/布局值,未测量时 aria-valuemax 回退当前值且 End 暂不跳转,待真实 clamp 测得后再启用上界跳转;断点门控、SSR 水合、sticky 把手、min/max 钳制与 MDC 友好 prop 契约复核无回归,DOM 黑盒测试覆盖静态与键盘路径,gate 全绿。",
+      "notes": "Round 3 复审：将传给 useSplitPane 的 default 从挂载时快照改为 getter，使 Enter/双击复位跟随运行时 defaultSize，并补 DOM 黑盒测试。断点门控、SSR 水合、sticky 把手、min/max 钳制、未测量时 aria-valuemax 回退与 End 惰性、MDC 友好 prop 契约复核无回归。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -734,14 +736,14 @@
       "findings": []
     },
     "api-docs-code-rail": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-26T01:53:55.505Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "898c79893333e91e64d50b83a4f145c7199c9445",
-        "headSha": "97c4171f2704d0eadd5f51af37e3414655b02e15",
+        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
+        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -758,9 +760,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "119ea38a7fce2d2a5d7c72aecacc412723c39f56bdccd25f2fb5ad112e27d8df"
+        "scopeDigest": "dc7890f64433ce93b0c052990f74fd023ffc173e03a8d239728c1990cba26dbf"
       },
-      "notes": "Round 2 复审:消费 SplitPaneHandle 的 step(delta, coarse),Shift 以 3× 步长(0.04→0.12)粗调,与 SidebarNav/SplitPane 惯例一致;收窄重分配注释的 universal claim(无空洞承诺以 minPane 地板为界,自身测试即断言 48px 自然高仍获 120px 预算);内容优先重分配、有效 aria 边界、观察目标增量同步与 stacked/fit/overflow 三态契约复核无回归,focused + 全量 gate 通过。",
+      "notes": "Co-review（SplitPane.vue 在其 scope 内被修改）：CodeRail 不消费 SplitPane 组件，只共享 SplitPaneHandle/useSplitPane/useBreakpointGate/useRafTask；SplitPane 的 live default 修复与 TermAnnotation 修复均不改变 CodeRail 行为。复核内容优先重分配、有效 ARIA 边界、RO+MO 观察目标同步、stacked/fit/overflow 三态与 Shift 3× 粗步进，无回归。",
       "findings": []
     },
     "api-docs-site-search": {
