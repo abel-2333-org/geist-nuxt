@@ -133,7 +133,10 @@ const {
   reset,
 } = useSplitPane({
   key: props.storageKey || `split-${id}`,
-  default: props.defaultSize ?? (isRatio.value ? 0.5 : 320),
+  // A getter, not a snapshot: useSplitPane re-reads `default` on every reset
+  // (Enter / double-click), so a `defaultSize` that changes after mount resets
+  // to the live prop instead of the mount-time value.
+  default: () => props.defaultSize ?? (isRatio.value ? 0.5 : 320),
   min: minClamp,
   max: maxClamp,
 })

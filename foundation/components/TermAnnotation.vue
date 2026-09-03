@@ -36,8 +36,12 @@ const t = computed<Required<Pick<TermAnnotationLabels, 'category' | 'learnMore'>
 }))
 
 const glossary = useGlossary()
+// Own-property lookup: the glossary is a plain object, so an id that happens
+// to name an Object.prototype member (`constructor`, `toString`, …) would
+// otherwise resolve to the inherited function and render a live trigger with
+// no entry behind it instead of degrading to plain text.
 const resolved = computed<GlossaryEntry | undefined>(
-  () => props.entry ?? (props.id ? glossary[props.id] : undefined),
+  () => props.entry ?? (props.id && Object.hasOwn(glossary, props.id) ? glossary[props.id] : undefined),
 )
 
 // Degrade diagnostics, shared with FieldAnnotation: warn only for an
