@@ -1,12 +1,11 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-03T02:07:57.687Z",
+  "lastRunAt": "2026-09-04T01:50:37.026Z",
   "lastPicked": [
-    "foundation-term-annotation",
-    "foundation-split-pane-handle",
-    "foundation-split-pane",
-    "api-docs-code-rail"
+    "api-docs-sidebar-nav",
+    "api-docs-method-badge",
+    "foundation-split-pane-handle"
   ],
   "items": {
     "foundation-copy-button": {
@@ -276,13 +275,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
-        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
+        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
+        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -295,9 +294,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "ace97508ec782c7f4099c56232f0005e5c2e5f13254271b1ddf084af68b35d96"
+        "scopeDigest": "39c27c83c2f0031efd95215861c43c4ffa3862e79af098693caa5cac0b228127"
       },
-      "notes": "Round 3 复审：handle 自身零改动——window-splitter ARIA 面、键盘映射只吞已处理键、disabled 惰性 spacer、grip/edge 双形态、命名 group 防泄漏与 step(delta, coarse)/jump 意图事件均与 focused spec 及 references 一致；三个消费方的变更未造成 handle 回归。",
+      "notes": "required co-review:SidebarNav.vue 在其 scope 内被改,改动仅为 active 派生位置(模板→computed),SplitPaneHandle 的 props/emits(value/min/max/controls/step/jump/drag-start)、edge 形态与 sidebar-nav.spec 的 resize 用例(键盘步进、Home/End、Enter/双击复位、Escape 回滚)全部保持,handle 自身零改动,无回归。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -447,14 +446,14 @@
       "findings": []
     },
     "api-docs-method-badge": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
+        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -473,7 +472,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "6ccab8886240bf0ccbfa7e70eedea4b65677974cf6eff5fb0c8b40fe31e42b30",
+        "scopeDigest": "039c061894a8c31c8748e8939e29736e1797d4452c5abc32f448101a8f5b0573",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -487,7 +486,7 @@
           }
         ]
       },
-      "notes": "affected co-review：共享 scope 中 SidebarNav 改用 SplitPaneHandle edge appearance，gallery/reference 同步键盘与持久化说明；HttpMethodBadge 的归一化、色调、attrs 与 translate=no 链路均未改变，无新 finding。复审追加:SidebarNav 删除 handle 已覆盖的 pointer 死守卫与冗余 select-none、default 改传 getter,不触及 HttpMethodBadge 任何链路。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审 clean:trim+uppercase 归一化与 UNKNOWN 回落、五色 tone 校准经 SemanticBadge 原子、translate=no 透传链路、size 默认与 LifecycleBadge/WebhookBadge 对齐,均与 http-method-badge.spec、data-display.md、kit index 一致;反向横扫确认 preset→SemanticBadge 包装形态仅 HttpMethodBadge/WebhookBadge/LifecycleBadge 三处且已按 index.md「平行原子」裁定,无新 finding。SidebarNav 本轮改动(active 派生位置)不触及 method badge 任何链路。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -844,29 +843,31 @@
       ]
     },
     "api-docs-sidebar-nav": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
+        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
         "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
         "scope": [
+          "app/components/demo/api-docs/DocsShell.vue",
           "app/pages/kits/api-docs/sidebar-nav.vue",
           "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useRafTask.ts",
           "foundation/composables/useSplitPane.ts",
+          "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/SidebarNav.vue",
           "kits/api-docs/internal/SidebarScenarioTags.vue",
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "0341a0d0fc54937796dbb78a1fa8ed478962c12fd7b38a787df3633c77917bc3"
+        "scopeDigest": "4d5b6e54e3c052a879deb2a39364f1e29deeb7128b4e7919fb8fc23a87a11af3"
       },
-      "notes": "采纳并完成原 deferred finding，并进一步共用 foundation SplitPaneHandle：SidebarNav 使用 appearance=edge 保留安静的边缘视觉，aria-controls 绑定真实 nav id，普通/Shift 键步进继续为 16/48px，Home/End、Enter/双击复位与 Escape 拖拽回滚保持完整；useSplitPane 继续统一 cookie-seeded SSR 状态与拖拽行为，registry copy-in 闭包补齐 handle 依赖。focused、全量 component、registry 与 typecheck 通过，原 finding 保持 resolved，无新增 finding。复审追加:useSplitPane cookie 种子加 Number.isFinite 守卫(destr 会把 \"nan\"/\"infinity\" 解析成数字,NaN 可穿透 clamp),恢复旧内联实现的健壮性;default 改 getter 使 Enter/双击复位跟随当前 defaultWidth;删除 handle 已过滤的 pointer 死守卫与被 body userSelect 锁覆盖的 select-none。focused + 全量 component + typecheck 通过,原 finding 保持 resolved。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审:active 派生从模板三次调用 isItemActive(每次 router.resolve)收敛为 resolved computed 内每行一次(实测 50 项导航单次调宽步进 150→0 次 router.resolve),行为契约与 sidebar-nav.spec 全部保持;reference props 表 searchPlaceholder 默认值修正为 `Search…`(aria-label 剥省略号)。搜索三轴过滤、active 单源、IME Esc 守卫、stretched-link、测量式溢出、SplitPaneHandle edge 调宽逐条复核无回归,无新 finding。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
