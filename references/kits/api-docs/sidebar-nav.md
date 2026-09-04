@@ -35,7 +35,7 @@ nav (landmark, 全高无外框列 + 自身滚动区，可拖拽调宽)
 | `sections` | `SidebarNavSection[]` | 向后兼容：扁平板块列表，内部自动包成一个无标题分组。与 `groups` 二选一 |
 | `ariaLabel` | `string` | `<nav>` 地标可访问名，默认 `Documentation` |
 | `searchable` | `boolean` | 是否显示顶部搜索，默认 `true` |
-| `searchPlaceholder` | `string` | 搜索占位符 / aria-label，默认 `Search` |
+| `searchPlaceholder` | `string` | 搜索占位符，默认 `Search…`；同时派生搜索框 aria-label（剥掉结尾省略号，即 `Search`） |
 | `searchShortcut` | `string` | 键盘提示 + 聚焦搜索的按键，默认 `/` |
 | `clearLabel` | `string` | 清除按钮的 aria-label，默认 `Clear search` |
 | `emptyLabel` | `string` | 搜索无结果时的文案，默认 `No matching pages` |
