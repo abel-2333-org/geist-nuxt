@@ -205,6 +205,14 @@ function itemScenarios(item: SidebarNavItem): string[] {
 // string) so aliases, trailing slashes, query strings and i18n-prefixed paths
 // all normalise before matching — raw string comparison misjudges every one
 // of those as inactive.
+//
+// Derived ONCE per item inside the `resolved` computed, never called from the
+// template: the render function re-runs on every width step while dragging
+// the resize handle and on every search keystroke, and each row consumes
+// `active` three times (link, text colour, aria-current) — resolving in the
+// template cost 3 × N `router.resolve` calls per frame. Cached in the computed,
+// a drag frame re-renders without touching the router; only a route, query or
+// data change recomputes.
 const route = useRoute()
 const router = useRouter()
 function isItemActive(item: SidebarNavItem): boolean {
@@ -250,7 +258,13 @@ function resolveSection(section: SidebarNavSection, q: string) {
     section,
     id: section.id ?? slug(section.label),
     kind: section.kind ?? 'guide',
-    items,
+    // Each row carries its derived view state so the template reads plain
+    // fields instead of re-deriving them per render (see `isItemActive`).
+    items: items.map(item => ({
+      item,
+      active: isItemActive(item),
+      scenarios: itemScenarios(item),
+    })),
     total: section.items.length,
     forceOpen: q ? items.length > 0 : false,
   }
@@ -536,17 +550,18 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
                        is driven by `isItemActive` + `group-hover/row` rather than
                        the link's own classes, since the link no longer wraps the
                        text. -->
-                  <!-- Active comes from ONE source (`isItemActive`): it feeds
-                       ULink's :active (background), the text colour AND
-                       aria-current together, so sighted users and screen
-                       readers always agree on the current location. ULink only
-                       emits aria-current from its own route matching, hence
-                       the explicit binding. -->
-                  <li v-for="item in entry.items" :key="item.to ?? item.label" class="group/row relative">
+                  <!-- Active comes from ONE source (`active`, derived by
+                       `isItemActive` inside `resolved`): it feeds ULink's
+                       :active (background), the text colour AND aria-current
+                       together, so sighted users and screen readers always
+                       agree on the current location. ULink only emits
+                       aria-current from its own route matching, hence the
+                       explicit binding. -->
+                  <li v-for="{ item, active, scenarios } in entry.items" :key="item.to ?? item.label" class="group/row relative">
                     <ULink
                       :to="item.to"
-                      :active="isItemActive(item)"
-                      :aria-current="isItemActive(item) ? 'page' : undefined"
+                      :active="active"
+                      :aria-current="active ? 'page' : undefined"
                       :aria-label="item.label"
                       active-class="bg-primary/10"
                       inactive-class="hover:bg-elevated"
@@ -554,7 +569,7 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
                     />
                     <div
                       class="pointer-events-none relative flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors"
-                      :class="isItemActive(item) ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
+                      :class="active ? 'text-primary' : 'text-muted group-hover/row:text-highlighted'"
                     >
                       <!-- Leading: an endpoint shows its HTTP method badge in a
                            fixed-width slot so purpose labels line up regardless
@@ -579,8 +594,8 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
                            Colour stays reserved for the active state. -->
                       <span class="min-w-16 shrink truncate">{{ item.label }}</span>
                       <SidebarScenarioTags
-                        v-if="itemScenarios(item).length"
-                        :scenarios="itemScenarios(item)"
+                        v-if="scenarios.length"
+                        :scenarios="scenarios"
                         :scenarios-label="scenariosLabel"
                         :overflow-label="scenarioOverflowLabel"
                         :separator="scenarioSeparator"
