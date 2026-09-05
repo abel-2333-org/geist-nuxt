@@ -201,6 +201,7 @@ describe('SiteSearch status announcements', () => {
   })
 
   it('announces async loading, empty, failure and successful-result transitions', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const empty = deferred<never[]>()
     const failed = deferred<never[]>()
     const found = deferred<{ label: string, to: string }[]>()
@@ -229,6 +230,9 @@ describe('SiteSearch status announcements', () => {
     failed.reject(new Error('offline'))
     await flushPromises()
     await vi.waitFor(() => expect(status().text()).toBe('Lookup failed'))
+    // The failure leaves an author diagnostic; the visible state alone must not.
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0]?.[0]).toContain('[SiteSearch] Search source failed')
 
     await query('found-query')
     await vi.waitFor(() => expect(status().text()).toBe('Looking…'))
@@ -239,6 +243,7 @@ describe('SiteSearch status announcements', () => {
   })
 
   it('does not announce an async failure while a static option remains available', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const request = deferred<never[]>()
     const search = vi.fn(() => request.promise)
     await mountSearch({
@@ -255,6 +260,22 @@ describe('SiteSearch status announcements', () => {
     await flushPromises()
     expect(palette().text()).toContain('Authentication')
     expect(status().text()).toBe('')
+    expect(warn).toHaveBeenCalledOnce()
+  })
+
+  it('warns through the mounted component when search is provided without searchGroupLabel', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSearch({ search: vi.fn(() => []) })
+
+    expect(warn).toHaveBeenCalledOnce()
+    expect(warn.mock.calls[0]?.[0]).toContain('`searchGroupLabel` is required')
+  })
+
+  it('stays silent when search comes with its group label', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSearch({ search: vi.fn(() => []), searchGroupLabel: 'Content' })
+
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('clears immediately on close and ignores a late request', async () => {

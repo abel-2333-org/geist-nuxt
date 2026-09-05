@@ -251,6 +251,7 @@ async function searchBody(query: string) {
           modal-title="搜索全部文档"
           placeholder="搜索指南与接口…"
           empty-label="没有匹配的结果"
+          :no-results-announcement="(q: string) => `没有与“${q}”匹配的结果`"
           searching-label="正在搜索文档…"
           search-error-label="搜索暂不可用，请稍后重试。"
         />
