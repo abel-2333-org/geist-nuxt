@@ -11,7 +11,8 @@
 // or LifecycleNotice — the consumer places those after the header, so each
 // piece stays independently reusable.
 //
-// Anatomy:  identity row ── badge · mono identifier · [#actions, right-aligned]
+// Anatomy:  identity row ── badge · mono identifier (wraps, does not truncate)
+//                           · [#actions, right-aligned]
 //           heading      ── summary (+ inline <LifecycleBadge> when
 //                           `lifecycle` is set)
 //           #description ── caller copy (component stays copy-agnostic)
@@ -68,15 +69,23 @@ const identifier = computed(() =>
 
 <template>
   <header class="flex flex-col gap-3">
-    <div class="flex min-w-0 items-center gap-3">
+    <!-- Baseline alignment: the badge sits on the identifier's first line
+         whether it renders as one line or wraps; actions stay centered. -->
+    <div class="flex min-w-0 items-baseline gap-3">
       <HttpMethodBadge v-if="props.kind === 'endpoint'" :method="props.method" />
       <WebhookBadge v-else />
 
-      <code translate="no" class="min-w-0 truncate font-mono text-sm text-highlighted">
+      <!-- Wrap, don't truncate: the identifier IS the operation's identity and
+           a webhook has no OperationTarget below to repeat it. On a 375px
+           viewport `truncate` hid the tail of realistic identifiers (e.g.
+           `…/payment_methods/{id}`, `…async_payment_succeeded`) with no
+           tooltip on touch. `wrap-anywhere` lets the mono token break at any
+           character and still shrink inside the flex row. -->
+      <code translate="no" class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">
         {{ identifier }}
       </code>
 
-      <div v-if="$slots.actions" class="ml-auto flex shrink-0 items-center gap-2">
+      <div v-if="$slots.actions" class="ml-auto flex shrink-0 self-center items-center gap-2">
         <slot name="actions" />
       </div>
     </div>
