@@ -22,8 +22,19 @@ export const langPreset: Record<string, string> = {
   shell: 'Shell',
 }
 
-/** Resolve a language id to its display label: overrides → preset → capitalized id. */
+/**
+ * Resolve a language id to its display label: overrides → preset → capitalized id.
+ *
+ * Language ids are matched case-insensitively — `'JSON'`, `'Json'` and
+ * `'json'` all resolve the same preset entry, and an override keyed
+ * `{ Python: 'Python 3' }` applies to `'python'` just as `{ python: … }`
+ * applies to `'Python'`. Callers never have to normalise their keys to hit
+ * the override table; when several keys differ only by case, the exact
+ * lowercase key wins.
+ */
 export function langLabel(id: string, overrides: Record<string, string> = {}): string {
   const key = id.toLowerCase()
-  return overrides[key] ?? langPreset[key] ?? id.charAt(0).toUpperCase() + id.slice(1)
+  const override = overrides[key]
+    ?? Object.entries(overrides).find(([candidate]) => candidate.toLowerCase() === key)?.[1]
+  return override ?? langPreset[key] ?? id.charAt(0).toUpperCase() + id.slice(1)
 }
