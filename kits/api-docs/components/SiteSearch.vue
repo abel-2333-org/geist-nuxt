@@ -115,7 +115,7 @@ watch(searchTerm, (query, _previousQuery, onCleanup) => {
     catch (error) {
       if (active) {
         searchFailed.value = true
-        if (import.meta.dev) {
+        if (import.meta.dev || import.meta.test) {
           console.warn('[SiteSearch] Search source failed:', error)
         }
       }
@@ -156,7 +156,10 @@ watch(
   { flush: 'post', immediate: true },
 )
 
-if (import.meta.dev) {
+// Author diagnostics follow the kit convention (EnumTable, FieldAnnotation,
+// ResponseExample): `import.meta.test` keeps them assertable in the component
+// suite, where `import.meta.dev` is false.
+if (import.meta.dev || import.meta.test) {
   watchEffect(() => {
     if (props.search && !props.searchGroupLabel) {
       console.warn('[SiteSearch] `searchGroupLabel` is required when `search` is provided.')
@@ -329,8 +332,11 @@ const paletteInput = computed(() => ({
           />
         </template>
 
+        <!-- UCommandPalette's own `empty` slot wrapper already carries the
+             size-calibrated padding, centering and muted text; this node only
+             hosts the label and the observation ref. -->
         <template #empty>
-          <div ref="empty" class="py-6 text-center text-sm text-muted">
+          <div ref="empty">
             {{ emptyStateLabel }}
           </div>
         </template>

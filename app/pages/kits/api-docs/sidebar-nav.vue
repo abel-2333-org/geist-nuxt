@@ -173,8 +173,9 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
           trigger-label="搜索全部文档"
           aria-label="搜索全部文档"
           modal-title="搜索 API 文档"
-          placeholder="搜索指南、接口或场景"
+          placeholder="搜索指南、接口或场景…"
           empty-label="没有匹配的文档"
+          :no-results-announcement="(q: string) => `没有匹配“${q}”的文档`"
           scenario-separator="、"
         />
       </div>

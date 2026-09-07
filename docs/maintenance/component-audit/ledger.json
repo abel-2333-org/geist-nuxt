@@ -1,11 +1,13 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-04T01:50:37.026Z",
+  "lastRunAt": "2026-09-05T14:06:15.202Z",
   "lastPicked": [
-    "api-docs-sidebar-nav",
+    "api-docs-site-search",
+    "api-docs-operation-header",
+    "api-docs-event-badge",
     "api-docs-method-badge",
-    "foundation-split-pane-handle"
+    "api-docs-sidebar-nav"
   ],
   "items": {
     "foundation-copy-button": {
@@ -447,13 +449,13 @@
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
-        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
+        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
+        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -472,7 +474,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "039c061894a8c31c8748e8939e29736e1797d4452c5abc32f448101a8f5b0573",
+        "scopeDigest": "1702e7ee1aaf1055997fa58a1bc3add83ca447439522234d0eb9a6b033f2d53e",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -486,7 +488,7 @@
           }
         ]
       },
-      "notes": "round 3 复审 clean:trim+uppercase 归一化与 UNKNOWN 回落、五色 tone 校准经 SemanticBadge 原子、translate=no 透传链路、size 默认与 LifecycleBadge/WebhookBadge 对齐,均与 http-method-badge.spec、data-display.md、kit index 一致;反向横扫确认 preset→SemanticBadge 包装形态仅 HttpMethodBadge/WebhookBadge/LifecycleBadge 三处且已按 index.md「平行原子」裁定,无新 finding。SidebarNav 本轮改动(active 派生位置)不触及 method badge 任何链路。",
+      "notes": "required co-review:scope 内 SiteSearch.vue(empty 槽 class、诊断条件)、OperationHeader.vue(标识换行 + 基线对齐)与 sidebar-nav.vue gallery 页(SiteSearch 实例文案)被改;三处均不触及 HttpMethodBadge 的调用参数(仍只传 method / size)、归一化、preset 色调与 translate=no 链路,http-method-badge.spec 5 用例原样通过,registry topology 未变,无新 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -623,14 +625,14 @@
       ]
     },
     "api-docs-event-badge": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
+        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -643,21 +645,21 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "85e9007dc680d2debf7ca9b94b2c42128991f6e7c2113d4d3dac381f7e2fec80",
+        "scopeDigest": "ac9c28e5d44bc87e2c4f3d57d3fc0588983c5127161087b6092e9febcdbe7ea4",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 translate 属性落到可见 badge。"
+            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发,使 translate 属性落到可见 badge。"
           },
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 WebhookBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
+            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传,使 WebhookBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
           }
         ]
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审 clean:单值词表 EVENT 内联常量、neutral+subtle 置于五方法色之外、font-mono tracking-wide tabular-nums 与 HttpMethodBadge 同形态、translate=no 经 SemanticBadge 单根透传、size 默认 sm 对齐同排原子,均与 index.md「Operation identity 分层」「平行原子」裁定一致;源码注释 never color alone 由常量文本结构性成立;消费面(OperationHeader kind=webhook、webhook-reference / index / structured-relations 页)全部零参或仅传 class,无绕过。反向横扫无簇外重复,无新 finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
@@ -707,14 +709,14 @@
       "findings": []
     },
     "api-docs-operation-header": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
+        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -729,9 +731,9 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "072cbc5140ffb0af30eb04f468a59d0260280df0a2630ba842232376b042fac4"
+        "scopeDigest": "1a5b9e81d79e9a81ac91d66590d46673b8cb733d94c4b17e93057241400890ae"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审:identity 行 mono 标识由 truncate 改为 wrap-anywhere,行对齐改 items-baseline(#actions self-center)。实测 375px 视口下 truncate 会吃掉真实长度标识的尾部(/v1/customers/{customer_id}/payment_methods/{id} 少 18 字符、checkout.session.async_payment_succeeded 少 11 字符)且触屏无 tooltip,webhook 形态又没有 OperationTarget 兜底;改后 375px 两行完整可读、徽章落在首行,1440px 仍单行。依据 responsiveness.md「缩略 = 截断 + tooltip」「永远保护主标识」。props/emits/slots 与 headingLevel 契约未变,operation-header.spec / chrome-labels.spec 原样通过,无新 finding。",
       "findings": []
     },
     "api-docs-code-rail": {
@@ -765,14 +767,14 @@
       "findings": []
     },
     "api-docs-site-search": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
+        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -781,12 +783,12 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "300ad8f8db8f88de44e9f7a3269561f9d838e1a52b6e58314c6b874f91f4c203",
+        "scopeDigest": "71fd5bc7af326a1ac90f1423f0535d157f5ead3c13b9091e120211fccebf4424",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UCommandPalette input object 将 UInput attrs 透传到原生 input，并依赖 ignoreFilter 与 #empty 槽契约。"
+            "reason": "依赖 UCommandPalette input object 将 UInput attrs 透传到原生 input、ignoreFilter 与 #empty 槽契约,以及 empty 槽 wrapper 自带按 size 校准的 padding / 居中 / muted 排版(组件不再重复声明)。"
           },
           {
             "name": "fuse.js",
@@ -795,7 +797,7 @@
           }
         ]
       },
-      "notes": "affected co-review：共享 gallery/reference 只更新 SidebarNav 共用 handle、键盘与持久化说明；SiteSearch 的同步/异步搜索、Fuse 过滤、状态文案和依赖行为均未改变，既有 resolved finding 保持关闭，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "round 3 复审:① #empty 槽内层 div 的 py-6/text-center/text-sm/text-muted 与 UCommandPalette 主题 md 档 empty 槽逐类重复,空态实测 110px → 去掉内层 class 后 64.6px(仅剩主题 py-6);② 两处诊断由 dev-only 收敛为 kit 惯例 import.meta.dev || import.meta.test,并补 4 条 warn 断言(失败源 warn、缺 searchGroupLabel warn、齐备时静默);③ gallery 两处实例补 noResultsAnnouncement 中文播报(此前可见文案中文、live region 英文),sidebar-nav 页 placeholder 补省略号。同步/异步搜索、Fuse 过滤、三态播报、hash 焦点交接契约未变,既有 resolved finding 保持关闭,无新 open finding。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -844,13 +846,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 3,
-      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
+      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
-        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
+        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
+        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
         "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -865,9 +867,9 @@
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "4d5b6e54e3c052a879deb2a39364f1e29deeb7128b4e7919fb8fc23a87a11af3"
+        "scopeDigest": "73523913d03af42c0245f585fc8d2ee0d0485acc10b3878ddcc7786d386503fc"
       },
-      "notes": "round 3 复审:active 派生从模板三次调用 isItemActive(每次 router.resolve)收敛为 resolved computed 内每行一次(实测 50 项导航单次调宽步进 150→0 次 router.resolve),行为契约与 sidebar-nav.spec 全部保持;reference props 表 searchPlaceholder 默认值修正为 `Search…`(aria-label 剥省略号)。搜索三轴过滤、active 单源、IME Esc 守卫、stretched-link、测量式溢出、SplitPaneHandle edge 调宽逐条复核无回归,无新 finding。",
+      "notes": "required co-review:scope 内 DocsShell.vue 与 sidebar-nav.vue gallery 页仅改 SiteSearch 实例的 props(补 noResultsAnnouncement 中文播报、placeholder 省略号),SidebarNav 的调用点、组件实现、useSplitPane 持久化与 sidebar-nav.spec 均未触碰;既有 finding f-12d73e8bc49d 保持 resolved(#105 已收敛),无新 finding。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
