@@ -1,13 +1,11 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-05T14:06:15.202Z",
+  "lastRunAt": "2026-09-07T23:33:54.080Z",
   "lastPicked": [
-    "api-docs-site-search",
-    "api-docs-operation-header",
-    "api-docs-event-badge",
-    "api-docs-method-badge",
-    "api-docs-sidebar-nav"
+    "api-docs-lifecycle-notice",
+    "foundation-semantic-badge",
+    "api-docs-code-block"
   ],
   "items": {
     "foundation-copy-button": {
@@ -115,14 +113,14 @@
       ]
     },
     "foundation-semantic-badge": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-19T02:06:34.943Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "c969781a09a6b574a302eabeef668965dd87a19a",
-        "headSha": "fba99851bd2331f88305b1b932e9c647806181d5",
+        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
+        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -150,7 +148,7 @@
           }
         ]
       },
-      "notes": "co-review：HttpMethodBadge/WebhookBadge 新增 translate=no 后复核 SemanticBadge 单根 UBadge 的 attrs 透传；两个 wrapper 的最终 DOM 断言通过，tone 映射、非空 label 与既有 resolved findings 均无回归。",
+      "notes": "clean:单根 UBadge wrapper,tone→色只经 BADGE_TONE_COLOR 穷尽映射,非空 label 契约由三个 preset wrapper 各自保证;全仓 <UBadge> 直用点(SidebarNav / SidebarScenarioTags / WebhookProtocol / ResponseExample status)均为计数、状态码或场景标签,不属语义 tone 词表,无绕过原子的用法;既有两条 resolved finding 无回归。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -330,14 +328,14 @@
       "findings": []
     },
     "api-docs-code-block": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
       "change": "modified",
-      "status": "verified",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
-        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
+        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
+        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -347,10 +345,18 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "42c02564bef80fd7ea7797665d73addc7b836034deef15495aba8f3334629792"
+        "scopeDigest": "31d688707bbcc7f895f1f45537f7fee5b0b2cc5eb56cae522d4806fc3250903c"
       },
-      "notes": "co-review：修正 code-sample.md 对共享 useCopy 的过时 VueUse 描述；CodeBlock 仍只委托 CopyButton，公开 props、运行时行为与复制本地化契约未变，focused tests 全绿，无新增 finding。",
-      "findings": []
+      "notes": "修复 langLabel 对 languageLabels 覆盖键的大小写敏感(JSDoc 与 code-sample.md 承诺覆盖优先,实测非小写键被静默忽略;精确小写键仍优先),补 6 条 focused tests;新增 1 条 low finding:换行切换按钮同时翻转 aria-label 与 aria-pressed,违反 WAI-ARIA APG toggle button 规则,修法涉及 ApiCodeLabels 公开 i18n 键,交人工决策。",
+      "findings": [
+        {
+          "id": "f-0c1cd3397501",
+          "severity": "low",
+          "claim": null,
+          "evidence": "CodeBlock.vue 工具栏换行按钮同时设置 :aria-pressed=\"wrap\" 与随状态翻转的 :aria-label=\"wrap ? t.wrapOff : t.wrapOn\"('Turn on line wrap' ↔ 'Turn off line wrap')。复现:渲染任意含 code 的 CodeBlock,读屏聚焦该按钮:关闭态播报 'Turn on line wrap, toggle button, not pressed',点击后播报 'Turn off line wrap, toggle button, pressed'——动作式文案与 pressed 状态互相矛盾。WAI-ARIA APG Button pattern 明文:'It is critical the label on a toggle does not change when its state changes';若设计需要文案翻转则不应再用 aria-pressed。修法二选一:① 保留 aria-pressed、label 固定为状态无关名词(如 'Line wrap'),需在 ApiCodeLabels 新增键并处理既有 wrapOn/wrapOff 键的去向(公开 i18n 契约变化,消费项目已本地化的键会失效);② 去掉 aria-pressed、保留动作式动态 label(与 CopyButton 同惯例,但失去 toggle 语义)。两者都改变辅助技术可感知的行为契约,交人工决策;推荐 ①。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-request-example": {
       "round": 2,
@@ -663,25 +669,28 @@
       "findings": []
     },
     "api-docs-lifecycle-notice": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
-      "change": "modified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
+        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
+          "app/pages/kits/api-docs/index.vue",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/LifecycleNotice.vue",
           "kits/api-docs/utils/lifecycle-preset.ts",
           "references/components/data-display.md",
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "64f9f60f18dc49c2726624eca93de724aeef057b2749e5134cac55b67bf6c642"
+        "scopeDigest": "d19bbd68e71262138a153a9c67abf2cfb902c2412fb2cada69133226ff7ae999"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "clean:UAlert 薄包装无 role/live-region 副作用,preset 词表、非空 title 回落、不可 dismiss、语义 token 与明暗表现均与 index.md / data-display.md 契约一致;反向横扫 lifecyclePreset 取值与空白回落一行式仅与 LifecycleBadge 同形,属同词表多形态设计,无新 finding。",
       "findings": []
     },
     "api-docs-operation-target": {

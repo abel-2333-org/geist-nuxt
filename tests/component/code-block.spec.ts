@@ -21,6 +21,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import CodeBlock from '../../kits/api-docs/components/CodeBlock.vue'
 import CopyButton from '../../foundation/components/CopyButton.vue'
+import { langLabel } from '../../kits/api-docs/utils/lang-preset'
 
 const twoLanguages = [
   { language: 'curl', code: 'curl https://api.example.com/v1/pets' },
@@ -61,6 +62,36 @@ describe('CodeBlock language select visibility', () => {
 
     expect(languageSelect(wrapper)).toBeUndefined()
     expect(wrapper.text()).toContain('No example available')
+  })
+})
+
+// `languageLabels` is documented as "overrides win over the preset". Ids are
+// matched case-insensitively, so a caller's override must not be dropped just
+// because its key casing differs from the variant's `language` id.
+describe('CodeBlock language label overrides', () => {
+  it.each([
+    { id: 'python', overrides: { Python: 'Python 3' }, expected: 'Python 3' },
+    { id: 'Python', overrides: { python: 'Python 3' }, expected: 'Python 3' },
+    { id: 'python', overrides: { Python: 'Py', python: 'Python 3' }, expected: 'Python 3' },
+    { id: 'JSON', overrides: {}, expected: 'JSON' },
+    { id: 'rust', overrides: {}, expected: 'Rust' },
+  ])('resolves $id with $overrides to $expected', ({ id, overrides, expected }) => {
+    expect(langLabel(id, overrides)).toBe(expected)
+  })
+
+  it('applies an override whose key casing differs from the variant id', async () => {
+    const wrapper = await mountSuspended(CodeBlock, {
+      props: {
+        variants: [
+          { language: 'python', code: 'print(1)' },
+          { language: 'go', code: 'fmt.Println(1)' },
+        ],
+        languageLabels: { Python: 'Python 3' },
+      },
+    })
+
+    const items = languageSelect(wrapper)!.props('items') as { label: string, value: string }[]
+    expect(items.map(item => item.label)).toEqual(['Python 3', 'Go'])
   })
 })
 
