@@ -1,26 +1,27 @@
-// CANDIDATE contract for issue #117 — the disclosure and counting policy for a
-// field's VALUE shape (array elements, record members, encoded content).
+// Contract for a field's VALUE shape (array elements, record members, encoded
+// content) — the disclosure, counting and labelling policy settled in issue
+// #117, now owned by the api-docs kit.
 //
-// Scoped to the playground candidate on purpose: these assertions are the
-// display contract the issue asks a candidate to establish, and they move with
-// the code when it is promoted into `kits/api-docs`. They cover the pure rules
-// only — the reading model is settled by a human at `/playground`, not here.
-//
-// Every case below is one line of the issue's acceptance list; the last one
-// exists because the playground caught a real bug: a deep link into a doubly
-// encoded payload revealed only the inner boundary, because path collection
-// stopped at `children`.
+// The pure rules live in `utils/field.ts` and are asserted without a DOM; the
+// mounted cases below pin what the row itself promises: the identity-line
+// token, that value properties are never counted as children, and that a deep
+// link into a doubly encoded payload reveals BOTH regions (the bug the
+// playground caught when value paths were collected beside, not inside,
+// `collectFieldPaths`).
+import { defineComponent, nextTick } from 'vue'
 import { describe, expect, it } from 'vitest'
+import { mountSuspended } from '@nuxt/test-utils/runtime'
+import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
+import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 import {
-  collectCandidateFieldPaths,
-  countValueFields,
+  collectFieldPaths,
   describeValueRequirements,
   fieldValueLabelDefaults,
   foldsIntoParentRegion,
   hasStructureBelow,
   valueScopeLabelKey,
-} from '../../playground/model/field-value'
-import type { FieldValueNode, ValueBearingField } from '../../playground/model/field-value'
+} from '../../kits/api-docs/utils/field'
+import type { FieldNode, FieldValueNode } from '../../kits/api-docs/utils/field'
 
 const primitiveItem: FieldValueNode = {
   relation: 'item',
@@ -54,9 +55,9 @@ describe('value disclosure policy', () => {
     expect(hasStructureBelow({ relation: 'item', type: 'object[]', value: objectItem })).toBe(true)
   })
 
-  it('folds a JSON-encoded array into ONE region, and nothing else', () => {
-    // The decode boundary and the element boundary share a region: "show JSON
-    // structure" already promises what is inside.
+  it('folds an encoded array into ONE region, and nothing else', () => {
+    // The decode boundary and the element boundary share a region: "show me
+    // what is inside" already promises the array.
     expect(foldsIntoParentRegion(jsonObjectArray, objectItem)).toBe(true)
     // A nested array keeps two regions — folding would stack two identical
     // headings in one panel with nothing to tell them apart.
@@ -71,11 +72,10 @@ describe('value disclosure policy', () => {
 })
 
 describe('disclosure wording', () => {
-  // Settled at /playground against the consumer's real endpoint, where 11
-  // structured fields are `string` + `json_string`: a per-boundary verb landed
-  // on nearly every row and repeated what `format` and the VALUE FORMAT fact
-  // already said. One verb, reused from FieldItem, is the accepted reading — so
-  // this model must not grow verb strings of its own again.
+  // Settled against the consumer's real endpoint, where 11 structured fields
+  // are `string` + `json_string`: a per-boundary verb landed on nearly every
+  // row and discriminated nothing. One verb, reused from FieldItem, is the
+  // accepted reading — so this model must not grow verb strings of its own.
   it('contributes no disclosure verbs to the label contract', () => {
     const keys = Object.keys(fieldValueLabelDefaults)
     expect(keys.filter(k => /^(show|hide)/i.test(k))).toEqual([])
@@ -85,15 +85,6 @@ describe('disclosure wording', () => {
     for (const value of Object.values(fieldValueLabelDefaults)) {
       expect(value).not.toMatch(/^(Show|Hide) /)
     }
-  })
-})
-
-describe('counting', () => {
-  it('counts real properties, never value roots', () => {
-    // Two properties behind the fold — the decode and element levels above them
-    // are not parameters and must not inflate the number.
-    expect(countValueFields(jsonObjectArray)).toBe(2)
-    expect(countValueFields(primitiveItem)).toBe(0)
   })
 })
 
@@ -152,38 +143,53 @@ describe('requirement density', () => {
     expect(block?.compact).toBe(false)
   })
 
+  it('never drops the author\'s own category label on a lone constraint', () => {
+    // A labelled constraint says two things (category + rule); the compact row
+    // has one slot, and that slot is the scope. So it escalates instead.
+    const block = describeValueRequirements(
+      { relation: 'item', type: 'object', notes: [{ label: 'Uniqueness', text: 'sku is unique.' }] },
+      fieldValueLabelDefaults,
+    )
+    expect(block?.compact).toBe(false)
+  })
+
   it('says nothing when there is nothing to say', () => {
     expect(describeValueRequirements({ relation: 'item', type: 'object' }, fieldValueLabelDefaults)).toBeNull()
   })
 })
 
-describe('anchor collection', () => {
-  it('reaches properties behind every value boundary, however deep', () => {
-    // envelope(string) → JSON object → payload(string) → JSON object → status
-    const fields: ValueBearingField[] = [{
-      path: 'envelope',
-      name: 'envelope',
+// envelope(string) → JSON object → payload(string) → JSON object → status
+const doublyEncoded: FieldNode = {
+  path: 'envelope',
+  name: 'envelope',
+  type: 'string',
+  format: 'json_string',
+  value: {
+    relation: 'decoded',
+    codec: 'json',
+    path: 'envelope_json',
+    type: 'object',
+    fields: [{
+      path: 'envelope_payload',
+      name: 'payload',
       type: 'string',
+      format: 'json_string',
       value: {
         relation: 'decoded',
-        path: 'envelope_json',
+        codec: 'json',
         type: 'object',
-        fields: [{
-          path: 'envelope_payload',
-          name: 'payload',
-          type: 'string',
-          value: {
-            relation: 'decoded',
-            type: 'object',
-            fields: [{ path: 'envelope_payload_status', name: 'status', type: 'string' }],
-          },
-        }],
+        fields: [{ path: 'envelope_payload_status', name: 'status', type: 'string' }],
       },
-    }]
+    }],
+  },
+}
 
+describe('anchor collection', () => {
+  it('reaches properties behind every value boundary, however deep', () => {
     // Without the innermost path in this set, the OUTER region never learns the
-    // active anchor is below it and a deep link lands on a collapsed row.
-    expect(collectCandidateFieldPaths(fields)).toEqual([
+    // active anchor is below it and a deep link lands on a collapsed row. This
+    // is why the value branch lives inside `collectFieldPaths` itself.
+    expect(collectFieldPaths([doublyEncoded])).toEqual([
       'envelope',
       'envelope_json',
       'envelope_payload',
@@ -192,7 +198,7 @@ describe('anchor collection', () => {
   })
 
   it('reaches fields inside a composition at a value root', () => {
-    const fields: ValueBearingField[] = [{
+    const fields: FieldNode[] = [{
       path: 'destinations',
       name: 'destinations',
       type: 'object[]',
@@ -209,6 +215,176 @@ describe('anchor collection', () => {
       },
     }]
 
-    expect(collectCandidateFieldPaths(fields)).toEqual(['destinations', 'iban', 'walletId'])
+    expect(collectFieldPaths(fields)).toEqual(['destinations', 'iban', 'walletId'])
+  })
+})
+
+describe('FieldItem with a value shape', () => {
+  it('prints the decoded shape as `codec<shape>` and lets it lead the wire type', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        path: 'retailers',
+        name: 'retailers',
+        type: 'string',
+        format: 'json_string',
+        value: jsonObjectArray,
+      },
+    })
+
+    const tokens = wrapper.get('[data-field-identity]').findAll('[translate="no"]')
+    expect(tokens.map(node => node.text())).toEqual(['retailers', 'string', 'json<object[]>'])
+    // The shape takes the type's own emphasis; `string` steps back.
+    expect(tokens[1]!.classes()).toContain('text-dimmed')
+    expect(tokens[2]!.classes()).toContain('text-muted')
+  })
+
+  it('keeps `format` and today\'s weighting for a field without a decode boundary', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'tags',
+        type: 'string[]',
+        format: 'csv',
+        value: primitiveItem,
+      },
+    })
+
+    const tokens = wrapper.get('[data-field-identity]').findAll('[translate="no"]')
+    expect(tokens.map(node => node.text())).toEqual(['tags', 'string[]', 'csv'])
+    expect(tokens[1]!.classes()).toContain('text-muted')
+    expect(tokens[2]!.classes()).toContain('text-dimmed')
+    // Nothing structural below: the element rule reads inline, no fold.
+    expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
+    expect(wrapper.get('[data-value-requirements]').text()).toContain('Each item')
+  })
+
+  it('never counts value properties as children, and counts only real properties behind the fold', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        path: 'retailers',
+        name: 'retailers',
+        type: 'string',
+        value: jsonObjectArray,
+      },
+    })
+
+    // No child-parameter disclosure: `sku` / `qty` are value properties, not
+    // children of `retailers`.
+    const toggles = wrapper.findAll('button').filter(b => /Child Parameters/.test(b.text()))
+    expect(toggles).toHaveLength(1)
+    const toggle = toggles[0]!
+    expect(toggle.attributes('data-value-structure-toggle')).toBeDefined()
+    // The verb is FieldItem's own; the count is the two real properties, not
+    // the decode + element levels above them.
+    expect(toggle.text()).toContain('Show Child Parameters')
+    expect(toggle.text()).toContain('(2)')
+  })
+
+  it('reveals every region above a deep link into doubly encoded content', async () => {
+    // The anchor state is Nuxt `useState`, so it is read from inside a host
+    // component rather than from the test body.
+    let anchor!: ReturnType<typeof useFieldAnchor>
+    const Host = defineComponent({
+      components: { FieldItem },
+      setup() {
+        anchor = useFieldAnchor()
+        // The anchor is app-level Nuxt state shared across mounts in this file.
+        anchor.active.value = ''
+        return { field: doublyEncoded }
+      },
+      template: '<FieldItem v-bind="field" />',
+    })
+    const wrapper = await mountSuspended(Host)
+
+    const toggles = () => wrapper.findAll('[data-value-structure-toggle]')
+    expect(toggles()).toHaveLength(2)
+    for (const toggle of toggles()) expect(toggle.attributes('aria-expanded')).toBe('false')
+
+    anchor.active.value = 'envelope_payload_status'
+    await nextTick()
+    await nextTick()
+
+    // Both the outer (envelope) and inner (payload) regions open — the outer
+    // one only knows because `collectFieldPaths` walks the value chain.
+    for (const toggle of toggles()) expect(toggle.attributes('aria-expanded')).toBe('true')
+    // The outer value root's own anchor is the region's DOM id.
+    expect(wrapper.find('[data-value-structure-region]').attributes('id')).toBe('envelope_json')
+  })
+
+  it('reveals the region when the value root itself is the deep-link target, and owns its arrival cue', async () => {
+    let anchor!: ReturnType<typeof useFieldAnchor>
+    const Host = defineComponent({
+      components: { FieldItem },
+      setup() {
+        anchor = useFieldAnchor()
+        // The anchor is app-level Nuxt state shared across mounts in this file.
+        anchor.active.value = ''
+        return { field: doublyEncoded }
+      },
+      template: '<FieldItem v-bind="field" />',
+    })
+    const wrapper = await mountSuspended(Host)
+
+    anchor.active.value = 'envelope_json'
+    await nextTick()
+    await nextTick()
+
+    const toggles = wrapper.findAll('[data-value-structure-toggle]')
+    expect(toggles[0]!.attributes('aria-expanded')).toBe('true')
+    // The inner boundary is not on the way to `envelope_json`; it stays shut.
+    expect(toggles[1]!.attributes('aria-expanded')).toBe('false')
+    // useFieldAnchor flashes the first cue INSIDE the id'd element: the region
+    // carries its own, so a nested row's cue is never the one that lights up.
+    const region = wrapper.find('#envelope_json')
+    expect(region.element.firstElementChild?.getAttribute('data-field-arrival-cue')).toBe('')
+  })
+
+  it('renders both the array\'s and the element\'s scope inside one folded region', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: { name: 'retailers', type: 'string', value: jsonObjectArray },
+    })
+
+    const region = wrapper.get('[data-value-structure-region]')
+    const scopes = region.findAll('[data-value-requirements] dt, [data-value-requirements] > p').map(n => n.text())
+    // Decode boundary and element boundary share the region but keep their
+    // own scope, so "at least 1 element" never reads as a rule about one item.
+    expect(scopes).toEqual(['Array', 'Each item'])
+    // The region is the only disclosure: nothing is a child of `retailers`.
+    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(1)
+    expect(region.findAll('[data-field-identity]').map(n => n.text())).toEqual(['skustring', 'qtyinteger'])
+  })
+
+  it('labels a record member with its own scope, and honours label overrides for every scope', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'attributes',
+        type: 'object',
+        value: {
+          relation: 'member',
+          type: 'string',
+          notes: [{ text: 'Non-empty.' }],
+          value: { relation: 'decoded', codec: 'json', type: 'object[]', notes: [{ text: 'At least one.' }] },
+        },
+        labels: { eachMember: '每个键', decodedArrayRequirements: '数组要求', showChildren: '展开' },
+      },
+    })
+
+    // No structure below either level: both rules read inline, no chevron.
+    expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
+    const scopes = wrapper.findAll('[data-value-requirements] dt').map(n => n.text())
+    expect(scopes).toEqual(['每个键', '数组要求'])
+  })
+
+  it('adds nothing below the row when the value only states identity facts', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'metaData',
+        type: 'string',
+        value: { relation: 'decoded', codec: 'json', type: 'object' },
+      },
+    })
+
+    expect(wrapper.get('[data-field-identity]').text()).toContain('json<object>')
+    expect(wrapper.find('[data-value-requirements]').exists()).toBe(false)
+    expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
   })
 })

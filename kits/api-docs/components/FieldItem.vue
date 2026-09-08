@@ -10,7 +10,9 @@ export type {
   FieldLifecycleInfo,
   FieldNode,
   FieldNote,
+  FieldValueNode,
   RequiredState,
+  ValueRelation,
 } from '#imports'
 </script>
 
@@ -39,12 +41,17 @@ export type {
 //           leaf detail  ── deprecation note → condition rule → description →
 //                           caveat callout(s) → aligned fact band (enum →
 //                           constraints → example → new/beta lifecycle metadata)
+//           value        ── the field's VALUE shape (array element / record
+//                           member / encoded content) via the internal
+//                           <FieldValueStructure>: never a child, never counted
 //           children     ── UCollapsible of nested <FieldItem>
 //           composition  ── field-level oneOf/anyOf/allOf delegated to
 //                           <SchemaComposition> after the children
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
 //           carry dynamic aria-labels; copied state announced politely.
+
+import FieldValueStructure from '../internal/FieldValueStructure.vue'
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
 // FieldItem); declared explicitly so the template's recursion resolves.
@@ -95,6 +102,7 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   copiedLink: (fieldName: string) => `${fieldName} link copied`,
   linkCopied: (fieldName: string) => `${fieldName} link copied to clipboard`,
   linkCopyFailed: () => 'Copy failed. Select the URL and copy it manually',
+  ...fieldValueLabelDefaults,
   ...props.labels,
 }))
 
@@ -105,7 +113,12 @@ const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
 // disclosure follows the real `children` graph rather than the id spelling.
 const anchor = useFieldAnchor()
 const isActive = computed(() => !!props.path && anchor.active.value === props.path)
-const childPaths = computed(() => collectFieldPaths(props.children ?? []))
+// A value root and the real fields inside it are reachable anchors too, so
+// they belong in the set that decides "is the active anchor below me".
+const childPaths = computed(() => [
+  ...collectFieldPaths(props.children ?? []),
+  ...(props.value ? collectValuePaths(props.value) : []),
+])
 const descendantActive = computed(() => childPaths.value.includes(anchor.active.value))
 
 function resolveAnchorLabel(label: string | ((fieldName: string) => string)) {
@@ -160,6 +173,26 @@ const hasLifecycleDetail = computed(
 // boundary, which is the one thing it is not.
 const constraints = computed(() => (props.notes ?? []).filter(n => n.kind !== 'caveat'))
 const caveats = computed(() => (props.notes ?? []).filter(n => n.kind === 'caveat'))
+
+// The decoded shape, only for a field whose value crosses an encoding boundary.
+// Read off `value.type` — data the model already carries.
+const decodedShape = computed(() =>
+  props.value?.relation === 'decoded' ? props.value.type : undefined)
+
+/**
+ * What the identity line prints after the wire type. For a field whose value
+ * crosses an encoding boundary this is `codec<shape>` (`json<object[]>`) —
+ * the decoded shape is the fact a reader scans a long field list for, and the
+ * wire type (`string` for every encoded field) is not. Fields without a
+ * boundary keep `format` exactly as before.
+ */
+const formatToken = computed(() => {
+  const codec = props.value?.relation === 'decoded' ? props.value.codec : undefined
+  if (!codec || !decodedShape.value) return props.format
+  return `${codec}<${decodedShape.value}>`
+})
+// When the token carries a decoded shape, it and the wire type swap weight.
+const shapeLeads = computed(() => !!decodedShape.value && formatToken.value !== props.format)
 
 const hasDetail = computed(
   () =>
@@ -254,8 +287,23 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
             translate="no"
           >{{ name }}</code>
-          <span class="shrink-0 font-mono text-xs text-muted" translate="no">{{ type }}</span>
-          <span v-if="format" class="wrap-anywhere font-mono text-xs text-dimmed" translate="no">{{ format }}</span>
+          <!-- When a field carries a decode boundary, the WIRE TYPE is the
+               least informative token on the row — on the consumer endpoint
+               that settled this, every structured field's type is `string`.
+               So the two swap weight: the shape the reader is scanning for
+               takes the type's own emphasis, and `string` steps back. A field
+               with no decode boundary keeps today's weighting exactly. -->
+          <span
+            class="shrink-0 font-mono text-xs"
+            :class="shapeLeads ? 'text-dimmed' : 'text-muted'"
+            translate="no"
+          >{{ type }}</span>
+          <span
+            v-if="formatToken"
+            class="wrap-anywhere font-mono text-xs"
+            :class="shapeLeads ? 'text-muted' : 'text-dimmed'"
+            translate="no"
+          >{{ formatToken }}</span>
           <span
             v-if="requiredState || lifecycle"
             data-field-qualifiers
@@ -488,6 +536,17 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         </p>
       </div>
     </div>
+
+    <!-- Value requirements & structure. NOT children: nothing in this block
+         is a named field, so nothing in it is counted by the disclosure below,
+         anchored as a field, or reachable as `children`. The fold inside reuses
+         this row's own child verbs — no per-boundary verb exists. -->
+    <FieldValueStructure
+      v-if="value"
+      :value="value"
+      :chrome="t"
+      :labels="labels"
+    />
 
     <!-- Child parameters — ONLY object/array fields expand, and only to reveal their subfields. -->
     <UCollapsible

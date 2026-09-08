@@ -354,11 +354,13 @@
       "name": "api-docs-field-item",
       "type": "registry:component",
       "title": "FieldItem",
-      "description": "Recursive API schema field row with deep-link handling. Field-level schema composition (the optional `composition` field) renders when api-docs-schema-composition is also installed.",
+      "description": "Recursive API schema field row with deep-link handling. A field may carry a `value` node (array element / record member / encoded content) rendered by the bundled internal FieldValueStructure. Field-level schema composition (the optional `composition` field) renders when api-docs-schema-composition is also installed.",
       "verification": ["visual", "interaction", "responsive"],
       "registryDependencies": ["foundation-inline-code", "foundation-inline-markdown", "foundation-use-copy", "api-docs-enum-table", "api-docs-lifecycle-badge"],
       "files": [
         { "path": "kits/api-docs/components/FieldItem.vue", "target": "app/components/FieldItem.vue" },
+        { "path": "kits/api-docs/internal/FieldValueRequirements.vue", "target": "app/internal/FieldValueRequirements.vue" },
+        { "path": "kits/api-docs/internal/FieldValueStructure.vue", "target": "app/internal/FieldValueStructure.vue" },
         { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" },
         { "path": "kits/api-docs/utils/field.ts", "target": "app/utils/field.ts" }
       ]
