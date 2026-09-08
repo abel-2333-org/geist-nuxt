@@ -1,11 +1,10 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-07T23:33:54.080Z",
+  "lastRunAt": "2026-09-08T23:25:58.000Z",
   "lastPicked": [
-    "api-docs-lifecycle-notice",
-    "foundation-semantic-badge",
-    "api-docs-code-block"
+    "api-docs-response-example",
+    "api-docs-request-example"
   ],
   "items": {
     "foundation-copy-button": {
@@ -359,17 +358,18 @@
       ]
     },
     "api-docs-request-example": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-20T23:25:41.600Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-08T23:25:58.000Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5b2cdb10bae6f8e7b102a5547ff5766a0cf278f9",
-        "headSha": "1652540a5e349f52f527f59df3f9f0a26cb38319",
+        "baseSha": "6da4dba66afeff6219509ce79409898b6b197819",
+        "headSha": "5f6c3813fa3e9af142ae9645b880e62675fe0ac7",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/webhook-reference.vue",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
@@ -377,23 +377,25 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "5f480e5770e3c48b4f01778ec5281b2a9e1f098e932e0e89091309248868af55"
+        "scopeDigest": "9903c78128d417f145ee6d19fbb688fb40d60491c769d947fa6cde4364bb8e49"
       },
-      "notes": "Round 2 复审:场景选择已收敛到 useExampleScenarioSelection,受控/非受控契约、fallback 只派生不回写、单次 emit 均有黑盒测试锁定;USelect 带 aria-label,≤1 场景隐藏选择器;与 CodeBlock 契约(CodeVariant/ApiCodeLabels)及 reference 文档一致,无新 finding。",
+      "notes": "复核维持 clean(08-07 首审修复、08-21 clean,08-22~24 三次复核):112 行薄包装,场景 seam 全走 useExampleScenarioSelection,受控/非受控、fallback 不回写、单次 emit、≤1 场景隐藏选择器均有黑盒测试;labels 透传、trustHighlightedHtml 默认 false、registry 依赖闭包与 import 实况一致;反向横扫无簇外新重复。",
       "findings": []
     },
     "api-docs-response-example": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-20T03:34:36.972Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-08T23:25:58.000Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "ccf1539410d14501a7e93c17e2dd237dc84f8437",
-        "headSha": "e67bb747b0207f19390d3d54bcaf93df961bbda5",
+        "baseSha": "6da4dba66afeff6219509ce79409898b6b197819",
+        "headSha": "5f6c3813fa3e9af142ae9645b880e62675fe0ac7",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
@@ -401,11 +403,12 @@
           "references/kits/api-docs/response-example.md",
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts",
-          "tests/component/use-example-scenario-selection.spec.ts"
+          "tests/component/use-example-scenario-selection.spec.ts",
+          "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "0477bb69b1854c2ed67f3facbf62d3365860b3ef700172645fc5d60c448c9f53"
+        "scopeDigest": "9eae9a0d505bf5b101eabea0dcec491bffd6945f38fbd95f1c88a55d0d2adf2e"
       },
-      "notes": "已按人工采纳结论解决共享 scenario seam 重复；仅抽取 scenario identity 状态，status/body 的上下文收敛仍留在 ResponseExample，三级选择、label fallback、live region 与响应式控件契约无回归。",
+      "notes": "修复 dev 重复 body id 检查只覆盖当前 status 的缺口(reference 承诺 dev 模式告警,未打开的 status 下重复 id 挂载时静默):改为随 scenario/status 全树 eager 检查,该 watchEffect 只依赖 scenarios、不再随选择变化重跑;补 1 条 focused test 与 reference 说明。三级收敛、label 回落、live region、窄容器 popover、文件下载链接契约复核无回归,既有 2 条 resolved finding 维持。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
