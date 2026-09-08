@@ -49,6 +49,7 @@ const props = defineProps<{
 const t = computed(() => ({ ...fieldValueLabelDefaults, ...props.labels }))
 
 
+
 // The chain of value levels starting at this node: element of element, JSON
 // inside JSON. Materialized once so both render paths read the same order.
 const chain = computed(() => {
@@ -98,9 +99,9 @@ const schemaComposition = computed(() => {
 // rule (one constraint → one row) is the same fact whether it is rendered here
 // or asserted in a test.
 const inlineBlocks = computed(() =>
-  inlineNodes.value.flatMap(n => describeValueRequirements(n, 'inline', t.value) ?? []))
+  inlineNodes.value.flatMap(n => describeValueRequirements(n, t.value) ?? []))
 const regionBlocks = computed(() =>
-  regionNodes.value.flatMap(n => describeValueRequirements(n, 'region', t.value) ?? []))
+  regionNodes.value.flatMap(n => describeValueRequirements(n, t.value) ?? []))
 
 
 // Deep linking, same contract as the field row: a link into a collapsed value

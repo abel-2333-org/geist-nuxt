@@ -417,9 +417,10 @@ export const zhLabels: FieldItemLabels & FieldValueLabels = {
     oneOfHint: '请求体只能匹配下列其中一种结构。',
   },
   eachItem: '每个元素',
-  itemRequirements: '元素要求',
-  eachMember: '每个成员',
-  memberRequirements: '成员要求',
+  eachMember: '每个键',
+  // Chrome is configured per locale, so the two languages need not be equally terse:
+  // English drops "requirements" because the column already is requirements,
+  // while a bare 「值」/「数组」 reads as a noun fragment rather than a heading.
   decodedRequirements: '值要求',
   decodedArrayRequirements: '数组要求',
 }

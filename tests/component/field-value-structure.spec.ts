@@ -117,18 +117,29 @@ describe('scope labels', () => {
     expect(fieldValueLabelDefaults.decodedArrayRequirements).not.toMatch(/json/i)
   })
 
-  it('switches voice with placement, and keeps an array root distinct from its items', () => {
-    expect(valueScopeLabelKey(primitiveItem, 'inline')).toBe('eachItem')
-    expect(valueScopeLabelKey(primitiveItem, 'region')).toBe('itemRequirements')
-    // A decoded array's own length rule is not a rule about an element.
-    expect(valueScopeLabelKey(jsonObjectArray, 'inline')).toBe('decodedArrayRequirements')
-    expect(valueScopeLabelKey({ relation: 'decoded', type: 'integer' }, 'inline')).toBe('decodedRequirements')
+  it('gives each scope ONE name, whatever the layout does with it', () => {
+    // The label answers "what are these rules about", which cannot depend on
+    // whether the block happened to land inline or behind a disclosure.
+    expect(valueScopeLabelKey(primitiveItem)).toBe('eachItem')
+    expect(valueScopeLabelKey({ relation: 'member' })).toBe('eachMember')
+    // A decoded ARRAY root keeps its own name, so its length rule never reads
+    // as a rule about one element.
+    expect(valueScopeLabelKey(jsonObjectArray)).toBe('decodedArrayRequirements')
+    expect(valueScopeLabelKey({ relation: 'decoded', type: 'integer' })).toBe('decodedRequirements')
+  })
+
+  it('keeps scope labels in the register of the category labels beside them', () => {
+    // They share one information column with author labels like MAX LENGTH, so
+    // a wordier scope label wraps to two lines next to one-line neighbours.
+    for (const key of ['eachItem', 'eachMember', 'decodedRequirements', 'decodedArrayRequirements'] as const) {
+      expect(fieldValueLabelDefaults[key]).not.toMatch(/requirements/i)
+    }
   })
 })
 
 describe('requirement density', () => {
   it('renders one lone constraint as a single scope-labelled row', () => {
-    const block = describeValueRequirements(primitiveItem, 'inline', fieldValueLabelDefaults)
+    const block = describeValueRequirements(primitiveItem, fieldValueLabelDefaults)
     expect(block?.compact).toBe(true)
     expect(block?.label).toBe('Each item')
   })
@@ -136,14 +147,13 @@ describe('requirement density', () => {
   it('escalates as soon as the level says more than one thing', () => {
     const block = describeValueRequirements(
       { ...primitiveItem, examples: ['abc'] },
-      'inline',
       fieldValueLabelDefaults,
     )
     expect(block?.compact).toBe(false)
   })
 
   it('says nothing when there is nothing to say', () => {
-    expect(describeValueRequirements({ relation: 'item', type: 'object' }, 'inline', fieldValueLabelDefaults)).toBeNull()
+    expect(describeValueRequirements({ relation: 'item', type: 'object' }, fieldValueLabelDefaults)).toBeNull()
   })
 })
 

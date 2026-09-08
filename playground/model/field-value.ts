@@ -106,13 +106,16 @@ export interface FieldValueLabels {
   // semantics, and labelling them "String requirements" asserted they were
   // rules about the wire string. Author-supplied note labels already carry that
   // meaning; the field's constraints stay in the field's own band.
-  /** Element constraints shown inline (no structure behind them). */
+  // Scope labels name the SUBJECT of a rule, in the same register as the
+  // author's own category labels beside them (MAX LENGTH, FORMAT, RULE). The
+  // word "requirements" was dropped: the column is already requirements, and it
+  // made the scope labels wrap two lines next to one-line category labels.
+  // The `each` voice is what marks a scope apart from a category — `EACH ITEM`
+  // cannot be misread as a rule category the way a bare `ITEM` could.
+  /** Every element of an array. */
   eachItem?: string
-  /** Element constraints shown inside the structure region. */
-  itemRequirements?: string
-  /** Record member equivalents of the two above. */
+  /** Every dynamic key of a record. */
   eachMember?: string
-  memberRequirements?: string
   /** Decoded-content constraints. `decodedArrayRequirements` applies when the
    *  decoded root is itself an array, so its length/uniqueness rules do not
    *  read as rules about the element.
@@ -122,6 +125,9 @@ export interface FieldValueLabels {
    *  govern the VALUE, not the field. */
   decodedRequirements?: string
   decodedArrayRequirements?: string
+  // NOTE: no placement variants. One scope has one name wherever it renders —
+  // a rule that changes voice depending on whether it landed inline or behind
+  // a disclosure is a rule about layout, not about meaning.
   // NO disclosure verbs here — reviewed and rejected. A per-boundary verb only
   // repeats what the row above it already states: `format` on the identity line
   // and the VALUE FORMAT fact, both component-rendered, both present on every
@@ -134,11 +140,9 @@ export interface FieldValueLabels {
 
 export const fieldValueLabelDefaults: Required<FieldValueLabels> = {
   eachItem: 'Each item',
-  itemRequirements: 'Item requirements',
-  eachMember: 'Each member',
-  memberRequirements: 'Member requirements',
-  decodedRequirements: 'Value requirements',
-  decodedArrayRequirements: 'Array requirements',
+  eachMember: 'Each key',
+  decodedRequirements: 'Value',
+  decodedArrayRequirements: 'Array',
 }
 
 // ---------------------------------------------------------------------------
@@ -187,15 +191,10 @@ export function foldsIntoParentRegion(parent: FieldValueNode, child: FieldValueN
   return parent.relation === 'decoded' && child.relation === 'item' && !hasOwnStructure(parent)
 }
 
-/** Requirements heading for a value node, given where it will be rendered.
- *  Inline placement uses the "every one of them" voice (Each item); placement
- *  inside a structure region uses the noun voice (Item requirements). */
-export function valueScopeLabelKey(
-  value: FieldValueNode,
-  placement: 'inline' | 'region',
-): keyof FieldValueLabels {
-  if (value.relation === 'item') return placement === 'inline' ? 'eachItem' : 'itemRequirements'
-  if (value.relation === 'member') return placement === 'inline' ? 'eachMember' : 'memberRequirements'
+/** The scope label for a value node — what the rules below it are ABOUT. */
+export function valueScopeLabelKey(value: FieldValueNode): keyof FieldValueLabels {
+  if (value.relation === 'item') return 'eachItem'
+  if (value.relation === 'member') return 'eachMember'
   return value.type?.endsWith('[]') || value.type?.startsWith('array')
     ? 'decodedArrayRequirements'
     : 'decodedRequirements'
@@ -282,7 +281,6 @@ export interface ValueRequirementsBlock {
 
 export function describeValueRequirements(
   node: FieldValueNode,
-  placement: 'inline' | 'region',
   labels: Required<FieldValueLabels>,
 ): ValueRequirementsBlock | null {
   if (!hasValueDetail(node)) return null
@@ -297,7 +295,7 @@ export function describeValueRequirements(
     || caveats.length > 0
   return {
     node,
-    label: labels[valueScopeLabelKey(node, placement)],
+    label: labels[valueScopeLabelKey(node)],
     constraints,
     caveats,
     compact: constraints.length === 1 && !extras,
