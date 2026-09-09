@@ -96,8 +96,14 @@ const schemaComposition = computed(() => {
 // or asserted in a test.
 const inlineBlocks = computed(() =>
   inlineNodes.value.flatMap(n => describeValueRequirements(n, props.chrome) ?? []))
-const regionBlocks = computed(() =>
-  regionNodes.value.flatMap(n => describeValueRequirements(n, props.chrome) ?? []))
+// Identity-only nodes still own public anchors. They overlay the containing
+// field (or enclosing value region) without creating an empty requirements row.
+const inlineAnchorNodes = computed(() => inlineNodes.value.filter(node =>
+  node.path && !describeValueRequirements(node, props.chrome)))
+const regionEntries = computed(() => regionNodes.value.map(node => ({
+  node,
+  block: describeValueRequirements(node, props.chrome),
+})).filter(entry => entry.block || entry.node === regionLast.value))
 
 // Deep linking, same contract as the field row: a link into a collapsed value
 // root or one of its properties must reveal itself. Membership in the collected
@@ -111,17 +117,38 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
 </script>
 
 <template>
+  <span
+    v-for="node in inlineAnchorNodes"
+    :id="node.path"
+    :key="node.path"
+    class="pointer-events-none absolute inset-0 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
+    :class="anchor.SCROLL_MARGIN_CLASS"
+  >
+    <span
+      data-field-arrival-cue
+      class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
+      aria-hidden="true"
+    />
+  </span>
   <!-- A value that only states identity facts (codec / type, already printed
        on the owner's identity line) has nothing to add below the row. -->
   <div v-if="inlineBlocks.length || opensRegion" class="mt-3 flex flex-col gap-3">
     <!-- Inline value requirements — no structure below, so no chevron. -->
-    <FieldValueRequirements
+    <div
       v-for="(block, i) in inlineBlocks"
       :key="`inline-${i}`"
-      :block="block"
-      :chrome="chrome"
-      :labels="labels"
-    />
+      :id="block.node.path"
+      class="relative rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
+      :class="anchor.SCROLL_MARGIN_CLASS"
+    >
+      <span
+        v-if="block.node.path"
+        data-field-arrival-cue
+        class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
+        aria-hidden="true"
+      />
+      <FieldValueRequirements :block="block" :chrome="chrome" :labels="labels" />
+    </div>
 
     <!-- Structure region. One disclosure per boundary the reader crosses. -->
     <UCollapsible
@@ -164,41 +191,56 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
             class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
             aria-hidden="true"
           />
-          <FieldValueRequirements
-            v-for="(block, i) in regionBlocks"
+          <!-- A folded node retains its own anchor around its actual content;
+               sharing a disclosure does not merge public path identities. -->
+          <div
+            v-for="(entry, i) in regionEntries"
             :key="`region-${i}`"
-            :block="block"
-            :chrome="chrome"
-            :labels="labels"
-          />
+            :id="entry.node !== value ? entry.node.path : undefined"
+            class="relative flex flex-col gap-3 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :class="anchor.SCROLL_MARGIN_CLASS"
+          >
+            <span
+              v-if="entry.node !== value && entry.node.path"
+              data-field-arrival-cue
+              class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
+              aria-hidden="true"
+            />
+            <FieldValueRequirements
+              v-if="entry.block"
+              :block="entry.block"
+              :chrome="chrome"
+              :labels="labels"
+            />
 
-          <!-- Real properties. Rendered as field rows, counted as fields,
-               anchored by their own paths — nothing synthesized. -->
-          <div v-if="regionFields.length" class="-my-1">
-            <FieldItem
-              v-for="field in regionFields"
-              :key="field.path ?? field.name"
-              v-bind="field"
+            <!-- Real properties. Rendered as field rows, counted as fields,
+                 anchored by their own paths — nothing synthesized. -->
+            <div v-if="entry.node === regionLast && regionFields.length" class="-my-1">
+              <FieldItem
+                v-for="field in regionFields"
+                :key="field.path ?? field.name"
+                v-bind="field"
+                :labels="labels"
+              />
+            </div>
+
+            <component
+              :is="schemaComposition"
+              v-if="entry.node === regionLast && regionComposition && schemaComposition"
+              v-bind="regionComposition"
+              :labels="labels?.composition"
+              :field-labels="labels"
+            />
+
+            <!-- A boundary that did not fold (nested array, JSON inside JSON):
+                 its own region, one indent deeper. -->
+            <FieldValueStructure
+              v-if="entry.node === regionLast && regionTail"
+              :value="regionTail"
+              :chrome="chrome"
               :labels="labels"
             />
           </div>
-
-          <component
-            :is="schemaComposition"
-            v-if="regionComposition && schemaComposition"
-            v-bind="regionComposition"
-            :labels="labels?.composition"
-            :field-labels="labels"
-          />
-
-          <!-- A boundary that did not fold (nested array, JSON inside JSON):
-               its own region, one indent deeper. -->
-          <FieldValueStructure
-            v-if="regionTail"
-            :value="regionTail"
-            :chrome="chrome"
-            :labels="labels"
-          />
         </div>
       </template>
     </UCollapsible>

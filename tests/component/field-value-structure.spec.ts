@@ -220,6 +220,59 @@ describe('anchor collection', () => {
 })
 
 describe('FieldItem with a value shape', () => {
+  it.each([
+    ['inline', { ...primitiveItem, path: 'inline-root' }],
+    ['identity-only', { relation: 'decoded', codec: 'json', type: 'object', path: 'identity-root' }],
+    ['folded', {
+      ...jsonObjectArray,
+      path: 'decoded-root',
+      value: { ...objectItem, path: 'item-root' },
+    }],
+    ['folded without requirements', {
+      relation: 'decoded', codec: 'json', type: 'object[]', path: 'decoded-root',
+      value: { ...objectItem, notes: undefined, path: 'item-root' },
+    }],
+    ['inline chain', {
+      relation: 'item', type: 'string', path: 'outer-root',
+      value: { ...primitiveItem, path: 'inner-root' },
+    }],
+  ] satisfies [string, FieldValueNode][])('preserves every %s value anchor with its own arrival cue and focus target', async (_, value) => {
+    let anchor!: ReturnType<typeof useFieldAnchor>
+    const field: FieldNode = { name: 'payload', type: 'string', value }
+    const Host = defineComponent({
+      components: { FieldItem },
+      setup() {
+        anchor = useFieldAnchor()
+        anchor.active.value = ''
+        return { field }
+      },
+      template: '<FieldItem v-bind="field" />',
+    })
+    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+    try {
+      for (const path of collectFieldPaths([field]).filter(path => path.endsWith('-root'))) {
+        anchor.active.value = path
+        await nextTick()
+        await nextTick()
+        const targets = wrapper.findAll('[id]').filter(node => node.attributes('id') === path)
+        expect(targets, `DOM anchor for ${path}`).toHaveLength(1)
+        const target = targets[0]!
+        expect(target.element.firstElementChild?.hasAttribute('data-field-arrival-cue')).toBe(true)
+        const element = target.element as HTMLElement
+        element.tabIndex = -1
+        element.focus()
+        expect(document.activeElement).toBe(element)
+      }
+      if (value.path === 'decoded-root') {
+        expect(wrapper.get('[data-value-structure-toggle]').attributes('aria-expanded')).toBe('true')
+        expect(wrapper.get('#item-root').text()).toContain('sku')
+      }
+    }
+    finally {
+      wrapper.unmount()
+    }
+  })
+
   it('prints the decoded shape as `codec<shape>` and lets it lead the wire type', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
