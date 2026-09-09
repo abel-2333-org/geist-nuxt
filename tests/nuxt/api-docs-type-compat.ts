@@ -6,6 +6,7 @@ import type {
   FieldLifecycleInfo,
   FieldNode,
   FieldNote,
+  FieldValueNode,
   RequiredState,
 } from '../../kits/api-docs/components/FieldItem.vue'
 import type {
@@ -38,6 +39,13 @@ const labels: FieldItemLabels = {
     oneOfHint: '以下仅一个适用。',
   },
 }
+// A value node is additive: the field keeps its wire type and gains a shape.
+const decoded: FieldValueNode = {
+  relation: 'decoded',
+  codec: 'json',
+  type: 'object[]',
+  value: { relation: 'item', type: 'object', fields: [{ name: 'sku', type: 'string' }] },
+}
 const field: FieldNode = {
   name: 'payment_method',
   type: 'object',
@@ -45,6 +53,7 @@ const field: FieldNode = {
   lifecycle: lifecycleInfo,
   notes: [note],
   enumVariants: [fieldVariant],
+  value: decoded,
 }
 
 void field

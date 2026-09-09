@@ -494,6 +494,171 @@ const denseFields = [
   },
 ]
 
+// 第三组：值的形状（#117）。转录自消费端真实端点 `POST /v1/txn/doTransaction`——
+// 该 API 的结构化字段全是 `string` + `json_string`，编码是常态而非特例。数组元素、
+// 编码内容没有业务字段名，所以挂在 `value` 而不是 `children`：不计入子字段数、
+// 不合成 `[]` / 「JSON 字符串内容」假字段。覆盖：编码对象、无 schema 的编码字段
+// （只有事实、不出折叠）、编码数组（解码边界与元素边界共用一个折叠区）、双层编码
+// （`txnOrderMsg.products`，两个独立折叠区）、编码内的普通数组元素。
+const valueFields: FieldNode[] = [
+  {
+    path: 'tx_billingInformation',
+    name: 'billingInformation',
+    type: 'string',
+    format: 'json_string',
+    description: '交易账单信息，包含客户账单地址和联系信息。',
+    condition: '除订阅后续扣款 / 更新（`subscription.requestType=1` 或 `2`）外必填。',
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object',
+      fields: [
+        { path: 'tx_billing_email', name: 'email', type: 'string', required: true, description: '客户邮箱地址，用于交易确认和争议处理。' },
+        { path: 'tx_billing_country', name: 'country', type: 'string', required: true, description: '[ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) 国家或地区代码。' },
+        { path: 'tx_billing_province', name: 'province', type: 'string', description: '[ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) 省/州代码。', condition: '当 `country` 为 `US` 或 `CA` 时必填。' },
+      ],
+    },
+  },
+  {
+    path: 'tx_metaData',
+    name: 'metaData',
+    type: 'string',
+    format: 'json_string',
+    description: '本次交易的商户自定义数据；交易查询和异步通知会原样返回。',
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object',
+      notes: [{ label: '规则', text: '内容结构由商户自定，不校验其中的字段。' }],
+    },
+  },
+  {
+    path: 'tx_retailers',
+    name: 'retailers',
+    type: 'string',
+    format: 'json_string',
+    description: 'marketplace 交易的零售商信息；订单包含的每个零售商各传入一个对象。',
+    lifecycle: { status: 'new' as const, since: '2026-08-10' },
+    notes: [
+      { label: '规则', text: '适用于 marketplace / 平台模式下商品由第三方零售商销售的场景；仅销售自有商品的商户无需传入。' },
+      { label: '一致性', text: '传入该字段后，`txnOrderMsg.products` 中的每个商品都需要传入 `retailerId`，且取值需命中此处列出的某个零售商。' },
+    ],
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object[]',
+      notes: [{ label: '数量', text: '至少 1 个零售商。' }],
+      value: {
+        relation: 'item',
+        type: 'object',
+        notes: [{ label: '唯一性', text: '`retailerId` 在数组内不可重复。' }],
+        fields: [
+          { path: 'tx_retailers_retailerId', name: 'retailerId', type: 'string', required: true, description: '商户自行定义的零售商唯一标识。', notes: [{ label: '长度', text: '最多 64 字符。' }] },
+          { path: 'tx_retailers_retailerName', name: 'retailerName', type: 'string', required: true, description: '零售商名称；建议传入其正式注册名称或对外经营名称。', notes: [{ label: '长度', text: '最多 128 字符。' }] },
+          { path: 'tx_retailers_retailerCountry', name: 'retailerCountry', type: 'string', required: true, description: '零售商所在国家或地区，ISO 3166-1 alpha-2 代码。' },
+        ],
+      },
+    },
+  },
+  {
+    path: 'tx_txnOrderMsg',
+    name: 'txnOrderMsg',
+    type: 'string',
+    format: 'json_string',
+    required: true,
+    description: '交易业务信息，包含 `returnUrl`、商品信息以及商户采集的浏览器与设备信息。',
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object',
+      fields: [
+        { path: 'tx_txnOrderMsg_returnUrl', name: 'returnUrl', type: 'string', required: true, description: '同步回跳地址，主要用于 3DS challenge 等跳转场景。' },
+        {
+          path: 'tx_txnOrderMsg_products',
+          name: 'products',
+          type: 'string',
+          format: 'json_string',
+          required: true,
+          description: '顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 `orderAmount`。',
+          value: {
+            relation: 'decoded',
+            codec: 'json',
+            type: 'object[]',
+            value: {
+              relation: 'item',
+              type: 'object',
+              fields: [
+                { path: 'tx_products_name', name: 'name', type: 'string', required: true, description: '商品名称。' },
+                { path: 'tx_products_price', name: 'price', type: 'string', required: true, description: '商品单价。' },
+                {
+                  path: 'tx_products_type',
+                  name: 'type',
+                  type: 'string',
+                  description: '商品类别；默认不填即普通商品。`discount` 商品金额需要传负数。',
+                  enumValues: [
+                    { value: 'virtual', description: '虚拟商品。' },
+                    { value: 'physical', description: '实物商品。' },
+                    { value: 'shipping_fee', description: '运费商品项。' },
+                    { value: 'discount', description: '折扣商品项，金额需要传负数。' },
+                  ],
+                },
+                {
+                  path: 'tx_products_retailerId',
+                  name: 'retailerId',
+                  type: 'string',
+                  description: '销售该商品的零售商标识。',
+                  condition: '传入 `retailers` 时必填。',
+                  lifecycle: { status: 'new' as const, since: '2026-08-10' },
+                },
+              ],
+            },
+          },
+        },
+        { path: 'tx_txnOrderMsg_transactionIp', name: 'transactionIp', type: 'string', required: true, description: '持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。' },
+      ],
+    },
+  },
+  {
+    path: 'tx_codeForm',
+    name: 'codeForm',
+    type: 'string | null',
+    format: 'json_string',
+    description: '响应中的支付码信息对象，以 JSON 字符串承载。',
+    condition: '需向用户展示支付码（二维码 / 条码）的支付方式才有值。',
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object',
+      fields: [
+        { path: 'tx_codeForm_expireTime', name: 'expireTime', type: 'string | null', description: '支付码失效时间，ISO 8601 格式。' },
+        {
+          path: 'tx_codeForm_codeDetails',
+          name: 'codeDetails',
+          type: 'object[] | null',
+          description: '支付码明细列表。',
+          value: {
+            relation: 'item',
+            type: 'object',
+            fields: [
+              {
+                path: 'tx_codeDetails_codeValueType',
+                name: 'codeValueType',
+                type: 'string | null',
+                description: '码格式类型。',
+                enumValues: [
+                  { value: 'BARCODE', description: '条形码格式。' },
+                  { value: 'QRCODE', description: '二维码格式。' },
+                ],
+              },
+              { path: 'tx_codeDetails_codeValue', name: 'codeValue', type: 'string | null', description: '码内容值，供用户展示或终端扫描的实际编码数据。' },
+            ],
+          },
+        },
+      ],
+    },
+  },
+]
+
 // 场景受控选择 story 数据：请求 / 响应两侧共用稳定场景 id（single / batch /
 // dry-run）；响应侧刻意缺 `batch`，现场演示缺侧 fallback——Request 切到 batch 时
 // Response 确定性收敛到第一项，不回写、不发事件、不抖动。scenario ↔ scenario 的
@@ -616,6 +781,32 @@ provideFieldSource({
     field: { path: 'res_state', name: 'state', type: 'enum', required: true, description: '部署状态，定义在 Reference 页的响应体（跨页字段）。' },
   },
 })
+
+// 第三组字段树的中文 chrome。值作用域标签按语言分别配置：英文去掉 requirements
+// （Value / Array），中文保留后缀（值要求 / 数组要求）——单独的「值」是名词碎片。
+const valueLabels: FieldItemLabels = {
+  required: '必填',
+  conditional: '条件必填',
+  default: '默认值',
+  example: '示例',
+  constraints: '约束',
+  note: '说明',
+  caveat: '注意',
+  showChildren: '展开子参数',
+  hideChildren: '收起子参数',
+  enumLabel: '允许值',
+  enumFilter: '筛选值',
+  enumEmpty: '没有匹配的值',
+  nestedScope: (label, relation, depth, codec) => {
+    if (relation === 'item') return `第 ${depth} 层元素`
+    if (relation === 'member') return `第 ${depth} 层键值`
+    return `${codec ?? label} 解码后（第 ${depth} 层）`
+  },
+  eachItem: '每个元素',
+  eachMember: '每个键',
+  decodedRequirements: '值要求',
+  decodedArrayRequirements: '数组要求',
+}
 
 const fieldLabels = {
   category: '字段',
@@ -895,7 +1086,12 @@ onMounted(() => anchor.initFromHash())
             这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
             带入页面时自动展开并滚动定位）。下面第一组是紧凑示例；第二组是刻意加压的
             高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超过默认 8 项阈值的长
-            enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。
+            enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。第三组转录自真实端点
+            <code class="font-mono text-[0.8125rem]">POST /v1/txn/doTransaction</code>：数组元素与
+            JSON 编码内容是「值的形状」而非字段，经 <code class="font-mono text-[0.8125rem]">value</code>
+            节点表达——身份行以 <code class="font-mono text-[0.8125rem]">json&lt;object[]&gt;</code>
+            标出解码后的形状，折叠区复用子参数动词、只计真实属性，编码数组的解码边界与元素边界共用一个折叠区，
+            双层编码（<code class="font-mono text-[0.8125rem]">txnOrderMsg.products</code>）各自一区。
           </p>
           <FieldGroup label="Request Body" :count="fields.length">
             <FieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
@@ -904,6 +1100,12 @@ onMounted(() => anchor.initFromHash())
           <div class="mt-8">
             <FieldGroup label="Settlement Payload" :count="denseFields.length">
               <FieldItem v-for="f in denseFields" :key="f.path ?? f.name" v-bind="f" />
+            </FieldGroup>
+          </div>
+
+          <div class="mt-8">
+            <FieldGroup label="doTransaction · 编码内容与数组元素" :count="valueFields.length">
+              <FieldItem v-for="f in valueFields" :key="f.path ?? f.name" v-bind="f" :labels="valueLabels" />
             </FieldGroup>
           </div>
         </div>

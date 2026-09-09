@@ -206,9 +206,13 @@ async function assertResolvedComponents(consumerRoot, lock) {
     if (!record.target.endsWith('.vue')) continue
     const source = await readFile(path.join(consumerRoot, record.target), 'utf8')
     const localComponents = localComponentImports(source, record.target)
+    // An SFC may refer to itself implicitly by its filename (recursive
+    // rendering). Internal helpers outside app/components/ have no global
+    // declaration, so that self-reference is resolved here explicitly.
+    const selfName = path.basename(record.target, '.vue')
     for (const tag of templateComponentTags(source, record.target)) {
       const name = pascalizeComponent(tag)
-      if (!name || BUILT_IN_COMPONENTS.has(name) || declared.has(name) || localComponents.has(name)) continue
+      if (!name || name === selfName || BUILT_IN_COMPONENTS.has(name) || declared.has(name) || localComponents.has(name)) continue
       unresolved.push(`${record.target} -> <${tag}>`)
     }
   }
