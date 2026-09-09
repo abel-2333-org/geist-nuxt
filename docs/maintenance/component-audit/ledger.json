@@ -274,13 +274,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-04T01:50:37.026Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b1f31a5ef1f0984edb93c69d1157d8c2a7c6cc8a",
-        "headSha": "a4e029f6f834782fb72a1b086c8fd5c9937f5071",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -293,9 +293,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "39c27c83c2f0031efd95215861c43c4ffa3862e79af098693caa5cac0b228127"
+        "scopeDigest": "a2fb3fcd1ff54c04be0d3479b6833d9614b2898dc29b04093c0600f5d3c71d02"
       },
-      "notes": "required co-review:SidebarNav.vue 在其 scope 内被改,改动仅为 active 派生位置(模板→computed),SplitPaneHandle 的 props/emits(value/min/max/controls/step/jump/drag-start)、edge 形态与 sidebar-nav.spec 的 resize 用例(键盘步进、Home/End、Enter/双击复位、Escape 回滚)全部保持,handle 自身零改动,无回归。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -328,13 +328,13 @@
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
-        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -344,9 +344,9 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "31d688707bbcc7f895f1f45537f7fee5b0b2cc5eb56cae522d4806fc3250903c"
+        "scopeDigest": "7dd3a3c8e7fd44a392be65bfc79934135c584194f4bb1c92e6a59c0491ba1d63"
       },
-      "notes": "修复 langLabel 对 languageLabels 覆盖键的大小写敏感(JSDoc 与 code-sample.md 承诺覆盖优先,实测非小写键被静默忽略;精确小写键仍优先),补 6 条 focused tests;新增 1 条 low finding:换行切换按钮同时翻转 aria-label 与 aria-pressed,违反 WAI-ARIA APG toggle button 规则,修法涉及 ApiCodeLabels 公开 i18n 键,交人工决策。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -384,13 +384,13 @@
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-08T23:25:58.000Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6da4dba66afeff6219509ce79409898b6b197819",
-        "headSha": "5f6c3813fa3e9af142ae9645b880e62675fe0ac7",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -406,9 +406,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "9eae9a0d505bf5b101eabea0dcec491bffd6945f38fbd95f1c88a55d0d2adf2e"
+        "scopeDigest": "44089ad69bf22754aa6d128ea35ce8d6a9eec22fac55ef2bbc4d4f29ce2b1cc4"
       },
-      "notes": "修复 dev 重复 body id 检查只覆盖当前 status 的缺口(reference 承诺 dev 模式告警,未打开的 status 下重复 id 挂载时静默):改为随 scenario/status 全树 eager 检查,该 watchEffect 只依赖 scenarios、不再随选择变化重跑;补 1 条 focused test 与 reference 说明。三级收敛、label 回落、live region、窄容器 popover、文件下载链接契约复核无回归,既有 2 条 resolved finding 维持。",
+      "notes": "同步 main 后复审：eager duplicate body 检查限于 dev/test，按 scenario/status 分组且每实例去重；PR gallery 的 value fixture 不改变其输入。保留 main 既有裁定。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -428,13 +428,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
-        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -451,20 +451,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "841dcb8e9c4b6863658e3638c71c396630b88ca26f578b48738e80fbf86e1e5b"
+        "scopeDigest": "054f86e5e266f1c9b0f77e71ba4f3823a7fa8842fbb271d11ee252478e08c012"
       },
-      "notes": "affected co-review：FieldItem 的结构测试新增技术标识、pointer modality 与 arrival cue 契约；LifecycleBadge 实现、公开契约和 registry topology 未改变，既有 verified 结论保持，无新增 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
-        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -483,7 +483,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "1702e7ee1aaf1055997fa58a1bc3add83ca447439522234d0eb9a6b033f2d53e",
+        "scopeDigest": "af8a1659329ffc4f5b38b33a2d50060e77f86ea8f1929576970d50c0987571f3",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -497,18 +497,18 @@
           }
         ]
       },
-      "notes": "required co-review:scope 内 SiteSearch.vue(empty 槽 class、诊断条件)、OperationHeader.vue(标识换行 + 基线对齐)与 sidebar-nav.vue gallery 页(SiteSearch 实例文案)被改;三处均不触及 HttpMethodBadge 的调用参数(仍只传 method / size)、归一化、preset 色调与 translate=no 链路,http-method-badge.spec 5 用例原样通过,registry topology 未变,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
-        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -521,20 +521,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "f9b32bb1aa9e6ca5917fa2f95676cce270b086a8d0bad4b4e70c9dbc8d3bb04b"
+        "scopeDigest": "3dd47fa9d64391b907b36c022bfdbc22438cbd9d87b385abf5cbc48ea91b9f69"
       },
-      "notes": "Round 3 复审修复 UTabs tab 与 tabpanel 的 ARIA 关系；面板抽为同一 registry item 内部实现并保留真实 overflow 探测、筛选与默认值语义。补齐合法 variant id 不告警测试及 tab/panel 关联测试，独立复审无新增 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 2,
-      "lastAuditedAt": "2026-08-25T03:46:05.151Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f97e97c2bd4f5c77b24d7f318325bbed635c05c4",
-        "headSha": "e924b4d92548d77aa06ad1fdc7d5894c96b9fc2c",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -543,46 +543,58 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "cfb1c286d388ae5098ac5b06ea24aa77ea32c3c6fe5395baa878077893dcc7db"
+        "scopeDigest": "a3452fc2659012b4e9cd19b0e01f3c83b92f80bda124d83e9acca12437f402e8"
       },
-      "notes": "affected co-review：共享 API Docs 权威索引新增 SplitPaneHandle 的 grip/edge appearance 与 coarse step 契约；该 owner 的实现、公开行为与 registry topology 未改变，既有 finding disposition 保持，无新 finding。 本轮复审同步修正 SidebarNav 持久化与拖拽选择锁的权威 reference；运行时契约未再变化，无新增 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
-      "status": "verified",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
-        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
-        "itemDigest": "b4f15a5424fdf01b5c6292ad98aae147a0a6b631704a54e2035a9b59dff565cc",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
+        "itemDigest": "e345344bfbf6d9dd9f6ceb2fc381d2c737a000bb65a68480ead6c6ab17297c2f",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
           "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/internal/FieldValueRequirements.vue",
+          "kits/api-docs/internal/FieldValueStructure.vue",
           "kits/api-docs/utils/field.ts",
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/field-anchor.spec.ts",
-          "tests/component/field-item-structure.spec.ts"
+          "tests/component/field-item-structure.spec.ts",
+          "tests/component/field-value-structure.spec.ts",
+          "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "eda896e4c9f611718f0059aac3ef6784e5cd72dd7bf7f8b8f53e8be9eafe762a"
+        "scopeDigest": "1c4b25790217c323fb25003d878d174ee74f838aee07677393c957faae561650"
       },
-      "notes": "Round 3 复审修复字段标识翻译保护、粗指针宽屏锚点可达性与触控操作提示；到达 cue 改由独立 overlay 承载静态 ring/wash，Web Animations 仅改变 opacity，保留行级 focus outline。focused tests、全量 component tests、typecheck 与 build 均通过。",
-      "findings": []
+      "notes": "修复 inline/folded/identity-only 值根锚点；专项 28/28。递归 decoded 的 codec/shape 丢失仍待人工确认呈现方式。",
+      "findings": [
+        {
+          "id": "f-2a33ea705a68",
+          "severity": "medium",
+          "claim": "FieldValueNode 可递归表达编码内容，编码边界由 codec<shape> 承载。",
+          "evidence": "string[] → item(string) → decoded(json, object) 没有 json<object>；string → decoded(base64,string) → decoded(json,object) 仅显示 base64<string>。FieldItem 只显示直接 decoded；内部渲染器假定身份事实均已显示。建议在递归编码边界补紧凑 codec<shape> token；与 Issue #117 已定案的身份行承载方式相关，等待用户决策。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-schema-composition": {
       "round": 2,
-      "lastAuditedAt": "2026-08-27T23:21:08.509Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
-        "headSha": "986e3d6a1f8abc1a9824f96081fb1c70c81e106d",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
@@ -591,20 +603,20 @@
           "references/kits/api-docs/schema-composition.md",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "ee38233da6f830516ee08cc3114d30fcc4a4e9a4518243aa463b41a9745f7a0e"
+        "scopeDigest": "b1d56cf32af7b40f8eeef4f669e6aa225383f5a3b3aef62dfe98e4ef29c39544"
       },
-      "notes": "复审判 clean:三种 kind 形态、discriminator 合成/聚合、opaque anchor 精确匹配与 revision 重放、anyOf 按钮 aria-expanded/aria-controls、heading 封顶 h6 均与 schema-composition.md 契约一致且被 focused tests 断言;自 2026-08-12 verified 以来组件源码零变更。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-field-annotation": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
-        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -613,9 +625,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "84c01ca8c21833a19aaabe149f4150c436dd4f93085660d61df7318fab0f9178"
+        "scopeDigest": "655ddef99a44d0bd19792bbb39c37f249617e2d736b2f3666385f78963901664"
       },
-      "notes": "round 3 复审 clean:双绑定(field/field-ref)、跨页 {page}#{path} 链接、未命中降级+dev 告警、fieldRequiredState 共享派生均与 reference 契约一致且有测试锚定;两条 wont-fix finding(trailing-slash 归一化重复、labels spread 惯例)维持人工判定,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -635,13 +647,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
-        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -654,7 +666,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "ac9c28e5d44bc87e2c4f3d57d3fc0588983c5127161087b6092e9febcdbe7ea4",
+        "scopeDigest": "a28b3185b82eeda026e180ea11c625f4da57814b2f27f727744e68a542e29ebd",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -668,18 +680,18 @@
           }
         ]
       },
-      "notes": "round 3 复审 clean:单值词表 EVENT 内联常量、neutral+subtle 置于五方法色之外、font-mono tracking-wide tabular-nums 与 HttpMethodBadge 同形态、translate=no 经 SemanticBadge 单根透传、size 默认 sm 对齐同排原子,均与 index.md「Operation identity 分层」「平行原子」裁定一致;源码注释 never color alone 由常量文本结构性成立;消费面(OperationHeader kind=webhook、webhook-reference / index / structured-relations 页)全部零参或仅传 class,无绕过。反向横扫无簇外重复,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
-        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -691,20 +703,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "d19bbd68e71262138a153a9c67abf2cfb902c2412fb2cada69133226ff7ae999"
+        "scopeDigest": "8d5df6788e9e91f6f8ae13da85d40b17fb06199cc3cfb306b792a44bc7f4d935"
       },
-      "notes": "clean:UAlert 薄包装无 role/live-region 副作用,preset 词表、非空 title 回落、不可 dismiss、语义 token 与明暗表现均与 index.md / data-display.md 契约一致;反向横扫 lifecyclePreset 取值与空白回落一行式仅与 LifecycleBadge 同形,属同词表多形态设计,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 2,
-      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
-        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -715,20 +727,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "b6186099d0a7eb732963557d8456029532df2fcae6433d476e86cedf91c08d68"
+        "scopeDigest": "d0df733a7e752790989357eef4f5f5582760915dd69cf7c2ef1322ec97a91baf"
       },
-      "notes": "两原子单元回流契约、三种复制可供性、选区守卫与单一 segment live region 均与权威 reference 及测试一致；@vueuse/core 由 registry 顶层 externalRequirements 声明，依赖闭包无缺口；无新增 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
-        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -743,20 +755,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "1a5b9e81d79e9a81ac91d66590d46673b8cb733d94c4b17e93057241400890ae"
+        "scopeDigest": "694e1c07008fd3c07e455f00a47b34729c3ffed4a8ba978a5672619d5daa0fda"
       },
-      "notes": "round 3 复审:identity 行 mono 标识由 truncate 改为 wrap-anywhere,行对齐改 items-baseline(#actions self-center)。实测 375px 视口下 truncate 会吃掉真实长度标识的尾部(/v1/customers/{customer_id}/payment_methods/{id} 少 18 字符、checkout.session.async_payment_succeeded 少 11 字符)且触屏无 tooltip,webhook 形态又没有 OperationTarget 兜底;改后 375px 两行完整可读、徽章落在首行,1440px 仍单行。依据 responsiveness.md「缩略 = 截断 + tooltip」「永远保护主标识」。props/emits/slots 与 headingLevel 契约未变,operation-header.spec / chrome-labels.spec 原样通过,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
-        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -773,20 +785,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "dc7890f64433ce93b0c052990f74fd023ffc173e03a8d239728c1990cba26dbf"
+        "scopeDigest": "15868a58d20684feaa05c5fdc7805ade7dd65db0fd6f00c17a083d402d10398e"
       },
-      "notes": "Co-review（SplitPane.vue 在其 scope 内被修改）：CodeRail 不消费 SplitPane 组件，只共享 SplitPaneHandle/useSplitPane/useBreakpointGate/useRafTask；SplitPane 的 live default 修复与 TermAnnotation 修复均不改变 CodeRail 行为。复核内容优先重分配、有效 ARIA 边界、RO+MO 观察目标同步、stacked/fit/overflow 三态与 Shift 3× 粗步进，无回归。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
-        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -795,7 +807,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "71fd5bc7af326a1ac90f1423f0535d157f5ead3c13b9091e120211fccebf4424",
+        "scopeDigest": "7298147edd6689dbda4c7eda7a365864b090fe8e8677d974bc30fc643f023cd3",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -809,7 +821,7 @@
           }
         ]
       },
-      "notes": "round 3 复审:① #empty 槽内层 div 的 py-6/text-center/text-sm/text-muted 与 UCommandPalette 主题 md 档 empty 槽逐类重复,空态实测 110px → 去掉内层 class 后 64.6px(仅剩主题 py-6);② 两处诊断由 dev-only 收敛为 kit 惯例 import.meta.dev || import.meta.test,并补 4 条 warn 断言(失败源 warn、缺 searchGroupLabel warn、齐备时静默);③ gallery 两处实例补 noResultsAnnouncement 中文播报(此前可见文案中文、live region 英文),sidebar-nav 页 placeholder 补省略号。同步/异步搜索、Fuse 过滤、三态播报、hash 焦点交接契约未变,既有 resolved finding 保持关闭,无新 open finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -822,13 +834,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
-        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -843,9 +855,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "d3a4f2e0111417f3df1dc95a7a4f55c47743b6c49cea412a93580ab810314c78"
+        "scopeDigest": "d6ddfd769bfba0cdc8e59e4335f9a7d604702dc5584524b63ae936c055c0ee97"
       },
-      "notes": "round 3 复审 clean:section 省略、ACK 三语义、fact format 明确 opt-in、schedule 折叠(含阈值 1/非法值退化)与 Label in Name + sr-only 全序列均有测试与 demo 变体锚定;「绝不渲染空卡片」「绝不由 value 内容触发」两条 universal claim 核证通过,无新 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -894,13 +906,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-08-31T03:27:54.412Z",
+      "lastAuditedAt": "2026-09-09T02:03:44.518Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "085b77ddc8fc3f59752fc4172bbe2c0ba0e6c8cb",
-        "headSha": "ad127a91e5b4d4f672cda0a4c2e99f5c03e50db1",
+        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
+        "headSha": "796e14f9a286f5e2dc16deae688bd05ddcc19fa6",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -910,9 +922,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "57aea9b84600b45ccc075984d3fad7c1fd221a1b372f85e3900ea6a5a7ed5173"
+        "scopeDigest": "8d4cd7a2de734085569f6188187b61606de4abcad26657dfe0aff49944a88127"
       },
-      "notes": "affected co-review：共享 useFieldAnchor 的到达动画改为独立 cue overlay 上的 opacity 动画；RelationSourcePath 的三态降级、fragment 编码、modified-click 与 focus 行为保持，focused tests 通过，无新增 finding。",
+      "notes": "PR #118 复审：检查受影响共享 reference、gallery 与依赖集成；组件全量验证通过，保留既有 finding 裁定。",
       "findings": []
     }
   }
