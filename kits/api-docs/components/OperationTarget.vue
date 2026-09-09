@@ -48,11 +48,16 @@ export interface ApiTargetLabels {
   copied?: string
   /** Complete failure message shared by all three copy actions. */
   copyFailed?: string
-  /** Accessible name for the host segment, e.g. "复制 host". */
+  /**
+   * Accessible-name prefix for the host segment, e.g. "复制 host". The current
+   * host value is appended (`Copy host https://api.example.com`): `aria-label`
+   * replaces the button text for assistive technology, so without the value a
+   * screen reader would never hear which host this row points at.
+   */
   copyHost?: string
   /** Complete host success message; also used as the copied label. */
   copiedHost?: string
-  /** Accessible name for the path segment, e.g. "复制 path". */
+  /** Accessible-name prefix for the path segment, e.g. "复制 path"; the path is appended. */
   copyPath?: string
   /** Complete path success message; also used as the copied label. */
   copiedPath?: string
@@ -104,6 +109,18 @@ const selectItems = computed(() =>
 const baseUrl = computed(() => activeHost.value?.baseUrl ?? '')
 
 const fullAddress = computed(() => `${baseUrl.value}${props.path}`)
+
+/**
+ * Segment accessible names. `aria-label` REPLACES a button's text content in
+ * the accessibility tree, so the name has to carry the value itself: "Copy
+ * host https://api.example.com", never just "Copy host" — otherwise a
+ * screen-reader user learns that a host exists but never what it is (the host
+ * appears nowhere else on the page; the environment picker only names the
+ * environment). The prefix is localizable chrome; the value is content,
+ * appended verbatim, so no locale has to compose a sentence around it.
+ */
+const hostName = computed(() => `${t.value.copyHost} ${baseUrl.value}`)
+const pathName = computed(() => `${t.value.copyPath} ${props.path}`)
 
 /* ------------------------------------------------------------------ *
  * Segment copy. Two independent useCopy instances so the two pulses (and
@@ -228,7 +245,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
         <button
           type="button"
           :class="[segment, hostSegment]"
-          :aria-label="hostCopied ? t.copiedHost : t.copyHost"
+          :aria-label="hostCopied ? t.copiedHost : hostName"
           @click="onCopyHost"
         ><code translate="no">{{ baseUrl }}</code></button>
       </UTooltip>
@@ -247,7 +264,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
             pathSegment,
             clipped ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]' : undefined,
           ]"
-          :aria-label="pathCopied ? t.copiedPath : t.copyPath"
+          :aria-label="pathCopied ? t.copiedPath : pathName"
           @click="onCopyPath"
         ><code translate="no" class="block whitespace-nowrap">{{ props.path }}</code></button>
       </UTooltip>
