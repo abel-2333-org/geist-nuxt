@@ -180,6 +180,8 @@ export interface FieldValueNode {
  * `string` + `json_string` and discriminated nothing).
  */
 export interface FieldValueLabels {
+  /** Disambiguates repeated anonymous scopes; depth counts this relation, including silent levels. */
+  nestedScope?: (label: string, relation: ValueRelation, depth: number, codec?: string) => string
   /** Every element of an array. */
   eachItem?: string
   /** Every dynamic key of a record. */
@@ -195,6 +197,7 @@ export interface FieldValueLabels {
 /** English defaults for the value scope labels. Lives here (not in a
  *  component) so FieldItem and its internal value renderer share one copy. */
 export const fieldValueLabelDefaults: Required<FieldValueLabels> = {
+  nestedScope: (label, _relation, depth, codec) => `${label} (${depth})${codec ? ` · ${codec}` : ''}`,
   eachItem: 'Each item',
   eachMember: 'Each key',
   decodedRequirements: 'Value',
@@ -266,7 +269,7 @@ export interface FieldItemLabels extends FieldValueLabels {
 export type FieldValueChrome = Required<Pick<
   FieldItemLabels,
   'caveat' | 'note' | 'default' | 'example' | 'showChildren' | 'hideChildren'
-  | 'eachItem' | 'eachMember' | 'decodedRequirements' | 'decodedArrayRequirements'
+  | 'eachItem' | 'eachMember' | 'decodedRequirements' | 'decodedArrayRequirements' | 'nestedScope'
 >>
 
 /** Public props contract for FieldItem. Kept outside the SFC so its
@@ -449,18 +452,13 @@ export function describeValueCodec(value?: FieldValueNode): {
   return { token, nodes }
 }
 
-/** A region may absorb another value boundary only while its current tail
- * has no structure of its own and no existing requirement block shares the
- * new node's scope. Compare the WHOLE region: an empty intermediate node must
- * not hide a collision between two non-adjacent levels. */
+/** Anonymous levels share a disclosure until actual fields or composition establish a boundary. */
 export function foldsIntoParentRegion(
   parent: FieldValueNode,
-  child: FieldValueNode,
-  region: readonly FieldValueNode[] = [parent],
+  _child: FieldValueNode,
+  _region: readonly FieldValueNode[] = [parent],
 ): boolean {
-  if (hasOwnStructure(parent)) return false
-  return !hasValueDetail(child) || !region.some(node =>
-    hasValueDetail(node) && valueScopeLabelKey(node) === valueScopeLabelKey(child))
+  return !hasOwnStructure(parent)
 }
 
 /** Nodes sharing a single structural disclosure, in display order. */
@@ -475,7 +473,7 @@ export function collectValueRegion(value: FieldValueNode): FieldValueNode[] {
 }
 
 /** The scope label for a value node — what the rules below it are ABOUT. */
-export function valueScopeLabelKey(value: FieldValueNode): keyof FieldValueLabels {
+export function valueScopeLabelKey(value: FieldValueNode): keyof Omit<FieldValueLabels, 'nestedScope'> {
   if (value.relation === 'item') return 'eachItem'
   if (value.relation === 'member') return 'eachMember'
   return value.type?.endsWith('[]') || value.type?.startsWith('array')
@@ -504,7 +502,7 @@ export interface ValueRequirementsBlock {
 
 export function describeValueRequirements(
   node: FieldValueNode,
-  labels: Required<FieldValueLabels>,
+  labels: Required<Omit<FieldValueLabels, 'nestedScope'>>,
 ): ValueRequirementsBlock | null {
   if (!hasValueDetail(node)) return null
   const notes = node.notes ?? []

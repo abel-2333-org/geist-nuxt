@@ -797,6 +797,11 @@ const valueLabels: FieldItemLabels = {
   enumLabel: '允许值',
   enumFilter: '筛选值',
   enumEmpty: '没有匹配的值',
+  nestedScope: (label, relation, depth, codec) => {
+    if (relation === 'item') return `第 ${depth} 层元素`
+    if (relation === 'member') return `第 ${depth} 层键值`
+    return `${codec ?? label} 解码后（第 ${depth} 层）`
+  },
   eachItem: '每个元素',
   eachMember: '每个键',
   decodedRequirements: '值要求',

@@ -14,8 +14,8 @@
 //   · nothing structural below  → no chevron at all; the rules read inline.
 //   · structure below           → exactly one region, opened by the boundary
 //                                 the reader actually crosses.
-//   · compatible levels         → share one region unless their rules would
-//                                 introduce duplicate scope headings.
+//   · anonymous levels          → share one region; repeated scopes receive
+//                                 explicit relation depths.
 //
 // Anatomy: inline requirements
 //          | region( requirements per folded node → real fields → composition
@@ -26,6 +26,7 @@ import {
   collectValueRegion,
   describeValueCodec,
   hasStructureBelow,
+  valueScopeLabelKey,
 } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, FieldValueNode } from '../utils/field'
 import FieldValueRequirements from './FieldValueRequirements.vue'
@@ -80,8 +81,8 @@ const representedForTail = computed(() => [
   ...boundaryCodecs.value.flatMap(codec => codec.nodes),
 ])
 
-/** The boundary that did NOT fold — rendered as its own nested region so two
- *  same-named headings can never land side by side in one panel. */
+/** The boundary that did NOT fold — rendered separately because the preceding
+ *  node already owns fields or composition. */
 const regionLast = computed(() => regionNodes.value[regionNodes.value.length - 1])
 const regionTail = computed(() => (opensRegion.value ? regionLast.value?.value : undefined))
 const regionFields = computed(() => regionLast.value?.fields ?? [])
@@ -100,18 +101,40 @@ const schemaComposition = computed(() => {
   return typeof resolved === 'string' ? null : resolved
 })
 
+// Repeated scopes share the panel but retain their own relation depth and codec.
+const requirementBlocks = computed(() => {
+  const blocks = new Map<FieldValueNode, ReturnType<typeof describeValueRequirements>>()
+  const depths = { item: 0, decoded: 0, member: 0 }
+  const counts = new Map<string, number>()
+  for (const node of chain.value) {
+    if (describeValueRequirements(node, props.chrome)) {
+      const key = valueScopeLabelKey(node)
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+  }
+  for (const node of chain.value) {
+    const depth = ++depths[node.relation]
+    const block = describeValueRequirements(node, props.chrome)
+    if (block && (counts.get(valueScopeLabelKey(node)) ?? 0) > 1) {
+      block.label = props.chrome.nestedScope(block.label, node.relation, depth, node.codec)
+    }
+    blocks.set(node, block)
+  }
+  return blocks
+})
+
 // Requirement blocks are derived by the model, not the template: the density
 // rule (one constraint → one row) is the same fact whether it is rendered here
 // or asserted in a test.
 const inlineBlocks = computed(() =>
-  inlineNodes.value.flatMap(n => describeValueRequirements(n, props.chrome) ?? []))
+  inlineNodes.value.flatMap(n => requirementBlocks.value.get(n) ?? []))
 // Identity-only nodes still own public anchors. They overlay the containing
 // field (or enclosing value region) without creating an empty requirements row.
 const inlineAnchorNodes = computed(() => inlineNodes.value.filter(node =>
   node.path && !describeValueRequirements(node, props.chrome)))
 const regionEntries = computed(() => regionNodes.value.map(node => ({
   node,
-  block: describeValueRequirements(node, props.chrome),
+  block: requirementBlocks.value.get(node),
 })).filter(entry => entry.block || entry.node === regionLast.value))
 const regionAnchorNodes = computed(() => regionNodes.value.filter(node =>
   node !== props.value && node !== regionLast.value && node.path && !describeValueRequirements(node, props.chrome)))

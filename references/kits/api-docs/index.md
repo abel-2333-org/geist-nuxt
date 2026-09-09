@@ -295,7 +295,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 `children` 只装真实子字段。数组元素、record 成员、编码字符串里的内容没有业务字段名，装进 `children` 只能靠合成 `[]` / 「JSON 字符串内容」假字段——多一层折叠、多一个不该计入的子字段数、约束归属不清。它们是**值的形状**，走可选 `value: FieldValueNode`：`relation`（`item` / `member` / `decoded`）说明它挂在上一层的方式，节点无名、不计数、可递归（`value.value` 表达元素的元素、JSON 套 JSON），`fields` 是值内的真实属性（按字段行渲染，是唯一被计数的东西）。组件仍不解析 schema、不解码字符串、不读 wire path；`relation` / `codec` / `type` 与 `type` / `format` 一样由 adapter 决定。`children` 与 `value` 语义互斥，类型层未强制。
 
-折叠策略：下方无结构 → 不出折叠，规则与尚未显示的编码 token 就地读；有结构 → 当前层没有自己的字段或 composition，且新层的约束作用域不与区域内任何已有约束块重名时，共用一个折叠区。连续解码与编码数组可以合并；同名约束即使隔着无约束层，也必须分区。`collectValueRegion` 通过 `foldsIntoParentRegion` 检查整个区域，避免只看相邻层漏掉碰撞。纯函数与 `hasStructureBelow` / `valueScopeLabelKey` / `describeValueRequirements` 均在 `utils/field.ts`，渲染与测试共用同一策略。
+折叠策略：下方无结构 → 不出折叠，规则与尚未显示的编码 token 就地读；有结构 → 当前层没有自己的字段或 composition 时，共用一个折叠区。连续匿名层不会因约束标题重复而增加折叠。重复作用域通过 `labels.nestedScope(label, relation, depth, codec?)` 区分，默认显示本地化标题、层级序号及编码名；`depth` 按同一种 relation 计数，包含空层，因此三维数组中间无约束时仍显示第 1 和第 3 层。真实具名字段与 composition 的边界保留；合并区域仍保留各层独立锚点。`collectValueRegion` / `foldsIntoParentRegion` 决定结构边界，`hasStructureBelow` / `valueScopeLabelKey` / `describeValueRequirements` 位于 `utils/field.ts`。
 
 四条裁定以消费端真实端点 `POST /v1/txn/doTransaction` 为准（11 个结构化字段全是 `string` + `json_string`，没有一个普通对象；合成 shape matrix 的 base rate 与之相反，单靠它会得出错误结论），**不要重新推导**：
 

@@ -9,7 +9,7 @@
 // playground caught when value paths were collected beside, not inside,
 // `collectFieldPaths`).
 import { defineComponent, nextTick } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
@@ -57,13 +57,13 @@ describe('value disclosure policy', () => {
     expect(hasStructureBelow({ relation: 'item', type: 'object[]', value: objectItem })).toBe(true)
   })
 
-  it('folds compatible boundaries and separates structural or repeated requirement scopes', () => {
+  it('folds compatible boundaries and separates actual structural boundaries', () => {
     // The decode boundary and the element boundary share a region: "show me
     // what is inside" already promises the array.
     expect(foldsIntoParentRegion(jsonObjectArray, objectItem)).toBe(true)
-    // A silent outer array can fold; two levels with item rules cannot.
+    // A silent outer array can fold; two levels with item rules can too.
     expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]' }, objectItem)).toBe(true)
-    expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]', notes: [{ text: 'At least one.' }] }, objectItem)).toBe(false)
+    expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]', notes: [{ text: 'At least one.' }] }, objectItem)).toBe(true)
     // A decode boundary that carries properties of its own is already the
     // region's subject; the element below it is a second boundary.
     expect(foldsIntoParentRegion(
@@ -74,12 +74,12 @@ describe('value disclosure policy', () => {
 })
 
 describe('value region and codec helpers', () => {
-  it('stops before a scope already represented anywhere in the region', () => {
+  it('passes through silent levels and repeated scopes', () => {
     const inner: FieldValueNode = { ...objectItem }
     const middle: FieldValueNode = { relation: 'item', type: 'object[]', value: inner }
     const outer: FieldValueNode = { relation: 'item', type: 'object[][]', notes: [{ text: 'At least one row.' }], value: middle }
-    expect(collectValueRegion(outer)).toEqual([outer, middle])
-    expect(foldsIntoParentRegion(middle, inner, [outer, middle])).toBe(false)
+    expect(collectValueRegion(outer)).toEqual([outer, middle, inner])
+    expect(foldsIntoParentRegion(middle, inner, [outer, middle])).toBe(true)
   })
 
   it('reports consecutive codec coverage in decode order and stops at an item', () => {
@@ -110,7 +110,7 @@ describe('disclosure wording', () => {
 
   it('keeps every label it does own scoped to requirements, not actions', () => {
     for (const value of Object.values(fieldValueLabelDefaults)) {
-      expect(value).not.toMatch(/^(Show|Hide) /)
+      if (typeof value === 'string') expect(value).not.toMatch(/^(Show|Hide) /)
     }
   })
 })
@@ -324,7 +324,7 @@ describe('recursive encoding boundaries', () => {
     expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
   })
 
-  it('retains every codec when requirements split the chain across regions', async () => {
+  it('retains every codec while repeated requirements share a region', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'payloads', type: 'string[]',
@@ -340,11 +340,11 @@ describe('recursive encoding boundaries', () => {
         },
       },
     })
-    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(2)
+    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(1)
     expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['base64<json<object>>'])
   })
 
-  it('keeps equal scopes separated even with a silent level between them', async () => {
+  it('qualifies equal scopes across a silent level without another disclosure', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'cube', type: 'object[][][]',
@@ -362,8 +362,23 @@ describe('recursive encoding boundaries', () => {
     })
     const scopes = wrapper.findAll('[data-value-requirements]')
     expect(scopes).toHaveLength(2)
+    expect(scopes.map(scope => scope.get('dt').text())).toEqual(['Each item (1)', 'Each item (3)'])
     expect(scopes[0]!.element.closest('[data-value-structure-region]'))
-      .not.toBe(scopes[1]!.element.closest('[data-value-structure-region]'))
+      .toBe(scopes[1]!.element.closest('[data-value-structure-region]'))
+  })
+
+  it('keeps empty and rule-only chains inline and localizes repeated decode scopes', async () => {
+    const nestedScope = vi.fn((_label: string, _relation: string, depth: number, codec?: string) => `${codec} 第 ${depth} 层`)
+    const wrapper = await mountSuspended(FieldItem, { props: {
+      name: 'encoded', type: 'string', labels: { nestedScope },
+      value: { relation: 'decoded', codec: 'json', type: 'string', notes: [{ text: 'Outer rule.' }],
+        value: { relation: 'decoded', codec: 'json', type: 'string', notes: [{ text: 'Inner rule.' }] } },
+    } })
+    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(0)
+    expect(wrapper.findAll('[data-value-requirements] dt').map(node => node.text())).toEqual(['json 第 1 层', 'json 第 2 层'])
+    await wrapper.setProps({ value: { relation: 'item', value: { relation: 'item', fields: [] } } })
+    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(0)
+    expect(wrapper.findAll('[data-value-requirements]')).toHaveLength(0)
   })
 
   it('retains repeated equal tokens at different item boundaries on update', async () => {
@@ -405,7 +420,7 @@ describe('recursive encoding boundaries', () => {
     expect(verbs[0]!.text()).toContain('(1)')
   })
 
-  it('keeps two same-named scopes out of one panel', async () => {
+  it('qualifies two scopes within one panel', async () => {
     // `object[][]` with rules at BOTH element levels: folding would stack two
     // identical `Each item` headings, the ambiguity the `[]` row created.
     const field: FieldNode = {
@@ -423,7 +438,7 @@ describe('recursive encoding boundaries', () => {
     }
     const w = await mountSuspended(FieldItem, { props: field })
     expect(w.findAll('button').filter(b => /Child Parameters/.test(b.text())).length)
-      .toBeGreaterThan(1)
+      .toBe(1)
   })
 })
 
