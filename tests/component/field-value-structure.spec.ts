@@ -219,6 +219,104 @@ describe('anchor collection', () => {
   })
 })
 
+describe('recursive encoding boundaries', () => {
+  // The shape matrix missed both of these: its only double-encoding case put a
+  // NAMED FIELD between the boundaries, and a named field has an identity line
+  // of its own to carry a token. Without one, the inner codec had nowhere to go
+  // and the reader was never told the decoded result still needs parsing.
+
+  it('composes every consecutive codec onto the identity line', async () => {
+    const field: FieldNode = {
+      name: 'token',
+      type: 'string',
+      value: {
+        relation: 'decoded', codec: 'base64', type: 'string',
+        value: {
+          relation: 'decoded', codec: 'json', type: 'object',
+          fields: [{ path: 'amount', name: 'amount', type: 'integer' }],
+        },
+      },
+    }
+    const w = await mountSuspended(FieldItem, { props: field })
+    // base64-decode, then JSON.parse, then you hold an object — in that order.
+    expect(w.text()).toContain('base64<json<object>>')
+  })
+
+  it('spells a codec the identity line cannot reach', async () => {
+    // `string[]` whose every ELEMENT is a JSON string: the codec applies per
+    // element, so it cannot ride the field's own identity line.
+    const field: FieldNode = {
+      name: 'receipts',
+      type: 'string[]',
+      value: {
+        relation: 'item', type: 'string',
+        value: {
+          relation: 'decoded', codec: 'json', type: 'object',
+          fields: [{ path: 'receiptId', name: 'receiptId', type: 'string' }],
+        },
+      },
+    }
+    const w = await mountSuspended(FieldItem, { props: field })
+    expect(w.find('[data-boundary-codec]').text()).toBe('json<object>')
+  })
+
+  it('never repeats a codec the identity line already composed', async () => {
+    const field: FieldNode = {
+      name: 'token',
+      type: 'string',
+      value: {
+        relation: 'decoded', codec: 'base64', type: 'string',
+        value: {
+          relation: 'decoded', codec: 'json', type: 'object',
+          fields: [{ path: 'amount', name: 'amount', type: 'integer' }],
+        },
+      },
+    }
+    const w = await mountSuspended(FieldItem, { props: field })
+    expect(w.findAll('[data-boundary-codec]')).toHaveLength(0)
+  })
+
+  it('spends one disclosure on a chain with nothing to inspect between levels', async () => {
+    const field: FieldNode = {
+      name: 'token',
+      type: 'string',
+      value: {
+        relation: 'decoded', codec: 'base64', type: 'string',
+        value: {
+          relation: 'decoded', codec: 'json', type: 'object',
+          fields: [{ path: 'amount', name: 'amount', type: 'integer' }],
+        },
+      },
+    }
+    const w = await mountSuspended(FieldItem, { props: field })
+    const verbs = w.findAll('button').filter(b => /Child Parameters/.test(b.text()))
+    expect(verbs).toHaveLength(1)
+    // and the one disclosure counts the real fields it reveals
+    expect(verbs[0]!.text()).toContain('(1)')
+  })
+
+  it('keeps two same-named scopes out of one panel', async () => {
+    // `object[][]` with rules at BOTH element levels: folding would stack two
+    // identical `Each item` headings, the ambiguity the `[]` row created.
+    const field: FieldNode = {
+      name: 'matrix',
+      type: 'object[][]',
+      value: {
+        relation: 'item', type: 'object[]',
+        notes: [{ text: 'Each row holds 1 to 20 cells.' }],
+        value: {
+          relation: 'item', type: 'object',
+          notes: [{ text: 'Every cell carries a value.' }],
+          fields: [{ path: 'cell', name: 'value', type: 'number' }],
+        },
+      },
+    }
+    const w = await mountSuspended(FieldItem, { props: field })
+    expect(w.findAll('button').filter(b => /Child Parameters/.test(b.text())).length)
+      .toBeGreaterThan(1)
+  })
+})
+
 describe('FieldItem with a value shape', () => {
   it.each([
     ['inline', { ...primitiveItem, path: 'inline-root' }],

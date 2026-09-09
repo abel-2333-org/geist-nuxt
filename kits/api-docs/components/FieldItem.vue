@@ -189,7 +189,20 @@ const decodedShape = computed(() =>
 const formatToken = computed(() => {
   const codec = props.value?.relation === 'decoded' ? props.value.codec : undefined
   if (!codec || !decodedShape.value) return props.format
-  return `${codec}<${decodedShape.value}>`
+  // CONSECUTIVE decode boundaries compose, so a base64 payload that carries
+  // JSON reads `base64<json<object>>` — every codec the reader has to apply, in
+  // the order they apply it. Showing only the outermost hid the fact that the
+  // decoded result still needs parsing.
+  const codecs: string[] = []
+  let node: FieldValueNode | undefined = props.value
+  let shape = decodedShape.value
+  while (node?.relation === 'decoded' && node.codec) {
+    codecs.push(node.codec)
+    // The INNERMOST decoded type is the shape the reader ends up holding.
+    shape = node.type ?? shape
+    node = node.value
+  }
+  return codecs.reduceRight((acc, c) => `${c}<${acc}>`, shape)
 })
 // When the token carries a decoded shape, it and the wire type swap weight.
 const shapeLeads = computed(() => !!decodedShape.value && formatToken.value !== props.format)

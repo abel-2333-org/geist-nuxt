@@ -24,6 +24,8 @@ import {
   collectValuePaths,
   describeValueRequirements,
   foldsIntoParentRegion,
+  hasOwnStructure,
+  valueScopeLabelKey,
   hasStructureBelow,
 } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, FieldValueNode } from '../utils/field'
@@ -47,6 +49,21 @@ const props = defineProps<{
 
 // The chain of value levels starting at this node: element of element, JSON
 // inside JSON. Materialized once so both render paths read the same order.
+/** A decode boundary folded into this region that the field's identity line
+ *  never saw, because an item/member level sits in front of it — e.g. an array
+ *  whose every element is a JSON string. */
+const foldedCodecs = computed(() => {
+  // The identity line composes CONSECUTIVE decodes starting at the field's own
+  // value, so a decode is already spelled there unless a non-decode level (an
+  // array element, a record member) sits in front of it and breaks the chain.
+  let chainIntact = true
+  return regionNodes.value.flatMap((n, i) => {
+    if (n.relation !== 'decoded') { chainIntact = false; return [] }
+    if (i === 0 || chainIntact) return []
+    return n.codec && n.type ? [`${n.codec}<${n.type}>`] : []
+  })
+})
+
 const chain = computed(() => {
   const nodes: FieldValueNode[] = []
   for (let node: FieldValueNode | undefined = props.value; node; node = node.value) nodes.push(node)
@@ -64,7 +81,23 @@ const regionNodes = computed(() => {
   if (!opensRegion.value) return []
   const nodes: FieldValueNode[] = [props.value]
   let child = props.value.value
-  while (child && foldsIntoParentRegion(nodes[nodes.length - 1]!, child)) {
+  // B generalises the shipped decoded→item rule: fold ANY two adjacent levels
+  // when the parent has nothing of its own to show AND the two scopes are named
+  // differently. The label check is what keeps a nested array (item→item, two
+  // identical `Each item` headings) out of one panel.
+  // Two identical headings in one panel is the ambiguity the `[]` row created,
+  // so the guard is about what actually RENDERS: a collision needs both levels
+  // to emit a requirements block AND to name the same scope. Two consecutive
+  // decodes where at most one has rules cannot collide, and folding them is the
+  // whole point — nothing sits between them for a reader to inspect.
+  const collides = (parent: FieldValueNode, kid: FieldValueNode) =>
+    valueScopeLabelKey(parent) === valueScopeLabelKey(kid)
+    && !!describeValueRequirements(parent, props.chrome)
+    && !!describeValueRequirements(kid, props.chrome)
+  const folds = (parent: FieldValueNode, kid: FieldValueNode) =>
+    foldsIntoParentRegion(parent, kid)
+    || (!hasOwnStructure(parent) && !collides(parent, kid))
+  while (child && folds(nodes[nodes.length - 1]!, child)) {
     nodes.push(child)
     child = child.value
   }
@@ -191,6 +224,16 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
             class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
             aria-hidden="true"
           />
+          <!-- The codec for a boundary the identity line could not reach.
+               Same mono register as the identity-line token. -->
+          <p
+            v-for="tok in foldedCodecs"
+            :key="tok"
+            data-boundary-codec
+            class="font-mono text-xs text-muted"
+            translate="no"
+          >{{ tok }}</p>
+
           <!-- A folded node retains its own anchor around its actual content;
                sharing a disclosure does not merge public path identities. -->
           <div
