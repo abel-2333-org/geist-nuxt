@@ -15,6 +15,8 @@ import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 import {
   collectFieldPaths,
+  collectValueRegion,
+  describeValueCodec,
   describeValueRequirements,
   fieldValueLabelDefaults,
   foldsIntoParentRegion,
@@ -55,19 +57,44 @@ describe('value disclosure policy', () => {
     expect(hasStructureBelow({ relation: 'item', type: 'object[]', value: objectItem })).toBe(true)
   })
 
-  it('folds an encoded array into ONE region, and nothing else', () => {
+  it('folds compatible boundaries and separates structural or repeated requirement scopes', () => {
     // The decode boundary and the element boundary share a region: "show me
     // what is inside" already promises the array.
     expect(foldsIntoParentRegion(jsonObjectArray, objectItem)).toBe(true)
-    // A nested array keeps two regions — folding would stack two identical
-    // headings in one panel with nothing to tell them apart.
-    expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]' }, objectItem)).toBe(false)
+    // A silent outer array can fold; two levels with item rules cannot.
+    expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]' }, objectItem)).toBe(true)
+    expect(foldsIntoParentRegion({ relation: 'item', type: 'object[]', notes: [{ text: 'At least one.' }] }, objectItem)).toBe(false)
     // A decode boundary that carries properties of its own is already the
     // region's subject; the element below it is a second boundary.
     expect(foldsIntoParentRegion(
       { relation: 'decoded', type: 'object', fields: [{ name: 'a', type: 'string' }] },
       objectItem,
     )).toBe(false)
+  })
+})
+
+describe('value region and codec helpers', () => {
+  it('stops before a scope already represented anywhere in the region', () => {
+    const inner: FieldValueNode = { ...objectItem }
+    const middle: FieldValueNode = { relation: 'item', type: 'object[]', value: inner }
+    const outer: FieldValueNode = { relation: 'item', type: 'object[][]', notes: [{ text: 'At least one row.' }], value: middle }
+    expect(collectValueRegion(outer)).toEqual([outer, middle])
+    expect(foldsIntoParentRegion(middle, inner, [outer, middle])).toBe(false)
+  })
+
+  it('reports consecutive codec coverage in decode order and stops at an item', () => {
+    const item: FieldValueNode = { relation: 'item', type: 'string', value: { relation: 'decoded', codec: 'json', type: 'number' } }
+    const json: FieldValueNode = { relation: 'decoded', codec: 'json', type: 'string[]', value: item }
+    const base64: FieldValueNode = { relation: 'decoded', codec: 'base64', type: 'string', value: json }
+    expect(describeValueCodec(base64)).toEqual({ token: 'base64<json<string[]>>', nodes: [base64, json] })
+    expect(describeValueCodec(item)).toBeNull()
+  })
+
+  it('preserves codecs without inventing an omitted decoded type', () => {
+    const json: FieldValueNode = { relation: 'decoded', codec: 'json' }
+    const base64: FieldValueNode = { relation: 'decoded', codec: 'base64', type: 'string', value: json }
+    expect(describeValueCodec(base64)).toEqual({ token: 'base64<json>', nodes: [base64, json] })
+    expect(describeValueCodec({ relation: 'decoded', type: 'object' })).toBeNull()
   })
 })
 
@@ -276,6 +303,89 @@ describe('recursive encoding boundaries', () => {
     expect(w.findAll('[data-boundary-codec]')).toHaveLength(0)
   })
 
+  it.each([
+    [{ relation: 'decoded', codec: 'json' }, 'json'],
+    [{ relation: 'decoded', codec: 'base64', type: 'string', value: { relation: 'decoded', codec: 'json' } }, 'base64<json>'],
+  ] satisfies [FieldValueNode, string][])('renders supplied codecs with optional decoded types', async (value, token) => {
+    const wrapper = await mountSuspended(FieldItem, { props: { name: 'payload', type: 'string', value } })
+    expect(wrapper.get('[data-field-identity]').findAll('[translate="no"]').map(node => node.text()))
+      .toEqual(['payload', 'string', token])
+    expect(wrapper.find('[data-boundary-codec]').exists()).toBe(false)
+  })
+
+  it('prints inline codecs beyond an item without creating an empty disclosure', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'values', type: 'string[]',
+        value: { relation: 'item', type: 'string', value: { relation: 'decoded', codec: 'json', type: 'number' } },
+      },
+    })
+    expect(wrapper.get('[data-boundary-codec]').text()).toBe('json<number>')
+    expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
+  })
+
+  it('retains every codec when requirements split the chain across regions', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'payloads', type: 'string[]',
+        value: {
+          relation: 'item', type: 'string',
+          value: {
+            relation: 'decoded', codec: 'base64', type: 'string', notes: [{ text: 'Valid UTF-8.' }],
+            value: {
+              relation: 'decoded', codec: 'json', type: 'object', notes: [{ text: 'An object is required.' }],
+              fields: [{ name: 'id', type: 'string' }],
+            },
+          },
+        },
+      },
+    })
+    expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(2)
+    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['base64<json<object>>'])
+  })
+
+  it('keeps equal scopes separated even with a silent level between them', async () => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: {
+        name: 'cube', type: 'object[][][]',
+        value: {
+          relation: 'item', type: 'object[][]', notes: [{ text: 'At least two rows.' }],
+          value: {
+            relation: 'item', type: 'object[]',
+            value: {
+              relation: 'item', type: 'object', notes: [{ text: 'A nonempty cell.' }],
+              fields: [{ name: 'id', type: 'string' }],
+            },
+          },
+        },
+      },
+    })
+    const scopes = wrapper.findAll('[data-value-requirements]')
+    expect(scopes).toHaveLength(2)
+    expect(scopes[0]!.element.closest('[data-value-structure-region]'))
+      .not.toBe(scopes[1]!.element.closest('[data-value-structure-region]'))
+  })
+
+  it('retains repeated equal tokens at different item boundaries on update', async () => {
+    const value: FieldValueNode = {
+      relation: 'item', type: 'string',
+      value: {
+        relation: 'decoded', codec: 'json', type: 'string[]',
+        value: {
+          relation: 'item', type: 'string',
+          value: {
+            relation: 'decoded', codec: 'json', type: 'string[]',
+            value: { relation: 'item', type: 'string' },
+          },
+        },
+      },
+    }
+    const wrapper = await mountSuspended(FieldItem, { props: { name: 'layers', type: 'string[]', value } })
+    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['json<string[]>', 'json<string[]>'])
+    await wrapper.setProps({ value: { ...value, value: value.value!.value } })
+    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['json<string[]>'])
+  })
+
   it('spends one disclosure on a chain with nothing to inspect between levels', async () => {
     const field: FieldNode = {
       name: 'token',
@@ -329,6 +439,13 @@ describe('FieldItem with a value shape', () => {
     ['folded without requirements', {
       relation: 'decoded', codec: 'json', type: 'object[]', path: 'decoded-root',
       value: { ...objectItem, notes: undefined, path: 'item-root' },
+    }],
+    ['three folded identity levels', {
+      relation: 'decoded', codec: 'base64', type: 'string', path: 'outer-root',
+      value: {
+        relation: 'decoded', codec: 'json', type: 'object[]', path: 'middle-root',
+        value: { ...objectItem, notes: undefined, path: 'last-root' },
+      },
     }],
     ['inline chain', {
       relation: 'item', type: 'string', path: 'outer-root',

@@ -14,8 +14,8 @@
 //   · nothing structural below  → no chevron at all; the rules read inline.
 //   · structure below           → exactly one region, opened by the boundary
 //                                 the reader actually crosses.
-//   · encoded array             → decode boundary and element boundary share
-//                                 that one region (see foldsIntoParentRegion).
+//   · compatible levels         → share one region unless their rules would
+//                                 introduce duplicate scope headings.
 //
 // Anatomy: inline requirements
 //          | region( requirements per folded node → real fields → composition
@@ -23,9 +23,8 @@
 import {
   collectValuePaths,
   describeValueRequirements,
-  foldsIntoParentRegion,
-  hasOwnStructure,
-  valueScopeLabelKey,
+  collectValueRegion,
+  describeValueCodec,
   hasStructureBelow,
 } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, FieldValueNode } from '../utils/field'
@@ -36,6 +35,8 @@ defineOptions({ name: 'FieldValueStructure' })
 
 const props = defineProps<{
   value: FieldValueNode
+  /** Decode boundaries already represented by the owner or an ancestor token. */
+  representedCodecs?: readonly FieldValueNode[]
   /**
    * Chrome already resolved by the owner FieldItem against its defaults, so
    * every default string exists once. The fold reuses `showChildren` /
@@ -46,23 +47,6 @@ const props = defineProps<{
    *  chrome (EnumTable, SchemaComposition) read it unchanged. */
   labels?: FieldItemLabels
 }>()
-
-// The chain of value levels starting at this node: element of element, JSON
-// inside JSON. Materialized once so both render paths read the same order.
-/** A decode boundary folded into this region that the field's identity line
- *  never saw, because an item/member level sits in front of it — e.g. an array
- *  whose every element is a JSON string. */
-const foldedCodecs = computed(() => {
-  // The identity line composes CONSECUTIVE decodes starting at the field's own
-  // value, so a decode is already spelled there unless a non-decode level (an
-  // array element, a record member) sits in front of it and breaks the chain.
-  let chainIntact = true
-  return regionNodes.value.flatMap((n, i) => {
-    if (n.relation !== 'decoded') { chainIntact = false; return [] }
-    if (i === 0 || chainIntact) return []
-    return n.codec && n.type ? [`${n.codec}<${n.type}>`] : []
-  })
-})
 
 const chain = computed(() => {
   const nodes: FieldValueNode[] = []
@@ -76,33 +60,25 @@ const opensRegion = computed(() => hasStructureBelow(props.value))
  *  in place. An empty collapsible around one sentence is chrome, not structure. */
 const inlineNodes = computed(() => (opensRegion.value ? [] : chain.value))
 
-/** Levels that share this region. More than one only for an encoded array. */
-const regionNodes = computed(() => {
-  if (!opensRegion.value) return []
-  const nodes: FieldValueNode[] = [props.value]
-  let child = props.value.value
-  // B generalises the shipped decoded→item rule: fold ANY two adjacent levels
-  // when the parent has nothing of its own to show AND the two scopes are named
-  // differently. The label check is what keeps a nested array (item→item, two
-  // identical `Each item` headings) out of one panel.
-  // Two identical headings in one panel is the ambiguity the `[]` row created,
-  // so the guard is about what actually RENDERS: a collision needs both levels
-  // to emit a requirements block AND to name the same scope. Two consecutive
-  // decodes where at most one has rules cannot collide, and folding them is the
-  // whole point — nothing sits between them for a reader to inspect.
-  const collides = (parent: FieldValueNode, kid: FieldValueNode) =>
-    valueScopeLabelKey(parent) === valueScopeLabelKey(kid)
-    && !!describeValueRequirements(parent, props.chrome)
-    && !!describeValueRequirements(kid, props.chrome)
-  const folds = (parent: FieldValueNode, kid: FieldValueNode) =>
-    foldsIntoParentRegion(parent, kid)
-    || (!hasOwnStructure(parent) && !collides(parent, kid))
-  while (child && folds(nodes[nodes.length - 1]!, child)) {
-    nodes.push(child)
-    child = child.value
-  }
-  return nodes
+/** The shared model decides which levels can coexist without scope ambiguity. */
+const regionNodes = computed(() => opensRegion.value ? collectValueRegion(props.value) : [])
+
+// A token can cover a consecutive decode chain across multiple regions. Carry
+// that coverage through recursion rather than inferring it from a local index.
+const boundaryCodecs = computed(() => {
+  const represented = new Set(props.representedCodecs)
+  return (opensRegion.value ? regionNodes.value : inlineNodes.value).flatMap(node => {
+    if (represented.has(node)) return []
+    const codec = describeValueCodec(node)
+    if (!codec) return []
+    for (const covered of codec.nodes) represented.add(covered)
+    return [codec]
+  })
 })
+const representedForTail = computed(() => [
+  ...(props.representedCodecs ?? []),
+  ...boundaryCodecs.value.flatMap(codec => codec.nodes),
+])
 
 /** The boundary that did NOT fold — rendered as its own nested region so two
  *  same-named headings can never land side by side in one panel. */
@@ -137,6 +113,8 @@ const regionEntries = computed(() => regionNodes.value.map(node => ({
   node,
   block: describeValueRequirements(node, props.chrome),
 })).filter(entry => entry.block || entry.node === regionLast.value))
+const regionAnchorNodes = computed(() => regionNodes.value.filter(node =>
+  node !== props.value && node !== regionLast.value && node.path && !describeValueRequirements(node, props.chrome)))
 
 // Deep linking, same contract as the field row: a link into a collapsed value
 // root or one of its properties must reveal itself. Membership in the collected
@@ -165,7 +143,16 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
   </span>
   <!-- A value that only states identity facts (codec / type, already printed
        on the owner's identity line) has nothing to add below the row. -->
-  <div v-if="inlineBlocks.length || opensRegion" class="mt-3 flex flex-col gap-3">
+  <div v-if="inlineBlocks.length || opensRegion || boundaryCodecs.length" class="mt-3 flex flex-col gap-3">
+    <template v-if="!opensRegion">
+      <p
+        v-for="(codec, index) in boundaryCodecs"
+        :key="index"
+        data-boundary-codec
+        class="font-mono text-xs text-muted"
+        translate="no"
+      >{{ codec.token }}</p>
+    </template>
     <!-- Inline value requirements — no structure below, so no chevron. -->
     <div
       v-for="(block, i) in inlineBlocks"
@@ -224,15 +211,29 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
             class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
             aria-hidden="true"
           />
+          <!-- Silent intermediate levels retain anchors without empty rows. -->
+          <span
+            v-for="node in regionAnchorNodes"
+            :id="node.path"
+            :key="node.path"
+            class="pointer-events-none absolute inset-0 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :class="anchor.SCROLL_MARGIN_CLASS"
+          >
+            <span
+              data-field-arrival-cue
+              class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
+              aria-hidden="true"
+            />
+          </span>
           <!-- The codec for a boundary the identity line could not reach.
                Same mono register as the identity-line token. -->
           <p
-            v-for="tok in foldedCodecs"
-            :key="tok"
+            v-for="(codec, index) in boundaryCodecs"
+            :key="index"
             data-boundary-codec
             class="font-mono text-xs text-muted"
             translate="no"
-          >{{ tok }}</p>
+          >{{ codec.token }}</p>
 
           <!-- A folded node retains its own anchor around its actual content;
                sharing a disclosure does not merge public path identities. -->
@@ -280,6 +281,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
             <FieldValueStructure
               v-if="entry.node === regionLast && regionTail"
               :value="regionTail"
+              :represented-codecs="representedForTail"
               :chrome="chrome"
               :labels="labels"
             />

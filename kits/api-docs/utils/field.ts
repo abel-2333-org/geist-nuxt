@@ -407,8 +407,7 @@ export function collectCompositionPaths(composition: CompositionNode): string[] 
 //   · nothing structural below  → no chevron at all; the rules read inline.
 //   · structure below           → exactly one region, opened by the boundary
 //                                 the reader actually crosses.
-//   · encoded array             → decode boundary and element boundary share
-//                                 that one region (see foldsIntoParentRegion).
+//   · no intervening structure or repeated requirement scope → share a region.
 // ---------------------------------------------------------------------------
 
 /** A value node says something beyond its own structure. */
@@ -432,23 +431,47 @@ export function hasStructureBelow(value: FieldValueNode): boolean {
   return hasOwnStructure(value) || (!!value.value && hasStructureBelow(value.value))
 }
 
-/**
- * Whether the boundary between two chained value nodes gets FOLDED into one
- * disclosure region.
- *
- * Exactly one fold exists: an encoded array. Its decode boundary and its
- * element boundary are two different facts, but only one of them is something
- * the reader has to open — "show me what is inside" already means the array,
- * and the array root's own rules belong in that same panel rather than behind
- * a second chevron.
- *
- * Every other chain (item → item for a nested array, decoded → decoded for
- * doubly-encoded content) keeps its own region. Folding those would stack two
- * identical scope headings in one panel with nothing to tell them apart,
- * which is the ambiguity the synthesized `[]` row created in the first place.
- */
-export function foldsIntoParentRegion(parent: FieldValueNode, child: FieldValueNode): boolean {
-  return parent.relation === 'decoded' && child.relation === 'item' && !hasOwnStructure(parent)
+/** Describe the consecutive codecs visible in one token, in decode order.
+ * The node list lets recursive renderers track which boundaries were already
+ * represented by an ancestor. Missing type information is never inferred. */
+export function describeValueCodec(value?: FieldValueNode): {
+  token: string
+  nodes: FieldValueNode[]
+} | null {
+  const nodes: FieldValueNode[] = []
+  for (let node = value; node?.relation === 'decoded' && node.codec; node = node.value) {
+    nodes.push(node)
+  }
+  if (!nodes.length) return null
+  const shape = nodes[nodes.length - 1]!.type ?? ''
+  const token = nodes.reduceRight((result, node) =>
+    result ? `${node.codec}<${result}>` : node.codec!, shape)
+  return { token, nodes }
+}
+
+/** A region may absorb another value boundary only while its current tail
+ * has no structure of its own and no existing requirement block shares the
+ * new node's scope. Compare the WHOLE region: an empty intermediate node must
+ * not hide a collision between two non-adjacent levels. */
+export function foldsIntoParentRegion(
+  parent: FieldValueNode,
+  child: FieldValueNode,
+  region: readonly FieldValueNode[] = [parent],
+): boolean {
+  if (hasOwnStructure(parent)) return false
+  return !hasValueDetail(child) || !region.some(node =>
+    hasValueDetail(node) && valueScopeLabelKey(node) === valueScopeLabelKey(child))
+}
+
+/** Nodes sharing a single structural disclosure, in display order. */
+export function collectValueRegion(value: FieldValueNode): FieldValueNode[] {
+  const nodes = [value]
+  let child = value.value
+  while (child && foldsIntoParentRegion(nodes[nodes.length - 1]!, child, nodes)) {
+    nodes.push(child)
+    child = child.value
+  }
+  return nodes
 }
 
 /** The scope label for a value node — what the rules below it are ABOUT. */

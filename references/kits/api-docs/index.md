@@ -295,18 +295,18 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 `children` 只装真实子字段。数组元素、record 成员、编码字符串里的内容没有业务字段名，装进 `children` 只能靠合成 `[]` / 「JSON 字符串内容」假字段——多一层折叠、多一个不该计入的子字段数、约束归属不清。它们是**值的形状**，走可选 `value: FieldValueNode`：`relation`（`item` / `member` / `decoded`）说明它挂在上一层的方式，节点无名、不计数、可递归（`value.value` 表达元素的元素、JSON 套 JSON），`fields` 是值内的真实属性（按字段行渲染，是唯一被计数的东西）。组件仍不解析 schema、不解码字符串、不读 wire path；`relation` / `codec` / `type` 与 `type` / `format` 一样由 adapter 决定。`children` 与 `value` 语义互斥，类型层未强制。
 
-折叠策略只有三行：下方无结构 → 不出折叠，规则就地读；有结构 → 恰好一个区域，由读者真正跨越的那个边界打开；编码数组 → 解码边界与元素边界共用那一个区域（`foldsIntoParentRegion`），其余链（嵌套数组、双层编码）各自一区，避免同名作用域标题在一个面板里并排。纯函数 `hasStructureBelow` / `foldsIntoParentRegion` / `valueScopeLabelKey` / `describeValueRequirements` 全在 `utils/field.ts`，策略可离开 DOM 断言。
+折叠策略：下方无结构 → 不出折叠，规则与尚未显示的编码 token 就地读；有结构 → 当前层没有自己的字段或 composition，且新层的约束作用域不与区域内任何已有约束块重名时，共用一个折叠区。连续解码与编码数组可以合并；同名约束即使隔着无约束层，也必须分区。`collectValueRegion` 通过 `foldsIntoParentRegion` 检查整个区域，避免只看相邻层漏掉碰撞。纯函数与 `hasStructureBelow` / `valueScopeLabelKey` / `describeValueRequirements` 均在 `utils/field.ts`，渲染与测试共用同一策略。
 
 四条裁定以消费端真实端点 `POST /v1/txn/doTransaction` 为准（11 个结构化字段全是 `string` + `json_string`，没有一个普通对象；合成 shape matrix 的 base rate 与之相反，单靠它会得出错误结论），**不要重新推导**：
 
 1. **折叠动词复用 `showChildren` / `hideChildren`，不新增按边界区分的动词。** 专用 JSON 动词会落在该端点几乎每一行，不区分任何东西；边界由身份行的 `codec<shape>` 与值作用域标签承载。`FieldValueLabels` 不含任何 `show*` / `hide*` 键，测试锁死。
 2. **字段自身的约束不加自动作用域标题。** 该标题需猜测约束主语，真实数据上猜错：`retailers` 的规则描述 marketplace 语义，与承载它的字符串无关。字段约束留在字段自己的 band、用作者的 note label；作用域标题只出现在值块内部。
-3. **编码边界由身份行的 `codec<shape>` 承载**（`retailers string json<object[]>`），取代「值格式」事实行。解码后的形状是读者扫描长字段列表时唯一有区分度的事实，`string` 在该 API 每行都一样，故二者交换视觉权重（`type` 转 `text-dimmed`、token 用 `text-muted`）；无解码边界的普通字段权重不变。`codec` 是短 token、不本地化、JSON 不硬编码在组件里。
+3. **直接挂在字段上的连续编码边界由身份行承载**（`retailers string json<object[]>`、`token string base64<json<object>>`），codec 顺序即解码顺序，shape 取连续链末层类型，取代「值格式」事实行。`item` / `member` 等层截断身份行可覆盖的链后，尚未显示的编码链在值区域内或无结构时就地显示同样的 token；跨折叠区递归时显式传递已覆盖的节点，避免漏显或重复。`describeValueCodec` 是共同真源，缺少末层类型时仅保留已知 codec，不推断 shape。解码后的形状是读者扫描长字段列表时唯一有区分度的事实，`string` 在该 API 每行都一样，故二者交换视觉权重（`type` 转 `text-dimmed`、token 用 `text-muted`）；无解码边界的普通字段权重不变。`codec` 是短 token、不本地化、JSON 不硬编码在组件里。
 4. **值作用域标签保留，但不含 codec 名、不按渲染位置换措辞。** 页面 13 处该标签中 12 处与另一层作用域相邻，确实在区分「这条管值、那条管字段」。英文去掉 `requirements`（该列本就是约束，且比邻座 `MAX LENGTH` 啰嗦、窄列折两行）：`eachItem: 'Each item'`、`eachMember: 'Each key'`、`decodedRequirements: 'Value'`、`decodedArrayRequirements: 'Array'`；中文按语言单独配置、保留后缀（`值要求` / `数组要求`），单独的「值」是名词碎片。同一作用域只有一个名字，`valueScopeLabelKey` 无 placement 参数。
 
 评审中否掉、不要重新提出的两个方案：值规则全部提到折叠之外与字段规则排成一列（真实端点唯一带值规则的字段 `metaData` 无子字段故无折叠，效果为零）；值约束并入 `CONSTRAINTS (N)` 表（13 条值约束中 11 条自带分类标签，左列装不下「作用域 + 分类」，会重新制造误归属）。
 
-深链接：`collectFieldPaths` **原地**走 `value` 链（`collectValuePaths`），不是并列 helper——候选阶段复现过：value 路径单独收集时，双层编码内字段的深链接只展开内层，外层不知道活动锚点在自己下方。凡自行收集 path 的消费者（`FieldAnnotation` 的 source registry、页面祖先揭示）都靠这一条不继承盲点。值根可选 `path` 作为折叠区的 DOM id，规则与 `FieldNode.path` 相同。
+深链接：`collectFieldPaths` **原地**走 `value` 链（`collectValuePaths`），不是并列 helper——候选阶段复现过：value 路径单独收集时，双层编码内字段的深链接只展开内层，外层不知道活动锚点在自己下方。凡自行收集 path 的消费者（`FieldAnnotation` 的 source registry、页面祖先揭示）都靠这一条不继承盲点。值根可选 `path` 作为 DOM id，规则与 `FieldNode.path` 相同。每个声明的值根都必须保留独立落点，包括合并区域的中间节点、内联约束及无详情节点；合并显示不合并导航身份。
 
 消费端迁移：`FieldNode.value` 是加法，既有消费者不受影响。adapter 把 `[]` / 「JSON 字符串内容」假字段改为 `value` 节点，`x-onerway-format: json_string` + `contentSchema` 映射为 `{ relation: 'decoded', codec: 'json', type: <解码形状>, fields: [...] }`；同时传 `FieldNode.format`（既有能力），否则结构化字段身份行只剩光秃秃的 `string`。
 

@@ -174,38 +174,11 @@ const hasLifecycleDetail = computed(
 const constraints = computed(() => (props.notes ?? []).filter(n => n.kind !== 'caveat'))
 const caveats = computed(() => (props.notes ?? []).filter(n => n.kind === 'caveat'))
 
-// The decoded shape, only for a field whose value crosses an encoding boundary.
-// Read off `value.type` — data the model already carries.
-const decodedShape = computed(() =>
-  props.value?.relation === 'decoded' ? props.value.type : undefined)
-
-/**
- * What the identity line prints after the wire type. For a field whose value
- * crosses an encoding boundary this is `codec<shape>` (`json<object[]>`) —
- * the decoded shape is the fact a reader scans a long field list for, and the
- * wire type (`string` for every encoded field) is not. Fields without a
- * boundary keep `format` exactly as before.
- */
-const formatToken = computed(() => {
-  const codec = props.value?.relation === 'decoded' ? props.value.codec : undefined
-  if (!codec || !decodedShape.value) return props.format
-  // CONSECUTIVE decode boundaries compose, so a base64 payload that carries
-  // JSON reads `base64<json<object>>` — every codec the reader has to apply, in
-  // the order they apply it. Showing only the outermost hid the fact that the
-  // decoded result still needs parsing.
-  const codecs: string[] = []
-  let node: FieldValueNode | undefined = props.value
-  let shape = decodedShape.value
-  while (node?.relation === 'decoded' && node.codec) {
-    codecs.push(node.codec)
-    // The INNERMOST decoded type is the shape the reader ends up holding.
-    shape = node.type ?? shape
-    node = node.value
-  }
-  return codecs.reduceRight((acc, c) => `${c}<${acc}>`, shape)
-})
-// When the token carries a decoded shape, it and the wire type swap weight.
-const shapeLeads = computed(() => !!decodedShape.value && formatToken.value !== props.format)
+// Share codec composition with the internal renderer; the covered nodes are
+// passed down explicitly, even when a later constraint opens a new region.
+const valueCodec = computed(() => describeValueCodec(props.value))
+const formatToken = computed(() => valueCodec.value?.token ?? props.format)
+const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== props.format)
 
 const hasDetail = computed(
   () =>
@@ -557,6 +530,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     <FieldValueStructure
       v-if="value"
       :value="value"
+      :represented-codecs="valueCodec?.nodes"
       :chrome="t"
       :labels="labels"
     />
