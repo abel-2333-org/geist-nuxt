@@ -199,9 +199,12 @@ const bodies = computed<ResponseBody[]>(() => currentStatus.value?.bodies ?? [])
 
 // Scenario ids, status codes, and body ids are selection identity keys;
 // duplicates silently resolve to the first match. Surface consumer data bugs
-// in dev instead of debugging "stuck" selects. Warnings dedupe per instance:
-// watchEffect re-runs on every data change and would otherwise repeat the
-// same message each time.
+// in dev instead of debugging "stuck" selects. The whole tree is checked
+// eagerly — a duplicate body id under a status the reader has not opened yet
+// is the same data bug and must surface at mount, not after navigation — so
+// the effect depends on `scenarios` only and never re-runs on selection
+// changes. Warnings dedupe per instance: watchEffect re-runs on every data
+// change and would otherwise repeat the same message each time.
 if (import.meta.dev || import.meta.test) {
   const warned = new Set<string>()
   const warnOnce = (message: string) => {
@@ -223,14 +226,15 @@ if (import.meta.dev || import.meta.test) {
           warnOnce(`duplicate status "${status.status}" within scenario "${s.id}" — selection resolves to the first match.`)
         }
         statusCodes.add(status.status)
+
+        const bodyIds = new Set<string>()
+        for (const b of status.bodies) {
+          if (bodyIds.has(b.id)) {
+            warnOnce(`duplicate body id "${b.id}" within status ${status.status} of scenario "${s.id}" — selection resolves to the first match.`)
+          }
+          bodyIds.add(b.id)
+        }
       }
-    }
-    const bodyIds = new Set<string>()
-    for (const b of bodies.value) {
-      if (bodyIds.has(b.id)) {
-        warnOnce(`duplicate body id "${b.id}" within status ${currentStatus.value?.status} — selection resolves to the first match.`)
-      }
-      bodyIds.add(b.id)
     }
   })
 }

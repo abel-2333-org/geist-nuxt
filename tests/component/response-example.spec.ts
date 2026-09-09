@@ -327,6 +327,33 @@ describe('ResponseExample scenario selection', () => {
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate body id "json" within status 200'))
   })
 
+  it('warns about duplicate body ids under a status that is not selected yet', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'eager',
+          label: 'Eager',
+          statuses: [
+            { status: 200, bodies: [{ id: 'json', kind: 'empty' as const }] },
+            {
+              status: 400,
+              bodies: [
+                { id: 'json', kind: 'empty' as const },
+                { id: 'json', kind: 'empty' as const },
+              ],
+            },
+          ],
+        }],
+      },
+    })
+
+    // The reader never opened status 400: the data bug still surfaces at mount.
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('duplicate body id "json" within status 400 of scenario "eager"'),
+    )
+  })
+
   it('warns once per duplicate key even when reactive data re-triggers the check', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const makeScenarios = (label: string) => [
