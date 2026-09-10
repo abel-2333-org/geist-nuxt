@@ -113,11 +113,13 @@ const fullAddress = computed(() => `${baseUrl.value}${props.path}`)
 /**
  * Segment accessible names. `aria-label` REPLACES a button's text content in
  * the accessibility tree, so the name has to carry the value itself: "Copy
- * host https://api.example.com", never just "Copy host" — otherwise a
- * screen-reader user learns that a host exists but never what it is (the host
- * appears nowhere else on the page; the environment picker only names the
- * environment). The prefix is localizable chrome; the value is content,
- * appended verbatim, so no locale has to compose a sentence around it.
+ * host https://api.example.com", not just "Copy host". Otherwise a
+ * screen-reader user learns that a host exists but not what it is (the
+ * environment picker only names the environment, and nothing else in this
+ * row shows the host), and the visible text is missing from the name, which
+ * WCAG 2.5.3 Label in Name (Level A) requires. The prefix is localizable
+ * chrome; the value is content, appended verbatim, so no locale has to
+ * compose a sentence around it.
  */
 const hostName = computed(() => `${t.value.copyHost} ${baseUrl.value}`)
 const pathName = computed(() => `${t.value.copyPath} ${props.path}`)

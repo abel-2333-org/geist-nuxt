@@ -57,12 +57,12 @@ const zh = {
   copiedPath: 'path 已复制',
 }
 
-const copyButtons = (w: Awaited<ReturnType<typeof mountSuspended>>) =>
-  w.findAllComponents({ name: 'CopyButton' })
+type Mounted = Awaited<ReturnType<typeof mountSuspended>>
+
+const copyButtons = (w: Mounted) => w.findAllComponents({ name: 'CopyButton' })
 
 // Segment names are `<prefix> <value>`; locate the segments by their prefix so
 // each test keeps reading as "the host segment" rather than repeating the URL.
-type Mounted = Awaited<ReturnType<typeof mountSuspended>>
 const hostSegment = (w: Mounted) => w.get(`button[aria-label^="${zh.copyHost} "]`)
 const pathSegment = (w: Mounted) => w.get(`button[aria-label^="${zh.copyPath} "]`)
 
@@ -115,8 +115,9 @@ describe('OperationTarget copy affordances', () => {
   it('names each segment with its value, so a screen reader hears what gets copied', async () => {
     const wrapper = await mountTarget({ props: { ...base, labels: zh } })
 
-    // `aria-label` replaces the button text in the accessibility tree; the
-    // host is shown nowhere else, so the name must carry the value itself.
+    // `aria-label` replaces the button text in the accessibility tree, so the
+    // name must carry the value itself — both so a screen reader hears WHICH
+    // host, and so the visible text is part of the name (WCAG 2.5.3).
     expect(hostSegment(wrapper).attributes('aria-label'))
       .toBe(`${zh.copyHost} https://api.example.com`)
     expect(pathSegment(wrapper).attributes('aria-label'))
