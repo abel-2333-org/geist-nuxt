@@ -98,8 +98,8 @@ v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来
 所以每轮追加不会让任何 item 的 scope digest 变 stale,也不触发 co-review。同时**每日**扫描都能直接读到
 已否决结论——这正是它从 GitHub tracking issue 搬进仓库的原因(issue 每轮只被打开一次,日常扫描读不到)。
 
-GitHub 上的「组件抽取候选」issue 随之收窄为**纯 backlog**:只在存在待人工拍板的实现候选时开启,
-清空即可关闭;已否决结论不再写回 issue。
+GitHub 上的「组件抽取候选」issue 随之收窄为**纯 backlog**:只在存在待人工拍板的实现候选时开启;
+已否决结论不再写回 issue。待决策候选清空后由人工关闭,scheduled task 不自行关闭 issue。
 
 ## 选簇算法
 
