@@ -1,21 +1,22 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-08T23:25:58.000Z",
+  "lastRunAt": "2026-09-10T00:09:28.504Z",
   "lastPicked": [
-    "api-docs-response-example",
-    "api-docs-request-example"
+    "api-docs-code-block",
+    "foundation-copy-button",
+    "api-docs-operation-target"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
-      "change": "modified",
-      "status": "verified",
+      "round": 3,
+      "lastAuditedAt": "2026-09-10T00:09:28.504Z",
+      "change": "none",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
-        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "27f2028267341506c78a1c4f6adfca31b1cfe3ad",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
@@ -29,10 +30,30 @@
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "4053c4e58e40e3744eea020dfef73007d8a6d68c643505cb555f3bd41a3b7dc5"
+        "scopeDigest": "87a3b72c632c84d72493c8637fbbb002895d69b52da498509f1f167eb7bc54db",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "Toast.vue 经 useForwardProps 透传 reka ToastRoot 的 type 而不设默认值,useToast().add 产生的 toast 以 reka 默认 foreground(assertive)自播报;若 Nuxt UI 改为 background 或提供关闭 announce 的开关,本 finding 的严重度与修法需重评。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "ToastRootImpl 对每个 toast 渲染 ToastAnnounce(VisuallyHidden、role=alert、aria-live 随 type)并前缀 ToastProvider label(默认 'Notification')播报标题;若 reka 改变 toast 自播报行为,本 finding 需重评。"
+          }
+        ]
       },
-      "notes": "逐条核对复制契约、attrs fallthrough、polite live region 与完整句 toast 约定；修正 code-sample.md 对 useCopy 的过时 VueUse 描述并将该 reference 纳入 evidence scope；全仓反查无重复剪贴板实现，无新增 finding。",
-      "findings": []
+      "notes": "复制契约、inheritAttrs 双分支、完整句 toast 约定、copied 脉冲与 focus-visible 无回归,全仓剪贴板逻辑仍唯一归 useCopy。新增 1 条 low finding:CopyButton(及沿用同约定的 OperationTarget 段级 region)自有的 polite live region 与 Nuxt UI toast 的 reka ToastAnnounce(role=alert、foreground 默认 assertive)对同一次复制重复播报;修法涉及 foundation + kit + 三份 reference 的播报归属决策,交人工。",
+      "findings": [
+        {
+          "id": "f-7e93479ff182",
+          "severity": "low",
+          "claim": "code-sample.md:「复制结果 announcement 由 CopyButton 拥有」(copy result announcement is owned by CopyButton);OperationTarget.vue 注释:「ONE polite region for both segments … two regions would compete」",
+          "evidence": "useCopy 成功路径无条件 useToast().add({ title: successMessage });Nuxt UI 4.9.0 Toast.vue 经 useForwardProps 透传 reka ToastRoot 的 type 且不设默认,reka-ui 2.9.10 ToastRoot type 默认 'foreground',ToastRootImpl 渲染 ToastAnnounce(VisuallyHidden、role=\"alert\"、aria-live=\"assertive\")并以 ToastProvider label 默认 'Notification' 前缀标题。复现:挂载 <UApp><CopyButton value=\"x\" /></UApp>,点击一次——DOM 中先出现 CopyButton 自有 sr-only role=status(polite)文本 'Copied to clipboard',两帧后再出现 reka 的 role=alert 文本 'Notification Copied to clipboard';同一次复制被两个 live region 播报,且 assertive 会打断 polite。OperationTarget 的段级 region 同理(segmentStatus + toast)。依据:Web Interface Guidelines「Async updates (toasts, validation) need aria-live=\"polite\"」——toast 已满足,组件再加一层属重复;WAI-ARIA live region 实践避免对同一事件重复播报。修法(人工决策):① 移除 CopyButton 与 OperationTarget 的自有 live region,播报统一交给 toast,并同步收窄 buttons.md / code-sample.md / index.md 的「polite live region 播报」表述与 operation-target.spec 的 2-region 断言;② 保留组件 region、在 UApp 层把 toaster 设为不播报(reka 当前无此开关,不可行)。推荐 ①。本证据基于依赖源码阅读与 DOM 级推演,未做真实读屏实测。",
+          "disposition": "open"
+        }
+      ]
     },
     "foundation-inline-code": {
       "round": 3,
@@ -328,13 +349,13 @@
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
-      "change": "modified",
+      "lastAuditedAt": "2026-09-10T00:09:28.504Z",
+      "change": "none",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "27f2028267341506c78a1c4f6adfca31b1cfe3ad",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -346,7 +367,7 @@
         ],
         "scopeDigest": "aab808d65fe1211eb3a2b8eaf86bd3ef6a8149fdf014996f191649c12967ec0b"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "再次复核(09-08 修复与 09-09 PR #118 co-review 后源码零变化):工具栏单行、语言选择器恒可见、代码区键盘可达 group、trust 门后 v-html、raw code 真源、双主题 token 切换、labels 合并兼容路径逐条无回归;registry 三条依赖与 import 一致。09-08 的换行 toggle ARIA 语义 finding 仍待人工决定 i18n 键去向,原 id 保留 open。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -701,17 +722,18 @@
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 2,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-10T00:09:28.504Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "27f2028267341506c78a1c4f6adfca31b1cfe3ad",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
           "kits/api-docs/components/OperationTarget.vue",
@@ -719,9 +741,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "aa45bd16bdb1cb0285cffe4560de8b0a06db8d0916317f9b9d873db45b0dd106"
+        "scopeDigest": "35777c26ff4dd159b6b0c1b1acd5f05b09302c4dba737f50e40c5b497e0ac2e7"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "修复段级复制按钮可访问名丢失地址值:aria-label 覆盖按钮文本,读屏只听到 'Copy host' / 'Copy path' 而听不到 host / path 值,且可见文本不在可访问名内(WCAG 2.5.3 Label in Name,Level A);08-11 曾以「WIG 无 label-in-name 条款」不立案,本轮以 WCAG 2.5.3 + 信息丢失推翻,列为人工决策点。名字改为「标签前缀 + 当前值」(如 'Copy host https://api.example.com'),labels 键与 props 形状不变;spec 改为前缀匹配并新增 1 条锁定用例(旧实现下失败)。两原子单元回流、三重复制可供性、选区守卫、revision 竞态、单 segment live region 无回归。toast 重复播报与 CopyButton 同根因,随 foundation-copy-button 的 finding 处置。",
       "findings": []
     },
     "api-docs-operation-header": {
