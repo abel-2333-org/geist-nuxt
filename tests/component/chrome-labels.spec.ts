@@ -91,6 +91,7 @@ describe('useCopy complete-message contract', () => {
 
     expect(copyState.add).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
+      type: 'background',
       color: 'success',
       icon: 'i-lucide-check',
     })
@@ -104,6 +105,7 @@ describe('useCopy complete-message contract', () => {
     expect(copied).toBe(true)
     expect(copyState.add).toHaveBeenCalledWith({
       title: '接口地址已复制',
+      type: 'background',
       color: 'success',
       icon: 'i-lucide-check',
     })
@@ -116,6 +118,7 @@ describe('useCopy complete-message contract', () => {
 
     expect(copyState.add).toHaveBeenCalledWith({
       title: 'Fallback copied',
+      type: 'background',
       color: 'success',
       icon: 'i-lucide-check',
     })
@@ -161,6 +164,7 @@ describe('useCopy complete-message contract', () => {
 
     expect(copyState.add).toHaveBeenCalledWith({
       title: '值已复制',
+      type: 'background',
       color: 'success',
       icon: 'i-lucide-check',
     })

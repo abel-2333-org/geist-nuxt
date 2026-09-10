@@ -24,8 +24,8 @@
 //                 (empty body / missing example / file) inside the same frame
 // States:   active language, wrap on/off, empty / unavailable. (Copied state
 //           lives in CopyButton.)
-// A11y:     icon buttons carry dynamic aria-labels; copy result announcement is
-//           owned by CopyButton; selects are labelled; :focus-visible rings
+// A11y:     wrap has a stable name and aria-pressed state; copy feedback is
+//           owned by CopyButton and its toast; selects are labelled; focus rings
 //           are preserved. The scrollable code surface is a keyboard-focusable
 //           named group (tabindex=0) so keyboard users can scroll it without
 //           turning every code block into a page landmark.
@@ -57,8 +57,8 @@ export interface ApiCodeLabels {
   /** Complete localized success/failure toast sentences. */
   copySuccess?: string
   copyFailure?: string
-  wrapOn?: string
-  wrapOff?: string
+  /** Stable toggle name; aria-pressed communicates the current wrap state. */
+  wrap?: string
   emptyTitle?: string
   emptyHint?: string
   /** Accessible name of the scrollable code region when no `title` is given. */
@@ -106,8 +106,7 @@ const t = computed<ResolvedApiCodeLabels>(() => ({
   language: 'Language',
   copy: 'Copy code',
   copied: 'Copied to clipboard',
-  wrapOn: 'Turn on line wrap',
-  wrapOff: 'Turn off line wrap',
+  wrap: 'Line wrap',
   emptyTitle: 'No example available',
   emptyHint: 'There is no sample here yet. Try another selection.',
   codeRegion: 'Code sample',
@@ -221,13 +220,13 @@ const wrap = useCodeWrap(props.defaultWrap)
           variant="ghost"
           size="xs"
           class="shrink-0"
-          :aria-label="wrap ? t.wrapOff : t.wrapOn"
+          :aria-label="t.wrap"
           :aria-pressed="wrap"
           @click="() => { wrap = !wrap }"
         />
 
         <!-- Copy — shared CopyButton owns the clipboard logic, copied state,
-             toast, and polite announcement. Matches the toolbar's `xs` ghost
+             polite success toast, and failure feedback. Matches the toolbar's `xs` ghost
              controls; no tooltip here since the sibling buttons don't use one. -->
         <CopyButton
           v-if="hasContent"

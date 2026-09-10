@@ -126,13 +126,11 @@ const pathName = computed(() => `${t.value.copyPath} ${props.path}`)
 
 /* ------------------------------------------------------------------ *
  * Segment copy. Two independent useCopy instances so the two pulses (and
- * the two toasts) never overwrite each other, but ONE live region: the
- * announcement describes "what just got copied", which is a single fact.
+ * the two toasts) remain independent. useCopy owns result announcements
+ * through the application toaster; segments do not add another live region.
  * ------------------------------------------------------------------ */
 const { copied: hostCopied, copy: writeHost } = useCopy()
 const { copied: pathCopied, copy: writePath } = useCopy()
-const segmentStatus = shallowRef('')
-let copyRevision = 0
 
 /**
  * True when this click merely FINISHED a text selection inside the segment.
@@ -149,22 +147,13 @@ function selecting(event: MouseEvent) {
     : true
 }
 
-async function copySegment(segment: 'host' | 'path', value: string) {
-  const revision = ++copyRevision
+function copySegment(segment: 'host' | 'path', value: string) {
   const successMessage = segment === 'host' ? t.value.copiedHost : t.value.copiedPath
   const write = segment === 'host' ? writeHost : writePath
-
-  // Clear first so repeating the same action still creates a live-region change.
-  segmentStatus.value = ''
-  const copied = await write(value, {
+  return write(value, {
     successMessage,
     failureMessage: t.value.copyFailed,
   })
-  if (!copied || revision !== copyRevision) return
-
-  await nextTick()
-  if (revision !== copyRevision) return
-  segmentStatus.value = successMessage
 }
 
 function onCopyHost(event: MouseEvent) {
@@ -277,11 +266,8 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
            desync the two. It sits outside the path's scroll area on purpose,
            because the task is to GET the address, not read it — it must never
            scroll away.
-           The classes live on this wrapper, NOT on <CopyButton>: that component
-           is multi-root (button + its aria-live status span), so Vue has no
-           single host to fall through to and a `class` passed to it is dropped
-           silently. The wrapper also keeps the status span travelling with its
-           button instead of becoming a stray flex item. -->
+           CopyButton explicitly disables attribute fallthrough, so its wrapper
+           owns layout classes in both tooltip and plain-button modes. -->
       <span class="ml-auto flex shrink-0">
         <CopyButton
           :value="fullAddress"
@@ -294,8 +280,5 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
       </span>
     </div>
 
-    <!-- ONE polite region for both segments: they answer the same question
-         ("what did I just copy?"), and two regions would compete. -->
-    <span role="status" aria-live="polite" class="sr-only">{{ segmentStatus }}</span>
   </div>
 </template>

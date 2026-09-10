@@ -26,8 +26,8 @@
 - 无 disabled / loading / invalid。
 
 **Accessibility**
-- icon 按钮带**动态** `aria-label`（换行 Wrap on / off）；换行按钮带 `aria-pressed`。复制按钮的动态 `aria-label`（Copy / Copied）由 `CopyButton` 负责。
-- 复制结果在 `role=status aria-live=polite` 的 `sr-only` 区**礼貌播报**——播报由 `CopyButton` 内部提供，CodeBlock 不再重复。
+- 换行按钮的 `aria-label` 固定为 `labels.wrap`（默认 `Line wrap`），开关状态由 `aria-pressed` 表达。复制按钮的动态 `aria-label`（Copy / Copied）由 `CopyButton` 负责。
+- 复制成功由 `CopyButton` 发起 `type: background` toast **礼貌播报**；失败由 toast 提示错误，组件不再另设 live region。
 - select 有 `aria-label`；`:focus-visible` 焦点环保留。
 - 语言/状态用**文字 + 图标**，不单靠颜色；色彩全走 Geist 语义 token，随 color-mode 明暗切换。
 - 代码体内部滚动（`overflow:auto` + `overscroll-behavior:contain`），长代码不把页面撑出横向溢出。
@@ -46,7 +46,7 @@ export interface CodeVariant {
 // 内容文案（语言名、标题）来自数据 props，原样渲染。
 export interface ApiCodeLabels {
   language?: string; copy?: string; copied?: string
-  wrapOn?: string; wrapOff?: string; emptyTitle?: string; emptyHint?: string
+  wrap?: string; emptyTitle?: string; emptyHint?: string
 }
 
 const props = withDefaults(defineProps<{
@@ -64,7 +64,7 @@ const props = withDefaults(defineProps<{
 // chrome 文案：调用方覆盖叠加在中性英文默认值之上
 const t = computed(() => ({
   language: 'Language', copy: 'Copy code', copied: 'Copied to clipboard',
-  wrapOn: 'Turn on line wrap', wrapOff: 'Turn off line wrap',
+  wrap: 'Line wrap',
   emptyTitle: 'No example available', emptyHint: 'Try another selection.',
   ...props.labels,
 }))
@@ -99,7 +99,7 @@ const wrap = useCodeWrap(props.defaultWrap)   // 共享 + 持久化
           size="xs" color="neutral" variant="subtle" :aria-label="t.language" />
         <UButton v-if="hasContent" :icon="wrap ? 'i-lucide-wrap-text' : 'i-lucide-text'"
           :color="wrap ? 'primary' : 'neutral'" variant="ghost" size="xs"
-          :aria-label="wrap ? t.wrapOff : t.wrapOn" :aria-pressed="wrap" @click="wrap = !wrap" />
+          :aria-label="t.wrap" :aria-pressed="wrap" @click="wrap = !wrap" />
         <!-- 复用通用基座的复制按钮：剪贴板逻辑、copied 态、播报、兜底全在里面 -->
         <CopyButton v-if="hasContent" :value="current?.code ?? ''"
           :label="t.copy" :copied-label="t.copied" :success-message="t.copied" size="xs" />

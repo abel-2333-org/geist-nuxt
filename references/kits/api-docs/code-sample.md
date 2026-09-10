@@ -19,7 +19,11 @@
 
 ### `ApiCodeLabels`（chrome 文案，用于 i18n）
 
-`language` · `copy` · `copied` · `copySuccess` · `copyFailure` · `wrapOn` · `wrapOff` · `emptyTitle` · `emptyHint` · `codeRegion`（未传 `title` 时代码滚动区的可访问名，默认 `Code sample`）。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 只接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。组件不接受对象名并拼接句尾，因此消费项目不会产生混合语言。内容类文本（语言标签、标题、代码本身）来自 data props。
+`language` · `copy` · `copied` · `copySuccess` · `copyFailure` · `wrap` · `emptyTitle` · `emptyHint` · `codeRegion`（未传 `title` 时代码滚动区的可访问名，默认 `Code sample`）。默认英文，传入即覆盖。`copySuccess` / `copyFailure` 只接收完整句子；未传 `copySuccess` 时，已有的 `copied` 本地化句子也会用于成功 toast。组件不接受对象名并拼接句尾，因此消费项目不会产生混合语言。内容类文本（语言标签、标题、代码本身）来自 data props。
+
+### 换行标签迁移
+
+`labels.wrap` 是状态无关的固定可访问名（默认 `Line wrap`），开关状态由 `aria-pressed` 表达。升级时把旧 `wrapOn` / `wrapOff` 字典项替换为 `wrap`，例如 `wrap: '自动换行'`；旧键已删除，不会自动推断或翻译动作句。消费项目须在同次 registry update 中迁移本地 labels 字典并运行 typecheck，避免失去中文覆盖。
 
 ## 关键点
 
@@ -32,7 +36,7 @@
 - **工具栏恒为单行**：左 icon·title·`#leading`（如状态 badge）；右 `#controls`（场景/状态选择器）·语言·换行·复制。标题优先截断，图标按钮不收缩。
 - **`#controls` 空态仍可见**：注入的场景/状态选择器在空态下不隐藏，读者始终能切回有内容的选择；语言选择器同样保持可见，只有换行/复制在无 code 时隐藏。
 - **`#notice` / `#body` 供包装组件注入语义面板**：`#notice` 在工具栏下渲染上下文条（如 status 级描述）；无 code 时 `#body` 替代通用空态，承载包装组件自有的语义面板（有意空正文 / 缺示例 / 文件 metadata，见 `ResponseExample`）。两个 slot 缺省不渲染任何东西，均非破坏性。CodeBlock 只提供框架 chrome，不理解这些语义。
-- **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`、`role=status` live region 播报；`useCopy` 内部优先调用异步 Clipboard API，拒绝或不可用时以 `document.execCommand('copy')` 的明确结果作为 iframe/insecure-context 兜底，并统一发送 toast。成功/失败 toast 均可通过完整消息注入，本地化不拼半句。
+- **复制委托给共享 `CopyButton`**：不在 CodeBlock 内重写剪贴板逻辑。CopyButton（`UButton` + `useCopy`）自带 copied 态图标切 check、动态 `aria-label`；`useCopy` 内部优先调用异步 Clipboard API，拒绝或不可用时以 `document.execCommand('copy')` 的明确结果作为 iframe/insecure-context 兜底，并统一发送 toast。复制成功只通过应用级 toast 的 polite live region 播报（`type: 'background'`），CopyButton 和 CodeBlock 不再各自创建 region；消费应用需挂载 `UApp` / toaster。成功/失败 toast 均可通过完整消息注入，本地化不拼半句。
 
 ## 双主题高亮 fragment（dark token 切换，#79）
 
@@ -64,6 +68,7 @@
 
 <!-- 本地化 chrome 文案 -->
 <CodeBlock :variants="variants" :labels="{
+  wrap: '自动换行',
   copy: '复制代码',
   copied: '代码已复制',
   copyFailure: '无法复制，请手动选择代码',

@@ -42,14 +42,6 @@ beforeEach(() => {
   write.mockResolvedValue(true)
 })
 
-function deferred() {
-  let resolve!: (value: boolean) => void
-  const promise = new Promise<boolean>((done) => {
-    resolve = done
-  })
-  return { promise, resolve }
-}
-
 const hosts = [
   { id: 'prod', label: '生产', baseUrl: 'https://api.example.com' },
   { id: 'sandbox', label: '沙箱', baseUrl: 'https://sandbox.example.com' },
@@ -233,43 +225,14 @@ describe('OperationTarget copy affordances', () => {
       .toEqual([zh.copyHost, zh.copyPath])
   })
 
-  it('announces segment copies through exactly one polite live region', async () => {
+  it('leaves live-region announcements to the application toaster', async () => {
     const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    // The CopyButton owns its own region; the row adds ONE for both segments.
-    expect(wrapper.findAll('[aria-live="polite"]')).toHaveLength(2)
-  })
-
-  it('announces the latest segment when host and path are copied in succession', async () => {
-    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
-
     await hostSegment(wrapper).trigger('click')
     await flushPromises()
-    expect(status.text()).toBe(zh.copiedHost)
-
     await pathSegment(wrapper).trigger('click')
     await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
-  })
-
-  it('keeps the latest requested segment when clipboard promises resolve out of order', async () => {
-    const host = deferred()
-    const path = deferred()
-    write
-      .mockReturnValueOnce(host.promise)
-      .mockReturnValueOnce(path.promise)
-    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
-
-    await hostSegment(wrapper).trigger('click')
-    await pathSegment(wrapper).trigger('click')
-    path.resolve(true)
-    await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
-
-    host.resolve(true)
-    await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
+    // useCopy is mocked here; the real toaster integration lives in copy-button.spec.
+    expect(wrapper.find('[aria-live]').exists()).toBe(false)
   })
 })
 

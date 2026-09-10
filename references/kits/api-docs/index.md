@@ -113,7 +113,7 @@ API 参考里「这是哪个接口 / webhook」由四层承担，词汇与组件
 - **HttpMethodBadge / WebhookBadge 是平行原子，不合并成 `OperationBadge kind=…`**——两者词表来源不同（HTTP 动词封闭集 vs 事件标识开放集），合并会让 props 类型变糊。EVENT 用统一词 + neutral tone：方法五色说「你调平台」，中性 EVENT 说「平台回调你」，方向差异用色彩系统区隔，对齐 Stripe 等主流范式。**不按事件动词尾段（succeeded/failed…）着色**——词表开放、映射难穷尽。
 - **OperationHeader 是单组件双形态**——两形态结构 90% 同构（identity 行 → 标题 → 描述 → 尾部块），拆成两个组件会重复。`kind` 只切换 identity 行的徽章与标识字段（`method`+`path` vs `event`）。
 - **OperationTarget 与 OperationHeader 正交**——target 放 header 的默认槽而非内嵌 prop，因为不是每个 endpoint 都要地址栏（stub 就没有），webhook 则根本没有。
-- **OperationTarget 有三个复制意图，但三种不同的可供性，绝不是三个平级图标**——「拿到能粘进 curl 的整条地址」是这一行的主任务，故只有它保留唯一一个显式、有可访问名的 `CopyButton`（行尾常显）；host / path 的段级复制则让**文本本身成为控件**（`<button>` 包 `<code>`，点击或聚焦后 Enter/Space 即复制）。段用 `cursor-copy` 明确动作类别，hover/focus 时出现下划线并由 `UTooltip` 说明复制意图；tooltip 只是鼠标/键盘的辅助提示，触摸端仍由真实 button 直接复制并用 toast / polite live region 反馈，不把能力藏进 hover。段保留 `select-text`，且当点击只是**结束一次真实的文本选区**时跳过复制（`event.detail === 0` 判定键盘激活，不被吞），拖选子串照旧可用。两段各自一个 `useCopy` 实例（脉冲与 toast 互不覆盖），但共享**一个** polite live region——「刚复制了什么」是同一个事实，两个区域会互相打断。
+- **OperationTarget 有三个复制意图，但三种不同的可供性，绝不是三个平级图标**——「拿到能粘进 curl 的整条地址」是这一行的主任务，故只有它保留唯一一个显式、有可访问名的 `CopyButton`（行尾常显）；host / path 的段级复制则让**文本本身成为控件**（`<button>` 包 `<code>`，点击或聚焦后 Enter/Space 即复制）。段用 `cursor-copy` 明确动作类别，hover/focus 时出现下划线并由 `UTooltip` 说明复制意图；tooltip 只是鼠标/键盘的辅助提示，触摸端仍由真实 button 直接复制并由应用级 toast 反馈，不把能力藏进 hover。段保留 `select-text`，且当点击只是**结束一次真实的文本选区**时跳过复制（`event.detail === 0` 判定键盘激活，不被吞），拖选子串照旧可用。两段各自一个 `useCopy` 实例；复制成功统一由 `type: 'background'` 的应用级 toast 进行 polite 播报，段与 CopyButton 不额外创建 live region。段的可访问名在 idle / copied 两态都包含当前可见地址值（标签前缀或成功句 + 当前值），不因复制反馈丢失对象。
 - **OperationTarget 的布局是两个原子单元，不是四个平级元素**——`origin` = 环境 select 与它所改变的 host；`operation` = path（操作身份）与作用于完整地址的主复制键。两个单元各自 `flex-nowrap`，父行 `flex-wrap` 只能在**单元之间**断行，所以复制键在任何宽度、任何字体下都不可能被单独甩到一行。阈值由此**由内容决定**（放得下才合并成单行），而不是由某个像素断点决定——这是 `references/foundations/responsiveness.md`「② 内在换行分组」的参考实现。**不要为此加视口断点或容器查询**：它活在可拖宽的 `SplitPane` 左栏，视口宽度与它自身宽度无稳定关系；而容器断点表达不了内容驱动的阈值，历史上正是这么产生了一条随内容漂移的孤立复制键错误带（#68）。`@container/target` 现在只服务 segment 密度，不参与回流。
 - **OperationTarget 的降级顺序**——host 是环境属性、冗余度最高，故**先截断**并留 `min-w-[6ch]` 可读地板；path **永不截断**，空间仍不足时才在自己单元内横向滚动。复制键**永不进滚动区**，复制值始终是全量地址，与截断/滚动位置无关。溢出提示用 `ResizeObserver` 实测 `scrollWidth > clientWidth` 才加右缘渐隐，不做常驻装饰。host 与 path 之间**没有分隔线**：分隔线断言「此刻相邻」，而内容驱动的换行不让 CSS 知道当前行况，`text-muted` / `text-highlighted` 的色阶已经承担接缝。不用 `order`，视觉、DOM 与 tab 顺序始终是 environment → host → path → copy。
 - **surface（整块参考区域的 frame + slots）刻意不做组件**——横向 `SplitPane` + `<CodeRail>` 的装配变量多（sticky offset、断点、storage key、单卡 vs 双例），封装成组件会僵化；以 `endpoint-reference.vue` / `webhook-reference.vue` 活骨架 + 下方「可拖动分栏」pattern 文档交付。
@@ -245,7 +245,7 @@ gallery 有**八个 api-docs demo 页，职责互补**：
 
 ## Accessibility（无障碍）
 
-- CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied）+ `role=status aria-live=polite` 播报；成功/失败 toast 接受完整本地化消息；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
+- CodeBlock 的复制委托给共享 `CopyButton`：动态 `aria-label`（Copy / Copied），复制成功只由应用级 toast（`type: 'background'`）进行 polite 播报；成功/失败 toast 接受完整本地化消息；换行按钮使用固定 `labels.wrap` 与 `aria-pressed`，升级时需把旧 `wrapOn` / `wrapOff` 标签迁移为 `wrap`；语言 USelect 的键盘导航与 `aria-*` 由 Reka UI 内置。
 - ResponseExample：状态码色 + 文本双通道，不单靠颜色传达含义。
 - 全部组件的色彩用 Geist 语义 token（`text-highlighted` / `text-muted` / `bg-elevated` / `border-default`），随 color-mode 明暗切换。
 - **配色按含义分配（跨 FieldItem 全体生效）**：
