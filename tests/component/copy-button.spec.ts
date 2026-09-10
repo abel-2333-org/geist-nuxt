@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { h } from 'vue'
+import { defineComponent, h } from 'vue'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { UApp } from '#components'
 import { useToast } from '#imports'
@@ -24,10 +24,11 @@ describe('CopyButton attrs contract', () => {
 
 describe('copy result announcements', () => {
   let wrapper: Awaited<ReturnType<typeof mountSuspended>> | undefined
+  let toast: ReturnType<typeof useToast> | undefined
   const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
 
   afterEach(() => {
-    useToast().clear()
+    toast?.clear()
     wrapper?.unmount()
     if (clipboard) Object.defineProperty(navigator, 'clipboard', clipboard)
     else Reflect.deleteProperty(navigator, 'clipboard')
@@ -61,10 +62,19 @@ describe('copy result announcements', () => {
       configurable: true,
       value: { writeText: vi.fn().mockResolvedValue(undefined) },
     })
-    wrapper = await mountSuspended(UApp, {
-      attachTo: document.body,
-      slots: { default: render },
+    const Host = defineComponent({
+      setup() {
+        toast = useToast()
+        return () => h(UApp, null, { default: render })
+      },
     })
+    wrapper = await mountSuspended(Host, {
+      attachTo: document.body,
+    })
+    const target = wrapper.findComponent(OperationTarget)
+    const component = target.exists() ? target : wrapper.getComponent(CopyButton)
+    // Reject duplicate sources before copied can expire during the toast wait.
+    expect(component.find('[aria-live]').exists()).toBe(false)
     await wrapper.get(`button[aria-label="${label}"]`).trigger('click')
 
     // Reka mounts its announcement after two frames. Wait for that source,
@@ -75,6 +85,6 @@ describe('copy result announcements', () => {
       expect(announcements.some(element => element.getAttribute('role') === 'alert')).toBe(true)
       expect(announcements).toHaveLength(1)
       expect(announcements[0]!.getAttribute('aria-live')).toBe('polite')
-    })
-  })
+    }, { timeout: 5000 })
+  }, 10_000)
 })
