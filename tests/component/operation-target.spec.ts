@@ -25,7 +25,17 @@ import OperationTarget from '../../kits/api-docs/components/OperationTarget.vue'
 // there); what this file must pin is WHICH VALUE each affordance hands it, so the
 // auto-import is mocked and the recorded calls are the assertion surface.
 const { write } = vi.hoisted(() => ({ write: vi.fn() }))
-mockNuxtImport('useCopy', () => () => ({ copied: shallowRef(false), copy: write }))
+mockNuxtImport('useCopy', () => () => {
+  const copied = shallowRef(false)
+  return {
+    copied,
+    async copy(...args: unknown[]) {
+      const ok = await write(...args)
+      if (ok) copied.value = true
+      return ok
+    },
+  }
+})
 
 beforeEach(() => {
   write.mockReset()
@@ -127,6 +137,22 @@ describe('OperationTarget copy affordances', () => {
     await wrapper.setProps({ modelValue: 'sandbox' })
     expect(hostSegment(wrapper).attributes('aria-label'))
       .toBe(`${zh.copyHost} https://sandbox.example.com`)
+  })
+
+  it.each(['host', 'path'] as const)('keeps the current %s value in the copied name', async (segment) => {
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+    const button = segment === 'host' ? hostSegment(wrapper) : pathSegment(wrapper)
+    const value = segment === 'host' ? hosts[0]!.baseUrl : base.path
+    const message = segment === 'host' ? zh.copiedHost : zh.copiedPath
+
+    await button.trigger('click')
+    await flushPromises()
+    expect(button.attributes('aria-label')).toBe(`${message} ${value}`)
+
+    // Props may change before the copied pulse expires. Name the visible value.
+    await wrapper.setProps({ modelValue: 'sandbox', path: '/v1/health' })
+    const currentValue = segment === 'host' ? hosts[1]!.baseUrl : '/v1/health'
+    expect(button.attributes('aria-label')).toBe(`${message} ${currentValue}`)
   })
 
   it('does not fire when the click merely ended a text selection in the segment', async () => {

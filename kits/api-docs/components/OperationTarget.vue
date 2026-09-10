@@ -55,11 +55,11 @@ export interface ApiTargetLabels {
    * screen reader would never hear which host this row points at.
    */
   copyHost?: string
-  /** Complete host success message; also used as the copied label. */
+  /** Complete host success message; the copied name appends the current host. */
   copiedHost?: string
   /** Accessible-name prefix for the path segment, e.g. "复制 path"; the path is appended. */
   copyPath?: string
-  /** Complete path success message; also used as the copied label. */
+  /** Complete path success message; the copied name appends the current path. */
   copiedPath?: string
 }
 
@@ -247,7 +247,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
         <button
           type="button"
           :class="[segment, hostSegment]"
-          :aria-label="hostCopied ? t.copiedHost : hostName"
+          :aria-label="hostCopied ? `${t.copiedHost} ${baseUrl}` : hostName"
           @click="onCopyHost"
         ><code translate="no">{{ baseUrl }}</code></button>
       </UTooltip>
@@ -266,7 +266,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
             pathSegment,
             clipped ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]' : undefined,
           ]"
-          :aria-label="pathCopied ? t.copiedPath : pathName"
+          :aria-label="pathCopied ? `${t.copiedPath} ${props.path}` : pathName"
           @click="onCopyPath"
         ><code translate="no" class="block whitespace-nowrap">{{ props.path }}</code></button>
       </UTooltip>
