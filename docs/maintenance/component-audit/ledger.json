@@ -1,21 +1,39 @@
 {
   "version": 2,
   "round": 3,
-  "lastRunAt": "2026-09-08T23:25:58.000Z",
+  "lastRunAt": "2026-09-10T03:34:50.771Z",
   "lastPicked": [
+    "api-docs-code-block",
+    "foundation-copy-button",
+    "api-docs-operation-target",
+    "api-docs-code-rail",
+    "api-docs-enum-table",
+    "api-docs-event-badge",
+    "api-docs-field-annotation",
+    "api-docs-field-group",
+    "api-docs-field-item",
+    "api-docs-lifecycle-badge",
+    "api-docs-lifecycle-notice",
+    "api-docs-method-badge",
+    "api-docs-operation-header",
+    "api-docs-relation-source-path",
+    "api-docs-request-example",
     "api-docs-response-example",
-    "api-docs-request-example"
+    "api-docs-site-search",
+    "api-docs-webhook-protocol",
+    "foundation-semantic-badge",
+    "foundation-split-pane-handle"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
-        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
@@ -29,9 +47,21 @@
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "4053c4e58e40e3744eea020dfef73007d8a6d68c643505cb555f3bd41a3b7dc5"
+        "scopeDigest": "9b578bba454a9844d60735122c82517ddd5e909ffa26ad48e303eaf33acaa44c",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "useCopy 成功 toast 的 type:background 经 Nuxt UI Toast 转发到 Reka；组件不另建 live region，依赖变化需复核转发与挂载。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "ToastAnnounce 对 background 产生 aria-live=polite；真实集成测试断言每次复制只有一个匹配的 polite region。依赖变化需复核播报行为。"
+          }
+        ]
       },
-      "notes": "逐条核对复制契约、attrs fallthrough、polite live region 与完整句 toast 约定；修正 code-sample.md 对 useCopy 的过时 VueUse 描述并将该 reference 纳入 evidence scope；全仓反查无重复剪贴板实现，无新增 finding。",
+      "notes": "复制结果只由 useCopy 的应用级 toast 播报；成功显式 background/polite，失败保持既有语义。移除 CopyButton 两分支的自有 region，inheritAttrs:false 和布局 wrapper 契约保留。真实 UApp/toast 集成测试覆盖 plain、tooltip、host、path，每次成功仅有一个 polite live region。草稿 toast finding f-7e93479ff182 后经证据纠正映射 f-537beeaf99aa，本次已修复；该问题未进入 canonical base，不新增已解决 finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -113,13 +143,13 @@
     },
     "foundation-semantic-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-07T23:33:54.080Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a83d849b9600e1a636995bf287a3d1b8676d2da7",
-        "headSha": "eb204277d14a7bfaa0a6cd829240be75fdc6b206",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -133,7 +163,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "0c6d9903b7104c687f263f34c70a9dde04a71d82bd31d4483fbb0d3349699be8",
+        "scopeDigest": "6ce4ef2c4f229746fbfc259074f3500034efaf78c5e6f1a469f1e3e1bf93c941",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -147,7 +177,7 @@
           }
         ]
       },
-      "notes": "clean:单根 UBadge wrapper,tone→色只经 BADGE_TONE_COLOR 穷尽映射,非空 label 契约由三个 preset wrapper 各自保证;全仓 <UBadge> 直用点(SidebarNav / SidebarScenarioTags / WebhookProtocol / ResponseExample status)均为计数、状态码或场景标签,不属语义 tone 词表,无绕过原子的用法;既有两条 resolved finding 无回归。",
+      "notes": "共享 scope 改动影响复核：tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -274,13 +304,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -293,9 +323,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "8c80d56834146c6fad723fcefb14ba766f2ba15bc4df0a19d6e50027cafea9bc"
+        "scopeDigest": "e0f567a2d67db1aee9ec97fbe4415c429f5e101f3e7adf77ec36711f892e3507"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -328,13 +358,13 @@
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -344,28 +374,28 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "aab808d65fe1211eb3a2b8eaf86bd3ef6a8149fdf014996f191649c12967ec0b"
+        "scopeDigest": "304519a3401e1930ac8c31ff223efb19215a79ca05478982661dc04b523967a9"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "换行标签迁移为固定 labels.wrap，保留 aria-pressed；删除 wrapOn/wrapOff，迁移两个 webhook gallery、consumer smoke 和 reference 示例。英文默认及中文标签在开关两态保持稳定。CodeBlock/RequestExample/ResponseExample/WebhookProtocol 的 ApiCodeLabels 透传一致。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
           "severity": "low",
           "claim": null,
           "evidence": "CodeBlock.vue 工具栏换行按钮同时设置 :aria-pressed=\"wrap\" 与随状态翻转的 :aria-label=\"wrap ? t.wrapOff : t.wrapOn\"('Turn on line wrap' ↔ 'Turn off line wrap')。复现:渲染任意含 code 的 CodeBlock,读屏聚焦该按钮:关闭态播报 'Turn on line wrap, toggle button, not pressed',点击后播报 'Turn off line wrap, toggle button, pressed'——动作式文案与 pressed 状态互相矛盾。WAI-ARIA APG Button pattern 明文:'It is critical the label on a toggle does not change when its state changes';若设计需要文案翻转则不应再用 aria-pressed。修法二选一:① 保留 aria-pressed、label 固定为状态无关名词(如 'Line wrap'),需在 ApiCodeLabels 新增键并处理既有 wrapOn/wrapOff 键的去向(公开 i18n 契约变化,消费项目已本地化的键会失效);② 去掉 aria-pressed、保留动作式动态 label(与 CopyButton 同惯例,但失去 toggle 语义)。两者都改变辅助技术可感知的行为契约,交人工决策;推荐 ①。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-08T23:25:58.000Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6da4dba66afeff6219509ce79409898b6b197819",
-        "headSha": "5f6c3813fa3e9af142ae9645b880e62675fe0ac7",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -377,20 +407,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "9903c78128d417f145ee6d19fbb688fb40d60491c769d947fa6cde4364bb8e49"
+        "scopeDigest": "3d29794f14ec82c40d5ad7d0f615313e94697fa9509ecc5992d8f41f843797df"
       },
-      "notes": "复核维持 clean(08-07 首审修复、08-21 clean,08-22~24 三次复核):112 行薄包装,场景 seam 全走 useExampleScenarioSelection,受控/非受控、fallback 不回写、单次 emit、≤1 场景隐藏选择器均有黑盒测试;labels 透传、trustHighlightedHtml 默认 false、registry 依赖闭包与 import 实况一致;反向横扫无簇外新重复。",
+      "notes": "共享 CodeBlock 与 webhook gallery 变化影响复核：RequestExample extends ApiCodeLabels 并原样透传 labels，新 wrap 可达；gallery 仅迁移 ACK 标签，请求内容、场景和插槽契约不变。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -406,9 +436,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "55b3f2913c8dad789daea64125f3115e1d072e9cc65a240d588eb9429167ea70"
+        "scopeDigest": "8d49e8f987edfdb8889b4fdce45deb7604bbadce2220e29e91c76802839c50eb"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 CodeBlock 变化影响复核：ResponseExample extends ApiCodeLabels 并原样透传 labels，新 wrap 可达；响应 panelAnnouncement live region 是面板状态而非复制反馈，保留。场景/状态/媒体/文件面板契约不变。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -428,13 +458,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -451,20 +481,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "4a81cfa4c53a2295bc93c9480a45f993d29866148532786744c512ed7b292a76"
+        "scopeDigest": "c02925af710256088274b473ab69174f80222ce72a5da2b9ab4003bcbf6c04d3"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -483,7 +513,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "ce94f2a1d7ec86fc90fa9f6d6337cd725b8cb7927d2580557d82c7b102cb66a3",
+        "scopeDigest": "4908f8b183b317c37c602ebe1b1f7ae5fca81061aae3d0d7dfc7facc591710ef",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -497,18 +527,18 @@
           }
         ]
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -521,20 +551,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "4678315acbee86f1dc8f714cbf990b38b34a7f2ed7e690d035044dfe95d5e3f7"
+        "scopeDigest": "20217e3c6248c85a5fa32266ab4fb080ed6e4539dccd318f44e973be6d417edd"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-field-group": {
-      "round": 2,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -543,20 +573,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "8660670c97769194f05728bdb2c214c79bfd3a41a6da852eb3b290f8967d3a71"
+        "scopeDigest": "9a8b1574c1b90129931845f54b8407afe0c608d4410455e040f1f9616a855866"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：app/pages/kits/api-docs/webhook-protocol.vue, references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "e345344bfbf6d9dd9f6ceb2fc381d2c737a000bb65a68480ead6c6ab17297c2f",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -573,9 +603,9 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "da95b46a3342b01cd84fe07eb5df9aa9612325481da69c862fd9839591d384a9"
+        "scopeDigest": "79ea87959f9070aeac057d83b7deb20c658db412a494d3bdcc299524b3e7cc5b"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 reference/test 及真实 useCopy 链影响复核：useFieldAnchor 继续传完整成功/失败消息，自身无复制 live region，普通复制结果由单来源 polite toast 反馈；锚点导航、层级及字段语义不变。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -602,13 +632,13 @@
     },
     "api-docs-field-annotation": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -617,9 +647,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "486ea8e3fe85cae446ef658d2ae5264ba039e0a21d5a3a5f9d3accdff3bbc1f6"
+        "scopeDigest": "101105eb2d9b77555b6a4d4be6c6fa28deaf52c936a7f1aff1269201eb03d22e"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -639,13 +669,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -658,7 +688,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "48d13c21af8edd1284b4af3a3dc58317ecbcd81ff7265406abf9646328dab890",
+        "scopeDigest": "4a65f977c58b09d86aed8f300f86e181b221594e14beae0bf37a0f300d8ff856",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -672,18 +702,18 @@
           }
         ]
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：app/pages/kits/api-docs/webhook-reference.vue, references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -695,23 +725,24 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "d38046b496b3064a6fef5978a44a3998df1521a7ed18791d19df6551982c16c7"
+        "scopeDigest": "309c79138d052941f2b765c01ec4a2e3b228f12a2f242a0253d56105e607b962"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-operation-target": {
-      "round": 2,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/index.vue",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
           "kits/api-docs/components/OperationTarget.vue",
@@ -719,20 +750,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "aa45bd16bdb1cb0285cffe4560de8b0a06db8d0916317f9b9d873db45b0dd106"
+        "scopeDigest": "6cd984f6261b1198fa49f7bb54edac4a019fedd357dc03cea96314aac68dba15"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "idle/copied 可访问名都包含当前地址值；复制选区守卫、两个布局单元、独立复制消息不变。删除段级 region 及只用于该 region 的 revision 状态，由应用 toast 单独 polite 播报。成功态 prop 更新测试与真实 toaster 集成验证通过。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -747,20 +778,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "cd8bb2b9bd9d077cb815f211b529b9eb12ad4e4bc200d03d5a38c8edaeedf8ad"
+        "scopeDigest": "3757c1e779920bb60af4a5201be5cbe03f2b6ecc81aadf1500d5543368209f46"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：app/pages/kits/api-docs/webhook-reference.vue, references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -777,20 +808,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "a731a6a96cdfe45949b59ad694f0e25007e65e026ab32b929a5ae610e335b052"
+        "scopeDigest": "dc69f232116c05b53857164d8b3a8e5ec06e2badbb78486a3a402376fe6c380a"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：app/pages/kits/api-docs/webhook-reference.vue, references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -799,7 +830,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "4c9c80952fca5c0cc42973dade71394c8c4bc60c42b01608ae069fd55e65ffb0",
+        "scopeDigest": "07be7e66395aff3d952e33049d82583cfbcf611c57dc73120df48e874d72008a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -813,7 +844,7 @@
           }
         ]
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -826,13 +857,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -847,9 +878,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "c6e76719d16973a225af2dc687d200795f2edc96e044d32ea31a4f47cb127dbd"
+        "scopeDigest": "7f66ce706cbb041ca6f138d74bcaf0a70576482cf387f3edab3f94bc66263128"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 index 与两个 webhook gallery 影响复核：acknowledgement.example.labels 类型为 ApiCodeLabels 且原样透传；旧键完整替换为 wrap，ACK 内容和三段协议结构不变。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -898,13 +929,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
+        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -914,9 +945,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "9c89d29f02d53c89b93e6031d92330439121c4e726827a33336fc23330d29e54"
+        "scopeDigest": "8ae257399ea39707110118d6e1aa034b712bb4226ec83dd7f43bef4481dafbd9"
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
       "findings": []
     }
   }
