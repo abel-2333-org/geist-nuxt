@@ -88,6 +88,19 @@ recorder 仍按同一规则自动推导 required owner，但 results 必须**恰
 v1 迁移产物使用 `{ "kind": "legacy-v1", "sha": ... }`，只保留历史来源；它不会把旧分支 SHA
 误称为 main SHA，也不会用当前树伪造过去的 scope，下一次审计该组件时再升级为 `scope-v1`。
 
+## 抽取候选登记(`extraction-candidates.md`)
+
+跨组件重复实现的候选与**已否决结论**登记在同目录的 `extraction-candidates.md`,由每日反向横扫与
+轮末横切扫描共同维护。抽取跨多个组件、属破坏性改动,采纳与否一律由人工决定;扫描本身不改代码、
+不写 `ledger.json`。
+
+它刻意放在 `docs/maintenance/component-audit/**` 而不是 `references/`:该前缀被 evidence scope 排除,
+所以每轮追加不会让任何 item 的 scope digest 变 stale,也不触发 co-review。同时**每日**扫描都能直接读到
+已否决结论——这正是它从 GitHub tracking issue 搬进仓库的原因(issue 每轮只被打开一次,日常扫描读不到)。
+
+GitHub 上的「组件抽取候选」issue 随之收窄为**纯 backlog**:只在存在待人工拍板的实现候选时开启,
+清空即可关闭;已否决结论不再写回 issue。
+
 ## 选簇算法
 
 关联关系取自 `registry.json` 的 `registryDependencies`,不靠猜:
