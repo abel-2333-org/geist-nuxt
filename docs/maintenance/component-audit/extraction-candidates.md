@@ -2,7 +2,8 @@
 
 跨组件重复实现的候选与**已否决结论**的常驻登记表。审计的两种扫描都往这里写:
 
-- **每日反向横扫**(`SKILL.md` §5):当日簇的特征模式在全仓反查,命中簇外重复时记 finding 并在此登记;
+- **每日反向横扫**(`SKILL.md` §5):当日簇的特征模式在全仓反查,命中簇外重复时在此登记评估;
+  重复本身**不产生 finding**——只有重复确实导致行为契约不一致(如同一意图的两处实现对同一输入给出不同结果)时,才另记 finding 走 ledger;
 - **轮末横切扫描**(`SKILL.md` §5b,每轮首日 `roundRollover`):不按依赖图,横向比对全部分发组件。
 
 采纳标准见 `references/method/component-reflow.md`。抽取跨多个组件、属破坏性改动,**采纳与否一律由人工决定**;
@@ -10,7 +11,7 @@
 
 ## 为什么在仓库里而不在 GitHub issue 里
 
-历史上这份登记是 tracking issue [#93「组件抽取候选」](https://github.com/abel-2333-org/geist-nuxt/issues/93)。
+历史上这份登记是 tracking issue [#93「组件抽取候选」](https://github.com/abel-2333-org/geist-nuxt/issues/93)(已于 2026-09-10 关闭,关闭说明指回本文件)。
 问题在于**每日**反向横扫读不到它——issue 只在每轮首日被打开一次,日常扫描命中重复时只能重新推导,
 或按日期交叉引用历史报告,记忆随报告堆积而退化。放进仓库后,任何一次扫描都能直接读到已否决结论,
 不必发网络请求,也与本目录 `ledger.json` / `reports/` 的「证据进仓库、可重算」一致。
@@ -18,8 +19,8 @@
 本文件位于 `docs/maintenance/component-audit/**`,该前缀被 evidence scope 明确排除(见 `README.md`),
 因此每轮追加**不会**让任何 item 的 scope digest 变 stale,也不触发 co-review。
 
-**issue 的职责收窄为纯 backlog**:只在存在「待人工拍板的实现候选」时开启,清空即可关闭;
-已否决结论不再写回 issue。
+**issue 的职责收窄为纯 backlog**:只在存在「待人工拍板的实现候选」时开启;已否决结论不再写回 issue。
+待决策候选清空后由**人工**关闭,scheduled task 只在简报里提出建议,不自行关闭 issue。
 
 ## 状态图例
 
