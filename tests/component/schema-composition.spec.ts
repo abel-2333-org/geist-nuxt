@@ -93,6 +93,8 @@ describe('SchemaComposition', () => {
     expect(wrapper.findAll('[id]').some(node => node.attributes('id') === contentId)).toBe(true)
     expect(buttons[0]?.text()).toBe('Email(1)')
     expect(buttons[0]?.text()).not.toMatch(/Show|Hide/)
+    // Disclosure toggles share FieldItem's touch contract: no double-tap zoom on rapid open/close.
+    buttons.forEach(button => expect(button.classes()).toContain('touch-manipulation'))
 
     await buttons[0]!.trigger('click')
     expect(buttons[0]?.attributes('aria-expanded')).toBe('true')
