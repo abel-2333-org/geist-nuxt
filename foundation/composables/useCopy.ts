@@ -71,6 +71,8 @@ export function useCopy(options: UseCopyOptions = {}) {
       copied.value = true
       toast.add({
         title: copyOptions.successMessage ?? successMessage,
+        // Clipboard confirmation is routine feedback; the toast is its only live region.
+        type: 'background',
         color: 'success',
         icon: 'i-lucide-check',
       })

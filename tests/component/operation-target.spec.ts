@@ -10,6 +10,10 @@
 //     and copy were peer flex items and the row's break point was left to
 //     content width. The layout is now two `flex-nowrap` units, which is a
 //     STRUCTURAL invariant a test can hold — unlike the pixel band it replaced.
+//   - the segment buttons once carried a bare `aria-label` ("Copy host"), which
+//     REPLACES the button text in the accessibility tree: a screen-reader user
+//     could hear that a host existed but never which one. The name now carries
+//     the value ("Copy host https://api.example.com").
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
@@ -21,20 +25,22 @@ import OperationTarget from '../../kits/api-docs/components/OperationTarget.vue'
 // there); what this file must pin is WHICH VALUE each affordance hands it, so the
 // auto-import is mocked and the recorded calls are the assertion surface.
 const { write } = vi.hoisted(() => ({ write: vi.fn() }))
-mockNuxtImport('useCopy', () => () => ({ copied: shallowRef(false), copy: write }))
+mockNuxtImport('useCopy', () => () => {
+  const copied = shallowRef(false)
+  return {
+    copied,
+    async copy(...args: unknown[]) {
+      const ok = await write(...args)
+      if (ok) copied.value = true
+      return ok
+    },
+  }
+})
 
 beforeEach(() => {
   write.mockReset()
   write.mockResolvedValue(true)
 })
-
-function deferred() {
-  let resolve!: (value: boolean) => void
-  const promise = new Promise<boolean>((done) => {
-    resolve = done
-  })
-  return { promise, resolve }
-}
 
 const hosts = [
   { id: 'prod', label: '生产', baseUrl: 'https://api.example.com' },
@@ -53,8 +59,14 @@ const zh = {
   copiedPath: 'path 已复制',
 }
 
-const copyButtons = (w: Awaited<ReturnType<typeof mountSuspended>>) =>
-  w.findAllComponents({ name: 'CopyButton' })
+type Mounted = Awaited<ReturnType<typeof mountSuspended>>
+
+const copyButtons = (w: Mounted) => w.findAllComponents({ name: 'CopyButton' })
+
+// Segment names are `<prefix> <value>`; locate the segments by their prefix so
+// each test keeps reading as "the host segment" rather than repeating the URL.
+const hostSegment = (w: Mounted) => w.get(`button[aria-label^="${zh.copyHost} "]`)
+const pathSegment = (w: Mounted) => w.get(`button[aria-label^="${zh.copyPath} "]`)
 
 const Host = defineComponent({
   components: { OperationTarget, UApp },
@@ -83,7 +95,7 @@ describe('OperationTarget copy affordances', () => {
       props: { ...base, labels: zh },
     })
 
-    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
+    await hostSegment(wrapper).trigger('click')
     expect(write).toHaveBeenCalledWith('https://api.example.com', {
       successMessage: zh.copiedHost,
       failureMessage: zh.copyFailed,
@@ -95,11 +107,44 @@ describe('OperationTarget copy affordances', () => {
       props: { ...base, labels: zh },
     })
 
-    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click')
+    await pathSegment(wrapper).trigger('click')
     expect(write).toHaveBeenCalledWith('/v1/deployments', {
       successMessage: zh.copiedPath,
       failureMessage: zh.copyFailed,
     })
+  })
+
+  it('names each segment with its value, so a screen reader hears what gets copied', async () => {
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+
+    // `aria-label` replaces the button text in the accessibility tree, so the
+    // name must carry the value itself — both so a screen reader hears WHICH
+    // host, and so the visible text is part of the name (WCAG 2.5.3).
+    expect(hostSegment(wrapper).attributes('aria-label'))
+      .toBe(`${zh.copyHost} https://api.example.com`)
+    expect(pathSegment(wrapper).attributes('aria-label'))
+      .toBe(`${zh.copyPath} /v1/deployments`)
+
+    // The name follows the environment, like the copied value does.
+    await wrapper.setProps({ modelValue: 'sandbox' })
+    expect(hostSegment(wrapper).attributes('aria-label'))
+      .toBe(`${zh.copyHost} https://sandbox.example.com`)
+  })
+
+  it.each(['host', 'path'] as const)('keeps the current %s value in the copied name', async (segment) => {
+    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
+    const button = segment === 'host' ? hostSegment(wrapper) : pathSegment(wrapper)
+    const value = segment === 'host' ? hosts[0]!.baseUrl : base.path
+    const message = segment === 'host' ? zh.copiedHost : zh.copiedPath
+
+    await button.trigger('click')
+    await flushPromises()
+    expect(button.attributes('aria-label')).toBe(`${message} ${value}`)
+
+    // Props may change before the copied pulse expires. Name the visible value.
+    await wrapper.setProps({ modelValue: 'sandbox', path: '/v1/health' })
+    const currentValue = segment === 'host' ? hosts[1]!.baseUrl : '/v1/health'
+    expect(button.attributes('aria-label')).toBe(`${message} ${currentValue}`)
   })
 
   it('does not fire when the click merely ended a text selection in the segment', async () => {
@@ -115,7 +160,7 @@ describe('OperationTarget copy affordances', () => {
       containsNode: () => true,
     } as unknown as Selection)
 
-    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click', { detail: 1 })
+    await pathSegment(wrapper).trigger('click', { detail: 1 })
     expect(write).not.toHaveBeenCalled()
     vi.mocked(window.getSelection).mockRestore()
   })
@@ -131,7 +176,7 @@ describe('OperationTarget copy affordances', () => {
       containsNode: () => true,
     } as unknown as Selection)
 
-    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click', { detail: 0 })
+    await pathSegment(wrapper).trigger('click', { detail: 0 })
     expect(write).toHaveBeenCalledWith('/v1/deployments', {
       successMessage: zh.copiedPath,
       failureMessage: zh.copyFailed,
@@ -147,7 +192,7 @@ describe('OperationTarget copy affordances', () => {
     expect(copyButtons(wrapper)[0]!.props('value'))
       .toBe('https://sandbox.example.com/v1/deployments')
 
-    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
+    await hostSegment(wrapper).trigger('click')
     expect(write).toHaveBeenCalledWith('https://sandbox.example.com', {
       successMessage: zh.copiedHost,
       failureMessage: zh.copyFailed,
@@ -162,8 +207,8 @@ describe('OperationTarget copy affordances', () => {
     expect(codes).toContain('/v1/deployments')
 
     const segments = [
-      wrapper.get(`button[aria-label="${zh.copyHost}"]`),
-      wrapper.get(`button[aria-label="${zh.copyPath}"]`),
+      hostSegment(wrapper),
+      pathSegment(wrapper),
     ]
     for (const segment of segments) {
       expect(segment.classes()).toEqual(expect.arrayContaining([
@@ -180,43 +225,14 @@ describe('OperationTarget copy affordances', () => {
       .toEqual([zh.copyHost, zh.copyPath])
   })
 
-  it('announces segment copies through exactly one polite live region', async () => {
+  it('leaves live-region announcements to the application toaster', async () => {
     const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    // The CopyButton owns its own region; the row adds ONE for both segments.
-    expect(wrapper.findAll('[aria-live="polite"]')).toHaveLength(2)
-  })
-
-  it('announces the latest segment when host and path are copied in succession', async () => {
-    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
-
-    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
+    await hostSegment(wrapper).trigger('click')
     await flushPromises()
-    expect(status.text()).toBe(zh.copiedHost)
-
-    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click')
+    await pathSegment(wrapper).trigger('click')
     await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
-  })
-
-  it('keeps the latest requested segment when clipboard promises resolve out of order', async () => {
-    const host = deferred()
-    const path = deferred()
-    write
-      .mockReturnValueOnce(host.promise)
-      .mockReturnValueOnce(path.promise)
-    const wrapper = await mountTarget({ props: { ...base, labels: zh } })
-    const status = wrapper.findAll('[aria-live="polite"]').at(-1)!
-
-    await wrapper.get(`button[aria-label="${zh.copyHost}"]`).trigger('click')
-    await wrapper.get(`button[aria-label="${zh.copyPath}"]`).trigger('click')
-    path.resolve(true)
-    await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
-
-    host.resolve(true)
-    await flushPromises()
-    expect(status.text()).toBe(zh.copiedPath)
+    // useCopy is mocked here; the real toaster integration lives in copy-button.spec.
+    expect(wrapper.find('[aria-live]').exists()).toBe(false)
   })
 })
 
@@ -230,7 +246,12 @@ describe('OperationTarget reading order', () => {
 
     // The whole-address action is last because it acts on everything before it,
     // and it must be last for the KEYBOARD too.
-    expect(names).toEqual(['选择环境', zh.copyHost, zh.copyPath, zh.copy])
+    expect(names).toEqual([
+      '选择环境',
+      `${zh.copyHost} https://api.example.com`,
+      `${zh.copyPath} /v1/deployments`,
+      zh.copy,
+    ])
   })
 
   it('never uses `order` utilities to place children, which would desync focus', async () => {
@@ -277,8 +298,8 @@ describe('OperationTarget reading order', () => {
     // The pairing is the point: path travels with the action that copies the
     // whole address, environment travels with the host it selects.
     expect(origin.find('button[aria-label="选择环境"]').exists()).toBe(true)
-    expect(origin.find(`button[aria-label="${zh.copyHost}"]`).exists()).toBe(true)
-    expect(operation.find(`button[aria-label="${zh.copyPath}"]`).exists()).toBe(true)
+    expect(origin.find(`button[aria-label^="${zh.copyHost} "]`).exists()).toBe(true)
+    expect(operation.find(`button[aria-label^="${zh.copyPath} "]`).exists()).toBe(true)
     expect(operation.findComponent({ name: 'CopyButton' }).exists()).toBe(true)
   })
 
@@ -325,8 +346,8 @@ describe('OperationTarget chrome localization', () => {
     const wrapper = await mountTarget({ props: base })
     const names = wrapper.findAll('button').map(b => b.attributes('aria-label'))
 
-    expect(names).toContain('Copy host')
-    expect(names).toContain('Copy path')
+    expect(names).toContain('Copy host https://api.example.com')
+    expect(names).toContain('Copy path /v1/deployments')
     expect(names).toContain('Copy endpoint')
   })
 })

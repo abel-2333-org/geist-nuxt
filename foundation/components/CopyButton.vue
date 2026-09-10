@@ -4,11 +4,11 @@ import type { ButtonProps } from '@nuxt/ui'
 defineOptions({ inheritAttrs: false })
 
 // Shared copy-to-clipboard button. The single UI home for "copy this value":
-// wraps a UButton with icon + color state, an optional tooltip, and a polite
-// live-region announcement, all driven by the useCopy composable (which owns
-// the clipboard write, the iframe/execCommand fallback, and the toast).
+// wraps a UButton with icon + color state and an optional tooltip. useCopy
+// owns the clipboard write, iframe/execCommand fallback, and the toast;
+// successful copies are announced politely by that toast alone.
 //
-// Anatomy:  [ UTooltip? > UButton (idle/copied icon) ] + sr-only live region
+// Anatomy:  [ UTooltip? > UButton (idle/copied icon) ]
 // States:   idle → copied (transient, ~2s; no layout shift), success color pulse
 // A11y:     dynamic aria-label (idle/copied); result announced politely; the
 //           UButton keeps its :focus-visible ring.
@@ -79,7 +79,6 @@ function onCopy() {
       :aria-label="copied ? copiedLabel : label"
       @click="onCopy"
     />
-    <span role="status" aria-live="polite" class="sr-only">{{ copied ? copiedLabel : '' }}</span>
   </UTooltip>
 
   <template v-else>
@@ -92,6 +91,5 @@ function onCopy() {
       :aria-label="copied ? copiedLabel : label"
       @click="onCopy"
     />
-    <span role="status" aria-live="polite" class="sr-only">{{ copied ? copiedLabel : '' }}</span>
   </template>
 </template>

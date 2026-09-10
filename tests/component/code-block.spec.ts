@@ -95,6 +95,32 @@ describe('CodeBlock language label overrides', () => {
   })
 })
 
+describe('CodeBlock wrap toggle a11y', () => {
+  it.each([
+    { labels: {}, name: 'Line wrap' },
+    { labels: { wrap: '自动换行' }, name: '自动换行' },
+  ])('keeps the $name name while toggling pressed state', async ({ labels, name }) => {
+    const wrapper = await mountSuspended(CodeBlock, {
+      props: { variants: twoLanguages, labels },
+    })
+    const toggle = wrapper.get('button[aria-pressed]')
+    // Wrap is shared and persisted; exercise both states without assuming
+    // the user's stored preference or coupling to the composable's internals.
+    const initial = toggle.attributes('aria-pressed')
+    expect(['true', 'false']).toContain(initial)
+    expect(toggle.attributes('aria-label')).toBe(name)
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-pressed')).toBe(initial === 'true' ? 'false' : 'true')
+    expect(toggle.attributes('aria-label')).toBe(name)
+
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-pressed')).toBe(initial)
+    expect(toggle.attributes('aria-label')).toBe(name)
+    wrapper.unmount()
+  })
+})
+
 describe('CodeBlock code surface a11y', () => {
   it('is a keyboard-focusable non-landmark group named by the title', async () => {
     const wrapper = await mountSuspended(CodeBlock, {

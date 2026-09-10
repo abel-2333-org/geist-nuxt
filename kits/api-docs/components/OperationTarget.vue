@@ -48,13 +48,18 @@ export interface ApiTargetLabels {
   copied?: string
   /** Complete failure message shared by all three copy actions. */
   copyFailed?: string
-  /** Accessible name for the host segment, e.g. "复制 host". */
+  /**
+   * Accessible-name prefix for the host segment, e.g. "复制 host". The current
+   * host value is appended (`Copy host https://api.example.com`): `aria-label`
+   * replaces the button text for assistive technology, so without the value a
+   * screen reader would never hear which host this row points at.
+   */
   copyHost?: string
-  /** Complete host success message; also used as the copied label. */
+  /** Complete host success message; the copied name appends the current host. */
   copiedHost?: string
-  /** Accessible name for the path segment, e.g. "复制 path". */
+  /** Accessible-name prefix for the path segment, e.g. "复制 path"; the path is appended. */
   copyPath?: string
-  /** Complete path success message; also used as the copied label. */
+  /** Complete path success message; the copied name appends the current path. */
   copiedPath?: string
 }
 
@@ -105,15 +110,27 @@ const baseUrl = computed(() => activeHost.value?.baseUrl ?? '')
 
 const fullAddress = computed(() => `${baseUrl.value}${props.path}`)
 
+/**
+ * Segment accessible names. `aria-label` REPLACES a button's text content in
+ * the accessibility tree, so the name has to carry the value itself: "Copy
+ * host https://api.example.com", not just "Copy host". Otherwise a
+ * screen-reader user learns that a host exists but not what it is (the
+ * environment picker only names the environment, and nothing else in this
+ * row shows the host), and the visible text is missing from the name, which
+ * WCAG 2.5.3 Label in Name (Level A) requires. The prefix is localizable
+ * chrome; the value is content, appended verbatim, so no locale has to
+ * compose a sentence around it.
+ */
+const hostName = computed(() => `${t.value.copyHost} ${baseUrl.value}`)
+const pathName = computed(() => `${t.value.copyPath} ${props.path}`)
+
 /* ------------------------------------------------------------------ *
  * Segment copy. Two independent useCopy instances so the two pulses (and
- * the two toasts) never overwrite each other, but ONE live region: the
- * announcement describes "what just got copied", which is a single fact.
+ * the two toasts) remain independent. useCopy owns result announcements
+ * through the application toaster; segments do not add another live region.
  * ------------------------------------------------------------------ */
 const { copied: hostCopied, copy: writeHost } = useCopy()
 const { copied: pathCopied, copy: writePath } = useCopy()
-const segmentStatus = shallowRef('')
-let copyRevision = 0
 
 /**
  * True when this click merely FINISHED a text selection inside the segment.
@@ -130,22 +147,13 @@ function selecting(event: MouseEvent) {
     : true
 }
 
-async function copySegment(segment: 'host' | 'path', value: string) {
-  const revision = ++copyRevision
+function copySegment(segment: 'host' | 'path', value: string) {
   const successMessage = segment === 'host' ? t.value.copiedHost : t.value.copiedPath
   const write = segment === 'host' ? writeHost : writePath
-
-  // Clear first so repeating the same action still creates a live-region change.
-  segmentStatus.value = ''
-  const copied = await write(value, {
+  return write(value, {
     successMessage,
     failureMessage: t.value.copyFailed,
   })
-  if (!copied || revision !== copyRevision) return
-
-  await nextTick()
-  if (revision !== copyRevision) return
-  segmentStatus.value = successMessage
 }
 
 function onCopyHost(event: MouseEvent) {
@@ -228,7 +236,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
         <button
           type="button"
           :class="[segment, hostSegment]"
-          :aria-label="hostCopied ? t.copiedHost : t.copyHost"
+          :aria-label="hostCopied ? `${t.copiedHost} ${baseUrl}` : hostName"
           @click="onCopyHost"
         ><code translate="no">{{ baseUrl }}</code></button>
       </UTooltip>
@@ -247,7 +255,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
             pathSegment,
             clipped ? '[mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]' : undefined,
           ]"
-          :aria-label="pathCopied ? t.copiedPath : t.copyPath"
+          :aria-label="pathCopied ? `${t.copiedPath} ${props.path}` : pathName"
           @click="onCopyPath"
         ><code translate="no" class="block whitespace-nowrap">{{ props.path }}</code></button>
       </UTooltip>
@@ -258,11 +266,8 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
            desync the two. It sits outside the path's scroll area on purpose,
            because the task is to GET the address, not read it — it must never
            scroll away.
-           The classes live on this wrapper, NOT on <CopyButton>: that component
-           is multi-root (button + its aria-live status span), so Vue has no
-           single host to fall through to and a `class` passed to it is dropped
-           silently. The wrapper also keeps the status span travelling with its
-           button instead of becoming a stray flex item. -->
+           CopyButton explicitly disables attribute fallthrough, so its wrapper
+           owns layout classes in both tooltip and plain-button modes. -->
       <span class="ml-auto flex shrink-0">
         <CopyButton
           :value="fullAddress"
@@ -275,8 +280,5 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
       </span>
     </div>
 
-    <!-- ONE polite region for both segments: they answer the same question
-         ("what did I just copy?"), and two regions would compete. -->
-    <span role="status" aria-live="polite" class="sr-only">{{ segmentStatus }}</span>
   </div>
 </template>

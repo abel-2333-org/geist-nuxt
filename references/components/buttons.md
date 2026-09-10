@@ -50,7 +50,7 @@
 
 **何时用**：任何「点击把一个字符串放进剪贴板」的动作。若按钮除复制外还有别的副作用（如复制深链接并滚动定位），保持调用方自建按钮 + `useCopy`，不往本组件加旁效（见 api-docs kit 的 FieldItem anchor）。
 
-**Anatomy**：`[UTooltip?] > UButton`(icon 随 idle/copied 切换) + sr-only `role="status"` live region。组件用 `inheritAttrs: false` 固定关闭 fallthrough，避免 tooltip / 非 tooltip 分支把 `class` 落到不同根上；需要布局类时一律在外面包一层元素（`OperationTarget` 的行尾包装是参考做法）。
+**Anatomy**：`[UTooltip?] > UButton`(icon 随 idle/copied 切换)。组件用 `inheritAttrs: false` 固定关闭 fallthrough，避免 tooltip / 非 tooltip 分支把 `class` 落到不同根上；需要布局类时一律在外面包一层元素（`OperationTarget` 的行尾包装是参考做法）。
 
 **关键 props**：
 - `value`（必填）：写入剪贴板的文本
@@ -61,7 +61,7 @@
 
 **State model**：idle → copied（约 2s 瞬态：图标 copy→check、颜色 neutral→success，无布局位移）→ 自动回 idle；写入失败只出 error toast，不进入 copied 态。
 
-**Accessibility**：图标态按钮自带动态 `aria-label`（idle/copied 切换）；复制结果经 polite live region 播报；`focus-visible` 环由 `UButton` 内置。
+**Accessibility**：图标态按钮自带动态 `aria-label`（idle/copied 切换）；复制成功结果只由 `useCopy` 产生的应用级 toast 播报（`type: 'background'` → `aria-live="polite"`）；组件不额外创建 live region，应用需挂载 `UApp` / toaster；`focus-visible` 环由 `UButton` 内置。
 
 ```vue
 <CopyButton value="pnpm add @nuxt/ui" label="复制命令" copied-label="命令已复制" />
