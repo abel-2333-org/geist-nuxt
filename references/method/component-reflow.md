@@ -21,6 +21,10 @@
 - 至少有明确的复用场景；
 - 归属明确：跨场景 → foundation，单领域 → 对应 kit。
 
+跨组件重复实现的抽取候选，以及**已评估为不建议抽取的结论**，登记在
+`docs/maintenance/component-audit/extraction-candidates.md`。判断一处重复该不该抽之前先查该表：
+列为「不建议抽取」的条目已完整评估过，除非出现新调用点或新反例，不要重新评估。
+
 ## 2. 规格与验证
 
 交互 / 状态 / 焦点复杂的组件按 `component-spec-template.md` 完成 anatomy → state → accessibility；纯展示原子轻量过 anatomy 与 a11y。
