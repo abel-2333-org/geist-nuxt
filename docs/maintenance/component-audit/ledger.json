@@ -143,13 +143,13 @@
     },
     "foundation-semantic-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "lastAuditedAt": "2026-09-10T08:43:46.348Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "320017f37c735606f014caf0dd188a7bf9de8e35",
+        "headSha": "63636b08062e69292b9514c5281395c0fd218394",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -163,7 +163,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "6ce4ef2c4f229746fbfc259074f3500034efaf78c5e6f1a469f1e3e1bf93c941",
+        "scopeDigest": "1bc096600c95e1c51ea3a92b1356085ec21f7734aea18a132619d69dcdf9c9d8",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -177,7 +177,7 @@
           }
         ]
       },
-      "notes": "共享 scope 改动影响复核：tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
+      "notes": "co-review:本 PR 只在 scope 内的 references/method/component-reflow.md §1 采纳决策后追加一段指向 extraction-candidates.md 的指针,不触及晋升流程本身,也不涉及 badge 归属或 tone 词表。逐条复核组件契约无回归:BadgeTone 六值 + BADGE_TONE_COLOR 的 Record 穷尽映射(新增 tone 未补色会编译报错)、组件读表不透传 tone、label 非空由三个 preset wrapper 各自保证、icon 仅为可选强化(意义不靠颜色单通道)、variant/size 默认 subtle/sm、显式相对 import 与 registry target 布局一致。两条既有 finding(f-304490421051 / f-e927544cd93a)维持 resolved,无回归、无新增。focused tests 39/39(http-method-badge 与 chrome-labels),registry:validate 40 items / 58 files、test:agent 17/17、test:registry 131/0 全绿。遗留观察不变:gallery DataDisplay.vue 的 tone 示例仍用「Deprecated=warning、Sunset=neutral」,与 api-docs kit 的 lifecyclePreset 校准相反,已登记待下次触碰该文件的功能 PR 顺手改为域中性词,本 PR 不夹带无关改动。",
       "findings": [
         {
           "id": "f-304490421051",
