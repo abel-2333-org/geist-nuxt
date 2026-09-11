@@ -1,7 +1,7 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-10T23:23:24.838Z",
+  "lastRunAt": "2026-09-11T00:41:29.220Z",
   "lastPicked": [
     "api-docs-schema-composition",
     "foundation-theme-toggle"
@@ -179,7 +179,7 @@
     },
     "foundation-theme-toggle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T23:23:24.838Z",
+      "lastAuditedAt": "2026-09-11T00:41:29.220Z",
       "change": "none",
       "status": "verified",
       "evidence": {
@@ -594,7 +594,7 @@
     },
     "api-docs-schema-composition": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T23:23:24.838Z",
+      "lastAuditedAt": "2026-09-11T00:41:29.220Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
@@ -610,7 +610,19 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "e4139519b9dd71a632ebbdec8be0da5a83714c557f8c0000777452c4afc4dfb3"
+        "scopeDigest": "e4139519b9dd71a632ebbdec8be0da5a83714c557f8c0000777452c4afc4dfb3",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UTabs / UCollapsible 必须继续转发 unmountOnHide=false，保留隐藏 variant 的 DOM 以支持 deep link；升级后复查 SchemaComposition 的隐藏 panel 与重复揭示行为。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "TabsContent / CollapsibleContent 在 unmountOnHide=false 时必须保留隐藏内容 DOM；升级后复查隐藏字段可寻址及 deep link 展开、滚动链路。"
+          }
+        ]
       },
       "notes": "anyOf 分区 disclosure 按钮补齐 touch-manipulation,与 FieldItem / FieldValueStructure 同形 disclosure 按钮的触控契约一致并由 focused test 锁定;oneOf/anyOf/allOf 忠实性、discriminator 合成、opaque anchor 揭示、heading outline 与语义 token 逐条复核成立,无其他改动。",
       "findings": []
