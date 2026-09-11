@@ -311,7 +311,7 @@ function toggleVariant(variantId: string) {
         <component :is="headingTag">
           <button
             type="button"
-            class="flex w-full flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+            class="flex w-full touch-manipulation flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
             :aria-expanded="open[view.variant.id] ?? false"
             :aria-controls="contentId(view.variant.id)"
             @click="toggleVariant(view.variant.id)"

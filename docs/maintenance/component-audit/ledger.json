@@ -1,28 +1,10 @@
 {
   "version": 2,
-  "round": 3,
-  "lastRunAt": "2026-09-10T03:34:50.771Z",
+  "round": 4,
+  "lastRunAt": "2026-09-11T00:41:29.220Z",
   "lastPicked": [
-    "api-docs-code-block",
-    "foundation-copy-button",
-    "api-docs-operation-target",
-    "api-docs-code-rail",
-    "api-docs-enum-table",
-    "api-docs-event-badge",
-    "api-docs-field-annotation",
-    "api-docs-field-group",
-    "api-docs-field-item",
-    "api-docs-lifecycle-badge",
-    "api-docs-lifecycle-notice",
-    "api-docs-method-badge",
-    "api-docs-operation-header",
-    "api-docs-relation-source-path",
-    "api-docs-request-example",
-    "api-docs-response-example",
-    "api-docs-site-search",
-    "api-docs-webhook-protocol",
-    "foundation-semantic-badge",
-    "foundation-split-pane-handle"
+    "api-docs-schema-composition",
+    "foundation-theme-toggle"
   ],
   "items": {
     "foundation-copy-button": {
@@ -196,22 +178,24 @@
       ]
     },
     "foundation-theme-toggle": {
-      "round": 2,
-      "lastAuditedAt": "2026-08-27T02:07:23.748Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-11T00:41:29.220Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "bdf797c82ce05d2758739fbbf75a6cc47a712fa2",
-        "headSha": "a4dcd5ac92c0cb900dd295a190b0eb28f87556e5",
+        "baseSha": "60c9eecb76dfd832271e4e7d09c054ab09a319d7",
+        "headSha": "9ecee9f4b7c7200d56746123dfdbbfdac3b6d7da",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
           "app/layouts/default.vue",
           "foundation/components/ThemeToggle.vue",
+          "foundation/compositions/AppHeader.vue",
           "references/compositions/page-shell.md",
-          "references/foundations/focus-a11y.md"
+          "references/foundations/focus-a11y.md",
+          "tests/component/app-header.spec.ts"
         ],
-        "scopeDigest": "8cf2131b51f9bc29644470a6f466afe71bba40c56203f3754b0826e3909e482a",
+        "scopeDigest": "0db7df56d30c0ece9314ea548e7be91a60188ee815a3631ba18000e2748a79bf",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -225,7 +209,7 @@
           }
         ]
       },
-      "notes": "UColorModeButton 稳定命名壳行为未变，registry description 与二态 light/dark 行为一致；上游 @nuxt/ui 4.9.0 与 @nuxtjs/color-mode 4.0.1 resolution 未漂移，重新绑定依赖前提。",
+      "notes": "UColorModeButton 稳定命名壳未变;上游 @nuxt/ui 4.9.0 与 @nuxtjs/color-mode 4.0.1 resolution 未漂移,可访问名称仍由 useLocale 读根 UApp locale 提供,重新绑定依赖前提。",
       "findings": []
     },
     "foundation-annotation-popover": {
@@ -609,25 +593,38 @@
       "findings": []
     },
     "api-docs-schema-composition": {
-      "round": 2,
-      "lastAuditedAt": "2026-09-09T11:38:09.886Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-11T00:41:29.220Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cd1b25017a888d3a754b6e22450844c3bcf09716",
-        "headSha": "139ea7185d56e5bcaec70c31d216e4b9ecf71713",
+        "baseSha": "60c9eecb76dfd832271e4e7d09c054ab09a319d7",
+        "headSha": "9ecee9f4b7c7200d56746123dfdbbfdac3b6d7da",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
           "kits/api-docs/components/SchemaComposition.vue",
           "kits/api-docs/utils/field.ts",
           "references/kits/api-docs/schema-composition.md",
+          "tests/component/chrome-labels.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "e9df061785759fd3ea5dd0af060d9da3ded3b42634603f79644bc8967728fcef"
+        "scopeDigest": "e4139519b9dd71a632ebbdec8be0da5a83714c557f8c0000777452c4afc4dfb3",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UTabs / UCollapsible 必须继续转发 unmountOnHide=false，保留隐藏 variant 的 DOM 以支持 deep link；升级后复查 SchemaComposition 的隐藏 panel 与重复揭示行为。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "TabsContent / CollapsibleContent 在 unmountOnHide=false 时必须保留隐藏内容 DOM；升级后复查隐藏字段可寻址及 deep link 展开、滚动链路。"
+          }
+        ]
       },
-      "notes": "PR #118 局部复审：匿名层仅按实际字段/composition 分隔；重复作用域通过可本地化层级标签区分，保留锚点与具名字段边界。共享 reference 与 gallery 的改动仅涉及该策略和标签；受影响组件集成测试 394/394、类型与构建通过。保留既有 finding 裁定。",
+      "notes": "anyOf 分区 disclosure 按钮补齐 touch-manipulation,与 FieldItem / FieldValueStructure 同形 disclosure 按钮的触控契约一致并由 focused test 锁定;oneOf/anyOf/allOf 忠实性、discriminator 合成、opaque anchor 揭示、heading outline 与语义 token 逐条复核成立,无其他改动。",
       "findings": []
     },
     "api-docs-field-annotation": {
