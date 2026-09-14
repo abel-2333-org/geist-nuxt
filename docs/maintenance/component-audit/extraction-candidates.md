@@ -95,4 +95,4 @@
   与 gallery 参考页之间的相似段落属 copy-and-adapt recipe 分层的刻意成本(「组合方式不作为切片分发」);抽取会把 demo 变成抽象层,与分层规则相悖,不抽取。
 - **`foundation/compositions` 结构相似度**:目前仅 `AppHeader.vue` 一个文件,无相似度可比,维度闭合。
 - **截至 Round 3**:分发面全量维度已过一遍,无未比对维度遗留。Round 4 起按此后新增 / 晋升的组件做增量比对。
-- **截至 Round 4 首日**:增量比对完成,无新增候选、无待决策候选。`api-docs-field-item` 内部的三组重复(arrival-cue overlay ×5、`resolveComponent('SchemaComposition')` 可选查找 ×2、`fit-content(8rem)` fact-row `dl` ×8)均在单一 registry item 内,抽 internal 原子只增加该 item 的 `files[]` 与一层间接、净节省 ≤ 10 行,与候选 4 / 6 / 8 尺度同构,不登记为候选;FieldItem fact-row 与 webhook-protocol 的 internal `FactRow`(sentence-case term + `w-36` flex reflow)语域与列策略不同,Round 2 / 3 已比对,结论不变。Round 5 起继续按新增 / 晋升组件增量比对。
+- **截至 Round 4 首日**:增量比对完成,无新增候选、无待决策候选。`api-docs-field-item` 内部的三组重复(arrival-cue overlay ×6、`resolveComponent('SchemaComposition')` 可选查找 ×2、`fit-content(8rem)` fact-row `dl` ×8)均在单一 registry item 内,抽 internal 原子只增加该 item 的 `files[]` 与一层间接、净节省 ≤ 10 行,与候选 4 / 6 / 8 尺度同构,不登记为候选;FieldItem fact-row 与 webhook-protocol 的 internal `FactRow`(sentence-case term + `w-36` flex reflow)语域与列策略不同,Round 2 / 3 已比对,结论不变。Round 5 起继续按新增 / 晋升组件增量比对。
