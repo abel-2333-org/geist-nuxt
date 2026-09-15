@@ -1,10 +1,10 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-11T00:41:29.220Z",
+  "lastRunAt": "2026-09-14T23:23:13.549Z",
   "lastPicked": [
-    "api-docs-schema-composition",
-    "foundation-theme-toggle"
+    "api-docs-field-item",
+    "api-docs-enum-table"
   ],
   "items": {
     "foundation-copy-button": {
@@ -515,14 +515,14 @@
       "findings": []
     },
     "api-docs-enum-table": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-14T23:23:13.549Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "81c7c28a331579d84f6b240bdd3ce45cf2abbfda",
+        "headSha": "81c7c28a331579d84f6b240bdd3ce45cf2abbfda",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -537,7 +537,7 @@
         ],
         "scopeDigest": "20217e3c6248c85a5fa32266ab4fb080ed6e4539dccd318f44e973be6d417edd"
       },
-      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
+      "notes": "Round 4 首日全量复审(上次 09-10 仅 co-review):单次 filteredVariants 保证 badge / body / live region 同源,tabpanel 由 Reka 关联,滚动框按实测 overflow 决定 tab stop,@vueuse/core 由 registry externalRequirements 统一声明;四维度无 finding。",
       "findings": []
     },
     "api-docs-field-group": {
@@ -563,14 +563,14 @@
       "findings": []
     },
     "api-docs-field-item": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-14T23:23:13.549Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "81c7c28a331579d84f6b240bdd3ce45cf2abbfda",
+        "headSha": "81c7c28a331579d84f6b240bdd3ce45cf2abbfda",
         "itemDigest": "e345344bfbf6d9dd9f6ceb2fc381d2c737a000bb65a68480ead6c6ab17297c2f",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -589,7 +589,7 @@
         ],
         "scopeDigest": "79ea87959f9070aeac057d83b7deb20c658db412a494d3bdcc299524b3e7cc5b"
       },
-      "notes": "共享 reference/test 及真实 useCopy 链影响复核：useFieldAnchor 继续传完整成功/失败消息，自身无复制 live region，普通复制结果由单来源 polite toast 反馈；锚点导航、层级及字段语义不变。",
+      "notes": "Round 4 首日全量复审四维度(晋升/精简/优化/重构)无 finding:归属与 registry 拓扑正确,值结构与 useFieldAnchor 的 universal claims 均有测试反例防护;嵌套行 hover 时 gutter 链接图标与树形引导线重叠属视觉打磨观察(无规则条款、修法涉及表面色假设),记报告交人工,不构成 finding。",
       "findings": []
     },
     "api-docs-schema-composition": {
