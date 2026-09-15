@@ -87,6 +87,7 @@
 |---|---|---|---|
 | Round 2 首日 | 2026-08-14 | `f56dd74` | class 组合(eyebrow / fact-row / wrap 族)、labels 契约形状、live region(7 处)、键盘 / 焦点(集中于 SplitPaneHandle / AnnotationPopover / useSplitPane)、测量副作用(ResizeObserver / matchMedia / rAF)、utils 格式化逻辑 |
 | Round 3 首日 | 2026-08-29 | `085b77d` | subgrid / dl 表格族(含 internal `FactList` / `FactRow` 归属确认)、溢出测量副作用、eyebrow class 两档分层、demo/gallery 私有组件重复、`foundation/compositions` 结构相似度 |
+| Round 4 首日 | 2026-09-15 | `81c7c28` | **增量**比对:Round 3 base 之后 registry 无新增 item,分发面新增文件仅 3 个 internal(`EnumTablePanel` / `FieldValueRequirements` / `FieldValueStructure`,全部属当日簇 `api-docs-field-item` / `api-docs-enum-table`),按当日反向横扫的全部维度(fact-row `dl` 族、arrival-cue overlay、可选组件 `resolveComponent` 查找、`anchor.revision` 揭示 watch、`break-all` / `wrap-anywhere` 换行、`fit-content` 列)全仓反查;item 内部重复的评估见 `reports/2026-09-15.md` |
 
 - **live region(7 处)**:契约已刻意统一为 results-announcement 家族,实现语义各异,不建议抽。
   2026-09-10 后 `CopyButton` / `OperationTarget` 的复制播报改由应用级 toast 承担(PR #120),该家族成员减少,结论不变。
@@ -94,3 +95,4 @@
   与 gallery 参考页之间的相似段落属 copy-and-adapt recipe 分层的刻意成本(「组合方式不作为切片分发」);抽取会把 demo 变成抽象层,与分层规则相悖,不抽取。
 - **`foundation/compositions` 结构相似度**:目前仅 `AppHeader.vue` 一个文件,无相似度可比,维度闭合。
 - **截至 Round 3**:分发面全量维度已过一遍,无未比对维度遗留。Round 4 起按此后新增 / 晋升的组件做增量比对。
+- **截至 Round 4 首日**:增量比对完成,无新增候选、无待决策候选。`api-docs-field-item` 内部的三组重复(arrival-cue overlay ×6、`resolveComponent('SchemaComposition')` 可选查找 ×2、`fit-content(8rem)` fact-row `dl` ×8)均在单一 registry item 内,抽 internal 原子只增加该 item 的 `files[]` 与一层间接、净节省 ≤ 10 行,与候选 4 / 6 / 8 尺度同构,不登记为候选;FieldItem fact-row 与 webhook-protocol 的 internal `FactRow`(sentence-case term + `w-36` flex reflow)语域与列策略不同,Round 2 / 3 已比对,结论不变。Round 5 起继续按新增 / 晋升组件增量比对。
