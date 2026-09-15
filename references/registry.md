@@ -88,6 +88,8 @@ pnpm geist:copy -- geist-foundation <item...> \
 
 `geist:copy` / `geist:update` 默认都是 **dry-run**，不创建文件、不删除文件，也不写 lock。只有显式 `--write` 才应用整个 batch。`--dry-run` 可用于强调只读意图，但不能与 `--write` 同时使用。
 
+“确认 plan”指 agent 核对目标、差异、依赖与已有授权；授权覆盖时直接应用，超出范围时才请用户决定。dry-run 本身不授予写入权限，也不要求对已授权操作再次确认。
+
 `--to <sha>` 接受且只接受精确 40 位 Git SHA，并且必须等于当前 checkout 的 `HEAD`。它是“我确认正在从这个 commit 安装”的断言，不会 fetch、checkout 或从远端读取其它 commit；省略时工具使用当前 `HEAD`。为保证 lock 中的 SHA 真能重现文件内容，`foundation/`、`kits/` 或 `registry.json` 有未提交变化时 CLI 会拒绝 copy / update，必须先提交来源资产。
 
 `geist:copy` 的完整行为：

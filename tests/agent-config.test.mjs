@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { lstat, mkdtemp, readFile, readlink, writeFile } from 'node:fs/promises'
+import { lstat, mkdtemp, readFile, readlink, realpath, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
@@ -25,11 +25,51 @@ test('tracks Claude Code links for every locked agent skill', async () => {
     assert.equal((await lstat(link)).isSymbolicLink(), true, `${name} must be a symlink`)
     assert.equal(await readlink(link), `../../.agents/skills/${name}`)
   }
+})
 
-  assert.equal(
-    await readlink(path.join(root, '.claude/skills/geist-nuxt/SKILL.md')),
-    '../../../SKILL.md',
-  )
+test('resolves first-party skill assets from both agent entrypoints', async () => {
+  const codexSkill = path.join(root, '.agents/skills/geist-nuxt')
+  const claudeSkill = path.join(root, '.claude/skills/geist-nuxt')
+  assert.equal((await lstat(codexSkill)).isDirectory(), true)
+  assert.equal((await lstat(claudeSkill)).isSymbolicLink(), true)
+  assert.equal(await realpath(claudeSkill), await realpath(codexSkill))
+
+  for (const entrypoint of [codexSkill, claudeSkill]) {
+    // A real entry file is discoverable without exposing the entire repository.
+    assert.equal((await lstat(path.join(entrypoint, 'SKILL.md'))).isFile(), true)
+    const instructions = await readFile(path.join(entrypoint, 'SKILL.md'), 'utf8')
+    const sourceLink = instructions.match(/\[[^\]]+\]\(([^)]+\/SKILL\.md)\)/)
+    assert.ok(sourceLink, 'entrypoint must link to the canonical skill')
+    assert.equal(await realpath(path.resolve(entrypoint, sourceLink[1])), path.join(await realpath(root), 'SKILL.md'))
+    for (const excluded of ['node_modules', '.git', '.agents', '.claude']) {
+      await assert.rejects(lstat(path.join(entrypoint, excluded)), error => error?.code === 'ENOENT')
+    }
+    for (const asset of ['references', 'registry.json', 'agents/openai.yaml']) {
+      assert.equal(
+        await realpath(path.join(entrypoint, asset)),
+        await realpath(path.join(root, asset)),
+        `${entrypoint}/${asset} must resolve to the root source`,
+      )
+    }
+  }
+})
+
+test('tracks only the first-party skill under .agents', () => {
+  const firstParty = ['SKILL.md', 'references', 'registry.json', 'agents']
+    .map(asset => `.agents/skills/geist-nuxt/${asset}`)
+  const thirdParty = ['.agents/skills/nuxt/SKILL.md', '.agents/local-config.json']
+  const result = spawnSync('git', ['check-ignore', '--no-index', '--stdin'], {
+    cwd: root,
+    input: [...firstParty, ...thirdParty].join('\n'),
+    encoding: 'utf8',
+  })
+  assert.equal(result.status, 0, result.stderr)
+  assert.deepEqual(result.stdout.trim().split('\n'), thirdParty)
+})
+
+test('loads shared repository instructions from the Claude entrypoint', async () => {
+  const instructions = await readFile(path.join(root, 'CLAUDE.md'), 'utf8')
+  assert.match(instructions, /^@AGENTS\.md\s*$/m)
 })
 
 test('reports U+FFFD and stays silent for clean or pathless events', async () => {
