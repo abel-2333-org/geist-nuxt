@@ -90,7 +90,7 @@ CI 按同一顺序验证根真源，再组装可运行的 `dist-skill` 根 snaps
 ## 多入口
 
 - **v0**：`v0.json` 的 starter path 是根 `.`，新会话直接运行同一份 Source-first snapshot。
-- **Codex / Claude Code**：真源仓库读取根 `AGENTS.md` 和 `SKILL.md`；消费项目用 `geist:skill` 安装项目内 skill，用 registry 工具安装 runtime 资产，不复制整套 gallery。
+- **Codex / Claude Code**：Codex 读取根 `AGENTS.md`，Claude 通过 `CLAUDE.md` 导入同一规则；两端从项目内 skill 入口按需加载根 `SKILL.md` 与 references。入口只链接真源文件，不维护副本。消费项目用 `geist:skill` 安装项目内 skill，用 registry 工具安装 runtime 资产，不复制整套 gallery。
 - **人类评审**：本地 gallery 或 https://geist-nuxt-gallery.vercel.app。
 
 铁律：只在真源仓库修改 foundation / kit / registry / references。消费项目里的 copy-in 文件是受管副本，用 `geist:update` 更新，不反向覆盖真源。

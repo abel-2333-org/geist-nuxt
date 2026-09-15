@@ -96,15 +96,15 @@ node scripts/sync-skill-memory.mjs /tmp/geist-nuxt-skill/dist-skill.tar.gz
 
 这是**完整 desired state 覆盖**，不是按文件人工合并。旧的 `starter/`、`packages/`、`apps/gallery/` 若残留，必须按 manifest 删除，否则 v0 会读取双活结构。
 
-## 维护会话新鲜度自检
+## v0 snapshot 维护新鲜度自检
 
-当会话准备修改 `foundation/**`、`kits/**`、`registry.json`、`app/**`、`references/**` 或 `SKILL.md` 时：
+仅当会话在 **v0 memory area 的 Source-first snapshot** 中准备修改 `foundation/**`、`kits/**`、`registry.json`、`app/**`、`references/**` 或 `SKILL.md` 时：
 
 1. 读取当前 memory area 的 `RELEASE`。
 2. 对照 GitHub 最新 `skill-v*` tag。
 3. 落后或无 stamp 时，先完成整体同步再维护。
 
-纯消费 skill、只在外部项目运行 `geist:copy` 的会话不做此自检。
+Git checkout 的维护使用当前 Git 状态与来源 SHA；涉及远程交付时按项目规则 fetch 并检查分歧，不用 release snapshot 覆盖 checkout。纯消费 skill、只在外部项目运行 `geist:copy` 的会话也不做此自检。
 
 ## 推送前人工边界
 

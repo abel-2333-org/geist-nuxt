@@ -1,6 +1,6 @@
 # AGENTS.md — geist-nuxt 设计系统
 
-> Codex / 通用 agent 的入口指针。实现任何 UI 前先读 `SKILL.md`，再按任务加载
+> Codex / 通用 agent 的入口指针。涉及设计系统实现、评审或分发时先读 `SKILL.md`，再按任务加载
 > `references/**`；不要凭记忆臆造组件、token、registry item 或 API。
 
 ## 权威边界
@@ -25,9 +25,9 @@
 ## 硬规则
 
 - 只用 Nuxt UI v4（Vue）原语 + 语义 token；不用 React。
-- 不硬编码颜色、尺寸或圆角；响应式遵循系统断点和 primitive。
+- 使用语义颜色、系统 spacing / radius scale 和已有契约规定的尺寸；不引入临时任意值。响应式遵循系统断点和 primitive。
 - foundation 可被任何消费项目安装；kit 只能依赖 foundation 或本 kit，禁止 kit → kit。
-- copy-in 只走 `pnpm geist:copy` / `pnpm geist:update`；两者默认 dry-run，确认 plan 后必须显式加 `--write` 才会修改目标。可复现安装用 `--to <40-char-sha>`，该 SHA 必须等于当前 checkout `HEAD`；改完跑 `pnpm geist:check`。
+- copy-in 只走 `pnpm geist:copy` / `pnpm geist:update`；两者默认 dry-run，agent 核对 plan 在已有授权范围内后显式加 `--write`。可复现安装用 `--to <40-char-sha>`，该 SHA 必须等于当前 checkout `HEAD`；改完跑 `pnpm geist:check -- --target <consumer>`。
 - 新组件先在 `/playground` 验证明暗、响应式、键盘和关键状态；人工采纳后才进入 foundation/kit + registry + gallery。
 
 ## 起步
