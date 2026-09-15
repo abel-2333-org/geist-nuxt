@@ -83,7 +83,7 @@
 
 - **涉及**:`foundation/composables/useGlossary.ts`（`provideGlossary` / `useGlossary`，服务 TermAnnotation）、`kits/api-docs/composables/useFieldSource.ts`（`provideFieldSource` / `useFieldSource`，服务 FieldAnnotation；源码注释自述「Mirror of useGlossary」）
 - **重复的是**:`InjectionKey<Record<string, Entry>>` + `provide(KEY, map)` + `inject(KEY, {})` 三行样板，两文件各 ~10 行（其余是各自的 entry 类型与 JSDoc）
-- **不建议的理由**:可共享的只有 `createScopedMap<Entry>(name)` 一个工厂（≈ 8 行），抽到 foundation 后两处各省 ≈ 5 行，但 `InjectionKey` 的显式类型声明与两个语义不同的 entry 形状（`GlossaryEntry` 的 term/definition/to vs `FieldSourceEntry` 的 field/page）仍需逐处保留；kit 侧会新增一条对 foundation util 的隐式自动导入依赖，与候选 3（labels 合并 idiom）同为「样板 < 5 行、类型收窄仍逐处声明」的尺度。两处行为一致（未提供时回退空映射、未命中 id 降级纯文本并在 dev 下 `console.warn`），不存在契约漂移，不记 finding
+- **不建议的理由**:可共享的只有 `createScopedMap<Entry>(name)` 一个工厂（≈ 8 行），抽到 foundation 后两处各省 ≈ 5 行，但 `InjectionKey` 的显式类型声明与两个语义不同的 entry 形状（`GlossaryEntry` 的 term/definition/to vs `FieldSourceEntry` 的 field/page）仍需逐处保留；kit 侧会新增一条对 foundation util 的隐式自动导入依赖，与候选 3（labels 合并 idiom）同为「样板 < 5 行、类型收窄仍逐处声明」的尺度。两个 composable 未提供时都回退空映射，其消费者（TermAnnotation / FieldAnnotation）对未命中 id 都降级纯文本并在 dev 下 `console.warn`，不存在契约漂移，不记 finding
 - **登记于**:2026-09-16 每日反向横扫（评估与依据见 `reports/2026-09-16.md`）
 
 ## 扫描覆盖史
