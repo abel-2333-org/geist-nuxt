@@ -1,10 +1,11 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-14T23:23:13.549Z",
+  "lastRunAt": "2026-09-15T23:25:36.765Z",
   "lastPicked": [
-    "api-docs-field-item",
-    "api-docs-enum-table"
+    "api-docs-field-annotation",
+    "foundation-inline-markdown",
+    "api-docs-webhook-protocol"
   ],
   "items": {
     "foundation-copy-button": {
@@ -80,14 +81,14 @@
       "findings": []
     },
     "foundation-inline-markdown": {
-      "round": 3,
-      "lastAuditedAt": "2026-08-31T23:22:00.297Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-15T23:25:36.765Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
-        "headSha": "239b6a8276c639299e704329a9d8531252f6cb8a",
+        "baseSha": "2a3c941c5494f9bee2a58f961ded7a6b64d976be",
+        "headSha": "7b95b993a4aa40b3865be6a299fa2f0ce8cd20ed",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -105,7 +106,7 @@
           }
         ]
       },
-      "notes": "round 3 复审 clean:安全白名单(协议 allowlist、raw HTML 不渲染)、intraword 星号降级、反斜杠保留均有 pinned 测试矩阵;marked 仍解析为 17.0.6,dependency evidence 前提未变;universal claim「Safe inline markdown subset」核证通过,无新 finding。",
+      "notes": "round 4 全量复审 clean:安全白名单(协议 allowlist、raw HTML / image / autolink 字面保留)、intraword 星号降级、反斜杠保留、CommonMark 定界符语义均有 pinned 测试矩阵;marked 仍解析为 17.0.6,dependency evidence 前提未变;render 函数而非 <script setup> 属递归 VNode 映射的必要选择;universal claims「Raw HTML is never rendered」「never re-parses a code span」「Safe inline markdown subset」核证通过,无新 finding。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -628,25 +629,26 @@
       "findings": []
     },
     "api-docs-field-annotation": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-15T23:25:36.765Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "2a3c941c5494f9bee2a58f961ded7a6b64d976be",
+        "headSha": "7b95b993a4aa40b3865be6a299fa2f0ce8cd20ed",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
           "kits/api-docs/components/FieldAnnotation.vue",
           "kits/api-docs/composables/useFieldSource.ts",
+          "references/components/overlays.md",
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "101105eb2d9b77555b6a4d4be6c6fa28deaf52c936a7f1aff1269201eb03d22e"
+        "scopeDigest": "1a587e8a408b65b44d86591319f2e482ac252a08aed1248e5ec6cf5a36ae9d85"
       },
-      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
+      "notes": "从零全量复审 clean:field / field-ref 双绑定、跨页 {page}#{encodeURIComponent(path)} 与目标页 initFromHash 的 decodeURIComponent 对称、未命中 ref 降级纯文本 + dev 告警、requiredState 与字段行共用 fieldRequiredState 派生均有 pinned 测试;已部署 gallery 真实指针点击核证同页跳转关闭 popover → 展开祖先 → 滚动 → 焦点落在字段行,跨页动作渲染为 ULink <a>;trigger 的 decoration-(--ui-primary)/50 与 text-code 经浏览器 computed style 核证已编译。两条既有 wont-fix 原样保留,无新 finding。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -853,14 +855,14 @@
       ]
     },
     "api-docs-webhook-protocol": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-15T23:25:36.765Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "2a3c941c5494f9bee2a58f961ded7a6b64d976be",
+        "headSha": "7b95b993a4aa40b3865be6a299fa2f0ce8cd20ed",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -875,9 +877,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "7f66ce706cbb041ca6f138d74bcaf0a70576482cf387f3edab3f94bc66263128"
+        "scopeDigest": "ba465029a77183ec2f113dd23ad97ef7a9d94033bee12cc2e74de287ef52550f"
       },
-      "notes": "共享 index 与两个 webhook gallery 影响复核：acknowledgement.example.labels 类型为 ApiCodeLabels 且原样透传；旧键完整替换为 wrap，ACK 内容和三段协议结构不变。",
+      "notes": "从零全量复审。唯一改动是收窄 universal claim:FactRow 注释与 webhook-protocol reference 声称 FactRow「随多个 registry 切片分发 / 所有含 FactRow 的切片」,但 registry.json 自 e9ebe19 起只有本 item 列出 internal/FactRow.vue(gallery 参考页经相对路径直接引用,不是切片);措辞改为「随任何采纳它的切片一起分发的共享 internal」,format 判别留在 WebhookProtocol 的设计决策与 #76 再评估条件不变。其余四维度无 finding:section 省略 / ACK 三语义 / format 明确 opt-in / schedule 总结句为可访问真源均有 pinned 测试;已部署 gallery 375px 暗色核证无横向溢出、chips 与箭头逐个 aria-hidden、展开后 aria-expanded=true 且 <dd> 内追加 sr-only 全序列。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
