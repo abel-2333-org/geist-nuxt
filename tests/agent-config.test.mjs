@@ -30,11 +30,14 @@ test('tracks Claude Code links for every locked agent skill', async () => {
 test('resolves first-party skill assets from both agent entrypoints', async () => {
   const codexSkill = path.join(root, '.agents/skills/geist-nuxt')
   const claudeSkill = path.join(root, '.claude/skills/geist-nuxt')
-  assert.equal((await lstat(codexSkill)).isDirectory(), true)
+  assert.equal((await lstat(codexSkill)).isSymbolicLink(), true)
+  assert.equal(await realpath(codexSkill), await realpath(root))
   assert.equal((await lstat(claudeSkill)).isSymbolicLink(), true)
   assert.equal(await realpath(claudeSkill), await realpath(codexSkill))
 
   for (const entrypoint of [codexSkill, claudeSkill]) {
+    // Codex follows skill directory links but skips a symlinked SKILL.md file.
+    assert.equal((await lstat(path.join(entrypoint, 'SKILL.md'))).isFile(), true)
     for (const asset of ['SKILL.md', 'references', 'registry.json', 'agents/openai.yaml']) {
       assert.equal(
         await realpath(path.join(entrypoint, asset)),
@@ -46,8 +49,7 @@ test('resolves first-party skill assets from both agent entrypoints', async () =
 })
 
 test('tracks only the first-party skill under .agents', () => {
-  const firstParty = ['SKILL.md', 'references', 'registry.json', 'agents']
-    .map(asset => `.agents/skills/geist-nuxt/${asset}`)
+  const firstParty = ['.agents/skills/geist-nuxt']
   const thirdParty = ['.agents/skills/nuxt/SKILL.md', '.agents/local-config.json']
   const result = spawnSync('git', ['check-ignore', '--no-index', '--stdin'], {
     cwd: root,

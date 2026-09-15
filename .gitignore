@@ -14,4 +14,4 @@ node_modules/
 /.agents/*
 !/.agents/skills/
 /.agents/skills/*
-!/.agents/skills/geist-nuxt/
+!/.agents/skills/geist-nuxt
