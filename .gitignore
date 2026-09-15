@@ -10,8 +10,8 @@ node_modules/
 .DS_Store
 
 # 第三方 skill 由 skills-lock.json 记录来源并还原到 .agents/；
-# 第一方 geist-nuxt 入口链接随仓库提交，供 Codex 与 Claude Code 共用。
+# 第一方 geist-nuxt 薄入口与资源链接随仓库提交，供 Codex 与 Claude Code 共用。
 /.agents/*
 !/.agents/skills/
 /.agents/skills/*
-!/.agents/skills/geist-nuxt
+!/.agents/skills/geist-nuxt/
