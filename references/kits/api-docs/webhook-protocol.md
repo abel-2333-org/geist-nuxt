@@ -110,6 +110,6 @@ interface WebhookProtocolSchedule {
 pnpm geist:copy -- geist-foundation api-docs-webhook-protocol --target <consumer> --to <checkout-40-char-sha>
 ```
 
-切片含公共组件、`webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖），以及只负责 `<dl>/<dt>/<dd>` 结构和容器回流的 `FactList.vue` / `FactRow.vue` internal helper。后两者复制到 `app/internal/`，由 `WebhookProtocol.vue` 显式相对导入，不增加公共组件面。rich fact 的 `format` 判别刻意留在 WebhookProtocol（经 `#value` slot），不下沉 FactRow——避免所有含 FactRow 的切片连带 `foundation-inline-markdown` 依赖；待第二个已采纳组件真实需要 rich fact 时再评估下沉（见 #76）。依赖闭包：`geist-foundation`、`foundation-inline-code`、`foundation-inline-markdown`、`api-docs-field-group`、`api-docs-code-block`。
+切片含公共组件、`webhook-protocol.ts`（section 正文判定与折叠派生纯函数，`tests/webhook-protocol.test.mjs` 覆盖），以及只负责 `<dl>/<dt>/<dd>` 结构和容器回流的 `FactList.vue` / `FactRow.vue` internal helper。后两者复制到 `app/internal/`，由 `WebhookProtocol.vue` 显式相对导入，不增加公共组件面。rich fact 的 `format` 判别刻意留在 WebhookProtocol（经 `#value` slot），不下沉 FactRow——FactRow 是随任何采纳它的切片一起分发的共享 internal（目前只有本 item 列出它，gallery 参考页经相对路径直接引用），下沉会让此后每个采纳切片连带 `foundation-inline-markdown` 依赖；待第二个已采纳组件真实需要 rich fact 时再评估下沉（见 #76）。依赖闭包：`geist-foundation`、`foundation-inline-code`、`foundation-inline-markdown`、`api-docs-field-group`、`api-docs-code-block`。
 
 Demo：`/kits/api-docs/webhook-protocol`（本页内联中性 fixture；变体演示省略规则、ACK 三语义、schedule 边界与窄屏长内容 stress）。
