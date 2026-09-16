@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-16T23:26:45.889Z",
+  "lastRunAt": "2026-09-15T23:25:36.765Z",
   "lastPicked": [
-    "foundation-inline-code",
-    "foundation-annotation-popover",
-    "foundation-doc-annotation"
+    "api-docs-field-annotation",
+    "foundation-inline-markdown",
+    "api-docs-webhook-protocol"
   ],
   "items": {
     "foundation-copy-button": {
@@ -48,58 +48,37 @@
       "findings": []
     },
     "foundation-inline-code": {
-      "round": 4,
-      "lastAuditedAt": "2026-09-16T23:26:45.889Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
       "change": "none",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
-          "foundation/assets/css/main.css",
           "foundation/components/InlineCode.vue",
-          "foundation/config/app.ts",
           "references/components/data-display.md",
-          "references/foundations/typography.md",
           "tests/component/inline-code.spec.ts"
         ],
-        "scopeDigest": "bd79261072db5c65a9918a03eb2cf4a1e6c2dae8df0342435e3ff6fb66c0b269",
+        "scopeDigest": "6d7db0dbd0df6f7b3895fec92b5624c11b4aaeadc8cf4245a7c3d3d0ac3ae4ec",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 ProseCode 的单一 <code> 根节点、class 经 tv/tailwind-merge 合并、主题 base 含 text-sm rounded-md 与 ui.prose 主题行为。"
-          },
-          {
-            "name": "tailwind-merge",
-            "version": "3.6.0",
-            "reason": "finding 前提:默认 font-size class group 只按 t-shirt size 识别,自定义 text-code 不与 text-sm 冲突;升级后若识别规则变化须复核。"
-          },
-          {
-            "name": "tailwindcss",
-            "version": "4.3.2",
-            "reason": "finding 前提:v4 产物中单声明的 .text-code 排在 .text-base/.text-sm/.text-xs 之后,13px 才生效;排序算法变化会直接改变渲染字号。"
+            "reason": "依赖 ProseCode 的单一 <code> 根节点、class/全局 attrs 转发与 ui.prose 主题行为。"
           },
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "依赖 Vue 3 单根组件的 fallthrough attr 合并顺序,使调用方 translate 覆盖组件静态默认值。"
+            "reason": "依赖 Vue 3 单根组件的 fallthrough attr 合并顺序，使调用方 translate 覆盖组件静态默认值。"
           }
         ]
       },
-      "notes": "round 4 复审:源码自 round 3 零变更,translate=\"no\" / ProseCode 委托契约与测试仍成立;但实测渲染 class 同时含主题 text-sm 与校准 text-code——tailwind-merge 3.6.0 按 t-shirt size 识别字号组,text-code 被归入文字颜色组不与 text-sm 冲突,13px 仅因 Tailwind 4.3.2 产物中 .text-code 排在所有主题字号之后而生效,行高仍取 text-sm 的 1.25rem;调用方 class 传 text-xs 亦被 text-code 压过。记 low deferred:修法落在 geist-foundation hub 配置(app.config ui.tv twMergeConfig + --text-code--line-height),改变全消费项目的 class 合并语义,交人工决策后单独 PR。",
-      "findings": [
-        {
-          "id": "f-0543595c5d75",
-          "severity": "low",
-          "claim": "data-display.md:「委托 ProseCode……仅覆盖两处回到 Geist 基础:圆角回控件档、字号 Copy 13 Mono」;nuxt-ui 核心规则 4:class prop 覆盖优先于 theme defaults",
-          "evidence": "mountSuspended(InlineCode) 渲染 <code class=\"px-1.5 py-0.5 text-sm font-mono font-medium inline-block border border-muted bg-muted rounded-sm text-code\">:rounded-md 被 tailwind-merge 去重而 text-sm 未被去重(tailwind-merge 3.6.0 的 font-size 组按 t-shirt size 识别,text-code 落入 text-color 组)。pnpm build 产物 entry css 中 .text-base(offset 51199)< .text-sm(51463)< .text-xs(51858)< .text-code(52376),字号 13px 仅靠单声明 utility 排在后面生效,line-height 仍是 text-sm 的 1.25rem;mount attrs class=\"text-xs\" 得 \"… text-code text-xs\",调用方无法经 class 覆盖字号。inline-code.spec.ts 仅断言 text-code 存在,不能捕获 text-sm 反超。",
-          "disposition": "open"
-        }
-      ]
+      "notes": "round 3 复审:原子自 round 2 内建 translate=\"no\" 契约后零变更;ProseCode 委托 + 两处 Geist 校准(rounded-sm / text-code)与 data-display.md 契约一致,inline-code.spec.ts 三条契约全绿;structured-relations 消费点经 fallthrough class/translate 正常扩展;横扫无簇外重复,记 clean。",
+      "findings": []
     },
     "foundation-inline-markdown": {
       "round": 4,
@@ -235,38 +214,25 @@
       "findings": []
     },
     "foundation-annotation-popover": {
-      "round": 4,
-      "lastAuditedAt": "2026-09-16T23:26:45.889Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
           "foundation/components/AnnotationPopover.vue",
           "foundation/utils/annotation.ts",
           "references/components/overlays.md",
-          "references/foundations/focus-a11y.md",
           "tests/component/annotation-popover.spec.ts"
         ],
-        "scopeDigest": "634918dcf6ada4218b81caab72bf3a941f4fecf402589f6ae137e3e1a9bd8659",
-        "dependencies": [
-          {
-            "name": "@nuxt/ui",
-            "version": "4.9.0",
-            "reason": "依赖 UPopover mode=click 以 as-child 渲染触发器、content prop 经 defu 后 v-bind 透传 onOpenAutoFocus/onCloseAutoFocus 钩子。"
-          },
-          {
-            "name": "reka-ui",
-            "version": "2.9.10",
-            "reason": "依赖 PopoverContent 的 role=dialog + aria-labelledby=triggerId 命名、PopoverTrigger 的 aria-haspopup/expanded/controls 与 onClick toggle 语义;壳不自加这些 aria。"
-          }
-        ]
+        "scopeDigest": "ea76805b31795d6c7d818236670983192489a095c5001e4ac40b07ebe9d80bfc"
       },
-      "notes": "round 4 复审:壳自 round 3 零变更;实测核证 reka-ui 2.9.10 PopoverContent 自带 role=dialog + aria-labelledby=triggerId(浮层以触发文本命名),PopoverTrigger as-child 使真实 <button> 获得 aria-haspopup/expanded/controls,无需自加 aria;click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权、forward-Tab 接管、disabled 卫生、loading/error chrome 与 overlays.md 及 381 行 focused spec 逐条一致;focus 样式符合 focus-a11y.md 实底控件规格;hover 打开后点击触发器按 reka toggle 语义关闭,属契约内 toggle 行为记观察不记 finding;横扫确认 hover 定时器与 focusable selector 全仓唯一,记 clean。",
+      "notes": "round 3 复审:壳自 round 2 零变更;click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权(keyboard 进面板/hover 不夺焦/关闭仅在焦点确实丢失时归还)、forward-Tab 接管、disabled 定时器卫生与 loading/error chrome 逐条对照 overlays.md 契约与 381 行 focused spec,无回归;源码内 universal claims(never yank focus 等)均有对应测试反证路径;横扫确认 hover 开合定时器模式全仓唯一;labels spread 合并模式属家族惯例,已由 wont-fix finding f-fd7282669072(api-docs-field-annotation)覆盖,不重复记录,记 clean。",
       "findings": []
     },
     "foundation-term-annotation": {
@@ -301,14 +267,14 @@
       ]
     },
     "foundation-doc-annotation": {
-      "round": 4,
-      "lastAuditedAt": "2026-09-16T23:26:45.889Z",
+      "round": 3,
+      "lastAuditedAt": "2026-09-01T23:19:27.521Z",
       "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
+        "baseSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
+        "headSha": "92746947a5770bd5b49bb1710f8c259e1d720ff4",
         "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -318,7 +284,7 @@
         ],
         "scopeDigest": "8bbe68267cd46d033a6078a520cb99b5570f34963f14e7aefcda1ff611ce43fc"
       },
-      "notes": "round 4 复审:自 round 3 零变更;load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化即时重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts 一致;UButton :to 渲染真实 <a> 满足「导航用链接」;error 态在重开时沿用缓存直到 Retry、catch 静默吞掉 reject 原因两点记观察(UI 已可见错误态且 Retry 在场,adapter 可自行记录),不记 finding;a11y/token/明暗依托壳组件,记 clean。",
+      "notes": "round 3 复审:自 round 2 零变更;load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化即时重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts(缓存复用/stale 响应/retry 恢复/wrap-anywhere)一致;requestToken 与 useFieldAnchor 的 navigationToken 同为 token 失效概念但形状不同(fetch 结果守卫 vs 多步导航中止),两处抽取属投机性抽象,不记 finding;a11y/token/明暗依托壳组件,记 clean。",
       "findings": []
     },
     "foundation-split-pane-handle": {
