@@ -4,9 +4,11 @@
 //
 // Rich-value rendering (e.g. WebhookProtocol's `format: 'inline-markdown'`)
 // deliberately lives in the owning component via the #value slot, not here:
-// FactRow ships with multiple registry slices, and baking InlineMarkdown in
-// would drag foundation-inline-markdown (+ marked) into every slice whether
-// used or not. Sink a shared `format` switch here only when a SECOND adopted
+// FactRow is a shared internal that travels with whichever slice adopts it
+// (today only api-docs-webhook-protocol lists it; the gallery reference pages
+// import it by relative path), and baking InlineMarkdown in would make every
+// future adopter inherit foundation-inline-markdown (+ marked) whether used
+// or not. Sink a shared `format` switch here only when a SECOND adopted
 // component needs rich facts, and re-evaluate the closure cost then (#76).
 export interface Fact {
   term: string

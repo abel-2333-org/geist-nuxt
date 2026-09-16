@@ -79,6 +79,13 @@
 - **不建议的理由**:核证 `@nuxt/ui` 4.9.0 已带的 `UEmpty` 原语**不能**直接替换——其 title 硬编码为 `<h2>`(每个空代码块都会向 API 文档大纲注入一个「No example available」标题,a11y 回退)、icon 经 `UAvatar` 带圆形底、根节点自带 `rounded-lg ring` 与响应式 `p-4 → p-8`,面向页面 / 面板级空态而非框内 body 面板。若抽 kit 内部原子需新增 registry item 且两个 item 拓扑变化,净收益约 15 行,与候选 6 / 7 的尺度同构
 - **登记于**:2026-09-08 每日反向横扫(评估与依据见 `reports/2026-09-08.md`)
 
+### 9. 页面级 provide/inject 映射 composable（`useGlossary` ↔ `useFieldSource`）
+
+- **涉及**:`foundation/composables/useGlossary.ts`（`provideGlossary` / `useGlossary`，服务 TermAnnotation）、`kits/api-docs/composables/useFieldSource.ts`（`provideFieldSource` / `useFieldSource`，服务 FieldAnnotation；源码注释自述「Mirror of useGlossary」）
+- **重复的是**:`InjectionKey<Record<string, Entry>>` + `provide(KEY, map)` + `inject(KEY, {})` 三行样板，两文件各 ~10 行（其余是各自的 entry 类型与 JSDoc）
+- **不建议的理由**:可共享的只有 `createScopedMap<Entry>(name)` 一个工厂（≈ 8 行），抽到 foundation 后两处各省 ≈ 5 行，但 `InjectionKey` 的显式类型声明与两个语义不同的 entry 形状（`GlossaryEntry` 的 term/definition/to vs `FieldSourceEntry` 的 field/page）仍需逐处保留；kit 侧会新增一条对 foundation util 的隐式自动导入依赖，与候选 3（labels 合并 idiom）同为「样板 < 5 行、类型收窄仍逐处声明」的尺度。两个 composable 未提供时都回退空映射，其消费者（TermAnnotation / FieldAnnotation）对未命中 id 都降级纯文本并在 dev 下 `console.warn`，不存在契约漂移，不记 finding
+- **登记于**:2026-09-16 每日反向横扫（评估与依据见 `reports/2026-09-16.md`）
+
 ## 扫描覆盖史
 
 轮末横切按此记录做**增量**比对,不必每轮重跑全量维度。
@@ -95,4 +102,5 @@
   与 gallery 参考页之间的相似段落属 copy-and-adapt recipe 分层的刻意成本(「组合方式不作为切片分发」);抽取会把 demo 变成抽象层,与分层规则相悖,不抽取。
 - **`foundation/compositions` 结构相似度**:目前仅 `AppHeader.vue` 一个文件,无相似度可比,维度闭合。
 - **截至 Round 3**:分发面全量维度已过一遍,无未比对维度遗留。Round 4 起按此后新增 / 晋升的组件做增量比对。
+- **2026-09-16 每日反向横扫**（base `2a3c941`，簇 `api-docs-field-annotation` / `foundation-inline-markdown` / `api-docs-webhook-protocol`）:新增候选 9（不建议抽取）；「aria-hidden 视觉 chips + `sr-only` 全序列文本」在 WebhookProtocol（仅展开态追加，折叠态真源是总结句）与 `SidebarScenarioTags`（始终追加）各一处，播报时机与真源不同，属同一 a11y 契约的两种实现，不抽；`hasWebhookProtocolContent` 式「section 至少有一项正文才进大纲」判定全仓仅此一处；`format: 'text' | 'code' | 'inline-markdown'` 判别全仓仅 WebhookProtocol 一处（FactRow 的下沉条件见 #76 与 `webhook-protocol.md`）；`line-clamp-4 wrap-anywhere` 描述段落在 FieldAnnotation 与 DocAnnotation 各一处、`decoration-(--ui-primary)/50` 触发器下划线在 FieldAnnotation 与 DocAnnotation 各一处，均为 Annotation 家族形态矩阵刻意共享的 class 组合，不抽。
 - **截至 Round 4 首日**:增量比对完成,无新增候选、无待决策候选。`api-docs-field-item` 内部的三组重复(arrival-cue overlay ×6、`resolveComponent('SchemaComposition')` 可选查找 ×2、`fit-content(8rem)` fact-row `dl` ×8)均在单一 registry item 内,抽 internal 原子只增加该 item 的 `files[]` 与一层间接、净节省 ≤ 10 行,与候选 4 / 6 / 8 尺度同构,不登记为候选;FieldItem fact-row 与 webhook-protocol 的 internal `FactRow`(sentence-case term + `w-36` flex reflow)语域与列策略不同,Round 2 / 3 已比对,结论不变。Round 5 起继续按新增 / 晋升组件增量比对。
