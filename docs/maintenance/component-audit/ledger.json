@@ -328,13 +328,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -347,9 +347,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "80bcc89cd9b4246176cc54fcfb121fa5d1748e158d7135415b7892a8510d4b8b"
+        "scopeDigest": "023d135b6253a6608f09c970aeea26dd207096301ceedb3d2e8b2009533cf323"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -482,13 +482,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -505,20 +505,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "8b286ac96371426c8b863234c21e99199751cb74e8e9a1ab233fa0c12d7152d6"
+        "scopeDigest": "d50ee2ca592d5bc6bb4d18298490d362a500aad5820ec61999a06a80a8ddc76c"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -537,7 +537,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "f3815b8e22815637f77d87ae1a516ed5f4985dbab8dd357bf44330712092d7c9",
+        "scopeDigest": "73b5ab228c62b92accfabd68fb2f8476611c8525fe7234b4187fbeb7372ee148",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -551,18 +551,18 @@
           }
         ]
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/endpoint-reference.vue`（endpoint 参考页在 Response Body 上方新增页面自有记号说明）；`app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -575,20 +575,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "54a26d5a20ea219fc3f515c9d360bc58c7d8e46961170fc78f6866568d57cd27"
+        "scopeDigest": "5b03d83e5610252592d7111c1a21b1bed4a43b92f735260f7f900d299226d617"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -597,20 +597,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "75d743f61a06ba8e1e242d9203d2d6524976e2c60d219c1e0b6b7a1f9e1fda09"
+        "scopeDigest": "a54990c84f20724d24b3a90b8a9730468b016a2bb77b2c4cedd329b2eb8f8d37"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "891545389646fe28ee5f004d6dc25926a5680052f0b7292e64791df73297670d",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -628,9 +628,9 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "63a965878335891f4c84b77cebfc5c7d1c12c772be584c5063445636574da046"
+        "scopeDigest": "ed9162b6547d1854a863ddf36da707d6c30d2027e9caaf3cd6e978fc00ac5780"
       },
-      "notes": "PR #133：可省略键的 `?` 改为 UTooltip 触发按钮（悬停 + 键盘聚焦，Escape 关闭），mayBeOmitted 同为 accessible name 与提示正文并去掉 aria-describedby，只念一次；每个 optional 字段恰好 +1 焦点、其余为零；select-none 修复复制带出记号；点击不关闭提示。field-presence.spec 25 条通过，真实浏览器核过 Tab / Escape / 悬停 / 明暗 / 375px 无溢出。",
+      "notes": "可省略记号 `?` 的焦点由外扩焦点环改为自身点亮（bg-primary + text-inverted，悬停 bg-elevated + text-toned，leading-4 把盒子收为 12×16），修复单字符盒子上焦点环呈竖椭圆并压住字段名末字符的问题；填充与强制配色模式下的透明 outline 兜底都由 field-presence.spec 钉住（26 例通过）。真实浏览器核过 Tab 聚焦、悬停、明暗模式，焦点块不与字段名重叠。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -670,13 +670,13 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -686,9 +686,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "9f21ad98bd219970babcf6ecbe501d5ed384557b665303c147d399138ad8b51a"
+        "scopeDigest": "14f7ebaabe76376863dfe9b392c886e28a89598e97bfb97850dcdaf8efdb7802"
       },
-      "notes": "PR #133：popover 已是浮层，`?` 保持非交互文字不叠 tooltip；`?` 与 sr-only 文案加 select-none，复制字段名不再带出记号；含义与字段行一致。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -708,13 +708,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
-        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -727,7 +727,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "041f6a2edadd9433e0fcff2dccbb6e0fbad55830785817ff5b428a4ad49f72f7",
+        "scopeDigest": "530bb8703d9ec0a2f078607482eb6ca16b2dbb889d4ce5d0f228dd647a49dd8a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -741,18 +741,18 @@
           }
         ]
       },
-      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -764,20 +764,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "a8375661984b4f2b10de6192a6cc407b1520b9a06dd79b01e94a4b8056f20529"
+        "scopeDigest": "1a87b9f563276faab6ab1e1f0b54cc50feb96e6c49d546c536ad673935670e6a"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -789,20 +789,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "8c7b74b405790b3122abd51d8034363b16a108c1aaaceb06a8af495ae46720c5"
+        "scopeDigest": "6c5803545b5a99ee1db11ac7747eddbc3d023da9b0b0dc93b7358bbfc18e2eee"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/endpoint-reference.vue`（endpoint 参考页在 Response Body 上方新增页面自有记号说明）；`app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
-        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -817,20 +817,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "4e554894af36e045425248078b40213c1e162c1a23d0b31ac71b54f4277763de"
+        "scopeDigest": "e34fbac97e55d04cfd59c5c5c7827d087a15903b45483c09f77e4768dd483e25"
       },
-      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
-        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -847,20 +847,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "5af910d21af429142bc0bdce69e4cd1621229aa8645b1c1627cd06d7486d0584"
+        "scopeDigest": "50609089f3f1890bb4904f74a41796510dabc8083d783100df9b8382f6101b5c"
       },
-      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -869,7 +869,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "67b2a0a1384b590a3ce872212e5233bca63f9dea5d40c79e1ee9a1c4172df1b5",
+        "scopeDigest": "1b53e10fc15f61c5d1340a76da56848c5220f6365ec00ab25695b04b1fdc03d2",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -883,7 +883,7 @@
           }
         ]
       },
-      "notes": "PR #133 复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -896,13 +896,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
-        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -917,9 +917,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "51c9c873fac7ae0a9243be2b96a0970b457bedd6b9e902f738a60417f10af8ad"
+        "scopeDigest": "cea96ab77f684b35cf5108d6206ac6fea251761607cc7649e97819b183653761"
       },
-      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -968,13 +968,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
+        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -984,9 +984,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "0baa34e563360aa2fb298d31c53c4f38d01a109a998459c30cbd2b55563ae957"
+        "scopeDigest": "3c3f4f8a0c6156f377c64ab009eee20b8445c2c97b299f01fd1381a1783d48bd"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
       "findings": []
     }
   }
