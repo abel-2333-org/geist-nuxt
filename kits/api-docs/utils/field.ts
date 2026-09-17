@@ -263,8 +263,9 @@ export const fieldValueLabelDefaults: Required<FieldValueLabels> = {
 export interface FieldItemLabels extends FieldValueLabels {
   required?: string
   conditional?: string
-  /** Screen-reader text behind the visual `?` on an omittable output key —
-   *  the one presence string, because bare punctuation is not announced. */
+  /** What the `?` on an omittable output key means — the one presence string.
+   *  FieldItem uses it as the `?` trigger's accessible name AND its tooltip;
+   *  FieldAnnotation's preview reads it to screen readers only. */
   mayBeOmitted?: string
   default?: string
   example?: string
