@@ -15,8 +15,9 @@
 //    `:trigger-class`) and in script / .ts code;
 //  - inside a bound class attribute only: the plain members of an innermost
 //    array, joined — `['text-code', { on }, 'text-sm']`. Object members and
-//    `${}` interpolations are dropped first (their classes are conditional),
-//    and an array whose remaining members use a conditional operator is skipped.
+//    `${}` interpolations are dropped first: they contribute conditional keys
+//    or another slot's classes, not this list. An array whose remaining
+//    members use a conditional operator, or keep an unpaired brace, is skipped.
 // Arrays in script code are never joined: there they are overwhelmingly data
 // (type-scale tables, menu items), and joining them would flag a gallery table
 // that lists `text-code` next to `text-sm` as two separate rows.
@@ -24,7 +25,8 @@
 // switch) and literals separated by `?:`, `&&` or `||` — exclusive branches
 // must not be flagged.
 // Known misses, accepted for a regex-level guard: pairings assembled from
-// conditional array members or object-syntax keys, nested arrays,
+// conditional array members or object-syntax keys, a whole array skipped
+// because one sibling member is conditional, nested arrays,
 // `+` concatenation, class arrays in script code, CSS /
 // `@apply` (the repo has none), a `/*` or `</script>` inside a string literal.
 // Non-class attributes and template prose are out of scope by design.
@@ -76,7 +78,9 @@ function withoutBracedFragments(code) {
 function joinedPlainArrays(expression) {
   return [...expression.matchAll(/\[([^[\]]*)\]/g)]
     .map(match => withoutBracedFragments(match[1]))
-    .filter(members => !CONDITIONAL.test(members))
+    // A leftover brace means a string member held an unpaired `{` / `}` and the
+    // fragments above may have swallowed member separators: do not guess.
+    .filter(members => !CONDITIONAL.test(members) && !/[{}]/.test(members))
     .map(members => stringLiterals(members).join(' '))
 }
 
@@ -181,8 +185,11 @@ test('joins the plain members of arrays that also hold objects or interpolations
     findPairings(inTemplate(`<p :class="[base, 'text-code', 'text-sm', { on }]" />`)),
     ['text-code text-sm'],
   )
-  // The interpolation is dropped, so only assert that the pairing is reported.
-  assert.equal(findPairings(inTemplate('<p :class="[\'text-code\', `gap-${n}`, \'text-sm\']" />')).length, 1)
+  // The interpolation is dropped; assert the one report names both tiers, not its spacing.
+  const interpolated = findPairings(inTemplate('<p :class="[\'text-code\', `gap-${n}`, \'text-sm\']" />'))
+  assert.equal(interpolated.length, 1)
+  assert.match(interpolated[0], /(?:^|\s)text-code(?:\s|$)/)
+  assert.match(interpolated[0], /(?:^|\s)text-sm(?:\s|$)/)
   assert.deepEqual(
     findPairings(inTemplate(`<p :class="['text-code', { nested: { deep: true } }, 'text-xs!']" />`)),
     ['text-code text-xs!'],
@@ -210,15 +217,29 @@ test('allows single tiers, exclusive branches and responsive switches', () => {
     `<p :class="dense ? 'text-code' : 'text-sm'" />`,
     `<p :class="[dense ? 'text-code' : 'text-sm', 'font-mono']" />`,
     `<p :class="['font-mono', dense && 'text-code', 'text-sm']" />`,
-    `<p :class="['text-code', { 'text-sm': dense }]" />`,
     `<p :class="[{ 'text-code': mono }, { 'text-sm': !mono }]" />`,
-    `<p :class="[dense ? { a } : { b }, 'text-code', 'text-sm']" />`,
     '<code class="text-code md:text-sm dark:text-xs">x</code>',
     '<code class="font-mono text-[13px] text-sm">x</code>',
     '<InlineCode class="text-xs">x</InlineCode><code class="text-code">y</code>',
   ]
   for (const markup of allowed) assert.deepEqual(findPairings(inTemplate(markup)), [], markup)
   assert.deepEqual(findPairings(inTemplate('<code class="text-code md:text-sm text-xs">x</code>')), ['text-code md:text-sm text-xs'])
+})
+
+test('documents accepted misses so tightening the guard is a deliberate change', () => {
+  // Real or possible pairings the regex-level guard does not report (see the
+  // header). They are pinned here as misses, not as correct "allowed" input.
+  const misses = [
+    `<p :class="['text-code', { 'text-sm': dense }]" />`,
+    `<p :class="[dense ? { a } : { b }, 'text-code', 'text-sm']" />`,
+    `<p :class="[['text-code'], ['text-sm']]" />`,
+  ]
+  for (const markup of misses) assert.deepEqual(findPairings(inTemplate(markup)), [], markup)
+})
+
+test('skips an array when a string member keeps an unpaired brace', () => {
+  const markup = `<p :class="['text-code', { k: 'text-sm{' }, { k: 'text-sm{' }]" />`
+  assert.deepEqual(findPairings(inTemplate(markup)), [])
 })
 
 test('never joins data arrays or separate slots into one class list', () => {
