@@ -338,6 +338,21 @@ describe('FieldItem omittable-key explanation (issue #133)', () => {
     expect(tooltip()).not.toBeNull()
   })
 
+  it('marks focus with a fill in normal rendering and an outline in forced colors — neither may be "cleaned up"', async () => {
+    wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
+    const classes = wrapper.get('[data-field-optional]').classes()
+    // Focus lights the glyph's own box (no offset ring to land on the field
+    // name). The fill is the ONLY visible indicator in normal rendering; the
+    // transparent outline is the only one left once Windows High Contrast
+    // strips backgrounds. happy-dom can render neither, so the classes are
+    // the contract.
+    expect(classes).toContain('focus-visible:bg-primary')
+    expect(classes).toContain('focus-visible:text-inverted')
+    expect(classes).toContain('focus-visible:outline-2')
+    expect(classes).toContain('focus-visible:outline-transparent')
+    expect(classes.some(name => name.startsWith('focus-visible:outline-offset'))).toBe(false)
+  })
+
   it('strikes the notation through with a deprecated name — a button is an atomic inline box the name\'s decoration skips', async () => {
     wrapper = await mountField({
       name: 'legacyCode',

@@ -301,6 +301,16 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                own, so a click must not dismiss the help it exists to show
                (`disable-closing-trigger`). It opens upward: below it would
                cover this row's own condition and description.
+               Focus LIGHTS THE GLYPH instead of ringing it — a deliberate
+               departure from the kit's offset focus ring: on a one-character
+               box that ring becomes a tall pill and its offset lands on the
+               name's last letter. A fill never grows past the button's own
+               box, so nothing is covered and the `name?` spacing is
+               untouched; hover is the same shape one step quieter. `leading-4`
+               is load-bearing: it caps the box at 16px, otherwise the fill
+               stretches to the row's 20px line height and reads as a bar.
+               Forced-colors mode drops backgrounds, so a transparent outline
+               stays behind — the system forces it to the foreground colour.
                `select-none` keeps the notation out of a copied field name.
                Touch never opens a tooltip; the consuming page's legend covers it. --><UTooltip
             v-if="presence.optional"
@@ -312,7 +322,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             data-field-optional
             :aria-label="t.mayBeOmitted"
             :aria-describedby="undefined"
-            class="cursor-help select-none rounded-sm px-0.5 font-normal text-dimmed transition-colors hover:text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            class="cursor-help select-none rounded-xs px-0.5 leading-4 font-normal text-dimmed transition-colors hover:bg-elevated hover:text-toned focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
             :class="{ 'line-through': isDeprecated }"
           >?</button></UTooltip></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the
