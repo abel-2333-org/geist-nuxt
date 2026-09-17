@@ -49,13 +49,13 @@
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
+      "lastAuditedAt": "2026-09-17T05:41:12.753Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
-        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
+        "baseSha": "b10b13eb1d83edbd77766025320cfdd5fa6d5518",
+        "headSha": "3f1f7aaeefd32429fabc3f18658549eb15e44db5",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -66,7 +66,7 @@
           "references/foundations/typography.md",
           "tests/component/inline-code.spec.ts"
         ],
-        "scopeDigest": "7f7e9af6b1203ecb3d26d3a6f292cace92c0a3ba204f04f026675e2aebb2ed85",
+        "scopeDigest": "fe14631f3a05dd5d9c1d84aba09f68a898048a6b95cd38fcebbde00487e1b6d1",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -95,7 +95,7 @@
           }
         ]
       },
-      "notes": "根治 PR #128 记录的 finding f-4b98b0623a0a:foundation/config/app.ts 经 ui.tv.twMergeConfig 把 text-code 注册进 tailwind-merge 的 font-size 组,main.css 补 --text-code--line-height: calc(1.25 / 0.8125)(= 20px,与 Tailwind 各档同为比值形式)使去掉 ProseCode 的 text-sm 后行高不变;inline-code.spec 新增三条断言(rounded-md / text-sm 被替换、调用方 text-error 与 text-code 共存、调用方 text-xs 覆盖 text-code)全绿;data-display.md / typography.md 同步改写。app/ 页面既有 text-[0.8125rem] 写法按人工决定另行处理。复审补充:--line-height 使 .text-code 在产物中排到主题字号之前,裸标记并写时主题字号胜出,已在 main.css / typography.md 留痕并绑定 tailwindcss 依赖证据;check-root-css marker 收紧为完整 .text-code 规则。",
+      "notes": "co-review:本次功能 diff 命中本 item scope 的只有 references/foundations/typography.md——在「裸元素只写其一」一句后补充说明该约束已由 pnpm test:registry 的 tests/type-scale-pairing.test.mjs 自动守卫(同一 class 字符串里无 variant 前缀的 text-code 与主题字号并写即失败,md:text-sm 等响应式切换放行)。InlineCode 源码、inline-code.spec、gallery、data-display.md、main.css、app.ts 零 diff;守卫在当前仓库扫描零违规,并经三次变异(页面静态 class 的 important 写法、app.ts 字符串字面量、FieldAnnotation 的数组化 :trigger-class)验证会报红,并经一次反向变异(往 Foundations.vue 字号表补合法 text-code 数据行)验证不误报;检测范围与已知限制写在测试文件头注释。既有 resolved finding f-4b98b0623a0a 原样保留,依赖证据前提不变。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
