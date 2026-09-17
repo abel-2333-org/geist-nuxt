@@ -411,7 +411,7 @@ onMounted(() => anchor.initFromHash())
         <p class="max-w-2xl leading-relaxed text-muted text-pretty">
           同一套组件在「协议不全 / 无示例 / 无协议」时如何收敛。组件级的省略规则
           （ACK 三语义、schedule 折叠）见
-          <code class="font-mono text-[0.8125rem]">/kits/api-docs/webhook-protocol</code>。
+          <code class="font-mono text-code">/kits/api-docs/webhook-protocol</code>。
         </p>
       </div>
 

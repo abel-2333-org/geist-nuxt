@@ -132,12 +132,12 @@ const uniformDelivery = {
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">Webhook 协议</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">WebhookProtocol</code>：连贯呈现一个 webhook 的
+          <code class="font-mono text-code">WebhookProtocol</code>：连贯呈现一个 webhook 的
           <b class="font-medium text-toned">Verification / Acknowledgement / Delivery</b> 三段协议事实，
-          是 <code class="font-mono text-[0.8125rem]">OperationHeader</code>（kind="webhook"）的正文伙伴。
+          是 <code class="font-mono text-code">OperationHeader</code>（kind="webhook"）的正文伙伴。
           三段各自独立省略——没写进契约的段<b class="font-medium text-toned">整段不出现</b>，绝不渲染空卡片；
           ACK body 语义由数据形状表达（字面值给 example、回显与刻意为空用 facts 行说明）；
-          fact value 支持 <code class="font-mono text-[0.8125rem]">format: 'inline-markdown'</code> 明确 opt-in
+          fact value 支持 <code class="font-mono text-code">format: 'inline-markdown'</code> 明确 opt-in
           的安全富文本（链接、code 混排；默认仍纯文本，raw HTML 不渲染）；
           重试节奏以<b class="font-medium text-toned">总结句为可访问真源</b>，chips 只是视觉序列，
           长序列折叠为带动作文案的展开按钮。
