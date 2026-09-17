@@ -1174,7 +1174,8 @@ onMounted(() => anchor.initFromHash())
             可省略 / 可为 null / 可为空三个事实相互独立，用开发者熟悉的类型记号表达而非文字——
             字段名后缀 <code class="font-mono text-[0.8125rem]">?</code> 表示键可缺失，类型并入
             <code class="font-mono text-[0.8125rem]">| null</code>，调用方给出的字面空值作为又一个联合成员
-            （<code class="font-mono text-[0.8125rem]">string | null | ""</code>），零词汇、零翻译。
+            （<code class="font-mono text-[0.8125rem]">string | null | ""</code>），零词汇；唯一文案键
+            <code class="font-mono text-[0.8125rem]">mayBeOmitted</code> 只供屏幕阅读器（视觉 <code class="font-mono text-[0.8125rem]">?</code> 不可闻）。
             记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；
             有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
             作用域下显示（<code class="font-mono text-[0.8125rem]">object | null</code>），不与外层字段互相继承。

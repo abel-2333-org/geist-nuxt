@@ -55,6 +55,8 @@ describe('describeFieldPresence', () => {
   it('treats a blank empty form as not stated — "empty" must be spelled out', () => {
     expect(describeFieldPresence({ empty: '' }).unionTail).toEqual([])
     expect(describeFieldPresence({ empty: '  ' }).unionTail).toEqual([])
+    // Surrounding whitespace is authoring noise, not part of the literal form.
+    expect(describeFieldPresence({ empty: ' "" ' }).unionTail).toEqual(['""'])
   })
 
   it('carries the condition through unchanged', () => {

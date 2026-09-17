@@ -441,7 +441,7 @@ export function describeFieldPresence(presence: FieldPresence | undefined): Pres
   if (nullable) unionTail.push('null')
   // A blank literal is exactly the unspecified "empty" the contract refuses:
   // treat it as not stated rather than printing a dangling `|`.
-  if (empty?.trim()) unionTail.push(empty)
+  if (empty?.trim()) unionTail.push(empty.trim())
   return { optional: !!optional, unionTail, condition }
 }
 
