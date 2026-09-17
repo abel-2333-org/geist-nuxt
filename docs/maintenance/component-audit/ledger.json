@@ -382,13 +382,13 @@
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -398,9 +398,9 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "7d2e468d90ec86ad7b62c4761127ec76fef6268489454866d064fde36b5ae096"
+        "scopeDigest": "ecf0ca58dd836fa363128add3322b52097e22a93e9066157b2b17789b2e8de3d"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处），合计 48 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 5 个路径）本次零 diff。既有 1 条 finding（f-0c1cd3397501/resolved）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -413,13 +413,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -431,20 +431,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "0a197e69e51a66bf4be0251a4a54cff3d069920e55dee9c5fe1dce668477a45b"
+        "scopeDigest": "45d96c77368605865b757d60107cd795eb90f20beb2a5948a85f0c5c93bbae84"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/webhook-reference.vue（1 处），合计 2 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 6 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -460,9 +460,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "1d05e8b259cc9d65c3d7af5e677656525548c54f7d068eb52bb614eaa12704b6"
+        "scopeDigest": "e7e162927ada8080ab5cea2c742affca5b83176a275af636567ca0327475c4fe"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/index.vue（48 处），合计 49 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 10 个路径）本次零 diff。既有 2 条 finding（f-985ff00a90aa/resolved、f-a35a4e313b64/resolved）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -482,13 +482,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -505,20 +505,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "67c1347593a17e16559822b4175a4c743e12af2e69a6d1b07071d94fcc3df10e"
+        "scopeDigest": "7f34c44d18946a982f080da352bc8b80e15954c837e78308183ec76f405dafe9"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处），合计 48 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 12 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -537,7 +537,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "6fe92604b7a24478715f78b508b3b30ca63fca437c98a7dcb7f261ea3bd6056d",
+        "scopeDigest": "0ac721e4a709f4b3215d51c51a3eeb7fe8926b4fa354ad2107ddc01edfb12e5d",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -551,18 +551,18 @@
           }
         ]
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/index.vue（48 处）、app/pages/kits/api-docs/sidebar-nav.vue（8 处），合计 57 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 12 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -575,20 +575,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "40be9f37314607340b57827f6246d6f6b47e7bb1cbfc3caac17863c75e7b957a"
+        "scopeDigest": "37c1aa48917f543d9db8cde92c91c22510b81c1c31cfe75888cccbe683fc0713"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处），合计 48 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 8 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -597,20 +597,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "3d645ba84d1528aa7e0b6a3108fceb14471a6817222c119e85093170cbf6889a"
+        "scopeDigest": "f30f23bbbedf28453fb0ad58722739226e344b71e18682fae9ce8cc99438239a"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处）、app/pages/kits/api-docs/webhook-protocol.vue（3 处），合计 51 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 3 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "c97bb896d865c484afb33f19ceceffbd351ac0ce5ab1db17e7ac2d150be82f68",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -628,20 +628,20 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "e2601ba2074e56c5b44b84803dc855431f8364c7f2a610d309ca94b31872734d"
+        "scopeDigest": "5d9e4e71a44e0b0c790d841d92ecaac33f3a2435ab06b21ab39f6cf5ccee6b94"
       },
-      "notes": "PR #127 输出存在性：presence → `name?` / `string | null | \"\"` 记号 + 中性条件行，值节点 ValuePresence 无 optional；新增 field-presence.spec 全覆盖，明暗 / 响应式 / EN-ZH 实测无溢出。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/index.vue（48 处），合计 49 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 12 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-schema-composition": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
@@ -651,7 +651,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "e105c429df67f01fee94afcb7548230aa57738ab3a0e6f95254ea956084cfdd0",
+        "scopeDigest": "e73e22ff876d52ec2d402d6b21476f0d082f027ed4a474df776e67ddbfdfd019",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -665,18 +665,18 @@
           }
         ]
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/schema-composition.vue（3 处），合计 3 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 5 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -686,9 +686,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "a9253498bf34f83b1f1ebb2e263ae451f91bbb5a53a93c31d8ce2ce5a4d1b9f2"
+        "scopeDigest": "8d16d3bd6403030a3f70f7ab5e29e961e3f7bff06acddfd048efa8ca136a646e"
       },
-      "notes": "PR #127：popover 共用 describeFieldPresence / presenceTypeExpression，渲染 name? 与联合类型，不预览条件句；sr-only 补 `?` 的可闻文案。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处），合计 48 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 5 个路径）本次零 diff。既有 2 条 finding（f-31f690a2dbaa/wont-fix、f-fd7282669072/wont-fix）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -708,13 +708,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -727,7 +727,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "3b07ea3eb98bff3a54f3f733e162deda060d2ca70d81dd89f44817cb6fa41253",
+        "scopeDigest": "fce140326cdf2b1f91eae0e33f9754003ea47019d8909a062bf74487506db871",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -741,18 +741,18 @@
           }
         ]
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处）、app/pages/kits/api-docs/webhook-reference.vue（1 处），合计 49 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 7 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -764,20 +764,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "f54aa5eb56c2e306f6ca2c09e582746a02e7ebfcab6ca32d2186b6a7a27c44dc"
+        "scopeDigest": "c54d1e80b6e4d0d748c4ed5783efe8a28fb3dca41393e3374401e88e4a920479"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/index.vue（48 处），合计 48 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 7 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -789,20 +789,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "fcf57e107426d6d2469aaf764dfa6f265f9b87dd7a757b62c06f5d855bdf5f6a"
+        "scopeDigest": "4dcaed1dfa8f5211cde1e80bd855804e360f0b332909e25c5be1b04ccd6b09b0"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/index.vue（48 处），合计 49 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 6 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -817,20 +817,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "0e5037314acf5c6303521b36a0c998e6119fe8ae6f2eca66ab9d09eee68b6d34"
+        "scopeDigest": "b12e6d2a415d785222f94ee93f9697ea81407ae08861409e16c98f4e290d3e05"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/index.vue（48 处）、app/pages/kits/api-docs/webhook-reference.vue（1 处），合计 50 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 8 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -847,20 +847,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "50581c7753d13be9662afad42604cd208046c789b16d5e06f4f4d7ee35e73951"
+        "scopeDigest": "6520a4b65df4724e130a0b44fe9968c86052fc30c11784c204603bb7699c8d85"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/endpoint-reference.vue（1 处）、app/pages/kits/api-docs/webhook-reference.vue（1 处），合计 2 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 11 个路径）本次零 diff。该 item 无既有 finding。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -869,7 +869,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "4bde8be86018f0571842d77c597cc29bf03f7a9991dccd26f49ba94e8d16b0d9",
+        "scopeDigest": "1cbd4740e90a9258430dcd2aa3c28279ba8aebeb4c262702b3c708797051c7ca",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -883,7 +883,7 @@
           }
         ]
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/sidebar-nav.vue（8 处），合计 8 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 4 个路径）本次零 diff。既有 1 条 finding（f-dd631c5b3977/resolved）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -896,13 +896,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -917,9 +917,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "97c75930db065a84f1c9a1defcbca5a1c7878a842526afa20d1aaa3aae8eddce"
+        "scopeDigest": "152cfa26a8c9326f7582a27e94259f4fc3352a1618248e60307a29327d31bed2"
       },
-      "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/webhook-protocol.vue（3 处）、app/pages/kits/api-docs/webhook-reference.vue（1 处），合计 4 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 9 个路径）本次零 diff。既有 1 条 finding（f-b1838c3b046a/resolved）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -932,13 +932,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 3,
-      "lastAuditedAt": "2026-09-05T14:06:15.202Z",
+      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "5353f73a98db06c88a04da6749baf950a1a5749e",
-        "headSha": "140c5e79c37d04d81fef7723dfcc98e26ea79a16",
+        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
+        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
         "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -953,9 +953,9 @@
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "73523913d03af42c0245f585fc8d2ee0d0485acc10b3878ddcc7786d386503fc"
+        "scopeDigest": "967b8284c8d7fa4f9073d3328e0647c642efdf2f168a111d7daee3d0aca58fd6"
       },
-      "notes": "required co-review:scope 内 DocsShell.vue 与 sidebar-nav.vue gallery 页仅改 SiteSearch 实例的 props(补 noResultsAnnouncement 中文播报、placeholder 省略号),SidebarNav 的调用点、组件实现、useSplitPane 持久化与 sidebar-nav.spec 均未触碰;既有 finding f-12d73e8bc49d 保持 resolved(#105 已收敛),无新 finding。",
+      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/sidebar-nav.vue（8 处），合计 8 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 10 个路径）本次零 diff。既有 1 条 finding（f-12d73e8bc49d/resolved）原样保留、disposition 未变。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
