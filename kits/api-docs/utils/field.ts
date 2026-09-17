@@ -32,6 +32,51 @@ export interface FieldLifecycleInfo {
 }
 
 /**
+ * OUTPUT-side presence facts for a field (response / webhook payload): the
+ * key may be absent, the value may be `null`, the value may be empty. These
+ * are three independent facts — none implies another, and a doc author states
+ * each one explicitly. They are NOT the request-side `required` / `condition`
+ * pair, which answers "must the caller send it"; a field with no `presence`
+ * keeps today's rendering, and nothing here is ever inferred from a missing
+ * request marker.
+ *
+ * Presence is neutral metadata (like `type` and `format`), not a gate: it
+ * renders as type NOTATION on the identity line (`name?`, `string | null | ""`,
+ * see `describeFieldPresence`) and never borrows the required-strength colours.
+ */
+export interface FieldPresence {
+  /** The key itself may be missing from the payload. */
+  optional?: boolean
+  /** The value may be `null`. */
+  nullable?: boolean
+  /**
+   * The value may be empty. The string is the literal empty form ON THE WIRE
+   * for this field — `""`, `[]`, `{}`, `"[]"` (an encoded empty container) —
+   * appended verbatim to the type as a union member (`string | ""`), because
+   * "empty" is not one thing and the component refuses to guess which one a
+   * field means. A blank string is treated as not stated.
+   */
+  empty?: string
+  /**
+   * Explains WHEN the facts above apply (already localized, inline markdown).
+   * Rendered as its own rule under the summary — never folded into `notes`,
+   * never hidden behind a tooltip. Its presence is what makes a fact
+   * "conditional": the marks say that something can happen, the sentence says
+   * when, and there is no separate conditional flag to keep in sync.
+   */
+  condition?: string
+}
+
+/**
+ * Presence facts for a VALUE node (array element / record member / decoded
+ * content). A value has no key of its own, so it cannot be "omitted" — only
+ * the field that carries it can. Excluding `optional` at the type level is
+ * what keeps an element's nullability from leaking up to the field row and
+ * the field's omittability from leaking down to its elements.
+ */
+export type ValuePresence = Omit<FieldPresence, 'optional'>
+
+/**
  * Note category. It drives BOTH grouping and color, so a doc author cannot file
  * a caveat under the "Constraints" heading by accident:
  *   constraint — an enforced input boundary (length, charset, format). Breaking
@@ -74,6 +119,9 @@ export interface FieldNode {
   required?: RequiredState
   /** Explains when a conditional field becomes required (already localized). */
   condition?: string
+  /** Output-side presence facts (may be omitted / null / empty). Absent for
+   *  request fields and for every existing consumer: nothing is inferred. */
+  presence?: FieldPresence
   defaultValue?: string
   /** Field lifecycle (new/beta/deprecated) with optional since + description. */
   lifecycle?: FieldLifecycleInfo
@@ -146,6 +194,9 @@ export interface FieldValueNode {
   codec?: string
   /** The element/content type, e.g. `object`, `object[]`, `integer`. */
   type?: string
+  /** Presence facts of THIS value (an element may be `null`, decoded content
+   *  may be `[]`). Never `optional`: a value has no key to omit. */
+  presence?: ValuePresence
   description?: string
   notes?: FieldNote[]
   enumValues?: EnumValue[]
@@ -212,6 +263,9 @@ export const fieldValueLabelDefaults: Required<FieldValueLabels> = {
 export interface FieldItemLabels extends FieldValueLabels {
   required?: string
   conditional?: string
+  /** Screen-reader text behind the visual `?` on an omittable output key —
+   *  the one presence string, because bare punctuation is not announced. */
+  mayBeOmitted?: string
   default?: string
   example?: string
   constraints?: string
@@ -355,6 +409,56 @@ export function fieldRequiredState(
   return null
 }
 
+/**
+ * Presence resolved into NOTATION, not words. The three facts map onto marks
+ * every API developer already reads: `?` after the name (the key may be
+ * absent — TypeScript's optional property), `| null` in the type (OpenAPI
+ * 3.1 / GitHub / Mintlify) and the author's literal empty form as one more
+ * union member (`string | null | ""`, `json<object> | "{}"`). There is no
+ * vocabulary, so there is nothing to localize; the only prose is the
+ * author's `condition`.
+ *
+ * "Conditional" is deliberately NOT spelled in the notation. The condition
+ * rule rendered under the row IS the distinction: a `| null` with a rule
+ * below it is conditional, one without is unconditional — the sentence says
+ * when, the mark says that it can happen at all.
+ *
+ * Shared by the field row, the value scope block and the FieldAnnotation
+ * popover, so no two surfaces can disagree about what a presence says.
+ */
+export interface PresenceNotation {
+  /** Render `?` after the field name. Always `false` for a value node. */
+  optional: boolean
+  /** Union members appended to the type, in reading order: `null`, then the
+   *  literal empty form. Empty when nothing was stated. */
+  unionTail: string[]
+  condition?: string
+}
+
+export function describeFieldPresence(presence: FieldPresence | undefined): PresenceNotation {
+  const { optional, nullable, empty, condition } = presence ?? {}
+  const unionTail: string[] = []
+  if (nullable) unionTail.push('null')
+  // A blank literal is exactly the unspecified "empty" the contract refuses:
+  // treat it as not stated rather than printing a dangling `|`.
+  if (empty?.trim()) unionTail.push(empty)
+  return { optional: !!optional, unionTail, condition }
+}
+
+/** The value-node form: a value has no key, so `optional` is dropped here at
+ *  runtime as well as in the type — a JavaScript caller that smuggles it in
+ *  still gets no `?` on an element, member or decoded content. */
+export function describeValuePresence(presence: ValuePresence | undefined): PresenceNotation {
+  const { nullable, empty, condition } = presence ?? {}
+  return describeFieldPresence({ nullable, empty, condition })
+}
+
+/** `string` + [`null`, `""`] → `string | null | ""`. A missing type yields the
+ *  bare tail, so a value node without a declared type still states `null`. */
+export function presenceTypeExpression(type: string | undefined, tail: readonly string[]): string {
+  return [type, ...tail].filter(Boolean).join(' | ')
+}
+
 /** Collect every real field anchor reachable through children, field-level
  *  compositions and the value chain. Order follows the display model and
  *  duplicate paths remain visible to callers that need to diagnose invalid
@@ -416,6 +520,8 @@ export function collectCompositionPaths(composition: CompositionNode): string[] 
 /** A value node says something beyond its own structure. */
 export function hasValueDetail(value: FieldValueNode): boolean {
   return !!value.description
+    || describeValuePresence(value.presence).unionTail.length > 0
+    || !!value.presence?.condition
     || (value.notes?.length ?? 0) > 0
     || (value.examples?.length ?? 0) > 0
     || (value.enumValues?.length ?? 0) > 0
@@ -495,6 +601,8 @@ export interface ValueRequirementsBlock {
   node: FieldValueNode
   /** Localized scope heading (Each item / Value / Array / …). */
   label: string
+  /** This value's own presence facts (never the owner field's). */
+  presence: PresenceNotation
   constraints: FieldNote[]
   caveats: FieldNote[]
   compact: boolean
@@ -508,7 +616,10 @@ export function describeValueRequirements(
   const notes = node.notes ?? []
   const constraints = notes.filter(n => n.kind !== 'caveat')
   const caveats = notes.filter(n => n.kind === 'caveat')
+  const presence = describeValuePresence(node.presence)
   const extras = !!node.description
+    || presence.unionTail.length > 0
+    || !!presence.condition
     || (node.examples?.length ?? 0) > 0
     || (node.enumValues?.length ?? 0) > 0
     || (node.enumVariants?.length ?? 0) > 0
@@ -517,6 +628,7 @@ export function describeValueRequirements(
   return {
     node,
     label: labels[valueScopeLabelKey(node)],
+    presence,
     constraints,
     caveats,
     compact: constraints.length === 1 && !constraints[0]!.label && !extras,

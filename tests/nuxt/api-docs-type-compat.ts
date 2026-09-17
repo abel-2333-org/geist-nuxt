@@ -6,8 +6,10 @@ import type {
   FieldLifecycleInfo,
   FieldNode,
   FieldNote,
+  FieldPresence,
   FieldValueNode,
   RequiredState,
+  ValuePresence,
 } from '../../kits/api-docs/components/FieldItem.vue'
 import type {
   EnumValue,
@@ -44,12 +46,29 @@ const decoded: FieldValueNode = {
   relation: 'decoded',
   codec: 'json',
   type: 'object[]',
-  value: { relation: 'item', type: 'object', fields: [{ name: 'sku', type: 'string' }] },
+  // Decoded content may be an encoded empty container; the literal form is the author's.
+  presence: { empty: '"[]"' },
+  value: { relation: 'item', type: 'object', presence: { nullable: true }, fields: [{ name: 'sku', type: 'string' }] },
+}
+// A value has no key of its own, so it cannot be omitted — only its field can.
+const valuePresence: ValuePresence = { nullable: true, empty: '[]' }
+const leakedOptional: FieldValueNode = {
+  relation: 'item',
+  type: 'object',
+  // @ts-expect-error `optional` is a field fact and never a value fact.
+  presence: { optional: true },
+}
+const presence: FieldPresence = {
+  optional: true,
+  nullable: true,
+  empty: '""',
+  condition: 'Omitted until the build is `READY`.',
 }
 const field: FieldNode = {
   name: 'payment_method',
   type: 'object',
   required,
+  presence,
   lifecycle: lifecycleInfo,
   notes: [note],
   enumVariants: [fieldVariant],
@@ -58,6 +77,8 @@ const field: FieldNode = {
 
 void field
 void fieldValue
+void valuePresence
+void leakedOptional
 void annotationLabels
 void labels
 void legacyNote

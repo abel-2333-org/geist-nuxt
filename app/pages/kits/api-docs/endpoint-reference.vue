@@ -427,7 +427,7 @@ const bodyFields = [
   },
 ]
 
-const responseFields = [
+const responseFields: FieldNode[] = [
   { path: 'res_id', name: 'id', type: 'string', required: true, description: 'Unique deployment id.', examples: ['dpl_8Kx2fQ'] },
   {
     path: 'res_state',
@@ -442,7 +442,20 @@ const responseFields = [
       { value: 'ERROR', description: 'Build failed.' },
     ],
   },
-  { path: 'res_url', name: 'url', type: 'string', required: false, description: 'Public URL once the deployment is `READY`.', examples: ['https://my-app.example.app'] },
+  {
+    path: 'res_url',
+    name: 'url',
+    type: 'string',
+    // Output presence (issue #127): the key is absent until the build is
+    // ready, and `null` when the build failed — two facts, one condition.
+    presence: {
+      optional: true,
+      nullable: true,
+      condition: 'Omitted while `state` is `QUEUED` or `BUILDING`; `null` when `state` is `ERROR`.',
+    },
+    description: 'Public URL once the deployment is `READY`.',
+    examples: ['https://my-app.example.app'],
+  },
   { path: 'res_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: 'Creation timestamp in milliseconds.' },
 ]
 

@@ -114,7 +114,7 @@ const delivery = {
 }
 
 // --- payload 字段树：递归 schema，驱动左侧文档流 ---
-const payloadFields = [
+const payloadFields: FieldNode[] = [
   {
     path: 'payload_id',
     name: 'id',
@@ -178,6 +178,9 @@ const payloadFields = [
         name: 'previousAttributes',
         type: 'object',
         required: false,
+        // 输出存在性（issue #127）：payload 字段的「可省略」是独立事实，只由
+        // presence 声明；旁边的 required: false 不产生任何推断，也不渲染任何标记。
+        presence: { optional: true, condition: '仅在本次事件改变了至少一个字段时返回；首次创建订阅的事件没有这个键。' },
         lifecycle: { status: 'beta' as const, since: 'v2.6' },
         description: '本次变更前的字段快照，仅变化字段。',
         children: [
