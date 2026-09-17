@@ -1,11 +1,11 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-16T23:31:57.540Z",
+  "lastRunAt": "2026-09-17T23:48:02.732Z",
   "lastPicked": [
-    "foundation-inline-code",
-    "foundation-annotation-popover",
-    "foundation-doc-annotation"
+    "foundation-term-annotation",
+    "foundation-split-pane-handle",
+    "foundation-split-pane"
   ],
   "items": {
     "foundation-copy-button": {
@@ -275,14 +275,14 @@
       "findings": []
     },
     "foundation-term-annotation": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
-        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
+        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -294,7 +294,7 @@
         ],
         "scopeDigest": "0df849eef4f0d09f2fcca4a06bc2ca3e274688980cbea93c3cbb57d96d80a29c"
       },
-      "notes": "Round 3 复审：修复 glossary 原型链查找并保留 reactive late-add 响应性——先用 Reflect.has 订阅 key 存在性，再用 Object.hasOwn 过滤继承成员；补充 constructor 降级与缺失条目动态注入两条 DOM 回归测试。entry 直传、labels 合并、to 深链接关闭后导航、wrap-anywhere 溢出与家族诊断策略复核无回归。",
+      "notes": "Round 4 全量复审 clean：owning file、tests、reference、gallery 自 09-03 evidence 起零变更。临时 probe 实测 `__proto__` / `hasOwnProperty` / `toString` 三个继承成员 id 均降级纯文本并各告警一次（无 button），「stale markdown never breaks a page」claim 成立；entry 直传、labels 合并、close 再导航、wrap-anywhere 与家族诊断条件复核无回归。",
       "findings": [
         {
           "id": "f-084ace82f441",
@@ -327,14 +327,14 @@
       "findings": []
     },
     "foundation-split-pane-handle": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -343,41 +343,47 @@
           "kits/api-docs/components/CodeRail.vue",
           "kits/api-docs/components/SidebarNav.vue",
           "references/components/index.md",
+          "references/foundations/focus-a11y.md",
           "references/kits/api-docs/index.md",
+          "references/kits/api-docs/sidebar-nav.md",
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "023d135b6253a6608f09c970aeea26dd207096301ceedb3d2e8b2009533cf323"
+        "scopeDigest": "d91fcc59ec775dab0fa8726819237898b28530ddd41210a53225ce5a492a7d7f"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "Round 4 全量复审 clean：window-splitter ARIA 面、主轴方向键 / Home / End / Enter、disabled 退化、grip / edge 双形态焦点指示与 references 及 split-pane-handle.spec 一致。观察（不立 finding）：Alt / Meta / Ctrl + 方向键同样被消费并 preventDefault（probe 实测）——与 reka-ui 2.9.10 Slider / Splitter 原语不做修饰键守卫的行为一致，reference 未承诺透传，属系统基座同款；若产品要放行浏览器后退组合键属契约变更，且会把 CodeRail / SidebarNav 拉为 co-review owner。 scope 补入本次实际核证依据的两份 reference：sidebar-nav.md（edge 形态 1px→2px 与键盘 / ARIA 消费契约）、focus-a11y.md（grip 形态 focus-visible 实底规格）。",
       "findings": []
     },
     "foundation-split-pane": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-03T02:07:57.687Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "104f7fd232dff8b77e41a16852f6dc221f868656",
-        "headSha": "1a7afc54838560528915479676a8ed0ab504e0a7",
+        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
+          "app/pages/kits/api-docs/endpoint-reference.vue",
+          "app/pages/kits/api-docs/webhook-reference.vue",
           "foundation/components/SplitPane.vue",
           "foundation/components/SplitPaneHandle.vue",
           "foundation/composables/useBreakpointGate.ts",
           "foundation/composables/useRafTask.ts",
           "foundation/composables/useSplitPane.ts",
+          "foundation/utils/breakpoints.ts",
           "references/components/index.md",
+          "references/kits/api-docs/index.md",
           "tests/component/split-pane-handle.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "d38c5e39e8eb1521932da3a95880abf36f203856b355ab53bd1b4385dba7e271"
+        "scopeDigest": "2daf0447109a1079f6b82469c3ce1e8b6f0022ff4cd40bea636b41adf4650303"
       },
-      "notes": "Round 3 复审：将传给 useSplitPane 的 default 从挂载时快照改为 getter，使 Enter/双击复位跟随运行时 defaultSize，并补 DOM 黑盒测试。断点门控、SSR 水合、sticky 把手、min/max 钳制、未测量时 aria-valuemax 回退与 End 惰性、MDC 友好 prop 契约复核无回归。",
+      "notes": "Round 4 全量复审 clean：断点门控、useRafTask 合帧测量、min/max/minOpposite 钳制、getter default 复位、未测量时 aria-valuemax 回退与 End 惰性、sticky 视口高把手、MDC 纯字面量 prop 契约复核无回归。scope 补入此前缺失的权威 reference（references/kits/api-docs/index.md 的 SplitPane 节）、两个 gallery 活骨架消费点（endpoint-reference / webhook-reference，均只传字面量 prop）与 `enabledFrom` 取值域所依赖的 utils/breakpoints.ts。观察（不立 finding）：同帧 pointermove + pointerup 时 stop() 取消待执行 rAF，终值停在最后已渲染帧（probe：140 而非松手点 160）——面板无跳变，终值与松手点误差 ≤ 一帧指针位移，持久化值即所见值；无 reference 承诺终值等于松手点。若将来要精确到松手点，修法只能放在 onEnd（先 apply() 再 stop()），不能挪进 stop()：Escape 分支先回滚再 stop()，在 stop() 内 apply 会覆盖回滚。另观察：mainSize 只在 ResizeObserver 回调内按 direction 取轴，direction 运行时翻转后旧值会短暂留在另一轴（未实测；理论上 flex-row↔flex-col 翻转会改变根盒高度并触发 RO，≤1 帧自纠）。components/index.md L74 只对 enabledFrom 承诺跟随运行时变化，MDC 契约要求全部 prop 为字面量，三处消费点也都传字面量 direction——无承诺、无合法复现路径，与 storageKey / mode 同属「reference 未承诺可变」，不立 finding。",
       "findings": []
     },
     "api-docs-code-block": {
