@@ -24,7 +24,7 @@ Geist 规范的核心不是"一堆字号"，而是**按用途分三族**——�
 - **Label（标签族）**：单行、`font-medium`、行高适中，便于与图标对齐。菜单项、按钮文字、字段 label、表头。
 - **Copy（正文族）**：多行、`leading-relaxed`、`font-normal`。段落、说明。
 
-> 同一 px 在不同族里行高不同——判断"标题 / 单行标签 / 多行正文"比挑 px 更关键。Tailwind 默认阶梯缺 13/40/56/64px：13px 由基座 `main.css` 的 `--text-code` 提供语义 utility **`text-code`**（自带 20px 行高），其余用 arbitrary 值（`text-[..]`）补齐。`text-code` 已在 `foundation/config/app.ts` 注册为 tailwind-merge 的字号组：**经组件 class prop 传入时**（如 `<InlineCode class="text-xs">`、`<UBadge class="text-code">`）可正常覆盖 / 被覆盖；**裸元素上**没有合并器，`text-code` 与 `text-sm` / `text-xs` 并写时由 CSS 发射顺序决定、主题字号胜出，所以裸元素只写其一。
+> 同一 px 在不同族里行高不同——判断"标题 / 单行标签 / 多行正文"比挑 px 更关键。Tailwind 默认阶梯缺 13/40/56/64px：13px 由基座 `main.css` 的 `--text-code` 提供语义 utility **`text-code`**（自带 20px 行高），其余用 arbitrary 值（`text-[..]`）补齐。`text-code` 已在 `foundation/config/app.ts` 注册为 tailwind-merge 的字号组：**经组件 class prop 传入时**（如 `<InlineCode class="text-xs">`、`<UBadge class="text-code">`）可正常覆盖 / 被覆盖；**裸元素上**没有合并器，`text-code` 与 `text-sm` / `text-xs` 并写时由 CSS 发射顺序决定、主题字号胜出，所以裸元素只写其一（真源仓库内由 `pnpm test:registry` 的 `tests/type-scale-pairing.test.mjs` 自动守卫：同一 class 字符串里无 variant 前缀的 `text-code` 与主题字号并写即失败；`md:text-sm` 这类响应式切换不受限。消费项目自行遵守）。
 
 ### Heading — `tracking-tight font-semibold`
 
