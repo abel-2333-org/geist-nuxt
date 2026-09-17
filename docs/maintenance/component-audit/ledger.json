@@ -49,13 +49,13 @@
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-16T23:31:57.540Z",
-      "change": "none",
-      "status": "deferred",
+      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
+      "change": "modified",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "ff6135da5016303427085908f15e8d49bb2fd837",
+        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
+        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -66,22 +66,27 @@
           "references/foundations/typography.md",
           "tests/component/inline-code.spec.ts"
         ],
-        "scopeDigest": "bd79261072db5c65a9918a03eb2cf4a1e6c2dae8df0342435e3ff6fb66c0b269",
+        "scopeDigest": "7f7e9af6b1203ecb3d26d3a6f292cace92c0a3ba204f04f026675e2aebb2ed85",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 ProseCode 的单一 <code> 根节点、class 经 tv/tailwind-merge 合并、主题 base 含 text-sm rounded-md 与 ui.prose 主题行为。"
+            "reason": "依赖 ProseCode 的单一 <code> 根节点、class 经 tv/tailwind-merge 合并、主题 base 含 text-sm rounded-md 与 ui.prose 主题行为;并依赖 runtime/utils/tv 用 createTV(appConfig.ui.tv) 构造合并器。"
           },
           {
             "name": "tailwind-merge",
             "version": "3.6.0",
-            "reason": "finding 前提:默认 font-size class group 只按 t-shirt size 识别,自定义 text-code 不与 text-sm 冲突;升级后若识别规则变化须复核。"
+            "reason": "依赖 extend.classGroups[\"font-size\"] 的扩展 API 与 t-shirt size 默认识别规则;升级后须重跑 inline-code.spec 的三条合并断言。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "依赖 createTV 把 twMergeConfig.extend 透传给 extendTailwindMerge;透传形状变化会让 font-size 组注册失效。"
           },
           {
             "name": "tailwindcss",
             "version": "4.3.2",
-            "reason": "finding 前提:v4 产物中单声明的 .text-code 排在 .text-base/.text-sm/.text-xs 之后,13px 才生效;排序算法变化会直接改变渲染字号。"
+            "reason": "v4 产物中 .text-code 与主题字号档的相对顺序在加 --line-height 后翻转:修复前 .text-base < .text-sm < .text-xs < .text-code,修复后 .text-base < .text-code < .text-sm < .text-xs(以实测 offset 为准,机制不做假设);裸标记上 text-code 与主题字号并写时主题字号胜出(经 class prop 由 tailwind-merge 先去重,不受影响);排序变化会改变裸标记的胜负,须复核 typography.md 的并写禁令。"
           },
           {
             "name": "vue",
@@ -90,26 +95,26 @@
           }
         ]
       },
-      "notes": "round 4 复审:源码自 round 3 零变更,translate=\"no\" / ProseCode 委托契约与测试仍成立;但实测渲染 class 同时含主题 text-sm 与校准 text-code——tailwind-merge 3.6.0 按 t-shirt size 识别字号组,text-code 被归入文字颜色组不与 text-sm 冲突,13px 仅因 Tailwind 4.3.2 产物中 .text-code 排在所有主题字号之后而生效,行高仍取 text-sm 的 1.25rem;调用方 class 传 text-xs 亦被 text-code 压过。进一步实证:调用方给 InlineCode 传语义文字颜色类(class=\"text-error\")时 tailwind-merge 把 text-code 当颜色删掉,13px 校准静默退回 14px,属正常用法即可触发的契约破坏,记 medium deferred:修法落在 geist-foundation hub 配置(app.config ui.tv twMergeConfig + --text-code--line-height),改变全消费项目的 class 合并语义,交人工决策后单独 PR。",
+      "notes": "根治 PR #128 记录的 finding f-4b98b0623a0a:foundation/config/app.ts 经 ui.tv.twMergeConfig 把 text-code 注册进 tailwind-merge 的 font-size 组,main.css 补 --text-code--line-height: calc(1.25 / 0.8125)(= 20px,与 Tailwind 各档同为比值形式)使去掉 ProseCode 的 text-sm 后行高不变;inline-code.spec 新增三条断言(rounded-md / text-sm 被替换、调用方 text-error 与 text-code 共存、调用方 text-xs 覆盖 text-code)全绿;data-display.md / typography.md 同步改写。app/ 页面既有 text-[0.8125rem] 写法按人工决定另行处理。复审补充:--line-height 使 .text-code 在产物中排到主题字号之前,裸标记并写时主题字号胜出,已在 main.css / typography.md 留痕并绑定 tailwindcss 依赖证据;check-root-css marker 收紧为完整 .text-code 规则。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
           "severity": "medium",
           "claim": "data-display.md:「委托 ProseCode……仅覆盖两处回到 Geist 基础:圆角回控件档、字号 Copy 13 Mono」;nuxt-ui 核心规则 4:class prop 覆盖优先于 theme defaults",
           "evidence": "mountSuspended(InlineCode) 渲染 <code class=\"px-1.5 py-0.5 text-sm font-mono font-medium inline-block border border-muted bg-muted rounded-sm text-code\">:rounded-md 被 tailwind-merge 去重而 text-sm 未被去重(tailwind-merge 3.6.0 的 font-size 组按 t-shirt size 识别,text-code 落入 text-color 组)。pnpm build 产物 entry css 中 .text-base(offset 51199)< .text-sm(51463)< .text-xs(51858)< .text-code(52376),字号 13px 仅靠单声明 utility 排在后面生效,line-height 仍是 text-sm 的 1.25rem;mount attrs class=\"text-xs\" 得 \"… text-code text-xs\",调用方无法经 class 覆盖字号。inline-code.spec.ts 仅断言 text-code 存在,不能捕获 text-sm 反超。 复审补充复现:mount attrs class=\"text-error\"(或 text-toned)得 \"px-1.5 py-0.5 text-sm font-mono font-medium inline-block border border-muted bg-muted rounded-sm text-error\"——tailwind-merge 把 text-code 当作被覆盖的文字颜色删掉(node 实证 twMerge(\"text-red-500 text-code\") === \"text-code\"),调用方加任一语义文字颜色类即静默丢失 13px 校准、退回 text-sm 14px;extendTailwindMerge({ extend: { classGroups: { \"font-size\": [{ text: [\"code\"] }] } } }) 后 \"text-sm text-code\" → \"text-code\"、\"text-red-500 text-code\" 两者并存,修法可行。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "foundation-inline-markdown": {
       "round": 4,
-      "lastAuditedAt": "2026-09-15T23:25:36.765Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2a3c941c5494f9bee2a58f961ded7a6b64d976be",
-        "headSha": "7b95b993a4aa40b3865be6a299fa2f0ce8cd20ed",
+        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
+        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -118,7 +123,7 @@
           "references/components/data-display.md",
           "tests/component/inline-markdown.spec.ts"
         ],
-        "scopeDigest": "799f4a94643b19060dac9fced07245b2d0eb694b56fd2dcf84d4d97f6261007d",
+        "scopeDigest": "986747f390d12211848121ae077ee281fb866d7a07162dacd131f7f65399a862",
         "dependencies": [
           {
             "name": "marked",
@@ -127,7 +132,7 @@
           }
         ]
       },
-      "notes": "round 4 全量复审 clean:安全白名单(协议 allowlist、raw HTML / image / autolink 字面保留)、intraword 星号降级、反斜杠保留、CommonMark 定界符语义均有 pinned 测试矩阵;marked 仍解析为 17.0.6,dependency evidence 前提未变;render 函数而非 <script setup> 属递归 VNode 映射的必要选择;universal claims「Raw HTML is never rendered」「never re-parses a code span」「Safe inline markdown subset」核证通过,无新 finding。",
+      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;InlineMarkdown 的 code token 渲染为 InlineCode,本次修复后其 13px 校准在被外层传色时不再丢失,对 InlineMarkdown 自身契约(安全子集、字面保留)无影响;既有两条 resolved finding 原样保留;marked 依赖前提不变。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -147,13 +152,13 @@
     },
     "foundation-semantic-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T08:43:46.348Z",
+      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "320017f37c735606f014caf0dd188a7bf9de8e35",
-        "headSha": "63636b08062e69292b9514c5281395c0fd218394",
+        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
+        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -167,7 +172,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "1bc096600c95e1c51ea3a92b1356085ec21f7734aea18a132619d69dcdf9c9d8",
+        "scopeDigest": "53307f1b405464a58e3e975c940d5e4312ede959bbfd8bfeb286e6cb0fea2f07",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -181,7 +186,7 @@
           }
         ]
       },
-      "notes": "co-review:本 PR 只在 scope 内的 references/method/component-reflow.md §1 采纳决策后追加一段指向 extraction-candidates.md 的指针,不触及晋升流程本身,也不涉及 badge 归属或 tone 词表。逐条复核组件契约无回归:BadgeTone 六值 + BADGE_TONE_COLOR 的 Record 穷尽映射(新增 tone 未补色会编译报错)、组件读表不透传 tone、label 非空由三个 preset wrapper 各自保证、icon 仅为可选强化(意义不靠颜色单通道)、variant/size 默认 subtle/sm、显式相对 import 与 registry target 布局一致。两条既有 finding(f-304490421051 / f-e927544cd93a)维持 resolved,无回归、无新增。focused tests 39/39(http-method-badge 与 chrome-labels),registry:validate 40 items / 58 files、test:agent 17/17、test:registry 131/0 全绿。遗留观察不变:gallery DataDisplay.vue 的 tone 示例仍用「Deprecated=warning、Sunset=neutral」,与 api-docs kit 的 lifecyclePreset 校准相反,已登记待下次触碰该文件的功能 PR 顺手改为域中性词,本 PR 不夹带无关改动。",
+      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;SemanticBadge 不使用 text-code(字号由 UBadge size 决定),twMergeConfig 扩展只影响含 text-code 的 class 合并,对 badge 无行为变化;既有两条 resolved finding 原样保留。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -507,13 +512,13 @@
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
+        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -532,7 +537,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "4908f8b183b317c37c602ebe1b1f7ae5fca81061aae3d0d7dfc7facc591710ef",
+        "scopeDigest": "6717d61c9450a371694ff70c203d5a94e8aa8e48332e219f33d799e16c83ff03",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -546,7 +551,7 @@
           }
         ]
       },
-      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
+      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;HttpMethodBadge 的 class 为 font-mono tracking-wide tabular-nums,不含 text-code,合并器扩展对其无影响;既有 finding 无。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -740,13 +745,13 @@
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
+        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -758,9 +763,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "309c79138d052941f2b765c01ec4a2e3b228f12a2f242a0253d56105e607b962"
+        "scopeDigest": "88a3632785743541616a314f620aac0dabf0b9836dfbdb4a058f34eee76f71ce"
       },
-      "notes": "共享 scope 改动影响复核：references/kits/api-docs/index.md, tests/component/chrome-labels.spec.ts。changed hunks 仅涉及复制反馈、ACK 换行标签及其断言，未改此组件的直接布局、数据、交互或本地化契约；组件测试覆盖通过。本次不是从零重审全部实现。",
+      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;LifecycleNotice / LifecycleBadge 不使用 text-code,合并器扩展对其无影响;既有 finding 无。",
       "findings": []
     },
     "api-docs-operation-target": {
