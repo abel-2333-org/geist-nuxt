@@ -22,10 +22,15 @@
 // switch) and literals separated by `?:`, `&&` or `||` — exclusive branches
 // must not be flagged.
 // Known misses, accepted for a regex-level guard: pairings assembled from
-// conditional array members, nested arrays, `+` concatenation, class arrays
-// in script code, CSS / `@apply` (the repo has none), a `/*` or `</script>`
-// inside a string literal. Non-class attributes and template prose are out of
-// scope by design.
+// conditional array members, arrays that contain an object or a `${}`
+// interpolation (array + object syntax disables the join for that array),
+// nested arrays, `+` concatenation, class arrays in script code, CSS /
+// `@apply` (the repo has none), a `/*` or `</script>` inside a string literal.
+// Non-class attributes and template prose are out of scope by design.
+// Known cost: a single string literal that contains both tiers is always
+// flagged, even when it is documentation (an anti-pattern sample, pre-rendered
+// HTML). Show the anti-pattern in template prose or split the string instead
+// of weakening the guard.
 import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
