@@ -24,7 +24,7 @@ Geist 规范的核心不是"一堆字号"，而是**按用途分三族**——�
 - **Label（标签族）**：单行、`font-medium`、行高适中，便于与图标对齐。菜单项、按钮文字、字段 label、表头。
 - **Copy（正文族）**：多行、`leading-relaxed`、`font-normal`。段落、说明。
 
-> 同一 px 在不同族里行高不同——判断"标题 / 单行标签 / 多行正文"比挑 px 更关键。Tailwind 默认阶梯缺 13/40/56/64px，用 arbitrary 值（`text-[..]`）补齐。
+> 同一 px 在不同族里行高不同——判断"标题 / 单行标签 / 多行正文"比挑 px 更关键。Tailwind 默认阶梯缺 13/40/56/64px：13px 由基座 `main.css` 的 `--text-code` 提供语义 utility **`text-code`**（自带 20px 行高），其余用 arbitrary 值（`text-[..]`）补齐。`text-code` 已在 `foundation/config/app.ts` 注册为 tailwind-merge 的字号组：**经组件 class prop 传入时**（如 `<InlineCode class="text-xs">`、`<UBadge class="text-code">`）可正常覆盖 / 被覆盖；**裸元素上**没有合并器，`text-code` 与 `text-sm` / `text-xs` 并写时由 CSS 发射顺序决定、主题字号胜出，所以裸元素只写其一。
 
 ### Heading — `tracking-tight font-semibold`
 
@@ -50,8 +50,8 @@ Geist 规范的核心不是"一堆字号"，而是**按用途分三族**——�
 | Copy 18 | 18 | `text-lg leading-relaxed` | 营销大段引用 |
 | Copy 16 | 16 | `text-base leading-relaxed` | Modal 等宽松视图正文 |
 | **Copy 14** | 14 | `text-sm leading-relaxed` | **最常用正文** |
-| Copy 13 | 13 | `text-[0.8125rem] leading-relaxed` | 次要文本、空间紧张处 |
-| Copy 13 Mono | 13 | `font-mono text-[0.8125rem]` | **内联代码提及** |
+| Copy 13 | 13 | `text-code leading-relaxed` | 次要文本、空间紧张处 |
+| Copy 13 Mono | 13 | `font-mono text-code` | **内联代码提及**（`<InlineCode>` 原子已内置） |
 
 ### Label — 单行 `font-medium`
 
@@ -62,8 +62,8 @@ Geist 规范的核心不是"一堆字号"，而是**按用途分三族**——�
 | Label 16 | 16 | `text-base font-medium` | 标题中与正文区分 |
 | **Label 14** | 14 | `text-sm font-medium` | **全站最常用**：菜单、按钮、字段 label |
 | Label 14 Mono | 14 | `font-mono text-sm` | 与 >14 文本搭配的最大 mono |
-| Label 13 | 13 | `text-[0.8125rem] font-medium`（数字加 `tabular-nums`） | 次级标签行；表数字用 tabular |
-| Label 13 Mono | 13 | `font-mono text-[0.8125rem]` | 与 Label 14 搭配的 mono |
+| Label 13 | 13 | `text-code font-medium`（数字加 `tabular-nums`） | 次级标签行；表数字用 tabular |
+| Label 13 Mono | 13 | `font-mono text-code` | 与 Label 14 搭配的 mono |
 | Label 12 | 12 | `text-xs font-medium uppercase tracking-wide` | 三级文本、日历大写、Show More |
 | Label 12 Mono | 12 | `font-mono text-xs` | — |
 
@@ -77,7 +77,7 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 - **菜单/按钮/字段标签** → `text-sm font-medium`（Label 14）
 - **卡片标题** → `text-base font-semibold tracking-tight`（Heading 16）
 - **页面标题** → `text-[2rem] leading-tight font-semibold tracking-tight`（Heading 32）
-- **内联代码** → `font-mono text-[0.8125rem]`（Copy 13 Mono）
+- **内联代码** → `<InlineCode>`，或裸元素上 `font-mono text-code`（Copy 13 Mono）；不要再写 `text-[0.8125rem]`
 
 > `app/components/gallery/showcase/Foundations.vue` 是活的字阶展示；同目录的 `Hero.vue` 是 Heading/Copy 组合的真实用例。
 

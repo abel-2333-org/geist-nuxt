@@ -20,9 +20,21 @@
   /*
    * Type scale addition — inline code sits between Tailwind's text-xs (12px)
    * and text-sm (14px). `--text-code` generates a semantic `text-code` utility
-   * instead of scattering an arbitrary 13px value across components.
+   * instead of scattering an arbitrary 13px value across components. The
+   * paired `--line-height` keeps the utility self-contained like text-sm
+   * (ratio form as Tailwind's own tiers; 1.25 / 0.8125 × 13px = 20px, the
+   * leading inline code inherited from ProseCode's text-sm before
+   * foundation/config/app.ts taught tailwind-merge to replace it).
+   *
+   * Emission order caveat: with two declarations `.text-code` now sorts
+   * BEFORE the single-purpose theme tiers (`.text-sm`, `.text-xs`) in the
+   * generated CSS. Through a component's class prop that never matters —
+   * tailwind-merge resolves the conflict first. On bare markup (plain Vue
+   * class concatenation) never pair `text-code` with a theme size: the theme
+   * size wins there.
    */
   --text-code: 0.8125rem;
+  --text-code--line-height: calc(1.25 / 0.8125);
 
   /*
    * Breakpoints — the foundation viewport scale. Overriding Tailwind's
