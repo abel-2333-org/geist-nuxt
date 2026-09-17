@@ -806,8 +806,8 @@ const valueLabels: FieldItemLabels = {
   eachMember: '每个键',
   decodedRequirements: '值要求',
   decodedArrayRequirements: '数组要求',
-  // 输出存在性只有这一个文案键：`?` 对屏幕阅读器不可闻，sr-only 补一句。
-  mayBeOmitted: '可省略',
+  // 输出存在性只有这一个文案键：`?` 的 tooltip 正文与读屏名称共用这一句。
+  mayBeOmitted: '响应中可能不返回此字段',
 }
 
 // 第四组：输出字段存在性（issue #127）。合成 fixture 逐一覆盖始终存在、仅 nullable、
@@ -1175,7 +1175,8 @@ onMounted(() => anchor.initFromHash())
             字段名后缀 <code class="font-mono text-code">?</code> 表示键可缺失，类型并入
             <code class="font-mono text-code">| null</code>，调用方给出的字面空值作为又一个联合成员
             （<code class="font-mono text-code">string | null | ""</code>），零词汇；唯一文案键
-            <code class="font-mono text-code">mayBeOmitted</code> 只供屏幕阅读器（视觉 <code class="font-mono text-code">?</code> 不可闻）。
+            <code class="font-mono text-code">mayBeOmitted</code> 就地解释记号：悬停或键盘聚焦 <code class="font-mono text-code">?</code> 即可读到，
+            同一句也是它的读屏名称；每个可省略字段只多一个焦点，其余字段为零，复制字段名不会带上记号。
             记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；
             有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
             作用域下显示（<code class="font-mono text-code">object | null</code>），不与外层字段互相继承。

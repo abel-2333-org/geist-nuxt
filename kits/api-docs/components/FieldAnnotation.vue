@@ -126,8 +126,8 @@ function jump(close: () => void) {
         <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}<template v-if="presence.optional"><span
           data-field-optional
           aria-hidden="true"
-          class="text-dimmed"
-        >?</span><span class="sr-only"> ({{ t.mayBeOmitted }})</span></template></InlineCode>
+          class="select-none text-dimmed"
+        >?</span><span class="sr-only select-none"> ({{ t.mayBeOmitted }})</span></template></InlineCode>
         <!-- Shrinkable like its siblings: `shrink-0` would pin the span to
              max-content, and a long union type then overflows the fixed-width
              panel no matter how the text is allowed to wrap. The presence

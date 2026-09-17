@@ -7,10 +7,17 @@
 // inference from request markers, request and output facts coexisting, the
 // field / value boundary in both directions, no vocabulary to localize, and
 // the FieldAnnotation popover agreeing with the row.
+//
+// Issue #133 adds the in-place explanation: the row's `?` is a tooltip trigger
+// (hover + keyboard focus) named by the same `mayBeOmitted` label. Pinned here
+// because each promise is invisible to CSS review: exactly one focus stop per
+// omittable key and none otherwise, the sentence announced once (name, not
+// name + description), and the notation kept out of a copied field name.
 import { defineComponent } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
+import { UApp } from '#components'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import FieldAnnotation from '../../kits/api-docs/components/FieldAnnotation.vue'
 import {
@@ -21,6 +28,16 @@ import {
   presenceTypeExpression,
 } from '../../kits/api-docs/utils/field'
 import type { FieldNode, FieldPresence, ValuePresence } from '../../kits/api-docs/utils/field'
+
+// The `?` trigger is a UTooltip, which needs the app-level provider — the same
+// <UApp> every consumer already mounts for the kit's other tooltips.
+const FieldHost = defineComponent({
+  components: { FieldItem, UApp },
+  inheritAttrs: false,
+  template: '<UApp><FieldItem v-bind="$attrs" /></UApp>',
+})
+const mountField = (props: Record<string, unknown>, options: Parameters<typeof mountSuspended>[1] = {}) =>
+  mountSuspended(FieldHost, { ...options, props })
 
 /** The row's own identity line (never a nested value's). */
 function identity(wrapper: VueWrapper) {
@@ -119,31 +136,24 @@ describe('FieldItem output presence', () => {
   })
 
   it('marks a lone optional fact on the name only', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: { name: 'failureCode', type: 'string', presence: { optional: true } },
-    })
-    // Visual `?` is hidden from AT (bare punctuation is not announced); the
-    // sr-only phrase is the one localizable presence string.
-    expect(nameText(wrapper)).toBe('failureCode? (may be omitted)')
+    const wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
+    expect(nameText(wrapper)).toBe('failureCode?')
     const mark = identity(wrapper).get('[data-field-optional]')
     expect(mark.text()).toBe('?')
-    expect(mark.attributes('aria-hidden')).toBe('true')
+    // Low visual weight: notation in the grey register, never a badge.
     expect(mark.classes()).toContain('text-dimmed')
-    expect(identity(wrapper).get('code .sr-only').text()).toBe('(may be omitted)')
     expect(typeText(wrapper)).toBe('string')
   })
 
   it('combines independent facts, shows the condition once in its own rule and never as a constraint', async () => {
     const condition = 'Omitted until `state` is `READY`; `null` while the build is queued.'
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'url',
-        type: 'string',
-        presence: { optional: true, nullable: true, empty: '""', condition },
-        notes: [{ label: 'Format', text: 'Absolute https URL.' }],
-      },
+    const wrapper = await mountField({
+      name: 'url',
+      type: 'string',
+      presence: { optional: true, nullable: true, empty: '""', condition },
+      notes: [{ label: 'Format', text: 'Absolute https URL.' }],
     })
-    expect(nameText(wrapper)).toBe('url? (may be omitted)')
+    expect(nameText(wrapper)).toBe('url?')
     // `""` and `[]` never collapse into one word: the literal form is the notation.
     expect(typeText(wrapper)).toBe('string | null | ""')
 
@@ -183,21 +193,19 @@ describe('FieldItem output presence', () => {
   })
 
   it('keeps the field / value boundary in both directions', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'items',
-        type: 'array',
-        presence: { optional: true },
-        value: {
-          relation: 'item',
-          type: 'object',
-          presence: { nullable: true, condition: 'An element is `null` when the SKU was retired.' },
-          fields: [{ path: 'sku', name: 'sku', type: 'string' }],
-        },
+    const wrapper = await mountField({
+      name: 'items',
+      type: 'array',
+      presence: { optional: true },
+      value: {
+        relation: 'item',
+        type: 'object',
+        presence: { nullable: true, condition: 'An element is `null` when the SKU was retired.' },
+        fields: [{ path: 'sku', name: 'sku', type: 'string' }],
       },
     })
     // The field row says only what the FIELD says.
-    expect(nameText(wrapper)).toBe('items? (may be omitted)')
+    expect(nameText(wrapper)).toBe('items?')
     expect(typeText(wrapper)).toBe('array')
     expect(wrapper.find('[data-field-presence-condition]').exists()).toBe(false)
     // The element's facts render under the element's scope, as the element's type.
@@ -224,20 +232,138 @@ describe('FieldItem output presence', () => {
   })
 
   it('needs one label at most: notation is language-neutral and reaches recursive rows unchanged', async () => {
-    const wrapper = await mountSuspended(FieldItem, {
-      props: {
-        name: 'data',
-        type: 'object',
-        presence: { optional: true, nullable: true },
-        labels: { required: '必填', mayBeOmitted: '可省略' },
-        children: [{ name: 'note', type: 'string', presence: { empty: '""' } }],
-      },
+    const wrapper = await mountField({
+      name: 'data',
+      type: 'object',
+      presence: { optional: true, nullable: true },
+      labels: { required: '必填', mayBeOmitted: '可省略' },
+      children: [{ name: 'note', type: 'string', presence: { empty: '""' } }],
     })
-    expect(nameText(wrapper)).toBe('data? (可省略)')
+    expect(nameText(wrapper)).toBe('data?')
+    expect(identity(wrapper).get('[data-field-optional]').attributes('aria-label')).toBe('可省略')
     expect(typeText(wrapper)).toBe('object | null')
     const child = wrapper.findAllComponents(FieldItem).find(row => row.props('name') === 'note')!
     expect(nameText(child)).toBe('note')
     expect(typeText(child)).toBe('string | ""')
+  })
+})
+
+describe('FieldItem omittable-key explanation (issue #133)', () => {
+  let wrapper: VueWrapper | undefined
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = undefined
+  })
+
+  const tooltip = () => document.querySelector<HTMLElement>('[role="tooltip"]')
+  const focusStops = (row: VueWrapper) => row.findAll('button, a[href], [tabindex]:not([tabindex="-1"])')
+
+  it('costs exactly one focus stop on an omittable key, and none on any other row', async () => {
+    const plain = await mountField({ path: 'id', name: 'id', type: 'string', presence: { nullable: true } })
+    const before = focusStops(plain).length
+    expect(plain.find('[data-field-optional]').exists()).toBe(false)
+    plain.unmount()
+
+    wrapper = await mountField({ path: 'id', name: 'id', type: 'string', presence: { optional: true, nullable: true } })
+    expect(focusStops(wrapper)).toHaveLength(before + 1)
+    const mark = wrapper.get('[data-field-optional]')
+    expect(mark.element.tagName).toBe('BUTTON')
+    expect(mark.attributes('type')).toBe('button')
+  })
+
+  it('names the trigger with the explanation, so punctuation is never announced as part of the field name', async () => {
+    wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
+    const mark = wrapper.get('[data-field-optional]')
+    expect(mark.attributes('aria-label')).toBe('may be omitted')
+    expect(mark.attributes('aria-hidden')).toBeUndefined()
+    // The name now lives on the trigger: a second hidden copy would be read twice.
+    expect(identity(wrapper).find('code .sr-only').exists()).toBe(false)
+  })
+
+  it('opens on keyboard focus with the injected copy, announces it once, and closes on Escape and on blur', async () => {
+    wrapper = await mountField(
+      { name: 'failureCode', type: 'string', presence: { optional: true }, labels: { mayBeOmitted: '可省略' } },
+      { attachTo: document.body },
+    )
+    const mark = wrapper.get('[data-field-optional]')
+    expect(tooltip()).toBeNull()
+
+    await mark.trigger('focus')
+    await vi.waitFor(() => {
+      if (!tooltip()) throw new Error('tooltip did not open on focus')
+    })
+    expect(tooltip()!.textContent).toBe('可省略')
+    // `role="tooltip"` is the primitive's hidden mirror; the panel a sighted
+    // reader sees must carry the same injected sentence.
+    expect(document.querySelector('[data-slot="text"]')?.textContent).toBe('可省略')
+    // Name and tooltip are the same sentence: exposing it as a description too
+    // would make a screen reader say it twice.
+    expect(mark.attributes('aria-label')).toBe('可省略')
+    expect(mark.attributes('aria-describedby')).toBeUndefined()
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await vi.waitFor(() => {
+      if (tooltip()) throw new Error('tooltip stayed open after Escape')
+    })
+
+    await mark.trigger('focus')
+    await vi.waitFor(() => {
+      if (!tooltip()) throw new Error('tooltip did not reopen')
+    })
+    await mark.trigger('blur')
+    await vi.waitFor(() => {
+      if (tooltip()) throw new Error('tooltip stayed open after blur')
+    })
+  })
+
+  it('keeps the row notation out of a selection, so a copied field name is the bare name', async () => {
+    wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
+    expect(wrapper.get('[data-field-optional]').classes()).toContain('select-none')
+  })
+
+  it('does not let a click dismiss the explanation: the trigger has no other action', async () => {
+    wrapper = await mountField(
+      { name: 'failureCode', type: 'string', presence: { optional: true } },
+      { attachTo: document.body },
+    )
+    const mark = wrapper.get('[data-field-optional]')
+    await mark.trigger('focus')
+    await vi.waitFor(() => {
+      if (!tooltip()) throw new Error('tooltip did not open on focus')
+    })
+    await mark.trigger('click')
+    // The primitive closes synchronously; the pause only gives the portal
+    // time to unmount, so a regression cannot hide behind a pending teardown.
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(tooltip()).not.toBeNull()
+  })
+
+  it('strikes the notation through with a deprecated name — a button is an atomic inline box the name\'s decoration skips', async () => {
+    wrapper = await mountField({
+      name: 'legacyCode',
+      type: 'string',
+      presence: { optional: true },
+      lifecycle: { status: 'deprecated' },
+    })
+    expect(identity(wrapper).get('code').classes()).toContain('line-through')
+    expect(wrapper.get('[data-field-optional]').classes()).toContain('line-through')
+  })
+
+  it('reaches recursive rows: each omittable descendant owns its own trigger', async () => {
+    wrapper = await mountField({
+      name: 'data',
+      type: 'object',
+      children: [
+        { name: 'note', type: 'string', presence: { optional: true } },
+        { name: 'id', type: 'string' },
+      ],
+    })
+    const rows = wrapper.findAllComponents(FieldItem)
+    const note = rows.find(row => row.props('name') === 'note')!
+    const id = rows.find(row => row.props('name') === 'id')!
+    expect(identity(note).find('button[data-field-optional]').exists()).toBe(true)
+    expect(identity(id).find('[data-field-optional]').exists()).toBe(false)
+    expect(identity(wrapper).find('[data-field-optional]').exists()).toBe(false)
   })
 })
 
@@ -270,7 +396,15 @@ describe('FieldAnnotation output presence', () => {
       if (!panel()) throw new Error('annotation panel did not open')
     })
     expect(panel()!.querySelector('code')?.textContent).toBe('url? (可省略)')
-    expect(panel()!.querySelector('[data-field-optional]')?.getAttribute('aria-hidden')).toBe('true')
+    // The preview is already a floating layer: its `?` stays plain text (no
+    // nested tooltip, no focus stop) and keeps the screen-reader sentence —
+    // both kept out of a copied name.
+    const mark = panel()!.querySelector('[data-field-optional]')!
+    expect(mark.tagName).toBe('SPAN')
+    expect(mark.getAttribute('aria-hidden')).toBe('true')
+    expect(mark.classList.contains('select-none')).toBe(true)
+    expect(panel()!.querySelector('code .sr-only')?.classList.contains('select-none')).toBe(true)
+    expect(panel()!.querySelector('code button')).toBeNull()
     expect(panel()!.querySelector('[data-field-type]')?.textContent).toBe('string | ""')
     // A summary, not the row: the presence condition stays in the row's detail.
     expect(panel()!.querySelector('[data-field-presence-condition]')).toBeNull()

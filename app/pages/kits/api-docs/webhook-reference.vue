@@ -337,9 +337,23 @@ onMounted(() => anchor.initFromHash())
 
             <!-- 2) PAYLOAD —— 验签通过后解析的数据，整页主角（与端点 Request/
                  Response Body 同构）。 -->
-            <FieldGroup label="Event Payload" :count="payloadFields.length">
-              <FieldItem v-for="f in payloadFields" :key="f.path ?? f.name" v-bind="f" />
-            </FieldGroup>
+            <!-- 记号说明由页面承载而非 kit：FieldItem 的 `?` tooltip 在触屏上不会
+                 打开，解释记号的那一句可见正文跟着字段区走。 -->
+            <!-- 图例与字段区合为外层节奏里的一个流项：它是下方字段区的前言，
+                 不是独立小节。只解释本页真实出现的记号。 -->
+            <div class="space-y-4">
+              <p class="text-sm leading-relaxed text-muted">
+                <code class="font-mono text-code">name?</code> 表示该字段可能不出现在 payload 中。
+              </p>
+              <FieldGroup label="Event Payload" :count="payloadFields.length">
+                <FieldItem
+                  v-for="f in payloadFields"
+                  :key="f.path ?? f.name"
+                  v-bind="f"
+                  :labels="{ mayBeOmitted: 'payload 中可能不包含此字段' }"
+                />
+              </FieldGroup>
+            </div>
 
             <!-- 3) ACKNOWLEDGEMENT → 4) DELIVERY —— 处理完「怎么回应」与「失败怎么
                  重试/时序」。后者偏背景参考，殿后。ACK 的字面响应体示例已移至右栏

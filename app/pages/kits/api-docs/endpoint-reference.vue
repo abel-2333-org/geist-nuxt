@@ -589,9 +589,20 @@ onMounted(() => anchor.initFromHash())
               <FieldItem v-for="f in bodyFields" :key="f.path ?? f.name" v-bind="f" />
             </FieldGroup>
 
-            <FieldGroup label="Response Body" :count="responseFields.length">
-              <FieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
-            </FieldGroup>
+            <!-- Notation legend — owned by the PAGE, not the kit: FieldItem's
+                 `?` tooltip never opens on touch, so the one visible sentence
+                 that explains the notation lives with the field section. -->
+            <!-- One flow item: the legend is the preface of the group below
+                 it, not a section of its own in the outer rhythm. -->
+            <div class="space-y-4">
+              <p class="text-sm leading-relaxed text-muted">
+                <code class="font-mono text-code">name?</code> — the field may be absent from the response.
+                <code class="font-mono text-code">| null</code> — the field is present and its value may be null.
+              </p>
+              <FieldGroup label="Response Body" :count="responseFields.length">
+                <FieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
+              </FieldGroup>
+            </div>
 
             <FieldGroup label="Error Response Body" :count="errorResponseFields.length">
               <FieldItem

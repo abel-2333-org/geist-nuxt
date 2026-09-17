@@ -30,7 +30,7 @@ export type {
 // method preset types). Callers that need the model import it from
 // `~/utils/field`, the single canonical home.
 //
-// Composed from Nuxt UI primitives (UIcon, UCollapsible) + core atoms
+// Composed from Nuxt UI primitives (UIcon, UCollapsible, UTooltip) + core atoms
 // (InlineCode and InlineMarkdown from foundation) + kit siblings
 // (EnumTable, LifecycleBadge, and SchemaComposition for
 // field-level composition). Deep linking is handled by the kit's useFieldAnchor
@@ -53,7 +53,9 @@ export type {
 //                           <SchemaComposition> after the children
 // States:   active-anchor highlight, descendant-active auto-expand, deprecated
 //           (name strike-through), expanded/collapsed. A11y: anchor buttons
-//           carry dynamic aria-labels; copied state announced politely.
+//           carry dynamic aria-labels; copied state announced politely; the
+//           omittable-key `?` is a UTooltip trigger named by `mayBeOmitted`
+//           (hover + keyboard focus, Escape closes) — needs the app's <UApp>.
 
 import FieldValueStructure from '../internal/FieldValueStructure.vue'
 
@@ -288,11 +290,31 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
             :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
             translate="no"
-          >{{ name }}<template v-if="presence.optional"><span
+          >{{ name }}<!-- The `?` is TypeScript shorthand a payments reader may
+               not know, so it explains itself in place: ONE focus stop per
+               omittable key, none otherwise. The explanation IS the button's
+               name — the tooltip repeats the same sentence, so the primitive's
+               `aria-describedby` is dropped rather than announced twice. That
+               override relies on reka's Slot merging `mergeProps(attrs,
+               childProps)` — the child's key wins; re-check on a reka upgrade
+               (field-presence.spec pins it). The button has no action of its
+               own, so a click must not dismiss the help it exists to show
+               (`disable-closing-trigger`). It opens upward: below it would
+               cover this row's own condition and description.
+               `select-none` keeps the notation out of a copied field name.
+               Touch never opens a tooltip; the consuming page's legend covers it. --><UTooltip
+            v-if="presence.optional"
+            :text="t.mayBeOmitted"
+            :content="{ side: 'top' }"
+            disable-closing-trigger
+          ><button
+            type="button"
             data-field-optional
-            aria-hidden="true"
-            class="font-normal text-dimmed"
-          >?</span><span class="sr-only"> ({{ t.mayBeOmitted }})</span></template></code>
+            :aria-label="t.mayBeOmitted"
+            :aria-describedby="undefined"
+            class="cursor-help select-none rounded-sm px-0.5 font-normal text-dimmed transition-colors hover:text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            :class="{ 'line-through': isDeprecated }"
+          >?</button></UTooltip></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the
                least informative token on the row — on the consumer endpoint
                that settled this, every structured field's type is `string`.
