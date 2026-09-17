@@ -286,13 +286,13 @@ const deepLinks = [
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">Schema 组合</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">SchemaComposition</code>：忠实呈现 OpenAPI / JSON Schema
+          <code class="font-mono text-code">SchemaComposition</code>：忠实呈现 OpenAPI / JSON Schema
           的 <b class="font-medium text-toned">oneOf / anyOf / allOf</b> 组合——
           oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、
           allOf 顺序全展开（全部成立），三种语义绝不互相误读。
-          <code class="font-mono text-[0.8125rem]">discriminator</code> 渲染为每个 variant 的首行真实字段（不虚构 wire path），
+          <code class="font-mono text-code">discriminator</code> 渲染为每个 variant 的首行真实字段（不虚构 wire path），
           deep link 会自动揭示隐藏的 tab / 分区。字段级组合由
-          <code class="font-mono text-[0.8125rem]">FieldItem</code> 在子字段之后委托本组件渲染。
+          <code class="font-mono text-code">FieldItem</code> 在子字段之后委托本组件渲染。
           组件数据无关、locale-ready，所有文案由调用方注入。
         </p>
       </div>

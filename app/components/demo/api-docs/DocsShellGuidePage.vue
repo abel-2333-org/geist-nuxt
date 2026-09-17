@@ -42,7 +42,7 @@ function toTokens(paragraph: string) {
           class="max-w-2xl leading-relaxed text-muted text-pretty"
         >
           <template v-for="(token, j) in toTokens(paragraph)" :key="j">
-            <code v-if="token.code" class="font-mono text-[0.8125rem] text-toned">{{ token.text }}</code>
+            <code v-if="token.code" class="font-mono text-code text-toned">{{ token.text }}</code>
             <template v-else>{{ token.text }}</template>
           </template>
         </p>

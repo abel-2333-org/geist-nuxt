@@ -150,7 +150,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
       <div class="space-y-2">
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">侧边栏导航</h2>
         <p class="max-w-2xl text-muted">
-          <code class="font-mono text-[0.8125rem]">SidebarNav</code>：一个菜单容纳多个可折叠板块，
+          <code class="font-mono text-code">SidebarNav</code>：一个菜单容纳多个可折叠板块，
           而各板块指向的页面性质差异很大——「指南」板块是文字链接，接口板块是<b class="font-medium text-toned">按用途命名</b>的端点链接。
           接口不严格遵循 REST、一个接口常服务多个业务场景，所以它<b class="font-medium text-toned">只出现一次</b>，
           行首是<b class="font-medium text-toned">请求方法色标</b>（GET/POST…，「怎么调」）、中间是用途名、行尾是<b class="font-medium text-toned">场景标签</b>（订阅、授权…，「用在哪」）。
@@ -207,11 +207,11 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
             <ul class="space-y-2 text-sm text-muted">
               <li class="flex gap-2">
                 <UIcon name="i-lucide-command" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）由 <code class="font-mono text-[0.8125rem]">SiteSearch</code> 提供，跨指南与接口导航；消费项目还可通过异步 <code class="font-mono text-[0.8125rem]">search</code> 接入自己的正文索引。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。</span>
+                <span><b class="font-medium text-toned">顶部导航栏</b>的「搜索全部文档」（或按 <UKbd value="meta" /><UKbd value="K" />）由 <code class="font-mono text-code">SiteSearch</code> 提供，跨指南与接口导航；消费项目还可通过异步 <code class="font-mono text-code">search</code> 接入自己的正文索引。它属于 app top bar，与侧栏的树内过滤不同层级、不并排。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-search" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>在侧栏搜索框输入用途名 <code class="font-mono text-[0.8125rem]">支付</code>，或直接输入<b class="font-medium text-toned">场景名</b> <code class="font-mono text-[0.8125rem]">订阅</code>——搜索<b class="font-medium text-toned">同时匹配用途名与场景标签</b>，输入「订阅」会浮出所有服务该场景的接口。这是导航树内就地过滤：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
+                <span>在侧栏搜索框输入用途名 <code class="font-mono text-code">支付</code>，或直接输入<b class="font-medium text-toned">场景名</b> <code class="font-mono text-code">订阅</code>——搜索<b class="font-medium text-toned">同时匹配用途名与场景标签</b>，输入「订阅」会浮出所有服务该场景的接口。这是导航树内就地过滤：板块被过滤并自动展开，计数徽章显示「命中/总数」。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-keyboard" class="mt-0.5 size-4 shrink-0 text-dimmed" />
@@ -223,7 +223,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-layers" class="mt-0.5 size-4 shrink-0 text-dimmed" />
-                <span>板块按 <code class="font-mono text-[0.8125rem]">文档</code> / <code class="font-mono text-[0.8125rem]">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">请求方法色标 + 用途名 + 场景标签</b>——两类界限分明，chrome 保持中性、方法色标各自带色、其余颜色只交给 active 态。</span>
+                <span>板块按 <code class="font-mono text-code">文档</code> / <code class="font-mono text-code">API 参考</code> 分组，组间有 eyebrow 小标题和分隔线；<b class="font-medium text-toned">指南型</b>板块头是柔和 sans、子项为图标链接，<b class="font-medium text-toned">接口型</b>板块头是大写等宽 mono、子项是<b class="font-medium text-toned">请求方法色标 + 用途名 + 场景标签</b>——两类界限分明，chrome 保持中性、方法色标各自带色、其余颜色只交给 active 态。</span>
               </li>
               <li class="flex gap-2">
                 <UIcon name="i-lucide-tag" class="mt-0.5 size-4 shrink-0 text-dimmed" />
@@ -237,7 +237,7 @@ const siteSearchGroups = groups.map((group, groupIndex) => ({
           </div>
 
           <p class="text-sm text-dimmed">
-            数据由本页内联假 ViewModel 驱动，不写进 kit。接口链接指向 <code class="font-mono text-[0.8125rem]">#</code> 锚点仅作演示。
+            数据由本页内联假 ViewModel 驱动，不写进 kit。接口链接指向 <code class="font-mono text-code">#</code> 锚点仅作演示。
           </p>
         </div>
       </div>

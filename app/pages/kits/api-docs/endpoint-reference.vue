@@ -683,7 +683,7 @@ onMounted(() => anchor.initFromHash())
         <p class="max-w-2xl leading-relaxed text-muted text-pretty">
           同一套组件在「单环境 / 无错误目录 / 无 relations」时如何收敛。组件级的
           省略规则（body 语义、字段门控）见
-          <code class="font-mono text-[0.8125rem]">/kits/api-docs</code>。
+          <code class="font-mono text-code">/kits/api-docs</code>。
         </p>
       </div>
 

@@ -905,27 +905,27 @@ onMounted(() => anchor.initFromHash())
         <h2 class="text-2xl font-semibold tracking-tight text-highlighted">API 文档场景</h2>
         <p class="text-muted max-w-2xl">
           API 文档场景的领域组件：代码块
-          <code class="font-mono text-[0.8125rem]">CodeBlock</code>、
+          <code class="font-mono text-code">CodeBlock</code>、
           请求 / 响应示例
-          <code class="font-mono text-[0.8125rem]">RequestExample</code> /
-          <code class="font-mono text-[0.8125rem]">ResponseExample</code>，
+          <code class="font-mono text-code">RequestExample</code> /
+          <code class="font-mono text-code">ResponseExample</code>，
           以及 method / event / lifecycle 徽章
-          <code class="font-mono text-[0.8125rem]">HttpMethodBadge</code> /
-          <code class="font-mono text-[0.8125rem]">WebhookBadge</code> /
-          <code class="font-mono text-[0.8125rem]">LifecycleBadge</code>
+          <code class="font-mono text-code">HttpMethodBadge</code> /
+          <code class="font-mono text-code">WebhookBadge</code> /
+          <code class="font-mono text-code">LifecycleBadge</code>
           与 enum 值表
-          <code class="font-mono text-[0.8125rem]">EnumTable</code>，
+          <code class="font-mono text-code">EnumTable</code>，
           以及字段树
-          <code class="font-mono text-[0.8125rem]">FieldGroup</code> /
-          <code class="font-mono text-[0.8125rem]">FieldItem</code>（递归子字段 + 深链接）与
-          <code class="font-mono text-[0.8125rem]">RelationSourcePath</code>（已解析来源层级 + 字段导航）。
+          <code class="font-mono text-code">FieldGroup</code> /
+          <code class="font-mono text-code">FieldItem</code>（递归子字段 + 深链接）与
+          <code class="font-mono text-code">RelationSourcePath</code>（已解析来源层级 + 字段导航）。
           Operation 身份层由
-          <code class="font-mono text-[0.8125rem]">OperationHeader</code>（端点 / webhook 同构头部）、
-          <code class="font-mono text-[0.8125rem]">OperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
-          <code class="font-mono text-[0.8125rem]">LifecycleNotice</code>（生命周期横幅）承担；
-          双例码轨道 <code class="font-mono text-[0.8125rem]">CodeRail</code> 见「端点参考页」。
+          <code class="font-mono text-code">OperationHeader</code>（端点 / webhook 同构头部）、
+          <code class="font-mono text-code">OperationTarget</code>（环境切换 + 分段地址 + 复制完整地址）与
+          <code class="font-mono text-code">LifecycleNotice</code>（生命周期横幅）承担；
+          双例码轨道 <code class="font-mono text-code">CodeRail</code> 见「端点参考页」。
           全部基于 Nuxt UI 原语与 Geist token；徽章在 core 的
-          <code class="font-mono text-[0.8125rem]">SemanticBadge</code> 之上包一层域词汇。
+          <code class="font-mono text-code">SemanticBadge</code> 之上包一层域词汇。
         </p>
       </div>
 
@@ -938,12 +938,12 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">双主题高亮 fragment</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            构建期 Shiki 双主题输出（内联浅色 <code class="font-mono text-[0.8125rem]">color</code> +
-            <code class="font-mono text-[0.8125rem]">--shiki-dark</code>）经
-            <code class="font-mono text-[0.8125rem]">trust-highlighted-html</code>
-            显式信任后，由组件 CSS 在 <code class="font-mono text-[0.8125rem]">.dark</code>
+            构建期 Shiki 双主题输出（内联浅色 <code class="font-mono text-code">color</code> +
+            <code class="font-mono text-code">--shiki-dark</code>）经
+            <code class="font-mono text-code">trust-highlighted-html</code>
+            显式信任后，由组件 CSS 在 <code class="font-mono text-code">.dark</code>
             祖先下把 token 颜色切到暗色变量——不解析重写 HTML、无运行时 watcher；
-            复制仍取 raw <code class="font-mono text-[0.8125rem]">code</code> 真源。
+            复制仍取 raw <code class="font-mono text-code">code</code> 真源。
           </p>
           <div class="space-y-4">
             <RequestExample :scenarios="highlightedRequestScenarios" trust-highlighted-html />
@@ -954,11 +954,11 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">响应</h3>
           <p class="mb-3 max-w-2xl text-sm text-muted">
-            body 语义显式建模：<code class="font-mono text-[0.8125rem]">code</code>（JSON / text/plain / CSV 等多 media type 出选择器）/
-            <code class="font-mono text-[0.8125rem]">empty</code>（有意空正文，如 204）/
-            <code class="font-mono text-[0.8125rem]">unavailable</code>（有正文缺示例）/
-            <code class="font-mono text-[0.8125rem]">file</code>（二进制 metadata + 可选下载）；
-            状态支持数字码与 <code class="font-mono text-[0.8125rem]">'default'</code>，可带 status 级描述。
+            body 语义显式建模：<code class="font-mono text-code">code</code>（JSON / text/plain / CSV 等多 media type 出选择器）/
+            <code class="font-mono text-code">empty</code>（有意空正文，如 204）/
+            <code class="font-mono text-code">unavailable</code>（有正文缺示例）/
+            <code class="font-mono text-code">file</code>（二进制 metadata + 可选下载）；
+            状态支持数字码与 <code class="font-mono text-code">'default'</code>，可带 status 级描述。
           </p>
           <ResponseExample :scenarios="responseScenarios" :labels="responseLabels" />
         </div>
@@ -967,7 +967,7 @@ onMounted(() => anchor.initFromHash())
           <h3 class="mb-1 text-sm font-semibold text-highlighted">场景受控选择</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
             请求 / 响应示例的场景选择默认各自独立（uncontrolled，无需任何绑定）；绑定
-            <code class="font-mono text-[0.8125rem]">v-model:scenario</code>
+            <code class="font-mono text-code">v-model:scenario</code>
             即转为受控，两侧可用一个页面级 ref 联动（linked），选择器互为镜像。
             scenario 间的对应关系由 consumer 持有，kit 不做 mapping。下例响应侧刻意
             缺「批量创建」：请求切到该场景时，响应确定性收敛到第一项——fallback 只派生
@@ -996,7 +996,7 @@ onMounted(() => anchor.initFromHash())
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Event 徽章</h3>
           <p class="mb-3 max-w-2xl text-sm text-muted">
             Webhook 的身份标：统一词
-            <code class="font-mono text-[0.8125rem]">EVENT</code>（中性灰，居五个 method 色之外）——
+            <code class="font-mono text-code">EVENT</code>（中性灰，居五个 method 色之外）——
             方法色标说「你调平台」，EVENT 标说「平台回调你」。事件名走旁边的 mono 代码位。
           </p>
           <div class="flex flex-wrap items-center gap-2">
@@ -1021,7 +1021,7 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-3 text-sm font-semibold text-highlighted">Lifecycle 横幅</h3>
           <p class="mb-3 max-w-2xl text-sm text-muted">
-            <code class="font-mono text-[0.8125rem]">LifecycleNotice</code>
+            <code class="font-mono text-code">LifecycleNotice</code>
             与 Lifecycle 徽章共用同一份 preset 词表与色调：徽章标记一行，横幅在正文里解释
             「发生了什么 + 怎么办」。置于 Operation Header 之后、字段区之前。
           </p>
@@ -1037,9 +1037,9 @@ onMounted(() => anchor.initFromHash())
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Operation Header / Target</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
             操作身份头：一个组件承担端点与 webhook 两形态
-            （<code class="font-mono text-[0.8125rem]">kind="endpoint" | "webhook"</code>），
+            （<code class="font-mono text-code">kind="endpoint" | "webhook"</code>），
             identity 行（徽章 + mono 标识 + 右对齐 #actions 槽）→ 标题（+ lifecycle）→ 描述。
-            端点形态下接 <code class="font-mono text-[0.8125rem]">OperationTarget</code>：
+            端点形态下接 <code class="font-mono text-code">OperationTarget</code>：
             环境与 host、path 与完整复制组成响应式两层；host / path 文本本身可复制，
             hover/focus 时用下划线与 tooltip 表明行为；
             webhook 的「目标」是你自己的回调地址，一句话说明即可，不用该组件。
@@ -1106,7 +1106,7 @@ onMounted(() => anchor.initFromHash())
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Relation source path</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
             consumer 提供已解析、已本地化的 scope、location 与完整字段层级；同页 field
-            委托 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> reveal / focus，
+            委托 <code class="font-mono text-code">useFieldAnchor</code> reveal / focus，
             跨页使用 router link，没有稳定目标时降级为纯文本。完整 Callback / Next Operation
             装配见「结构化关系」正式 recipe。
           </p>
@@ -1135,12 +1135,12 @@ onMounted(() => anchor.initFromHash())
         <div>
           <h3 class="mb-1 text-sm font-semibold text-highlighted">Field 注释</h3>
           <p class="mb-4 max-w-2xl text-sm text-muted">
-            <code class="font-mono text-[0.8125rem]">FieldAnnotation</code>
+            <code class="font-mono text-code">FieldAnnotation</code>
             把字段引用嵌进叙事文本：hover / 点击预览字段摘要，动作跳转到字段行。
-            同页字段经 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code>
+            同页字段经 <code class="font-mono text-code">useFieldAnchor</code>
             滚动 + 展开 + 高亮（下方字段树即跳转目标，嵌套字段会自动展开祖先）；
-            跨页字段渲染为 <code class="font-mono text-[0.8125rem]">{page}#{path}</code>
-            链接，由目标页的 <code class="font-mono text-[0.8125rem]">initFromHash</code> 接管。
+            跨页字段渲染为 <code class="font-mono text-code">{page}#{path}</code>
+            链接，由目标页的 <code class="font-mono text-code">initFromHash</code> 接管。
           </p>
           <p class="mb-8 max-w-2xl leading-relaxed text-toned">
             创建部署时，
@@ -1160,25 +1160,25 @@ onMounted(() => anchor.initFromHash())
           <p class="mb-4 max-w-2xl text-sm text-muted">
             递归 schema 视图：对象字段可折叠展开子字段，覆盖 required 三态、默认值、
             示例、条件、enum、约束注记与字段 lifecycle。每行悬停时行首出现链接图标，
-            点击即复制该字段的深链接（<code class="font-mono text-[0.8125rem]">#body_gitSource_ref</code>
-            这类锚点由 <code class="font-mono text-[0.8125rem]">useFieldAnchor</code> 驱动，
+            点击即复制该字段的深链接（<code class="font-mono text-code">#body_gitSource_ref</code>
+            这类锚点由 <code class="font-mono text-code">useFieldAnchor</code> 驱动，
             带入页面时自动展开并滚动定位）。下面第一组是紧凑示例；第二组是刻意加压的
             高密度用例——超长字段名、单行多 facet（触发换行）、四层嵌套、超过默认 8 项阈值的长
             enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。第三组转录自真实端点
-            <code class="font-mono text-[0.8125rem]">POST /v1/txn/doTransaction</code>：数组元素与
-            JSON 编码内容是「值的形状」而非字段，经 <code class="font-mono text-[0.8125rem]">value</code>
-            节点表达——身份行以 <code class="font-mono text-[0.8125rem]">json&lt;object[]&gt;</code>
+            <code class="font-mono text-code">POST /v1/txn/doTransaction</code>：数组元素与
+            JSON 编码内容是「值的形状」而非字段，经 <code class="font-mono text-code">value</code>
+            节点表达——身份行以 <code class="font-mono text-code">json&lt;object[]&gt;</code>
             标出解码后的形状，折叠区复用子参数动词、只计真实属性，编码数组的解码边界与元素边界共用一个折叠区，
-            双层编码（<code class="font-mono text-[0.8125rem]">txnOrderMsg.products</code>）各自一区。
-            第四组是响应字段的输出存在性（<code class="font-mono text-[0.8125rem]">presence</code>）：
+            双层编码（<code class="font-mono text-code">txnOrderMsg.products</code>）各自一区。
+            第四组是响应字段的输出存在性（<code class="font-mono text-code">presence</code>）：
             可省略 / 可为 null / 可为空三个事实相互独立，用开发者熟悉的类型记号表达而非文字——
-            字段名后缀 <code class="font-mono text-[0.8125rem]">?</code> 表示键可缺失，类型并入
-            <code class="font-mono text-[0.8125rem]">| null</code>，调用方给出的字面空值作为又一个联合成员
-            （<code class="font-mono text-[0.8125rem]">string | null | ""</code>），零词汇；唯一文案键
-            <code class="font-mono text-[0.8125rem]">mayBeOmitted</code> 只供屏幕阅读器（视觉 <code class="font-mono text-[0.8125rem]">?</code> 不可闻）。
+            字段名后缀 <code class="font-mono text-code">?</code> 表示键可缺失，类型并入
+            <code class="font-mono text-code">| null</code>，调用方给出的字面空值作为又一个联合成员
+            （<code class="font-mono text-code">string | null | ""</code>），零词汇；唯一文案键
+            <code class="font-mono text-code">mayBeOmitted</code> 只供屏幕阅读器（视觉 <code class="font-mono text-code">?</code> 不可闻）。
             记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；
             有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
-            作用域下显示（<code class="font-mono text-[0.8125rem]">object | null</code>），不与外层字段互相继承。
+            作用域下显示（<code class="font-mono text-code">object | null</code>），不与外层字段互相继承。
           </p>
           <FieldGroup label="Request Body" :count="fields.length">
             <FieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
