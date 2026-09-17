@@ -328,13 +328,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -382,13 +382,13 @@
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -398,7 +398,7 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "8538ff8f9bc7e1a82741dd780285eb7bd66e8018414e83abaa8b6881a1eff41d"
+        "scopeDigest": "7d2e468d90ec86ad7b62c4761127ec76fef6268489454866d064fde36b5ae096"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": [
@@ -413,13 +413,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -438,13 +438,13 @@
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -460,7 +460,7 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "2acad1e3ad6cd0881c59735a137a6aebef3a697f5de4cc8df0e31edc21cd420f"
+        "scopeDigest": "1d05e8b259cc9d65c3d7af5e677656525548c54f7d068eb52bb614eaa12704b6"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": [
@@ -482,13 +482,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -505,20 +505,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "8a56b073d3d5252ae2f1b11ee2c4652bd5f81f9c1561a241513d7c6219101b77"
+        "scopeDigest": "67c1347593a17e16559822b4175a4c743e12af2e69a6d1b07071d94fcc3df10e"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -537,7 +537,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "3e52ab256a87a0b0a8aa852e7d1280f00287a283d4369f1cbc6cf2950be3b036",
+        "scopeDigest": "6fe92604b7a24478715f78b508b3b30ca63fca437c98a7dcb7f261ea3bd6056d",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -556,13 +556,13 @@
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -575,20 +575,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "42638a26be50b9d055d830538ff260b19cb5563c533f47857cb771bd3cf4bcde"
+        "scopeDigest": "40be9f37314607340b57827f6246d6f6b47e7bb1cbfc3caac17863c75e7b957a"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -597,20 +597,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "39e9ab3298292ab180e66a4703b4bf7516672ae3b1e4c6e17c1453475eb3405a"
+        "scopeDigest": "3d645ba84d1528aa7e0b6a3108fceb14471a6817222c119e85093170cbf6889a"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "c97bb896d865c484afb33f19ceceffbd351ac0ce5ab1db17e7ac2d150be82f68",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -628,20 +628,20 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "9cf2efe75c15ce9beae1035c57a592217379f9cab85211694b7056faa62842e1"
+        "scopeDigest": "e2601ba2074e56c5b44b84803dc855431f8364c7f2a610d309ca94b31872734d"
       },
       "notes": "PR #127 输出存在性：presence → `name?` / `string | null | \"\"` 记号 + 中性条件行，值节点 ValuePresence 无 optional；新增 field-presence.spec 全覆盖，明暗 / 响应式 / EN-ZH 实测无溢出。",
       "findings": []
     },
     "api-docs-schema-composition": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
@@ -651,7 +651,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "4498a69c5ddcb6eac5bd3eea5ea6ef79efe417b11b2dfac1f51459133d33714a",
+        "scopeDigest": "e105c429df67f01fee94afcb7548230aa57738ab3a0e6f95254ea956084cfdd0",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -670,13 +670,13 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -686,7 +686,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "d6c8f76afe77a5f50373521643338ceebc1b73b7d3d0c1bdb9ccdec59fbf94f0"
+        "scopeDigest": "a9253498bf34f83b1f1ebb2e263ae451f91bbb5a53a93c31d8ce2ce5a4d1b9f2"
       },
       "notes": "PR #127：popover 共用 describeFieldPresence / presenceTypeExpression，渲染 name? 与联合类型，不预览条件句；sr-only 补 `?` 的可闻文案。",
       "findings": [
@@ -708,13 +708,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -727,7 +727,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "a2f74d16ed0fc233bf77ad044d4f7ec37cfb80d5848dfec5e3e6671336629397",
+        "scopeDigest": "3b07ea3eb98bff3a54f3f733e162deda060d2ca70d81dd89f44817cb6fa41253",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -746,13 +746,13 @@
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -764,20 +764,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "1e86b00480d8f9e0ea71420d004fdbe29c851672bacb79c46ad0a144f8361db9"
+        "scopeDigest": "f54aa5eb56c2e306f6ca2c09e582746a02e7ebfcab6ca32d2186b6a7a27c44dc"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -789,20 +789,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "d87da0f724ba6b7f0ac308825c3a220fd2298fa0fe4139e9f1660d1ddcaa0ef9"
+        "scopeDigest": "fcf57e107426d6d2469aaf764dfa6f265f9b87dd7a757b62c06f5d855bdf5f6a"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -817,20 +817,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "5c30817a766c25d26a8e000bfcac5b307b049c33ee772f353be2d7312883744c"
+        "scopeDigest": "0e5037314acf5c6303521b36a0c998e6119fe8ae6f2eca66ab9d09eee68b6d34"
       },
       "notes": "PR #127 复审：共享 reference `references/kits/api-docs/index.md` 新增输出存在性段落，本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -854,13 +854,13 @@
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -896,13 +896,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -968,13 +968,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T03:23:10.418Z",
+      "lastAuditedAt": "2026-09-17T03:38:39.672Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "91e8a86caa4b3debc20c5c410492b84ace5b1d07",
-        "headSha": "3fd4f72c1bded06fe55c21ae71dd11c0eff9bea1",
+        "headSha": "fe060374b2d5c8e5b10415d8ac087878fdb04712",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
