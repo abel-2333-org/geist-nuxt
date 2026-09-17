@@ -23,7 +23,7 @@ async function readCssTree(directory) {
 
 export const requiredMarkers = [
   { marker: '--breakpoint-sm:401px', source: 'foundation/assets/css/main.css' },
-  { marker: '.text-code{', source: 'foundation/assets/css/main.css' },
+  { marker: '.text-code{font-size:var(--text-code);line-height:var(--tw-leading,var(--text-code--line-height))}', source: 'foundation/assets/css/main.css' },
   { marker: '--ui-container:100%', source: 'foundation/assets/css/main.css' },
   { marker: 'max-w-28', source: 'kits/api-docs/internal/SidebarScenarioTags.vue' },
   { marker: 'touch-manipulation', source: 'kits/api-docs/internal/SidebarScenarioTags.vue' },

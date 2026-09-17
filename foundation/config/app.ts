@@ -22,5 +22,22 @@ export default {
     slideover: {
       slots: { content: 'shadow-xl' },
     },
+    // Class merging: Nuxt UI feeds this into tailwind-variants' createTV, which
+    // builds every component's tailwind-merge instance from it. tailwind-merge
+    // only recognises the stock t-shirt sizes (text-xs/sm/…) as font-size
+    // classes; the foundation's own `text-code` utility (main.css `--text-code`)
+    // would otherwise be filed under text-color, so it neither replaces a
+    // theme's `text-sm` nor survives a caller's `text-error` (see
+    // tests/component/inline-code.spec.ts). Registering it here makes the
+    // override priority (class prop → theme default) hold for the 13px tier.
+    tv: {
+      twMergeConfig: {
+        extend: {
+          classGroups: {
+            'font-size': [{ text: ['code'] }],
+          },
+        },
+      },
+    },
   },
 }
