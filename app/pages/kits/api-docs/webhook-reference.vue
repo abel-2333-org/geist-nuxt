@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import FactList from '../../../../kits/api-docs/internal/FactList.vue'
 import FactRow from '../../../../kits/api-docs/internal/FactRow.vue'
+import type { ApiCodeLabels } from '../../../../kits/api-docs/components/CodeBlock.vue'
 
 definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower', order: 2 } })
 
@@ -42,9 +43,9 @@ definePageMeta({ nav: { label: 'Webhook 参考页', icon: 'i-lucide-radio-tower'
 // --- Webhook 身份（本页唯一 <h1>）---
 const webhook = {
   event: 'subscription.renewed',
-  summary: 'Subscription renewed',
+  summary: '订阅已续费',
   description:
-    'Sent after a subscription successfully renews for the next billing cycle. Use it to extend access, issue a receipt, or reconcile your own records. Delivered to every registered endpoint that subscribes to this event.',
+    '订阅成功续费进入下一个计费周期后发送。可据此延长访问权限、开具收据或核对自己的记录。所有订阅了本事件的 Endpoint 都会收到。',
 }
 
 // --- 通用扩展区：由页面/consumer 持有，kit 不定义认证或 relation 业务 shape ---
@@ -59,12 +60,12 @@ const partialRequirements = [
 ]
 const relations = [
   {
-    label: 'Event data object',
+    label: '事件数据对象',
     description: '查看本事件携带的订阅数据。',
     to: '#payload_data',
   },
   {
-    label: 'Previous attributes',
+    label: '变更前的属性',
     description: '查看本次续费前发生变化的字段。',
     to: '#payload_data_previousAttributes',
   },
@@ -73,7 +74,7 @@ const relations = [
 // --- 协议三段：验证 / 确认 / 投递 ---
 // 主 fixture 三段齐全，覆盖 ACK 的 literal body 语义（给 example）。
 const verification = {
-  label: 'VERIFICATION',
+  label: '验证',
   description: '每次投递都带签名头。用你的 signing secret 对原始请求体重算并比对，通过后再处理事件。',
   facts: [
     { term: '签名头', value: 'Webhook-Signature', format: 'code' as const },
@@ -87,17 +88,17 @@ const verification = {
 // 归右栏 CodeRail（见下方 ackExample + 模板 #bottom），不内联在左侧文档流里。
 // facts 里的「响应体」行明确把读者指向右栏。
 const acknowledgement = {
-  label: 'ACKNOWLEDGEMENT',
+  label: '确认',
   description: '返回下列响应即视为确认成功；其它任何响应都会触发重试。',
   facts: [
-    { term: 'HTTP status', value: '200', format: 'code' as const },
-    { term: 'Media type', value: 'application/json', format: 'code' as const },
-    { term: '响应体', value: '固定 JSON 字面量，见本页 Acknowledgement 示例。' },
+    { term: 'HTTP 状态码', value: '200', format: 'code' as const },
+    { term: '媒体类型', value: 'application/json', format: 'code' as const },
+    { term: '响应体', value: '固定 JSON 字面量，见本页「确认响应」示例。' },
   ],
 }
 
 const delivery = {
-  label: 'DELIVERY',
+  label: '投递',
   description: '未收到成功确认时按退避序列重试，最长约 28 小时。',
   facts: [
     { term: '总次数', value: '首次投递 + 最多 8 次重试。' },
@@ -111,6 +112,40 @@ const delivery = {
     expandLabel: (hidden: number) => `展开其余 ${hidden} 档`,
     collapseLabel: '收起',
   },
+}
+
+// --- chrome 本地化：kit 组件的英文默认只是中性兜底，中文页面由页面注入整套文案。
+// 保留为英文的只有领域词汇与标识符：EVENT 徽章（kit 刻意不开放）、Beta 状态词、
+// Payload / Endpoint / JSON，以及事件名、header 名等字面量。
+const fieldLabels: FieldItemLabels = {
+  required: '必填',
+  conditional: '条件必填',
+  // 与 kit 首页 valueLabels 有两处刻意不同，不是漂移：webhook payload 不是「响应」，
+  // 读者也不发送这些值，所以是「payload 中…」与「子字段」而非「响应中…」与「子参数」。
+  mayBeOmitted: 'payload 中可能不包含此字段',
+  default: '默认值',
+  example: '示例',
+  constraints: '约束',
+  note: '说明',
+  caveat: '注意',
+  since: '起始版本',
+  showChildren: '展开子字段',
+  hideChildren: '收起子字段',
+  copyLink: name => `复制 ${name} 的链接`,
+  copiedLink: name => `${name} 的链接已复制`,
+  linkCopied: name => `${name} 的链接已复制到剪贴板`,
+  linkCopyFailed: () => '复制失败，请选中地址栏手动复制',
+  // 只注入本页会渲染到的键：唯一的 enum 只有 2 个值，低于 EnumTable 的筛选阈值，
+  // 筛选框与 live region 不挂载，对应文案不预置。
+  enumLabel: '允许值',
+}
+
+const codeLabels: ApiCodeLabels = {
+  language: '语言',
+  copy: '复制代码',
+  copied: '已复制到剪贴板',
+  copyFailure: '复制失败，请重试。',
+  wrap: '自动换行',
 }
 
 // --- payload 字段树：递归 schema，驱动左侧文档流 ---
@@ -221,18 +256,16 @@ const payloadExample = [
   },
 ]
 
+const payloadLabels: ApiCodeLabels = { ...codeLabels, copySuccess: 'Payload 示例已复制。' }
+
 // ACK 固定响应体（literal）——作为右栏底部卡，直接喂给 <CodeBlock>。
 const ackExample = {
   code: '{\n  "received": true\n}',
   language: 'json',
-  title: 'Acknowledgement',
+  title: '确认响应',
   labels: {
-    language: '语言',
-    copy: '复制代码',
-    copied: '已复制到剪贴板',
+    ...codeLabels,
     copySuccess: '确认响应体已复制。',
-    copyFailure: '复制失败，请重试。',
-    wrap: '自动换行',
     emptyTitle: '暂无示例',
     emptyHint: '当前没有确认响应体示例。',
   },
@@ -242,14 +275,14 @@ const ackExample = {
 // partial：协议缺「确认」段（echo/空/字面之外，有些事件干脆不要求特定确认体）；
 //          且不提供 payload 示例——文档只描述字段，不给样本。
 const partialVerification = {
-  label: 'VERIFICATION',
+  label: '验证',
   facts: [
     { term: '签名头', value: 'Webhook-Signature', format: 'code' as const },
     { term: '算法', value: 'HMAC-SHA256', format: 'code' as const },
   ],
 }
 const partialDelivery = {
-  label: 'DELIVERY',
+  label: '投递',
   facts: [{ term: '总次数', value: '最多 5 次。' }],
   schedule: { term: '重试节奏', summary: '每 15 分钟一次，间隔固定，无退避。' },
 }
@@ -286,7 +319,7 @@ onMounted(() => anchor.initFromHash())
       :min-size="360"
       :max-size="640"
       :min-opposite="380"
-      label="Resize documentation and payload panels"
+      label="调整文档栏与示例栏的宽度"
     >
       <template #start>
         <div class="lg:pe-8">
@@ -308,7 +341,7 @@ onMounted(() => anchor.initFromHash())
           <div class="mt-8 space-y-12">
             <!-- 可选 requirements / guide 扩展区：页面只定义位置与语义层级，
                  consumer 自己提供已解析、已本地化的内容。 -->
-            <FieldGroup label="Requirements">
+            <FieldGroup label="前置条件">
               <div class="space-y-4 pt-2">
                 <FactList>
                   <FactRow
@@ -345,12 +378,12 @@ onMounted(() => anchor.initFromHash())
               <p class="text-sm leading-relaxed text-muted">
                 <code class="font-mono text-code">name?</code> 表示该字段可能不出现在 payload 中。
               </p>
-              <FieldGroup label="Event Payload" :count="payloadFields.length">
+              <FieldGroup label="事件 Payload" :count="payloadFields.length">
                 <FieldItem
                   v-for="f in payloadFields"
                   :key="f.path ?? f.name"
                   v-bind="f"
-                  :labels="{ mayBeOmitted: 'payload 中可能不包含此字段' }"
+                  :labels="fieldLabels"
                 />
               </FieldGroup>
             </div>
@@ -365,7 +398,7 @@ onMounted(() => anchor.initFromHash())
 
             <!-- 可选 relations 扩展区：仅承载通用链接/描述，不把 callback、
                  response-link 或消费项目路由 shape 固化进 kit。 -->
-            <FieldGroup label="Related Resources">
+            <FieldGroup label="相关资源">
               <ul class="divide-y divide-default">
                 <li v-for="relation in relations" :key="relation.to">
                   <ULink
@@ -395,11 +428,16 @@ onMounted(() => anchor.initFromHash())
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
           <CodeRail
             storage-key="api-docs-webhook-rail-split"
-            resize-label="Resize payload and acknowledgement panels"
+            resize-label="调整 Payload 与确认响应面板的高度"
             class="h-full max-lg:space-y-4"
           >
             <template #top="{ maxHeight }">
-              <RequestExample title="Payload" :scenarios="payloadExample" :max-height="maxHeight" />
+              <RequestExample
+                title="Payload"
+                :scenarios="payloadExample"
+                :labels="payloadLabels"
+                :max-height="maxHeight"
+              />
             </template>
             <template #bottom="{ maxHeight }">
               <CodeBlock
@@ -440,9 +478,9 @@ onMounted(() => anchor.initFromHash())
               <WebhookBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">invoice.finalized</code>
             </div>
-            <h3 class="text-lg font-semibold tracking-tight text-highlighted">Invoice finalized</h3>
+            <h3 class="text-lg font-semibold tracking-tight text-highlighted">账单已定稿</h3>
           </header>
-          <FieldGroup label="Requirements" :heading-level="4">
+          <FieldGroup label="前置条件" :heading-level="4">
             <FactList class="pt-2">
               <FactRow
                 v-for="item in partialRequirements"
@@ -456,8 +494,8 @@ onMounted(() => anchor.initFromHash())
             :delivery="partialDelivery"
             :heading-level="4"
           />
-          <FieldGroup label="Event Payload" :count="partialPayloadFields.length" :heading-level="4">
-            <FieldItem v-for="f in partialPayloadFields" :key="f.path" v-bind="f" />
+          <FieldGroup label="事件 Payload" :count="partialPayloadFields.length" :heading-level="4">
+            <FieldItem v-for="f in partialPayloadFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
           </FieldGroup>
         </figure>
 
@@ -471,10 +509,10 @@ onMounted(() => anchor.initFromHash())
               <WebhookBadge />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">ping.sent</code>
             </div>
-            <h3 class="text-lg font-semibold tracking-tight text-highlighted">Ping sent</h3>
+            <h3 class="text-lg font-semibold tracking-tight text-highlighted">Ping 已发送</h3>
           </header>
-          <FieldGroup label="Event Payload" :count="minimalPayloadFields.length" :heading-level="4">
-            <FieldItem v-for="f in minimalPayloadFields" :key="f.path" v-bind="f" />
+          <FieldGroup label="事件 Payload" :count="minimalPayloadFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalPayloadFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
           </FieldGroup>
         </figure>
       </div>

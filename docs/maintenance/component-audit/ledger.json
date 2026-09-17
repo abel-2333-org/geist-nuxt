@@ -413,13 +413,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
+        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -431,9 +431,9 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "67a8bf335e6e29a75540f3ad2607d8af03bb4c623142081163e3761d408120a2"
+        "scopeDigest": "9c037dc62d428136ea2c72f7cf0e4ca3802d4cd0180d17450eac3d3667dc5b0c"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/endpoint-reference.vue`（endpoint 参考页在 Response Body 上方新增页面自有记号说明）；`app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页在 Event Payload 上方新增记号说明并注入 mayBeOmitted）；本组件代码与契约未变，复核无回归。",
+      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-response-example": {
@@ -708,13 +708,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
+        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -727,7 +727,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "f556bf5be8ed406b23f2fe34f7a5075d29204d52e3e78b12ae14b7d23817b106",
+        "scopeDigest": "041f6a2edadd9433e0fcff2dccbb6e0fbad55830785817ff5b428a4ad49f72f7",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -741,7 +741,7 @@
           }
         ]
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页在 Event Payload 上方新增记号说明并注入 mayBeOmitted）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
@@ -796,13 +796,13 @@
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
+        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -817,20 +817,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "051445ac40fdc7e1d30621f6bc54c86ffdf483e7405d72d5867af0f77507c6ab"
+        "scopeDigest": "4e554894af36e045425248078b40213c1e162c1a23d0b31ac71b54f4277763de"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/endpoint-reference.vue`（endpoint 参考页在 Response Body 上方新增页面自有记号说明）；`app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；`app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页在 Event Payload 上方新增记号说明并注入 mayBeOmitted）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
+        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -847,9 +847,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "d141235ed2ca92b5d36808f1b8947e21aee5ae3d0dc8336aa13460803c5fcc99"
+        "scopeDigest": "5af910d21af429142bc0bdce69e4cd1621229aa8645b1c1627cd06d7486d0584"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/endpoint-reference.vue`（endpoint 参考页在 Response Body 上方新增页面自有记号说明）；`app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页在 Event Payload 上方新增记号说明并注入 mayBeOmitted）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-site-search": {
@@ -896,13 +896,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-17T08:05:41.467Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "78771f76851ccd7a88a4910a4977495682b27e6b",
+        "headSha": "0d9dfedc73f60fe517f4a38ca3287fd0237a7e24",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -917,9 +917,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "698d90bf00a836b8053806494972eb55a14605dd95cf99bb0e3212f43f96077b"
+        "scopeDigest": "51c9c873fac7ae0a9243be2b96a0970b457bedd6b9e902f738a60417f10af8ad"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页在 Event Payload 上方新增记号说明并注入 mayBeOmitted）；`references/kits/api-docs/index.md`（共享 reference 的 FieldItem / FieldAnnotation 行与 presence 配色条补充 `?` 提示说明）；本组件代码与契约未变，复核无回归。",
+      "notes": "webhook 参考页本地化复审：scope 内变动仅 `app/pages/kits/api-docs/webhook-reference.vue`（webhook 参考页文案本地化：页面自有标题与事件文案、注入 FieldItem / RequestExample / CodeBlock 中文 labels、resize 无障碍名称；新增 / 改写注入的 chrome labels 与页面自有文案，不改组件源码与页面结构）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
