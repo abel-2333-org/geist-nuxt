@@ -806,7 +806,85 @@ const valueLabels: FieldItemLabels = {
   eachMember: '每个键',
   decodedRequirements: '值要求',
   decodedArrayRequirements: '数组要求',
+  // 输出存在性只有这一个文案键：`?` 对屏幕阅读器不可闻，sr-only 补一句。
+  mayBeOmitted: '可省略',
 }
+
+// 第四组：输出字段存在性（issue #127）。合成 fixture 逐一覆盖始终存在、仅 nullable、
+// 仅 optional、三者组合、带条件，以及字段 / 值边界——外层字段可省略不下传给元素，
+// 元素可为 null 不上浮到字段行；解码内容的「空」是编码后的空容器 `"[]"`，不是 `[]`。
+// 全部是响应字段：不带 required，也不从缺少 required 推断任何存在性。
+const presenceFields: FieldNode[] = [
+  {
+    path: 'out_id',
+    name: 'id',
+    type: 'string',
+    description: '交易 id。始终存在：不带 presence 的行就是「总是有值」，不需要任何标记。',
+    examples: ['txn_8Kx2fQ'],
+  },
+  {
+    path: 'out_settledAt',
+    name: 'settledAt',
+    type: 'integer',
+    format: 'unix_ms',
+    presence: { nullable: true },
+    description: '清算时间。键始终存在，未清算时为 `null`。',
+  },
+  {
+    path: 'out_failureCode',
+    name: 'failureCode',
+    type: 'string',
+    presence: { optional: true },
+    description: '失败码。成功交易的响应里没有这个键。',
+    examples: ['insufficient_funds'],
+  },
+  {
+    path: 'out_receiptUrl',
+    name: 'receiptUrl',
+    type: 'string',
+    presence: {
+      optional: true,
+      nullable: true,
+      empty: '""',
+      condition: '仅 `status` 为 `succeeded` 时返回；收据尚未生成时为 `null`，商户关闭收据功能时为空字符串。',
+    },
+    description: '收据地址。三个存在性事实相互独立：可省略、可为 null、可为空各自有各自的触发条件。',
+    notes: [{ label: '格式', text: '绝对 https 地址。' }],
+  },
+  {
+    path: 'out_refunds',
+    name: 'refunds',
+    type: 'array',
+    presence: { optional: true, condition: '仅在发生过退款时返回；从未退款的交易没有这个键。' },
+    description: '退款记录。字段可省略是字段自己的事实，不会下传给数组元素。',
+    value: {
+      relation: 'item',
+      type: 'object',
+      presence: { nullable: true, condition: '退款被风控撤销后，对应位置保留为 `null`，数组长度不变。' },
+      fields: [
+        { path: 'out_refunds_id', name: 'id', type: 'string', description: '退款 id。' },
+        { path: 'out_refunds_amount', name: 'amount', type: 'integer', description: '退款金额（最小货币单位）。' },
+      ],
+    },
+  },
+  {
+    path: 'out_extra',
+    name: 'extra',
+    type: 'string',
+    format: 'json_string',
+    presence: { nullable: true },
+    description: '扩展信息。字段值可为 `null`；解码后内容可能是编码过的空对象——两个"空"分属两层，各标各的。',
+    value: {
+      relation: 'decoded',
+      codec: 'json',
+      type: 'object',
+      presence: { empty: '"{}"' },
+      fields: [
+        { path: 'out_extra_channel', name: 'channel', type: 'string', description: '渠道标识。' },
+      ],
+    },
+  },
+]
 
 const fieldLabels = {
   category: '字段',
@@ -1092,6 +1170,15 @@ onMounted(() => anchor.initFromHash())
             节点表达——身份行以 <code class="font-mono text-[0.8125rem]">json&lt;object[]&gt;</code>
             标出解码后的形状，折叠区复用子参数动词、只计真实属性，编码数组的解码边界与元素边界共用一个折叠区，
             双层编码（<code class="font-mono text-[0.8125rem]">txnOrderMsg.products</code>）各自一区。
+            第四组是响应字段的输出存在性（<code class="font-mono text-[0.8125rem]">presence</code>）：
+            可省略 / 可为 null / 可为空三个事实相互独立，用开发者熟悉的类型记号表达而非文字——
+            字段名后缀 <code class="font-mono text-[0.8125rem]">?</code> 表示键可缺失，类型并入
+            <code class="font-mono text-[0.8125rem]">| null</code>，调用方给出的字面空值作为又一个联合成员
+            （<code class="font-mono text-[0.8125rem]">string | null | ""</code>），零词汇；唯一文案键
+            <code class="font-mono text-[0.8125rem]">mayBeOmitted</code> 只供屏幕阅读器（视觉 <code class="font-mono text-[0.8125rem]">?</code> 不可闻）。
+            记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；
+            有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
+            作用域下显示（<code class="font-mono text-[0.8125rem]">object | null</code>），不与外层字段互相继承。
           </p>
           <FieldGroup label="Request Body" :count="fields.length">
             <FieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
@@ -1106,6 +1193,12 @@ onMounted(() => anchor.initFromHash())
           <div class="mt-8">
             <FieldGroup label="doTransaction · 编码内容与数组元素" :count="valueFields.length">
               <FieldItem v-for="f in valueFields" :key="f.path ?? f.name" v-bind="f" :labels="valueLabels" />
+            </FieldGroup>
+          </div>
+
+          <div class="mt-8">
+            <FieldGroup label="Response · 输出字段存在性" :count="presenceFields.length">
+              <FieldItem v-for="f in presenceFields" :key="f.path ?? f.name" v-bind="f" :labels="valueLabels" />
             </FieldGroup>
           </div>
         </div>

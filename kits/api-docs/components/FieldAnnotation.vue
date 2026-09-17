@@ -26,6 +26,8 @@ export interface FieldAnnotationLabels extends AnnotationPopoverLabels {
   category?: string
   required?: string
   conditional?: string
+  /** Screen-reader text behind the visual `?` on an omittable output key. */
+  mayBeOmitted?: string
   /** Caption of the jump-to-field action. */
   viewField?: string
 }
@@ -43,10 +45,11 @@ const props = withDefaults(
   { labels: () => ({}) },
 )
 
-const t = computed<Required<Pick<FieldAnnotationLabels, 'category' | 'required' | 'conditional' | 'viewField'>>>(() => ({
+const t = computed<Required<Pick<FieldAnnotationLabels, 'category' | 'required' | 'conditional' | 'mayBeOmitted' | 'viewField'>>>(() => ({
   category: 'Field',
   required: 'Required',
   conditional: 'Conditional',
+  mayBeOmitted: 'may be omitted',
   viewField: 'View field details',
   ...props.labels,
 }))
@@ -74,6 +77,11 @@ if (import.meta.dev || import.meta.test) {
 // a `condition`. Sharing the function — not re-reading `required` here — is
 // what keeps the two surfaces from drifting.
 const requiredState = computed(() => (node.value ? fieldRequiredState(node.value) : null))
+// Output presence shares the row's derivation for the same reason: the
+// popover previews the row, so it must show exactly the notation the row
+// shows (`name?`, `string | null | ""`).
+const presence = computed(() => describeFieldPresence(node.value?.presence))
+const typeExpression = computed(() => presenceTypeExpression(node.value?.type, presence.value.unionTail))
 
 const route = useRoute()
 const anchor = useFieldAnchor()
@@ -115,11 +123,16 @@ function jump(close: () => void) {
 
     <template #content>
       <div class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-        <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}</InlineCode>
+        <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}<template v-if="presence.optional"><span
+          data-field-optional
+          aria-hidden="true"
+          class="text-dimmed"
+        >?</span><span class="sr-only"> ({{ t.mayBeOmitted }})</span></template></InlineCode>
         <!-- Shrinkable like its siblings: `shrink-0` would pin the span to
              max-content, and a long union type then overflows the fixed-width
-             panel no matter how the text is allowed to wrap. -->
-        <span class="wrap-anywhere min-w-0 font-mono text-xs text-muted">{{ node.type }}</span>
+             panel no matter how the text is allowed to wrap. The presence
+             notation (`| null | ""`) is part of this same type expression. -->
+        <span data-field-type class="wrap-anywhere min-w-0 font-mono text-xs text-muted">{{ typeExpression }}</span>
         <span v-if="node.format" class="wrap-anywhere font-mono text-xs text-dimmed">{{ node.format }}</span>
         <span
           v-if="requiredState"

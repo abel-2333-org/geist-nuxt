@@ -8,6 +8,7 @@
 // same uppercase dimmed scope label, same `fit-content(8rem)` information
 // column. A value's rules and a field's rules read as the same kind of fact —
 // only the SCOPE differs, and the scope is exactly what the label carries.
+import { presenceTypeExpression } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, ValueRequirementsBlock } from '../utils/field'
 
 const props = defineProps<{
@@ -42,6 +43,31 @@ const node = computed(() => props.block.node)
     <p class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ block.label }}</p>
 
     <div class="flex flex-col gap-3 border-s border-default/60 ps-3">
+      <!-- This VALUE's presence (an element may be null, decoded content may
+           be `[]`), as the same type notation the owner's identity line uses
+           — `object | null` — but scoped under this heading, which is the
+           whole point: the owner row never shows it, and the owner's own
+           `| null` never lands here. A value has no key, so `?` cannot
+           appear (typed out and stripped at runtime). -->
+      <div
+        v-if="block.presence.unionTail.length || block.presence.condition"
+        data-value-presence
+        class="flex flex-col gap-2"
+      >
+        <p
+          v-if="block.presence.unionTail.length"
+          class="wrap-anywhere font-mono text-xs text-muted"
+          translate="no"
+        >{{ presenceTypeExpression(node.type, block.presence.unionTail) }}</p>
+        <div
+          v-if="block.presence.condition"
+          data-value-presence-condition
+          class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
+        >
+          <InlineMarkdown :text="block.presence.condition" />
+        </div>
+      </div>
+
       <p v-if="node.description" class="text-sm leading-relaxed text-toned">
         <InlineMarkdown :text="node.description" />
       </p>

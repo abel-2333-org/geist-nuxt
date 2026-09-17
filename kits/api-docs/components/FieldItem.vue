@@ -10,8 +10,10 @@ export type {
   FieldLifecycleInfo,
   FieldNode,
   FieldNote,
+  FieldPresence,
   FieldValueNode,
   RequiredState,
+  ValuePresence,
   ValueRelation,
 } from '#imports'
 </script>
@@ -35,10 +37,12 @@ export type {
 // composable (auto-imported).
 //
 // Anatomy:  summary row  ── anchor · signature
-//                           (name/type/format/requiredness/lifecycle) · trailing
-//                           fallback fact (default); container-width responsive,
-//                           optional remains unmarked
-//           leaf detail  ── deprecation note → condition rule → description →
+//                           (name[?]/type[| null | ""]/format/requiredness/
+//                           lifecycle) · trailing fallback fact (default);
+//                           container-width responsive, request-optional
+//                           remains unmarked
+//           leaf detail  ── deprecation note → condition rule → presence rule
+//                           → description →
 //                           caveat callout(s) → aligned fact band (enum →
 //                           constraints → example → new/beta lifecycle metadata)
 //           value        ── the field's VALUE shape (array element / record
@@ -90,6 +94,7 @@ type PassthroughLabel =
 const t = computed<Required<Omit<FieldItemLabels, PassthroughLabel>>>(() => ({
   required: 'Required',
   conditional: 'Conditional',
+  mayBeOmitted: 'may be omitted',
   default: 'Default',
   example: 'Example',
   constraints: 'Constraints',
@@ -180,10 +185,21 @@ const valueCodec = computed(() => describeValueCodec(props.value))
 const formatToken = computed(() => valueCodec.value?.token ?? props.format)
 const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== props.format)
 
+// Output presence (may be omitted / null / empty), rendered as type notation:
+// `name?` and `string | null | ""`. Derived by the shared pure function so the
+// identity line, the value scopes and the FieldAnnotation popover cannot
+// disagree. It is NOT a requiredness marker: a response field is never
+// "optional" in the request sense, `?` never appears on a request row (whose
+// optional state is silent), and nothing is inferred from a missing `required`.
+const presence = computed(() => describeFieldPresence(props.presence))
+const presenceCondition = computed(() => presence.value.condition)
+const typeExpression = computed(() => presenceTypeExpression(props.type, presence.value.unionTail))
+
 const hasDetail = computed(
   () =>
     !!props.description
     || !!props.condition
+    || !!presenceCondition.value
     || (props.examples?.length ?? 0) > 0
     || (props.notes?.length ?? 0) > 0
     || hasEnum.value
@@ -272,18 +288,29 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             class="wrap-anywhere min-w-0 font-mono text-sm font-medium"
             :class="isDeprecated ? 'text-dimmed line-through' : 'text-highlighted'"
             translate="no"
-          >{{ name }}</code>
+          >{{ name }}<template v-if="presence.optional"><span
+            data-field-optional
+            aria-hidden="true"
+            class="font-normal text-dimmed"
+          >?</span><span class="sr-only"> ({{ t.mayBeOmitted }})</span></template></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the
                least informative token on the row — on the consumer endpoint
                that settled this, every structured field's type is `string`.
                So the two swap weight: the shape the reader is scanning for
                takes the type's own emphasis, and `string` steps back. A field
                with no decode boundary keeps today's weighting exactly. -->
+          <!-- Output presence rides on the type as notation — `string | null | ""`
+               — in the same grey register, because it is a fact about the
+               payload's shape, not a gate: the required-strength colours
+               (red / amber) stay reserved for what the CALLER must do. The
+               span may shrink (no `shrink-0`) so a union breaks at its ` | `
+               instead of overflowing a narrow column. -->
           <span
-            class="shrink-0 font-mono text-xs"
+            data-field-type
+            class="wrap-anywhere min-w-0 font-mono text-xs"
             :class="shapeLeads ? 'text-dimmed' : 'text-muted'"
             translate="no"
-          >{{ type }}</span>
+          >{{ typeExpression }}</span>
           <span
             v-if="formatToken"
             class="wrap-anywhere font-mono text-xs"
@@ -399,6 +426,22 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         class="border-s-2 border-warning ps-3 text-sm leading-relaxed text-toned"
       >
         <InlineMarkdown :text="condition" />
+      </div>
+
+      <!-- 2b. Presence rule — "when is this omitted / null / empty?". Same
+           bordered-rule form as the request condition (it is also a fact, not
+           a risk, and also has no lead-in: the identity line's conditional
+           token is the word that points here) but a NEUTRAL border. Amber is
+           the required-strength axis; a payload fact must not read as a
+           caller obligation. It stays out of `notes` and off the constraints
+           band — where a consumer used to shove it — because a constraint is
+           an input boundary and this is output behaviour. -->
+      <div
+        v-if="presenceCondition"
+        data-field-presence-condition
+        class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
+      >
+        <InlineMarkdown :text="presenceCondition" />
       </div>
 
       <p v-if="description" class="text-sm leading-relaxed text-toned">
