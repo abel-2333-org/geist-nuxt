@@ -13,8 +13,10 @@
 //  - a static class attribute (`class`, `trigger-class`, `contentClass`) as a whole;
 //  - each string literal inside a bound class attribute (`:class`, `:ui`,
 //    `:trigger-class`) and in script / .ts code;
-//  - inside a bound class attribute only: an innermost array of plain members
-//    (no objects, no conditional operator), joined — `['text-code', 'text-sm']`.
+//  - inside a bound class attribute only: the plain members of an innermost
+//    array, joined — `['text-code', { on }, 'text-sm']`. Object members and
+//    `${}` interpolations are dropped first (their classes are conditional),
+//    and an array whose remaining members use a conditional operator is skipped.
 // Arrays in script code are never joined: there they are overwhelmingly data
 // (type-scale tables, menu items), and joining them would flag a gallery table
 // that lists `text-code` next to `text-sm` as two separate rows.
@@ -22,9 +24,8 @@
 // switch) and literals separated by `?:`, `&&` or `||` — exclusive branches
 // must not be flagged.
 // Known misses, accepted for a regex-level guard: pairings assembled from
-// conditional array members, arrays that contain an object or a `${}`
-// interpolation (array + object syntax disables the join for that array),
-// nested arrays, `+` concatenation, class arrays in script code, CSS /
+// conditional array members or object-syntax keys, nested arrays,
+// `+` concatenation, class arrays in script code, CSS /
 // `@apply` (the repo has none), a `/*` or `</script>` inside a string literal.
 // Non-class attributes and template prose are out of scope by design.
 // Known cost: a single string literal that contains both tiers is always
@@ -61,11 +62,22 @@ function stringLiterals(code) {
   return [...code.matchAll(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)].map(match => match[2])
 }
 
-/** Innermost arrays of plain members (no objects, no conditionals) are one class list. */
+/** Drops `{…}` object members and `${…}` interpolations, innermost first. */
+function withoutBracedFragments(code) {
+  let previous
+  do {
+    previous = code
+    code = code.replace(/\$?\{[^{}]*\}/g, ' ')
+  } while (code !== previous)
+  return code
+}
+
+/** The plain members of an innermost array are one class list. */
 function joinedPlainArrays(expression) {
   return [...expression.matchAll(/\[([^[\]]*)\]/g)]
-    .filter(match => !CONDITIONAL.test(match[1]) && !/[{}]/.test(match[1]))
-    .map(match => stringLiterals(match[1]).join(' '))
+    .map(match => withoutBracedFragments(match[1]))
+    .filter(members => !CONDITIONAL.test(members))
+    .map(members => stringLiterals(members).join(' '))
 }
 
 function boundAttributeSegments(expression) {
@@ -157,6 +169,24 @@ test('flags pairings inside bound class attributes', () => {
   assert.deepEqual(findPairings(inTemplate('<p :class="`text-code ${tone} text-sm`" />')), ['text-code ${tone} text-sm'])
   assert.deepEqual(findPairings(inTemplate(`<p :class="['font-mono', 'text-code', 'text-sm']" />`)), ['font-mono text-code text-sm'])
   assert.deepEqual(findPairings(inTemplate(`<UBadge :ui="{ base: 'text-code text-xs' }" />`)), ['text-code text-xs'])
+  assert.deepEqual(findPairings(inTemplate(`<UBadge :ui="{ base: ['text-code', 'text-xs'] }" />`)), ['text-code text-xs'])
+})
+
+test('joins the plain members of arrays that also hold objects or interpolations', () => {
+  assert.deepEqual(
+    findPairings(inTemplate(`<p :class="['text-code', { 'font-bold': strong && loud }, 'text-sm']" />`)),
+    ['text-code text-sm'],
+  )
+  assert.deepEqual(
+    findPairings(inTemplate(`<p :class="[base, 'text-code', 'text-sm', { on }]" />`)),
+    ['text-code text-sm'],
+  )
+  // The interpolation is dropped, so only assert that the pairing is reported.
+  assert.equal(findPairings(inTemplate('<p :class="[\'text-code\', `gap-${n}`, \'text-sm\']" />')).length, 1)
+  assert.deepEqual(
+    findPairings(inTemplate(`<p :class="['text-code', { nested: { deep: true } }, 'text-xs!']" />`)),
+    ['text-code text-xs!'],
+  )
 })
 
 test('flags pairings in script and .ts string literals', () => {
@@ -180,6 +210,9 @@ test('allows single tiers, exclusive branches and responsive switches', () => {
     `<p :class="dense ? 'text-code' : 'text-sm'" />`,
     `<p :class="[dense ? 'text-code' : 'text-sm', 'font-mono']" />`,
     `<p :class="['font-mono', dense && 'text-code', 'text-sm']" />`,
+    `<p :class="['text-code', { 'text-sm': dense }]" />`,
+    `<p :class="[{ 'text-code': mono }, { 'text-sm': !mono }]" />`,
+    `<p :class="[dense ? { a } : { b }, 'text-code', 'text-sm']" />`,
     '<code class="text-code md:text-sm dark:text-xs">x</code>',
     '<code class="font-mono text-[13px] text-sm">x</code>',
     '<InlineCode class="text-xs">x</InlineCode><code class="text-code">y</code>',
