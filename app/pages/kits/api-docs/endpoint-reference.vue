@@ -611,9 +611,12 @@ onMounted(() => anchor.initFromHash())
                     :fact="item"
                   >
                     <template #value>
-                      <span class="wrap-anywhere text-sm text-highlighted">
+                      <span v-if="item.value !== undefined" class="wrap-anywhere text-sm text-highlighted">
                         <InlineMarkdown :text="item.value" />
                       </span>
+                      <p v-if="item.note" class="wrap-anywhere text-sm leading-relaxed text-muted">
+                        {{ item.note }}
+                      </p>
                     </template>
                   </FactRow>
                 </FactList>
@@ -661,7 +664,7 @@ onMounted(() => anchor.initFromHash())
                     <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                     <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                   </dt>
-                  <dd class="text-sm leading-relaxed text-muted">
+                  <dd class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted">
                     <InlineMarkdown :text="err.when" />
                   </dd>
                 </div>
@@ -768,7 +771,7 @@ onMounted(() => anchor.initFromHash())
                   <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                   <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                 </dt>
-                <dd class="text-sm leading-relaxed text-muted">
+                <dd class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted">
                   <InlineMarkdown :text="err.when" />
                 </dd>
               </div>
