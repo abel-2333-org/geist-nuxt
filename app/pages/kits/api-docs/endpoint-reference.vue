@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FactList from '../../../../kits/api-docs/internal/FactList.vue'
-import FactRow from '../../../../kits/api-docs/internal/FactRow.vue'
+import FactRow, { type Fact } from '../../../../kits/api-docs/internal/FactRow.vue'
 
 definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', order: 1 } })
 
@@ -63,7 +63,7 @@ const selectedHost = computed(
 // --- 通用扩展区：由页面/consumer 持有，kit 不定义认证或 relation 业务 shape ---
 // full 同时提供 requirements/guide + relations；partial 只保留 requirements；
 // minimal 两者都省略，扩展区独立出现/省略时不会留下空壳。
-const requirements = [
+const requirements: Fact[] = [
   { term: '认证', value: 'Bearer token，作用域需含 `deployments:write`。' },
   { term: 'Content-Type', value: 'application/json 或 multipart/form-data。' },
 ]
