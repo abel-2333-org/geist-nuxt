@@ -11,6 +11,10 @@
 - 允许执行到:scan → 分支/worktree → 实现 → tests → commit → push 分支 → 创建/更新 Draft PR,然后停止;
 - 未经人工明确授权,不得:push `main`、merge PR、squash merge、close finding(`wont-fix` 判定属于人工)、
   删除远端分支、把 Draft PR 转 ready、启用 auto-merge;
+- **metadata-only 豁免**:以下三项**同时**满足时,scheduled task 可直接创建非 draft PR(仍不得 merge / 启用
+  auto-merge,由人工在 checks 全绿后决定):① 当日复审的全部 item 均为 `change: "none"`,且这些 item 无 open finding;
+  ② PR diff 只含 `docs/maintenance/component-audit/**`;③ PR 描述注明「metadata-only」。任一不满足一律 Draft,
+  且创建后的 Draft → ready 仍属人工;
 - 审计报告与 `ledger.json` 更新也走 PR 分支,**禁止直推 main**;PR 合并后才进入 canonical main。
 
 > main protection 的强制执行还需要 GitHub 仓库侧的 branch protection / ruleset(禁止直推、要求 PR 与
