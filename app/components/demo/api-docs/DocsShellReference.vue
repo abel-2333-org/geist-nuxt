@@ -44,6 +44,35 @@ const paymentsRequestScenarios = computed(
   () => makePaymentsRequestScenarios(selectedHost.value.baseUrl),
 )
 
+// chrome 本地化：kit 组件的英文默认只是中性兜底，中文 demo 由本层注入整套文案
+// （与 endpoint / webhook 参考页同口径）。webhook payload 一组刻意不同：payload 不是
+// 「响应」，读者也不发送这些值，所以是「payload 中…」与「子字段」。右栏 Request /
+// Response 示例卡的 chrome 全 gallery 统一沿用英文默认，另行处理。
+const fieldLabels: FieldItemLabels = {
+  required: '必填',
+  conditional: '条件必填',
+  mayBeOmitted: '响应中可能不返回此字段',
+  default: '默认值',
+  example: '示例',
+  constraints: '约束',
+  note: '说明',
+  caveat: '注意',
+  since: '起始版本',
+  showChildren: '展开子参数',
+  hideChildren: '收起子参数',
+  copyLink: name => `复制 ${name} 的链接`,
+  copiedLink: name => `${name} 的链接已复制`,
+  linkCopied: name => `${name} 的链接已复制到剪贴板`,
+  linkCopyFailed: () => '复制失败，请选中地址栏手动复制',
+  enumLabel: '允许值',
+}
+const payloadFieldLabels: FieldItemLabels = {
+  ...fieldLabels,
+  mayBeOmitted: 'payload 中可能不包含此字段',
+  showChildren: '展开子字段',
+  hideChildren: '收起子字段',
+}
+
 // 深链接：带 `#path` 进入时自动展开 + 滚动定位到对应字段（三层导航的第三层）。
 const anchor = useFieldAnchor()
 onMounted(() => anchor.initFromHash())
@@ -131,12 +160,12 @@ onMounted(() => anchor.initFromHash())
             <!-- 端点标题是 h2，字段分组归入其下为 h3（FieldGroup 默认 h2
                  是给独立成岛的场景用的） -->
             <div class="mt-8 space-y-10">
-              <FieldGroup label="Request Body" :count="paymentsBodyFields.length" :heading-level="3">
-                <FieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" />
+              <FieldGroup label="请求体" :count="paymentsBodyFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsBodyFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
               </FieldGroup>
 
-              <FieldGroup label="Response Body" :count="paymentsResponseFields.length" :heading-level="3">
-                <FieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" />
+              <FieldGroup label="响应体" :count="paymentsResponseFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsResponseFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
               </FieldGroup>
             </div>
           </div>
@@ -144,7 +173,12 @@ onMounted(() => anchor.initFromHash())
 
         <template #end>
           <div class="xl:sticky xl:top-[var(--docs-shell-sticky-offset)] xl:h-[calc(100dvh-var(--docs-shell-sticky-offset)-2rem)]">
-            <CodeRail enabled-from="xl" storage-key="docs-shell-rail-split" class="h-full max-xl:space-y-4">
+            <CodeRail
+              enabled-from="xl"
+              storage-key="docs-shell-rail-split"
+              resize-label="调整请求与响应面板的高度"
+              class="h-full max-xl:space-y-4"
+            >
               <template #top="{ maxHeight }">
                 <RequestExample :scenarios="paymentsRequestScenarios" :max-height="maxHeight" />
               </template>
@@ -234,8 +268,8 @@ onMounted(() => anchor.initFromHash())
             </OperationHeader>
 
             <div class="mt-8 space-y-10">
-              <FieldGroup label="Event Payload" :count="paymentsWebhookPayloadFields.length" :heading-level="3">
-                <FieldItem v-for="f in paymentsWebhookPayloadFields" :key="f.path" v-bind="f" />
+              <FieldGroup label="事件 Payload" :count="paymentsWebhookPayloadFields.length" :heading-level="3">
+                <FieldItem v-for="f in paymentsWebhookPayloadFields" :key="f.path" v-bind="f" :labels="payloadFieldLabels" />
               </FieldGroup>
             </div>
           </div>

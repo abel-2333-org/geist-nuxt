@@ -43,9 +43,9 @@ definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', or
 const endpoint = {
   method: 'POST',
   path: '/v1/deployments',
-  summary: 'Create a deployment',
+  summary: '创建部署',
   description:
-    'Trigger a new deployment for a project from a Git source or an inline file set. Returns the created deployment with its initial build state.',
+    '从 Git 仓库或内联文件集为项目触发一次新部署，返回创建的部署对象及其初始构建状态。',
 }
 
 // --- 环境联动：选中 host 提升到本页持有——OperationTarget（地址栏 + 复制）
@@ -64,17 +64,17 @@ const selectedHost = computed(
 // full 同时提供 requirements/guide + relations；partial 只保留 requirements；
 // minimal 两者都省略，扩展区独立出现/省略时不会留下空壳。
 const requirements = [
-  { term: 'Authentication', value: 'Bearer token，作用域需含 `deployments:write`。' },
+  { term: '认证', value: 'Bearer token，作用域需含 `deployments:write`。' },
   { term: 'Content-Type', value: 'application/json 或 multipart/form-data。' },
 ]
 const relations = [
   {
-    label: 'Deployment object',
+    label: '部署对象',
     description: '查看返回的部署对象完整字段。',
     to: '#res_id',
   },
   {
-    label: 'Build state',
+    label: '构建状态',
     description: '了解部署状态机各枚举值的含义。',
     to: '#res_state',
   },
@@ -215,7 +215,7 @@ const responseScenarios = [
       {
         status: 400,
         statusText: 'Bad Request',
-        description: '请求体未通过校验，见 ERRORS 目录 invalid_name。',
+        description: '请求体未通过校验，见左栏「错误目录」的 invalid_name。',
         bodies: [
           {
             id: 'json',
@@ -318,9 +318,9 @@ const errors = [
 
 // --- 字段树：递归 schema，驱动左侧文档流（够长以演示滚动 + sticky 右栏） ---
 const enumValues = [
-  { value: 'production', description: 'Live environment served to end users.' },
-  { value: 'preview', description: 'Per-branch deploy for review. Supports `?token=` access.' },
-  { value: 'development', description: 'Local or ephemeral environment. **Not** publicly routed.' },
+  { value: 'production', description: '面向终端用户的线上环境。' },
+  { value: 'preview', description: '按分支生成的预览部署，供评审；支持 `?token=` 访问。' },
+  { value: 'development', description: '本地或临时环境，**不**对外路由。' },
 ]
 
 const bodyFields = [
@@ -329,11 +329,11 @@ const bodyFields = [
     name: 'name',
     type: 'string',
     required: true,
-    description: 'Unique project name. Becomes part of the default domain.',
+    description: '项目唯一名称，会成为默认域名的一部分。',
     examples: ['my-app'],
     notes: [
-      { label: 'Range', text: '1–52 characters.' },
-      { label: 'Rule', text: 'Lowercase letters, digits and `-` only.' },
+      { label: '范围', text: '1–52 个字符。' },
+      { label: '规则', text: '仅限小写字母、数字与 `-`。' },
     ],
   },
   {
@@ -341,10 +341,10 @@ const bodyFields = [
     name: 'type',
     type: 'enum',
     required: true,
-    description: 'Deployment source type. Controls whether `gitSource` or `files` is required.',
+    description: '部署来源类型，决定必填的是 `gitSource` 还是 `files`。',
     enumValues: [
-      { value: 'git', description: 'Build from a connected Git repository.' },
-      { value: 'inline', description: 'Upload one or more files directly.' },
+      { value: 'git', description: '从已连接的 Git 仓库构建。' },
+      { value: 'inline', description: '直接上传一个或多个文件。' },
     ],
   },
   {
@@ -353,7 +353,7 @@ const bodyFields = [
     type: 'enum',
     required: false,
     defaultValue: 'production',
-    description: 'Deploy environment.',
+    description: '部署环境。',
     enumValues,
   },
   {
@@ -361,8 +361,8 @@ const bodyFields = [
     name: 'files',
     type: 'array',
     required: 'conditional' as const,
-    condition: 'Required when `type` is `inline`.',
-    description: 'Files uploaded for an inline deployment.',
+    condition: '`type` 为 `inline` 时必填。',
+    description: '内联部署上传的文件。',
     children: [
       {
         path: 'req_files_item',
@@ -370,7 +370,7 @@ const bodyFields = [
         type: 'string',
         format: 'binary',
         required: true,
-        description: 'One file in the deployment bundle.',
+        description: '部署包中的一个文件。',
       },
     ],
   },
@@ -379,16 +379,16 @@ const bodyFields = [
     name: 'gitSource',
     type: 'object',
     required: 'conditional' as const,
-    condition: 'Required when `type` is `git`.',
-    lifecycle: { status: 'beta' as const, since: 'v2.4', description: 'Shape may still change during beta.' },
-    description: 'Git repository to deploy from.',
+    condition: '`type` 为 `git` 时必填。',
+    lifecycle: { status: 'beta' as const, since: 'v2.4', description: 'Beta 期间结构仍可能变化。' },
+    description: '用于部署的 Git 仓库。',
     children: [
       {
         path: 'req_gitSource_repoId',
         name: 'repoId',
         type: 'string',
         required: true,
-        description: 'Connected repository id.',
+        description: '已连接仓库的 id。',
         examples: ['ghr_9f2a'],
       },
       {
@@ -397,15 +397,15 @@ const bodyFields = [
         type: 'string',
         required: false,
         defaultValue: 'main',
-        description: 'Branch, tag, or commit SHA to build.',
+        description: '要构建的分支、标签或 commit SHA。',
       },
       {
         path: 'req_gitSource_legacyBranch',
         name: 'legacyBranch',
         type: 'string',
         required: false,
-        lifecycle: { status: 'deprecated' as const, since: 'v2.4', description: 'Use `ref` instead.' },
-        description: 'Legacy branch selector.',
+        lifecycle: { status: 'deprecated' as const, since: 'v2.4', description: '请改用 `ref`。' },
+        description: '旧版分支选择器。',
       },
     ],
   },
@@ -415,31 +415,31 @@ const bodyFields = [
     type: 'object',
     required: false,
     lifecycle: { status: 'new' as const, since: 'v2.5' },
-    description: 'Arbitrary key/value metadata attached to the deployment.',
+    description: '附加在部署上的任意键值元数据。',
     notes: [
-      { label: 'Range', text: 'Up to 16 keys.' },
-      { kind: 'caveat' as const, label: 'Caveat', text: 'Values are stored in plain text — do not put secrets here.' },
+      { label: '范围', text: '最多 16 个键。' },
+      { kind: 'caveat' as const, label: '注意', text: '值以明文存储，不要放入密钥。' },
     ],
     children: [
-      { path: 'req_meta_key', name: 'key', type: 'string', required: true, notes: [{ label: 'Range', text: 'Up to 64 characters.' }] },
+      { path: 'req_meta_key', name: 'key', type: 'string', required: true, notes: [{ label: '范围', text: '最多 64 个字符。' }] },
       { path: 'req_meta_value', name: 'value', type: 'string', required: true },
     ],
   },
 ]
 
 const responseFields: FieldNode[] = [
-  { path: 'res_id', name: 'id', type: 'string', required: true, description: 'Unique deployment id.', examples: ['dpl_8Kx2fQ'] },
+  { path: 'res_id', name: 'id', type: 'string', required: true, description: '部署的唯一 id。', examples: ['dpl_8Kx2fQ'] },
   {
     path: 'res_state',
     name: 'state',
     type: 'enum',
     required: true,
-    description: 'Current build state.',
+    description: '当前构建状态。',
     enumValues: [
-      { value: 'QUEUED', description: 'Waiting for a build slot.' },
-      { value: 'BUILDING', description: 'Build in progress.' },
-      { value: 'READY', description: 'Deployed and serving traffic.' },
-      { value: 'ERROR', description: 'Build failed.' },
+      { value: 'QUEUED', description: '等待构建资源。' },
+      { value: 'BUILDING', description: '构建进行中。' },
+      { value: 'READY', description: '已部署并对外提供服务。' },
+      { value: 'ERROR', description: '构建失败。' },
     ],
   },
   {
@@ -451,12 +451,12 @@ const responseFields: FieldNode[] = [
     presence: {
       optional: true,
       nullable: true,
-      condition: 'Omitted while `state` is `QUEUED` or `BUILDING`; `null` when `state` is `ERROR`.',
+      condition: '`state` 为 `QUEUED` 或 `BUILDING` 时不返回；`state` 为 `ERROR` 时为 `null`。',
     },
-    description: 'Public URL once the deployment is `READY`.',
+    description: '部署进入 `READY` 后的公开访问地址。',
     examples: ['https://my-app.example.app'],
   },
-  { path: 'res_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: 'Creation timestamp in milliseconds.' },
+  { path: 'res_createdAt', name: 'createdAt', type: 'integer', format: 'unix_ms', required: true, description: '创建时间戳（毫秒）。' },
 ]
 
 const errorResponseFields = [
@@ -465,14 +465,14 @@ const errorResponseFields = [
     name: 'error',
     type: 'object',
     required: true,
-    description: 'Structured error returned for non-2xx responses.',
+    description: '非 2xx 响应返回的结构化错误。',
     children: [
       {
         path: 'err_error_code',
         name: 'code',
         type: 'string',
         required: true,
-        description: 'Stable machine-readable error code.',
+        description: '稳定的机器可读错误码。',
         examples: ['invalid_name'],
       },
       {
@@ -480,7 +480,7 @@ const errorResponseFields = [
         name: 'message',
         type: 'string',
         required: true,
-        description: 'Reader-facing explanation of the failure.',
+        description: '面向读者的失败说明。',
         examples: ['Project name must be lowercase letters, digits and dashes.'],
       },
     ],
@@ -492,6 +492,40 @@ const errorResponseFields = [
 // 另一侧确定性收敛到第一项（fallback 只派生不回写），双向演示缺侧行为。
 // scenario 间的 mapping 归本页（consumer）持有，kit 组件零 mapping。
 const activeScenario = ref('git')
+
+// --- chrome 本地化：kit 组件的英文默认只是中性兜底，中文页面由页面注入整套文案
+// （与 webhook 参考页同口径）。保留为英文的只有领域词汇与标识符：METHOD 徽章、
+// Beta / Deprecated / New 状态词、HTTP 状态短语、header 名与字段名等字面量。
+// 右栏 Request / Response 示例卡的 chrome 全 gallery 统一沿用英文默认，另行处理。
+const targetLabels = {
+  copy: '复制完整地址',
+  copied: '接口地址已复制',
+  copyFailed: '复制失败，请手动复制地址',
+  copyHost: '复制环境地址',
+  copiedHost: '环境地址已复制',
+  copyPath: '复制接口路径',
+  copiedPath: '接口路径已复制',
+}
+const fieldLabels: FieldItemLabels = {
+  required: '必填',
+  conditional: '条件必填',
+  mayBeOmitted: '响应中可能不返回此字段',
+  default: '默认值',
+  example: '示例',
+  constraints: '约束',
+  note: '说明',
+  caveat: '注意',
+  since: '起始版本',
+  showChildren: '展开子参数',
+  hideChildren: '收起子参数',
+  copyLink: name => `复制 ${name} 的链接`,
+  copiedLink: name => `${name} 的链接已复制`,
+  linkCopied: name => `${name} 的链接已复制到剪贴板`,
+  linkCopyFailed: () => '复制失败，请选中地址栏手动复制',
+  // 只注入本页会渲染到的键：最大的 enum 只有 4 个值，低于 EnumTable 的筛选阈值（8），
+  // 筛选框与 live region 不挂载，对应文案不预置。
+  enumLabel: '允许值',
+}
 
 // --- 组合级形态变体的 fixture（区别于组件级变体）---
 // partial：单 host（无环境 select，只剩地址 + 复制）、保留精简 errors、
@@ -533,7 +567,7 @@ onMounted(() => anchor.initFromHash())
       :min-size="380"
       :max-size="720"
       :min-opposite="380"
-      label="Resize documentation and code panels"
+      label="调整文档栏与代码栏的宽度"
     >
       <!-- 左：文档流（端点头 + 环境 + 前置 + 字段树 + 错误目录 + relations） -->
       <template #start>
@@ -558,22 +592,14 @@ onMounted(() => anchor.initFromHash())
               :hosts="hosts"
               :path="endpoint.path"
               select-label="选择环境"
-              :labels="{
-                copy: '复制完整地址',
-                copied: '接口地址已复制',
-                copyFailed: '复制失败，请手动复制地址',
-                copyHost: '复制环境地址',
-                copiedHost: '环境地址已复制',
-                copyPath: '复制接口路径',
-                copiedPath: '接口路径已复制',
-              }"
+              :labels="targetLabels"
             />
           </header>
 
           <div class="mt-8 space-y-10">
             <!-- 可选 requirements / guide 扩展区：页面只定义位置与语义层级，
                  consumer 自己提供已解析、已本地化的内容。 -->
-            <FieldGroup label="Requirements">
+            <FieldGroup label="前置条件">
               <div class="space-y-4 pt-2">
                 <FactList>
                   <FactRow
@@ -585,8 +611,8 @@ onMounted(() => anchor.initFromHash())
               </div>
             </FieldGroup>
 
-            <FieldGroup label="Request Body" :count="bodyFields.length">
-              <FieldItem v-for="f in bodyFields" :key="f.path ?? f.name" v-bind="f" />
+            <FieldGroup label="请求体" :count="bodyFields.length">
+              <FieldItem v-for="f in bodyFields" :key="f.path ?? f.name" v-bind="f" :labels="fieldLabels" />
             </FieldGroup>
 
             <!-- Notation legend — owned by the PAGE, not the kit: FieldItem's
@@ -596,25 +622,26 @@ onMounted(() => anchor.initFromHash())
                  it, not a section of its own in the outer rhythm. -->
             <div class="space-y-4">
               <p class="text-sm leading-relaxed text-muted">
-                <code class="font-mono text-code">name?</code> — the field may be absent from the response.
-                <code class="font-mono text-code">| null</code> — the field is present and its value may be null.
+                <code class="font-mono text-code">name?</code> 表示该字段可能不出现在响应中；
+                <code class="font-mono text-code">| null</code> 表示该字段存在但值可能为 null。
               </p>
-              <FieldGroup label="Response Body" :count="responseFields.length">
-                <FieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" />
+              <FieldGroup label="响应体" :count="responseFields.length">
+                <FieldItem v-for="f in responseFields" :key="f.path ?? f.name" v-bind="f" :labels="fieldLabels" />
               </FieldGroup>
             </div>
 
-            <FieldGroup label="Error Response Body" :count="errorResponseFields.length">
+            <FieldGroup label="错误响应体" :count="errorResponseFields.length">
               <FieldItem
                 v-for="f in errorResponseFields"
                 :key="f.path ?? f.name"
                 v-bind="f"
+                :labels="fieldLabels"
               />
             </FieldGroup>
 
             <!-- 独立 ERRORS 目录：error code → 含义 → 触发条件。字面错误响应体
                  作为线缆样本归右栏（Response 的 4xx 状态），此处只留目录并连线。 -->
-            <FieldGroup label="Errors" :count="errors.length">
+            <FieldGroup label="错误目录" :count="errors.length">
               <dl class="divide-y divide-default">
                 <div
                   v-for="err in errors"
@@ -635,7 +662,7 @@ onMounted(() => anchor.initFromHash())
 
             <!-- 可选 relations 扩展区：仅承载通用链接/描述，不把消费项目路由
                  shape 固化进 kit。 -->
-            <FieldGroup label="Related Resources">
+            <FieldGroup label="相关资源">
               <ul class="divide-y divide-default">
                 <li v-for="relation in relations" :key="relation.to">
                   <ULink
@@ -663,7 +690,11 @@ onMounted(() => anchor.initFromHash())
            内容优先重分配；<lg 回退为堆叠各卡自滚动。 -->
       <template #end>
         <div class="lg:sticky lg:top-20 lg:h-[calc(100dvh-7rem)]">
-          <CodeRail storage-key="api-docs-endpoint-rail-split" class="h-full max-lg:space-y-4">
+          <CodeRail
+            storage-key="api-docs-endpoint-rail-split"
+            resize-label="调整请求与响应面板的高度"
+            class="h-full max-lg:space-y-4"
+          >
             <template #top="{ maxHeight }">
               <RequestExample
                 v-model:scenario="activeScenario"
@@ -709,16 +740,17 @@ onMounted(() => anchor.initFromHash())
               <HttpMethodBadge method="GET" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/deployments/{id}</code>
             </div>
-            <h3 class="text-lg font-semibold tracking-tight text-highlighted">Get a deployment</h3>
+            <h3 class="text-lg font-semibold tracking-tight text-highlighted">获取部署</h3>
             <OperationTarget
               :hosts="partialHosts"
               path="/v1/deployments/{id}"
+              :labels="targetLabels"
             />
           </header>
-          <FieldGroup label="Response Body" :count="partialBodyFields.length" :heading-level="4">
-            <FieldItem v-for="f in partialBodyFields" :key="f.path" v-bind="f" />
+          <FieldGroup label="响应体" :count="partialBodyFields.length" :heading-level="4">
+            <FieldItem v-for="f in partialBodyFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
           </FieldGroup>
-          <FieldGroup label="Errors" :count="partialErrors.length" :heading-level="4">
+          <FieldGroup label="错误目录" :count="partialErrors.length" :heading-level="4">
             <dl class="divide-y divide-default">
               <div v-for="err in partialErrors" :key="err.code" class="flex items-baseline gap-3 py-2.5">
                 <dt class="flex shrink-0 items-center gap-2">
@@ -741,13 +773,13 @@ onMounted(() => anchor.initFromHash())
               <HttpMethodBadge method="GET" />
               <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/health</code>
             </div>
-            <h3 class="text-lg font-semibold tracking-tight text-highlighted">Health check</h3>
+            <h3 class="text-lg font-semibold tracking-tight text-highlighted">健康检查</h3>
           </header>
-          <FieldGroup label="Request" :count="minimalBodyFields.length" :heading-level="4">
-            <FieldItem v-for="f in minimalBodyFields" :key="f.path" v-bind="f" />
+          <FieldGroup label="请求参数" :count="minimalBodyFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalBodyFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
           </FieldGroup>
-          <FieldGroup label="Response Body" :count="minimalResponseFields.length" :heading-level="4">
-            <FieldItem v-for="f in minimalResponseFields" :key="f.path" v-bind="f" />
+          <FieldGroup label="响应体" :count="minimalResponseFields.length" :heading-level="4">
+            <FieldItem v-for="f in minimalResponseFields" :key="f.path" v-bind="f" :labels="fieldLabels" />
           </FieldGroup>
         </figure>
       </div>

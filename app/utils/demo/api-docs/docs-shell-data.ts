@@ -322,7 +322,7 @@ export const paymentsBodyFields = [
     required: true,
     description: '支付金额，以货币最小单位计（人民币为分）。',
     examples: ['4900'],
-    notes: [{ label: 'Rule', text: '必须为正整数。' }],
+    notes: [{ label: '规则', text: '必须为正整数。' }],
   },
   {
     path: 'body_currency',
