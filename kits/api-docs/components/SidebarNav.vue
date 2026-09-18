@@ -501,10 +501,13 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
               <template #default="{ open }">
                 <!-- Section header treatment forks on `kind` via typography
                      only: endpoints read as UPPER MONO with tracking; guides
-                     stay soft sentence-case sans. Chrome stays neutral. -->
+                     stay soft sentence-case sans. Chrome stays neutral.
+                     `touch-manipulation` is the kit's disclosure-toggle touch
+                     contract (FieldItem / SchemaComposition): a rapid open →
+                     close double-tap must toggle, never double-tap-zoom. -->
                 <button
                   type="button"
-                  class="group/sec flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  class="group/sec flex w-full touch-manipulation items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   <UIcon
                     name="i-lucide-chevron-right"

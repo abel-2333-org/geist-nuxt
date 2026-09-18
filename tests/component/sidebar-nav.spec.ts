@@ -183,6 +183,9 @@ describe('SidebarNav section identity', () => {
 
     const trigger = wrapper.findAll('button').find(b => b.text().includes('批量'))
     expect(trigger).toBeDefined()
+    // Section toggles share the kit's disclosure touch contract (FieldItem /
+    // SchemaComposition): a rapid open → close double-tap toggles, never zooms.
+    expect(trigger!.classes()).toContain('touch-manipulation')
     await trigger!.trigger('click')
 
     // If both labels slugged to the same empty id, opening one would open both.
