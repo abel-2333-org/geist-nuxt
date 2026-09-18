@@ -602,11 +602,20 @@ onMounted(() => anchor.initFromHash())
             <FieldGroup label="前置条件">
               <div class="space-y-4 pt-2">
                 <FactList>
+                  <!-- rich fact 走 FactRow 的 #value seam（同 WebhookProtocol 的
+                       inline-markdown opt-in）：FactRow 默认 value 是纯文本，
+                       markdown 记号会字面保留，页面自己决定在哪里开富文本。 -->
                   <FactRow
                     v-for="item in requirements"
                     :key="item.term"
                     :fact="item"
-                  />
+                  >
+                    <template #value>
+                      <span class="wrap-anywhere text-sm text-highlighted">
+                        <InlineMarkdown :text="item.value" />
+                      </span>
+                    </template>
+                  </FactRow>
                 </FactList>
               </div>
             </FieldGroup>
@@ -652,7 +661,9 @@ onMounted(() => anchor.initFromHash())
                     <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                     <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                   </dt>
-                  <dd class="text-sm leading-relaxed text-muted">{{ err.when }}</dd>
+                  <dd class="text-sm leading-relaxed text-muted">
+                    <InlineMarkdown :text="err.when" />
+                  </dd>
                 </div>
               </dl>
               <p class="mt-2 text-sm text-dimmed">
@@ -757,7 +768,9 @@ onMounted(() => anchor.initFromHash())
                   <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                   <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                 </dt>
-                <dd class="text-sm leading-relaxed text-muted">{{ err.when }}</dd>
+                <dd class="text-sm leading-relaxed text-muted">
+                  <InlineMarkdown :text="err.when" />
+                </dd>
               </div>
             </dl>
           </FieldGroup>
