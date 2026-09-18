@@ -461,6 +461,7 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
             variant="link"
             size="xs"
             :aria-label="clearLabel"
+            class="touch-manipulation"
             @click="clear"
           />
           <UKbd v-else :value="searchShortcut" aria-hidden="true" class="max-sm:hidden" />
@@ -502,9 +503,11 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
                 <!-- Section header treatment forks on `kind` via typography
                      only: endpoints read as UPPER MONO with tracking; guides
                      stay soft sentence-case sans. Chrome stays neutral.
-                     `touch-manipulation` is the kit's disclosure-toggle touch
-                     contract (FieldItem / SchemaComposition): a rapid open →
-                     close double-tap must toggle, never double-tap-zoom. -->
+                     `touch-manipulation` is the kit's tap-target touch contract
+                     (FieldItem / SchemaComposition / OperationTarget, and the
+                     "+N" trigger below): a rapid open → close double-tap must
+                     toggle, never double-tap-zoom. The search clear button and
+                     the row link overlay opt in for the same reason. -->
                 <button
                   type="button"
                   class="group/sec flex w-full touch-manipulation items-center gap-2 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -568,7 +571,7 @@ function onResizeJump(to: 'min' | 'max' | 'reset') {
                       :aria-label="item.label"
                       active-class="bg-primary/10"
                       inactive-class="hover:bg-elevated"
-                      class="absolute inset-0 rounded-md transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      class="absolute inset-0 touch-manipulation rounded-md transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     />
                     <div
                       class="pointer-events-none relative flex items-center gap-2 px-2.5 py-1.5 text-sm transition-colors"

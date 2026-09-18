@@ -183,14 +183,32 @@ describe('SidebarNav section identity', () => {
 
     const trigger = wrapper.findAll('button').find(b => b.text().includes('批量'))
     expect(trigger).toBeDefined()
-    // Section toggles share the kit's disclosure touch contract (FieldItem /
-    // SchemaComposition): a rapid open → close double-tap toggles, never zooms.
-    expect(trigger!.classes()).toContain('touch-manipulation')
     await trigger!.trigger('click')
 
     // If both labels slugged to the same empty id, opening one would open both.
     expect(wrapper.text()).toContain('甲')
     expect(wrapper.text()).not.toContain('乙')
+  })
+})
+
+describe('SidebarNav touch contract', () => {
+  it('opts every tap target into touch-manipulation (no double-tap zoom)', async () => {
+    // Same contract as the kit's other tap targets (FieldItem /
+    // SchemaComposition / OperationTarget): section toggles, row links and the
+    // search clear button all disable the double-tap-zoom heuristic.
+    await mountNav()
+    const headers = wrapper!.findAll('button[aria-expanded]')
+    expect(headers.length).toBeGreaterThan(0)
+    headers.forEach(header => expect(header.classes()).toContain('touch-manipulation'))
+
+    const links = wrapper!.findAll('a[aria-label]')
+    expect(links.length).toBeGreaterThan(0)
+    links.forEach(link => expect(link.classes()).toContain('touch-manipulation'))
+
+    await searchInput().setValue('批处理')
+    const clear = wrapper!.find('button[aria-label="Clear search"]')
+    expect(clear.exists()).toBe(true)
+    expect(clear.classes()).toContain('touch-manipulation')
   })
 })
 
