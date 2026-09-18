@@ -356,13 +356,13 @@
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -381,9 +381,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "bd576dbf0e082471a27361a54fd12aed7890125a327471debb1f59f4513db989"
+        "scopeDigest": "f6651c4b88d6f0c0a908704ea47c3a0af98f336dfb5d47b3b48baf5b2ca2995e"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -419,13 +419,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -437,20 +437,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "33855f19b40ac63cffcff0488c77245e2b448f369b3380aa74738359c4b94551"
+        "scopeDigest": "645017ec6dbf81aa4f127f04e036046473610ba1f0d2e083f715ffff1a604888"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -466,9 +466,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "165b91c8951d8eb293f5256d85fd11cf5811461e010866963c2c11e9bf4cd9dc"
+        "scopeDigest": "3da3b02ab4c7d2397c8680eaae6d87138e3c6a71b6f96af5b764383fee2619dd"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -518,13 +518,13 @@
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -543,7 +543,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "746c85ed899ca2b5639f5bb7e0ea79ee0b750e323ab25cf77d075cb0bf86b90b",
+        "scopeDigest": "cbf470c7871477f18115b086bde0246e0433edc5fb4ebeadaafef50bcf536a97",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -557,7 +557,7 @@
           }
         ]
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -610,13 +610,13 @@
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "891545389646fe28ee5f004d6dc25926a5680052f0b7292e64791df73297670d",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -634,9 +634,9 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "8664f1a9170c4363adcd44b72711798bea1d38732874fd59b4e08ef9f0c0c62d"
+        "scopeDigest": "d0bb4b44971ce849c76e37cb83d953093119942fa059e8d4bbd67e408c6ddf79"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -777,13 +777,13 @@
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -795,20 +795,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "6d60537d70af61c3e15af3c356f165750e06e78eda2ae7103d37b3f4f25e763f"
+        "scopeDigest": "e95ce9be994dae715fbf4eb3697562b8d0eb1ed1fbe80750ded111bcff04d34a"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -823,20 +823,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "3fa251a237d946c3f30ce0baab81859ff13823a9a434657533d414f76c8277d5"
+        "scopeDigest": "dc801718dfe89ba058db4bd6394e2799a8b8fb4475918a2a1a7532f3c9a24882"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-18T02:53:18.345Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
+        "headSha": "20658f6ce3f41ca6e94f267c02ee451ba25039ce",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -853,9 +853,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "fdbf37aa90c01d2d2964e49cae8b0ede73c745a25cf771bd8c78b0cd6f532c1c"
+        "scopeDigest": "7bdd50d3e44b2f3856ace1565852a0223dd6fc8e561fab4f45e17a3ce21efa46"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
       "findings": []
     },
     "api-docs-site-search": {
