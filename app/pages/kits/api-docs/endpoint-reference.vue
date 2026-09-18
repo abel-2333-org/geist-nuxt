@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FactList from '../../../../kits/api-docs/internal/FactList.vue'
-import FactRow from '../../../../kits/api-docs/internal/FactRow.vue'
+import FactRow, { type Fact } from '../../../../kits/api-docs/internal/FactRow.vue'
 
 definePageMeta({ nav: { label: '端点参考页', icon: 'i-lucide-columns-2', order: 1 } })
 
@@ -63,7 +63,7 @@ const selectedHost = computed(
 // --- 通用扩展区：由页面/consumer 持有，kit 不定义认证或 relation 业务 shape ---
 // full 同时提供 requirements/guide + relations；partial 只保留 requirements；
 // minimal 两者都省略，扩展区独立出现/省略时不会留下空壳。
-const requirements = [
+const requirements: Fact[] = [
   { term: '认证', value: 'Bearer token，作用域需含 `deployments:write`。' },
   { term: 'Content-Type', value: 'application/json 或 multipart/form-data。' },
 ]
@@ -602,11 +602,23 @@ onMounted(() => anchor.initFromHash())
             <FieldGroup label="前置条件">
               <div class="space-y-4 pt-2">
                 <FactList>
+                  <!-- rich fact 走 FactRow 的 #value seam（同 WebhookProtocol 的
+                       inline-markdown opt-in）：FactRow 默认 value 是纯文本，
+                       markdown 记号会字面保留，页面自己决定在哪里开富文本。 -->
                   <FactRow
                     v-for="item in requirements"
                     :key="item.term"
                     :fact="item"
-                  />
+                  >
+                    <template #value>
+                      <span v-if="item.value !== undefined" class="wrap-anywhere text-sm text-highlighted">
+                        <InlineMarkdown :text="item.value" />
+                      </span>
+                      <p v-if="item.note" class="wrap-anywhere text-sm leading-relaxed text-muted">
+                        {{ item.note }}
+                      </p>
+                    </template>
+                  </FactRow>
                 </FactList>
               </div>
             </FieldGroup>
@@ -652,7 +664,9 @@ onMounted(() => anchor.initFromHash())
                     <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                     <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                   </dt>
-                  <dd class="text-sm leading-relaxed text-muted">{{ err.when }}</dd>
+                  <dd class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted">
+                    <InlineMarkdown :text="err.when" />
+                  </dd>
                 </div>
               </dl>
               <p class="mt-2 text-sm text-dimmed">
@@ -757,7 +771,9 @@ onMounted(() => anchor.initFromHash())
                   <code class="font-mono text-sm text-highlighted">{{ err.code }}</code>
                   <span class="font-mono text-xs text-dimmed">{{ err.status }}</span>
                 </dt>
-                <dd class="text-sm leading-relaxed text-muted">{{ err.when }}</dd>
+                <dd class="wrap-anywhere min-w-0 text-sm leading-relaxed text-muted">
+                  <InlineMarkdown :text="err.when" />
+                </dd>
               </div>
             </dl>
           </FieldGroup>
