@@ -140,8 +140,11 @@ describe('FieldItem output presence', () => {
     expect(nameText(wrapper)).toBe('failureCode?')
     const mark = identity(wrapper).get('[data-field-optional]')
     expect(mark.text()).toBe('?')
-    // Low visual weight: notation in the grey register, never a badge.
-    expect(mark.classes()).toContain('text-dimmed')
+    // Low visual weight: notation in the grey register, never a badge — but
+    // the readable grey: the glyph states a fact, so it must clear WCAG 1.4.3
+    // on the light theme, which `text-dimmed` (~2.4:1) does not.
+    expect(mark.classes()).toContain('text-toned')
+    expect(mark.classes()).not.toContain('text-dimmed')
     expect(typeText(wrapper)).toBe('string')
   })
 
@@ -418,6 +421,10 @@ describe('FieldAnnotation output presence', () => {
     expect(mark.tagName).toBe('SPAN')
     expect(mark.getAttribute('aria-hidden')).toBe('true')
     expect(mark.classList.contains('select-none')).toBe(true)
+    // Same grey as the row's `?`: the preview must not drift back to the
+    // dimmest tier the row left for WCAG 1.4.3.
+    expect(mark.classList.contains('text-toned')).toBe(true)
+    expect(mark.classList.contains('text-dimmed')).toBe(false)
     expect(panel()!.querySelector('code .sr-only')?.classList.contains('select-none')).toBe(true)
     expect(panel()!.querySelector('code button')).toBeNull()
     expect(panel()!.querySelector('[data-field-type]')?.textContent).toBe('string | ""')

@@ -126,7 +126,7 @@ function jump(close: () => void) {
         <InlineCode class="wrap-anywhere min-w-0">{{ node.name }}<template v-if="presence.optional"><span
           data-field-optional
           aria-hidden="true"
-          class="select-none text-dimmed"
+          class="select-none text-toned"
         >?</span><span class="sr-only select-none"> ({{ t.mayBeOmitted }})</span></template></InlineCode>
         <!-- Shrinkable like its siblings: `shrink-0` would pin the span to
              max-content, and a long union type then overflows the fixed-width

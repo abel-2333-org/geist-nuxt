@@ -328,13 +328,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
-        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -349,20 +349,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "d91fcc59ec775dab0fa8726819237898b28530ddd41210a53225ce5a492a7d7f"
+        "scopeDigest": "d0090d3a868d9d5ea94c96562ae5ca343e2377074f08e2faceeaf6303dc2b9df"
       },
-      "notes": "Round 4 全量复审 clean：window-splitter ARIA 面、主轴方向键 / Home / End / Enter、disabled 退化、grip / edge 双形态焦点指示与 references 及 split-pane-handle.spec 一致。观察（不立 finding）：Alt / Meta / Ctrl + 方向键同样被消费并 preventDefault（probe 实测）——与 reka-ui 2.9.10 Slider / Splitter 原语不做修饰键守卫的行为一致，reference 未承诺透传，属系统基座同款；若产品要放行浏览器后退组合键属契约变更，且会把 CodeRail / SidebarNav 拉为 co-review owner。 scope 补入本次实际核证依据的两份 reference：sidebar-nav.md（edge 形态 1px→2px 与键盘 / ARIA 消费契约）、focus-a11y.md（grip 形态 focus-visible 实底规格）。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
-        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -381,9 +381,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "2daf0447109a1079f6b82469c3ce1e8b6f0022ff4cd40bea636b41adf4650303"
+        "scopeDigest": "3cf5eea908d9c65039a2349d4f486c22122a43d8fdd2df4b3c3835a33510d9f2"
       },
-      "notes": "Round 4 全量复审 clean：断点门控、useRafTask 合帧测量、min/max/minOpposite 钳制、getter default 复位、未测量时 aria-valuemax 回退与 End 惰性、sticky 视口高把手、MDC 纯字面量 prop 契约复核无回归。scope 补入此前缺失的权威 reference（references/kits/api-docs/index.md 的 SplitPane 节）、两个 gallery 活骨架消费点（endpoint-reference / webhook-reference，均只传字面量 prop）与 `enabledFrom` 取值域所依赖的 utils/breakpoints.ts。观察（不立 finding）：同帧 pointermove + pointerup 时 stop() 取消待执行 rAF，终值停在最后已渲染帧（probe：140 而非松手点 160）——面板无跳变，终值与松手点误差 ≤ 一帧指针位移，持久化值即所见值；无 reference 承诺终值等于松手点。若将来要精确到松手点，修法只能放在 onEnd（先 apply() 再 stop()），不能挪进 stop()：Escape 分支先回滚再 stop()，在 stop() 内 apply 会覆盖回滚。另观察：mainSize 只在 ResizeObserver 回调内按 direction 取轴，direction 运行时翻转后旧值会短暂留在另一轴（未实测；理论上 flex-row↔flex-col 翻转会改变根盒高度并触发 RO，≤1 帧自纠）。components/index.md L74 只对 enabledFrom 承诺跟随运行时变化，MDC 契约要求全部 prop 为字面量，三处消费点也都传字面量 direction——无承诺、无合法复现路径，与 storageKey / mode 同属「reference 未承诺可变」，不立 finding。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -488,13 +488,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -511,20 +511,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "d50ee2ca592d5bc6bb4d18298490d362a500aad5820ec61999a06a80a8ddc76c"
+        "scopeDigest": "2d38330fb9c415d49f90498a809020092dbe6e05b5cc6b900ed4a3c8d36d13f7"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -543,7 +543,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "73b5ab228c62b92accfabd68fb2f8476611c8525fe7234b4187fbeb7372ee148",
+        "scopeDigest": "3d1139d57a21e29af54931399b16c2907879e7dd383231191451479ffc878d52",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -557,18 +557,18 @@
           }
         ]
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -581,20 +581,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "5b03d83e5610252592d7111c1a21b1bed4a43b92f735260f7f900d299226d617"
+        "scopeDigest": "413b318c0d1a274469cd144e58492bc8b8130bc009aa1b2e14adcc2708da5b62"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -603,20 +603,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "a54990c84f20724d24b3a90b8a9730468b016a2bb77b2c4cedd329b2eb8f8d37"
+        "scopeDigest": "f354322c58dab5743153661ba2669c43e1cd1df7986970f707ae062f39908c6a"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "891545389646fe28ee5f004d6dc25926a5680052f0b7292e64791df73297670d",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -634,9 +634,9 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "ed9162b6547d1854a863ddf36da707d6c30d2027e9caaf3cd6e978fc00ac5780"
+        "scopeDigest": "05e9bf17184b66a26b658da50998facbfd96df38164b15ac7bf5e2ef1ebef8b8"
       },
-      "notes": "可省略记号 `?` 的焦点由外扩焦点环改为自身点亮（bg-primary + text-inverted，悬停 bg-elevated + text-toned，leading-4 把盒子收为 12×16），修复单字符盒子上焦点环呈竖椭圆并压住字段名末字符的问题；填充与强制配色模式下的透明 outline 兜底都由 field-presence.spec 钉住（26 例通过）。真实浏览器核过 Tab 聚焦、悬停、明暗模式，焦点块不与字段名重叠。",
+      "notes": "scope 内变动：FieldItem.vue、field-presence.spec.ts、references/kits/api-docs/index.md。可省略记号 `?` 常态色由 text-dimmed 升为 text-toned：它承载「键可缺失」这个事实，明色下 2.4:1 过不了 WCAG 1.4.3；实测明色 5.74:1、暗色 7.66:1，字段名 17.9:1 层级不变；悬停只保留 bg-elevated。field-presence.spec 改钉 text-toned（26 例通过）。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -676,13 +676,13 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -692,9 +692,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "14f7ebaabe76376863dfe9b392c886e28a89598e97bfb97850dcdaf8efdb7802"
+        "scopeDigest": "2aed94095d61439400bf0406bd199c55d10f73d8629dd692e87a8b12cee550e9"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "scope 内变动：FieldAnnotation.vue、references/kits/api-docs/index.md。popover 预览里的同一 `?` 记号由 text-dimmed 升为 text-toned，与字段行一致；非交互 span 不变。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -714,13 +714,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -733,7 +733,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "530bb8703d9ec0a2f078607482eb6ca16b2dbb889d4ce5d0f228dd647a49dd8a",
+        "scopeDigest": "c58e416447d118016181c22e688ba90113192f70adbf7eb82818e7eb51102b41",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -747,18 +747,18 @@
           }
         ]
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -770,20 +770,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "1a87b9f563276faab6ab1e1f0b54cc50feb96e6c49d546c536ad673935670e6a"
+        "scopeDigest": "e747e676abae7ea4d230fcd20aea76d6f278c60c1871523afbe70ff8b3fd6616"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -795,20 +795,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "6c5803545b5a99ee1db11ac7747eddbc3d023da9b0b0dc93b7358bbfc18e2eee"
+        "scopeDigest": "ba954ccc9d23ec166144f2ca75b5f57f8ae3696f48817af4c4711e34aaee551d"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -823,20 +823,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "e34fbac97e55d04cfd59c5c5c7827d087a15903b45483c09f77e4768dd483e25"
+        "scopeDigest": "693617036eafba09c1a89cc5b359d852a51d355536414bafd678b421eb03d577"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -853,20 +853,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "50609089f3f1890bb4904f74a41796510dabc8083d783100df9b8382f6101b5c"
+        "scopeDigest": "6d789de09c326bb6e36be16cadfb68fd947a4ae7c64654f7587418e784d65796"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -875,7 +875,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "1b53e10fc15f61c5d1340a76da56848c5220f6365ec00ab25695b04b1fdc03d2",
+        "scopeDigest": "2a6213d023fa089901dd8f43ae5d246e7a10bc5ec2bf8b4f4878516a60f9c6c9",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -889,7 +889,7 @@
           }
         ]
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -902,13 +902,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -923,9 +923,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "cea96ab77f684b35cf5108d6206ac6fea251761607cc7649e97819b183653761"
+        "scopeDigest": "65bc1e9610a0282609e35d680b25fb96a56ae76dd517a9011c3bc8f6efebbc68"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -974,13 +974,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T10:29:24.869Z",
+      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "f4cda0ac11d0be29b358961e4e7c1eb21083e6fd",
-        "headSha": "e240db1052d607961132534ac36570d957e28eb7",
+        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
+        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -990,9 +990,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "3c3f4f8a0c6156f377c64ab009eee20b8445c2c97b299f01fd1381a1783d48bd"
+        "scopeDigest": "f979434bd70819be75a78acf989f2d3a3aa747fb46984b349ec2706b8b1e4b1c"
       },
-      "notes": "`?` 焦点样式修复的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 FieldItem 行补充 `?` 焦点样式对通用焦点环的有意偏离）；本组件代码与契约未变，复核无回归。",
+      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
       "findings": []
     }
   }

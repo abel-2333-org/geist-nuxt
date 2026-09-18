@@ -306,9 +306,14 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                box that ring becomes a tall pill and its offset lands on the
                name's last letter. A fill never grows past the button's own
                box, so nothing is covered and the `name?` spacing is
-               untouched; hover is the same shape one step quieter. `leading-4`
-               is load-bearing: it caps the box at 16px, otherwise the fill
-               stretches to the row's 20px line height and reads as a bar.
+               untouched; hover is the same shape one step quieter. The glyph
+               sits in `text-toned`, not the dimmest grey: it carries a fact
+               (the key may be absent), so it must clear WCAG 1.4.3 on the
+               light theme, where `text-dimmed` is ~2.4:1. `text-toned` still
+               reads clearly lighter than the name, so the notation stays
+               subordinate. `leading-4` is load-bearing: it caps the box at
+               16px, otherwise the fill stretches to the row's 20px line
+               height and reads as a bar.
                Forced-colors mode drops backgrounds, so a transparent outline
                stays behind — the system forces it to the foreground colour.
                `select-none` keeps the notation out of a copied field name.
@@ -322,7 +327,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             data-field-optional
             :aria-label="t.mayBeOmitted"
             :aria-describedby="undefined"
-            class="cursor-help select-none rounded-xs px-0.5 leading-4 font-normal text-dimmed transition-colors hover:bg-elevated hover:text-toned focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
+            class="cursor-help select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-colors hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
             :class="{ 'line-through': isDeprecated }"
           >?</button></UTooltip></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the
