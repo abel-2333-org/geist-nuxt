@@ -50,6 +50,16 @@ async function query(value: string) {
   await palette().get('input').setValue(value)
 }
 
+describe('SiteSearch touch contract', () => {
+  it('opts the trigger into touch-manipulation (no double-tap zoom)', async () => {
+    // Same contract as the kit's other tap targets (SidebarNav / FieldItem /
+    // SchemaComposition / OperationTarget): the trigger is the top bar's only
+    // always-visible tap target and collapses to an icon at `max-sm`.
+    wrapper = await mountSuspended(SiteSearch, { props: { groups }, attachTo: document.body })
+    expect(wrapper.get('button').classes()).toContain('touch-manipulation')
+  })
+})
+
 describe('SiteSearch accessible naming', () => {
   it('labels the search input independently from its placeholder', async () => {
     await mountSearch({
