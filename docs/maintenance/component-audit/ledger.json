@@ -1,11 +1,12 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-17T23:48:02.732Z",
+  "lastRunAt": "2026-09-19T00:24:05.456Z",
   "lastPicked": [
-    "foundation-term-annotation",
-    "foundation-split-pane-handle",
-    "foundation-split-pane"
+    "api-docs-sidebar-nav",
+    "api-docs-code-rail",
+    "api-docs-method-badge",
+    "foundation-split-pane-handle"
   ],
   "items": {
     "foundation-copy-button": {
@@ -328,13 +329,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
+        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -349,9 +350,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "d0090d3a868d9d5ea94c96562ae5ca343e2377074f08e2faceeaf6303dc2b9df"
+        "scopeDigest": "a414e67503800d8263faaed9a6afb4f9a9c5fa7ebc678834fccfb52eb3691c3a"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "required co-review:本次功能 diff(54e2542 + a1ad0cc)命中其 scope 中的 kits/api-docs/components/SidebarNav.vue——分区 header <button>(L505)、搜索清除 UButton、行 ULink 覆盖层的 class 增加 touch-manipulation;SidebarNav 对 SplitPaneHandle 的消费(L630–644:appearance=edge、orientation=vertical、dragging / label / controls / value / min / max 传参、drag-start / step / jump 三事件映射到 useSplitPane)一行未动。完整复审:SplitPaneHandle.vue 的 role=separator + aria-orientation / label / controls / valuenow-min-max、disabled 退为无语义 spacer、touch-none、edge 形态 1px→2px primary 唯一焦点指示、方向键 / Home / End / Enter 键盘映射与 references/components/index.md、focus-a11y.md、kits/api-docs/index.md L158、sidebar-nav.md L99 / L117 逐条一致;split-pane-handle.spec.ts 与 code-rail.spec.ts 随 test:component 通过;三个消费方(SplitPane / CodeRail / SidebarNav)对 coarse 仍以 3× 响应。09-18 记录的修饰键组合观察维持不立 finding。无 finding。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -517,14 +518,14 @@
       "findings": []
     },
     "api-docs-method-badge": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
+        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -543,7 +544,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "7500e5c4d31afdb12caeebf58ef4a1a3e505c31e81c4bdee31da461813ba52f5",
+        "scopeDigest": "fbc8f0ead1a27e8377c0d9f515d60cabe54309faaa4ea8b2ad12ccb9dd0eb57f",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -557,7 +558,7 @@
           }
         ]
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "required co-review:本次功能 diff(54e2542 + a1ad0cc)命中其 scope 中的 kits/api-docs/components/SidebarNav.vue——分区 header <button>、搜索清除 UButton、行 ULink 覆盖层的 class 增加 touch-manipulation 并补注释;行 ULink 覆盖层加 class 不影响其兄弟内容层;HttpMethodBadge 在接口行(L578 定宽 w-14 槽)的渲染、size=sm 传参、translate=no 透传链路与 method 归一化契约均未触及。完整复审:HttpMethodBadge.vue 源码(trim + uppercase + UNKNOWN 回退、methodPreset / methodFallback 查表、SemanticBadge 透传)与 sidebar-nav.md L115「文字即动词、颜色只是强化」一致,http-method-badge.spec.ts 随 test:component 33 files / 430 tests(a1ad0cc) 通过;既有两条 dependency evidence(@nuxt/ui UBadge 单根 attrs 转发、vue 单根 fallthrough)前提未变,原样重绑。无 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -829,14 +830,14 @@
       "findings": []
     },
     "api-docs-code-rail": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
+        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -847,15 +848,16 @@
           "foundation/composables/useBreakpointGate.ts",
           "foundation/composables/useRafTask.ts",
           "foundation/composables/useSplitPane.ts",
+          "foundation/utils/breakpoints.ts",
           "kits/api-docs/components/CodeRail.vue",
           "references/kits/api-docs/index.md",
           "tests/component/code-rail.spec.ts",
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "ffcd617dcd255c3cb0598ca9a09f7b321f984679967cb3a73e036f84640688be"
+        "scopeDigest": "66494519c3ffd5e151abc28cc4a2bd5bce708c5b6a3da8fb999e0667c84d4525"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "Round 4 全量复审(计划项),clean。自 08-26 modified 以来 owning file / spec / reference「可拖动分栏」节零变更;09-03 与 09-18 两次 affected 复审已核 SplitPane 与页面消费点。四维度:kit 归属(ADR-010,耦合 .code-surface / pre.raw-pre)成立,registryDependencies 6 项与 GeistBreakpoint 类型 / useBreakpointGate / useSplitPane / useRafTask / SplitPaneHandle 引用一致;341 行(audit-plan 计数)单一职责(split math + 双观察者增量目标同步),computeSplitBudgets 纯函数与 reference 列出的实现逻辑等价(reference 摘录为 export 单行签名、中文 JSDoc,源码是模块私有多行签名、英文 JSDoc;reference 明言「不需要单独 copy」,摘录非契约);SSR 恒 stacked、:style 恒对象、rAF 合帧、stacked 不渲染把手 / fit 态 disabled、aria 取有效分隔位与有效边界,均有 code-rail.spec.ts 锁定;无颜色 / 尺寸硬编码(纯布局)。三处消费点(endpoint / webhook 参考页 lg、DocsShellReference xl)内外层 enabled-from 同步、各传独立 storage-key 与中文 resize-label。源码 4 条 never / always claim(未同步 gate 不占 sticky 条、useId 回退不串扰、fit 态不调用重分配、style 恒对象)逐条成立。观察不立 finding:Home / End 把存储 ratio 写到 0.2 / 0.8 clamp 端而非有效边界,aria 仍显示有效值、下次拖拽 / 步进前 alignRatio 重锚定,reference 未承诺存储 ratio 语义;模板 props.resizeLabel 与其它未加前缀的绑定风格不一,无规则依据不动。scope 新增 foundation/utils/breakpoints.ts:enabledFrom 的取值域由 GeistBreakpoint 派生(与 09-18 对 SplitPane 的同一裁定)。",
       "findings": []
     },
     "api-docs-site-search": {
@@ -937,14 +939,14 @@
       ]
     },
     "api-docs-sidebar-nav": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-17T03:57:00.511Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "6a7f83c1a5169a2d75de2eaf00898d9463683b30",
-        "headSha": "1685a6c10ee111c53b9f058071db3d04ea44e6ad",
+        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
+        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
         "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -959,9 +961,21 @@
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "967b8284c8d7fa4f9073d3328e0647c642efdf2f168a111d7daee3d0aca58fd6"
+        "scopeDigest": "64a63b178db4604eafc9ddd4efda762b54c2f87cb2b40beda29e3a4cd81cd2b8",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UCollapsible 须继续把 #default slot 包进 reka CollapsibleTrigger as-child,分区 header <button> 的 aria-expanded / aria-controls 由此而来(sidebar-nav.md「板块用真实 <button> 触发」契约);升级后复查板块 trigger 的 ARIA 与开合受控行为。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "CollapsibleTrigger as-child 须继续把 aria-expanded / aria-controls / data-state 合并到 slot 内的 <button>;升级后复查 SidebarNav 板块 header 的可访问名与 aria-expanded。"
+          }
+        ]
       },
-      "notes": "text-code 迁移复审：本次功能 diff 命中该 item evidence scope 中的 gallery 页面 app/pages/kits/api-docs/sidebar-nav.vue（8 处），合计 8 处，全部是 demo 说明文字里的行内 <code>（display: inline）把 class 中的 text-[0.8125rem] 换成 text-code，属纯 class token 替换，无文案、结构或 props 变化；这些 <code> 的最近父级行高均 ≥ text-code 的 20px（lang=\"zh-CN\" 命中 main.css 的 CJK line-height 1.7；text-sm 自带行高本身也正好 20px），行盒不变、无行高变化处，也没有一处与 text-sm/xs/base 并写需要清理。该 item 的组件源码、tests 与 references（scope 其余 10 个路径）本次零 diff。既有 1 条 finding（f-12d73e8bc49d/resolved）原样保留、disposition 未变。",
+      "notes": "Round 4 全量复审(计划项)。落地修复:SidebarNav.vue 的全部 tap 目标纳入 touch-manipulation 触控契约——分区 header <button>(base 帧 L505,09-11 报告线索)、搜索清除 UButton、行 ULink 覆盖层;依据 web-design-guidelines「touch-action: manipulation(prevents double-tap zoom delay)」与分发面惯例(FieldItem ×3 / FieldValueStructure / SchemaComposition / OperationTarget / AnnotationPopover / 本 item 内 SidebarScenarioTags +N 触发器都带该 class,其中 FieldItem ×3 / SchemaComposition / OperationTarget 5 处被 classes() 断言锁定;FieldItem 的 ? 记号按钮触屏不开 tooltip,不计)。sidebar-nav.spec.ts 新增独立用例断言三类目标。props / emits / slots / 行为契约未变;reference 不逐 class 记录触控细节(与 09-11 同裁定)。两轮 caveman 复审(opus):第 1 轮把「一次性 tap 不在契约内」的自相矛盾理由改为一并补齐。其余四维度复核无 finding:kit 归属(ADR-005)与 registry 拓扑(5 项依赖)与源码引用一致;width resize 已收敛 useSplitPane(#105,f-12d73e8bc49d resolved 原样保留);active 单源 / # 不自推断 / IME Esc / 搜索三维匹配 / 测量式场景标签均有测试;全部语义 token,尺寸走系统 scale(w-14 / min-w-16 / max-w-28)。观察不立 finding:/ 快捷键用手写 window keydown 而非 defineShortcuts(SiteSearch ⌘K 用后者)——typing / IME 守卫与 searchShortcut prop 语义已由测试钉住,换实现会改行为、无规则依据。本次新增 dependency evidence:板块 header <button> 的 aria-expanded / aria-controls 来自 @nuxt/ui UCollapsible 把 #default slot 包进 reka-ui CollapsibleTrigger as-child(sidebar-nav.md L112 契约),此前未绑定。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
