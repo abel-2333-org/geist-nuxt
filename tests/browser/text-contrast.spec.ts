@@ -68,9 +68,12 @@ async function scenario(theme: Theme, id: string, run: (page: Page, check: Check
     const regions: Record<string, string> = { matrix: 'token-matrix', containers: 'container-variants', forms: 'form-variants', docs: 'documentation-states', paint: 'documentation-states' }
     if (regions[id]) await page.getByTestId(regions[id]!).screenshot({ path: resolve(artifacts, `${theme}-${id}-detail.png`) })
     await page.screenshot({ path: resolve(artifacts, `${theme}-${id}.png`), fullPage: true })
-    await writeFile(resolve(artifacts, `${theme}-${id}.json`), JSON.stringify({ source, browser: page.context().browser()?.version(), fonts, platformFonts, failure, records }, null, 2))
+    const report = { source, browser: page.context().browser()?.version(), fonts, platformFonts, failure, records }
     await page.context().tracing.stop({ path: resolve(artifacts, `${theme}-${id}.zip`) })
     await page.context().close()
+    // A report is valid only after artifact capture and cleanup both succeed.
+    // Otherwise a contrast failure could hide a later infrastructure failure.
+    await writeFile(resolve(artifacts, `${theme}-${id}.json`), JSON.stringify(report, null, 2))
   }
 }
 
