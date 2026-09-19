@@ -191,6 +191,27 @@ describe('SidebarNav section identity', () => {
   })
 })
 
+describe('SidebarNav touch contract', () => {
+  it('opts every tap target into touch-manipulation (no double-tap zoom)', async () => {
+    // Same contract as the kit's other tap targets (FieldItem /
+    // SchemaComposition / OperationTarget): section toggles, row links and the
+    // search clear button all disable the double-tap-zoom heuristic.
+    await mountNav()
+    const headers = wrapper!.findAll('button[aria-expanded]')
+    expect(headers.length).toBeGreaterThan(0)
+    headers.forEach(header => expect(header.classes()).toContain('touch-manipulation'))
+
+    const links = wrapper!.findAll('a[aria-label]')
+    expect(links.length).toBeGreaterThan(0)
+    links.forEach(link => expect(link.classes()).toContain('touch-manipulation'))
+
+    await searchInput().setValue('批处理')
+    const clear = wrapper!.find('button[aria-label="Clear search"]')
+    expect(clear.exists()).toBe(true)
+    expect(clear.classes()).toContain('touch-manipulation')
+  })
+})
+
 describe('SidebarNav resize handle', () => {
   it('is keyboard-operable and clamps to [minWidth, maxWidth]', async () => {
     await mountNav({ widthStorageKey: 'sidebar-nav-spec-resize' })
