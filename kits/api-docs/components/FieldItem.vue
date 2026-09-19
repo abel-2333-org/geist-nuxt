@@ -307,11 +307,10 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                name's last letter. A fill never grows past the button's own
                box, so nothing is covered and the `name?` spacing is
                untouched; hover is the same shape one step quieter. The glyph
-               sits in `text-toned`, not the dimmest grey: it carries a fact
-               (the key may be absent), so it must clear WCAG 1.4.3 on the
-               light theme, where `text-dimmed` is ~2.4:1. `text-toned` still
-               reads clearly lighter than the name, so the notation stays
-               subordinate. `leading-4` is load-bearing: it caps the box at
+               uses `text-toned` for the key-absence fact: all normal neutral
+               text roles are readable, and this role keeps the notation more
+               prominent than metadata while subordinate to the field name.
+               `leading-4` is load-bearing: it caps the box at
                16px, otherwise the fill stretches to the row's 20px line
                height and reads as a bar.
                Forced-colors mode drops backgrounds, so a transparent outline
@@ -551,7 +550,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
         <div v-else-if="constraints.length > 1" data-field-constraints class="space-y-2">
           <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
             {{ t.constraints }}
-            <span class="text-dimmed/70">({{ constraints.length }})</span>
+            <span class="text-dimmed">({{ constraints.length }})</span>
           </p>
           <!-- One shared grid: the label column is sized once to the widest
                label across all rows (capped at 8rem) via subgrid, so every
@@ -625,7 +624,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <template #default="{ open }">
         <button
           type="button"
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary transition-colors hover:text-primary/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"

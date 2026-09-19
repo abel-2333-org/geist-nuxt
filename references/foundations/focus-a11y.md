@@ -28,7 +28,7 @@ Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
 
 ## 无障碍硬要求（Geist Do's）
 
-- **对比度**：正文保持 WCAG AA（4.5:1）。用 Nuxt UI 语义 token 排层级：`text-default` 主文字、`text-toned` 次要、`text-muted` 禁用/占位（不要手拼 shade 数字）。
+- **对比度**：正常可读文字保持 WCAG AA（4.5:1），以未舍入值判定。五个中性文字角色在明暗两主题的四个中性背景上均须通过；description/help/hint/type/format/count/constraint/普通 placeholder 都在范围内。用 `text-default`、`text-toned`、`text-muted`、`text-dimmed` 排可读层级，不要手拼 shade 数字；额外 alpha 需重新验证合成对比。
 - **不要只用颜色表达状态** —— 必须搭配图标或文字标签（如成功不只是变绿，要带 ✓ 或"已完成"）。
 - **每个交互元素**在 `:focus-visible` 都要显示 focus 环。
 - **纯图标按钮**必须有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
@@ -37,8 +37,9 @@ Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
 
 ## 语义色的可及性
 
-- 语义色（primary/success/error…）已在明暗两主题各自调过对比度（`--ui-primary` 浅色 500、深色 400）。直接用语义 token，不要手挑 hex。
-- 禁用态：`bg-muted` 底 + `text-muted` 文字 + `cursor-not-allowed`（Nuxt UI 的 `disabled` 变体已内置，一般用 `:disabled` 即可，无需手写）。
+- 使用语义 token，不要手挑 hex；token 名称不等于所有搭配都通过。功能色、反色、透明度、叠加层及 hover/focus 必须验证实际前景与背景的合成对比，不能用正常中性文字的 40 对结果替代。
+- 反色容器的正常文字用 `text-inverted`，排版承担层级；已有五类 solid slot 覆盖见 `tokens.md`。自定义 slot 或实例覆盖需单独检查。
+- 真正不可操作的 disabled 控件与纯装饰内容可单独记录例外；用 Nuxt UI 的 `:disabled` 表达禁用行为，不能仅靠 `text-muted` 或 `text-dimmed` 判断。readonly、失焦、未选中、deprecated 和普通 placeholder 仍需满足正常文字对比度。
 
 ## 源码参考
 

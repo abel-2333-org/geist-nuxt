@@ -97,7 +97,7 @@ Geist Button 16/14/12 → `UButton` 的 `size="lg"` / `"md"`（默认）/ `"xs"`
 | `text-default`（默认） | `--ui-text` | 正文 |
 | `text-toned` | `--ui-text-toned` | 次要正文 |
 | `text-muted` | `--ui-text-muted` | 说明、标签 |
-| `text-dimmed` | `--ui-text-dimmed` | 占位、禁用感 |
+| `text-dimmed` | `--ui-text-dimmed` | 低强调的可读辅助文字、占位 |
 
 ## 源码参考
 
