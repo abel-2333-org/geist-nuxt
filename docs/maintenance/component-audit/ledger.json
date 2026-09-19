@@ -1,12 +1,12 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-19T00:24:05.456Z",
+  "lastRunAt": "2026-09-19T23:48:05.159Z",
   "lastPicked": [
-    "api-docs-sidebar-nav",
-    "api-docs-code-rail",
-    "api-docs-method-badge",
-    "foundation-split-pane-handle"
+    "api-docs-site-search",
+    "api-docs-operation-header",
+    "api-docs-lifecycle-badge",
+    "api-docs-method-badge"
   ],
   "items": {
     "foundation-copy-button": {
@@ -488,14 +488,14 @@
       ]
     },
     "api-docs-lifecycle-badge": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
+        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -514,18 +514,18 @@
         ],
         "scopeDigest": "efd36098b4929bf31aceaefdbcb4e983922a536dc9317c85bbfdf6f566a09718"
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue、app/utils/demo/api-docs/docs-shell-data.ts;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "Round 4 全量复审 clean:自 08-01 首审(preset 契约表 + 空白回落)以来 owning file 零变更;六态 preset icon+label 齐全、`Record<LifecycleStatus,…>` 穷尽、`label` 空白回落 preset 文案、size=sm 显式对齐约定复核成立;三个 dependents(FieldItem / LifecycleNotice / OperationHeader)均只传单值 status。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
+      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
-        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
+        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
+        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -544,7 +544,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "fbc8f0ead1a27e8377c0d9f515d60cabe54309faaa4ea8b2ad12ccb9dd0eb57f",
+        "scopeDigest": "6d85dac4d493fe32b261e9fbeb261f75fdb50ce896d32f5f4ad40b5c976b57e0",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -558,7 +558,7 @@
           }
         ]
       },
-      "notes": "required co-review:本次功能 diff(54e2542 + a1ad0cc)命中其 scope 中的 kits/api-docs/components/SidebarNav.vue——分区 header <button>、搜索清除 UButton、行 ULink 覆盖层的 class 增加 touch-manipulation 并补注释;行 ULink 覆盖层加 class 不影响其兄弟内容层;HttpMethodBadge 在接口行(L578 定宽 w-14 槽)的渲染、size=sm 传参、translate=no 透传链路与 method 归一化契约均未触及。完整复审:HttpMethodBadge.vue 源码(trim + uppercase + UNKNOWN 回退、methodPreset / methodFallback 查表、SemanticBadge 透传)与 sidebar-nav.md L115「文字即动词、颜色只是强化」一致,http-method-badge.spec.ts 随 test:component 33 files / 430 tests(a1ad0cc) 通过;既有两条 dependency evidence(@nuxt/ui UBadge 单根 attrs 转发、vue 单根 fallthrough)前提未变,原样重绑。无 finding。",
+      "notes": "required co-review:scope 内 `SiteSearch.vue` 被改(触发 UButton 加 `touch-manipulation` + 注释),不触及 `#item-leading` 对 HttpMethodBadge 的调用(仍只传 method)、`trim + toUpperCase || 'UNKNOWN'` 归一化、`methodPreset` 色调与 `translate=no` 透传链路;`http-method-badge.spec.ts` 原样通过,registry topology 未变,依赖证据原样重录。无 finding。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -802,14 +802,14 @@
       "findings": []
     },
     "api-docs-operation-header": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
-      "change": "modified",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
+      "change": "none",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
+        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -826,7 +826,7 @@
         ],
         "scopeDigest": "15317449ebfcc8e9a463f2c57075ca943a0d0b7c43b1f1dadb65a7ae93420db1"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "Round 4 全量复审 clean:自 09-05(标识 wrap-anywhere + 基线对齐)以来 scope 零变更;`kind` discriminated union、`headingLevel` 2–4、identity 行不截断、`translate=no`、lifecycle 徽章 icon+text 复核成立;三条 registryDependencies 逐一有模板消费。gallery 手写 h1 identity header 9 处仍用 `min-w-0 truncate`(09-05 遗留、页面私有 recipe),不在本 item 改。",
       "findings": []
     },
     "api-docs-code-rail": {
@@ -861,28 +861,29 @@
       "findings": []
     },
     "api-docs-site-search": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
+        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
           "app/pages/kits/api-docs/sidebar-nav.vue",
+          "app/utils/demo/api-docs/docs-shell-data.ts",
           "kits/api-docs/components/SiteSearch.vue",
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "2a6213d023fa089901dd8f43ae5d246e7a10bc5ec2bf8b4f4878516a60f9c6c9",
+        "scopeDigest": "a983c2e3b1ff780ac27aabb8abaf5cd49ed98e4a891126ba7120452eb1a555f8",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UCommandPalette input object 将 UInput attrs 透传到原生 input、ignoreFilter 与 #empty 槽契约,以及 empty 槽 wrapper 自带按 size 校准的 padding / 居中 / muted 排版(组件不再重复声明)。"
+            "reason": "依赖 UCommandPalette input object 将 UInput attrs 透传到原生 input、ignoreFilter 与 #empty 槽契约,以及 empty 槽 wrapper 自带按 size 校准的 padding / 居中 / muted 排版(组件不再重复声明);依赖 UModal 在 #content 模式下经 VisuallyHidden DialogTitle 用 title 命名 dialog;依赖 UButton 把 class 透传到根 button(touch-manipulation 落点)。"
           },
           {
             "name": "fuse.js",
@@ -891,7 +892,7 @@
           }
         ]
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "Round 4 全量复审:触发 UButton 补 `touch-manipulation`(SidebarNav 源码自述的 kit tap 目标触控契约;顶栏在触屏上唯一常显、max-sm 折叠为 icon 的 tap 目标),spec 新增独立用例锁定;props / emits / slots / 行为契约未变。其余复核无回归:UModal #content 模式经 VisuallyHidden DialogTitle 命名、`ignoreFilter` 组按 resultLimit 切片为上游默认行为(09-05 已裁定)、`highlight` 只消费 item.matches。scope 新纳入 gallery adapter `docs-shell-data.ts`(toSiteSearchGroups / searchDocsBody 是 display model 契约的消费示范)。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
