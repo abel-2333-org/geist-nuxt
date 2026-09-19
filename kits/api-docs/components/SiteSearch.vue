@@ -293,9 +293,9 @@ const paletteInput = computed(() => ({
     :content="{ onCloseAutoFocus }"
   >
     <!-- `touch-manipulation` is the kit's tap-target touch contract (SidebarNav /
-         FieldItem / SchemaComposition / OperationTarget): on touch this is the
-         only always-visible tap target of the top bar and collapses to an icon
-         at `max-sm`, so a quick open → Esc → tap must reopen, never zoom. -->
+         FieldItem / SchemaComposition / OperationTarget). The trigger is a
+         high-frequency tap target that collapses to an icon at `max-sm`, so a
+         quick open → Esc → tap must reopen, never double-tap-zoom. -->
     <UButton
       color="neutral"
       variant="outline"
