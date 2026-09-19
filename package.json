@@ -42,6 +42,7 @@
   "devDependencies": {
     "@nuxt/kit": "4.4.8",
     "@nuxt/test-utils": "^4.0.3",
+    "@types/node": "26.1.1",
     "@vue/compiler-dom": "^3.5.39",
     "@vue/compiler-sfc": "^3.5.39",
     "@vue/test-utils": "^2.4.11",
