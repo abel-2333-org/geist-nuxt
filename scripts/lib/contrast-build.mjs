@@ -16,8 +16,10 @@ export async function contrastSource(root) {
       else if (entry.isFile()) files.push(file)
     }
   }
-  for (const directory of ['foundation', 'kits', 'app', 'playground', 'tests/fixtures/contrast']) await visit(directory)
-  files.push('nuxt.config.ts', 'package.json', 'pnpm-lock.yaml', 'scripts/build-contrast.mjs', 'scripts/lib/contrast-build.mjs')
+  for (const directory of ['foundation', 'kits', 'app', 'playground', 'tests/fixtures/contrast', 'tests/browser']) await visit(directory)
+  // Evidence identifies both the rendered source and the code interpreting it.
+  // A changed measurement algorithm must invalidate an earlier build stamp.
+  files.push('nuxt.config.ts', 'package.json', 'pnpm-lock.yaml', 'vitest.browser.config.ts', 'scripts/build-contrast.mjs', 'scripts/lib/contrast-build.mjs', 'scripts/lib/text-contrast.mjs')
   for (const file of files.sort()) hash.update(file).update('\0').update(await readFile(path.join(root, file))).update('\0')
   return { sha: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), digest: hash.digest('hex') }
 }

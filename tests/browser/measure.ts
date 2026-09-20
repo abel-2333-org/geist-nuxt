@@ -103,43 +103,128 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     if (pseudo) foreground[3] *= Number(style.opacity)
     let branch: Element | null = null
     const layers: any[] = []
-    let opaqueBranch = false
+    let opaqueSurface: Element | null = null
+    const excludedPaint: any[] = []
+    const overlapsText = (box: { left: number, right: number, top: number, bottom: number }) =>
+      box.left < textRect.right && box.right > textRect.left && box.top < textRect.bottom && box.bottom > textRect.top
+
+    // Only use a bounded, provable part of CSS painting order. A positioned
+    // stacking context is atomic: descendants cannot escape its stack level.
+    // DOM order alone says nothing about a sibling with a higher z-index.
+    function positionedContext(leaf: Element, ancestor: Element) {
+      const path: Element[] = []
+      for (let node: Element | null = leaf; node && node !== ancestor; node = node.parentElement) path.unshift(node)
+      for (const node of path) {
+        const css = getComputedStyle(node)
+        if (css.display === 'contents') return null // no box, hence no positioned context to compare
+        const positioned = css.position !== 'static'
+        if (positioned && (css.zIndex !== 'auto' || css.position === 'fixed' || css.position === 'sticky')) {
+          const level = css.zIndex === 'auto' ? 0 : Number(css.zIndex)
+          return Number.isInteger(level) ? { node, level } : null
+        }
+        // These may establish a different atomic context. Do not flatten it
+        // or let a nested positioned descendant masquerade as an outer one.
+        const parentDisplay = node.parentElement ? getComputedStyle(node.parentElement).display : ''
+        if (Number(css.opacity) !== 1 || css.transform !== 'none' || css.translate !== 'none'
+          || css.rotate !== 'none' || css.scale !== 'none' || css.perspective !== 'none'
+          || css.filter !== 'none' || css.backdropFilter !== 'none' || css.isolation === 'isolate'
+          || css.mixBlendMode !== 'normal' || css.clipPath !== 'none' || css.maskImage !== 'none'
+          || css.contain !== 'none' || css.containerType !== 'normal' || css.willChange !== 'auto'
+          || (css.zIndex !== 'auto' && /flex|grid/.test(parentDisplay))) return null
+      }
+      return { node: null, level: 0 }
+    }
+    function behindOpaqueBranch(paintNode: Element, ancestor: Element) {
+      if (!opaqueSurface) return false
+      const content = positionedContext(target, ancestor)
+      const other = positionedContext(paintNode, ancestor)
+      if (!content?.node || !other || !content.node.contains(opaqueSurface)) return false
+      const below = content.level > 0 && other.level < content.level
+      const earlierPeer = other.node && content.level === other.level
+        && (other.node.compareDocumentPosition(content.node) & Node.DOCUMENT_POSITION_FOLLOWING)
+      if (!below && !earlierPeer) return false
+      excludedPaint.push({ node: paintNode.tagName, reason: 'behind opaque positioned stacking context', contentLevel: content.level, otherLevel: other.level })
+      return true
+    }
+    function coversText(node: Element, css: CSSStyleDeclaration) {
+      if (css.backgroundClip !== 'border-box' || css.clipPath !== 'none' || css.clip !== 'auto') return false
+      const box = node.getBoundingClientRect()
+      if (box.left > textRect.left || box.right < textRect.right || box.top > textRect.top || box.bottom < textRect.bottom) return false
+      // Do not treat the transparent corners of a rounded box as opaque.
+      // Reject the whole corner rectangle instead of approximating an ellipse.
+      for (const [radius, left, top] of [
+        [css.borderTopLeftRadius, true, true], [css.borderTopRightRadius, false, true],
+        [css.borderBottomLeftRadius, true, false], [css.borderBottomRightRadius, false, false],
+      ] as const) {
+        const values = radius.split(' ')
+        const length = (value: string, axis: number) => /^\d+(?:\.\d+)?px$/.test(value) ? parseFloat(value)
+          : /^\d+(?:\.\d+)?%$/.test(value) ? parseFloat(value) * axis / 100 : NaN
+        const x = length(values[0]!, box.width)
+        const y = length(values[1] || values[0]!, box.height)
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false
+        if ((left ? textRect.left < box.left + x : textRect.right > box.right - x)
+          && (top ? textRect.top < box.top + y : textRect.bottom > box.bottom - y)) return false
+      }
+      return true
+    }
+    function* renderedSubtree(node: Element): Generator<Element> {
+      const css = getComputedStyle(node)
+      if (css.display === 'none' || Number(css.opacity) === 0) return
+      yield node
+      // Transparent, zero-sized, non-overlapping, or visibility:hidden wrappers
+      // do not prove their descendants harmless (overflow/visibility may differ).
+      for (const child of node.children) yield* renderedSubtree(child)
+    }
     try {
+      // Native top-layer content/backdrops escape ordinary ancestor stacking
+      // and clipping. Our portal model does not prove their paint ordering.
+      if (document.querySelector(':modal, :popover-open')) fail('unmodeled top-layer paint')
       for (let node: Element | null = target; node; branch = node, node = node.parentElement) {
         const current = getComputedStyle(node)
         supported(node, current)
         if (current.display === 'none') fail('display:none ancestor')
         const underlays = supportedPseudos(node, true)
-        if (branch) for (const sibling of node.children) {
-          if (sibling === branch || sibling === probe) continue
-          const siblingStyle = getComputedStyle(sibling)
-          const box = sibling.getBoundingClientRect()
-          if (!box.width || !box.height || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
-          const overlap = box.left < rect.right && box.right > rect.left && box.top < rect.bottom && box.bottom > rect.top
-          if (!overlap) continue
-          supported(sibling, siblingStyle)
-          supportedPseudos(sibling)
-          const background = color(siblingStyle.backgroundColor)
-          const painted = background[3] > 0 || siblingStyle.backgroundImage !== 'none'
-          if (!painted) continue
-          if (opaqueBranch && (sibling.compareDocumentPosition(branch) & Node.DOCUMENT_POSITION_FOLLOWING)) continue
-          const isIndicator = sibling.getAttribute('data-slot') === 'indicator' && target.closest('[role="tab"]')
-          const isArrival = sibling.hasAttribute('data-field-arrival-cue')
-          if (!isIndicator && !isArrival) fail(`unmodeled overlapping sibling ${sibling.tagName}.${sibling.className}`)
-          // Both accepted layers precede the positioned content in DOM paint
-          // order. Reject a changed stacking contract instead of guessing.
-          if (!(sibling.compareDocumentPosition(branch) & Node.DOCUMENT_POSITION_FOLLOWING)
-            || siblingStyle.zIndex !== 'auto' || getComputedStyle(branch).zIndex !== 'auto'
-            || getComputedStyle(branch).position === 'static') fail('unverified sibling stacking order')
-          if (box.left > rect.left + 1 || box.right < rect.right - 1 || box.top > rect.top + 1 || box.bottom < rect.bottom - 1) fail('partial sibling coverage')
-          background[3] *= Number(siblingStyle.opacity)
-          underlays.push({ kind: isIndicator ? 'tabs-indicator' : 'arrival-cue', background, raw: siblingStyle.backgroundColor, opacity: Number(siblingStyle.opacity), box: box.toJSON() })
+        if (branch) for (const siblingRoot of node.children) {
+          if (siblingRoot === branch || siblingRoot === probe) continue
+          for (const sibling of renderedSubtree(siblingRoot)) {
+            const siblingStyle = getComputedStyle(sibling)
+            const box = sibling.getBoundingClientRect()
+            if (!box.width || !box.height || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
+            if (!overlapsText(box)) continue
+            if (behindOpaqueBranch(sibling, node)) continue
+            supported(sibling, siblingStyle)
+            supportedPseudos(sibling)
+            const background = color(siblingStyle.backgroundColor)
+            const painted = background[3] > 0 || siblingStyle.backgroundImage !== 'none'
+            // A transparent element can still paint text or replaced content.
+            // Such overlap has no modeled composition and must not pass silently.
+            if (sibling instanceof SVGElement || /^(IMG|VIDEO|CANVAS|IFRAME)$/.test(sibling.tagName)) fail(`unmodeled overlapping content ${sibling.tagName}`)
+            for (const child of sibling.childNodes) {
+              if (child.nodeType !== Node.TEXT_NODE || !child.textContent?.trim()) continue
+              const range = document.createRange()
+              range.selectNode(child)
+              if (Array.from(range.getClientRects()).some(overlapsText)) fail(`unmodeled overlapping text ${sibling.tagName}`)
+            }
+            if (!painted) continue
+            const isIndicator = sibling.getAttribute('data-slot') === 'indicator' && target.closest('[role="tab"]')
+            const isArrival = sibling.hasAttribute('data-field-arrival-cue')
+            if (!isIndicator && !isArrival) fail(`unmodeled overlapping sibling ${sibling.tagName}.${sibling.className}`)
+            // Both accepted layers precede the positioned content in DOM paint
+            // order. Reject a changed stacking contract instead of guessing.
+            if (sibling !== siblingRoot || !(sibling.compareDocumentPosition(branch) & Node.DOCUMENT_POSITION_FOLLOWING)
+              || siblingStyle.zIndex !== 'auto' || getComputedStyle(branch).zIndex !== 'auto'
+              || getComputedStyle(branch).position === 'static') fail('unverified sibling stacking order')
+            if (box.left > rect.left + 1 || box.right < rect.right - 1 || box.top > rect.top + 1 || box.bottom < rect.bottom - 1) fail('partial sibling coverage')
+            background[3] *= Number(siblingStyle.opacity)
+            underlays.push({ kind: isIndicator ? 'tabs-indicator' : 'arrival-cue', background, raw: siblingStyle.backgroundColor, opacity: Number(siblingStyle.opacity), box: box.toJSON() })
+          }
         }
-        opaqueBranch = (opaqueBranch || color(current.backgroundColor)[3] === 1) && Number(current.opacity) === 1
+        if (Number(current.opacity) !== 1) opaqueSurface = null
+        else if (!opaqueSurface && color(current.backgroundColor)[3] === 1 && coversText(node, current)) opaqueSurface = node
         chain.push({ node: node.tagName + (node.id ? `#${node.id}` : ''), background: color(current.backgroundColor), rawBackground: current.backgroundColor, opacity: Number(current.opacity), underlays })
       }
       layers.push(...chain)
-      return { text, rawForeground: style.color, foreground, layers, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
+      return { text, rawForeground: style.color, foreground, layers, excludedPaint, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
     }
     finally { probe.remove() }
   }, pseudo)

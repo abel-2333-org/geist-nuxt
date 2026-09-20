@@ -145,6 +145,143 @@ for (const theme of ['light', 'dark'] as const) {
     await target.evaluate(el => { el.textContent = '' })
     await expect(measure(target)).rejects.toThrow(/unresolved: empty or hidden/)
   }))
+
+  for (const kind of ['transparent-parent', 'earlier-higher-z'] as const) {
+    test(`${theme}: detector rejects ${kind} overlapping paint`, () => scenario(theme, `negative-paint-${kind}`, async (page, check) => {
+      // These DOM paint controls exercise the real Chromium stacking order.
+      // They are detector contract tests, not source-mutation red/green proof.
+      await page.evaluate((kind) => {
+        const host = document.createElement('section')
+        host.id = 'paint-control'
+        Object.assign(host.style, { position: 'relative', isolation: 'isolate', width: '600px', padding: '32px', backgroundColor: 'var(--ui-bg)' })
+        const overlay = document.createElement('div')
+        overlay.id = 'paint-overlay'
+        Object.assign(overlay.style, { display: 'none', position: 'absolute', inset: '32px', backgroundColor: kind === 'earlier-higher-z' ? 'currentColor' : 'transparent' })
+        if (kind === 'transparent-parent') {
+          const child = document.createElement('div')
+          child.id = 'paint-colored-child'
+          Object.assign(child.style, { position: 'absolute', inset: '0', backgroundColor: 'currentColor' })
+          overlay.append(child)
+        }
+        const branch = document.createElement('div')
+        branch.id = 'paint-branch'
+        Object.assign(branch.style, { position: 'relative', padding: '12px', backgroundColor: kind === 'earlier-higher-z' ? 'var(--ui-bg)' : 'transparent' })
+        const target = document.createElement('span')
+        target.id = 'paint-target'
+        target.textContent = 'Actual browser paint must stay readable'
+        branch.append(target)
+        host.append(overlay, branch)
+        document.querySelector('[data-testid="contrast-fixture"]')!.prepend(host)
+      }, kind)
+      const target = page.locator('#paint-target')
+      const overlay = page.locator('#paint-overlay')
+      await check(target, `${kind}/no overlay`, 'measurement contract')
+      await overlay.evaluate((node) => { Object.assign((node as HTMLElement).style, { display: 'block', transform: 'translateX(700px)' }) })
+      const separated = await overlay.evaluate((node) => ({ overlay: node.getBoundingClientRect().toJSON(), target: document.getElementById('paint-target')!.getBoundingClientRect().toJSON() }))
+      expect(separated.overlay.left, 'normal control really does not overlap').toBeGreaterThanOrEqual(separated.target.right)
+      await check(target, `${kind}/nonoverlapping paint`, 'measurement contract')
+
+      await overlay.evaluate((node, kind) => { Object.assign((node as HTMLElement).style, { transform: 'none', zIndex: kind === 'earlier-higher-z' ? '1' : 'auto' }) }, kind)
+      const describePaint = () => page.evaluate(() => {
+        const target = document.getElementById('paint-target')!
+        const paint = document.getElementById('paint-colored-child') || document.getElementById('paint-overlay')!
+        const targetRect = target.getBoundingClientRect()
+        const ids = ['paint-control', 'paint-overlay', 'paint-colored-child', 'paint-branch', 'paint-target', 'paint-layer-wrapper', 'paint-dialog']
+        return {
+          targetRect: targetRect.toJSON(), paintRect: paint.getBoundingClientRect().toJSON(),
+          paintBackground: getComputedStyle(paint).backgroundColor, targetColor: getComputedStyle(target).color,
+          elementsAtTextCenter: document.elementsFromPoint((targetRect.left + targetRect.right) / 2, (targetRect.top + targetRect.bottom) / 2).map(node => node.id || node.tagName),
+          elements: ids.map(id => document.getElementById(id)).filter((node): node is HTMLElement => node !== null).map((node) => {
+            const style = getComputedStyle(node)
+            return { id: node.id, rect: node.getBoundingClientRect().toJSON(), backgroundColor: style.backgroundColor, color: style.color, opacity: style.opacity, position: style.position, zIndex: style.zIndex, isolation: style.isolation, display: style.display, whiteSpace: style.whiteSpace, overflow: style.overflow, backgroundClip: style.backgroundClip, modal: node.matches(':modal') }
+          }),
+        }
+      })
+      const expectUnmodeledPaint = async (state: string, computed: Awaited<ReturnType<typeof describePaint>>) => {
+        const detection = await measure(target).then(measurement => ({ measurement, rejection: null }), error => ({ measurement: null, rejection: String(error) }))
+        await page.locator('#paint-control').screenshot({ path: resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.png`) })
+        // Expected rejections are not positive records or source-mutation proof.
+        await writeFile(resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.json`), JSON.stringify({ source, theme, kind, state, classification: 'expected detector rejection; not a positive suite red run', computed, ...detection }, null, 2))
+        expect(detection.rejection, `${state}: an unknown overlapping layer must not silently pass`).toMatch(/unresolved:.*(?:sibling|paint|stacking)/)
+      }
+      const computed = await describePaint()
+      expect(computed.paintRect.left).toBeLessThanOrEqual(computed.targetRect.left)
+      expect(computed.paintRect.right).toBeGreaterThanOrEqual(computed.targetRect.right)
+      expect(computed.paintRect.top).toBeLessThanOrEqual(computed.targetRect.top)
+      expect(computed.paintRect.bottom).toBeGreaterThanOrEqual(computed.targetRect.bottom)
+      expect(computed.paintBackground, 'same-color paint makes the rendered text unreadable').toBe(computed.targetColor)
+      if (kind === 'earlier-higher-z') expect(computed.elementsAtTextCenter[0], 'positive z-index paints above the opaque text branch').toBe('paint-overlay')
+      else expect(computed.elements.find(node => node.id === 'paint-overlay')!.backgroundColor, 'only the transparent sibling descendant paints').toBe('rgba(0, 0, 0, 0)')
+      await expectUnmodeledPaint('rejection', computed)
+
+      // A preceding sibling behind a higher opaque stacking context is valid.
+      // The transparent-parent case restores its unpainted child instead.
+      if (kind === 'earlier-higher-z') {
+        await page.locator('#paint-branch').evaluate((node) => { (node as HTMLElement).style.zIndex = '2' })
+        for (const order of ['before', 'after']) {
+          if (order === 'after') await overlay.evaluate(node => node.parentElement!.append(node))
+          const protectedRows = await check(target, `${kind}/opaque higher context DOM ${order}`, 'measurement contract')
+          expect(protectedRows[0].excludedPaint.some((paint: any) => paint.contentLevel === 2 && paint.otherLevel === 1), 'exclusion needs a proven lower stacking context').toBe(true)
+        }
+
+        // An opaque ancestor outside that context cannot hide the underlay.
+        await page.locator('#paint-branch').evaluate((node) => { (node as HTMLElement).style.backgroundColor = 'transparent' })
+        const outsideComputed = await describePaint()
+        expect(outsideComputed.elements.find(node => node.id === 'paint-branch')!.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        expect(outsideComputed.elements.find(node => node.id === 'paint-control')!.backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+        await expectUnmodeledPaint('outside-context', outsideComputed)
+        await page.locator('#paint-branch').evaluate((node) => { (node as HTMLElement).style.backgroundColor = 'var(--ui-bg)' })
+
+        // An opaque box cannot shield glyphs that overflow its right edge.
+        const branch = page.locator('#paint-branch')
+        await branch.evaluate((node) => { Object.assign((node as HTMLElement).style, { width: '12px', padding: '0', whiteSpace: 'nowrap' }) })
+        const overflow = await describePaint()
+        expect(overflow.elements.find(node => node.id === 'paint-branch')!.rect.right).toBeLessThan(overflow.targetRect.right)
+        await expectUnmodeledPaint('overflow-text', overflow)
+        await branch.evaluate((node) => { Object.assign((node as HTMLElement).style, { width: '', padding: '12px', whiteSpace: '' }) })
+        await check(target, `${kind}/opaque coverage restored`, 'measurement contract')
+
+        // Native modal dialogs escape their low-z ancestor into the top layer.
+        await overlay.evaluate((node) => {
+          const dialog = document.createElement('dialog')
+          dialog.id = 'paint-dialog'
+          Object.assign(dialog.style, { position: 'fixed', inset: '0', margin: '0', width: '100vw', height: '100vh', maxWidth: 'none', maxHeight: 'none', padding: '0', border: '0', backgroundColor: 'currentColor', color: 'inherit' })
+          node.append(dialog)
+        })
+        await check(target, `${kind}/closed native dialog`, 'measurement contract')
+        await page.locator('#paint-dialog').evaluate((node) => { (node as HTMLDialogElement).showModal() })
+        const topLayer = await describePaint()
+        expect(topLayer.elements.find(node => node.id === 'paint-dialog')!.modal).toBe(true)
+        expect(topLayer.elementsAtTextCenter[0], 'native top layer really covers the text').toBe('paint-dialog')
+        await expectUnmodeledPaint('native-top-layer', topLayer)
+        await page.locator('#paint-dialog').evaluate((node) => { (node as HTMLDialogElement).close(); node.remove() })
+        await check(target, `${kind}/native dialog removed`, 'measurement contract')
+
+        // A block wrapper traps z2 below the text's z1 context. display:contents
+        // removes that wrapper box/context and lets z2 paint above the text.
+        await branch.evaluate((node) => { (node as HTMLElement).style.zIndex = '1' })
+        await overlay.evaluate((node) => {
+          const wrapper = document.createElement('div')
+          wrapper.id = 'paint-layer-wrapper'
+          const height = document.getElementById('paint-branch')!.getBoundingClientRect().height
+          Object.assign(wrapper.style, { display: 'block', position: 'relative', zIndex: '0', height: `${height}px`, marginTop: `-${height}px` })
+          node.parentElement!.append(wrapper)
+          wrapper.append(node)
+          Object.assign((node as HTMLElement).style, { inset: '0', zIndex: '2' })
+        })
+        const trapped = await check(target, `${kind}/boxed lower context`, 'measurement contract')
+        expect(trapped[0].excludedPaint.some((paint: any) => paint.contentLevel === 1 && paint.otherLevel === 0)).toBe(true)
+        await page.locator('#paint-layer-wrapper').evaluate((node) => { (node as HTMLElement).style.display = 'contents' })
+        const contents = await describePaint()
+        expect(contents.elements.find(node => node.id === 'paint-layer-wrapper')!.display).toBe('contents')
+        expect(contents.elementsAtTextCenter[0], 'display:contents does not trap the higher child').toBe('paint-overlay')
+        await expectUnmodeledPaint('display-contents', contents)
+        await page.locator('#paint-layer-wrapper').evaluate((node) => { (node as HTMLElement).style.display = 'block' })
+      }
+      else await page.locator('#paint-colored-child').evaluate((node) => { (node as HTMLElement).style.backgroundColor = 'transparent' })
+      await check(target, `${kind}/restored paint`, 'measurement contract')
+    }))
+  }
 }
 
 for (const theme of ['light', 'dark'] as const) {

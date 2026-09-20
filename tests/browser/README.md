@@ -14,9 +14,11 @@ pnpm build:contrast
 pnpm test:browser
 ```
 
-`vitest.browser.config.ts` 是独立 Node 配置，不继承 Nuxt runtime 组件配置，不调用 `mountSuspended`。`@nuxt/test-utils/e2e` 启动本地生产 Nitro 和锁定的 Chromium；`build:false` 显式指向 `.output/contrast`。空测试集、缺构建、源码摘要或 HEAD 不匹配、启动失败均阻断。
+`vitest.browser.config.ts` 是独立 Node 配置，不继承 Nuxt runtime 组件配置，不调用 `mountSuspended`。`@nuxt/test-utils/e2e` 启动本地生产 Nitro 和锁定的 Chromium；`build:false` 显式指向 `.output/contrast`。空测试集、缺构建、源码摘要或 HEAD 不匹配、启动失败均阻断。摘要同时覆盖生产源码、fixture、`tests/browser/`、浏览器配置和颜色计算依赖；测量器变化也必须重新构建，不能沿用旧检测器的来源标记。
 
 `build:contrast` 使用根 Nuxt 配置、真实 foundation CSS/config 和 kit 组件，单独添加 `/__contrast` 路由及 fixture 扫描入口。fixture 在 `tests/fixtures/contrast/`，通过 `tests/nuxt/contrast-fixture.ts` 接入已有类型检查；不进入 registry，也不注册到正常 gallery 构建。正常页面的实际回归仍使用三个已有 API Docs 路由。
+
+上述隔离指运行时注册与 registry copy-in。现行 Source-first 完整根源码 snapshot 仍包含测试和 fixture 源文件；截图、trace 和日志位于被排除的构建产物目录。若要求 release/v0 snapshot 也移除 fixture，需要单独决定分发边界，不能仅删除 fixture 而留下失效的测试命令和类型入口。
 
 CI 保留原有三个 required check 名称，浏览器步骤位于 `Verify Source-first root` 的正常 build 之后。结果、原始颜色、合成层、状态、源码 SHA/digest、实际字体、截图和 trace 写入 `.output/contrast-artifacts/` 并上传 artifact；`.output` 不进入 Source-first 发布包。可用 `GEIST_CONTRAST_ARTIFACTS` 指定独立证据目录。
 
@@ -39,6 +41,8 @@ CI 保留原有三个 required check 名称，浏览器步骤位于 `Verify Sour
 Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS 变量依赖；条件覆盖、未知选择器、缺失或循环变量、fallback、非法/超范围颜色及非 CSS 空白明确拒绝。它不是通用 CSS cascade 引擎。消费者验证同样读取实际复制到 consumer 的 CSS。
 
 浏览器使用 computed style，并由 Chromium 的相对颜色序列化转为浮点 sRGB；不对截图抗锯齿边缘取色，也不先量化为 8-bit 像素。测量合成背景和祖先 opacity，针对已验证结构处理 Tabs indicator、arrival cue、portal item 的 `::before`，核对几何与层叠。零偏移/零模糊的 inset ring 只有完全位于文字区域之外才可排除；未知渐变、滤镜、mask、混合模式、伪元素或重叠层不默认通过。判定直接使用未舍入 ratio >= 4.5。
+
+F-01 回归递归检查兄弟子树，透明或零尺寸包装不能遮蔽其中的绘制节点。DOM 靠前不能作为遮挡排除依据：只有可比较的 positioned stacking context、其中完全覆盖文字的不透明表面及明确更低的绘制顺序共同成立，才记录 `excludedPaint` 并排除该层。`display:contents` 不能被当作有盒子的层叠上下文；原生 modal/popover top layer 暂未建模，出现时显式 `unresolved`。反例及正常对照保留实际几何、颜色、层叠和拒绝原因；它们证明检测器拒绝未知绘制，不代替完整正向命令的源码变异红→绿证据。
 
 常规 CI 的四个 alpha 负向样本在独立场景恢复旧声明，证明检测器捕获失败，然后恢复并重新验证。外层测试绿色仅表示检测器工作；不能称为正向命令已经跑红。
 
