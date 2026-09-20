@@ -42,7 +42,7 @@ Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS
 
 浏览器使用 computed style，并由 Chromium 的相对颜色序列化转为浮点 sRGB；不对截图抗锯齿边缘取色，也不先量化为 8-bit 像素。测量合成背景和祖先 opacity，针对已验证结构处理 Tabs indicator、arrival cue、portal item 的 `::before`，核对几何与层叠。零偏移/零模糊的 inset ring 只有完全位于文字区域之外才可排除；未知渐变、滤镜、mask、混合模式、伪元素或重叠层不默认通过。判定直接使用未舍入 ratio >= 4.5。
 
-F-01 回归递归检查兄弟子树，透明或零尺寸包装不能遮蔽其中的绘制节点。DOM 靠前不能作为遮挡排除依据：只有可比较的 positioned stacking context、其中完全覆盖文字的不透明表面及明确更低的绘制顺序共同成立，才记录 `excludedPaint` 并排除该层。`display:contents` 不能被当作有盒子的层叠上下文；原生 modal/popover top layer 暂未建模，出现时显式 `unresolved`。反例及正常对照保留实际几何、颜色、层叠和拒绝原因；它们证明检测器拒绝未知绘制，不代替完整正向命令的源码变异红→绿证据。
+F-01 回归递归检查兄弟子树，透明或零尺寸包装不能遮蔽其中的绘制节点；在宿主几何跳过之前检查伪元素，宿主不重叠也不能证明生成内容无影响。DOM 靠前不能作为遮挡排除依据：只有可比较的 positioned / isolation stacking context、其中完全覆盖文字的不透明表面及明确更低的绘制顺序共同成立，才记录 `excludedPaint` 并排除该层。`display:contents` 不能被当作有盒子的层叠上下文；原生 modal/popover top layer 暂未建模，出现时显式 `unresolved`。文字 Range 按可证明的矩形 overflow 裁切求交，不以像素容差忽略重叠；无法证明包含关系的脱离文档流或变换路径保留较大的保守范围。反例及正常对照保留实际几何、颜色、层叠和拒绝原因；它们证明检测器拒绝未知绘制，不代替完整正向命令的源码变异红→绿证据。
 
 常规 CI 的四个 alpha 负向样本在独立场景恢复旧声明，证明检测器捕获失败，然后恢复并重新验证。外层测试绿色仅表示检测器工作；不能称为正向命令已经跑红。
 

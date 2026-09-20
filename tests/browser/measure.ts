@@ -13,15 +13,47 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     // behind a glyph. Other targets use their actual text range when possible.
     const range = document.createRange()
     range.selectNodeContents(target)
-    const textRect = input ? {
+    type Bounds = { left: number, right: number, top: number, bottom: number }
+    function transformed(element: Element) {
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        const css = getComputedStyle(node)
+        if (css.transform !== 'none' || css.rotate !== 'none' || css.scale !== 'none') return true
+      }
+      return false
+    }
+    // A Range includes clipped glyphs. Intersect only with rectangular clips
+    // whose containing-block relationship we can prove; never use an epsilon.
+    function clipped(box: Bounds, leaf: Element, includeSelf = true): Bounds {
+      const result = { left: box.left, right: box.right, top: box.top, bottom: box.bottom }
+      for (let node: Element | null = leaf; node; node = node.parentElement) {
+        const css = getComputedStyle(node)
+        // Out-of-flow content can escape an overflow ancestor. Keeping the
+        // larger bounds is conservative when that relationship is unmodeled.
+        if (css.position === 'absolute' || css.position === 'fixed') break
+        if (!includeSelf && node === leaf) continue
+        if (css.display === 'contents') continue
+        if (transformed(node)) continue
+        const bounds = node.getBoundingClientRect()
+        if (/^(hidden|clip|scroll|auto)$/.test(css.overflowX)) {
+          result.left = Math.max(result.left, bounds.left + parseFloat(css.borderLeftWidth))
+          result.right = Math.min(result.right, bounds.right - parseFloat(css.borderRightWidth))
+        }
+        if (/^(hidden|clip|scroll|auto)$/.test(css.overflowY)) {
+          result.top = Math.max(result.top, bounds.top + parseFloat(css.borderTopWidth))
+          result.bottom = Math.min(result.bottom, bounds.bottom - parseFloat(css.borderBottomWidth))
+        }
+      }
+      return result
+    }
+    const textRect = clipped(input ? {
       left: rect.left + parseFloat(host.borderLeftWidth) + parseFloat(host.paddingLeft),
       right: rect.right - parseFloat(host.borderRightWidth) - parseFloat(host.paddingRight),
       top: rect.top + parseFloat(host.borderTopWidth) + parseFloat(host.paddingTop),
       bottom: rect.bottom - parseFloat(host.borderBottomWidth) - parseFloat(host.paddingBottom),
-    } : range.getBoundingClientRect()
+    } : range.getBoundingClientRect(), target)
     const text = pseudo ? (target as HTMLInputElement).placeholder : ((target as HTMLInputElement).value || target.textContent?.trim())
     const fail = (reason: string): never => { throw new Error(`unresolved: ${reason}`) }
-    if (!text || !rect.width || !rect.height || getComputedStyle(target).visibility !== 'visible') fail('empty or hidden target')
+    if (!text || !rect.width || !rect.height || textRect.right <= textRect.left || textRect.bottom <= textRect.top || getComputedStyle(target).visibility !== 'visible') fail('empty or hidden target')
     if (pseudo && (target as HTMLInputElement).value) fail('placeholder is not visible')
     const probe = document.createElement('span')
     probe.style.position = 'fixed'
@@ -63,18 +95,39 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         }
       }
     }
-    function supportedPseudos(node: Element, allowItem = false) {
+    function supportedPseudos(node: Element, allowItem = false, sibling = false) {
       const paints: any[] = []
       for (const pseudoName of ['::before', '::after']) {
         const ps = getComputedStyle(node, pseudoName)
         const background = color(ps.backgroundColor)
-        if (ps.content === 'none' || ps.content === 'normal' || (background[3] === 0 && ps.backgroundImage === 'none' && ps.boxShadow === 'none' && ps.filter === 'none')) continue
+        if (ps.display === 'none' || ps.visibility !== 'visible' || Number(ps.opacity) === 0) continue
+        if (ps.content === 'none' || ps.content === 'normal') continue
+        const emptyContent = ps.content === '""' || ps.content === "''"
+        const borderPaint = [ps.borderTopWidth, ps.borderRightWidth, ps.borderBottomWidth, ps.borderLeftWidth].some(value => parseFloat(value) > 0)
+        if (emptyContent && !borderPaint && background[3] === 0 && ps.backgroundImage === 'none' && ps.boxShadow === 'none' && ps.filter === 'none' && ps.backdropFilter === 'none') continue
         const current = getComputedStyle(node)
+        // A pseudo has no DOM rect. Only a bounded absolute box in this
+        // positioned host permits geometric exclusion; zero-sized/static
+        // hosts cannot prove that their generated paint stays out of the text.
+        if (sibling && emptyContent && !transformed(node) && current.position === 'relative' && current.display !== 'contents'
+          && ps.position === 'absolute' && ps.transform === 'none' && ps.translate === 'none'
+          && ps.rotate === 'none' && ps.scale === 'none' && ps.boxShadow === 'none' && ps.filter === 'none' && ps.backdropFilter === 'none') {
+          const lengths = [ps.left, ps.top, ps.width, ps.height, ps.marginLeft, ps.marginTop]
+          if (lengths.every(value => /^-?\d+(?:\.\d+)?px$/.test(value))) {
+            const [left, top, width, height, marginLeft, marginTop] = lengths.map(parseFloat)
+            const box = node.getBoundingClientRect()
+            const x = box.left + parseFloat(current.borderLeftWidth) + left! + marginLeft!
+            const y = box.top + parseFloat(current.borderTopWidth) + top! + marginTop!
+            const extraX = ps.boxSizing === 'border-box' ? 0 : parseFloat(ps.paddingLeft) + parseFloat(ps.paddingRight) + parseFloat(ps.borderLeftWidth) + parseFloat(ps.borderRightWidth)
+            const extraY = ps.boxSizing === 'border-box' ? 0 : parseFloat(ps.paddingTop) + parseFloat(ps.paddingBottom) + parseFloat(ps.borderTopWidth) + parseFloat(ps.borderBottomWidth)
+            if (!overlapsText({ left: x, top: y, right: x + width! + extraX, bottom: y + height! + extraY })) continue
+          }
+        }
         if (!allowItem || pseudoName !== '::before' || node.getAttribute('data-slot') !== 'item'
           || !['option', 'menuitem'].includes(node.getAttribute('role') || '')
           || ps.position !== 'absolute' || ps.zIndex !== '-1' || current.position !== 'relative'
           || current.zIndex !== 'auto' || color(current.backgroundColor)[3] !== 0
-          || ps.backgroundImage !== 'none' || ps.boxShadow !== 'none' || ps.filter !== 'none') fail(`unmodeled ${pseudoName}`)
+          || !emptyContent || borderPaint || ps.backgroundImage !== 'none' || ps.boxShadow !== 'none' || ps.filter !== 'none' || ps.backdropFilter !== 'none') fail(`unmodeled ${pseudoName}`)
         const insets = [ps.left, ps.right, ps.top, ps.bottom]
         if (insets.some(v => !/^\d+(?:\.\d+)?px$/.test(v))) fail('unresolved item pseudo geometry')
         const [left, right, top, bottom] = insets.map(parseFloat)
@@ -106,7 +159,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     let opaqueSurface: Element | null = null
     const excludedPaint: any[] = []
     const overlapsText = (box: { left: number, right: number, top: number, bottom: number }) =>
-      box.left < textRect.right && box.right > textRect.left && box.top < textRect.bottom && box.bottom > textRect.top
+      box.left < box.right && box.top < box.bottom && box.left < textRect.right && box.right > textRect.left && box.top < textRect.bottom && box.bottom > textRect.top
 
     // Only use a bounded, provable part of CSS painting order. A positioned
     // stacking context is atomic: descendants cannot escape its stack level.
@@ -116,12 +169,13 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       for (let node: Element | null = leaf; node && node !== ancestor; node = node.parentElement) path.unshift(node)
       for (const node of path) {
         const css = getComputedStyle(node)
-        if (css.display === 'contents') return null // no box, hence no positioned context to compare
+        if (css.display === 'contents') continue // no box: inspect the actual descendant contexts
         const positioned = css.position !== 'static'
         if (positioned && (css.zIndex !== 'auto' || css.position === 'fixed' || css.position === 'sticky')) {
           const level = css.zIndex === 'auto' ? 0 : Number(css.zIndex)
           return Number.isInteger(level) ? { node, level } : null
         }
+        if (css.isolation === 'isolate' && css.zIndex === 'auto') return { node, level: 0 }
         // These may establish a different atomic context. Do not flatten it
         // or let a nested positioned descendant masquerade as an outer one.
         const parentDisplay = node.parentElement ? getComputedStyle(node.parentElement).display : ''
@@ -169,7 +223,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     }
     function* renderedSubtree(node: Element): Generator<Element> {
       const css = getComputedStyle(node)
-      if (css.display === 'none' || Number(css.opacity) === 0) return
+      if (css.display === 'none' || (css.display !== 'contents' && Number(css.opacity) === 0)) return
       yield node
       // Transparent, zero-sized, non-overlapping, or visibility:hidden wrappers
       // do not prove their descendants harmless (overflow/visibility may differ).
@@ -189,11 +243,11 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
           for (const sibling of renderedSubtree(siblingRoot)) {
             const siblingStyle = getComputedStyle(sibling)
             const box = sibling.getBoundingClientRect()
-            if (!box.width || !box.height || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
-            if (!overlapsText(box)) continue
             if (behindOpaqueBranch(sibling, node)) continue
+            supportedPseudos(sibling, false, true)
+            if (!box.width || !box.height || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
+            if (!overlapsText(clipped(box, sibling, false))) continue
             supported(sibling, siblingStyle)
-            supportedPseudos(sibling)
             const background = color(siblingStyle.backgroundColor)
             const painted = background[3] > 0 || siblingStyle.backgroundImage !== 'none'
             // A transparent element can still paint text or replaced content.
@@ -203,7 +257,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
               if (child.nodeType !== Node.TEXT_NODE || !child.textContent?.trim()) continue
               const range = document.createRange()
               range.selectNode(child)
-              if (Array.from(range.getClientRects()).some(overlapsText)) fail(`unmodeled overlapping text ${sibling.tagName}`)
+              if (Array.from(range.getClientRects()).some(box => overlapsText(clipped(box, sibling)))) fail(`unmodeled overlapping text ${sibling.tagName}`)
             }
             if (!painted) continue
             const isIndicator = sibling.getAttribute('data-slot') === 'indicator' && target.closest('[role="tab"]')

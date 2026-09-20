@@ -186,7 +186,7 @@ for (const theme of ['light', 'dark'] as const) {
         const target = document.getElementById('paint-target')!
         const paint = document.getElementById('paint-colored-child') || document.getElementById('paint-overlay')!
         const targetRect = target.getBoundingClientRect()
-        const ids = ['paint-control', 'paint-overlay', 'paint-colored-child', 'paint-branch', 'paint-target', 'paint-layer-wrapper', 'paint-dialog']
+        const ids = ['paint-control', 'paint-overlay', 'paint-colored-child', 'paint-branch', 'paint-target', 'paint-layer-wrapper', 'paint-dialog', 'paint-zero-pseudo', 'paint-clip-wrapper', 'paint-clipped-text']
         return {
           targetRect: targetRect.toJSON(), paintRect: paint.getBoundingClientRect().toJSON(),
           paintBackground: getComputedStyle(paint).backgroundColor, targetColor: getComputedStyle(target).color,
@@ -202,7 +202,7 @@ for (const theme of ['light', 'dark'] as const) {
         await page.locator('#paint-control').screenshot({ path: resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.png`) })
         // Expected rejections are not positive records or source-mutation proof.
         await writeFile(resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.json`), JSON.stringify({ source, theme, kind, state, classification: 'expected detector rejection; not a positive suite red run', computed, ...detection }, null, 2))
-        expect(detection.rejection, `${state}: an unknown overlapping layer must not silently pass`).toMatch(/unresolved:.*(?:sibling|paint|stacking)/)
+        expect(detection.rejection, `${state}: an unknown overlapping layer must not silently pass`).toMatch(/unresolved:.*(?:sibling|paint|stacking|::before|::after)/)
       }
       const computed = await describePaint()
       expect(computed.paintRect.left).toBeLessThanOrEqual(computed.targetRect.left)
@@ -278,7 +278,65 @@ for (const theme of ['light', 'dark'] as const) {
         await expectUnmodeledPaint('display-contents', contents)
         await page.locator('#paint-layer-wrapper').evaluate((node) => { (node as HTMLElement).style.display = 'block' })
       }
-      else await page.locator('#paint-colored-child').evaluate((node) => { (node as HTMLElement).style.backgroundColor = 'transparent' })
+      else {
+        await page.locator('#paint-colored-child').evaluate((node) => { (node as HTMLElement).style.backgroundColor = 'transparent' })
+        await page.locator('#paint-control').evaluate((host) => {
+          const zero = document.createElement('div')
+          zero.id = 'paint-zero-pseudo'
+          Object.assign(zero.style, { width: '0', height: '0', position: 'static', overflow: 'visible' })
+          host.append(zero)
+        })
+        await check(target, `${kind}/unpainted zero-size sibling`, 'measurement contract')
+        const pseudoStyle = await page.addStyleTag({ content: '#paint-zero-pseudo::before { content: ""; position: absolute; inset: 0; z-index: 3; background: currentColor; }' })
+        const describePseudo = () => page.locator('#paint-zero-pseudo').evaluate((node) => {
+          const css = getComputedStyle(node, '::before')
+          return { content: css.content, position: css.position, zIndex: css.zIndex, width: css.width, height: css.height, top: css.top, right: css.right, bottom: css.bottom, left: css.left, backgroundColor: css.backgroundColor }
+        })
+        const zeroSize = {
+          ...await describePaint(),
+          pseudo: await describePseudo(),
+        }
+        const owner = zeroSize.elements.find(node => node.id === 'paint-zero-pseudo')!
+        expect(owner.rect.width).toBe(0); expect(owner.rect.height).toBe(0)
+        expect(zeroSize.pseudo.backgroundColor).toBe(zeroSize.targetColor)
+        expect(parseFloat(zeroSize.pseudo.width)).toBeGreaterThan(zeroSize.targetRect.width)
+        expect(parseFloat(zeroSize.pseudo.height)).toBeGreaterThan(zeroSize.targetRect.height)
+        expect(zeroSize.elementsAtTextCenter[0], 'the zero-size owner has a real covering pseudo box').toBe('paint-zero-pseudo')
+        await expectUnmodeledPaint('zero-size-pseudo', zeroSize)
+        await page.locator('#paint-zero-pseudo').evaluate((node) => { Object.assign((node as HTMLElement).style, { width: '16px', height: '16px', marginLeft: '700px' }) })
+        const escapedPseudo = await describePaint()
+        expect(escapedPseudo.elements.find(node => node.id === 'paint-zero-pseudo')!.rect.left).toBeGreaterThan(escapedPseudo.targetRect.right)
+        expect(escapedPseudo.elementsAtTextCenter[0], 'a nonoverlapping static owner does not bound its absolute pseudo').toBe('paint-zero-pseudo')
+        const escapedEvidence = { ...escapedPseudo, pseudo: await describePseudo() }
+        await expectUnmodeledPaint('nonoverlapping-owner-pseudo', escapedEvidence)
+        await pseudoStyle.evaluate(node => node.parentNode!.removeChild(node))
+        await check(target, `${kind}/unpainted nonoverlapping owner`, 'measurement contract')
+
+        // A collapsed positioned ancestor really clips this overlapping text.
+        // Removing only the clip makes it visible and must reject measurement.
+        await page.locator('#paint-control').evaluate((host) => {
+          const clip = document.createElement('div')
+          clip.id = 'paint-clip-wrapper'
+          Object.assign(clip.style, { position: 'relative', height: '0', overflow: 'hidden' })
+          const text = document.createElement('span')
+          text.id = 'paint-clipped-text'
+          text.textContent = 'Overlapping text from the collapsed sibling'
+          Object.assign(text.style, { position: 'absolute', whiteSpace: 'nowrap' })
+          clip.append(text); host.append(clip)
+          const target = document.getElementById('paint-target')!.getBoundingClientRect()
+          const box = clip.getBoundingClientRect()
+          Object.assign(text.style, { top: `${target.top - box.top}px`, left: `${target.left - box.left}px` })
+        })
+        const clipped = await describePaint()
+        const hiddenText = clipped.elements.find(node => node.id === 'paint-clipped-text')!
+        expect(hiddenText.rect.top).toBeLessThan(clipped.targetRect.bottom)
+        expect(hiddenText.rect.bottom).toBeGreaterThan(clipped.targetRect.top)
+        expect(clipped.elements.find(node => node.id === 'paint-clip-wrapper')!.rect.height).toBe(0)
+        await check(target, `${kind}/ancestor-clipped sibling text`, 'measurement contract')
+        await page.locator('#paint-clip-wrapper').evaluate((node) => { (node as HTMLElement).style.overflow = 'visible' })
+        await expectUnmodeledPaint('removed-ancestor-clip', await describePaint())
+        await page.locator('#paint-clip-wrapper').evaluate((node) => { (node as HTMLElement).style.overflow = 'hidden' })
+      }
       await check(target, `${kind}/restored paint`, 'measurement contract')
     }))
   }
