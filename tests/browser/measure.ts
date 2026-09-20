@@ -146,7 +146,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
           || !['option', 'menuitem'].includes(node.getAttribute('role') || '')
           || ps.position !== 'absolute' || ps.zIndex !== '-1' || current.position !== 'relative'
           || current.zIndex !== 'auto' || color(current.backgroundColor)[3] !== 0
-          || !emptyContent || borderPaint || ps.backgroundImage !== 'none' || ps.boxShadow !== 'none' || ps.filter !== 'none' || ps.backdropFilter !== 'none') fail(`unmodeled ${pseudoName}`)
+          || !emptyContent || borderPaint || ps.backgroundImage !== 'none' || ps.boxShadow !== 'none' || ps.filter !== 'none' || ps.backdropFilter !== 'none') fail(`unmodeled ${pseudoName} on ${node.tagName}${node.id ? '#' + node.id : ''}`)
         const insets = [ps.left, ps.right, ps.top, ps.bottom]
         if (insets.some(v => !/^\d+(?:\.\d+)?px$/.test(v))) fail('unresolved item pseudo geometry')
         const [left, right, top, bottom] = insets.map(parseFloat)

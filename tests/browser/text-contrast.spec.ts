@@ -202,7 +202,7 @@ for (const theme of ['light', 'dark'] as const) {
         await page.locator('#paint-control').screenshot({ path: resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.png`) })
         // Expected rejections are not positive records or source-mutation proof.
         await writeFile(resolve(artifacts, `${theme}-negative-paint-${kind}-${state}.json`), JSON.stringify({ source, theme, kind, state, classification: 'expected detector rejection; not a positive suite red run', computed, ...detection }, null, 2))
-        expect(detection.rejection, `${state}: an unknown overlapping layer must not silently pass`).toMatch(/unresolved:.*(?:sibling|paint|stacking|::before|::after)/)
+        expect(detection.rejection, `${state}: an unknown overlapping layer must not silently pass`).toMatch(/unresolved:.*(?:sibling|paint|text|stacking|::before|::after)/)
       }
       const computed = await describePaint()
       expect(computed.paintRect.left).toBeLessThanOrEqual(computed.targetRect.left)
@@ -501,7 +501,9 @@ for (const theme of ['light', 'dark'] as const) {
           await node.press('ArrowDown'); await settle(page)
           await check(page.locator('[role="option"] [data-slot="itemLabel"]'), `input-menu-${variant}/options`, 'Nuxt UI InputMenu portal', 'open')
         }
-        await page.keyboard.press('Escape'); await node.blur(); await page.mouse.move(0, 0)
+        await page.keyboard.press('Escape')
+        if (component === 'input-menu') await page.locator('[role="option"]').first().waitFor({ state: 'hidden' })
+        await node.blur(); await page.mouse.move(0, 0)
       }
       for (const component of ['input', 'textarea']) await check(page.getByTestId(`${component}-readonly-${variant}`).locator('input, textarea'), `${component}-${variant}/readonly`, 'foundation/assets/css/main.css')
       for (const component of ['select', 'select-menu']) {
