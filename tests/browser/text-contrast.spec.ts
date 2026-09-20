@@ -186,14 +186,14 @@ for (const theme of ['light', 'dark'] as const) {
         const target = document.getElementById('paint-target')!
         const paint = document.getElementById('paint-colored-child') || document.getElementById('paint-overlay')!
         const targetRect = target.getBoundingClientRect()
-        const ids = ['paint-control', 'paint-overlay', 'paint-colored-child', 'paint-branch', 'paint-target', 'paint-layer-wrapper', 'paint-dialog', 'paint-zero-pseudo', 'paint-clip-wrapper', 'paint-clipped-text']
+        const ids = ['paint-control', 'paint-overlay', 'paint-colored-child', 'paint-branch', 'paint-target', 'paint-layer-wrapper', 'paint-dialog', 'paint-zero-pseudo', 'paint-clip-wrapper', 'paint-clipped-text', 'paint-clip-margin', 'paint-clip-margin-child', 'paint-inline-clip', 'paint-inline-child', 'paint-scroll-host', 'paint-zoom-host']
         return {
           targetRect: targetRect.toJSON(), paintRect: paint.getBoundingClientRect().toJSON(),
           paintBackground: getComputedStyle(paint).backgroundColor, targetColor: getComputedStyle(target).color,
           elementsAtTextCenter: document.elementsFromPoint((targetRect.left + targetRect.right) / 2, (targetRect.top + targetRect.bottom) / 2).map(node => node.id || node.tagName),
           elements: ids.map(id => document.getElementById(id)).filter((node): node is HTMLElement => node !== null).map((node) => {
             const style = getComputedStyle(node)
-            return { id: node.id, rect: node.getBoundingClientRect().toJSON(), backgroundColor: style.backgroundColor, color: style.color, opacity: style.opacity, position: style.position, zIndex: style.zIndex, isolation: style.isolation, display: style.display, whiteSpace: style.whiteSpace, overflow: style.overflow, backgroundClip: style.backgroundClip, modal: node.matches(':modal') }
+            return { id: node.id, rect: node.getBoundingClientRect().toJSON(), backgroundColor: style.backgroundColor, color: style.color, opacity: style.opacity, position: style.position, zIndex: style.zIndex, isolation: style.isolation, display: style.display, whiteSpace: style.whiteSpace, overflow: style.overflow, overflowClipMargin: style.overflowClipMargin, scrollLeft: node.scrollLeft, scrollTop: node.scrollTop, zoom: style.zoom, transform: style.transform, backgroundClip: style.backgroundClip, modal: node.matches(':modal') }
           }),
         }
       })
@@ -336,6 +336,115 @@ for (const theme of ['light', 'dark'] as const) {
         await page.locator('#paint-clip-wrapper').evaluate((node) => { (node as HTMLElement).style.overflow = 'visible' })
         await expectUnmodeledPaint('removed-ancestor-clip', await describePaint())
         await page.locator('#paint-clip-wrapper').evaluate((node) => { (node as HTMLElement).style.overflow = 'hidden' })
+        await check(target, `${kind}/ancestor clip restored`, 'measurement contract')
+        await page.locator('#paint-clip-wrapper').evaluate(node => node.remove())
+
+        // overflow:clip can paint outside its box when clip-margin expands it.
+        await page.locator('#paint-branch').evaluate((node) => {
+          const clip = document.createElement('div')
+          clip.id = 'paint-clip-margin'
+          Object.assign(clip.style, { width: '12px', height: '48px', overflow: 'hidden' })
+          const paint = document.createElement('div')
+          paint.id = 'paint-clip-margin-child'
+          Object.assign(paint.style, { width: '536px', height: '48px', backgroundColor: 'currentColor' })
+          clip.append(paint); node.before(clip)
+          Object.assign((node as HTMLElement).style, { marginTop: '-48px', marginLeft: '40px' })
+        })
+        await check(target, `${kind}/narrow hidden clip`, 'measurement contract')
+        await page.locator('#paint-clip-margin').evaluate((node) => { Object.assign((node as HTMLElement).style, { overflow: 'clip', overflowClipMargin: '500px' }) })
+        const expandedClip = await describePaint()
+        expect(expandedClip.elements.find(node => node.id === 'paint-clip-margin')!.rect.right).toBeLessThan(expandedClip.targetRect.left)
+        const expandedPaint = expandedClip.elements.find(node => node.id === 'paint-clip-margin-child')!
+        expect(expandedPaint.rect.right).toBeGreaterThan(expandedClip.targetRect.right)
+        expect(expandedPaint.backgroundColor).toBe(expandedClip.targetColor)
+        expect(expandedClip.elementsAtTextCenter).toContain('paint-clip-margin-child')
+        await expectUnmodeledPaint('expanded-overflow-clip-margin', expandedClip)
+        await page.locator('#paint-clip-margin').evaluate((node) => { Object.assign((node as HTMLElement).style, { overflow: 'hidden', overflowClipMargin: '0px' }) })
+        await check(target, `${kind}/hidden clip restored`, 'measurement contract')
+        await page.locator('#paint-clip-margin').evaluate(node => node.remove())
+        await page.locator('#paint-branch').evaluate((node) => { Object.assign((node as HTMLElement).style, { marginTop: '', marginLeft: '' }) })
+
+        // Overflow on a non-replaced inline box does not clip its descendants.
+        await page.locator('#paint-branch').evaluate((node) => {
+          const clip = document.createElement('span')
+          clip.id = 'paint-inline-clip'
+          Object.assign(clip.style, { display: 'inline-block', width: '12px', height: '48px', overflow: 'hidden' })
+          const inner = document.createElement('span')
+          Object.assign(inner.style, { display: 'inline-block', width: '12px', height: '48px' })
+          const paint = document.createElement('span')
+          paint.id = 'paint-inline-child'
+          Object.assign(paint.style, { display: 'block', width: '536px', height: '48px', backgroundColor: 'currentColor' })
+          inner.append(paint); clip.append(inner); node.before(clip)
+          Object.assign((node as HTMLElement).style, { marginTop: '-48px', marginLeft: '40px' })
+        })
+        await check(target, `${kind}/inline-block clips paint`, 'measurement contract')
+        await page.locator('#paint-inline-clip').evaluate((node) => { (node as HTMLElement).style.display = 'inline' })
+        const inline = await describePaint()
+        expect(inline.elements.find(node => node.id === 'paint-inline-clip')!.display).toBe('inline')
+        expect(inline.elementsAtTextCenter).toContain('paint-inline-child')
+        await expectUnmodeledPaint('inline-overflow-not-a-clip', inline)
+        await page.locator('#paint-inline-clip').evaluate((node) => { (node as HTMLElement).style.display = 'inline-block' })
+        await check(target, `${kind}/inline-block clip restored`, 'measurement contract')
+        await page.locator('#paint-inline-clip').evaluate(node => node.remove())
+        await page.locator('#paint-branch').evaluate((node) => { Object.assign((node as HTMLElement).style, { marginTop: '', marginLeft: '' }) })
+
+        // The pseudo's CSS left offset is unchanged when its host scrolls.
+        await page.locator('#paint-branch').evaluate((node) => {
+          const scroll = document.createElement('div')
+          scroll.id = 'paint-scroll-host'
+          Object.assign(scroll.style, { position: 'relative', width: '536px', height: '80px', overflow: 'auto' })
+          node.before(scroll)
+          ;(node as HTMLElement).style.marginTop = '-80px'
+        })
+        const scrollStyle = await page.addStyleTag({ content: '#paint-scroll-host::before { content: ""; position: absolute; left: 600px; top: 0; width: 600px; height: 80px; background: currentColor; }' })
+        await check(target, `${kind}/unscrolled distant pseudo`, 'measurement contract')
+        await page.locator('#paint-scroll-host').evaluate((node) => { node.scrollLeft = 600 })
+        const scrolled = {
+          ...await describePaint(),
+          pseudo: await page.locator('#paint-scroll-host').evaluate((node) => {
+            const css = getComputedStyle(node, '::before')
+            return { left: css.left, top: css.top, width: css.width, height: css.height, backgroundColor: css.backgroundColor, scrollLeft: node.scrollLeft, scrollTop: node.scrollTop }
+          }),
+        }
+        expect(scrolled.pseudo.scrollLeft).toBe(600)
+        expect(scrolled.pseudo.left).toBe('600px')
+        expect(scrolled.pseudo.backgroundColor).toBe(scrolled.targetColor)
+        await expectUnmodeledPaint('scrolled-pseudo-host', scrolled)
+        await page.locator('#paint-scroll-host').evaluate((node) => { node.scrollLeft = 0 })
+        await check(target, `${kind}/pseudo scroll restored`, 'measurement contract')
+        await scrollStyle.evaluate(node => node.parentNode!.removeChild(node))
+        await page.locator('#paint-scroll-host').evaluate(node => node.remove())
+        await page.locator('#paint-branch').evaluate((node) => { (node as HTMLElement).style.marginTop = '' })
+
+        // CSS zoom changes CSS offsets relative to viewport-space DOM rects.
+        await page.locator('#paint-control').evaluate((host) => { Object.assign((host as HTMLElement).style, { zoom: '0.5', transform: 'translate(24px, 10px)' }) })
+        await page.locator('#paint-branch').evaluate((node) => {
+          const zoom = document.createElement('div')
+          zoom.id = 'paint-zoom-host'
+          Object.assign(zoom.style, { position: 'relative', width: '536px', height: '80px' })
+          node.before(zoom)
+          ;(node as HTMLElement).style.marginTop = '-20px'
+        })
+        const zoomStyle = await page.addStyleTag({ content: '#paint-zoom-host::before { content: ""; position: absolute; left: 0; top: 60px; width: 536px; height: 80px; background: currentColor; }' })
+        const zoomed = {
+          ...await describePaint(),
+          pseudo: await page.locator('#paint-zoom-host').evaluate((node) => {
+            const css = getComputedStyle(node, '::before')
+            return { top: css.top, left: css.left, width: css.width, height: css.height, backgroundColor: css.backgroundColor }
+          }),
+        }
+        const zoomHost = zoomed.elements.find(node => node.id === 'paint-zoom-host')!
+        expect(zoomed.elements.find(node => node.id === 'paint-control')!.zoom).toBe('0.5')
+        expect(zoomHost.rect.top + parseFloat(zoomed.pseudo.top), 'unscaled offsets would wrongly appear disjoint').toBeGreaterThan(zoomed.targetRect.bottom)
+        expect(zoomHost.rect.top + parseFloat(zoomed.pseudo.top) * 0.5).toBeLessThanOrEqual(zoomed.targetRect.top)
+        expect(zoomHost.rect.top + (parseFloat(zoomed.pseudo.top) + parseFloat(zoomed.pseudo.height)) * 0.5).toBeGreaterThanOrEqual(zoomed.targetRect.bottom)
+        expect(zoomed.pseudo.backgroundColor).toBe(zoomed.targetColor)
+        await expectUnmodeledPaint('css-zoom-pseudo', zoomed)
+        await zoomStyle.evaluate(node => node.parentNode!.removeChild(node))
+        await check(target, `${kind}/zoom without pseudo restored`, 'measurement contract')
+        await page.locator('#paint-zoom-host').evaluate(node => node.remove())
+        await page.locator('#paint-branch').evaluate((node) => { (node as HTMLElement).style.marginTop = '' })
+        await page.locator('#paint-control').evaluate((host) => { Object.assign((host as HTMLElement).style, { zoom: '', transform: '' }) })
       }
       await check(target, `${kind}/restored paint`, 'measurement contract')
     }))

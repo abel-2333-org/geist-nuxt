@@ -14,10 +14,15 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     const range = document.createRange()
     range.selectNodeContents(target)
     type Bounds = { left: number, right: number, top: number, bottom: number }
-    function transformed(element: Element) {
+    function transformed(element: Element, allowTranslation = false) {
       for (let node: Element | null = element; node; node = node.parentElement) {
         const css = getComputedStyle(node)
-        if (css.transform !== 'none' || css.rotate !== 'none' || css.scale !== 'none') return true
+        if (css.zoom !== '1') return true
+        if (css.rotate !== 'none' || css.scale !== 'none' || css.perspective !== 'none' || css.transformStyle !== 'flat') return true
+        if (css.transform !== 'none') {
+          const matrix = new DOMMatrixReadOnly(css.transform)
+          if (!allowTranslation || !matrix.is2D || matrix.a !== 1 || matrix.b !== 0 || matrix.c !== 0 || matrix.d !== 1) return true
+        }
       }
       return false
     }
@@ -29,16 +34,29 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         const css = getComputedStyle(node)
         // Out-of-flow content can escape an overflow ancestor. Keeping the
         // larger bounds is conservative when that relationship is unmodeled.
-        if (css.position === 'absolute' || css.position === 'fixed') break
+        if (css.position === 'absolute' || css.position === 'fixed') {
+          // This one bounded case has a known immediate containing block.
+          // Do not infer clips across any other out-of-flow ancestor path.
+          if (node === leaf && css.position === 'absolute' && node.parentElement
+            && getComputedStyle(node.parentElement).position === 'relative'
+            && getComputedStyle(node.parentElement).display !== 'contents'
+            && !transformed(node.parentElement)) continue
+          break
+        }
         if (!includeSelf && node === leaf) continue
         if (css.display === 'contents') continue
+        // overflow does not clip a non-replaced inline box. Keep unknown box
+        // types conservative instead of treating every computed value as a clip.
+        if (!['block', 'inline-block', 'flow-root', 'flex', 'inline-flex', 'grid', 'inline-grid'].includes(css.display)) continue
         if (transformed(node)) continue
         const bounds = node.getBoundingClientRect()
-        if (/^(hidden|clip|scroll|auto)$/.test(css.overflowX)) {
+        // overflow:clip can extend via overflow-clip-margin; that geometry
+        // is not modeled, so it cannot justify excluding any paint.
+        if (/^(hidden|scroll|auto)$/.test(css.overflowX)) {
           result.left = Math.max(result.left, bounds.left + parseFloat(css.borderLeftWidth))
           result.right = Math.min(result.right, bounds.right - parseFloat(css.borderRightWidth))
         }
-        if (/^(hidden|clip|scroll|auto)$/.test(css.overflowY)) {
+        if (/^(hidden|scroll|auto)$/.test(css.overflowY)) {
           result.top = Math.max(result.top, bounds.top + parseFloat(css.borderTopWidth))
           result.bottom = Math.min(result.bottom, bounds.bottom - parseFloat(css.borderBottomWidth))
         }
@@ -109,7 +127,8 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         // A pseudo has no DOM rect. Only a bounded absolute box in this
         // positioned host permits geometric exclusion; zero-sized/static
         // hosts cannot prove that their generated paint stays out of the text.
-        if (sibling && emptyContent && !transformed(node) && current.position === 'relative' && current.display !== 'contents'
+        if (sibling && emptyContent && node.scrollLeft === 0 && node.scrollTop === 0
+          && !transformed(node, true) && current.position === 'relative' && current.display !== 'contents'
           && ps.position === 'absolute' && ps.transform === 'none' && ps.translate === 'none'
           && ps.rotate === 'none' && ps.scale === 'none' && ps.boxShadow === 'none' && ps.filter === 'none' && ps.backdropFilter === 'none') {
           const lengths = [ps.left, ps.top, ps.width, ps.height, ps.marginLeft, ps.marginTop]
@@ -201,6 +220,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       return true
     }
     function coversText(node: Element, css: CSSStyleDeclaration) {
+      if (transformed(node, true)) return false
       if (css.backgroundClip !== 'border-box' || css.clipPath !== 'none' || css.clip !== 'auto') return false
       const box = node.getBoundingClientRect()
       if (box.left > textRect.left || box.right < textRect.right || box.top > textRect.top || box.bottom < textRect.bottom) return false
