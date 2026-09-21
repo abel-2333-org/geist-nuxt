@@ -95,12 +95,96 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       }
       return result
     }
-    const textRect = clipped(input ? {
+    const rawTextRect = input ? {
       left: rect.left + parseFloat(host.borderLeftWidth) + parseFloat(host.paddingLeft),
       right: rect.right - parseFloat(host.borderRightWidth) - parseFloat(host.paddingRight),
       top: rect.top + parseFloat(host.borderTopWidth) + parseFloat(host.paddingTop),
       bottom: rect.bottom - parseFloat(host.borderBottomWidth) - parseFloat(host.paddingBottom),
-    } : range.getBoundingClientRect(), target)
+    } : range.getBoundingClientRect()
+    function singleGlyphTop() {
+      // A text Range includes font leading. Only this isolated, ordinary glyph
+      // path has the same shaping/font metrics in DOM and Canvas. Every other
+      // path keeps the original Range, including unsupported font features.
+      const glyph = target.textContent || ''
+      if (input || pseudo || !engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
+        || !/^[!-~]$/.test(glyph) || target.childNodes.length !== 1 || target.firstChild?.nodeType !== Node.TEXT_NODE
+        || range.getClientRects().length !== 1 || !['inline-block', 'flow-root'].includes(host.display)
+        || [rawTextRect.left, rawTextRect.right, rawTextRect.top, rawTextRect.bottom].some(v => !Number.isFinite(v) || Math.abs(v) >= 2 ** 18)
+        || transformed(target) || host.writingMode !== 'horizontal-tb' || host.direction !== 'ltr'
+        || host.fontStyle !== 'normal' || host.fontVariant !== 'normal' || host.fontFeatureSettings !== 'normal'
+        || host.fontVariationSettings !== 'normal' || host.fontSizeAdjust !== 'none' || host.fontOpticalSizing !== 'auto'
+        || host.fontKerning !== 'auto' || host.textRendering !== 'auto' || host.letterSpacing !== 'normal'
+        || !['normal', '0px'].includes(host.wordSpacing) || host.textTransform !== 'none'
+        || host.textCombineUpright !== 'none' || host.textEmphasisStyle !== 'none'
+        || host.textShadow !== 'none' || host.webkitTextStrokeWidth !== '0px') return null
+      const fontProperties = ['font-family', 'font-size', 'font-weight', 'font-style', 'font-stretch', 'font-variant',
+        'font-feature-settings', 'font-variation-settings', 'font-size-adjust', 'font-optical-sizing', 'font-language-override',
+        'text-transform', 'text-shadow', '-webkit-text-stroke-width', 'text-decoration-line', 'text-emphasis-style']
+      for (let node: Element | null = target; node; node = node.parentElement) {
+        const css = getComputedStyle(node)
+        if (node.hasAttribute('xml:lang') || css.getPropertyValue('font-language-override') !== 'normal' || css.translate !== 'none' || css.textDecorationLine !== 'none' || css.textEmphasisStyle !== 'none'
+          || css.getPropertyValue('dominant-baseline') !== 'auto' || css.getPropertyValue('text-fit') !== 'none'
+          || css.getPropertyValue('text-box-trim') !== 'none' || css.getPropertyValue('text-box-edge') !== 'auto') return null
+        for (const name of ['::first-line', '::first-letter']) {
+          const ps = getComputedStyle(node, name)
+          if (fontProperties.some(key => ps.getPropertyValue(key) !== css.getPropertyValue(key))) return null
+        }
+      }
+      try {
+        const map = (target as any).computedStyleMap()
+        const size = map.get('font-size'), weight = map.get('font-weight'), stretch = map.get('font-stretch')
+        if (size.unit !== 'px' || !Number.isFinite(size.value) || size.value <= 4 || size.value > 256
+          || weight.unit !== 'number' || weight.value !== 400 || stretch.unit !== 'percent' || stretch.value !== 100) return null
+        // Require a loaded ordinary face for this primary family. Unknown font
+        // selection/descriptors are not a license to shrink a Range.
+        const family = /^"([^"\\]+)"(?:,|$)/.exec(host.fontFamily)?.[1]
+        if (!family || !document.fonts.check(`${size.value}px "${family}"`, glyph)) return null
+        const familyFaces = Array.from(document.fonts).filter(face => face.family.replace(/^"|"$/g, '') === family && face.style === 'normal')
+        if (familyFaces.some(face => !/^(normal|[0-9]+)$/.test(face.weight))) return null
+        const faces = familyFaces.filter(face => ['normal', '400'].includes(face.weight) && ['normal', '100%'].includes(face.stretch))
+        const coverage = (face: FontFace) => {
+          const ranges = face.unicodeRange.split(',').map(part => /^\s*U\+([0-9A-F]+)(?:-([0-9A-F]+))?\s*$/i.exec(part))
+          if (ranges.some(match => !match)) return null
+          const code = glyph.codePointAt(0)!
+          return ranges.some(match => code >= parseInt(match![1]!, 16) && code <= parseInt(match![2] || match![1]!, 16))
+        }
+        if (faces.some(face => coverage(face) === null)) return null
+        const matches = faces.filter(face => coverage(face))
+        if (matches.length !== 1) return null
+        const face = matches[0]! as FontFace & { variationSettings?: string, variant?: string, sizeAdjust?: string }
+        if (face.variationSettings !== 'normal' || face.variant !== 'normal' || face.status !== 'loaded' || face.featureSettings !== 'normal'
+          || face.ascentOverride !== 'normal' || face.descentOverride !== 'normal' || face.lineGapOverride !== 'normal'
+          || face.sizeAdjust !== '100%') return null
+        const context = document.createElement('canvas').getContext('2d')
+        if (!context) return null
+        const language = target.closest('[lang]')?.getAttribute('lang') || ''
+        const localized = context as CanvasRenderingContext2D & { lang?: string }
+        if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(language) || typeof localized.lang !== 'string') return null
+        localized.lang = language
+        if (localized.lang !== language) return null
+        context.direction = 'ltr'
+        context.font = `${weight.value} ${size.value}px ${host.fontFamily}`
+        context.textBaseline = 'alphabetic'
+        const metrics = context.measureText(glyph)
+        const values = [metrics.fontBoundingBoxAscent, metrics.fontBoundingBoxDescent, metrics.actualBoundingBoxAscent,
+          metrics.actualBoundingBoxDescent, metrics.width]
+        if (!values.every(Number.isFinite) || metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent <= 0
+          || Math.abs(rawTextRect.bottom - rawTextRect.top - metrics.fontBoundingBoxAscent - metrics.fontBoundingBoxDescent) > 1
+          || Math.abs(rawTextRect.right - rawTextRect.left - metrics.width) > 1 / 64) return null
+        // Blink's DOM baseline rounds the primary font ascent; Canvas uses its
+        // float ascent. Retain 0.5px for that difference and 1px for glyph ink
+        // rasterization, then round outward. X and bottom are never tightened.
+        const top = Math.max(rawTextRect.top, Math.floor(rawTextRect.top + metrics.fontBoundingBoxAscent
+          - metrics.actualBoundingBoxAscent - 0.5 - 1))
+        if (top >= rawTextRect.bottom) return null
+        return { top, glyph, font: context.font, language, primaryFace: { family: face.family, status: face.status, unicodeRange: face.unicodeRange }, fontBoundingBoxAscent: metrics.fontBoundingBoxAscent,
+          actualBoundingBoxAscent: metrics.actualBoundingBoxAscent, baselineAllowance: 0.5, rasterAllowance: 1 }
+      }
+      catch { return null }
+    }
+    const glyphBounds = singleGlyphTop()
+    const textRect = clipped({ left: rawTextRect.left, right: rawTextRect.right, top: glyphBounds?.top ?? rawTextRect.top,
+      bottom: rawTextRect.bottom }, target)
     const text = pseudo ? (target as HTMLInputElement).placeholder : ((target as HTMLInputElement).value || target.textContent?.trim())
     const fail = (reason: string): never => { throw new Error(`unresolved: ${reason}`) }
     if (!text || !rect.width || !rect.height || textRect.right <= textRect.left || textRect.bottom <= textRect.top || getComputedStyle(target).visibility !== 'visible') fail('empty or hidden target')
@@ -481,7 +565,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         chain.push({ node: node.tagName + (node.id ? `#${node.id}` : ''), background: color(current.backgroundColor), rawBackground: current.backgroundColor, opacity: Number(current.opacity), underlays })
       }
       layers.push(...chain)
-      return { text, rawForeground: style.color, foreground, layers, excludedPaint, engine, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
+      return { text, textBounds: { raw: { left: rawTextRect.left, right: rawTextRect.right, top: rawTextRect.top, bottom: rawTextRect.bottom }, used: textRect, glyph: glyphBounds }, rawForeground: style.color, foreground, layers, excludedPaint, engine, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
     }
     finally { probe.remove() }
   }, { pseudo, engine })
