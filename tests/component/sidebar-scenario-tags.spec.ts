@@ -95,6 +95,8 @@ describe('SidebarScenarioTags measured overflow', () => {
     expect(trigger).not.toBeNull()
     expect(trigger!.getAttribute('aria-label')).toBe('View all 2 scenarios')
     expect(trigger!.textContent).toContain('+1')
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md).
+    expect(trigger!.classList.contains('touch-manipulation')).toBe(true)
   })
 
   it('reserves the rendered "+N" width across a digit boundary', async () => {

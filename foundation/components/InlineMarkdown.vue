@@ -48,7 +48,9 @@ export default defineComponent({
         if (node.type === 'del') return h('del', render(node.children))
         return h(
           ProseA,
-          { href: node.href, target: node.external ? '_blank' : undefined },
+          // Foundation tap-target touch contract (focus-a11y.md): the class rides
+          // ProseA's attrs down to its root <a>.
+          { href: node.href, target: node.external ? '_blank' : undefined, class: 'touch-manipulation' },
           () => render(node.children),
         )
       })

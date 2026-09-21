@@ -33,7 +33,7 @@ Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
 - **每个交互元素**在 `:focus-visible` 都要显示 focus 环。
 - **纯图标按钮**必须有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
 - **键盘可达**：所有可点击元素用真正的 `<button>`/`<a>` 或带 `tabindex`/`role` 的元素；Nuxt UI 组件默认已处理键盘交互（Reka UI 基座）。
-- **触控 tap 目标**：分发组件（foundation / kit）里的每个可点击元素——原生 `<button>` / 链接、stretched-link 覆盖层，以及经 `class` 落到根元素的 `UButton` / `ULink`——都加 `touch-manipulation`，关闭浏览器的双击缩放启发式，让快速连点（展开 → 收起、打开 → Esc → 再打开）稳定触发而不被判为缩放。拖拽把手用 `touch-none`（`SplitPaneHandle`），不属此列。组件 spec 用 `classes()` 锁定该 class（先例：`SidebarNav` / `SchemaComposition` / `SiteSearch`）。
+- **触控 tap 目标**：分发组件（foundation / kit）里**每个最终渲染为 `<button>` / `<a>` 的元素**都加 `touch-manipulation`——判定看渲染结果，不看有没有 `@click`（只在 hover / focus 触发 tooltip 的记号按钮同样算），含原生标签、stretched-link 覆盖层、`<component :is>` 与 render function 生成的链接，以及经 `class` 到达根元素的 `UButton` / `ULink` / `UColorModeButton`。它关闭浏览器的双击缩放启发式，让快速连点（展开 → 收起、打开 → Esc → 再打开）稳定触发而不被判为缩放。两类明示例外：拖拽把手用 `touch-none`（`SplitPaneHandle`）；Nuxt UI 原语在内部生成、`class` 到不了的链接 / 按钮（如 `UNavigationMenu` 的菜单项、`USelect` 的触发器）由上游主题决定，不在本契约内。组件 spec 用 `classes()` 锁定该 class（先例：`SidebarNav` / `SchemaComposition` / `SiteSearch`）。
 - **表单**：一律用 `UFormField` 包裹，自动关联 label/error/描述与控件（`for`/`aria-describedby`）。
 
 ## 语义色的可及性

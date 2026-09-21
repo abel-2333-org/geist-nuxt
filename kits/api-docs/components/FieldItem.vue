@@ -317,7 +317,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                Forced-colors mode drops backgrounds, so a transparent outline
                stays behind — the system forces it to the foreground colour.
                `select-none` keeps the notation out of a copied field name.
-               Touch never opens a tooltip; the consuming page's legend covers it. --><UTooltip
+               Touch never opens a tooltip; the consuming page's legend covers it.
+               `touch-manipulation` is not a tap affordance: it is the blanket
+               tap-target contract from focus-a11y.md (every rendered <button>). --><UTooltip
             v-if="presence.optional"
             :text="t.mayBeOmitted"
             :content="{ side: 'top' }"

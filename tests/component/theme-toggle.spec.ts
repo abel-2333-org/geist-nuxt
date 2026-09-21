@@ -13,7 +13,7 @@ afterEach(() => {
 describe('ThemeToggle touch contract', () => {
   it('opts the color-mode button into touch-manipulation', async () => {
     // Foundation tap-target touch contract (references/foundations/focus-a11y.md):
-    // the class must reach UColorModeButton's root UButton through $attrs.
+    // UColorModeButton takes `class` as a prop and forwards it to the root UButton.
     wrapper = await mountSuspended(ThemeToggle)
     expect(wrapper.get('button').classes()).toContain('touch-manipulation')
   })
