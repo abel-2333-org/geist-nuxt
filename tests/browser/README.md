@@ -71,3 +71,5 @@ node scripts/verify-contrast-mutations.mjs --artifacts /absolute/external/eviden
 F-03 单独检查 `::before` / `::after` 的 computed outline；宿主的 outline 检查不能覆盖生成内容。伪元素缺少可直接读取的 DOMRect，outline 又可伸出其盒子，因此普通可见 outline 与 `auto` outline 在空绘制和盒子不相交两条早退之前显式 `unresolved`，不沿用宿主几何排除。普通透明、零宽或未生成的 outline 仍按无绘制处理；`auto` 不获得透明/零宽豁免。明暗测试分别以透明 `::before` 和有背景但盒子分离的 `::after` 复现两条路径，保存无遮挡、透明、零宽、覆盖与移除恢复的几何、测量和截图。
 
 gallery 的 `?` hover/focus 样本等待实际 trigger 打开、对应 Tooltip 可见、入场动画及按钮自身颜色过渡结束，再测稳定态文字；不以固定延迟假定 Tooltip 已打开，也不关闭真实浮层或捕获 `unresolved` 重试。就绪 sidecar 保存两侧动画计数、浮层 opacity / transform 与状态，它只证明采样状态，随后仍由原始测量与完整命令判断对比度。
+
+`optional-trigger-motion.spec.ts` 在真实键盘输入前开始观察 `?`，独立覆盖明暗主题、普通与 reduced motion、无 hover 的 Tab 进入/退出、hover 与 focus 交叠及快速反向切换。它记录 computed transition 配置、实际颜色 transition 事件、运行中的相关动画和每个恢复端点的颜色合成；不会等 `optionalTooltipReady()` 返回才开始观察，也不以少量中间帧代替无颜色插值的证明。Tooltip 自身入场动画继续运行，稳定端点仍须通过原测量器。此处承接 #148 的具体 trigger 过渡问题，#147 其余功能色及 owner 未决范围保持独立。
