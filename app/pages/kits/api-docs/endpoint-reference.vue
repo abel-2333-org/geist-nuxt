@@ -379,7 +379,7 @@ const bodyFields = [
     name: 'gitSource',
     type: 'object',
     required: 'conditional' as const,
-    // Two independent sentences: one list, one rule, one entry each (#145).
+    // 两个独立事实：一条 rule，一句一个 entry（#145）。
     condition: [
       '`type` 为 `git` 时必填。',
       '未传 `type` 且未传 `files` 时同样必填，此时按 `git` 部署处理。',

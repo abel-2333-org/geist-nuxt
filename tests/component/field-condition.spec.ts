@@ -85,7 +85,14 @@ describe('presence derivation with list conditions', () => {
       fieldValueLabelDefaults,
     )
     expect(block?.presence.condition).toEqual(two)
-    expect(block?.compact).toBe(false)
+    // One unlabelled constraint alone would be the compact row; the condition
+    // list must still escalate past it, or the compact template would drop
+    // the whole presence rule.
+    const withConstraint = describeValueRequirements(
+      { relation: 'item', type: 'object', notes: [{ text: 'At least 1 character.' }], presence: { condition: two } },
+      fieldValueLabelDefaults,
+    )
+    expect(withConstraint?.compact).toBe(false)
   })
 })
 

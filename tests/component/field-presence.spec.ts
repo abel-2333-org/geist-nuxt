@@ -96,7 +96,13 @@ describe('describeFieldPresence', () => {
 
   it('counts as value detail and escalates the scope block past compact', () => {
     const chrome = fieldValueLabelDefaults
-    const block = describeValueRequirements({ relation: 'item', type: 'object', presence: { nullable: true } }, chrome)
+    // A lone unlabelled constraint is exactly the compact row, so the presence
+    // fact must be what escalates it — a fixture without a constraint would
+    // pass regardless.
+    const block = describeValueRequirements(
+      { relation: 'item', type: 'object', notes: [{ text: 'At least 1 character.' }], presence: { nullable: true } },
+      chrome,
+    )
     expect(block?.presence.unionTail).toEqual(['null'])
     expect(block?.compact).toBe(false)
     const conditionOnly = describeValueRequirements(

@@ -196,9 +196,10 @@ const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== pr
 // optional state is silent), and nothing is inferred from a missing `required`.
 const presence = computed(() => describeFieldPresence(props.presence))
 const presenceCondition = computed(() => presence.value.condition)
-// The request condition, normalised once for the marker, the detail gate and
-// the rule alike; `conditionEntries` is the single place that decides whether
-// a string, a list or a list of blanks says anything.
+// The request condition, normalised through the single shared function
+// (`fieldRequiredState` calls it again for the marker); `conditionEntries` is
+// the one place that decides whether a string, a list or a list of blanks
+// says anything, so the marker, the detail gate and the rule cannot disagree.
 const conditions = computed(() => conditionEntries(props.condition))
 const typeExpression = computed(() => presenceTypeExpression(props.type, presence.value.unionTail))
 
