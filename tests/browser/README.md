@@ -18,7 +18,7 @@ pnpm test:browser
 
 `build:contrast` 使用根 Nuxt 配置、真实 foundation CSS/config 和 kit 组件，单独添加 `/__contrast` 路由及 fixture 扫描入口。fixture 在 `tests/fixtures/contrast/`，通过 `tests/nuxt/contrast-fixture.ts` 接入已有类型检查；不进入 registry，也不注册到正常 gallery 构建。正常页面的实际回归仍使用三个已有 API Docs 路由。
 
-上述隔离指运行时注册与 registry copy-in。现行 Source-first 完整根源码 snapshot 仍包含测试和 fixture 源文件；截图、trace 和日志位于被排除的构建产物目录。若要求 release/v0 snapshot 也移除 fixture，需要单独决定分发边界，不能仅删除 fixture 而留下失效的测试命令和类型入口。
+按 [源码快照与 runtime 边界](../../references/maintenance/sync.md#源码快照与-runtime-边界)，release / v0 完整根源码 snapshot 保留测试和 fixture 源文件，供接收方复现验证；上述隔离约束正常 gallery 的运行时注册与 registry copy-in。测试截图、trace 和日志保存在被排除的构建产物目录或仓库外部证据目录，不进入源码快照。
 
 CI 保留原有三个 required check 名称，浏览器步骤位于 `Verify Source-first root` 的正常 build 之后。结果、原始颜色、合成层、状态、源码 SHA/digest、实际字体、截图和 trace 写入 `.output/contrast-artifacts/` 并上传 artifact；`.output` 不进入 Source-first 发布包。可用 `GEIST_CONTRAST_ARTIFACTS` 指定独立证据目录。
 

@@ -15,6 +15,14 @@ GitHub 真源根目录
 
 没有 npm publish、registry 可见性等待、独立 starter lockfile 或 Nuxt layer。根 snapshot 自带 `app/`、`foundation/`、`kits/`、`playground/`、`registry.json`、工具脚本、配置和 references；`v0.json` 从 `.` 启动它。
 
+## 源码快照与 runtime 边界
+
+release / v0 分发的是完整、可运行的根源码快照，保留 `tests/`、fixture、测试源码，以及复现该版本验证所需的脚本、配置和类型入口。接收方可据此检查、修改和重新验证同一版本；不另行维护裁剪后的源码分发版本。
+
+业务 consumer 的 runtime copy-in 仍只由 `registry.json` 声明的正式资产及依赖闭包决定，`geist:copy` / `geist:update` 不安装测试或 fixture。正常 gallery 构建不注册测试路由；`/__contrast` 仅由显式的 `build:contrast` 测试构建接入。
+
+测试产生的截图、trace 和日志作为独立验证证据保存，写入被打包规则排除的构建产物目录或仓库外部目录，不进入源码快照。这不等同于全局排除 PNG 等文件格式：正式品牌和设计资产仍按既有契约分发。以下源码快照组装、排除规则和验证流程保持适用。
+
 ## CI 完成定义
 
 Source-first 真源必须依次通过：
