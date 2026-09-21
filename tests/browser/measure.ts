@@ -39,14 +39,21 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     const range = document.createRange()
     range.selectNodeContents(target)
     type Bounds = { left: number, right: number, top: number, bottom: number }
-    function transformed(element: Element, allowTranslation = false) {
+    function transformed(element: Element, allowTranslation = false, wholePixelTranslation = false) {
       for (let node: Element | null = element; node; node = node.parentElement) {
         const css = getComputedStyle(node)
-        if (css.zoom !== '1') return true
+        if (css.zoom !== '1' || (node as Element & { currentCSSZoom?: number }).currentCSSZoom !== 1) return true
         if (css.rotate !== 'none' || css.scale !== 'none' || css.perspective !== 'none' || css.transformStyle !== 'flat') return true
         if (css.transform !== 'none') {
-          const matrix = new DOMMatrixReadOnly(css.transform)
-          if (!allowTranslation || !matrix.is2D || matrix.a !== 1 || matrix.b !== 0 || matrix.c !== 0 || matrix.d !== 1) return true
+          if (!allowTranslation) return true
+          let matrix: DOMMatrixReadOnly
+          // CSS strings round small scale changes into apparent identity. Typed
+          // OM retains the underlying numbers and must be available for proof.
+          try { matrix = (node as any).computedStyleMap().get('transform').toMatrix() }
+          catch { return true }
+          if (!matrix.is2D || matrix.a !== 1 || matrix.b !== 0 || matrix.c !== 0 || matrix.d !== 1
+            || !Number.isFinite(matrix.e) || !Number.isFinite(matrix.f)) return true
+          if (wholePixelTranslation && (!Number.isSafeInteger(matrix.e) || !Number.isSafeInteger(matrix.f))) return true
         }
       }
       return false
@@ -172,7 +179,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       const shape = css.getPropertyValue('border-shape')
       if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
         || !(node instanceof HTMLElement) || node.getClientRects().length !== 1
-        || (shape && shape !== 'none') || transformed(node)) return null
+        || (shape && shape !== 'none') || transformed(node, true, true)) return null
       const axes = { x: true, y: true }
       for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
         const value = getComputedStyle(ancestor).translate
@@ -187,6 +194,27 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         if (y !== 0) axes.y = false
       }
       return axes.x || axes.y ? axes : null
+    }
+    function casterSnapMargin(node: Element, axis: 'x' | 'y') {
+      const start = axis === 'x' ? 'left' : 'top', end = axis === 'x' ? 'right' : 'bottom'
+      // Below 2^18, binary32 retains Chromium's 1/64 LayoutUnit grid. Large
+      // coordinates must not masquerade as aligned after float conversion.
+      const aligned = (value: number) => Number.isSafeInteger(value) && Math.abs(value) < 2 ** 18
+      if (!aligned(axis === 'x' ? scrollX : scrollY)
+        || !aligned(node.getBoundingClientRect()[end])) return 1
+      for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const boxes = ancestor.getClientRects()
+        if (boxes.length !== 1 || !aligned(boxes[0]![start])
+          || !aligned(axis === 'x' ? ancestor.scrollLeft : ancestor.scrollTop)) return 1
+        if (getComputedStyle(ancestor).transform !== 'none') {
+          const matrix = (ancestor as any).computedStyleMap().get('transform').toMatrix() as DOMMatrixReadOnly
+          if (!aligned(axis === 'x' ? matrix.e : matrix.f)) return 1
+        }
+      }
+      // On a proven axis all paint origins/scroll mappings and both caster
+      // edges are on the DPR1 pixel grid, so caster snapping is the identity.
+      // Shadow serialization bounds and the final raster floor/ceil remain.
+      return 0
     }
     function onProvenAxes(bounds: Bounds, axes: { x: boolean, y: boolean }): Bounds {
       return { left: axes.x ? bounds.left : -Infinity, right: axes.x ? bounds.right : Infinity,
@@ -241,14 +269,15 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         const extent = Math.ceil(Math.fround(3 * Math.fround(Math.fround(blur) * 0.5)))
           + Math.max(0, shadow.spread + unit(shadow.spread))
         const xError = unit(shadow.x), yError = unit(shadow.y)
-        // The extra pixel encloses caster snapping and raster rounding at DPR1.
-        // This enlarges the possible paint area; it never ignores an overlap.
-        const bounds = onProvenAxes({ left: Math.floor(box.left + shadow.x - xError - extent - 1),
-          right: Math.ceil(box.right + shadow.x + xError + extent + 1),
-          top: Math.floor(box.top + shadow.y - yError - extent - 1),
-          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + 1) }, axes!)
+        // Retain a full pixel for uncertain caster snapping. Only explicitly
+        // aligned axes may omit it; final raster bounds still round outward.
+        const snapX = casterSnapMargin(node, 'x'), snapY = casterSnapMargin(node, 'y')
+        const bounds = onProvenAxes({ left: Math.floor(box.left + shadow.x - xError - extent - snapX),
+          right: Math.ceil(box.right + shadow.x + xError + extent + snapX),
+          top: Math.floor(box.top + shadow.y - yError - extent - snapY),
+          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + snapY) }, axes!)
         if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping outer shadow paint on ${node.tagName}`)
-        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, bounds: recordBounds(bounds) })
+        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, snapMargin: { x: snapX, y: snapY }, bounds: recordBounds(bounds) })
       }
     }
     function supported(node: Element, computed: CSSStyleDeclaration) {
