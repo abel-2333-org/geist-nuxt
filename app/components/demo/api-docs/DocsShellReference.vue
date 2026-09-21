@@ -206,7 +206,7 @@ onMounted(() => anchor.initFromHash())
       >
         <div class="flex flex-wrap items-center gap-2.5">
           <HttpMethodBadge :method="stub.method" />
-          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
+          <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">{{ stub.path }}</code>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
           <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
@@ -301,7 +301,7 @@ onMounted(() => anchor.initFromHash())
       >
         <div class="flex flex-wrap items-center gap-2.5">
           <WebhookBadge />
-          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.event }}</code>
+          <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">{{ stub.event }}</code>
         </div>
         <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
         <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>
@@ -341,7 +341,7 @@ onMounted(() => anchor.initFromHash())
       >
         <div class="flex flex-wrap items-center gap-2.5">
           <HttpMethodBadge :method="stub.method" />
-          <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ stub.path }}</code>
+          <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">{{ stub.path }}</code>
         </div>
         <h2 class="text-lg font-semibold tracking-tight text-highlighted">{{ stub.summary }}</h2>
         <p class="max-w-2xl leading-relaxed text-muted text-pretty">{{ stub.description }}</p>

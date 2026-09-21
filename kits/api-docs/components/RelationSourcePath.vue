@@ -121,7 +121,7 @@ function jump(event: MouseEvent) {
     :is="source.to ? ULink : source.field ? 'a' : 'span'"
     :to="source.to"
     :href="href"
-    class="group flex min-w-0 flex-wrap items-center gap-y-0.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    class="group flex min-w-0 touch-manipulation flex-wrap items-center gap-y-0.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     v-on="events"
   >
     <span class="sr-only">{{ `${prefix} ` }}</span>

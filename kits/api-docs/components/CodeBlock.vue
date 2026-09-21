@@ -208,7 +208,7 @@ const wrap = useCodeWrap(props.defaultWrap)
           color="neutral"
           variant="subtle"
           :aria-label="t.language"
-          class="min-w-0 max-w-full"
+          class="min-w-0 max-w-full touch-manipulation"
           :ui="{ content: 'min-w-fit' }"
         />
 
@@ -219,7 +219,7 @@ const wrap = useCodeWrap(props.defaultWrap)
           :color="wrap ? 'primary' : 'neutral'"
           variant="ghost"
           size="xs"
-          class="shrink-0"
+          class="shrink-0 touch-manipulation"
           :aria-label="t.wrap"
           :aria-pressed="wrap"
           @click="() => { wrap = !wrap }"

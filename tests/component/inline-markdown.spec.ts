@@ -72,6 +72,7 @@ describe('InlineMarkdown links', () => {
   it('routes internal hrefs and opens external ones in a new tab', async () => {
     const internal = (await render('[docs](/reference)')).find('a')
     expect(internal.attributes('href')).toBe('/reference')
+    expect(internal.classes()).toContain('touch-manipulation')
     expect(internal.attributes('target')).toBeUndefined()
 
     const external = (await render('[site](https://example.com)')).find('a')

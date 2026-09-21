@@ -85,6 +85,7 @@ if (import.meta.dev || import.meta.test) {
         color="neutral"
         variant="ghost"
         size="xs"
+        class="touch-manipulation"
         trailing-icon="i-lucide-arrow-right"
         @click="close()"
       >

@@ -188,6 +188,8 @@ describe('OperationTarget copy affordances', () => {
     const wrapper = await mountTarget({
       props: { ...base, labels: zh, modelValue: 'sandbox' },
     })
+    // Kit tap-target touch contract: USelect forwards `class` to its trigger <button>.
+    expect(wrapper.findComponent({ name: 'USelect' }).get('button').classes()).toContain('touch-manipulation')
 
     expect(copyButtons(wrapper)[0]!.props('value'))
       .toBe('https://sandbox.example.com/v1/deployments')
