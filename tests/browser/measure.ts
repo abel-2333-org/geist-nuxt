@@ -43,7 +43,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       for (let node: Element | null = element; node; node = node.parentElement) {
         const css = getComputedStyle(node)
         if (css.zoom !== '1' || (node as Element & { currentCSSZoom?: number }).currentCSSZoom !== 1) return true
-        if (css.rotate !== 'none' || css.scale !== 'none' || css.perspective !== 'none' || css.transformStyle !== 'flat') return true
+        if (css.offsetPath !== 'none' || css.rotate !== 'none' || css.scale !== 'none' || css.perspective !== 'none' || css.transformStyle !== 'flat') return true
         if (css.transform !== 'none') {
           if (!allowTranslation) return true
           let matrix: DOMMatrixReadOnly
@@ -289,6 +289,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
           if (!(ancestor instanceof HTMLElement) || ancestor.getAnimations().length) return false
           const current = getComputedStyle(ancestor), box = ancestor.getBoundingClientRect()
           if ([box.left, box.right, box.top, box.bottom].some(value => !Number.isFinite(value) || Math.abs(value) >= 2 ** 18)
+            || current.offsetPath !== 'none' || current.getPropertyValue('-webkit-box-reflect') !== 'none'
             || current.filter !== 'none' || current.backdropFilter !== 'none' || current.maskImage !== 'none'
             || current.clipPath !== 'none' || current.clip !== 'auto' || current.willChange !== 'auto'
             || current.contain !== 'none' || current.containerType !== 'normal'
@@ -360,6 +361,8 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       // clips and the existing opaque stacking-context exclusion.
       const clip = clipped({ left: -Infinity, right: Infinity, top: -Infinity, bottom: Infinity }, node, false)
       if (!overlapsText(clip)) return
+      const reflection = css.getPropertyValue('-webkit-box-reflect')
+      if (reflection && reflection !== 'none') fail(`unmodeled reflection paint on ${node.tagName}`)
       const borderShape = css.getPropertyValue('border-shape')
       if (borderShape && borderShape !== 'none') fail(`unmodeled border shape paint on ${node.tagName}`)
       if (css.borderImageSource !== 'none') fail(`unmodeled expanded border image paint on ${node.tagName}`)
