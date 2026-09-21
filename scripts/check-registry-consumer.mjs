@@ -989,7 +989,11 @@ try {
             if (scenario.all && !builtCss.includes('var(--shiki-dark')) {
               throw new Error(`${scenario.label}: built CSS did not contain the CodeBlock dark token switch (#79)`)
             }
-            for (const marker of [scenario.cssMarker ?? []].flat()) {
+            const markers = [scenario.cssMarker ?? []].flat()
+            if (scenario.cssMarker !== undefined && markers.length === 0) {
+              throw new Error(`${scenario.label}: cssMarker is an empty list, nothing would be checked`)
+            }
+            for (const marker of markers) {
               if (!marker) throw new Error(`${scenario.label}: empty CSS marker would match any output`)
               if (!builtCss.includes(marker)) {
                 throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${marker}`)

@@ -24,7 +24,7 @@ async function readCssTree(directory) {
 /**
  * The shared hierarchy utility (`@utility subtree` in foundation main.css):
  * the 1px neutral line + base indent, and the container-query step that widens
- * it. All three must reach every build that copies a subtree caller, so the
+ * it. Both must reach every build that copies a subtree caller, so the
  * consumer smoke (scripts/check-registry-consumer.mjs) reuses these exact
  * strings for the api-docs-field-item and api-docs-schema-composition closures.
  * The query condition's syntax is deliberately not part of a marker: the
