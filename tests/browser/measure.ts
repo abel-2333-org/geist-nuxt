@@ -434,6 +434,11 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         const background = color(ps.backgroundColor)
         if (ps.display === 'none' || ps.visibility !== 'visible' || Number(ps.opacity) === 0) continue
         if (ps.content === 'none' || ps.content === 'normal') continue
+        // A pseudo's outline is independent of its host and can escape its
+        // box. Check it before either empty-paint or separated-box exclusion;
+        // auto focus rings do not share ordinary zero-width/color guarantees.
+        if (ps.outlineStyle === 'auto' || (ps.outlineStyle !== 'none'
+          && ps.outlineWidth !== '0px' && color(ps.outlineColor)[3] !== 0)) fail(`unmodeled ${pseudoName} outline on ${node.tagName}${node.id ? '#' + node.id : ''}`)
         const emptyContent = ps.content === '""' || ps.content === "''"
         const borderPaint = [ps.borderTopWidth, ps.borderRightWidth, ps.borderBottomWidth, ps.borderLeftWidth].some(value => parseFloat(value) > 0)
         if (emptyContent && !borderPaint && background[3] === 0 && ps.backgroundImage === 'none' && ps.boxShadow === 'none' && ps.filter === 'none' && ps.backdropFilter === 'none') continue

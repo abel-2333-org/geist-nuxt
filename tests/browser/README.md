@@ -69,3 +69,5 @@ node scripts/verify-contrast-mutations.mjs --artifacts /absolute/external/eviden
 普通非 auto outline 仅在同一引擎、DPR 与有限变换前提下，对显式非 inline 的单片 HTML 盒子使用宿主范围加 `widthUpper + max(0, offsetUpper)` 的外扩，再保留宿主对齐及 floor/ceil 余量。该 revision 的普通轮廓不纳入 block 后代 ink；auto 轮廓、inline、多片或未知几何仍阻断。负 offset 不用来缩小范围。实际远处焦点轮廓可据此排除，移到字形上的轮廓必须 unresolved；不关闭已有焦点状态。
 
 F-03 单独检查 `::before` / `::after` 的 computed outline；宿主的 outline 检查不能覆盖生成内容。伪元素缺少可直接读取的 DOMRect，outline 又可伸出其盒子，因此普通可见 outline 与 `auto` outline 在空绘制和盒子不相交两条早退之前显式 `unresolved`，不沿用宿主几何排除。普通透明、零宽或未生成的 outline 仍按无绘制处理；`auto` 不获得透明/零宽豁免。明暗测试分别以透明 `::before` 和有背景但盒子分离的 `::after` 复现两条路径，保存无遮挡、透明、零宽、覆盖与移除恢复的几何、测量和截图。
+
+gallery 的 `?` hover/focus 样本等待实际 trigger 打开、对应 Tooltip 可见、入场动画及按钮自身颜色过渡结束，再测稳定态文字；不以固定延迟假定 Tooltip 已打开，也不关闭真实浮层或捕获 `unresolved` 重试。就绪 sidecar 保存两侧动画计数、浮层 opacity / transform 与状态，它只证明采样状态，随后仍由原始测量与完整命令判断对比度。
