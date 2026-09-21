@@ -53,15 +53,15 @@ function typeText(wrapper: VueWrapper) {
 describe('describeFieldPresence', () => {
   it('yields no notation for an absent or all-false presence — the unmarked row is "always present"', () => {
     for (const presence of [undefined, {}, { optional: false, nullable: false }]) {
-      expect(describeFieldPresence(presence)).toEqual({ optional: false, unionTail: [], condition: undefined })
+      expect(describeFieldPresence(presence)).toEqual({ optional: false, unionTail: [], condition: [] })
     }
   })
 
   it('keeps the three facts independent: `?` for the key, `null` then the literal empty form for the value', () => {
     const presence: FieldPresence = { empty: '""', nullable: true, optional: true }
-    expect(describeFieldPresence(presence)).toEqual({ optional: true, unionTail: ['null', '""'], condition: undefined })
-    expect(describeFieldPresence({ nullable: true })).toEqual({ optional: false, unionTail: ['null'], condition: undefined })
-    expect(describeFieldPresence({ optional: true })).toEqual({ optional: true, unionTail: [], condition: undefined })
+    expect(describeFieldPresence(presence)).toEqual({ optional: true, unionTail: ['null', '""'], condition: [] })
+    expect(describeFieldPresence({ nullable: true })).toEqual({ optional: false, unionTail: ['null'], condition: [] })
+    expect(describeFieldPresence({ optional: true })).toEqual({ optional: true, unionTail: [], condition: [] })
   })
 
   it('takes the literal empty form verbatim — `[]` and `"[]"` are different facts', () => {
@@ -76,16 +76,16 @@ describe('describeFieldPresence', () => {
     expect(describeFieldPresence({ empty: ' "" ' }).unionTail).toEqual(['""'])
   })
 
-  it('carries the condition through unchanged', () => {
-    expect(describeFieldPresence({ condition: 'Absent for drafts.' }).condition).toBe('Absent for drafts.')
+  it('carries the condition through as normalised entries', () => {
+    expect(describeFieldPresence({ condition: 'Absent for drafts.' }).condition).toEqual(['Absent for drafts.'])
   })
 
   it('never reads omittability off a value node', () => {
     // `optional` is typed out of ValuePresence; a JavaScript caller that
     // smuggles it in still gets no `?`, because a value has no key to omit.
     const smuggled = { optional: true, nullable: true } as ValuePresence
-    expect(describeValuePresence(smuggled)).toEqual({ optional: false, unionTail: ['null'], condition: undefined })
-    expect(describeValuePresence(undefined)).toEqual({ optional: false, unionTail: [] })
+    expect(describeValuePresence(smuggled)).toEqual({ optional: false, unionTail: ['null'], condition: [] })
+    expect(describeValuePresence(undefined)).toEqual({ optional: false, unionTail: [], condition: [] })
   })
 
   it('composes the type expression, and states the bare tail when a value has no declared type', () => {
@@ -103,7 +103,7 @@ describe('describeFieldPresence', () => {
       { relation: 'item', type: 'object', presence: { condition: 'Absent for drafts.' } },
       chrome,
     )
-    expect(conditionOnly?.presence.condition).toBe('Absent for drafts.')
+    expect(conditionOnly?.presence.condition).toEqual(['Absent for drafts.'])
   })
 })
 

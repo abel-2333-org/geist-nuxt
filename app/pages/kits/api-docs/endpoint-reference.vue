@@ -379,7 +379,11 @@ const bodyFields = [
     name: 'gitSource',
     type: 'object',
     required: 'conditional' as const,
-    condition: '`type` 为 `git` 时必填。',
+    // Two independent sentences: one list, one rule, one entry each (#145).
+    condition: [
+      '`type` 为 `git` 时必填。',
+      '未传 `type` 且未传 `files` 时同样必填，此时按 `git` 部署处理。',
+    ],
     lifecycle: { status: 'beta' as const, since: 'v2.4', description: 'Beta 期间结构仍可能变化。' },
     description: '用于部署的 Git 仓库。',
     children: [
@@ -451,7 +455,10 @@ const responseFields: FieldNode[] = [
     presence: {
       optional: true,
       nullable: true,
-      condition: '`state` 为 `QUEUED` 或 `BUILDING` 时不返回；`state` 为 `ERROR` 时为 `null`。',
+      condition: [
+        '`state` 为 `QUEUED` 或 `BUILDING` 时不返回。',
+        '`state` 为 `ERROR` 时为 `null`。',
+      ],
     },
     description: '部署进入 `READY` 后的公开访问地址。',
     examples: ['https://my-app.example.app'],

@@ -846,7 +846,11 @@ const presenceFields: FieldNode[] = [
       optional: true,
       nullable: true,
       empty: '""',
-      condition: '仅 `status` 为 `succeeded` 时返回；收据尚未生成时为 `null`，商户关闭收据功能时为空字符串。',
+      condition: [
+        '仅 `status` 为 `succeeded` 时返回。',
+        '收据尚未生成时为 `null`。',
+        '商户关闭收据功能时为空字符串。',
+      ],
     },
     description: '收据地址。三个存在性事实相互独立：可省略、可为 null、可为空各自有各自的触发条件。',
     notes: [{ label: '格式', text: '绝对 https 地址。' }],
