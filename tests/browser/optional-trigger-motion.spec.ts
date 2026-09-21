@@ -106,9 +106,15 @@ async function installRecorder(target: Locator) {
       if (event.key === 'Tab') keyboard.push({ at: performance.now(), phase, key: event.key, shiftKey: event.shiftKey,
         trusted: event.isTrusted, target: (event.target as Element).tagName })
     }
+    const onScroll = (event: Event) => {
+      if (!(event.target instanceof Node) || !event.target.contains(node)) return
+      events.push({ at: performance.now(), phase, type: 'ancestor-scroll', trusted: event.isTrusted, property: null, elapsedTime: null })
+      sample('ancestor-scroll')
+    }
     const eventNames = ['focus', 'blur', 'pointerenter', 'pointerleave', 'transitionrun', 'transitionstart', 'transitionend', 'transitioncancel']
     for (const name of eventNames) node.addEventListener(name, onEvent)
     document.addEventListener('keydown', onKey, true)
+    window.addEventListener('scroll', onScroll, true)
     const tick = () => { sample('animation-frame'); frame = requestAnimationFrame(tick) }
     frame = requestAnimationFrame(tick)
     window.__optionalTriggerMotion = {
@@ -118,6 +124,7 @@ async function installRecorder(target: Locator) {
         sample('stop')
         for (const name of eventNames) node.removeEventListener(name, onEvent)
         document.removeEventListener('keydown', onKey, true)
+        window.removeEventListener('scroll', onScroll, true)
         return { samples, events, keyboard }
       },
     }
@@ -207,6 +214,13 @@ async function motionScenario(theme: Theme) {
       // focus, inserted tab stops, or click establishes :focus-visible.
       for (let count = 0; count < 100 && !await target.evaluate(node => document.activeElement === node); count++) await page.keyboard.press('Tab')
       actions.push({ state: `${prefix}-keyboard-tab-navigation`, expected: focused, actual: await sample() })
+      // Sequential navigation may scroll a trigger ancestor, which legitimately
+      // closes Reka Tooltip. Preserve this arrival, then re-enter from the
+      // adjacent real tab stop and require the normal open Tooltip behavior.
+      await check('keyboard-arrival', focused, 'either')
+      await act('keyboard-arrival-blur', () => page.keyboard.press('Shift+Tab'), idle)
+      await check('keyboard-arrival-blurred', idle, 'closed')
+      await act('keyboard-reenter', () => page.keyboard.press('Tab'), focused)
       await check('keyboard-focus', focused, 'open')
       await act('keyboard-blur', () => page.keyboard.press('Shift+Tab'), idle)
       await check('keyboard-blurred', idle, 'closed')

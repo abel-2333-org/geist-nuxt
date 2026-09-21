@@ -193,6 +193,9 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     const probe = document.createElement('span')
     probe.style.position = 'fixed'
     probe.style.visibility = 'hidden'
+    // This hidden parser must not interpolate its successive input colors.
+    // In particular, reduced-motion CSS can assign a nonzero global duration.
+    probe.style.transitionProperty = 'none'
     document.body.append(probe)
     function color(value: string) {
       // Chromium resolves color-mix/OKLab using its own CSS color engine.
