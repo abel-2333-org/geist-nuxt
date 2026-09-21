@@ -493,7 +493,7 @@ const panelAnnouncement = computed(() => {
             color="neutral"
             variant="subtle"
             :aria-label="t.scenario"
-            class="min-w-0 max-w-full"
+            class="min-w-0 max-w-full touch-manipulation"
             :ui="{ content: 'min-w-fit' }"
           />
           <!-- Closed trigger prefers statusText — the adjacent badge already
@@ -509,7 +509,7 @@ const panelAnnouncement = computed(() => {
             color="neutral"
             variant="subtle"
             :aria-label="t.status"
-            class="min-w-0 max-w-full"
+            class="min-w-0 max-w-full touch-manipulation"
             :ui="{ content: 'min-w-fit' }"
           >
             {{ currentStatusLabel }}
@@ -523,7 +523,7 @@ const panelAnnouncement = computed(() => {
             color="neutral"
             variant="subtle"
             :aria-label="t.mediaType"
-            class="min-w-0 max-w-full"
+            class="min-w-0 max-w-full touch-manipulation"
             :ui="{ content: 'min-w-fit' }"
           />
         </div>
@@ -563,7 +563,7 @@ const panelAnnouncement = computed(() => {
                   color="neutral"
                   variant="subtle"
                   :aria-label="t.scenario"
-                  class="w-full"
+                  class="w-full touch-manipulation"
                 />
               </UFormField>
               <URadioGroup

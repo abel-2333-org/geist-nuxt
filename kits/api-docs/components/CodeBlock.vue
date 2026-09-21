@@ -208,7 +208,7 @@ const wrap = useCodeWrap(props.defaultWrap)
           color="neutral"
           variant="subtle"
           :aria-label="t.language"
-          class="min-w-0 max-w-full"
+          class="min-w-0 max-w-full touch-manipulation"
           :ui="{ content: 'min-w-fit' }"
         />
 

@@ -146,3 +146,14 @@ describe('RequestExample scenario selection', () => {
     expect(wrapper.text()).toContain('CODE-BASIC')
   })
 })
+
+describe('RequestExample touch contract', () => {
+  it('opts the scenario USelect trigger into touch-manipulation', async () => {
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md):
+    // USelect forwards `class` to its SelectTrigger root <button>.
+    const wrapper = await mountSuspended(RequestExample, { props: { scenarios } })
+    const selects = wrapper.findAllComponents({ name: 'USelect' })
+    expect(selects.length).toBeGreaterThan(0)
+    selects.forEach(select => expect(select.get('button').classes()).toContain('touch-manipulation'))
+  })
+})

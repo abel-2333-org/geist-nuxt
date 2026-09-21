@@ -105,6 +105,8 @@ describe('CodeBlock wrap toggle a11y', () => {
     })
     const toggle = wrapper.get('button[aria-pressed]')
     expect(toggle.classes()).toContain('touch-manipulation')
+    // The language USelect trigger is a tap target under the same contract.
+    expect(languageSelect(wrapper)!.get('button').classes()).toContain('touch-manipulation')
     // Wrap is shared and persisted; exercise both states without assuming
     // the user's stored preference or coupling to the composable's internals.
     const initial = toggle.attributes('aria-pressed')

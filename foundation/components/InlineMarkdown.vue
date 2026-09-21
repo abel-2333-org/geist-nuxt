@@ -48,8 +48,8 @@ export default defineComponent({
         if (node.type === 'del') return h('del', render(node.children))
         return h(
           ProseA,
-          // Foundation tap-target touch contract (focus-a11y.md): the class rides
-          // ProseA's attrs down to its root <a>.
+          // Foundation tap-target touch contract (focus-a11y.md): ProseA takes
+          // `class` as a prop and forwards it to its root <a> via ULink.
           { href: node.href, target: node.external ? '_blank' : undefined, class: 'touch-manipulation' },
           () => render(node.children),
         )
