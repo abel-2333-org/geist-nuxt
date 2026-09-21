@@ -174,6 +174,7 @@ for (const theme of ['light', 'dark'] as const) {
         range.selectNodeContents(target)
         const textRect = range.getBoundingClientRect()
         const rect = overlay.getBoundingClientRect()
+        const clientRects = Array.from(overlay.getClientRects())
         const css = getComputedStyle(overlay)
         type Bounds = { left: number, right: number, top: number, bottom: number }
         const overlapsText = (bounds: Bounds) => bounds.left < textRect.right && bounds.right > textRect.left && bounds.top < textRect.bottom && bounds.bottom > textRect.top
@@ -186,15 +187,31 @@ for (const theme of ['light', 'dark'] as const) {
           if (side === 'Left') bounds.right = rect.left + width
           return { side, width, color: css.getPropertyValue(`border-${side.toLowerCase()}-color`), style: css.getPropertyValue(`border-${side.toLowerCase()}-style`), bounds, overlapsText: width > 0 && overlapsText(bounds) }
         })
+        const topWidth = parseFloat(css.borderTopWidth)
+        const fragmentTopBorders = clientRects.map((fragment) => {
+          const bounds = { left: fragment.left, right: fragment.right, top: fragment.top, bottom: fragment.top + topWidth }
+          return { bounds, overlapsText: topWidth > 0 && overlapsText(bounds) }
+        })
         // The test injects one zero-blur shadow. These bounds describe that
         // controlled paint; they are not a general CSS shadow implementation.
         const lengths = Array.from(css.boxShadow.matchAll(/(?:^|\s)(-?[\d.]+)px(?=\s|$)/g), match => Number(match[1]))
         const [x = 0, y = 0, , spread = 0] = lengths
         const shadowBounds = { left: rect.left + x - spread, right: rect.right + x + spread, top: rect.top + y - spread, bottom: rect.bottom + y + spread }
+        const filterChild = overlay.querySelector('#box-paint-filter-child')
+        const filterLengths = Array.from(css.filter.matchAll(/(-?[\d.]+)px/g), match => Number(match[1]))
+        const [filterX = 0, filterY = 0] = filterLengths
+        const childRect = filterChild?.getBoundingClientRect()
         return {
-          targetRect: target.getBoundingClientRect().toJSON(), textRect: textRect.toJSON(), overlayRect: rect.toJSON(), hostRect: document.getElementById('box-paint-control')!.getBoundingClientRect().toJSON(),
+          targetRect: target.getBoundingClientRect().toJSON(), textRect: textRect.toJSON(), overlayRect: rect.toJSON(), clientRects: clientRects.map(rect => rect.toJSON()), fragmentTopBorders, hostRect: document.getElementById('box-paint-control')!.getBoundingClientRect().toJSON(),
           targetColor: getComputedStyle(target).color, backgroundColor: css.backgroundColor, color: css.color, display: css.display, position: css.position, zIndex: css.zIndex, borderStrips,
-          boxShadow: css.boxShadow,
+          boxShadow: css.boxShadow, filter: css.filter, visibility: css.visibility,
+          children: Array.from(overlay.querySelectorAll('*')).map((child) => {
+            const style = getComputedStyle(child)
+            return { id: child.id, tag: child.tagName, rect: child.getBoundingClientRect().toJSON(), clientRects: Array.from(child.getClientRects(), rect => rect.toJSON()), display: style.display, visibility: style.visibility, filter: style.filter, backgroundColor: style.backgroundColor, color: style.color, opacity: style.opacity }
+          }),
+          // Only this controlled zero-blur drop-shadow uses translated child
+          // bounds. The detector must reject the unmodeled ancestor filter.
+          filterShadow: css.filter !== 'none' && childRect ? { lengths: filterLengths, bounds: { left: childRect.left + filterX, right: childRect.right + filterX, top: childRect.top + filterY, bottom: childRect.bottom + filterY } } : null,
           shadow: css.boxShadow === 'none' ? null : { lengths, color: css.boxShadow.replace(/(?:\s+-?[\d.]+px){4}$/, ''), bounds: shadowBounds, overlapsText: overlapsText(shadowBounds) },
         }
       })
@@ -212,6 +229,7 @@ for (const theme of ['light', 'dark'] as const) {
       const expectRejection = async (state: string, computed: Awaited<ReturnType<typeof describePaint>>) => {
         const detection = await measure(target).then(measurement => ({ measurement, rejection: null }), error => ({ measurement: null, rejection: String(error) }))
         await capture(state, computed, detection, 'expected detector rejection; not a positive suite red run')
+        expect(detection.rejection, `${state}: overlapping paint must reject instead of returning a contrast ratio`).not.toBeNull()
         expect(detection.rejection, `${state}: overlapping paint must not silently pass`).toMatch(/unresolved:/)
       }
       const expectCoverage = (paint: { left: number, right: number, top: number, bottom: number }, text: { left: number, right: number, top: number, bottom: number }) => {
@@ -251,6 +269,58 @@ for (const theme of ['light', 'dark'] as const) {
         await expectRejection('border-covers-text', covered)
         await overlay.evaluate(node => { (node as HTMLElement).style.border = '1px solid currentColor' })
         await positive('thin-border-restored')
+
+        const beforeFragments = await overlay.evaluate((node) => {
+          const host = document.getElementById('box-paint-control')!
+          const branch = document.getElementById('box-paint-target')!.parentElement!
+          const original = { host: host.getAttribute('style'), branch: branch.getAttribute('style'), overlay: node.getAttribute('style') }
+          Object.assign((host as HTMLElement).style, { height: '240px', padding: '0' })
+          Object.assign(branch.style, { position: 'absolute', left: '20px', top: '75px', padding: '0', backgroundColor: 'var(--ui-bg)' })
+          const wrapper = document.createElement('div')
+          wrapper.id = 'box-paint-fragment-wrapper'
+          Object.assign(wrapper.style, { position: 'relative', zIndex: '1', width: '536px', fontSize: '0', lineHeight: '50px' })
+          host.prepend(wrapper)
+          wrapper.append(node)
+          Object.assign((node as HTMLElement).style, { display: 'inline', position: 'static', width: 'auto', height: 'auto', border: '0', zIndex: 'auto' })
+          for (let index = 0; index < 3; index++) {
+            if (index) node.append(document.createElement('br'))
+            const spacer = document.createElement('i')
+            Object.assign(spacer.style, { display: 'inline-block', width: '512px', height: '40px' })
+            node.append(spacer)
+          }
+          return original
+        })
+        const unpaintedFragments = await positive('fragmented-inline-without-border')
+        expect(unpaintedFragments.clientRects.length).toBeGreaterThan(1)
+        await overlay.evaluate((node) => {
+          ;(node as HTMLElement).style.borderTop = '28px solid currentColor'
+          const target = document.getElementById('box-paint-target')!
+          const branch = target.parentElement!
+          const range = document.createRange()
+          range.selectNodeContents(target)
+          // Align actual glyph bounds with the middle fragment, independent
+          // of the platform's font ascent or inline baseline metrics.
+          branch.style.top = `${parseFloat(branch.style.top) + node.getClientRects()[1]!.top + 2 - range.getBoundingClientRect().top}px`
+        })
+        const fragmented = await describePaint()
+        expect(fragmented.clientRects.length).toBeGreaterThan(1)
+        expect(fragmented.borderStrips.every(strip => !strip.overlapsText), 'the union outer edges miss the middle fragment border').toBe(true)
+        expect(fragmented.borderStrips.find(strip => strip.side === 'Top')!.color).toBe(fragmented.targetColor)
+        expectCoverage(fragmented.fragmentTopBorders[1]!.bounds, fragmented.textRect)
+        await expectRejection('fragmented-inline-middle-border', fragmented)
+        await overlay.evaluate(node => { (node as HTMLElement).style.borderTop = 'none' })
+        await positive('fragmented-inline-border-removed')
+        await overlay.evaluate((node, original) => {
+          const host = document.getElementById('box-paint-control')!
+          const branch = document.getElementById('box-paint-target')!.parentElement!
+          host.append(node)
+          document.getElementById('box-paint-fragment-wrapper')!.remove()
+          node.replaceChildren()
+          host.setAttribute('style', original.host || '')
+          branch.setAttribute('style', original.branch || '')
+          node.setAttribute('style', original.overlay || '')
+        }, beforeFragments)
+        await positive('thin-border-after-fragments-restored')
       }
       else {
         await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { display: 'block', left: '600px', boxShadow: '32px 0 0 0 currentColor' }))
@@ -289,6 +359,36 @@ for (const theme of ['light', 'dark'] as const) {
         await expectRejection('zero-host-spread-covers-text', zeroCovered)
         await overlay.evaluate(node => { (node as HTMLElement).style.boxShadow = '0 0 0 32px currentColor' })
         await positive('zero-host-separated-spread-restored')
+
+        await overlay.evaluate((node) => {
+          Object.assign((node as HTMLElement).style, { width: '536px', height: '56px', top: '32px', boxShadow: 'none', visibility: 'hidden', filter: 'none' })
+          const child = document.createElement('div')
+          child.id = 'box-paint-filter-child'
+          Object.assign(child.style, { width: '536px', height: '56px', backgroundColor: 'currentColor', visibility: 'visible' })
+          node.append(child)
+        })
+        const noFilter = await positive('hidden-ancestor-visible-child-without-filter')
+        expect(noFilter.visibility).toBe('hidden')
+        expect(noFilter.children[0]!.visibility).toBe('visible')
+        expect(noFilter.children[0]!.rect.left).toBeGreaterThanOrEqual(noFilter.textRect.right)
+        await overlay.evaluate(node => { (node as HTMLElement).style.filter = 'drop-shadow(-568px 0 0 currentColor)' })
+        const filtered = await describePaint()
+        expect(filtered.overlayRect.left).toBeGreaterThanOrEqual(filtered.textRect.right)
+        expect(filtered.visibility).toBe('hidden')
+        expect(filtered.filter).toContain('drop-shadow(')
+        expect(filtered.filter).toContain(filtered.targetColor)
+        expect(filtered.filterShadow!.lengths).toEqual([-568, 0, 0])
+        expect(filtered.children[0]!.visibility).toBe('visible')
+        expect(filtered.children[0]!.filter).toBe('none')
+        expect(filtered.children[0]!.backgroundColor).toBe(filtered.targetColor)
+        expectCoverage(filtered.filterShadow!.bounds, filtered.textRect)
+        await expectRejection('hidden-ancestor-filter-projects-visible-child', filtered)
+        await overlay.evaluate(node => { (node as HTMLElement).style.filter = 'none' })
+        await positive('hidden-ancestor-filter-removed')
+        await overlay.evaluate((node) => {
+          node.replaceChildren()
+          ;(node as HTMLElement).style.visibility = 'visible'
+        })
       }
       await overlay.evaluate(node => { (node as HTMLElement).style.display = 'none' })
       await positive('no-overlay-restored')
