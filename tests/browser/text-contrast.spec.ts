@@ -37,14 +37,19 @@ async function optionalTooltipReady(page: Page, trigger: Locator, artifact: stri
   const label = await trigger.getAttribute('aria-label')
   expect(label, 'the optional trigger has its accessible label').toBeTruthy()
   expect(await tooltip.locator('[data-slot="text"]').textContent()).toBe(label)
-  const describe = () => tooltip.evaluate((node) => {
-    const css = getComputedStyle(node)
-    return {
-      pendingAnimations: node.getAnimations({ subtree: true }).filter(animation => animation.pending || animation.playState === 'running').length,
-      opacity: css.opacity, transform: css.transform,
-    }
+  const describe = async () => ({
+    ...await tooltip.evaluate((node) => {
+      const css = getComputedStyle(node)
+      return {
+        pendingAnimations: node.getAnimations({ subtree: true }).filter(animation => animation.pending || animation.playState === 'running').length,
+        opacity: css.opacity, transform: css.transform,
+      }
+    }),
+    // The trigger's focus colors transition independently of the popup.
+    triggerPendingAnimations: await trigger.evaluate(node => node.getAnimations({ subtree: true })
+      .filter(animation => animation.pending || animation.playState === 'running').length),
   })
-  await expect.poll(describe, { timeout: 5_000 }).toEqual({ pendingAnimations: 0, opacity: '1', transform: 'none' })
+  await expect.poll(describe, { timeout: 5_000 }).toEqual({ pendingAnimations: 0, opacity: '1', transform: 'none', triggerPendingAnimations: 0 })
   expect(await trigger.getAttribute('data-state')).toMatch(/^(delayed|instant)-open$/)
   await writeFile(resolve(artifacts, `${artifact}-tooltip-ready.json`), JSON.stringify({
     source, classification: 'Tooltip state readiness; not a contrast measurement', label,
