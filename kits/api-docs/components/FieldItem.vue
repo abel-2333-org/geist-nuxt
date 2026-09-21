@@ -324,7 +324,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                `select-none` keeps the notation out of a copied field name.
                Touch never opens a tooltip; the consuming page's legend covers it.
                `touch-manipulation` is not a tap affordance: it is the blanket
-               tap-target contract from focus-a11y.md (every rendered <button>). --><UTooltip
+               tap-target contract from focus-a11y.md (every rendered <button>).
+               Do not interpolate this trigger's text/fill: intermediate colors
+               can lose contrast in both focus directions. Tooltip motion stays. --><UTooltip
             v-if="presence.optional"
             :text="t.mayBeOmitted"
             :content="{ side: 'top' }"
@@ -334,7 +336,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             data-field-optional
             :aria-label="t.mayBeOmitted"
             :aria-describedby="undefined"
-            class="cursor-help touch-manipulation select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-colors hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
+            class="cursor-help touch-manipulation select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-none hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
             :class="{ 'line-through': isDeprecated }"
           >?</button></UTooltip></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the
