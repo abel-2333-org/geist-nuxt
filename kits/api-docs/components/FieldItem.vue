@@ -57,6 +57,7 @@ export type {
 //           omittable-key `?` is a UTooltip trigger named by `mayBeOmitted`
 //           (hover + keyboard focus, Escape closes) — needs the app's <UApp>.
 
+import ConditionEntries from '../internal/ConditionEntries.vue'
 import FieldValueStructure from '../internal/FieldValueStructure.vue'
 
 // Recursive self-reference name (kit uses pathPrefix, so the global name is
@@ -195,13 +196,18 @@ const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== pr
 // optional state is silent), and nothing is inferred from a missing `required`.
 const presence = computed(() => describeFieldPresence(props.presence))
 const presenceCondition = computed(() => presence.value.condition)
+// The request condition, normalised through the single shared function
+// (`fieldRequiredState` calls it again for the marker); `conditionEntries` is
+// the one place that decides whether a string, a list or a list of blanks
+// says anything, so the marker, the detail gate and the rule cannot disagree.
+const conditions = computed(() => conditionEntries(props.condition))
 const typeExpression = computed(() => presenceTypeExpression(props.type, presence.value.unionTail))
 
 const hasDetail = computed(
   () =>
     !!props.description
-    || !!props.condition
-    || !!presenceCondition.value
+    || conditions.value.length > 0
+    || presenceCondition.value.length > 0
     || (props.examples?.length ?? 0) > 0
     || (props.notes?.length ?? 0) > 0
     || hasEnum.value
@@ -460,11 +466,11 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            twice, and the condition sentence ("Required when …") is itself the
            text channel that keeps amber from carrying the meaning alone. -->
       <div
-        v-if="condition"
+        v-if="conditions.length"
         data-field-condition
         class="border-s-2 border-warning ps-3 text-sm leading-relaxed text-toned"
       >
-        <InlineMarkdown :text="condition" />
+        <ConditionEntries :entries="conditions" />
       </div>
 
       <!-- 2b. Presence rule — "when is this omitted / null / empty?". Same
@@ -476,11 +482,11 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            band — where a consumer used to shove it — because a constraint is
            an input boundary and this is output behaviour. -->
       <div
-        v-if="presenceCondition"
+        v-if="presenceCondition.length"
         data-field-presence-condition
         class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
       >
-        <InlineMarkdown :text="presenceCondition" />
+        <ConditionEntries :entries="presenceCondition" />
       </div>
 
       <p v-if="description" class="text-sm leading-relaxed text-toned">

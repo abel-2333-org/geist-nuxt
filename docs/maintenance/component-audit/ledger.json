@@ -330,13 +330,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -351,20 +351,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "cea6dcf41060c459b6e2b952db261cd7c167807ca13be031b1862b9557e64c2e"
+        "scopeDigest": "465723b76770756658abdb0b6cb019632a9c4696dcaa50ad6cab78c4994921bb"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:focus-a11y.md):`focus-a11y.md` 新增「触控 tap 目标」硬要求 明文把拖拽把手(`touch-none`)排除在外,与本组件实现一致;源码、spec 与 reference 其余条款未触及;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -383,20 +383,20 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "dbc8a4fe21720a1df39c220488338119ffac2b9b714951f4a0ac33b1a550ce65"
+        "scopeDigest": "b7b9adf43ffbdd9fc2db397b87e487452db1c835b01dcaf97938e932fb93aa2e"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -406,9 +406,9 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "0ddf43cd164533dc255723ab41a7795f8f82842c91bc353ad1dcf124d0a94082"
+        "scopeDigest": "d1f3ca565f8396ed01cd4f20c25224f01a361914216d1ca26a25305b64cf45bd"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:CodeBlock.vue, code-block.spec.ts):换行开关 `UButton` 与语言 `USelect` 触发器补 `touch-manipulation`(前者经 UButton、后者经 USelect 的 `class` prop 落到根 button),`code-block.spec` 在 aria-pressed 用例内对两者断言;其余(wrap 持久化、可访问名、`translate=no` `<pre>`)未触及;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -421,13 +421,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -439,20 +439,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "79ff645c617aa055a26bbeed6831f86bb3c06b912357603467f1736f55d5c772"
+        "scopeDigest": "39bfe1426344c04c675979419ffb679e0b68d5ee7fc628c00359f31c7e437bda"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, webhook-reference.vue, CodeBlock.vue, RequestExample.vue, request-example.spec.ts):场景 `USelect` 触发器补 `touch-manipulation`(第 2 轮复审指出 USelect 把 `class` 交给 SelectTrigger 根 button,属条款纳入范围),`request-example.spec` 新增遍历用例;受控 / 非受控 scenario 契约未触及;scope 命中 `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -468,9 +468,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "4780cdaff74a95cc3011b3e1565bc1175ef662680f64d10d9eeefafd1410d839"
+        "scopeDigest": "a9e15d44b4b4f0eb040da006d87fe410e2b9a33aea896e5075ac2d32d8bdfa19"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, CodeBlock.vue, RequestExample.vue, ResponseExample.vue, request-example.spec.ts, response-example.spec.ts):紧凑触发器(`data-response-compact-trigger`)、文件下载链接(`<a download>`)与 4 个 `USelect` 触发器(scenario / status / body / 紧凑面板内 scenario)补 `touch-manipulation`,`response-example.spec` 各补断言(下载链接新增 file panel 用例,USelect 新增遍历用例);CodeBlock 换行开关同批修复;scenario / status 选择与 live region 契约未触及;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -490,13 +490,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -513,20 +513,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "9b19877ece87ceb15b29e2494ff5e8f23237e506964026c4eb0229c857a62b47"
+        "scopeDigest": "5a092b755de965b02d370333b94e8b9370923b6012c5aaef9493b52e8beef113"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue):scope 命中 `DocsShellReference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md、api-docs-type-compat.ts）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；`api-docs-type-compat.ts` 只新增 condition 列表形态锚点与「条目必须是 string」的 `@ts-expect-error`，本组件类型锚点未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -545,7 +545,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "eccb17df890605040dd68f28ed888d07ee961fc8be65e44470cc90bafad069f6",
+        "scopeDigest": "b87c1c80e6fcfd821e01955463987e995b8fd45f2b3f885adb6473dad84fa174",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -559,18 +559,18 @@
           }
         ]
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -583,20 +583,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "413b318c0d1a274469cd144e58492bc8b8130bc009aa1b2e14adcc2708da5b62"
+        "scopeDigest": "7042d3df2057db92fe8a9f7185458ec7df2946e5d9271c4c7734cb20ae051035"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -605,51 +605,53 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "47772616daa6b6208e1b1c6b8c5ea1338da34df0ad52ccab38caaaf8da6c02a3"
+        "scopeDigest": "6b49d791f44d4e6d9248572a707187d95cb26ae1abf4beb9a1ca56bea68e09eb"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:WebhookProtocol.vue):scope 命中 `WebhookProtocol.vue`(依赖组件补 `touch-manipulation`),本组件对其调用与契约未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
-        "itemDigest": "891545389646fe28ee5f004d6dc25926a5680052f0b7292e64791df73297670d",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "itemDigest": "365a28b929abbf9fbbb3ade1527b7efe42d41eaf91a9170f79ccd967020abea4",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
           "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/internal/ConditionEntries.vue",
           "kits/api-docs/internal/FieldValueRequirements.vue",
           "kits/api-docs/internal/FieldValueStructure.vue",
           "kits/api-docs/utils/field.ts",
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/field-anchor.spec.ts",
+          "tests/component/field-condition.spec.ts",
           "tests/component/field-item-structure.spec.ts",
           "tests/component/field-presence.spec.ts",
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "f8fbff90830714f1d114477a82d9ca060c7fad3eadb97618c2fd90698303060a"
+        "scopeDigest": "1ca5e3ed67f4985356c570ee4179e85176bd4559dc18e1061c518ee2f4c5d010"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, FieldItem.vue, field-presence.spec.ts, field-value-structure.spec.ts):`?` 可省略记号 `<button>` 补 `touch-manipulation`(此前 09-19 以「触屏不开 tooltip」豁免,新条款按渲染结果判定、不看 `@click`),`field-presence.spec` 在记号用例内断言;其余 3 个按钮本已纳入;09-19 遗留的 FieldValueStructure 展开按钮 spec 锁定本次在 `field-value-structure.spec` 补齐;`endpoint-reference.vue` 命中为 h1 identity 换行,FieldItem 用法未变;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表功能复审（命中：endpoint-reference.vue、index.vue、FieldItem.vue、ConditionEntries.vue、FieldValueRequirements.vue、field.ts、index.md、field-condition.spec.ts、field-presence.spec.ts、api-docs-type-compat.ts）：`FieldNode.condition` / `FieldPresence.condition` 统一为 `ConditionText = string | readonly string[]`（`ValuePresence` 随派生），`conditionEntries()` 为唯一归一化入口（忽略空白与非 string 条目、保持顺序、返回 `ConditionEntryList`），`fieldRequiredState` / `hasDetail` / `describeFieldPresence`（`PresenceNotation.condition` 变为恒有只读数组）/ `hasValueDetail` / `describeValueRequirements` 全部改读归一化结果，空列表不再从 truthy 推出 Conditional；新增内部 `ConditionEntries.vue`（1 条与字符串等价，≥2 条在同一 rule 内渲染 `<ul role=\"list\">`，`list-disc space-y-1 ps-4 marker:text-muted`，0 条不渲染）挂入本 item files，被 FieldItem 两条 rule 与 FieldValueRequirements 共用；新增 `field-condition.spec.ts` 覆盖归一化（含非 string 条目）、判定优先级、字段行 / 递归子字段 / presence / 值节点渲染与两侧「单条列表 ≡ 字符串」等价、FieldAnnotation popover 标记，`field-presence.spec` 按新契约更新并修正值节点 `compact` 恒真断言，`api-docs-type-compat.ts` 钉住列表形态；gallery 四处条件列表实例（`receiptUrl` 3 条 / `url` 2 条 / `gitSource` 请求侧 2 条 / `refunds` 元素值节点 2 条）+ 字段区记号说明句同步；本地 gallery 明 / 暗、桌面 / 320px、EN 长 token 实测单一 rule 内列表、无横向溢出、链接可键盘聚焦；三轮 opus 复审（契约与规范 / 正确性 / 修复复核）finding 全部处置；无回归。",
       "findings": []
     },
     "api-docs-schema-composition": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
@@ -659,7 +661,7 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "6e07e6f55131ec54b1403208c5948436a31257c95de21d5cc24904889b270f2a",
+        "scopeDigest": "61967a5d0c389baa5be5d12fba434aa3ce7c7adf52f341c5b6ed07e7fa8dd91a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -673,18 +675,18 @@
           }
         ]
       },
-      "notes": "PR #133 复审：scope 内变动仅 `kits/api-docs/utils/field.ts`（`FieldItemLabels.mayBeOmitted` 的 JSDoc 改写（无类型与运行时变化））；本组件代码与契约未变，复核无回归。",
+      "notes": "#145 条件列表复审（命中：field.ts）：`utils/field.ts` 改动仅限 condition 类型、`conditionEntries()` 与 presence / 值节点判定，composition 模型（`CompositionNode` / variants / discriminator）与 `collectCompositionPaths` 未变，SchemaComposition 不读 `condition`；变体内字段行经 FieldItem 渲染，由 field-item 复审覆盖；无回归。",
       "findings": []
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -692,11 +694,12 @@
           "kits/api-docs/composables/useFieldSource.ts",
           "references/components/overlays.md",
           "references/kits/api-docs/index.md",
-          "tests/component/annotation-forms.spec.ts"
+          "tests/component/annotation-forms.spec.ts",
+          "tests/component/field-condition.spec.ts"
         ],
-        "scopeDigest": "6fa71f6634a8f56b8d79b40f604afae05e5ede60fc8faaab31ba2ba55dfa6135"
+        "scopeDigest": "fb4e98ad0301682776cd2c686ae1291cf78f53680cb3666d94da270b50d939c7"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:FieldAnnotation.vue, annotation-forms.spec.ts):`#actions` 两个 `UButton`(同页 jump / 跨页 `:to`)补 `touch-manipulation`,`annotation-forms.spec` 在 jump 用例内断言;触发器(AnnotationPopover)本已纳入;两条 wont-fix finding 原样保留;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md、field-condition.spec.ts）：popover 经 `fieldRequiredState` 共用判定，列表条件出 Conditional、空列表不出，由新纳入 scope 的 `field-condition.spec.ts` 钉住；`describeFieldPresence().condition` 变为数组但 popover 不预览 presence 条件句，无读取；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；无回归。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -716,13 +719,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -735,7 +738,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "364a1424de7755c94b2d497ef6dda301352030829bc3fe4e2470a3f6811d1ba0",
+        "scopeDigest": "56390cce7afec152bd1de85da59f8b0f55c95520f5757cdce92a676c1be85d9d",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -749,18 +752,18 @@
           }
         ]
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -772,20 +775,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "e747e676abae7ea4d230fcd20aea76d6f278c60c1871523afbe70ff8b3fd6616"
+        "scopeDigest": "1f6b7e147ddd98fae1f0fb517031103710eb245ec1d7407a82756b4aeefdf8b4"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -797,20 +800,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "0099d69059ad28ff787243ab5972d67f1243ebed7729ccbfe00f63c9cd15b018"
+        "scopeDigest": "bb12cd867da1986bd1d8f2ba6ae30250a69e9f7a19ca67cca02d132bca513d5c"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, CopyButton.vue, OperationTarget.vue, operation-target.spec.ts):环境 `USelect` 触发器补 `touch-manipulation`(host / path 两段 `<button>` 本已纳入),`operation-target.spec` 在环境切换用例内断言;两原子单元布局、复制意图与 toast 播报未触及;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -825,20 +828,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "6ab92ef7f0a78ade7e7490f040cc060edd4ea1becc4bd76b2d878c8da11fc511"
+        "scopeDigest": "86ebfd0a1bab2ca1ddbef80d4476a298321fac264acdac286e1cd0cc3de45a98"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -856,20 +859,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "f8e0920f4f307ef43c5e4255514fca4dca4092515f0eb96f03abe14adb18a1d4"
+        "scopeDigest": "3af94166e1d9d85dbb792805d879e540a50dd175077f2568ef4f29d0757f6a54"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
-        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -879,7 +882,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "a983c2e3b1ff780ac27aabb8abaf5cd49ed98e4a891126ba7120452eb1a555f8",
+        "scopeDigest": "f4508304cf7f9e09f9337b4cc935ad3baf51c10700854974c6abb9bf02fc6bf6",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -893,7 +896,7 @@
           }
         ]
       },
-      "notes": "Round 4 全量复审:触发 UButton 补 `touch-manipulation`(SidebarNav 源码自述的 kit tap 目标触控契约;顶栏在触屏上唯一常显、max-sm 折叠为 icon 的 tap 目标),spec 新增独立用例锁定;props / emits / slots / 行为契约未变。其余复核无回归:UModal #content 模式经 VisuallyHidden DialogTitle 命名、`ignoreFilter` 组按 resultLimit 切片为上游默认行为(09-05 已裁定)、`highlight` 只消费 item.matches。scope 新纳入 gallery adapter `docs-shell-data.ts`(toSiteSearchGroups / searchDocsBody 是 display model 契约的消费示范)。",
+      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -906,13 +909,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -927,9 +930,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "3ea1771b365301dc9798fe334b00fbb7e4e9abb133f58f4a2f9514d7bb4cce07"
+        "scopeDigest": "73a8f414672e18465d4db05e230c0995b638efea037d8c8d525c45a6c96d5484"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:webhook-reference.vue, WebhookProtocol.vue, webhook-protocol.spec.ts):重试节奏展开 `UButton` 补 `touch-manipulation`,`webhook-protocol.spec` 在首个 toggleButton 用例内断言;三段协议事实、fact format、总结句真源未触及;scope 命中 `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -990,13 +993,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
+        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -1006,9 +1009,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "95791605cb532c5144425fd60f62522c4f48250aad40c4e1255dced43e0932f4"
+        "scopeDigest": "9ef01846575594966b8aa4d24a1e2a809f28ce584016c43f5ef9cf89d17a07c4"
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:RelationSourcePath.vue, relation-source-path.spec.ts):根 `<component :is>`(`to` → ULink / `field` → `<a>` 两态)补 `touch-manipulation`——第 1 轮复审指出字面标签扫描漏掉 `<component :is>`;`relation-source-path.spec` 在两种链接态用例内断言;三态降级与单次 spoken path 契约未触及;复核无回归。",
+      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
       "findings": []
     }
   }
