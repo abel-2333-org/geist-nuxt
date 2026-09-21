@@ -289,11 +289,13 @@ body {
  * matches and the tighter step stays. Callers own everything else — vertical
  * spacing, anchors, focus targets, state — and must not pair `subtree` with
  * `ps-*` / `border-s*` (tailwind-merge does not know they conflict).
- * Same organisation as `--text-code` above: one foundation-owned utility,
- * distributed with geist-foundation, instead of the same class string typed
- * into every caller.
+ * Like `--text-code` above it is a foundation-owned semantic utility that
+ * ships with geist-foundation, instead of the same class string typed into
+ * every caller. The border style is declared here so the line does not
+ * depend on Preflight's `border: 0 solid` reset surviving in a consumer.
  */
 @utility subtree {
+  border-inline-start-style: solid;
   border-inline-start-width: 1px;
   border-inline-start-color: var(--ui-border);
   padding-inline-start: --spacing(3);

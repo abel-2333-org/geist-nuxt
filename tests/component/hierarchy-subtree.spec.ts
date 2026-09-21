@@ -62,10 +62,16 @@ const anyOf: CompositionNode = {
   variants: [{
     id: 'email',
     label: 'Email',
-    fields: [{
-      path: 'email_address', name: 'address', type: 'object',
-      children: [{ path: 'email_address_domain', name: 'domain', type: 'string' }],
-    }],
+    fields: [
+      {
+        path: 'email_address', name: 'address', type: 'object',
+        children: [{ path: 'email_address_domain', name: 'domain', type: 'string' }],
+      },
+      {
+        path: 'email_aliases', name: 'aliases', type: 'string[]',
+        value: { relation: 'item', type: 'object', path: 'email_aliases_item', fields: [{ path: 'email_aliases_label', name: 'label', type: 'string' }] },
+      },
+    ],
     composition: nestedAllOf,
   }],
 }
@@ -153,12 +159,14 @@ describe('hierarchy grammar — subtree containers', () => {
 
   it('does not repeat the anyOf card boundary as a line, but lines the real subtrees inside the card', async () => {
     const wrapper = await mountSuspended(SchemaComposition, { props: anyOf })
-    const card = wrapper.get('.rounded-lg').element
+    const card = wrapper.get('[data-schema-composition] > div.rounded-lg').element
     expect([...card.classList]).not.toContain(SUBTREE)
     expect(handWrittenLine(card)).toEqual([])
-    // Card interior: a child-field region under a variant field row, and the
-    // nested composition, both keep the subtree line.
+    // Card interior: the three real subtrees rule 2 names — a child-field
+    // region under a variant field row, a value region, and the nested
+    // composition — all keep the subtree line.
     expectSubtree(wrapper.get('#email_address_domain').element.parentElement, 'child region inside a card')
+    expectSubtree(wrapper.get('[data-value-structure-region]').element, 'value region inside a card')
     expectSubtree(nestedRoots(wrapper)[0], 'nested composition inside a card')
   })
 

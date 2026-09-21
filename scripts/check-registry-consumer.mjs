@@ -597,6 +597,7 @@ async function loadGuide() {
     // scroll-mt-24 proves the composable's class reached the build; the
     // subtree markers prove the foundation hierarchy utility (line + container
     // step) is generated for this closure on its own, not only in the gallery.
+    // The label plus two markers: one array, all must match.
     cssMarker: ['scroll-mt-24', ...subtreeCssMarkers],
     renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
@@ -988,7 +989,7 @@ try {
             if (scenario.all && !builtCss.includes('var(--shiki-dark')) {
               throw new Error(`${scenario.label}: built CSS did not contain the CodeBlock dark token switch (#79)`)
             }
-            for (const marker of [scenario.cssMarker].flat().filter(Boolean)) {
+            for (const marker of [scenario.cssMarker ?? []].flat()) {
               if (!builtCss.includes(marker)) {
                 throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${marker}`)
               }

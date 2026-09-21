@@ -27,15 +27,16 @@ async function readCssTree(directory) {
  * it. All three must reach every build that copies a subtree caller, so the
  * consumer smoke (scripts/check-registry-consumer.mjs) reuses these exact
  * strings for the api-docs-field-item and api-docs-schema-composition closures.
- * The query condition is deliberately not part of a marker: the gallery build
- * lowers it to `(min-width:24rem)` while a consumer build keeps the range
- * form `(width>=24rem)`; the named container and the nested step are what
- * prove the responsive rule was generated.
+ * The query condition's syntax is deliberately not part of a marker: the
+ * gallery build lowers it to `(min-width:24rem)` while a consumer build keeps
+ * the range form `(width>=24rem)`. Both end in `24rem)`, so the second
+ * marker pins the threshold and the nested step without pinning the syntax.
+ * (`@container field (` alone would not discriminate: FieldItem's own
+ * `@md/field:` utilities emit the same prefix.)
  */
 export const subtreeCssMarkers = [
-  '.subtree{border-inline-start-width:1px;border-inline-start-color:var(--ui-border);padding-inline-start:calc(var(--spacing)*3)}',
-  '@container field (',
-  '{.subtree{padding-inline-start:calc(var(--spacing)*4)}}',
+  '.subtree{border-inline-start-style:solid;border-inline-start-width:1px;border-inline-start-color:var(--ui-border);padding-inline-start:calc(var(--spacing)*3)}',
+  '24rem){.subtree{padding-inline-start:calc(var(--spacing)*4)}}',
 ]
 
 export const requiredMarkers = [
