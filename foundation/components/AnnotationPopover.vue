@@ -256,6 +256,7 @@ onBeforeUnmount(clearTimers)
               color="neutral"
               variant="outline"
               size="xs"
+              class="touch-manipulation"
               icon="i-lucide-rotate-cw"
               @click="emit('retry')"
             >

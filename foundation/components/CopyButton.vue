@@ -75,7 +75,7 @@ function onCopy() {
       :color="copied ? copiedColor : color"
       :variant="variant"
       :size="size"
-      class="shrink-0"
+      class="shrink-0 touch-manipulation"
       :aria-label="copied ? copiedLabel : label"
       @click="onCopy"
     />
@@ -87,7 +87,7 @@ function onCopy() {
       :color="copied ? copiedColor : color"
       :variant="variant"
       :size="size"
-      class="shrink-0"
+      class="shrink-0 touch-manipulation"
       :aria-label="copied ? copiedLabel : label"
       @click="onCopy"
     />

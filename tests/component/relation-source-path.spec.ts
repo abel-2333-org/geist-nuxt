@@ -18,6 +18,9 @@ describe('RelationSourcePath', () => {
     })
 
     const link = wrapper.get('a')
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md) applies to
+    // the <component :is> root in both link states.
+    expect(link.classes()).toContain('touch-manipulation')
     expect(link.attributes('href')).toBe('#res_payment_id')
     expect(link.text().replace(/\s+/g, ' ').trim()).toBe('Source: Response body under payment under id')
     expect(wrapper.findAll('[translate="no"]').map(node => node.text())).toEqual(['payment', 'id'])
@@ -92,6 +95,9 @@ describe('RelationSourcePath', () => {
     })
 
     const link = wrapper.get('a')
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md) applies to
+    // the <component :is> root in both link states.
+    expect(link.classes()).toContain('touch-manipulation')
     expect(link.attributes('href')).toBe('/reference/webhook#callback_url')
     expect(link.text().replace(/\s+/g, ' ').trim()).toBe('来源： 请求体 下的 callback_url')
   })

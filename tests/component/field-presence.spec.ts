@@ -139,6 +139,8 @@ describe('FieldItem output presence', () => {
     const wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
     expect(nameText(wrapper)).toBe('failureCode?')
     const mark = identity(wrapper).get('[data-field-optional]')
+    // Kit tap-target touch contract: the marker is a real <button> and joins it.
+    expect(mark.classes()).toContain('touch-manipulation')
     expect(mark.text()).toBe('?')
     // The key-absence fact stays in the neutral text-toned role: subordinate
     // to the name, more prominent than metadata, and never a status badge.

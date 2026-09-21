@@ -294,6 +294,7 @@ describe('ResponseExample scenario selection', () => {
     const statusSelect = selectByIcon(wrapper, 'i-lucide-activity')
     expect(statusSelect?.text()).toContain('200')
     expect(wrapper.get('[data-response-compact-trigger]').text()).toContain('200')
+    expect(wrapper.get('[data-response-compact-trigger]').classes()).toContain('touch-manipulation')
 
     statusSelect!.vm.$emit('update:modelValue', 201)
     await wrapper.vm.$nextTick()
@@ -541,5 +542,60 @@ describe('ResponseExample body selection', () => {
 
     expect(liveRegion.text()).toContain('No response body')
     expect(liveRegion.text()).toContain('Intentionally empty.')
+  })
+})
+
+describe('ResponseExample touch contract', () => {
+  it('opts the file download link into touch-manipulation', async () => {
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md):
+    // the download UButton renders as a real <a download>, and the class must
+    // reach that root the same way it reaches the compact trigger.
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'file',
+          label: 'File',
+          statuses: [{
+            status: 200,
+            statusText: 'OK',
+            bodies: [{
+              id: 'pdf',
+              kind: 'file' as const,
+              mediaType: 'application/pdf',
+              filename: 'invoice.pdf',
+              downloadUrl: '/invoice.pdf',
+            }],
+          }],
+        }],
+      },
+    })
+
+    const link = wrapper.get('a[download]')
+    expect(link.attributes('href')).toBe('/invoice.pdf')
+    expect(link.classes()).toContain('touch-manipulation')
+  })
+
+  it('opts every USelect trigger (wide toolbar and compact panel) into touch-manipulation', async () => {
+    // USelect forwards `class` to its SelectTrigger root <button>. The wide
+    // toolbar renders scenario / status / media selects by cardinality; the
+    // compact panel mounts its own scenario select only once opened.
+    const assertAll = (w: VueWrapper<InstanceType<typeof ResponseExample>>, min: number) => {
+      const selects = w.findAllComponents({ name: 'USelect' })
+      expect(selects.length).toBeGreaterThanOrEqual(min)
+      selects.forEach(select => expect(select.get('button').classes()).toContain('touch-manipulation'))
+      return selects.length
+    }
+
+    // Multiple bodies per status → the media select renders.
+    assertAll(await mountSuspended(ResponseExample, { props: { scenarios: bodyScenarios } }), 1)
+
+    // Multiple scenarios and statuses → scenario + status selects; opening the
+    // compact trigger mounts the panel's scenario select on top of them.
+    const wrapper = await mountSuspended(ResponseExample, { props: { scenarios }, attachTo: document.body })
+    const wide = assertAll(wrapper, 2)
+    await wrapper.get('[data-response-compact-trigger]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.findAllComponents({ name: 'USelect' }).length).toBeGreaterThan(wide))
+    assertAll(wrapper, wide + 1)
+    wrapper.unmount()
   })
 })

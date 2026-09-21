@@ -341,6 +341,8 @@ describe('recursive encoding boundaries', () => {
       },
     })
     expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(1)
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md).
+    expect(wrapper.get('[data-value-structure-toggle]').classes()).toContain('touch-manipulation')
     expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['base64<json<object>>'])
   })
 

@@ -208,6 +208,7 @@ function toggleSchedule() {
                       color="neutral"
                       variant="outline"
                       size="xs"
+                      class="touch-manipulation"
                       :trailing-icon="scheduleExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
                       :aria-expanded="scheduleExpanded"
                       @click="toggleSchedule"

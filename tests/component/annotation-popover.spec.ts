@@ -322,6 +322,15 @@ describe('AnnotationPopover disabled', () => {
   })
 })
 
+describe('AnnotationPopover touch contract', () => {
+  it('opts the trigger into touch-manipulation (no double-tap zoom)', async () => {
+    // Foundation tap-target touch contract (references/foundations/focus-a11y.md);
+    // the retry button is asserted in the error-chrome case below.
+    const w = await mount()
+    expect(trigger(w).classes()).toContain('touch-manipulation')
+  })
+})
+
 describe('AnnotationPopover loading & error chrome', () => {
   it('loading: aria-busy panel, sr-only status, skeletons, no content slot', async () => {
     const w = await mount({ props: { loading: true } })
@@ -347,6 +356,7 @@ describe('AnnotationPopover loading & error chrome', () => {
       b.textContent?.includes('Retry preview'),
     )
     expect(retry).toBeDefined()
+    expect(retry!.classList.contains('touch-manipulation')).toBe(true)
     retry!.click()
     await nextTick()
     expect(w.emitted('retry')).toHaveLength(1)

@@ -229,7 +229,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
         :aria-label="props.selectLabel ?? 'Environment'"
         size="sm"
         variant="soft"
-        class="shrink-0"
+        class="shrink-0 touch-manipulation"
       />
 
       <UTooltip :text="hostCopied ? t.copiedHost : t.copyHost">

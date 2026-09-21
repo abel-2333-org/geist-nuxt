@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<{
   <UHeader mode="slideover">
     <template #left>
       <slot name="brand">
-        <NuxtLink to="/" class="flex items-center gap-2 font-semibold tracking-tight text-highlighted">
+        <NuxtLink to="/" class="flex touch-manipulation items-center gap-2 font-semibold tracking-tight text-highlighted">
           {{ props.brand }}
         </NuxtLink>
       </slot>

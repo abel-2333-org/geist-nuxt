@@ -151,6 +151,7 @@ function jump(close: () => void) {
         color="neutral"
         variant="ghost"
         size="xs"
+        class="touch-manipulation"
         trailing-icon="i-lucide-arrow-right"
         @click="jump(close)"
       >
@@ -164,6 +165,7 @@ function jump(close: () => void) {
         color="neutral"
         variant="ghost"
         size="xs"
+        class="touch-manipulation"
         trailing-icon="i-lucide-arrow-right"
         @click="close()"
       >
