@@ -64,6 +64,17 @@ const presence: FieldPresence = {
   empty: '""',
   condition: 'Omitted until the build is `READY`.',
 }
+// A condition is one sentence or an ordered list of sentences (issue #145);
+// the list form is part of the public surface, and its entries are strings.
+const listPresence: FieldPresence = { nullable: true, condition: ['`null` while queued.', 'Omitted for drafts.'] }
+const listCondition: FieldNode = { name: 'teamId', type: 'string', condition: ['Required when scoped.', 'Required for SSO.'] }
+const nonStringEntry: FieldNode = {
+  name: 'teamId',
+  type: 'string',
+  // @ts-expect-error a condition entry is localized prose, never a structured value.
+  condition: [{ text: 'Required when scoped.' }],
+}
+void [listPresence, listCondition, nonStringEntry]
 const field: FieldNode = {
   name: 'payment_method',
   type: 'object',

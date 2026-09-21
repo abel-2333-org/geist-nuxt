@@ -379,7 +379,11 @@ const bodyFields = [
     name: 'gitSource',
     type: 'object',
     required: 'conditional' as const,
-    condition: '`type` 为 `git` 时必填。',
+    // 两个独立事实：一条 rule，一句一个 entry（#145）。
+    condition: [
+      '`type` 为 `git` 时必填。',
+      '未传 `type` 且未传 `files` 时同样必填，此时按 `git` 部署处理。',
+    ],
     lifecycle: { status: 'beta' as const, since: 'v2.4', description: 'Beta 期间结构仍可能变化。' },
     description: '用于部署的 Git 仓库。',
     children: [
@@ -446,12 +450,15 @@ const responseFields: FieldNode[] = [
     path: 'res_url',
     name: 'url',
     type: 'string',
-    // Output presence (issue #127): the key is absent until the build is
-    // ready, and `null` when the build failed — two facts, one condition.
+    // 输出存在性（#127）：构建未 ready 时键缺失、构建失败时为 null——
+    // 两个事实，同一条 rule 里两个 entry（#145）。
     presence: {
       optional: true,
       nullable: true,
-      condition: '`state` 为 `QUEUED` 或 `BUILDING` 时不返回；`state` 为 `ERROR` 时为 `null`。',
+      condition: [
+        '`state` 为 `QUEUED` 或 `BUILDING` 时不返回。',
+        '`state` 为 `ERROR` 时为 `null`。',
+      ],
     },
     description: '部署进入 `READY` 后的公开访问地址。',
     examples: ['https://my-app.example.app'],

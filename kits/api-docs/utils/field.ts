@@ -20,6 +20,43 @@ import type { FieldLifecycle } from './lifecycle-preset'
 export type RequiredState = boolean | 'conditional'
 
 /**
+ * Localized condition prose (inline markdown): one sentence, or an ordered
+ * list of independent sentences that must keep their own boundaries. The
+ * same shape serves the request side (`FieldNode.condition`, "when must the
+ * caller send it") and the output side (`FieldPresence.condition`, "when is
+ * it omitted / null / empty"); the two never share a rule, only a grammar.
+ *
+ * A list is text in reading order, nothing more: the component does not
+ * infer AND / OR, does not parse the sentences, and does not know which
+ * presence fact a given entry qualifies. Keeping the entries unbound is what
+ * leaves room for a later `{ text, facts }` entry shape without a rewrite —
+ * this union is the compatible prefix of that shape.
+ */
+export type ConditionText = string | readonly string[]
+
+/** `ConditionText` after `conditionEntries()`: blank entries dropped, order
+ *  kept, empty when nothing was stated. Consumers read THIS, never the raw
+ *  prop, so "is there a condition?" has exactly one answer everywhere.
+ *  (Named apart from the internal `ConditionEntries.vue` that renders it, so
+ *  the two never shadow each other in an owner that imports the component.) */
+export type ConditionEntryList = readonly string[]
+
+/**
+ * The only normalisation of condition prose. Every truthiness check on a
+ * condition — the requiredness marker, the row's detail gate, the value
+ * scope block — goes through here, so an empty list or a list of blanks can
+ * never leak a phantom `Conditional` tag or an empty amber rule. A lone
+ * sentence and a one-entry list are the same input.
+ */
+export function conditionEntries(condition: ConditionText | undefined): ConditionEntryList {
+  const raw = typeof condition === 'string' ? [condition] : Array.isArray(condition) ? condition : []
+  // Fail-soft for a JavaScript caller that smuggles in a non-string entry,
+  // like `describeValuePresence` strips a smuggled `optional`: skip it rather
+  // than throw from inside a render.
+  return raw.filter((entry): entry is string => typeof entry === 'string').map(entry => entry.trim()).filter(Boolean)
+}
+
+/**
  * Field lifecycle metadata. `status` drives the badge; `since` and
  * `description` (already localized) surface as detail under the field.
  */
@@ -63,8 +100,10 @@ export interface FieldPresence {
    * never hidden behind a tooltip. Its presence is what makes a fact
    * "conditional": the marks say that something can happen, the sentence says
    * when, and there is no separate conditional flag to keep in sync.
+   * Several independent sentences go in as a list and render as one rule
+   * with one entry per sentence; the entries are not tied to the facts.
    */
-  condition?: string
+  condition?: ConditionText
 }
 
 /**
@@ -117,8 +156,9 @@ export interface FieldNode {
   format?: string
   /** `true`, `false`/absent, or `'conditional'` (required only in certain cases). */
   required?: RequiredState
-  /** Explains when a conditional field becomes required (already localized). */
-  condition?: string
+  /** Explains when a conditional field becomes required (already localized).
+   *  A list renders as one condition rule with one entry per sentence. */
+  condition?: ConditionText
   /** Output-side presence facts (may be omitted / null / empty). Absent for
    *  request fields and for every existing consumer: nothing is inferred. */
   presence?: FieldPresence
@@ -406,7 +446,7 @@ export function fieldRequiredState(
   field: Pick<FieldNode, 'required' | 'condition'>,
 ): 'required' | 'conditional' | null {
   if (field.required === true) return 'required'
-  if (field.required === 'conditional' || field.condition) return 'conditional'
+  if (field.required === 'conditional' || conditionEntries(field.condition).length > 0) return 'conditional'
   return null
 }
 
@@ -433,7 +473,8 @@ export interface PresenceNotation {
   /** Union members appended to the type, in reading order: `null`, then the
    *  literal empty form. Empty when nothing was stated. */
   unionTail: string[]
-  condition?: string
+  /** The author's condition prose, normalised; empty when none was stated. */
+  condition: ConditionEntryList
 }
 
 export function describeFieldPresence(presence: FieldPresence | undefined): PresenceNotation {
@@ -443,7 +484,7 @@ export function describeFieldPresence(presence: FieldPresence | undefined): Pres
   // A blank literal is exactly the unspecified "empty" the contract refuses:
   // treat it as not stated rather than printing a dangling `|`.
   if (empty?.trim()) unionTail.push(empty.trim())
-  return { optional: !!optional, unionTail, condition }
+  return { optional: !!optional, unionTail, condition: conditionEntries(condition) }
 }
 
 /** The value-node form: a value has no key, so `optional` is dropped here at
@@ -520,9 +561,10 @@ export function collectCompositionPaths(composition: CompositionNode): string[] 
 
 /** A value node says something beyond its own structure. */
 export function hasValueDetail(value: FieldValueNode): boolean {
+  const presence = describeValuePresence(value.presence)
   return !!value.description
-    || describeValuePresence(value.presence).unionTail.length > 0
-    || !!value.presence?.condition
+    || presence.unionTail.length > 0
+    || presence.condition.length > 0
     || (value.notes?.length ?? 0) > 0
     || (value.examples?.length ?? 0) > 0
     || (value.enumValues?.length ?? 0) > 0
@@ -620,7 +662,7 @@ export function describeValueRequirements(
   const presence = describeValuePresence(node.presence)
   const extras = !!node.description
     || presence.unionTail.length > 0
-    || !!presence.condition
+    || presence.condition.length > 0
     || (node.examples?.length ?? 0) > 0
     || (node.enumValues?.length ?? 0) > 0
     || (node.enumVariants?.length ?? 0) > 0

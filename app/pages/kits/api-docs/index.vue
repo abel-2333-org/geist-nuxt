@@ -846,7 +846,11 @@ const presenceFields: FieldNode[] = [
       optional: true,
       nullable: true,
       empty: '""',
-      condition: '仅 `status` 为 `succeeded` 时返回；收据尚未生成时为 `null`，商户关闭收据功能时为空字符串。',
+      condition: [
+        '仅 `status` 为 `succeeded` 时返回。',
+        '收据尚未生成时为 `null`。',
+        '商户关闭收据功能时为空字符串。',
+      ],
     },
     description: '收据地址。三个存在性事实相互独立：可省略、可为 null、可为空各自有各自的触发条件。',
     notes: [{ label: '格式', text: '绝对 https 地址。' }],
@@ -855,12 +859,19 @@ const presenceFields: FieldNode[] = [
     path: 'out_refunds',
     name: 'refunds',
     type: 'array',
-    presence: { optional: true, condition: '仅在发生过退款时返回；从未退款的交易没有这个键。' },
+    presence: { optional: true, condition: '仅在发生过退款时返回，从未退款的交易没有这个键。' },
     description: '退款记录。字段可省略是字段自己的事实，不会下传给数组元素。',
     value: {
       relation: 'item',
       type: 'object',
-      presence: { nullable: true, condition: '退款被风控撤销后，对应位置保留为 `null`，数组长度不变。' },
+      // 值节点的条件同样可以是列表：在元素作用域内逐条渲染，不上浮到字段行。
+      presence: {
+        nullable: true,
+        condition: [
+          '退款被风控撤销后，对应位置保留为 `null`，数组长度不变。',
+          '退款仍在处理中时同样为 `null`，完成后原位替换为退款对象。',
+        ],
+      },
       fields: [
         { path: 'out_refunds_id', name: 'id', type: 'string', description: '退款 id。' },
         { path: 'out_refunds_amount', name: 'amount', type: 'integer', description: '退款金额（最小货币单位）。' },
@@ -1177,7 +1188,7 @@ onMounted(() => anchor.initFromHash())
             （<code class="font-mono text-code">string | null | ""</code>），零词汇；唯一文案键
             <code class="font-mono text-code">mayBeOmitted</code> 就地解释记号：悬停或键盘聚焦 <code class="font-mono text-code">?</code> 即可读到，
             同一句也是它的读屏名称；每个可省略字段只多一个焦点，其余字段为零，复制字段名不会带上记号。
-            记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；
+            记号只说「可能」，何时发生由描述上方独立成行的条件句说（中性边框，不进约束区、不进 tooltip）；多个独立事实各写一句、按序传入列表，仍是同一条 rule、逐条一行；
             有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
             作用域下显示（<code class="font-mono text-code">object | null</code>），不与外层字段互相继承。
           </p>

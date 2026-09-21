@@ -10,6 +10,7 @@
 // only the SCOPE differs, and the scope is exactly what the label carries.
 import { presenceTypeExpression } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, ValueRequirementsBlock } from '../utils/field'
+import ConditionEntries from './ConditionEntries.vue'
 
 const props = defineProps<{
   block: ValueRequirementsBlock
@@ -50,7 +51,7 @@ const node = computed(() => props.block.node)
            `| null` never lands here. A value has no key, so `?` cannot
            appear (typed out and stripped at runtime). -->
       <div
-        v-if="block.presence.unionTail.length || block.presence.condition"
+        v-if="block.presence.unionTail.length || block.presence.condition.length"
         data-value-presence
         class="flex flex-col gap-2"
       >
@@ -60,11 +61,11 @@ const node = computed(() => props.block.node)
           translate="no"
         >{{ presenceTypeExpression(node.type, block.presence.unionTail) }}</p>
         <div
-          v-if="block.presence.condition"
+          v-if="block.presence.condition.length"
           data-value-presence-condition
           class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
         >
-          <InlineMarkdown :text="block.presence.condition" />
+          <ConditionEntries :entries="block.presence.condition" />
         </div>
       </div>
 
