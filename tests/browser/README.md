@@ -44,6 +44,12 @@ Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS
 
 F-01 回归递归检查兄弟子树，透明或零尺寸包装不能遮蔽其中的绘制节点；在宿主几何跳过之前检查伪元素，宿主不重叠也不能证明生成内容无影响。DOM 靠前不能作为遮挡排除依据：只有可比较的 positioned / isolation stacking context、其中完全覆盖文字的不透明表面及明确更低的绘制顺序共同成立，才记录 `excludedPaint` 并排除该层。`display:contents` 不能被当作有盒子的层叠上下文；原生 modal/popover top layer 暂未建模，出现时显式 `unresolved`。文字 Range 按可证明的矩形 overflow 裁切求交，不以像素容差忽略重叠；无法证明包含关系的脱离文档流或变换路径保留较大的保守范围。反例及正常对照保留实际几何、颜色、层叠和拒绝原因；它们证明检测器拒绝未知绘制，不代替完整正向命令的源码变异红→绿证据。
 
+F-02 将普通有色边框作为独立绘制检查：只在已证明边条和圆角保守区域不接触文字时排除；多片 inline 边框或变换下无法确认的几何明确拒绝。外扩绘制在宿主零尺寸/不相交判断之前检查；文字完全处于单片投影宿主的边框形状内部时可排除外阴影；其他外阴影只在以下已核验引擎和几何前提内使用保守绘制范围。未知引擎、变换阴影、outline、border-image、border-shape 与滤镜不靠宿主矩形猜测范围；不能证明安全时返回 `unresolved`。`visibility:hidden` 不豁免父层作用于可见子层的滤镜。明暗反例覆盖边框、远处投影、零尺寸 spread、多片边框和隐藏父层滤镜，并保留无遮挡、分离、薄边框、移除及恢复对照。
+
+外阴影范围当前绑定 CDP `Browser.getVersion` 的 `Chrome/153.0.8010.12` / `@971a7443b0c9b0a9b2860529b33331b76077ec62`，并要求 DPR 1、visual viewport scale 1、单片盒子、普通 border shape 及祖先无 zoom / transform / translate。实际身份随测量记录保留；引擎升级必须重新核验，未匹配时不会沿用旧证明。该 revision 的 [ShadowData](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/style/shadow_data.h) 使用 `sigma = blur / 2`，[绘制外扩](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/style/shadow_data.cc)为 `ceil(3 * sigma) + spread`。测量器先包住 computed CSS 六位有效数字的序列化误差，再按 float 运算求外扩；负 spread 保守取零，范围另向外扩一像素并 floor/ceil，包住宿主像素对齐和栅格舍入。此处只扩大可能绘制区域，不用容差忽略重叠，也不由截图猜测模糊截止。只在该范围与文字不相交时排除，并记录 `excludedPaint` 的原因、阴影及范围。源码链和定向边界证据随本轮 F-02 补证保存。
+
+外阴影内部裁切依据 [CSS Backgrounds and Borders](https://www.w3.org/TR/css-backgrounds-3/#shadow-shape)；outline 的形状可能受后代影响，按 [CSS UI](https://www.w3.org/TR/css-ui-4/#outline-props) 保持未建模拒绝，不能把宿主矩形当作其完整绘制边界。
+
 常规 CI 的四个 alpha 负向样本在独立场景恢复旧声明，证明检测器捕获失败，然后恢复并重新验证。外层测试绿色仅表示检测器工作；不能称为正向命令已经跑红。
 
 首次实施另在已提交且 clean 的 HEAD 执行：

@@ -1,8 +1,33 @@
-import type { Locator } from 'playwright-core'
+import type { Browser, Locator } from 'playwright-core'
 import { composite, contrastRatio } from '../../scripts/lib/text-contrast.mjs'
 
+type PaintEngine = { product: string, revision: string, boundedShadow: boolean }
+const paintEngines = new WeakMap<Browser, Promise<PaintEngine>>()
+async function paintEngine(locator: Locator): Promise<PaintEngine> {
+  const browser = locator.page().context().browser()
+  if (!browser) return { product: 'unavailable', revision: '', boundedShadow: false }
+  let identity = paintEngines.get(browser)
+  if (!identity) {
+    identity = (async () => {
+      try {
+        const cdp = await browser.newBrowserCDPSession()
+        try {
+          const { product, revision } = await cdp.send('Browser.getVersion')
+          return { product, revision, boundedShadow: product === 'Chrome/153.0.8010.12'
+            && revision === '@971a7443b0c9b0a9b2860529b33331b76077ec62' }
+        }
+        finally { await cdp.detach() }
+      }
+      catch { return { product: browser.version(), revision: 'unavailable', boundedShadow: false } }
+    })()
+    paintEngines.set(browser, identity)
+  }
+  return identity
+}
+
 export async function measure(locator: Locator, pseudo: '::placeholder' | null = null) {
-  const paint = await locator.evaluate((element, pseudo) => {
+  const engine = await paintEngine(locator)
+  const paint = await locator.evaluate((element, { pseudo, engine }) => {
     const target = element as HTMLElement
     const style = getComputedStyle(target, pseudo)
     const rect = target.getBoundingClientRect()
@@ -92,27 +117,116 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       if ([...channels, alpha].some(v => !Number.isFinite(v) || v < 0 || v > 1)) fail(`out of gamut ${normalized}`)
       return [...channels.map(v => v * 255), alpha]
     }
+    function shadows(value: string) {
+      if (value === 'none') return []
+      const colors: string[] = []
+      return value.replace(/(?:rgba?|color|oklab|oklch|lab|lch)\([^)]*\)/g, value => {
+        colors.push(value); return `COLOR${colors.length - 1}`
+      }).split(',').map(shadow => {
+        const match = /COLOR(\d+)/.exec(shadow)
+        if (!match) fail('unsupported shadow color')
+        const lengths = shadow.replace(/COLOR\d+|inset/g, '').trim().split(/\s+/)
+        if (lengths.length !== 4 || lengths.some(v => !/^-?[\d.]+px$/.test(v))) fail('unsupported shadow geometry')
+        const [x, y, blur, spread] = lengths.map(parseFloat)
+        if (![x, y, blur, spread].every(Number.isFinite)) fail('unsupported shadow lengths')
+        return { inset: shadow.includes('inset'), alpha: color(colors[Number(match![1])]!)[3]!, x: x!, y: y!, blur: blur!, spread: spread! }
+      })
+    }
+    // Border bands and corner rectangles conservatively contain border paint.
+    // A transparent background says nothing about these independently colored
+    // strokes. Unknown border geometry must not become an empty paint list.
+    function supportedBorder(node: Element, css: CSSStyleDeclaration) {
+      const sides = [
+        [css.borderTopWidth, css.borderTopColor], [css.borderRightWidth, css.borderRightColor],
+        [css.borderBottomWidth, css.borderBottomColor], [css.borderLeftWidth, css.borderLeftColor],
+      ] as const
+      const widths = sides.map(([width, shade]) => parseFloat(width) > 0 && color(shade)[3]! > 0 ? parseFloat(width) : 0)
+      if (!widths.some(width => width > 0)) return
+      const box = node.getBoundingClientRect()
+      if (!overlapsText(clipped(box, node, false))) return
+      if (node.getClientRects().length !== 1) fail('unmodeled fragmented border paint')
+      if (transformed(node, true)) fail('unmodeled transformed border paint')
+      const [top, right, bottom, left] = widths as [number, number, number, number]
+      const bands = [
+        { left: box.left, right: box.right, top: box.top, bottom: box.top + top },
+        { left: box.right - right, right: box.right, top: box.top, bottom: box.bottom },
+        { left: box.left, right: box.right, top: box.bottom - bottom, bottom: box.bottom },
+        { left: box.left, right: box.left + left, top: box.top, bottom: box.bottom },
+      ]
+      for (const [radius, isLeft, isTop, painted] of [
+        [css.borderTopLeftRadius, true, true, top || left], [css.borderTopRightRadius, false, true, top || right],
+        [css.borderBottomLeftRadius, true, false, bottom || left], [css.borderBottomRightRadius, false, false, bottom || right],
+      ] as const) {
+        if (!painted) continue
+        const values = radius.split(' ')
+        const length = (value: string, axis: number) => /^\d+(?:\.\d+)?px$/.test(value) ? parseFloat(value)
+          : /^\d+(?:\.\d+)?%$/.test(value) ? parseFloat(value) * axis / 100 : NaN
+        const x = length(values[0]!, box.width), y = length(values[1] || values[0]!, box.height)
+        if (!Number.isFinite(x) || !Number.isFinite(y)) fail('unmodeled border radius paint')
+        bands.push({ left: isLeft ? box.left : box.right - x, right: isLeft ? box.left + x : box.right,
+          top: isTop ? box.top : box.bottom - y, bottom: isTop ? box.top + y : box.bottom })
+      }
+      if (bands.some(band => overlapsText(clipped(band, node, false)))) fail(`unmodeled overlapping border paint on ${node.tagName}`)
+    }
+    function supportedCompositePaint(node: Element, css: CSSStyleDeclaration) {
+      // visibility:hidden does not hide a descendant that restores visibility.
+      // A filter on that ancestor still applies to the descendant's paint.
+      if (css.filter === 'none' && css.backdropFilter === 'none') return
+      const clip = clipped({ left: -Infinity, right: Infinity, top: -Infinity, bottom: Infinity }, node, false)
+      if (overlapsText(clip)) fail(`unmodeled expanded filter paint on ${node.tagName}`)
+    }
+    function supportedOverflowPaint(node: Element, css: CSSStyleDeclaration) {
+      // These effects can escape a zero-size or distant border box. Check them
+      // before excluding the host by geometry, while retaining proven ancestor
+      // clips and the existing opaque stacking-context exclusion.
+      const clip = clipped({ left: -Infinity, right: Infinity, top: -Infinity, bottom: Infinity }, node, false)
+      if (!overlapsText(clip)) return
+      const borderShape = css.getPropertyValue('border-shape')
+      if (borderShape && borderShape !== 'none') fail(`unmodeled border shape paint on ${node.tagName}`)
+      if (css.borderImageSource !== 'none') fail(`unmodeled expanded border image paint on ${node.tagName}`)
+      if (css.outlineStyle !== 'none' && parseFloat(css.outlineWidth) > 0 && color(css.outlineColor)[3]! > 0) fail(`unmodeled outline paint on ${node.tagName}`)
+      for (const shadow of shadows(css.boxShadow)) {
+        if (shadow.inset || shadow.alpha === 0) continue
+        // An outer shadow is clipped out of its caster's border shape. Reuse
+        // only the proven interior geometry (including rounded corners).
+        if (coversText(node, css)) continue
+        // This is the verified Blink ink-overflow bound, not a guessed Gaussian
+        // cutoff. A browser upgrade or a different coordinate mapping requires
+        // new proof; see README for the exact revision and source chain.
+        if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
+          || node.getClientRects().length !== 1 || transformed(node)) fail(`unmodeled outer shadow paint on ${node.tagName}`)
+        for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+          if (getComputedStyle(ancestor).translate !== 'none') fail('unmodeled translated shadow paint')
+        }
+        const box = node.getBoundingClientRect()
+        // Computed CSS uses %.6g. Expand by one full last-place unit before
+        // reproducing Blink's float sigma=blur/2 and ceil(3*sigma) outset.
+        const unit = (value: number) => value === 0 ? 0 : 10 ** (Number(Math.abs(value).toExponential().split('e')[1]) - 5)
+        const blur = shadow.blur + unit(shadow.blur)
+        const extent = Math.ceil(Math.fround(3 * Math.fround(Math.fround(blur) * 0.5)))
+          + Math.max(0, shadow.spread + unit(shadow.spread))
+        const xError = unit(shadow.x), yError = unit(shadow.y)
+        // The extra pixel encloses caster snapping and raster rounding at DPR1.
+        // This enlarges the possible paint area; it never ignores an overlap.
+        const bounds = { left: Math.floor(box.left + shadow.x - xError - extent - 1),
+          right: Math.ceil(box.right + shadow.x + xError + extent + 1),
+          top: Math.floor(box.top + shadow.y - yError - extent - 1),
+          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + 1) }
+        if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping outer shadow paint on ${node.tagName}`)
+        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, bounds })
+      }
+    }
     function supported(node: Element, computed: CSSStyleDeclaration) {
       if (computed.backgroundImage !== 'none' || computed.filter !== 'none' || computed.backdropFilter !== 'none'
         || computed.mixBlendMode !== 'normal' || computed.maskImage !== 'none') fail(`unsupported paint on ${node.tagName}`)
-      if (computed.boxShadow.includes('inset')) {
-        const colors: string[] = []
-        const shadows = computed.boxShadow.replace(/(?:rgba?|color|oklab|oklch|lab|lch)\([^)]*\)/g, value => {
-          colors.push(value); return `COLOR${colors.length - 1}`
-        }).split(',')
-        for (const shadow of shadows.filter(s => s.includes('inset'))) {
-          const match = /COLOR(\d+)/.exec(shadow)
-          if (!match) fail('unsupported inset shadow color')
-          if (color(colors[Number(match![1])]!)[3] === 0) continue
-          const lengths = shadow.replace(/COLOR\d+|inset/g, '').trim().split(/\s+/)
-          if (lengths.length !== 4 || lengths.some(v => !/^-?[\d.]+px$/.test(v))) fail('unsupported inset shadow geometry')
-          const [x, y, blur, spread] = lengths.map(parseFloat)
-          const box = node.getBoundingClientRect()
-          const clearance = Math.min(textRect.left - box.left, box.right - textRect.right, textRect.top - box.top, box.bottom - textRect.bottom)
-          if (x !== 0 || y !== 0 || blur !== 0 || spread! < 0 || spread! > clearance) fail('inset shadow may overlap text')
-        }
+      for (const shadow of shadows(computed.boxShadow)) {
+        if (!shadow.inset || shadow.alpha === 0) continue
+        const box = node.getBoundingClientRect()
+        const clearance = Math.min(textRect.left - box.left, box.right - textRect.right, textRect.top - box.top, box.bottom - textRect.bottom)
+        if (shadow.x !== 0 || shadow.y !== 0 || shadow.blur !== 0 || shadow.spread < 0 || shadow.spread > clearance) fail('inset shadow may overlap text')
       }
     }
+
     function supportedPseudos(node: Element, allowItem = false, sibling = false) {
       const paints: any[] = []
       for (const pseudoName of ['::before', '::after']) {
@@ -220,7 +334,9 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       return true
     }
     function coversText(node: Element, css: CSSStyleDeclaration) {
-      if (transformed(node, true)) return false
+      const borderShape = css.getPropertyValue('border-shape')
+      if (borderShape && borderShape !== 'none') return false
+      if (node.getClientRects().length !== 1 || transformed(node, true)) return false
       if (css.backgroundClip !== 'border-box' || css.clipPath !== 'none' || css.clip !== 'auto') return false
       const box = node.getBoundingClientRect()
       if (box.left > textRect.left || box.right < textRect.right || box.top > textRect.top || box.bottom < textRect.bottom) return false
@@ -265,9 +381,12 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
             const box = sibling.getBoundingClientRect()
             if (behindOpaqueBranch(sibling, node)) continue
             supportedPseudos(sibling, false, true)
-            if (!box.width || !box.height || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
-            if (!overlapsText(clipped(box, sibling, false))) continue
+            supportedCompositePaint(sibling, siblingStyle)
+            if (siblingStyle.display === 'contents' || siblingStyle.visibility !== 'visible' || Number(siblingStyle.opacity) === 0) continue
+            supportedOverflowPaint(sibling, siblingStyle)
+            if (!box.width || !box.height || !overlapsText(clipped(box, sibling, false))) continue
             supported(sibling, siblingStyle)
+            supportedBorder(sibling, siblingStyle)
             const background = color(siblingStyle.backgroundColor)
             const painted = background[3] > 0 || siblingStyle.backgroundImage !== 'none'
             // A transparent element can still paint text or replaced content.
@@ -298,10 +417,10 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         chain.push({ node: node.tagName + (node.id ? `#${node.id}` : ''), background: color(current.backgroundColor), rawBackground: current.backgroundColor, opacity: Number(current.opacity), underlays })
       }
       layers.push(...chain)
-      return { text, rawForeground: style.color, foreground, layers, excludedPaint, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
+      return { text, rawForeground: style.color, foreground, layers, excludedPaint, engine, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
     }
     finally { probe.remove() }
-  }, pseudo)
+  }, { pseudo, engine })
   let background = [0, 0, 0, 0]
   let foreground = paint.foreground
   for (const layer of paint.layers) {
