@@ -11,13 +11,13 @@
   "items": {
     "foundation-copy-button": {
       "round": 3,
-      "lastAuditedAt": "2026-09-10T03:34:50.771Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8c8c96e499fedc3b624b1f1e266e1db2b12e988b",
-        "headSha": "5f0fe3a47b1273abe1285b2bf2f50bdcab3b34db",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/components/gallery/Buttons.vue",
@@ -31,7 +31,7 @@
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "9b578bba454a9844d60735122c82517ddd5e909ffa26ad48e303eaf33acaa44c",
+        "scopeDigest": "0abccc4ffdc7791b9b14209bb73c127cfc9f346a3c3d9126688e5f226eda5fd7",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -45,7 +45,7 @@
           }
         ]
       },
-      "notes": "复制结果只由 useCopy 的应用级 toast 播报；成功显式 background/polite，失败保持既有语义。移除 CopyButton 两分支的自有 region，inheritAttrs:false 和布局 wrapper 契约保留。真实 UApp/toast 集成测试覆盖 plain、tooltip、host、path，每次成功仅有一个 polite live region。草稿 toast finding f-7e93479ff182 后经证据纠正映射 f-537beeaf99aa，本次已修复；该问题未进入 canonical base，不新增已解决 finding。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:CopyButton.vue, copy-button.spec.ts, operation-target.spec.ts):tooltip / 非 tooltip 两分支 `UButton` 均补 `touch-manipulation`,`copy-button.spec` 新增 it.each 用例;toast 播报与 attrs 契约未触及;复核无回归。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -109,13 +109,13 @@
     },
     "foundation-inline-markdown": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
-        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "8fc2c8d1f6d165cb83a52c181665b15bff7f717d2568330acab2ea85ba2caca7",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -124,7 +124,7 @@
           "references/components/data-display.md",
           "tests/component/inline-markdown.spec.ts"
         ],
-        "scopeDigest": "986747f390d12211848121ae077ee281fb866d7a07162dacd131f7f65399a862",
+        "scopeDigest": "c56738341a9a879b2351e0170ebde14e96b4d113cca65a44e78480bb22f4a558",
         "dependencies": [
           {
             "name": "marked",
@@ -133,7 +133,7 @@
           }
         ]
       },
-      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;InlineMarkdown 的 code token 渲染为 InlineCode,本次修复后其 13px 校准在被外层传色时不再丢失,对 InlineMarkdown 自身契约(安全子集、字面保留)无影响;既有两条 resolved finding 原样保留;marked 依赖前提不变。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:InlineMarkdown.vue, inline-markdown.spec.ts):render function 生成的 ProseA 链接补 `class: touch-manipulation`(经 ProseA attrs 落到根 `<a>`)——第 1 轮复审指出 render function 在字面标签扫描盲区;`inline-markdown.spec` 在内部链接用例内断言;安全子集解析与 `marked` dependency evidence 未触及;复核无回归。",
       "findings": [
         {
           "id": "f-4a60b6008a52",
@@ -207,13 +207,13 @@
     },
     "foundation-theme-toggle": {
       "round": 3,
-      "lastAuditedAt": "2026-09-11T00:41:29.220Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "60c9eecb76dfd832271e4e7d09c054ab09a319d7",
-        "headSha": "9ecee9f4b7c7200d56746123dfdbbfdac3b6d7da",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
           "app/layouts/default.vue",
@@ -221,9 +221,10 @@
           "foundation/compositions/AppHeader.vue",
           "references/compositions/page-shell.md",
           "references/foundations/focus-a11y.md",
-          "tests/component/app-header.spec.ts"
+          "tests/component/app-header.spec.ts",
+          "tests/component/theme-toggle.spec.ts"
         ],
-        "scopeDigest": "0db7df56d30c0ece9314ea548e7be91a60188ee815a3631ba18000e2748a79bf",
+        "scopeDigest": "13b7f9261ff27231e9a5b4b10f70f695847cbd98a619b04ee0953db3a9691e73",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -237,18 +238,18 @@
           }
         ]
       },
-      "notes": "UColorModeButton 稳定命名壳未变;上游 @nuxt/ui 4.9.0 与 @nuxtjs/color-mode 4.0.1 resolution 未漂移,可访问名称仍由 useLocale 读根 UApp locale 提供,重新绑定依赖前提。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:ThemeToggle.vue, AppHeader.vue, focus-a11y.md, app-header.spec.ts):`UColorModeButton` 加 `class=\"touch-manipulation\"`(它把 `class` 声明为 prop、`inheritAttrs: false`,经 `useForwardProps` 转发到根 UButton),新增 `theme-toggle.spec.ts` 锁定并纳入 scope;同 scope 的 AppHeader 品牌 `NuxtLink` 补同一 class(`app-header.spec` 新增用例,stub 根 `<a>` 承接);`focus-a11y.md` 新增「触控 tap 目标」硬要求;既有 dependency evidence 原样重绑;复核无回归。",
       "findings": []
     },
     "foundation-annotation-popover": {
       "round": 4,
-      "lastAuditedAt": "2026-09-16T23:31:57.540Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "ff6135da5016303427085908f15e8d49bb2fd837",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -258,7 +259,7 @@
           "references/foundations/focus-a11y.md",
           "tests/component/annotation-popover.spec.ts"
         ],
-        "scopeDigest": "634918dcf6ada4218b81caab72bf3a941f4fecf402589f6ae137e3e1a9bd8659",
+        "scopeDigest": "027efad7d44b3255590d77549cb89747e1a51f2f36aa1af60bdac07cf32aff96",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -272,18 +273,18 @@
           }
         ]
       },
-      "notes": "round 4 复审:壳自 round 3 零变更;实测核证 reka-ui 2.9.10 PopoverContent 自带 role=dialog + aria-labelledby=triggerId(浮层以触发文本命名),PopoverTrigger as-child 使真实 <button> 获得 aria-haspopup/expanded/controls,无需自加 aria;click 骨架 + mouse-only hover 定时器、OpenSource 焦点所有权、forward-Tab 接管、disabled 卫生、loading/error chrome 与 overlays.md 及 381 行 focused spec 逐条一致;focus 样式符合 focus-a11y.md 实底控件规格;hover 打开后点击触发器按 reka toggle 语义关闭,属契约内 toggle 行为记观察不记 finding;横扫确认 hover 定时器与 focusable selector 全仓唯一,记 clean。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:AnnotationPopover.vue, focus-a11y.md, annotation-popover.spec.ts):`#error` retry `UButton` 补 `touch-manipulation`(触发器本已纳入),`annotation-popover.spec` 在 retry 用例内断言,并新增触发器 `classes()` 用例闭合 09-19 遗留;`focus-a11y.md` 新增「触控 tap 目标」硬要求(本组件触发器是先例之一);开合定时器、焦点所有权、四态机未触及;复核无回归。",
       "findings": []
     },
     "foundation-term-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T23:48:02.732Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
-        "headSha": "8dab72f096e876fd196e64c3b5ee6f1fefa9b830",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "73f1bb6e784c6e3cbe0365792c5c9a90aad035c1f22627efb87d1fc9449f36cd",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -293,9 +294,9 @@
           "tests/component/annotation-forms.spec.ts",
           "tests/component/term-annotation.spec.ts"
         ],
-        "scopeDigest": "0df849eef4f0d09f2fcca4a06bc2ca3e274688980cbea93c3cbb57d96d80a29c"
+        "scopeDigest": "5c42eb295cdd41474dc277a089c36300646e63404a0064e1ec399878885f4bfb"
       },
-      "notes": "Round 4 全量复审 clean：owning file、tests、reference、gallery 自 09-03 evidence 起零变更。临时 probe 实测 `__proto__` / `hasOwnProperty` / `toString` 三个继承成员 id 均降级纯文本并各告警一次（无 button），「stale markdown never breaks a page」claim 成立；entry 直传、labels 合并、close 再导航、wrap-anywhere 与家族诊断条件复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:TermAnnotation.vue, annotation-forms.spec.ts):`#actions` 的 `UButton :to` 补 `touch-manipulation`,`annotation-forms.spec` 在 glossary 用例内断言 `<a>`;原型链查表守卫与降级未触及,resolved finding 原样保留;复核无回归。",
       "findings": [
         {
           "id": "f-084ace82f441",
@@ -308,13 +309,13 @@
     },
     "foundation-doc-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-16T23:31:57.540Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "688f83c63c3d278dd58115c987b650f1b45d1b0a",
-        "headSha": "ff6135da5016303427085908f15e8d49bb2fd837",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "e14b8ac1aa16df51a87f7b69f8511928de42c1354f655410174c96a37ef9bbf4",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -322,20 +323,20 @@
           "references/components/overlays.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "8bbe68267cd46d033a6078a520cb99b5570f34963f14e7aefcda1ff611ce43fc"
+        "scopeDigest": "015f330f799327d55994e1e4154a4682250c61f4f4ba15b9765b9ef562013d9c"
       },
-      "notes": "round 4 复审:自 round 3 零变更;load 管线无关 + per-instance 缓存 + requestToken 陈旧响应防护 + to 变化即时重取 + error 态不死路,与 overlays.md 契约及 annotation-forms.spec.ts 一致;UButton :to 渲染真实 <a> 满足「导航用链接」;error 态在重开时沿用缓存直到 Retry、catch 静默吞掉 reject 原因两点记观察(UI 已可见错误态且 Retry 在场,adapter 可自行记录),不记 finding;a11y/token/明暗依托壳组件,记 clean。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocAnnotation.vue, annotation-forms.spec.ts):`#actions` 的 `UButton :to` 补 `touch-manipulation`,`annotation-forms.spec` 在固定宽度用例内断言 `<a>`;预览加载 / 缓存 / 陈旧丢弃未触及;复核无回归。",
       "findings": []
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
-        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -350,20 +351,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "a414e67503800d8263faaed9a6afb4f9a9c5fa7ebc678834fccfb52eb3691c3a"
+        "scopeDigest": "cea6dcf41060c459b6e2b952db261cd7c167807ca13be031b1862b9557e64c2e"
       },
-      "notes": "required co-review:本次功能 diff(54e2542 + a1ad0cc)命中其 scope 中的 kits/api-docs/components/SidebarNav.vue——分区 header <button>(L505)、搜索清除 UButton、行 ULink 覆盖层的 class 增加 touch-manipulation;SidebarNav 对 SplitPaneHandle 的消费(L630–644:appearance=edge、orientation=vertical、dragging / label / controls / value / min / max 传参、drag-start / step / jump 三事件映射到 useSplitPane)一行未动。完整复审:SplitPaneHandle.vue 的 role=separator + aria-orientation / label / controls / valuenow-min-max、disabled 退为无语义 spacer、touch-none、edge 形态 1px→2px primary 唯一焦点指示、方向键 / Home / End / Enter 键盘映射与 references/components/index.md、focus-a11y.md、kits/api-docs/index.md L158、sidebar-nav.md L99 / L117 逐条一致;split-pane-handle.spec.ts 与 code-rail.spec.ts 随 test:component 通过;三个消费方(SplitPane / CodeRail / SidebarNav)对 coarse 仍以 3× 响应。09-18 记录的修饰键组合观察维持不立 finding。无 finding。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:focus-a11y.md):`focus-a11y.md` 新增「触控 tap 目标」硬要求 明文把拖拽把手(`touch-none`)排除在外,与本组件实现一致;源码、spec 与 reference 其余条款未触及;复核无回归。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -382,20 +383,20 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "0745aad0ab0b4bef02eca968931e169cf511e3a662f00fc656878cc03707b9a4"
+        "scopeDigest": "dbc8a4fe21720a1df39c220488338119ffac2b9b714951f4a0ac33b1a550ce65"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-code-block": {
       "round": 3,
-      "lastAuditedAt": "2026-09-17T07:35:37.090Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "fe5e5e7f0b824531254d3690ee16cbd80da572fa",
-        "headSha": "55d9d368cc27b40dc0f519a950119f187184270b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -405,9 +406,9 @@
           "references/kits/api-docs/code-sample.md",
           "tests/component/code-block.spec.ts"
         ],
-        "scopeDigest": "04a5caa81acd4d2a3d821ba1686db501cb5585737124e0a4aac3ab714ef793e4"
+        "scopeDigest": "0ddf43cd164533dc255723ab41a7795f8f82842c91bc353ad1dcf124d0a94082"
       },
-      "notes": "PR #133 复审：scope 内变动仅 `app/pages/kits/api-docs/index.vue`（kit 首页的 presence 说明段与 mayBeOmitted 文案）；本组件代码与契约未变，复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:CodeBlock.vue, code-block.spec.ts):换行开关 `UButton` 与语言 `USelect` 触发器补 `touch-manipulation`(前者经 UButton、后者经 USelect 的 `class` prop 落到根 button),`code-block.spec` 在 aria-pressed 用例内对两者断言;其余(wrap 持久化、可访问名、`translate=no` `<pre>`)未触及;复核无回归。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -420,13 +421,13 @@
     },
     "api-docs-request-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -438,20 +439,20 @@
           "tests/component/request-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts"
         ],
-        "scopeDigest": "53c0455596843b85581d22c8c62fc41e80875d0c7d60fb304f8fc87206f02130"
+        "scopeDigest": "79ff645c617aa055a26bbeed6831f86bb3c06b912357603467f1736f55d5c772"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, webhook-reference.vue, CodeBlock.vue, RequestExample.vue, request-example.spec.ts):场景 `USelect` 触发器补 `touch-manipulation`(第 2 轮复审指出 USelect 把 `class` 交给 SelectTrigger 根 button,属条款纳入范围),`request-example.spec` 新增遍历用例;受控 / 非受控 scenario 契约未触及;scope 命中 `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -467,9 +468,9 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "tests/nuxt/response-example-contract.ts"
         ],
-        "scopeDigest": "a2162d325d1dd1f118afd0d7b6ba18316b811465db388ef6a977811c6b162a33"
+        "scopeDigest": "4780cdaff74a95cc3011b3e1565bc1175ef662680f64d10d9eeefafd1410d839"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, CodeBlock.vue, RequestExample.vue, ResponseExample.vue, request-example.spec.ts, response-example.spec.ts):紧凑触发器(`data-response-compact-trigger`)、文件下载链接(`<a download>`)与 4 个 `USelect` 触发器(scenario / status / body / 紧凑面板内 scenario)补 `touch-manipulation`,`response-example.spec` 各补断言(下载链接新增 file panel 用例,USelect 新增遍历用例);CodeBlock 换行开关同批修复;scenario / status 选择与 live region 契约未触及;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -489,13 +490,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
-        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -512,20 +513,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "efd36098b4929bf31aceaefdbcb4e983922a536dc9317c85bbfdf6f566a09718"
+        "scopeDigest": "9b19877ece87ceb15b29e2494ff5e8f23237e506964026c4eb0229c857a62b47"
       },
-      "notes": "Round 4 全量复审 clean:自 08-01 首审(preset 契约表 + 空白回落)以来 owning file 零变更;六态 preset icon+label 齐全、`Record<LifecycleStatus,…>` 穷尽、`label` 空白回落 preset 文案、size=sm 显式对齐约定复核成立;三个 dependents(FieldItem / LifecycleNotice / OperationHeader)均只传单值 status。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue):scope 命中 `DocsShellReference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
-        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -544,7 +545,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "6d85dac4d493fe32b261e9fbeb261f75fdb50ce896d32f5f4ad40b5c976b57e0",
+        "scopeDigest": "eccb17df890605040dd68f28ed888d07ee961fc8be65e44470cc90bafad069f6",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -558,7 +559,7 @@
           }
         ]
       },
-      "notes": "required co-review:scope 内 `SiteSearch.vue` 被改(触发 UButton 加 `touch-manipulation` + 注释),不触及 `#item-leading` 对 HttpMethodBadge 的调用(仍只传 method)、`trim + toUpperCase || 'UNKNOWN'` 归一化、`methodPreset` 色调与 `translate=no` 透传链路;`http-method-badge.spec.ts` 原样通过,registry topology 未变,依赖证据原样重录。无 finding。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-enum-table": {
@@ -589,13 +590,13 @@
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -604,20 +605,20 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "f354322c58dab5743153661ba2669c43e1cd1df7986970f707ae062f39908c6a"
+        "scopeDigest": "47772616daa6b6208e1b1c6b8c5ea1338da34df0ad52ccab38caaaf8da6c02a3"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:WebhookProtocol.vue):scope 命中 `WebhookProtocol.vue`(依赖组件补 `touch-manipulation`),本组件对其调用与契约未变;复核无回归。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "891545389646fe28ee5f004d6dc25926a5680052f0b7292e64791df73297670d",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -635,9 +636,9 @@
           "tests/component/field-value-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "2b3c04fb01d314746b8c118c219296f72ce0fad65843d24ad4aafd0f97f9d459"
+        "scopeDigest": "f8fbff90830714f1d114477a82d9ca060c7fad3eadb97618c2fd90698303060a"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, FieldItem.vue, field-presence.spec.ts, field-value-structure.spec.ts):`?` 可省略记号 `<button>` 补 `touch-manipulation`(此前 09-19 以「触屏不开 tooltip」豁免,新条款按渲染结果判定、不看 `@click`),`field-presence.spec` 在记号用例内断言;其余 3 个按钮本已纳入;09-19 遗留的 FieldValueStructure 展开按钮 spec 锁定本次在 `field-value-structure.spec` 补齐;`endpoint-reference.vue` 命中为 h1 identity 换行,FieldItem 用法未变;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-schema-composition": {
@@ -677,13 +678,13 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -693,9 +694,9 @@
           "references/kits/api-docs/index.md",
           "tests/component/annotation-forms.spec.ts"
         ],
-        "scopeDigest": "2aed94095d61439400bf0406bd199c55d10f73d8629dd692e87a8b12cee550e9"
+        "scopeDigest": "6fa71f6634a8f56b8d79b40f604afae05e5ede60fc8faaab31ba2ba55dfa6135"
       },
-      "notes": "scope 内变动：FieldAnnotation.vue、references/kits/api-docs/index.md。popover 预览里的同一 `?` 记号由 text-dimmed 升为 text-toned，与字段行一致；非交互 span 不变。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:FieldAnnotation.vue, annotation-forms.spec.ts):`#actions` 两个 `UButton`(同页 jump / 跨页 `:to`)补 `touch-manipulation`,`annotation-forms.spec` 在 jump 用例内断言;触发器(AnnotationPopover)本已纳入;两条 wont-fix finding 原样保留;复核无回归。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -715,13 +716,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:12:35.376Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8300c2e2191b13d855fb43c3ad34ceddca3a5310",
-        "headSha": "763e78229ec284852bc8a7af3ce88b538a9559e2",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -734,7 +735,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "5a9ce25e1ad0d5d0c35a327bbc963f2fda2a4e4ee1dfa6a6eae904f8aa533208",
+        "scopeDigest": "364a1424de7755c94b2d497ef6dda301352030829bc3fe4e2470a3f6811d1ba0",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -748,7 +749,7 @@
           }
         ]
       },
-      "notes": "gallery i18n 复审(endpoint 参考页整页中文 + DocsShellReference 注入 FieldItemLabels):scope 命中 app/components/demo/api-docs/DocsShellReference.vue;只改页面文案、FieldGroup label 与 kit labels 注入,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
@@ -778,13 +779,13 @@
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T03:02:57.199Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "64588b7548a70ce156eeff926c2ab65b7e6bbb2f",
-        "headSha": "a3a93e0f5bdb324c3db7fdb7e42f6e49356f0d2b",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -796,20 +797,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "0a49090122ddc6209edba03b4beac73ff9b1fba0a41d8a4f44a8f9733518b4d3"
+        "scopeDigest": "0099d69059ad28ff787243ab5972d67f1243ebed7729ccbfe00f63c9cd15b018"
       },
-      "notes": "端点参考页 rich fact 复审(requirements 走 FactRow #value seam、errors <dd> 改 InlineMarkdown):scope 命中 app/pages/kits/api-docs/endpoint-reference.vue;只改页面渲染面,组件源码、契约与用法未变,复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:endpoint-reference.vue, CopyButton.vue, OperationTarget.vue, operation-target.spec.ts):环境 `USelect` 触发器补 `touch-manipulation`(host / path 两段 `<button>` 本已纳入),`operation-target.spec` 在环境切换用例内断言;两原子单元布局、复制意图与 toast 播报未触及;scope 命中 `endpoint-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T23:48:05.159Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "d126cfe1f6a0551c42738c7fb1d13582de2abc2a",
-        "headSha": "014c1c817fcf5886f0cf762d4beb2d648ff5b390",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -824,20 +825,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "15317449ebfcc8e9a463f2c57075ca943a0d0b7c43b1f1dadb65a7ae93420db1"
+        "scopeDigest": "6ab92ef7f0a78ade7e7490f040cc060edd4ea1becc4bd76b2d878c8da11fc511"
       },
-      "notes": "Round 4 全量复审 clean:自 09-05(标识 wrap-anywhere + 基线对齐)以来 scope 零变更;`kind` discriminated union、`headingLevel` 2–4、identity 行不截断、`translate=no`、lifecycle 徽章 icon+text 复核成立;三条 registryDependencies 逐一有模板消费。gallery 手写 h1 identity header 9 处仍用 `min-w-0 truncate`(09-05 遗留、页面私有 recipe),不在本 item 改。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
-      "change": "none",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
-        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -855,9 +856,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "66494519c3ffd5e151abc28cc4a2bd5bce708c5b6a3da8fb999e0667c84d4525"
+        "scopeDigest": "f8e0920f4f307ef43c5e4255514fca4dca4092515f0eb96f03abe14adb18a1d4"
       },
-      "notes": "Round 4 全量复审(计划项),clean。自 08-26 modified 以来 owning file / spec / reference「可拖动分栏」节零变更;09-03 与 09-18 两次 affected 复审已核 SplitPane 与页面消费点。四维度:kit 归属(ADR-010,耦合 .code-surface / pre.raw-pre)成立,registryDependencies 6 项与 GeistBreakpoint 类型 / useBreakpointGate / useSplitPane / useRafTask / SplitPaneHandle 引用一致;341 行(audit-plan 计数)单一职责(split math + 双观察者增量目标同步),computeSplitBudgets 纯函数与 reference 列出的实现逻辑等价(reference 摘录为 export 单行签名、中文 JSDoc,源码是模块私有多行签名、英文 JSDoc;reference 明言「不需要单独 copy」,摘录非契约);SSR 恒 stacked、:style 恒对象、rAF 合帧、stacked 不渲染把手 / fit 态 disabled、aria 取有效分隔位与有效边界,均有 code-rail.spec.ts 锁定;无颜色 / 尺寸硬编码(纯布局)。三处消费点(endpoint / webhook 参考页 lg、DocsShellReference xl)内外层 enabled-from 同步、各传独立 storage-key 与中文 resize-label。源码 4 条 never / always claim(未同步 gate 不占 sticky 条、useId 回退不串扰、fit 态不调用重分配、style 恒对象)逐条成立。观察不立 finding:Home / End 把存储 ratio 写到 0.2 / 0.8 clamp 端而非有效边界,aria 仍显示有效值、下次拖拽 / 步进前 alignRatio 重锚定,reference 未承诺存储 ratio 语义;模板 props.resizeLabel 与其它未加前缀的绑定风格不一,无规则依据不动。scope 新增 foundation/utils/breakpoints.ts:enabledFrom 的取值域由 GeistBreakpoint 派生(与 09-18 对 SplitPane 的同一裁定)。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:DocsShellReference.vue, endpoint-reference.vue, webhook-reference.vue):scope 命中 `DocsShellReference.vue` / `endpoint-reference.vue` / `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": []
     },
     "api-docs-site-search": {
@@ -905,13 +906,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -926,9 +927,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "65bc1e9610a0282609e35d680b25fb96a56ae76dd517a9011c3bc8f6efebbc68"
+        "scopeDigest": "3ea1771b365301dc9798fe334b00fbb7e4e9abb133f58f4a2f9514d7bb4cce07"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:webhook-reference.vue, WebhookProtocol.vue, webhook-protocol.spec.ts):重试节奏展开 `UButton` 补 `touch-manipulation`,`webhook-protocol.spec` 在首个 toggleButton 用例内断言;三段协议事实、fact format、总结句真源未触及;scope 命中 `webhook-reference.vue`:gallery 参考页手写 h1 identity 由 `truncate` 改 `wrap-anywhere`(页面私有 recipe,与 kit OperationHeader 一致),该页对本组件的调用参数与用法未变;复核无回归。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -941,13 +942,13 @@
     },
     "api-docs-sidebar-nav": {
       "round": 4,
-      "lastAuditedAt": "2026-09-19T00:24:05.456Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "52e7f1dfcf6c6f25057417606e85bdccf90772d2",
-        "headSha": "a1ad0cc12500a80ae8600455fdb358bab20541b9",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "8cd0a838beebbd223a10f5ecb2f981a225052b696c75458ae39c0365afe92ec8",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -962,7 +963,7 @@
           "tests/component/sidebar-nav.spec.ts",
           "tests/component/sidebar-scenario-tags.spec.ts"
         ],
-        "scopeDigest": "64a63b178db4604eafc9ddd4efda762b54c2f87cb2b40beda29e3a4cd81cd2b8",
+        "scopeDigest": "046c99c523f9f804200de03117c71b9a0262e2ec37cfa0a01ec7d3f0613aeaaf",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -976,7 +977,7 @@
           }
         ]
       },
-      "notes": "Round 4 全量复审(计划项)。落地修复:SidebarNav.vue 的全部 tap 目标纳入 touch-manipulation 触控契约——分区 header <button>(base 帧 L505,09-11 报告线索)、搜索清除 UButton、行 ULink 覆盖层;依据 web-design-guidelines「touch-action: manipulation(prevents double-tap zoom delay)」与分发面惯例(FieldItem ×3 / FieldValueStructure / SchemaComposition / OperationTarget / AnnotationPopover / 本 item 内 SidebarScenarioTags +N 触发器都带该 class,其中 FieldItem ×3 / SchemaComposition / OperationTarget 5 处被 classes() 断言锁定;FieldItem 的 ? 记号按钮触屏不开 tooltip,不计)。sidebar-nav.spec.ts 新增独立用例断言三类目标。props / emits / slots / 行为契约未变;reference 不逐 class 记录触控细节(与 09-11 同裁定)。两轮 caveman 复审(opus):第 1 轮把「一次性 tap 不在契约内」的自相矛盾理由改为一并补齐。其余四维度复核无 finding:kit 归属(ADR-005)与 registry 拓扑(5 项依赖)与源码引用一致;width resize 已收敛 useSplitPane(#105,f-12d73e8bc49d resolved 原样保留);active 单源 / # 不自推断 / IME Esc / 搜索三维匹配 / 测量式场景标签均有测试;全部语义 token,尺寸走系统 scale(w-14 / min-w-16 / max-w-28)。观察不立 finding:/ 快捷键用手写 window keydown 而非 defineShortcuts(SiteSearch ⌘K 用后者)——typing / IME 守卫与 searchShortcut prop 语义已由测试钉住,换实现会改行为、无规则依据。本次新增 dependency evidence:板块 header <button> 的 aria-expanded / aria-controls 来自 @nuxt/ui UCollapsible 把 #default slot 包进 reka-ui CollapsibleTrigger as-child(sidebar-nav.md L112 契约),此前未绑定。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:sidebar-scenario-tags.spec.ts):scope 命中 `sidebar-scenario-tags.spec.ts`:为 `+N` 触发器补 `classes()` 断言,闭合 09-19 遗留(当时因溢出 rig 复杂未补);SidebarNav / SidebarScenarioTags 源码未变,既有 dependency evidence 原样重绑;复核无回归。",
       "findings": [
         {
           "id": "f-12d73e8bc49d",
@@ -989,13 +990,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-18T02:05:46.187Z",
+      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "8ea0b313c89f64d017dd79f08427d54a380909f9",
-        "headSha": "a8c60fa726d9ac7abcace7bf1c0648e90d84ade3",
+        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
+        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -1005,9 +1006,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "f979434bd70819be75a78acf989f2d3a3aa747fb46984b349ec2706b8b1e4b1c"
+        "scopeDigest": "95791605cb532c5144425fd60f62522c4f48250aad40c4e1255dced43e0932f4"
       },
-      "notes": "`?` 常态色升档的复审：scope 内变动仅 `references/kits/api-docs/index.md`（共享 reference 的 presence 配色条把 `?` 的色阶由 text-dimmed 改为 text-toned 并说明对比度依据）；本组件代码与契约未变，复核无回归。",
+      "notes": "touch 契约 + gallery identity 换行复审(命中:RelationSourcePath.vue, relation-source-path.spec.ts):根 `<component :is>`(`to` → ULink / `field` → `<a>` 两态)补 `touch-manipulation`——第 1 轮复审指出字面标签扫描漏掉 `<component :is>`;`relation-source-path.spec` 在两种链接态用例内断言;三态降级与单次 spoken path 契约未触及;复核无回归。",
       "findings": []
     }
   }
