@@ -168,12 +168,50 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       }
       if (bands.some(band => overlapsText(clipped(band, node, false)))) fail(`unmodeled overlapping border paint on ${node.tagName}`)
     }
+    function boundedPaintGeometry(node: Element, css: CSSStyleDeclaration) {
+      const shape = css.getPropertyValue('border-shape')
+      if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
+        || !(node instanceof HTMLElement) || node.getClientRects().length !== 1
+        || (shape && shape !== 'none') || transformed(node)) return null
+      const axes = { x: true, y: true }
+      for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const value = getComputedStyle(ancestor).translate
+        if (value === 'none') continue
+        const parts = value.split(' ')
+        if (parts.length > 3 || parts.some(v => !/^-?\d+(?:\.\d+)?(?:px|%)$/.test(v))) return null
+        const [x, y = 0, z = 0] = parts.map(parseFloat)
+        if (z !== 0) return null
+        // Serialization cannot prove an integer translation is exact. Discard
+        // every moved axis instead of assuming pixel-aligned resampling.
+        if (x !== 0) axes.x = false
+        if (y !== 0) axes.y = false
+      }
+      return axes.x || axes.y ? axes : null
+    }
+    function onProvenAxes(bounds: Bounds, axes: { x: boolean, y: boolean }): Bounds {
+      return { left: axes.x ? bounds.left : -Infinity, right: axes.x ? bounds.right : Infinity,
+        top: axes.y ? bounds.top : -Infinity, bottom: axes.y ? bounds.bottom : Infinity }
+    }
+    function recordBounds(bounds: Bounds) {
+      // JSON cannot represent Infinity; keep unknown axes explicit in evidence.
+      return Object.fromEntries(Object.entries(bounds).map(([key, value]) => [key, Number.isFinite(value) ? value : String(value)]))
+    }
     function supportedCompositePaint(node: Element, css: CSSStyleDeclaration) {
       // visibility:hidden does not hide a descendant that restores visibility.
       // A filter on that ancestor still applies to the descendant's paint.
       if (css.filter === 'none' && css.backdropFilter === 'none') return
       const clip = clipped({ left: -Infinity, right: Infinity, top: -Infinity, bottom: Infinity }, node, false)
-      if (overlapsText(clip)) fail(`unmodeled expanded filter paint on ${node.tagName}`)
+      if (!overlapsText(clip)) return
+      if (css.filter !== 'none') fail(`unmodeled expanded filter paint on ${node.tagName}`)
+      // backdrop-filter's output is clipped to its border box, unlike filter's
+      // projection of descendant paint. Keep the two effects independent.
+      const axes = boundedPaintGeometry(node, css)
+      if (!axes) fail(`unmodeled backdrop geometry on ${node.tagName}`)
+      const box = node.getBoundingClientRect()
+      const bounds = onProvenAxes({ left: Math.floor(box.left - 1), right: Math.ceil(box.right + 1),
+        top: Math.floor(box.top - 1), bottom: Math.ceil(box.bottom + 1) }, axes!)
+      if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping backdrop paint on ${node.tagName}`)
+      excludedPaint.push({ node: node.tagName, reason: 'outside backdrop-filter border-box clip', bounds: recordBounds(bounds) })
     }
     function supportedOverflowPaint(node: Element, css: CSSStyleDeclaration) {
       // These effects can escape a zero-size or distant border box. Check them
@@ -193,11 +231,8 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         // This is the verified Blink ink-overflow bound, not a guessed Gaussian
         // cutoff. A browser upgrade or a different coordinate mapping requires
         // new proof; see README for the exact revision and source chain.
-        if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
-          || node.getClientRects().length !== 1 || transformed(node)) fail(`unmodeled outer shadow paint on ${node.tagName}`)
-        for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
-          if (getComputedStyle(ancestor).translate !== 'none') fail('unmodeled translated shadow paint')
-        }
+        const axes = boundedPaintGeometry(node, css)
+        if (!axes) fail(`unmodeled outer shadow paint on ${node.tagName}`)
         const box = node.getBoundingClientRect()
         // Computed CSS uses %.6g. Expand by one full last-place unit before
         // reproducing Blink's float sigma=blur/2 and ceil(3*sigma) outset.
@@ -208,12 +243,12 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         const xError = unit(shadow.x), yError = unit(shadow.y)
         // The extra pixel encloses caster snapping and raster rounding at DPR1.
         // This enlarges the possible paint area; it never ignores an overlap.
-        const bounds = { left: Math.floor(box.left + shadow.x - xError - extent - 1),
+        const bounds = onProvenAxes({ left: Math.floor(box.left + shadow.x - xError - extent - 1),
           right: Math.ceil(box.right + shadow.x + xError + extent + 1),
           top: Math.floor(box.top + shadow.y - yError - extent - 1),
-          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + 1) }
+          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + 1) }, axes!)
         if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping outer shadow paint on ${node.tagName}`)
-        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, bounds })
+        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, bounds: recordBounds(bounds) })
       }
     }
     function supported(node: Element, computed: CSSStyleDeclaration) {
