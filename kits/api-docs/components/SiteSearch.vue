@@ -292,11 +292,15 @@ const paletteInput = computed(() => ({
     :title="props.modalTitle"
     :content="{ onCloseAutoFocus }"
   >
+    <!-- `touch-manipulation` is the kit's tap-target touch contract (SidebarNav /
+         FieldItem / SchemaComposition / OperationTarget). The trigger is a
+         high-frequency tap target that collapses to an icon at `max-sm`, so a
+         quick open → Esc → tap must reopen, never double-tap-zoom. -->
     <UButton
       color="neutral"
       variant="outline"
       size="sm"
-      class="text-muted max-sm:px-1.5"
+      class="touch-manipulation text-muted max-sm:px-1.5"
       :aria-label="props.ariaLabel ?? props.triggerLabel"
     >
       <UIcon name="i-lucide-search" class="size-4 shrink-0" />
