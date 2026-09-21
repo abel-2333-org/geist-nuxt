@@ -42,9 +42,13 @@ async function describe(target: Locator, tooltip: Locator) {
     }),
     tooltip: await tooltip.evaluate((node) => {
       const css = getComputedStyle(node)
+      const popper = node.closest('[data-reka-popper-content-wrapper]') as HTMLElement | null
+      const popperStyle = popper && getComputedStyle(popper)
       return {
         rect: node.getBoundingClientRect().toJSON(), state: node.getAttribute('data-state'), side: node.getAttribute('data-side'),
-        boxShadow: css.boxShadow, color: css.color, opacity: css.opacity, transform: css.transform,
+        boxShadow: css.boxShadow, outline: { style: css.outlineStyle, width: css.outlineWidth, offset: css.outlineOffset, color: css.outlineColor }, color: css.color, opacity: css.opacity, transform: css.transform,
+        translate: css.translate, scale: css.scale, rotate: css.rotate, inlineStyle: node.getAttribute('style'),
+        popper: popper && popperStyle ? { rect: popper.getBoundingClientRect().toJSON(), translate: popperStyle.translate, transform: popperStyle.transform, scale: popperStyle.scale, rotate: popperStyle.rotate, inlineStyle: popper.getAttribute('style') } : null,
       }
     }),
   }
@@ -152,6 +156,80 @@ async function glyphScenario(theme: Theme) {
       else style.removeProperty('box-shadow')
     }, shifted.original)
     await check('tooltip-shadow-restored')
+
+    const originalOutline = await tooltip.evaluate((node, shade) => {
+      const style = (node as HTMLElement).style
+      const original = { outline: style.getPropertyValue('outline'), priority: style.getPropertyPriority('outline') }
+      style.setProperty('outline', `2px solid ${shade}`, 'important')
+      return original
+    }, normal.rawForeground)
+    const distantOutline = await check('ordinary-outline-outside-glyph')
+    expect(distantOutline.excludedPaint.some((paint: any) => paint.reason === 'outside verified Chromium ordinary outline bounds')).toBe(true)
+    await tooltip.evaluate((node, shade) => (node as HTMLElement).style.setProperty('outline', `28px solid ${shade}`, 'important'), normal.rawForeground)
+    await reject('ordinary-outline-over-glyph', { normalBounds: normal.textBounds })
+    await tooltip.evaluate((node, original) => {
+      const style = (node as HTMLElement).style
+      if (original.outline) style.setProperty('outline', original.outline, original.priority)
+      else style.removeProperty('outline')
+    }, originalOutline)
+    await check('ordinary-outline-restored')
+
+    // Keep the real trigger and its glyph fixed. Two independent fractional
+    // translations move the Tooltip, including its ordinary shadows, away.
+    const originalTranslation = await tooltip.evaluate((node) => {
+      const content = node as HTMLElement
+      const popper = node.closest('[data-reka-popper-content-wrapper]') as HTMLElement | null
+      if (!popper || popper === content) throw new Error('Tooltip must have its real separate Popper wrapper')
+      const original = {
+        content: { value: content.style.getPropertyValue('translate'), priority: content.style.getPropertyPriority('translate') },
+        popper: { value: popper.style.getPropertyValue('translate'), priority: popper.style.getPropertyPriority('translate') },
+        shadow: { value: content.style.getPropertyValue('box-shadow'), priority: content.style.getPropertyPriority('box-shadow') },
+      }
+      content.style.setProperty('translate', '480.25px 0.375px', 'important')
+      popper.style.setProperty('translate', '64.375px 0.25px', 'important')
+      return original
+    })
+    const translated = await describe(target, tooltip)
+    expect(translated.tooltip.translate).toBe('480.25px 0.375px')
+    expect(translated.tooltip.popper!.translate).toBe('64.375px 0.25px')
+    expect(translated.target.range, 'moving the portal must not move the original glyph').toEqual(original.target.range)
+    expect(translated.tooltip.rect.left, 'the translated Tooltip is truly separated horizontally').toBeGreaterThan(normal.textBounds.used.right)
+    const separatedTranslation = await check('nested-fractional-translate-separated')
+    expect(separatedTranslation.textBounds.used).toEqual(normal.textBounds.used)
+
+    const projected = await tooltip.evaluate((node, { glyph, shade }) => {
+      const rect = node.getBoundingClientRect()
+      const x = (glyph.left + glyph.right - rect.left - rect.right) / 2
+      const y = (glyph.top + glyph.bottom - rect.top - rect.bottom) / 2
+      ;(node as HTMLElement).style.setProperty('box-shadow', `${x}px ${y}px 0px 0px ${shade}`, 'important')
+      const boxShadow = getComputedStyle(node).boxShadow
+      const lengths = Array.from(boxShadow.matchAll(/(-?[\d.]+)px/g), match => Number(match[1]))
+      if (lengths.length !== 4) throw new Error('Controlled translated Tooltip shadow must expose four lengths')
+      // Record the browser's computed offsets, not the requested CSS string.
+      return { boxShadow, lengths, caster: rect.toJSON(), bounds: { left: rect.left + lengths[0]!, right: rect.right + lengths[0]!, top: rect.top + lengths[1]!, bottom: rect.bottom + lengths[1]! } }
+    }, { glyph: normal.textBounds.used, shade: normal.rawForeground })
+    expect(projected.lengths.slice(2)).toEqual([0, 0])
+    expect(projected.caster.left).toBeGreaterThan(normal.textBounds.used.right)
+    expect(projected.bounds.left).toBeLessThanOrEqual(normal.textBounds.used.left)
+    expect(projected.bounds.right).toBeGreaterThanOrEqual(normal.textBounds.used.right)
+    expect(projected.bounds.top).toBeLessThanOrEqual(normal.textBounds.used.top)
+    expect(projected.bounds.bottom).toBeGreaterThanOrEqual(normal.textBounds.used.bottom)
+    await reject('nested-fractional-translate-shadow-over-glyph', { projected, normalBounds: normal.textBounds })
+    await tooltip.evaluate((node, original) => {
+      const style = (node as HTMLElement).style
+      if (original.value) style.setProperty('box-shadow', original.value, original.priority)
+      else style.removeProperty('box-shadow')
+    }, originalTranslation.shadow)
+    await check('nested-fractional-translate-shadow-restored')
+    await tooltip.evaluate((node, original) => {
+      const popper = node.closest('[data-reka-popper-content-wrapper]') as HTMLElement
+      for (const [element, saved] of [[node as HTMLElement, original.content], [popper, original.popper]] as const) {
+        if (saved.value) element.style.setProperty('translate', saved.value, saved.priority)
+        else element.style.removeProperty('translate')
+      }
+    }, originalTranslation)
+    const translationRestored = await check('individual-translate-restored')
+    expect(translationRestored.textBounds.used).toEqual(normal.textBounds.used)
 
     const originalFeature = await target.evaluate((node) => {
       const style = (node as HTMLElement).style

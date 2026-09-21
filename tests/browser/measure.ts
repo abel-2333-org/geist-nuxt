@@ -159,7 +159,8 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         if (!context) return null
         const language = target.closest('[lang]')?.getAttribute('lang') || ''
         const localized = context as CanvasRenderingContext2D & { lang?: string }
-        if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(language) || typeof localized.lang !== 'string') return null
+        if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(language) || typeof localized.lang !== 'string'
+          || host.getPropertyValue('-webkit-locale') !== `\"${language}\"`) return null
         localized.lang = language
         if (localized.lang !== language) return null
         context.direction = 'ltr'
@@ -264,18 +265,46 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1
         || !(node instanceof HTMLElement) || node.getClientRects().length !== 1
         || (shape && shape !== 'none') || transformed(node, true, true)) return null
-      const axes = { x: true, y: true }
+      const axes = { x: true, y: true, translationOutset: { x: 0, y: 0 } }
+      const ancestors: Element[] = []
       for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+        ancestors.push(ancestor)
         const value = getComputedStyle(ancestor).translate
         if (value === 'none') continue
         const parts = value.split(' ')
         if (parts.length > 3 || parts.some(v => !/^-?\d+(?:\.\d+)?(?:px|%)$/.test(v))) return null
         const [x, y = 0, z = 0] = parts.map(parseFloat)
         if (z !== 0) return null
-        // Serialization cannot prove an integer translation is exact. Discard
-        // every moved axis instead of assuming pixel-aligned resampling.
+        // Serialization cannot prove an integer translation is exact. Keep
+        // moved axes unknown until the bounded compositor path below proves them.
         if (x !== 0) axes.x = false
         if (y !== 0) axes.y = false
+      }
+      if (!axes.x || !axes.y) {
+        // A DOMRect already contains the actual translation. Do not mistake
+        // rounded CSS strings for exact pixel alignment. Instead, this limited
+        // static path budgets every ancestor's possible ordinary render surface:
+        // 1px enclosure/AA + 1px bilinear sampling, plus the final quad's 1px.
+        const ordinarySurfaces = ancestors.every(ancestor => {
+          if (!(ancestor instanceof HTMLElement) || ancestor.getAnimations().length) return false
+          const current = getComputedStyle(ancestor), box = ancestor.getBoundingClientRect()
+          if ([box.left, box.right, box.top, box.bottom].some(value => !Number.isFinite(value) || Math.abs(value) >= 2 ** 18)
+            || current.filter !== 'none' || current.backdropFilter !== 'none' || current.maskImage !== 'none'
+            || current.clipPath !== 'none' || current.clip !== 'auto' || current.willChange !== 'auto'
+            || current.contain !== 'none' || current.containerType !== 'normal'
+            || Number(current.opacity) !== 1 || current.mixBlendMode !== 'normal'
+            || current.overflowX !== 'visible' || current.overflowY !== 'visible') return false
+          const transitionName = current.getPropertyValue('view-transition-name')
+          return transitionName === 'none' || (ancestor === document.documentElement && transitionName === 'root')
+        })
+        let transition = true
+        try { transition = document.documentElement.matches(':active-view-transition') }
+        catch { /* Unknown view-transition support keeps the axis unproved. */ }
+        if (ordinarySurfaces && !transition) {
+          const outset = 2 * ancestors.length + 1
+          axes.translationOutset = { x: axes.x ? 0 : outset, y: axes.y ? 0 : outset }
+          axes.x = true; axes.y = true
+        }
       }
       return axes.x || axes.y ? axes : null
     }
@@ -334,7 +363,27 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       const borderShape = css.getPropertyValue('border-shape')
       if (borderShape && borderShape !== 'none') fail(`unmodeled border shape paint on ${node.tagName}`)
       if (css.borderImageSource !== 'none') fail(`unmodeled expanded border image paint on ${node.tagName}`)
-      if (css.outlineStyle !== 'none' && parseFloat(css.outlineWidth) > 0 && color(css.outlineColor)[3]! > 0) fail(`unmodeled outline paint on ${node.tagName}`)
+      if (css.outlineStyle !== 'none' && parseFloat(css.outlineWidth) > 0 && color(css.outlineColor)[3]! > 0) {
+        const axes = boundedPaintGeometry(node, css)
+        // This Blink revision bounds a non-auto outline of one ordinary box
+        // by that box. Auto outlines may include descendant ink; inline or
+        // fragmented outlines also need different geometry, so remain unknown.
+        if (!axes || css.outlineStyle === 'auto'
+          || !['block', 'inline-block', 'flow-root', 'flex', 'inline-flex', 'grid', 'inline-grid'].includes(css.display)
+          || !/^-?[\d.]+px$/.test(css.outlineWidth) || !/^-?[\d.]+px$/.test(css.outlineOffset)) fail(`unmodeled outline paint on ${node.tagName}`)
+        const width = parseFloat(css.outlineWidth), offset = parseFloat(css.outlineOffset)
+        const unit = (value: number) => value === 0 ? 0 : 10 ** (Number(Math.abs(value).toExponential().split('e')[1]) - 5)
+        // Negative offsets are clamped during painting; never use them to
+        // reduce this outer bound. Keep serialization and caster-snap margins.
+        const extent = width + unit(width) + Math.max(0, offset + unit(offset))
+        const snapX = casterSnapMargin(node, 'x'), snapY = casterSnapMargin(node, 'y')
+        const box = node.getBoundingClientRect()
+        const bounds = onProvenAxes({ left: Math.floor(box.left - extent - snapX - axes!.translationOutset.x), right: Math.ceil(box.right + extent + snapX + axes!.translationOutset.x),
+          top: Math.floor(box.top - extent - snapY - axes!.translationOutset.y), bottom: Math.ceil(box.bottom + extent + snapY + axes!.translationOutset.y) }, axes!)
+        if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping outline paint on ${node.tagName}`)
+        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium ordinary outline bounds',
+          outline: { style: css.outlineStyle, width, offset, color: css.outlineColor }, snapMargin: { x: snapX, y: snapY }, translationOutset: axes!.translationOutset, bounds: recordBounds(bounds) })
+      }
       for (const shadow of shadows(css.boxShadow)) {
         if (shadow.inset || shadow.alpha === 0) continue
         // An outer shadow is clipped out of its caster's border shape. Reuse
@@ -356,12 +405,12 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         // Retain a full pixel for uncertain caster snapping. Only explicitly
         // aligned axes may omit it; final raster bounds still round outward.
         const snapX = casterSnapMargin(node, 'x'), snapY = casterSnapMargin(node, 'y')
-        const bounds = onProvenAxes({ left: Math.floor(box.left + shadow.x - xError - extent - snapX),
-          right: Math.ceil(box.right + shadow.x + xError + extent + snapX),
-          top: Math.floor(box.top + shadow.y - yError - extent - snapY),
-          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + snapY) }, axes!)
+        const bounds = onProvenAxes({ left: Math.floor(box.left + shadow.x - xError - extent - snapX - axes!.translationOutset.x),
+          right: Math.ceil(box.right + shadow.x + xError + extent + snapX + axes!.translationOutset.x),
+          top: Math.floor(box.top + shadow.y - yError - extent - snapY - axes!.translationOutset.y),
+          bottom: Math.ceil(box.bottom + shadow.y + yError + extent + snapY + axes!.translationOutset.y) }, axes!)
         if (overlapsText(clipped(bounds, node, false))) fail(`unmodeled overlapping outer shadow paint on ${node.tagName}`)
-        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, snapMargin: { x: snapX, y: snapY }, bounds: recordBounds(bounds) })
+        excludedPaint.push({ node: node.tagName, reason: 'outside verified Chromium box-shadow bounds', shadow, snapMargin: { x: snapX, y: snapY }, translationOutset: axes!.translationOutset, bounds: recordBounds(bounds) })
       }
     }
     function supported(node: Element, computed: CSSStyleDeclaration) {
