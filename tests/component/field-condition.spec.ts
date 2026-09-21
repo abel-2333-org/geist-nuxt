@@ -47,6 +47,11 @@ describe('conditionEntries', () => {
       expect(conditionEntries(condition)).toEqual([])
     }
   })
+
+  it('skips a smuggled non-string entry instead of throwing from a render', () => {
+    const smuggled = [null, 0, 'Absent for drafts.', undefined] as unknown as string[]
+    expect(conditionEntries(smuggled)).toEqual(['Absent for drafts.'])
+  })
 })
 
 describe('fieldRequiredState with list conditions', () => {
@@ -166,6 +171,13 @@ describe('FieldItem request condition list', () => {
 })
 
 describe('FieldItem presence condition list', () => {
+  it('renders a one-entry list exactly like the plain string', async () => {
+    const asString = await mountField({ name: 'note', type: 'string', presence: { condition: 'Absent for drafts.' } })
+    const asList = await mountField({ name: 'note', type: 'string', presence: { condition: ['Absent for drafts.'] } })
+    expect(asList.get('[data-field-presence-condition]').html()).toBe(asString.get('[data-field-presence-condition]').html())
+    expect(asList.find('[data-condition-list]').exists()).toBe(false)
+  })
+
   it('renders several entries in the one neutral presence rule and keeps the notation', async () => {
     const wrapper = await mountField({
       name: 'receiptUrl',

@@ -36,8 +36,10 @@ export type ConditionText = string | readonly string[]
 
 /** `ConditionText` after `conditionEntries()`: blank entries dropped, order
  *  kept, empty when nothing was stated. Consumers read THIS, never the raw
- *  prop, so "is there a condition?" has exactly one answer everywhere. */
-export type ConditionEntries = readonly string[]
+ *  prop, so "is there a condition?" has exactly one answer everywhere.
+ *  (Named apart from the internal `ConditionEntries.vue` that renders it, so
+ *  the two never shadow each other in an owner that imports the component.) */
+export type ConditionEntryList = readonly string[]
 
 /**
  * The only normalisation of condition prose. Every truthiness check on a
@@ -46,9 +48,12 @@ export type ConditionEntries = readonly string[]
  * never leak a phantom `Conditional` tag or an empty amber rule. A lone
  * sentence and a one-entry list are the same input.
  */
-export function conditionEntries(condition: ConditionText | undefined): ConditionEntries {
-  const raw = typeof condition === 'string' ? [condition] : condition ?? []
-  return raw.map(entry => entry.trim()).filter(Boolean)
+export function conditionEntries(condition: ConditionText | undefined): ConditionEntryList {
+  const raw = typeof condition === 'string' ? [condition] : Array.isArray(condition) ? condition : []
+  // Fail-soft for a JavaScript caller that smuggles in a non-string entry,
+  // like `describeValuePresence` strips a smuggled `optional`: skip it rather
+  // than throw from inside a render.
+  return raw.filter((entry): entry is string => typeof entry === 'string').map(entry => entry.trim()).filter(Boolean)
 }
 
 /**
@@ -469,7 +474,7 @@ export interface PresenceNotation {
    *  literal empty form. Empty when nothing was stated. */
   unionTail: string[]
   /** The author's condition prose, normalised; empty when none was stated. */
-  condition: ConditionEntries
+  condition: ConditionEntryList
 }
 
 export function describeFieldPresence(presence: FieldPresence | undefined): PresenceNotation {

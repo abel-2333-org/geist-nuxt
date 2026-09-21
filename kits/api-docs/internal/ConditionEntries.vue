@@ -12,21 +12,22 @@
 // grey on both axes because the border already carries the colour, and a
 // second amber object per entry would break the fill ladder (tag → rule →
 // callout → badge) the field band is graded by.
-import type { ConditionEntries } from '../utils/field'
+import type { ConditionEntryList } from '../utils/field'
 
 defineProps<{
-  /** Already normalised by `conditionEntries()`; the owner renders nothing when empty. */
-  entries: ConditionEntries
+  /** Already normalised by `conditionEntries()`. The owner renders nothing
+   *  when empty; this file still guards it (no empty `<ul>` for a misuse). */
+  entries: ConditionEntryList
 }>()
 </script>
 
 <template>
   <InlineMarkdown v-if="entries.length === 1" :text="entries[0]!" />
   <ul
-    v-else
+    v-else-if="entries.length > 1"
     role="list"
     data-condition-list
-    class="flex list-disc flex-col gap-1 ps-4 marker:text-muted"
+    class="list-disc space-y-1 ps-4 marker:text-muted"
   >
     <li v-for="(entry, i) in entries" :key="i" class="wrap-anywhere min-w-0 ps-0.5">
       <InlineMarkdown :text="entry" />

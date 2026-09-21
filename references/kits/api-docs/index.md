@@ -348,7 +348,7 @@ await copyLink(path, {
 - `kits/api-docs/components/{HttpMethodBadge,WebhookBadge,LifecycleBadge,LifecycleNotice}.vue` + `kits/api-docs/utils/{method,lifecycle}-preset.ts`
 - `kits/api-docs/components/{OperationHeader,OperationTarget,CodeRail}.vue`
 - `kits/api-docs/components/WebhookProtocol.vue` + `kits/api-docs/utils/webhook-protocol.ts`
-- `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition / 值结构显示模型,kit auto-import）+ `kits/api-docs/internal/{FieldValueStructure,FieldValueRequirements}.vue`（FieldItem 的值结构渲染，随 `api-docs-field-item` 分发、不供消费者直接使用）
+- `kits/api-docs/components/{EnumTable,FieldGroup,FieldItem,SchemaComposition,SidebarNav,SiteSearch}.vue` + `kits/api-docs/utils/{enum,field}.ts`（字段 / composition / 值结构显示模型,kit auto-import）+ `kits/api-docs/internal/{FieldValueStructure,FieldValueRequirements,ConditionEntries}.vue`（FieldItem 的值结构渲染与条件 rule 的条目渲染，随 `api-docs-field-item` 分发、不供消费者直接使用）
 - `kits/api-docs/components/FieldAnnotation.vue` + `kits/api-docs/composables/useFieldSource.ts`（Annotation 家族字段形态；壳复用 foundation `AnnotationPopover`）
 - `kits/api-docs/components/RelationSourcePath.vue`（已解析 relation source hierarchy；同页导航复用 `useFieldAnchor`）
 - `kits/api-docs/composables/{useCodeWrap,useExampleScenarioSelection,useFieldAnchor}.ts`
