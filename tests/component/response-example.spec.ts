@@ -294,6 +294,7 @@ describe('ResponseExample scenario selection', () => {
     const statusSelect = selectByIcon(wrapper, 'i-lucide-activity')
     expect(statusSelect?.text()).toContain('200')
     expect(wrapper.get('[data-response-compact-trigger]').text()).toContain('200')
+    expect(wrapper.get('[data-response-compact-trigger]').classes()).toContain('touch-manipulation')
 
     statusSelect!.vm.$emit('update:modelValue', 201)
     await wrapper.vm.$nextTick()
@@ -541,5 +542,36 @@ describe('ResponseExample body selection', () => {
 
     expect(liveRegion.text()).toContain('No response body')
     expect(liveRegion.text()).toContain('Intentionally empty.')
+  })
+})
+
+describe('ResponseExample touch contract', () => {
+  it('opts the file download link into touch-manipulation', async () => {
+    // Kit tap-target touch contract (references/foundations/focus-a11y.md):
+    // the download UButton renders as a real <a download>, and the class must
+    // reach that root the same way it reaches the compact trigger.
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'file',
+          label: 'File',
+          statuses: [{
+            status: 200,
+            statusText: 'OK',
+            bodies: [{
+              id: 'pdf',
+              kind: 'file' as const,
+              mediaType: 'application/pdf',
+              filename: 'invoice.pdf',
+              downloadUrl: '/invoice.pdf',
+            }],
+          }],
+        }],
+      },
+    })
+
+    const link = wrapper.get('a[download]')
+    expect(link.attributes('href')).toBe('/invoice.pdf')
+    expect(link.classes()).toContain('touch-manipulation')
   })
 })

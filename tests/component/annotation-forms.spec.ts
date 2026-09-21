@@ -54,6 +54,7 @@ describe('TermAnnotation', () => {
     await open(wrapper)
     expect(panel()!.textContent).toContain('Counts requests in a rolling interval.')
     expect(panel()!.querySelector('a')?.getAttribute('href')).toBe('/guides/rate-limits')
+    expect(panel()!.querySelector('a')?.classList.contains('touch-manipulation')).toBe(true)
   })
 
   it('degrades an unknown id to slot text without an interactive trigger', async () => {
@@ -81,6 +82,7 @@ describe('DocAnnotation', () => {
 
     await open(wrapper)
     await flushPromises()
+    expect(panel()!.querySelector('a')?.classList.contains('touch-manipulation')).toBe(true)
     const paragraphs = Array.from(panel()!.querySelectorAll('p'))
     const titleElement = paragraphs.find(element => element.textContent === title)
     const descriptionElement = paragraphs.find(element => element.textContent === description)
@@ -243,6 +245,7 @@ describe('FieldAnnotation', () => {
     const action = Array.from(panel()!.querySelectorAll('button'))
       .find(button => button.textContent?.includes('View field details'))
     expect(action).toBeDefined()
+    expect(action!.classList.contains('touch-manipulation')).toBe(true)
     action!.click()
 
     await vi.waitFor(() => {

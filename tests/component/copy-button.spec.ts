@@ -20,6 +20,20 @@ describe('CopyButton attrs contract', () => {
 
     expect(wrapper.find('.layout-owner').exists()).toBe(false)
   })
+
+  it.each([false, true])('opts the button into touch-manipulation when tooltip=%s', async (tooltip) => {
+    // Foundation tap-target touch contract (references/foundations/focus-a11y.md).
+    const wrapper = await mountSuspended(CopyButton, {
+      props: { value: 'value', tooltip },
+      global: {
+        stubs: {
+          UTooltip: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+
+    expect(wrapper.get('button').classes()).toContain('touch-manipulation')
+  })
 })
 
 describe('copy result announcements', () => {

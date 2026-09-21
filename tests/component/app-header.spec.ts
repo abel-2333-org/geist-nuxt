@@ -22,6 +22,12 @@ afterEach(() => {
 })
 
 describe('AppHeader brand contract', () => {
+  it('opts the brand link into touch-manipulation', () => {
+    // Foundation tap-target touch contract (references/foundations/focus-a11y.md).
+    wrapper = mount(AppHeader, { global })
+    expect(wrapper.get('a').classes()).toContain('touch-manipulation')
+  })
+
   it('renders a neutral fallback by default', () => {
     wrapper = mount(AppHeader, { global })
 

@@ -347,6 +347,7 @@ describe('AnnotationPopover loading & error chrome', () => {
       b.textContent?.includes('Retry preview'),
     )
     expect(retry).toBeDefined()
+    expect(retry!.classList.contains('touch-manipulation')).toBe(true)
     retry!.click()
     await nextTick()
     expect(w.emitted('retry')).toHaveLength(1)

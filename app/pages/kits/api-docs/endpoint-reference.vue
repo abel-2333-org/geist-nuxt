@@ -576,7 +576,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-4 border-b border-default pb-8">
             <div class="flex flex-wrap items-center gap-2.5">
               <HttpMethodBadge :method="endpoint.method" />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">{{ endpoint.path }}</code>
             </div>
             <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
               {{ endpoint.summary }}
@@ -752,7 +752,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
               <HttpMethodBadge method="GET" />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/deployments/{id}</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">/v1/deployments/{id}</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">获取部署</h3>
             <OperationTarget
@@ -787,7 +787,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
               <HttpMethodBadge method="GET" />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">/v1/health</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">/v1/health</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">健康检查</h3>
           </header>

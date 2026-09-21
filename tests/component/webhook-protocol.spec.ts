@@ -100,6 +100,7 @@ describe('WebhookProtocol schedule toggle', () => {
       props: { delivery: delivery({}) },
     })
     const button = toggleButton(wrapper)
+    expect(button.classes()).toContain('touch-manipulation')
     // 8 steps, max 6 → 5 visible + 3 folded；可见文案即可访问名，无 aria-label 分裂。
     expect(button.text()).toBe('Show 3 more')
     expect(button.attributes('aria-label')).toBeUndefined()

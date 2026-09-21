@@ -328,7 +328,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-4 border-b border-default pb-8">
             <div class="flex flex-wrap items-center gap-2.5">
               <WebhookBadge />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">{{ webhook.event }}</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">{{ webhook.event }}</code>
             </div>
             <h1 class="text-2xl font-semibold tracking-tight text-highlighted text-balance sm:text-3xl sm:leading-tight">
               {{ webhook.summary }}
@@ -476,7 +476,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
               <WebhookBadge />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">invoice.finalized</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">invoice.finalized</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">账单已定稿</h3>
           </header>
@@ -507,7 +507,7 @@ onMounted(() => anchor.initFromHash())
           <header class="space-y-3 border-b border-default pb-5">
             <div class="flex flex-wrap items-center gap-2.5">
               <WebhookBadge />
-              <code class="min-w-0 truncate font-mono text-sm text-highlighted">ping.sent</code>
+              <code class="min-w-0 wrap-anywhere font-mono text-sm text-highlighted">ping.sent</code>
             </div>
             <h3 class="text-lg font-semibold tracking-tight text-highlighted">Ping 已发送</h3>
           </header>

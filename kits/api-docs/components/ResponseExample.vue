@@ -541,7 +541,7 @@ const panelAnnouncement = computed(() => {
             color="neutral"
             variant="subtle"
             :aria-label="compactControlAriaLabel"
-            class="min-w-0 max-w-36 @xl/response:hidden"
+            class="min-w-0 max-w-36 touch-manipulation @xl/response:hidden"
             :ui="{ label: 'truncate' }"
           />
 
@@ -644,6 +644,7 @@ const panelAnnouncement = computed(() => {
               color="neutral"
               variant="subtle"
               size="xs"
+              class="touch-manipulation"
               :aria-label="`${t.download} ${panel.filename ?? t.fileTitle}`"
             >
               {{ t.download }}

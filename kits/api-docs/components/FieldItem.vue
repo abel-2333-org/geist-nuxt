@@ -327,7 +327,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             data-field-optional
             :aria-label="t.mayBeOmitted"
             :aria-describedby="undefined"
-            class="cursor-help select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-colors hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
+            class="cursor-help touch-manipulation select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-colors hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
             :class="{ 'line-through': isDeprecated }"
           >?</button></UTooltip></code>
           <!-- When a field carries a decode boundary, the WIRE TYPE is the

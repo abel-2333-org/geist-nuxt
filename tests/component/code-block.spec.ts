@@ -104,6 +104,7 @@ describe('CodeBlock wrap toggle a11y', () => {
       props: { variants: twoLanguages, labels },
     })
     const toggle = wrapper.get('button[aria-pressed]')
+    expect(toggle.classes()).toContain('touch-manipulation')
     // Wrap is shared and persisted; exercise both states without assuming
     // the user's stored preference or coupling to the composable's internals.
     const initial = toggle.attributes('aria-pressed')

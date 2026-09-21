@@ -139,6 +139,8 @@ describe('FieldItem output presence', () => {
     const wrapper = await mountField({ name: 'failureCode', type: 'string', presence: { optional: true } })
     expect(nameText(wrapper)).toBe('failureCode?')
     const mark = identity(wrapper).get('[data-field-optional]')
+    // Kit tap-target touch contract: the marker is a real <button> and joins it.
+    expect(mark.classes()).toContain('touch-manipulation')
     expect(mark.text()).toBe('?')
     // Low visual weight: notation in the grey register, never a badge — but
     // the readable grey: the glyph states a fact, so it must clear WCAG 1.4.3

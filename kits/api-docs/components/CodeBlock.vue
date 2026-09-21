@@ -219,7 +219,7 @@ const wrap = useCodeWrap(props.defaultWrap)
           :color="wrap ? 'primary' : 'neutral'"
           variant="ghost"
           size="xs"
-          class="shrink-0"
+          class="shrink-0 touch-manipulation"
           :aria-label="t.wrap"
           :aria-pressed="wrap"
           @click="() => { wrap = !wrap }"
