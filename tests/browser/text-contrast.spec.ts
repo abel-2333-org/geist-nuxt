@@ -26,6 +26,33 @@ type Theme = 'light' | 'dark'
 type Check = (target: Locator, id: string, owner: string, state?: string, pseudo?: '::placeholder') => Promise<any[]>
 const settle = (page: Page) => page.waitForTimeout(300)
 
+async function optionalTooltipReady(page: Page, trigger: Locator, artifact: string) {
+  // Opening is delayed independently of the pointer action. A fixed delay can
+  // finish before scale-in starts, so measure the actual settled open state.
+  await expect.poll(() => trigger.getAttribute('data-state')).toMatch(/^(delayed|instant)-open$/)
+  const tooltip = page.locator('[data-reka-popper-content-wrapper] [data-slot="content"][data-side="top"]')
+    .filter({ has: page.locator('[data-slot="text"]'), visible: true })
+  await tooltip.waitFor({ state: 'visible' })
+  expect(await tooltip.count(), 'the optional trigger opens one actual Tooltip').toBe(1)
+  const label = await trigger.getAttribute('aria-label')
+  expect(label, 'the optional trigger has its accessible label').toBeTruthy()
+  expect(await tooltip.locator('[data-slot="text"]').textContent()).toBe(label)
+  const describe = () => tooltip.evaluate((node) => {
+    const css = getComputedStyle(node)
+    return {
+      pendingAnimations: node.getAnimations({ subtree: true }).filter(animation => animation.pending || animation.playState === 'running').length,
+      opacity: css.opacity, transform: css.transform,
+    }
+  })
+  await expect.poll(describe, { timeout: 5_000 }).toEqual({ pendingAnimations: 0, opacity: '1', transform: 'none' })
+  expect(await trigger.getAttribute('data-state')).toMatch(/^(delayed|instant)-open$/)
+  await writeFile(resolve(artifacts, `${artifact}-tooltip-ready.json`), JSON.stringify({
+    source, classification: 'Tooltip state readiness; not a contrast measurement', label,
+    triggerState: await trigger.getAttribute('data-state'), tooltipState: await tooltip.getAttribute('data-state'),
+    computed: await describe(),
+  }, null, 2))
+}
+
 async function scenario(theme: Theme, id: string, run: (page: Page, check: Check) => Promise<void>, route = '/__contrast') {
   expect(typeof window).toBe('undefined')
   const page = await createPage(route)
@@ -90,10 +117,10 @@ for (const theme of ['light', 'dark'] as const) {
       await check(page.locator('dt.text-dimmed').filter({ visible: true }), 'Constraint/Since metadata', 'kits/api-docs/components/FieldItem.vue')
       if (name !== 'index') await check(page.locator('p').filter({ hasText: 'name?' }), 'page notation legend', `app/pages/kits/api-docs/${name}.vue`)
       const optional = page.locator('[data-field-optional]').filter({ visible: true }).first()
-      await optional.hover(); await settle(page)
+      await optional.hover(); await optionalTooltipReady(page, optional, `${theme}-gallery-${name}-hover`)
       await check(optional, 'optional notation', 'kits/api-docs/components/FieldItem.vue', 'hover')
       await page.keyboard.press('Escape')
-      await optional.focus(); await settle(page)
+      await optional.focus(); await optionalTooltipReady(page, optional, `${theme}-gallery-${name}-focus`)
       await check(optional, 'optional notation', 'kits/api-docs/components/FieldItem.vue', 'focus')
       await page.keyboard.press('Escape')
       await optional.blur(); await page.mouse.move(0, 0)
