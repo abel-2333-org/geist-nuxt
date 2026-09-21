@@ -7,6 +7,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ElementTypes, parse as parseTemplate } from '@vue/compiler-dom'
 import { parse as parseSfc } from '@vue/compiler-sfc'
+import { checkTextContrastFile } from './check-text-contrast.mjs'
 import {
   applyCopyPlan,
   assertExactSha,
@@ -412,6 +413,7 @@ async function checkLegacyConfigMigration({
     await writeFile(path.join(consumerRoot, 'nuxt.config.ts'), currentEntrypoints.nuxt)
     await writeFile(path.join(consumerRoot, 'app/app.config.ts'), currentEntrypoints.app)
     const currentLock = await checkConsumer({ registry, repoRoot, consumerRoot })
+    await checkTextContrastFile(path.join(consumerRoot, 'app/assets/css/main.css'))
     assertPackageRequirements(foundationManifest, currentLock, 'legacy config migration')
     run('pnpm', ['run', 'typecheck'], consumerRoot)
     run('pnpm', ['run', 'build'], consumerRoot)
@@ -513,6 +515,7 @@ async function runUpgradeSmoke({ baseSha, headSha, headRegistry, dependencyNodeM
       path.join(consumerRoot, 'app/pages/index.vue'),
     )
     const lock = await checkConsumer({ registry: headRegistry, repoRoot, consumerRoot })
+    await checkTextContrastFile(path.join(consumerRoot, 'app/assets/css/main.css'))
     assertPackageRequirements(headManifest, lock, 'consumer upgrade')
 
     run('pnpm', ['run', 'typecheck'], consumerRoot)
@@ -836,6 +839,7 @@ try {
   if (options.target || options.consumer) {
     const consumerRoot = path.resolve(options.target ?? options.consumer)
     const lock = await checkConsumer({ registry, repoRoot, consumerRoot })
+    await checkTextContrastFile(path.join(consumerRoot, 'app/assets/css/main.css'))
     console.log(`Consumer lock valid: ${Object.keys(lock.items).length} items, ${Object.keys(lock.files).length} files`)
   }
   else {
@@ -947,6 +951,7 @@ try {
           const after = await protectedHashes(consumerRoot)
           if (JSON.stringify(before) !== JSON.stringify(after)) throw new Error(`${scenario.label}: copy-in modified a protected consumer file`)
           const lock = await checkConsumer({ registry, repoRoot, consumerRoot })
+          await checkTextContrastFile(path.join(consumerRoot, 'app/assets/css/main.css'))
           assertPackageRequirements(manifest, lock, scenario.label)
 
           const converged = JSON.parse(capture(process.execPath, [...copyArgs, '--json'], repoRoot, copyEnv))

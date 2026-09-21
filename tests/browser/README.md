@@ -1,0 +1,75 @@
+# 文字对比度回归
+
+这些用例验证 #144 的中性文字契约与有限伴随修复。#147 的功能色 F1–F9 仍独立跟踪并阻止 #140 关闭；本套测试不是整页 WCAG 合规声明。
+
+## 构建与执行
+
+```sh
+pnpm install --frozen-lockfile
+pnpm exec playwright-core install --no-shell chromium
+pnpm test:registry
+pnpm typecheck
+pnpm build
+pnpm build:contrast
+pnpm test:browser
+```
+
+`vitest.browser.config.ts` 是独立 Node 配置，不继承 Nuxt runtime 组件配置，不调用 `mountSuspended`。`@nuxt/test-utils/e2e` 启动本地生产 Nitro 和锁定的 Chromium；`build:false` 显式指向 `.output/contrast`。空测试集、缺构建、源码摘要或 HEAD 不匹配、启动失败均阻断。摘要同时覆盖生产源码、fixture、`tests/browser/`、浏览器配置和颜色计算依赖；测量器变化也必须重新构建，不能沿用旧检测器的来源标记。
+
+`build:contrast` 使用根 Nuxt 配置、真实 foundation CSS/config 和 kit 组件，单独添加 `/__contrast` 路由及 fixture 扫描入口。fixture 在 `tests/fixtures/contrast/`，通过 `tests/nuxt/contrast-fixture.ts` 接入已有类型检查；不进入 registry，也不注册到正常 gallery 构建。正常页面的实际回归仍使用三个已有 API Docs 路由。
+
+按 [源码快照与 runtime 边界](../../references/maintenance/sync.md#源码快照与-runtime-边界)，release / v0 完整根源码 snapshot 保留测试和 fixture 源文件，供接收方复现验证；上述隔离约束正常 gallery 的运行时注册与 registry copy-in。测试截图、trace 和日志保存在被排除的构建产物目录或仓库外部证据目录，不进入源码快照。
+
+CI 保留原有三个 required check 名称，浏览器步骤位于 `Verify Source-first root` 的正常 build 之后。结果、原始颜色、合成层、状态、源码 SHA/digest、实际字体、截图和 trace 写入 `.output/contrast-artifacts/` 并上传 artifact；`.output` 不进入 Source-first 发布包。可用 `GEIST_CONTRAST_ARTIFACTS` 指定独立证据目录。
+
+## 场景与归属
+
+| 场景 | 源码/路由 | 必测节点与触发 |
+| --- | --- | --- |
+| 40 个完整配对 | foundation CSS；`/__contrast` | 每主题五种 `[data-token]` × 四种 `[data-surface]`，20 个唯一非空组合 |
+| 五类 solid / 非 solid | foundation app config；ContainerVariants fixture | Card、Empty、PageCTA、PageCard 的 description；PricingPlan 的 description、discount、billingCycle、billingPeriod、featureTitle、tagline、terms。所有真实 variant、默认省略 variant，以及 Card 具名 slot；PageCard 卡片 hover 与链接 focus |
+| 表单 | FormVariants fixture | Input/Textarea/InputMenu 的真实 `::placeholder`，五种 variant 的 idle/hover/focus；Input/Textarea readonly 值；Select/SelectMenu placeholder 与 open portal 选项及搜索；FormField props/slots 的 description/hint/help；neutral Alert opacity-90 |
+| 计数与展开 | FieldItem、EnumTable、internal/FieldValueStructure；DocumentationStates fixture | `field-count`、`enum-count` 的 `(2)`；`field-expand`、`value-expand` 的展开动词 idle、真 hover、展开后 hover |
+| 选择与到达高亮 | Nuxt UI Tabs、FieldItem/useFieldAnchor；`/__contrast` | 两个 tab 分别选中并 focus；记录 indicator 几何、颜色和层叠。真实 `goTo` 触发 arrival，通过浏览器 computed progress 定位原动画的 opacity 峰值，不替换 easing |
+| 浮层 | OverlayDescriptions fixture | 打开 Modal、Slideover、Popover、Tooltip、DropdownMenu，读取 portal 中非空 description |
+| API Docs 回归 | `/kits/api-docs`、`/kits/api-docs/endpoint-reference`、`/kits/api-docs/webhook-reference` | 可见 type/shape wire type、FieldGroup count、Constraint/Since；参考页 legend；Webhook 先展开 `payload_data` 再测 `?` hover/focus；390px 与1440px截图 |
+
+所有以上场景均执行 light/dark。零节点、隐藏/空文字、状态未触发、未知绘制层均失败。真正 disabled 不是这些正常文字样本；readonly、placeholder、未选中和可见 `aria-hidden` 信息没有自动豁免。
+
+## 计算边界与负向证据
+
+Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS 变量依赖；条件覆盖、未知选择器、缺失或循环变量、fallback、非法/超范围颜色及非 CSS 空白明确拒绝。它不是通用 CSS cascade 引擎。消费者验证同样读取实际复制到 consumer 的 CSS。
+
+浏览器使用 computed style，并由 Chromium 的相对颜色序列化转为浮点 sRGB；不对截图抗锯齿边缘取色，也不先量化为 8-bit 像素。测量合成背景和祖先 opacity，针对已验证结构处理 Tabs indicator、arrival cue、portal item 的 `::before`，核对几何与层叠。零偏移/零模糊的 inset ring 只有完全位于文字区域之外才可排除；未知渐变、滤镜、mask、混合模式、伪元素或重叠层不默认通过。判定直接使用未舍入 ratio >= 4.5。
+
+F-01 回归递归检查兄弟子树，透明或零尺寸包装不能遮蔽其中的绘制节点；在宿主几何跳过之前检查伪元素，宿主不重叠也不能证明生成内容无影响。DOM 靠前不能作为遮挡排除依据：只有可比较的 positioned / isolation stacking context、其中完全覆盖文字的不透明表面及明确更低的绘制顺序共同成立，才记录 `excludedPaint` 并排除该层。`display:contents` 不能被当作有盒子的层叠上下文；原生 modal/popover top layer 暂未建模，出现时显式 `unresolved`。文字 Range 按可证明的矩形 overflow 裁切求交，不以像素容差忽略重叠；无法证明包含关系的脱离文档流或变换路径保留较大的保守范围。反例及正常对照保留实际几何、颜色、层叠和拒绝原因；它们证明检测器拒绝未知绘制，不代替完整正向命令的源码变异红→绿证据。
+
+F-02 将普通有色边框作为独立绘制检查：只在已证明边条和圆角保守区域不接触文字时排除；多片 inline 边框或变换下无法确认的几何明确拒绝。外扩绘制在宿主零尺寸/不相交判断之前检查；文字完全处于单片投影宿主的边框形状内部时可排除外阴影；其他外阴影只在以下已核验引擎和几何前提内使用保守绘制范围。未知引擎、变换阴影、outline、border-image、border-shape 与滤镜不靠宿主矩形猜测范围；不能证明安全时返回 `unresolved`。`visibility:hidden` 不豁免父层作用于可见子层的滤镜。明暗反例覆盖边框、远处投影、零尺寸 spread、多片边框和隐藏父层滤镜，并保留无遮挡、分离、薄边框、移除及恢复对照。
+
+外阴影范围当前绑定 CDP `Browser.getVersion` 的 `Chrome/153.0.8010.12` / `@971a7443b0c9b0a9b2860529b33331b76077ec62`，并要求 DPR 1、visual viewport scale 1、单片盒子、普通 border shape 及祖先无 zoom / scale / rotate / perspective；transform 仅接受 Typed OM 的实际矩阵可证明线性部分为单位矩阵且 e/f 为安全整数的二维平移。individual translate 不从 CSS 字符串推断整数对齐。非零轴默认未知；只有整个祖先链均为静态普通 HTML、opacity 1、normal blend、无 filter/backdrop/mask/clip/overflow 裁切/contain/will-change、无动画或活动 view transition、坐标绝对值小于 `2^18` 时，才用已含真实位移的 DOMRect 加 `2*n+1` 像素外包围（n 为整条祖先链长度）：每层保留一像素 enclosing/AA 和一像素 bilinear，末尾再留一像素最终 quad；记录 `translationOutset`。这包住多层分数平移，不声称每个平移都是整数。缺少这些证明的非零轴仍标为无限；两轴均未知或非零 z 位移时拒绝。整数 transform 平移在 DPR 1 下保持像素相位，DOMRect 已含该平移，不重复加到阴影偏移；computed matrix 字符串的舍入不能作为单位矩阵证明。平移造成的层叠上下文仍按原规则判断，不能因为几何排除而忽略。zoom 使用每层 `currentCSSZoom === 1` 的数值证明，不能只信可能舍入为 `1` 的 CSS 字符串。实际身份随测量记录保留；引擎升级必须重新核验，未匹配时不会沿用旧证明。该 revision 的 [ShadowData](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/style/shadow_data.h) 使用 `sigma = blur / 2`，[绘制外扩](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/style/shadow_data.cc)为 `ceil(3 * sigma) + spread`。测量器先包住 computed CSS 六位有效数字的序列化误差，再按 float 运算求外扩；负 spread 保守取零，范围保留一像素的宿主对齐余量并 floor/ceil。只有某轴的宿主两边、单片祖先原点、滚动与已证整数矩阵位移全在整数像素上且绝对值小于 `2^18` 时，该轴宿主对齐是恒等，可省去这一个余量；参数精度区间和最终向外 floor/ceil 均保留。记录同时包含该轴的实际 snap margin。此处只扩大可能绘制区域，不用容差忽略重叠，也不由截图猜测模糊截止。只在该范围与文字不相交时排除，并记录 `excludedPaint` 的原因、阴影及范围。源码链和定向边界证据随本轮 F-02 补证保存。
+
+普通 `filter` 仍按可能扩展到子层的绘制处理；`backdrop-filter` 则按 [Filter Effects 2 的处理顺序](https://drafts.csswg.org/filter-effects-2/#backdrop-filter-operation)裁切在元素 border box 内。在同一有限几何模型中，仅当向外包围后的边框范围不接触文字时排除背景滤镜，继续检查子树；后续 `filter` 不因该裁切获得豁免。
+
+外阴影内部裁切依据 [CSS Backgrounds and Borders](https://www.w3.org/TR/css-backgrounds-3/#shadow-shape)；outline 的形状可能受后代影响，按 [CSS UI](https://www.w3.org/TR/css-ui-4/#outline-props) 保持未建模拒绝，不能把宿主矩形当作其完整绘制边界。
+
+常规 CI 的四个 alpha 负向样本在独立场景恢复旧声明，证明检测器捕获失败，然后恢复并重新验证。外层测试绿色仅表示检测器工作；不能称为正向命令已经跑红。
+
+首次实施另在已提交且 clean 的 HEAD 执行：
+
+```sh
+node scripts/verify-contrast-mutations.mjs --artifacts /absolute/external/evidence-directory
+```
+
+该脚本保留独立源码副本，依次执行 A 正向、旧 token、两个独立 count `/70`、两个独立 hover `/75`、恢复 A。每次重新构建，运行同一完整 `pnpm test:browser`；旧 token 另执行同一 Node 测试。必须是指定 owner/状态的实际对比度断言失败才能认定有效红；启动、零节点、超时或 unresolved 均不算。输出保留 diff/hash、功能 SHA、每步命令/退出码、原始测量和截图；变异副本不冒称 clean SHA。
+
+截图使用浏览器实际渲染的字体；报告同时保留 FontFace 状态与 Chromium `CSS.getPlatformFontsForNode` 的字体 readback。维护者视觉验收独立于数值门禁。
+
+文字区域默认保留 DOM Range 的字体高度。为避免把字体留白当作字形，只对同一已核验 Chromium、DPR 1、无变换、独立 inline-block/flow-root 中的单个普通 ASCII 字符启用字形上边界证明：单文本节点、单片 Range、normal 字体特性、Typed OM 数值字号/400 字重/100% 字宽、已加载且唯一匹配字符的普通首选 FontFace，并拒绝 metric overrides、variation/variant、非默认 baseline/text-fit/text-box、首行/首字形字体差异、装饰、强调、描边和 text shadow。Canvas 与 DOM 使用相同字体链，并显式对齐目标的已声明语言与 ltr 方向；未知语言、xml:lang 或 font-language-override 回退原 Range。此 revision 的 [DOM 绘制 baseline](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/paint/text_fragment_painter.cc#L529) 使用整数 ascent，而 [Canvas TextMetrics](https://github.com/chromium/chromium/blob/971a7443b0c9b0a9b2860529b33331b76077ec62/third_party/blink/renderer/core/html/canvas/text_metrics.cc#L132) 使用 float ascent。因此上边界为 `floor(range.top + fontBoundingBoxAscent - actualBoundingBoxAscent - 0.5 - 1)`，其中 0.5 包围 ascent 舍入、1 包围字形栅格化；只在不超过原 Range 时提高 top，不收紧左右或 bottom。任何条件无法证明都回退到原 Range，重叠仍 `unresolved`。每条记录保存原 Range、实际使用范围及字形度量。此路径不改变阴影范围、对比度计算或 Tooltip 的真实开关状态；字形源码链与定向反例随 F-02 证据保存。
+
+普通非 auto outline 仅在同一引擎、DPR 与有限变换前提下，对显式非 inline 的单片 HTML 盒子使用宿主范围加 `widthUpper + max(0, offsetUpper)` 的外扩，再保留宿主对齐及 floor/ceil 余量。该 revision 的普通轮廓不纳入 block 后代 ink；auto 轮廓、inline、多片或未知几何仍阻断。负 offset 不用来缩小范围。实际远处焦点轮廓可据此排除，移到字形上的轮廓必须 unresolved；不关闭已有焦点状态。
+
+F-03 单独检查 `::before` / `::after` 的 computed outline；宿主的 outline 检查不能覆盖生成内容。伪元素缺少可直接读取的 DOMRect，outline 又可伸出其盒子，因此普通可见 outline 与 `auto` outline 在空绘制和盒子不相交两条早退之前显式 `unresolved`，不沿用宿主几何排除。普通透明、零宽或未生成的 outline 仍按无绘制处理；`auto` 不获得透明/零宽豁免。明暗测试分别以透明 `::before` 和有背景但盒子分离的 `::after` 复现两条路径，保存无遮挡、透明、零宽、覆盖与移除恢复的几何、测量和截图。
+
+gallery 的 `?` hover/focus 样本等待实际 trigger 打开、对应 Tooltip 可见、入场动画及按钮自身颜色过渡结束，再测稳定态文字；不以固定延迟假定 Tooltip 已打开，也不关闭真实浮层或捕获 `unresolved` 重试。就绪 sidecar 保存两侧动画计数、浮层 opacity / transform 与状态，它只证明采样状态，随后仍由原始测量与完整命令判断对比度。
+
+`optional-trigger-motion.spec.ts` 在真实键盘输入前开始观察 `?`，独立覆盖明暗主题、普通与 reduced motion、无 hover 的 Tab 进入/退出、hover 与 focus 交叠及快速反向切换。它记录 computed transition 配置、实际颜色 transition 事件、运行中的相关动画和每个恢复端点的颜色合成；不会等 `optionalTooltipReady()` 返回才开始观察，也不以少量中间帧代替无颜色插值的证明。Tooltip 自身入场动画继续运行，稳定端点仍须通过原测量器。此处承接 #148 的具体 trigger 过渡问题，#147 其余功能色及 owner 未决范围保持独立。

@@ -148,9 +148,8 @@ describe('FieldItem output presence', () => {
     // Kit tap-target touch contract: the marker is a real <button> and joins it.
     expect(mark.classes()).toContain('touch-manipulation')
     expect(mark.text()).toBe('?')
-    // Low visual weight: notation in the grey register, never a badge — but
-    // the readable grey: the glyph states a fact, so it must clear WCAG 1.4.3
-    // on the light theme, which `text-dimmed` (~2.4:1) does not.
+    // The key-absence fact stays in the neutral text-toned role: subordinate
+    // to the name, more prominent than metadata, and never a status badge.
     expect(mark.classes()).toContain('text-toned')
     expect(mark.classes()).not.toContain('text-dimmed')
     expect(typeText(wrapper)).toBe('string')
