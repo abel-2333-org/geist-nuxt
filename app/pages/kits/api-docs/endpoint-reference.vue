@@ -450,8 +450,8 @@ const responseFields: FieldNode[] = [
     path: 'res_url',
     name: 'url',
     type: 'string',
-    // Output presence (issue #127): the key is absent until the build is
-    // ready, and `null` when the build failed — two facts, two condition entries in one rule.
+    // 输出存在性（#127）：构建未 ready 时键缺失、构建失败时为 null——
+    // 两个事实，同一条 rule 里两个 entry（#145）。
     presence: {
       optional: true,
       nullable: true,
