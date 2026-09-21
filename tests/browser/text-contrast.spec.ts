@@ -146,6 +146,155 @@ for (const theme of ['light', 'dark'] as const) {
     await expect(measure(target)).rejects.toThrow(/unresolved: empty or hidden/)
   }))
 
+  for (const kind of ['border', 'outer-shadow'] as const) {
+    test(`${theme}: detector rejects ${kind} painting outside its content box`, () => scenario(theme, `negative-paint-${kind}`, async (page, check) => {
+      await page.evaluate(() => {
+        const host = document.createElement('section')
+        host.id = 'box-paint-control'
+        Object.assign(host.style, { position: 'relative', isolation: 'isolate', width: '1200px', height: '144px', padding: '32px', backgroundColor: 'var(--ui-bg)', color: 'var(--ui-text)' })
+        const branch = document.createElement('div')
+        Object.assign(branch.style, { position: 'relative', width: '536px', padding: '12px' })
+        const target = document.createElement('span')
+        target.id = 'box-paint-target'
+        target.textContent = 'Actual browser paint must stay readable'
+        target.style.whiteSpace = 'nowrap'
+        branch.append(target)
+        const overlay = document.createElement('div')
+        overlay.id = 'box-paint-overlay'
+        Object.assign(overlay.style, { display: 'none', position: 'absolute', left: '32px', top: '32px', width: '536px', height: '56px', boxSizing: 'border-box', backgroundColor: 'transparent', zIndex: '1' })
+        host.append(branch, overlay)
+        document.querySelector('[data-testid="contrast-fixture"]')!.prepend(host)
+      })
+      const target = page.locator('#box-paint-target')
+      const overlay = page.locator('#box-paint-overlay')
+      const describePaint = () => page.evaluate(() => {
+        const target = document.getElementById('box-paint-target')!
+        const overlay = document.getElementById('box-paint-overlay')!
+        const range = document.createRange()
+        range.selectNodeContents(target)
+        const textRect = range.getBoundingClientRect()
+        const rect = overlay.getBoundingClientRect()
+        const css = getComputedStyle(overlay)
+        type Bounds = { left: number, right: number, top: number, bottom: number }
+        const overlapsText = (bounds: Bounds) => bounds.left < textRect.right && bounds.right > textRect.left && bounds.top < textRect.bottom && bounds.bottom > textRect.top
+        const borderStrips = (['Top', 'Right', 'Bottom', 'Left'] as const).map((side) => {
+          const width = parseFloat(css.getPropertyValue(`border-${side.toLowerCase()}-width`))
+          const bounds = { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+          if (side === 'Top') bounds.bottom = rect.top + width
+          if (side === 'Right') bounds.left = rect.right - width
+          if (side === 'Bottom') bounds.top = rect.bottom - width
+          if (side === 'Left') bounds.right = rect.left + width
+          return { side, width, color: css.getPropertyValue(`border-${side.toLowerCase()}-color`), style: css.getPropertyValue(`border-${side.toLowerCase()}-style`), bounds, overlapsText: width > 0 && overlapsText(bounds) }
+        })
+        // The test injects one zero-blur shadow. These bounds describe that
+        // controlled paint; they are not a general CSS shadow implementation.
+        const lengths = Array.from(css.boxShadow.matchAll(/(?:^|\s)(-?[\d.]+)px(?=\s|$)/g), match => Number(match[1]))
+        const [x = 0, y = 0, , spread = 0] = lengths
+        const shadowBounds = { left: rect.left + x - spread, right: rect.right + x + spread, top: rect.top + y - spread, bottom: rect.bottom + y + spread }
+        return {
+          targetRect: target.getBoundingClientRect().toJSON(), textRect: textRect.toJSON(), overlayRect: rect.toJSON(), hostRect: document.getElementById('box-paint-control')!.getBoundingClientRect().toJSON(),
+          targetColor: getComputedStyle(target).color, backgroundColor: css.backgroundColor, color: css.color, display: css.display, position: css.position, zIndex: css.zIndex, borderStrips,
+          boxShadow: css.boxShadow,
+          shadow: css.boxShadow === 'none' ? null : { lengths, color: css.boxShadow.replace(/(?:\s+-?[\d.]+px){4}$/, ''), bounds: shadowBounds, overlapsText: overlapsText(shadowBounds) },
+        }
+      })
+      const capture = async (state: string, computed: Awaited<ReturnType<typeof describePaint>>, detection: Record<string, unknown>, classification: string) => {
+        const name = `${theme}-negative-paint-${kind}-${state}`
+        await page.locator('#box-paint-control').screenshot({ path: resolve(artifacts, `${name}.png`) })
+        await writeFile(resolve(artifacts, `${name}.json`), JSON.stringify({ source, theme, kind, state, classification, computed, ...detection }, null, 2))
+      }
+      const positive = async (state: string) => {
+        const rows = await check(target, `${kind}/${state}`, 'measurement contract')
+        const computed = await describePaint()
+        await capture(state, computed, { measurements: rows }, 'positive detector control')
+        return computed
+      }
+      const expectRejection = async (state: string, computed: Awaited<ReturnType<typeof describePaint>>) => {
+        const detection = await measure(target).then(measurement => ({ measurement, rejection: null }), error => ({ measurement: null, rejection: String(error) }))
+        await capture(state, computed, detection, 'expected detector rejection; not a positive suite red run')
+        expect(detection.rejection, `${state}: overlapping paint must not silently pass`).toMatch(/unresolved:/)
+      }
+      const expectCoverage = (paint: { left: number, right: number, top: number, bottom: number }, text: { left: number, right: number, top: number, bottom: number }) => {
+        expect(paint.left).toBeLessThanOrEqual(text.left)
+        expect(paint.right).toBeGreaterThanOrEqual(text.right)
+        expect(paint.top).toBeLessThanOrEqual(text.top)
+        expect(paint.bottom).toBeGreaterThanOrEqual(text.bottom)
+      }
+
+      await positive('no-overlay')
+      if (kind === 'border') {
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { display: 'block', left: '600px', borderTop: '56px solid currentColor' }))
+        const separated = await positive('separated-border')
+        expect(separated.overlayRect.left).toBeGreaterThanOrEqual(separated.textRect.right)
+        expect(separated.borderStrips.every(strip => !strip.overlapsText)).toBe(true)
+
+        // The overlay box surrounds the text, but each thin edge stays clear
+        // of its Range. Rejecting every border would break this normal case.
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { left: '32px', border: '1px solid currentColor' }))
+        const thin = await positive('thin-border-around-text')
+        expectCoverage(thin.overlayRect, thin.textRect)
+        expect(thin.borderStrips.every(strip => strip.width === 1 && !strip.overlapsText)).toBe(true)
+
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { border: '0', backgroundColor: 'currentColor' }))
+        const background = await describePaint()
+        expectCoverage(background.overlayRect, background.textRect)
+        expect(background.backgroundColor).toBe(background.targetColor)
+        await expectRejection('same-color-background', background)
+
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { backgroundColor: 'transparent', borderTop: '56px solid currentColor' }))
+        const covered = await describePaint()
+        const top = covered.borderStrips.find(strip => strip.side === 'Top')!
+        expect(covered.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        expect(top.width).toBe(56)
+        expect(top.color).toBe(covered.targetColor)
+        expectCoverage(top.bounds, covered.textRect)
+        await expectRejection('border-covers-text', covered)
+        await overlay.evaluate(node => { (node as HTMLElement).style.border = '1px solid currentColor' })
+        await positive('thin-border-restored')
+      }
+      else {
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { display: 'block', left: '600px', boxShadow: '32px 0 0 0 currentColor' }))
+        const separated = await positive('separated-shadow')
+        expect(separated.overlayRect.left).toBeGreaterThanOrEqual(separated.textRect.right)
+        expect(separated.shadow!.lengths).toEqual([32, 0, 0, 0])
+        expect(separated.shadow!.overlapsText).toBe(false)
+
+        await overlay.evaluate(node => { (node as HTMLElement).style.boxShadow = '-568px 0 0 0 currentColor' })
+        const covered = await describePaint()
+        expect(covered.overlayRect.left, 'the shadow host itself stays outside the text').toBeGreaterThanOrEqual(covered.textRect.right)
+        expect(covered.backgroundColor).toBe('rgba(0, 0, 0, 0)')
+        expect(covered.shadow!.lengths).toEqual([-568, 0, 0, 0])
+        expect(covered.shadow!.color).toBe(covered.targetColor)
+        expectCoverage(covered.shadow!.bounds, covered.textRect)
+        await expectRejection('offset-shadow-covers-text', covered)
+        await overlay.evaluate(node => { (node as HTMLElement).style.boxShadow = '32px 0 0 0 currentColor' })
+        await positive('separated-shadow-restored')
+
+        await overlay.evaluate(node => Object.assign((node as HTMLElement).style, { width: '0', height: '0', top: '60px', boxShadow: '0 0 0 32px currentColor' }))
+        const zeroSeparated = await positive('zero-host-separated-spread')
+        expect(zeroSeparated.overlayRect.width).toBe(0)
+        expect(zeroSeparated.overlayRect.height).toBe(0)
+        expect(zeroSeparated.shadow!.lengths).toEqual([0, 0, 0, 32])
+        expect(zeroSeparated.shadow!.overlapsText).toBe(false)
+        expect(zeroSeparated.shadow!.bounds.left).toBeGreaterThanOrEqual(zeroSeparated.textRect.right)
+
+        await overlay.evaluate(node => { (node as HTMLElement).style.boxShadow = '-544px 0 0 32px currentColor' })
+        const zeroCovered = await describePaint()
+        expect(zeroCovered.overlayRect.width).toBe(0)
+        expect(zeroCovered.overlayRect.height).toBe(0)
+        expect(zeroCovered.overlayRect.left).toBeGreaterThanOrEqual(zeroCovered.textRect.right)
+        expect(zeroCovered.shadow!.lengths).toEqual([-544, 0, 0, 32])
+        expect(zeroCovered.shadow!.color).toBe(zeroCovered.targetColor)
+        expect(zeroCovered.shadow!.overlapsText, 'spread paints over glyphs even when its host has no area').toBe(true)
+        await expectRejection('zero-host-spread-covers-text', zeroCovered)
+        await overlay.evaluate(node => { (node as HTMLElement).style.boxShadow = '0 0 0 32px currentColor' })
+        await positive('zero-host-separated-spread-restored')
+      }
+      await overlay.evaluate(node => { (node as HTMLElement).style.display = 'none' })
+      await positive('no-overlay-restored')
+    }))
+  }
+
   for (const kind of ['transparent-parent', 'earlier-higher-z'] as const) {
     test(`${theme}: detector rejects ${kind} overlapping paint`, () => scenario(theme, `negative-paint-${kind}`, async (page, check) => {
       // These DOM paint controls exercise the real Chromium stacking order.
