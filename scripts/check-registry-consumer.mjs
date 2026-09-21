@@ -24,6 +24,7 @@ import {
   sha256,
   validateRegistry,
 } from './lib/registry.mjs'
+import { subtreeCssMarkers } from './check-root-css.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const fixtureRoot = path.join(repoRoot, 'tests/fixtures/consumer')
@@ -593,7 +594,10 @@ async function loadGuide() {
     label: 'api-docs-field-item',
     item: 'api-docs-field-item',
     build: true,
-    cssMarker: 'scroll-mt-24',
+    // scroll-mt-24 proves the composable's class reached the build; the
+    // subtree markers prove the foundation hierarchy utility (line + container
+    // step) is generated for this closure on its own, not only in the gallery.
+    cssMarker: ['scroll-mt-24', ...subtreeCssMarkers],
     renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -659,7 +663,9 @@ provideFieldSource({
     build: true,
     // ps-9 is the discriminator row's indent — unique to this component's
     // template, so its presence proves the SchemaComposition source was copied.
-    cssMarker: 'ps-9',
+    // The subtree markers prove the nested-composition line + container step
+    // are generated for this closure too.
+    cssMarker: ['ps-9', ...subtreeCssMarkers],
     renderedMarkers: ['One of', 'Card', 'brand'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -982,8 +988,10 @@ try {
             if (scenario.all && !builtCss.includes('var(--shiki-dark')) {
               throw new Error(`${scenario.label}: built CSS did not contain the CodeBlock dark token switch (#79)`)
             }
-            if (scenario.cssMarker && !builtCss.includes(scenario.cssMarker)) {
-              throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
+            for (const marker of [scenario.cssMarker].flat().filter(Boolean)) {
+              if (!builtCss.includes(marker)) {
+                throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${marker}`)
+              }
             }
             if (scenario.renderedMarkers || scenario.forbiddenRuntimeOutput) {
               const runtime = await renderBuiltPage(consumerRoot)

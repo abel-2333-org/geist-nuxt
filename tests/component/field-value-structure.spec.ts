@@ -158,8 +158,28 @@ describe('scope labels', () => {
 describe('requirement density', () => {
   it('renders one lone constraint as a single scope-labelled row', () => {
     const block = describeValueRequirements(primitiveItem, fieldValueLabelDefaults)
-    expect(block?.compact).toBe(true)
+    expect(block?.compact).toEqual({ kind: 'constraint', text: 'At least 1 character.' })
     expect(block?.label).toBe('Each item')
+  })
+
+  it('renders a lone presence notation as a single scope-labelled row', () => {
+    const presenceOnly: FieldValueNode = { relation: 'decoded', codec: 'json', type: 'object', presence: { empty: '"{}"' } }
+    expect(describeValueRequirements(presenceOnly, fieldValueLabelDefaults)?.compact)
+      .toEqual({ kind: 'presence', expression: 'object | "{}"' })
+    // A notation beside a lone constraint is two facts: neither kind fits.
+    const withConstraint = { ...presenceOnly, notes: [{ text: 'Keys are unique.' }] }
+    expect(describeValueRequirements(withConstraint, fieldValueLabelDefaults)?.compact).toBeNull()
+  })
+
+  it('keeps a presence notation out of the compact row once a condition sentence joins it', () => {
+    // Same fixture as the compact case above plus ONE condition: the rule has
+    // to render, so the level escalates to the heading form.
+    const block = describeValueRequirements(
+      { relation: 'decoded', codec: 'json', type: 'object', presence: { empty: '"{}"', condition: 'Empty until the order is confirmed.' } },
+      fieldValueLabelDefaults,
+    )
+    expect(block?.presence.unionTail).toEqual(['"{}"'])
+    expect(block?.compact).toBeNull()
   })
 
   it('escalates as soon as the level says more than one thing', () => {
@@ -167,7 +187,7 @@ describe('requirement density', () => {
       { ...primitiveItem, examples: ['abc'] },
       fieldValueLabelDefaults,
     )
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
   })
 
   it('never drops the author\'s own category label on a lone constraint', () => {
@@ -177,7 +197,7 @@ describe('requirement density', () => {
       { relation: 'item', type: 'object', notes: [{ label: 'Uniqueness', text: 'sku is unique.' }] },
       fieldValueLabelDefaults,
     )
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
   })
 
   it('says nothing when there is nothing to say', () => {

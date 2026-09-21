@@ -55,6 +55,7 @@ foundation / 根 gallery 的真实节奏，直接照用：
 - **用 `gap-*` 而非 margin 堆叠**：容器负责间距，子项不带外边距，更可组合。
 - **响应式列数**：`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`（见 `responsiveness.md`）。
 - **边框克制**：分隔用 `border border-default` 单像素细边 + 圆角 `rounded-lg`，配合 `bg-elevated`/`bg-muted` 的浅表面，而不是阴影。Geist 几乎不用 drop shadow。
+- **子树结构线只有一个来源**：内容从属于上方一行时用 foundation `main.css` 的 `subtree` utility（1px `--ui-border` 起始边 + 随具名容器 `field` 宽度收紧的缩进），不手写 `border-s border-default ps-*`；分组标题、事实列、语义 rule 不画结构线。规则与允许的线数见 `references/kits/api-docs/index.md`「折叠与层级语法」。
 
 ## 圆角（Geist 三层：6 / 12 / 16px）
 

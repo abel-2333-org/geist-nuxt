@@ -92,7 +92,7 @@ describe('presence derivation with list conditions', () => {
       { relation: 'item', type: 'object', notes: [{ text: 'At least 1 character.' }], presence: { condition: two } },
       fieldValueLabelDefaults,
     )
-    expect(withConstraint?.compact).toBe(false)
+    expect(withConstraint?.compact).toBeNull()
   })
 })
 

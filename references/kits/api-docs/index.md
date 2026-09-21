@@ -296,7 +296,7 @@ API Docs kit 只定义组件 props，以及组件为这些 props 暴露的 ViewM
 
 `children` 只装真实子字段。数组元素、record 成员、编码字符串里的内容没有业务字段名，装进 `children` 只能靠合成 `[]` / 「JSON 字符串内容」假字段——多一层折叠、多一个不该计入的子字段数、约束归属不清。它们是**值的形状**，走可选 `value: FieldValueNode`：`relation`（`item` / `member` / `decoded`）说明它挂在上一层的方式，节点无名、不计数、可递归（`value.value` 表达元素的元素、JSON 套 JSON），`fields` 是值内的真实属性（按字段行渲染，是唯一被计数的东西）。组件仍不解析 schema、不解码字符串、不读 wire path；`relation` / `codec` / `type` 与 `type` / `format` 一样由 adapter 决定。`children` 与 `value` 语义互斥，类型层未强制。值节点的存在性走 `presence: ValuePresence`（`nullable` / `empty` / `condition`，**没有 `optional`**——值没有键可省略，类型层排除、`describeValuePresence()` 运行时再剥一次），只在该值的作用域块（Each item / Value / Array）内以同款记号（`object | null`，由 `presenceTypeExpression(node.type, unionTail)` 拼装，无 `?`）+ 中性 rule 渲染；外层字段的 `presence.optional` 不下传给元素，元素的 nullable/empty 不上浮到字段行。
 
-折叠策略：下方无结构 → 不出折叠，规则与尚未显示的编码 token 就地读；有结构 → 当前层没有自己的字段或 composition 时，共用一个折叠区。连续匿名层不会因约束标题重复而增加折叠。重复作用域通过 `labels.nestedScope(label, relation, depth, codec?)` 区分，默认显示本地化标题、层级序号及编码名；`depth` 按同一种 relation 计数，包含空层，因此三维数组中间无约束时仍显示第 1 和第 3 层。真实具名字段与 composition 的边界保留；合并区域仍保留各层独立锚点。`collectValueRegion` / `foldsIntoParentRegion` 决定结构边界，`hasStructureBelow` / `valueScopeLabelKey` / `describeValueRequirements` 与存在性派生 `describeFieldPresence` / `describeValuePresence` / `presenceTypeExpression` 位于 `utils/field.ts`。
+折叠策略：下方无结构 → 不出折叠，规则与尚未显示的编码 token 就地读；有结构 → 当前层没有自己的字段或 composition 时，共用一个折叠区；折叠区展开后怎么画（结构线、缩进、单事实密度）见下节「折叠与层级语法」。连续匿名层不会因约束标题重复而增加折叠。重复作用域通过 `labels.nestedScope(label, relation, depth, codec?)` 区分，默认显示本地化标题、层级序号及编码名；`depth` 按同一种 relation 计数，包含空层，因此三维数组中间无约束时仍显示第 1 和第 3 层。真实具名字段与 composition 的边界保留；合并区域仍保留各层独立锚点。`collectValueRegion` / `foldsIntoParentRegion` 决定结构边界，`hasStructureBelow` / `valueScopeLabelKey` / `describeValueRequirements` 与存在性派生 `describeFieldPresence` / `describeValuePresence` / `presenceTypeExpression` 位于 `utils/field.ts`。
 
 四条裁定以消费端真实端点 `POST /v1/txn/doTransaction` 为准（11 个结构化字段全是 `string` + `json_string`，没有一个普通对象；合成 shape matrix 的 base rate 与之相反，单靠它会得出错误结论），**不要重新推导**：
 
@@ -323,6 +323,24 @@ await copyLink(path, {
 ```
 
 需要原来的组合行为时显式调用 `await goTo(path)` 后再 `await copyLink(path, options)`。旧的 `copyLink(path, 'Link copied')` 会在 typecheck 阶段报错，避免升级后静默改变运行时行为。
+
+### 折叠与层级语法
+
+「展开 / 折叠 / 切换 / 分组」四类意图各自保留触发器与文案，但层级怎么画只有一套语法（Issue #152）。五条规则逐条可对照实现核验，审计以本节为准，视觉实现不得反向覆盖。
+
+1. **结构线只表达「子树归属」。** 一条 1px 中性线 + 一级逻辑方向缩进，只给「从属于上方那一行」的子树：子字段区（`FieldItem`）、值区域（`FieldValueStructure` 的 `[data-value-structure-region]`）、字段级 composition 区（`FieldItem`）、变体内嵌套 composition（`SchemaComposition` 的 oneOf / anyOf / allOf 三处）。与是否可折叠无关：可折叠子树展开后画线，静态子树直接画线。这六处容器共用 foundation `main.css` 的 `@utility subtree`（随 `geist-foundation` 分发，`api-docs-field-item` 与 `api-docs-schema-composition` 均经依赖闭包间接依赖），组件里不再手写 `border-s border-default ps-*`。utility 只含结构线、逻辑方向缩进与容器查询；上下间距（`mt-*`）、内容布局、锚点、焦点目标、状态仍由调用方负责，不加 DOM 包装、不提供样式开关，只有出现真实的共同 DOM 或运行时逻辑需求才升级为组件。**分组标题、事实列、rule 一律不画线**：`FieldValueRequirements` 标题形态块内没有中性线包裹层。
+2. **集合用卡片，不用线。** anyOf 保持 `rounded-lg border divide-y` 卡片分区（内容 `ps-9` 对齐 chevron），oneOf 保持 `UTabs`，allOf 保持标题分段；三者的按钮与文案按各自意图保留，不强求同形。卡片容器不重复表达同一结构边界，但卡片内部的真实子树（变体内的子字段区、值区域、嵌套 composition）仍按第 1 条画线。这是本次范围内保留的呈现策略，不宣称数据语义永久决定唯一 UI。
+3. **语义 rule 不构成层级。** 2px 彩色左边框只给带颜色轴的事实——condition 琥珀（`border-warning`）、presence 中性强调（`border-accented`）、caveat 琥珀填充——不额外缩进、不计入结构层数。从值区域到 presence rule 最多两条左边框（结构线 + rule），`tests/component/hierarchy-subtree.spec.ts` 锁定。
+4. **单事实密度。** 一个块只陈述一件事时渲染为一行 `LABEL │ value`，两件以上升级为标题 + 列表；由 `describeValueRequirements` 判定，模板只按种类渲染、不读 `constraints[0]`。`ValueRequirementsBlock.compact` 是可辨识联合：`{ kind: 'constraint', text }`（恰好一条无 label constraint，且无其它任何事实）、`{ kind: 'presence', expression }`（只有 presence 记号、条件句为空、无 constraint / description / enum / example / default / caveat；`expression` 即 `presenceTypeExpression(node.type, unionTail)`）、`null`（标题形态）。带条件句的 presence 因为要渲染 rule，不进紧凑行。紧凑行无损：只把已存在的记号换位置，不省略作者输入。两种紧凑行样式分列：constraint 紧凑行保持正文样式与 `InlineMarkdown`；presence 紧凑行用 mono 灰阶记号 + `translate="no"`，落在 `dd[data-value-presence]`，与标题形态的 `[data-value-presence] p` 同名可查。紧凑行允许自然换行，不扩展为所有内容块都必须单行。
+5. **缩进随实际容器宽度收紧。** `subtree` 的缩进为 `--spacing(3)`，具名容器 `field` 宽度达到 `--container-sm`（24rem）时升到 `--spacing(4)`——即原 `ps-3 @sm/field:ps-4` 基线，不表述为永久最优。`FieldItem` 行自带 `@container/field`；页面级独立使用的 `SchemaComposition` 在三种变体内容容器（oneOf 面板、anyOf 内容、allOf 分段）上声明 `@container/field`，使嵌套 composition 的查询在没有字段行祖先时也能解析。不引入深度计算或缩进上限。
+
+按此推导：gallery `refunds` 元素最多两条线（值区域结构线 + presence rule）；`extra` 为一行 `值要求 │ object | "{}"`；`txnOrderMsg → products` 深层嵌套每个真实边界恰好一条线。
+
+**V3 裁定依据**（2026-09-21，gallery `txnOrderMsg → products`，decoded → item → decoded → item + 子字段）：桌面（字段容器 960px）每层 17px（1px 线 + 16px），行宽 960 → 943 → 926；320px 视口每层 13px（1px + 12px），行宽 288 → 275 → 262，identity 剩余 226px，无横向溢出；375px 视口 343 → 330 → 317。迁移前页面级 `SchemaComposition` 的嵌套 composition 固定 16px，与字段内 320px 下的 12px 不一致；迁移后三种上下文统一按容器查询收紧且都可读，因此不做容器查询之外的缩进机制。
+
+**现状不一致的处置**：composition 区固定 `ps-4` 与子字段区随容器收紧——已统一到 `subtree`。`UCollapsible` 默认槽按钮与 anyOf 手写 `aria-expanded` / `aria-controls`——V1 核实 Reka 会给默认槽按钮注入 `aria-expanded` 与 `data-state`，SSR HTML 也带 `aria-controls` id，但 hydration 后折叠态按钮的 `aria-controls` 为空串、首次开合后才填入并保持；anyOf 手写的两个属性始终存在。两者不等价，保留现状并记录：触发器收敛（PR B 的 `DisclosureTrigger`）须自带 `aria-controls`。折叠态内容三处一致：SSR 为 `hidden` + `display: none`，客户端关闭后经动画得到 `hidden="until-found"`（`content-visibility: hidden`，不可聚焦、不进辅助技术树）。
+
+**保持不变**：各模式计数语义（子字段恒显 `(N)`、值区域只在直接揭示真实字段时显示、anyOf / allOf 为 `fields.length + (composition ? 1 : 0)` 且为 0 不显示、`WebhookProtocol` 显示被隐藏条数、约束表 `(N)`）、默认开合、深链接自动展开与 arrival cue、`unmount-on-hide=false`、动词与 labels 契约、anyOf 卡片 / oneOf tabs / allOf 全展开三个既有决策、字段行自身的 presence 记号与 rule / caveat 形态。不纳入 `SidebarNav`、`EnumTable` 切换、`ResponseExample` 面板、gallery 外壳。
 
 ### FieldAnnotation 的字段引用约束
 

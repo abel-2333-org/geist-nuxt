@@ -217,7 +217,9 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
       </template>
 
       <template #content>
-        <!-- The region is the value root's own anchor target (`value.path`),
+        <!-- The region is a subtree of the owner row (foundation `subtree`:
+             one structural line, container-driven indent) and the value
+             root's own anchor target (`value.path`),
              so it carries the same arrival cue overlay and focus outline as a
              field row: useFieldAnchor focuses the id'd element and flashes the
              first cue inside it, which must be this region's, not a nested
@@ -225,7 +227,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         <div
           :id="value.path"
           data-value-structure-region
-          class="relative mt-2 flex flex-col gap-3 rounded-md border-s border-default ps-3 outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary @sm/field:ps-4"
+          class="subtree relative mt-2 flex flex-col gap-3 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
           :class="anchor.SCROLL_MARGIN_CLASS"
         >
           <span

@@ -8,6 +8,13 @@
 // same uppercase dimmed scope label, same `fit-content(8rem)` information
 // column. A value's rules and a field's rules read as the same kind of fact —
 // only the SCOPE differs, and the scope is exactly what the label carries.
+//
+// Density and lines follow references/kits/api-docs/index.md «折叠与层级语法»:
+// the model (`block.compact`) decides between one row and a heading and this
+// template only renders the kind it is handed; and nothing here draws a
+// structural line — a block is a list of facts, not a subtree, so the region
+// around it stays the only neutral line. The 2px semantic rules (condition,
+// caveat) carry a colour axis, not hierarchy.
 import { presenceTypeExpression } from '../utils/field'
 import type { FieldItemLabels, FieldValueChrome, ValueRequirementsBlock } from '../utils/field'
 import ConditionEntries from './ConditionEntries.vue'
@@ -24,26 +31,39 @@ const node = computed(() => props.block.node)
 </script>
 
 <template>
-  <!-- Compact: one constraint, nothing else. The scope IS the label, so the
-       whole fact is one scannable row — "EACH ITEM │ at least 1 character". -->
+  <!-- Compact: the level states ONE thing. The scope IS the label, so the
+       whole fact is one scannable row — "EACH ITEM │ at least 1 character",
+       or "VALUE │ object | null" when the one thing is a presence notation.
+       The row may wrap: a long notation breaks inside the value column. -->
   <dl
     v-if="block.compact"
     data-value-requirements
+    :data-compact="block.compact.kind"
     class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
   >
     <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ block.label }}</dt>
-    <dd class="wrap-anywhere min-w-0 text-toned">
-      <InlineMarkdown :text="block.constraints[0]!.text" />
+    <dd v-if="block.compact.kind === 'constraint'" class="wrap-anywhere min-w-0 text-toned">
+      <InlineMarkdown :text="block.compact.text" />
     </dd>
+    <!-- Same mono notation the heading form prints under `data-value-presence`,
+         so the value's presence is found in one place whichever density the
+         level landed on. -->
+    <dd
+      v-else
+      data-value-presence
+      class="wrap-anywhere min-w-0 font-mono text-xs text-muted"
+      translate="no"
+    >{{ block.compact.expression }}</dd>
   </dl>
 
-  <!-- Rich: the level also has a description, values, an example or a default.
-       One row cannot hold that, so the scope becomes a heading and the facts
-       sit under it in the same information column. -->
+  <!-- Heading: the level also has a condition, a description, values, an
+       example or a default. One row cannot hold that, so the scope becomes a
+       heading and the facts sit under it in the same information column —
+       a list, not a subtree, hence no line and no indent of its own. -->
   <section v-else data-value-requirements class="flex flex-col gap-2">
     <p class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ block.label }}</p>
 
-    <div class="flex flex-col gap-3 border-s border-default/60 ps-3">
+    <div class="flex flex-col gap-3">
       <!-- This VALUE's presence (an element may be null, decoded content may
            be `[]`), as the same type notation the owner's identity line uses
            — `object | null` — but scoped under this heading, which is the

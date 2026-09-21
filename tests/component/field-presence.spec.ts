@@ -104,7 +104,7 @@ describe('describeFieldPresence', () => {
       chrome,
     )
     expect(block?.presence.unionTail).toEqual(['null'])
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
     const conditionOnly = describeValueRequirements(
       { relation: 'item', type: 'object', presence: { condition: 'Absent for drafts.' } },
       chrome,
@@ -238,8 +238,14 @@ describe('FieldItem output presence', () => {
     expect(typeText(wrapper)).toBe('string')
     const scope = wrapper.get('[data-value-requirements]')
     // Decoded root is an array, so the scope reads as the array's requirements.
-    expect(scope.text()).toContain('Array')
-    expect(scope.get('[data-value-presence] p').text()).toBe('object[] | "[]"')
+    expect(scope.get('dt').text()).toBe('Array')
+    // The notation is the level's only fact, so it sits in the compact row —
+    // one `SCOPE │ notation` line, mono and untranslated like the heading form.
+    expect(scope.attributes('data-compact')).toBe('presence')
+    const notation = scope.get('dd[data-value-presence]')
+    expect(notation.text()).toBe('object[] | "[]"')
+    expect(notation.attributes('translate')).toBe('no')
+    expect(notation.classes()).toContain('font-mono')
   })
 
   it('needs one label at most: notation is language-neutral and reaches recursive rows unchanged', async () => {

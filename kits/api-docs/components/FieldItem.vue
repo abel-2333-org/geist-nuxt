@@ -651,7 +651,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       </template>
 
       <template #content>
-        <div class="mt-1 border-s border-default ps-3 @sm/field:ps-4">
+        <!-- Subtree of this row: the structural line and indent come from the
+             foundation `subtree` utility, never hand-written here. -->
+        <div class="mt-1 subtree">
           <FieldItem
             v-for="child in children"
             :key="child.path ?? child.name"
@@ -669,7 +671,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
          component (see script) so FieldItem installs standalone without a
          dependency cycle; the block only appears when that slice is present.
          FieldItem passes both its own chrome and `labels.composition` through. -->
-    <div v-if="composition && schemaComposition" class="mt-3 border-s border-default ps-4">
+    <div v-if="composition && schemaComposition" class="mt-3 subtree">
       <component
         :is="schemaComposition"
         v-bind="composition"

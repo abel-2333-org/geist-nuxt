@@ -21,9 +21,27 @@ async function readCssTree(directory) {
   return chunks.join('\n')
 }
 
+/**
+ * The shared hierarchy utility (`@utility subtree` in foundation main.css):
+ * the 1px neutral line + base indent, and the container-query step that widens
+ * it. All three must reach every build that copies a subtree caller, so the
+ * consumer smoke (scripts/check-registry-consumer.mjs) reuses these exact
+ * strings for the api-docs-field-item and api-docs-schema-composition closures.
+ * The query condition is deliberately not part of a marker: the gallery build
+ * lowers it to `(min-width:24rem)` while a consumer build keeps the range
+ * form `(width>=24rem)`; the named container and the nested step are what
+ * prove the responsive rule was generated.
+ */
+export const subtreeCssMarkers = [
+  '.subtree{border-inline-start-width:1px;border-inline-start-color:var(--ui-border);padding-inline-start:calc(var(--spacing)*3)}',
+  '@container field (',
+  '{.subtree{padding-inline-start:calc(var(--spacing)*4)}}',
+]
+
 export const requiredMarkers = [
   { marker: '--breakpoint-sm:401px', source: 'foundation/assets/css/main.css' },
   { marker: '.text-code{font-size:var(--text-code);line-height:var(--tw-leading,var(--text-code--line-height))}', source: 'foundation/assets/css/main.css' },
+  ...subtreeCssMarkers.map(marker => ({ marker, source: 'foundation/assets/css/main.css' })),
   { marker: '--ui-container:100%', source: 'foundation/assets/css/main.css' },
   { marker: 'max-w-28', source: 'kits/api-docs/internal/SidebarScenarioTags.vue' },
   { marker: 'touch-manipulation', source: 'kits/api-docs/internal/SidebarScenarioTags.vue' },
