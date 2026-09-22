@@ -1,0 +1,42 @@
+[
+  {
+    "command": "pnpm install --frozen-lockfile",
+    "exitCode": 0
+  },
+  {
+    "command": "node playground/functional-colors/build.mjs (first)",
+    "exitCode": 0
+  },
+  {
+    "command": "GEIST_FUNCTIONAL_MODES=baseline pnpm exec vitest run --config playground/functional-colors/vitest.config.ts (diagnostic)",
+    "exitCode": 1
+  },
+  {
+    "command": "node playground/functional-colors/build.mjs (final)",
+    "exitCode": 0
+  },
+  {
+    "command": "pnpm exec vitest run --config playground/functional-colors/vitest.config.ts (final)",
+    "exitCode": 1
+  },
+  {
+    "command": "pnpm typecheck",
+    "exitCode": 0
+  },
+  {
+    "command": "node --test tests/text-contrast.test.mjs",
+    "exitCode": 0
+  },
+  {
+    "command": "node docs/maintenance/functional-color-stage1/calculate.mjs",
+    "exitCode": 0
+  },
+  {
+    "command": "node docs/maintenance/functional-color-stage1/capture-visual.mjs",
+    "exitCode": 0
+  },
+  {
+    "command": "python3 docs/maintenance/functional-color-stage1/summarize.py",
+    "exitCode": 0
+  }
+]

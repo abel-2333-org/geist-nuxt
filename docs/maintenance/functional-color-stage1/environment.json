@@ -1,0 +1,30 @@
+{
+  "baselineSHA": "19a107527d1226585611f4547619320b430fab2a",
+  "originMainAtStart": "19a107527d1226585611f4547619320b430fab2a",
+  "initialWorktree": "clean, detached HEAD; created abel/147-functional-color-stage1",
+  "node": "v22.23.1",
+  "pnpm": "10.34.5",
+  "packageManagerField": null,
+  "repositoryNodePin": "No .nvmrc/.node-version or engines field; existing CI Node 22 / pnpm 10",
+  "installed": {
+    "@nuxt/ui": "4.9.0",
+    "nuxt": "4.4.8",
+    "vue": "3.5.39",
+    "playwright-core": "1.63.0"
+  },
+  "sha256": {
+    "pnpm-lock.yaml": "50769ac3ed6932f61d327f5f01d217ff314f6ce1857d9573a9eb1fb8d5ebc5fe",
+    "foundation/assets/css/main.css": "bc80a01772b7029f3c3f44dab79c0b40b2215f11dcd9a6cfb7b2c43bac909347",
+    "foundation/config/app.ts": "b1f3495f96cea90509b0e3316c7a539e63a0434e749f10ec0a42630b258b27f2",
+    "node_modules/@nuxt/ui/dist/shared/ui.BfHSFiIO.mjs": "7cc8d6251d0bb12c7f692bfc372fc212284f7c924dd5d15bd1e5236bd5ddfdcd",
+    "tests/browser/measure.ts": "fedebe3af48eec60bb129f30fe5450ff012eaf94791cf20680df77de79ee8faa",
+    "scripts/lib/text-contrast.mjs": "21d29bd96c98c6c4fca1c75386f5c6bd309459e919778695ffc58e060d6f040c"
+  },
+  "source": {
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+    "builtAt": "2026-09-22T00:41:37.373Z",
+    "purpose": "Issue 147 stage 1 only; production sources unchanged"
+  },
+  "scope": "Stage 1 isolated audit/candidate. No production theme/runtime/contracts/ledger modifications."
+}

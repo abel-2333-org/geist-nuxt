@@ -1,4 +1,4 @@
-import type { Browser, Locator } from 'playwright-core'
+import type { Browser, JSHandle, Locator } from 'playwright-core'
 import { composite, contrastRatio } from '../../scripts/lib/text-contrast.mjs'
 
 type PaintEngine = { product: string, revision: string, boundedShadow: boolean }
@@ -25,9 +25,164 @@ async function paintEngine(locator: Locator): Promise<PaintEngine> {
   return identity
 }
 
-export async function measure(locator: Locator, pseudo: '::placeholder' | null = null) {
+type GeneratedText = {
+  path: number[], tag: string, pseudo: string, text: string, hostBounds: number[], bounds: number[],
+  styles: Record<string, string>, backendNodeId: number, platformFonts: unknown,
+}
+type PlainText = {
+  path: number[], tag: string, original: string, rendered: string, styles: Record<string, string>,
+  fragments: Array<{ start: number, length: number, bounds: number[] }>,
+  platformFonts: { fonts: Array<{ familyName: string, isCustomFont: boolean, glyphCount: number }> },
+}
+const generatedStyleNames = ['content', 'display', 'visibility', 'position', 'color', 'opacity', 'font-family', 'font-size', 'font-weight',
+  'font-style', 'font-stretch', 'font-variant', 'font-feature-settings', 'font-variation-settings', 'font-size-adjust',
+  'line-height', 'letter-spacing', 'word-spacing', 'text-transform', 'writing-mode', 'direction', 'vertical-align',
+  'margin-left', 'margin-right', 'margin-top', 'margin-bottom', 'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
+  'text-shadow', '-webkit-text-stroke-width', '-webkit-text-fill-color', '-webkit-text-security', 'text-decoration-line', 'text-emphasis-style',
+  '-webkit-locale', 'font-language-override', 'background-color', 'background-image', 'box-shadow', 'outline-style', 'outline-width', 'outline-color',
+  'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+  'transform', 'translate', 'rotate', 'scale', 'filter', 'backdrop-filter', 'mask-image', 'mix-blend-mode']
+const textStyleNames = [...new Set([...generatedStyleNames, 'font-optical-sizing', 'font-kerning', 'text-rendering',
+  'white-space', 'text-align', 'text-align-last', 'text-indent', 'text-justify', 'word-break', 'overflow-wrap', 'hyphens',
+  'text-wrap-style', 'text-spacing-trim', 'text-autospace', 'unicode-bidi', 'text-combine-upright',
+  'dominant-baseline', 'text-fit', 'text-box-trim', 'text-box-edge'])]
+
+type GeneratedGuard = { check(): { domMutations: number, events: number, geometryMatches: boolean }, stop(): void }
+
+async function generatedTextLayout(locator: Locator) {
+  const page = locator.page()
+  const cdp = await page.context().newCDPSession(page)
+  let guard: JSHandle<GeneratedGuard> | null = null
+  const changes: string[] = []
+  const close = async () => {
+    try { if (guard) { await guard.evaluate(value => value.stop()); await guard.dispose() } }
+    finally { await cdp.detach() }
+  }
+  try {
+    await cdp.send('DOM.enable')
+    await cdp.send('CSS.enable')
+    await cdp.send('DOM.getDocument')
+    // Keep these events alive through the final synchronous paint read. CDP's
+    // stylesheet notifications include CSSOM writes, even when reverted before
+    // the final computed-style read; FontFace updates have a separate event.
+    for (const name of ['CSS.styleSheetAdded', 'CSS.styleSheetRemoved', 'CSS.styleSheetChanged', 'CSS.fontsUpdated', 'DOM.documentUpdated'] as const) {
+      cdp.on(name, () => changes.push(name))
+    }
+    guard = await page.evaluateHandle(() => {
+      let domMutations = 0, events = 0
+      const observer = new MutationObserver(records => { domMutations += records.length })
+      observer.observe(document, { subtree: true, childList: true, characterData: true, attributes: true })
+      const changed = () => { events++ }
+      const registrations: Array<[EventTarget, string]> = [
+        [document, 'scroll'], [window, 'scroll'], [window, 'resize'],
+        [document.fonts, 'loading'], [document.fonts, 'loadingdone'], [document.fonts, 'loadingerror'],
+        [document, 'load'], [document, 'error'], [document, 'transitionrun'], [document, 'animationstart'],
+      ]
+      if (visualViewport) registrations.push([visualViewport, 'scroll'], [visualViewport, 'resize'])
+      for (const [target, name] of registrations) target.addEventListener(name, changed, true)
+      const ambient = () => JSON.stringify({
+        viewport: [innerWidth, innerHeight, scrollX, scrollY, devicePixelRatio, visualViewport?.scale, visualViewport?.offsetLeft, visualViewport?.offsetTop],
+        fonts: Array.from(document.fonts, font => [font.family, font.style, font.weight, font.stretch, font.status, font.unicodeRange,
+          font.featureSettings, (font as FontFace & { variationSettings?: string }).variationSettings, font.ascentOverride, font.descentOverride, font.lineGapOverride]),
+        elements: Array.from(document.querySelectorAll('*'), node => [node.scrollLeft, node.scrollTop,
+          Array.from(node.getClientRects(), rect => [rect.x, rect.y, rect.width, rect.height]),
+          node instanceof HTMLImageElement ? [node.complete, node.naturalWidth, node.naturalHeight] : null]),
+      })
+      const baseline = ambient()
+      return {
+        check() {
+          domMutations += observer.takeRecords().length
+          return { domMutations, events, geometryMatches: baseline === ambient() }
+        },
+        stop() {
+          observer.disconnect()
+          for (const [target, name] of registrations) target.removeEventListener(name, changed, true)
+        },
+      }
+    })
+    const plainPaths = await locator.evaluate(target => {
+      if (target.childNodes.length !== 1 || target.firstChild?.nodeType !== Node.TEXT_NODE) return []
+      return [target, ...Array.from(target.parentElement?.children || [])].filter(node => node.childNodes.length === 1
+        && node.firstChild?.nodeType === Node.TEXT_NODE).map(node => {
+        const path: number[] = []
+        for (let current = node; current.parentElement; current = current.parentElement) path.unshift(Array.from(current.parentElement.children).indexOf(current))
+        return JSON.stringify(path)
+      })
+    })
+    const snapshot = await cdp.send('DOMSnapshot.captureSnapshot', { computedStyles: textStyleNames })
+    if (snapshot.documents.length !== 1) throw new Error('unresolved: generated text in a multi-document snapshot')
+    const snapshotDocument = snapshot.documents[0]!, { nodes, layout, textBoxes } = snapshotDocument
+    const value = (index: number) => snapshot.strings[index] || ''
+    const pseudoNodes = new Set(nodes.pseudoType?.index || [])
+    const path = (index: number): number[] => {
+      const parent = nodes.parentIndex![index]!
+      if (parent < 0 || nodes.nodeType![parent] === 9) return []
+      const siblings = nodes.parentIndex!.flatMap((owner, candidate) => owner === parent
+        && nodes.nodeType![candidate] === 1 && !pseudoNodes.has(candidate) ? [candidate] : [])
+      return [...path(parent), siblings.indexOf(index)]
+    }
+    const viewport = (box: number[]) => [box[0]! - snapshotDocument.scrollOffsetX!, box[1]! - snapshotDocument.scrollOffsetY!, box[2]!, box[3]!]
+    const result: GeneratedText[] = []
+    for (const [offset, nodeIndex] of (nodes.pseudoType?.index || []).entries()) {
+      const pseudo = '::' + value(nodes.pseudoType!.value[offset]!)
+      const hostIndex = nodes.parentIndex![nodeIndex]!
+      const boxes = textBoxes.layoutIndex.flatMap((layoutIndex, boxIndex) => layout.nodeIndex[layoutIndex] === nodeIndex
+        ? [{ layoutIndex, boxIndex }] : [])
+      const hostLayouts = layout.nodeIndex.flatMap((index, candidate) => index === hostIndex ? [candidate] : [])
+      // No surrogate range, multi-fragment union, or inferred text is accepted.
+      if (boxes.length !== 1 || hostLayouts.length !== 1) continue
+      const { layoutIndex, boxIndex } = boxes[0]!
+      const text = value(layout.text[layoutIndex]!)
+      if (text !== '*' || textBoxes.start[boxIndex] !== 0 || textBoxes.length[boxIndex] !== 1) continue
+      const backendNodeId = nodes.backendNodeId![nodeIndex]!
+      const pushed = await cdp.send('DOM.pushNodesByBackendIdsToFrontend', { backendNodeIds: [backendNodeId] })
+      const platformFonts = await cdp.send('CSS.getPlatformFontsForNode', { nodeId: pushed.nodeIds[0]! })
+      result.push({ path: path(hostIndex), tag: value(nodes.nodeName![hostIndex]!), pseudo, text,
+        hostBounds: viewport(layout.bounds[hostLayouts[0]!]!), bounds: viewport(textBoxes.bounds[boxIndex]!),
+        styles: Object.fromEntries(generatedStyleNames.map((name, index) => [name, value(layout.styles[layoutIndex]![index]!)])),
+        backendNodeId, platformFonts })
+    }
+    const plain: PlainText[] = []
+    for (const [layoutIndex, nodeIndex] of layout.nodeIndex.entries()) {
+      if (nodes.nodeType![nodeIndex] !== 3) continue
+      const hostIndex = nodes.parentIndex![nodeIndex]!, hostPath = path(hostIndex)
+      if (!plainPaths.includes(JSON.stringify(hostPath))) continue
+      const hostLayout = layout.nodeIndex.indexOf(hostIndex)
+      if (hostLayout < 0) continue
+      const pushed = await cdp.send('DOM.pushNodesByBackendIdsToFrontend', { backendNodeIds: [nodes.backendNodeId![hostIndex]!] })
+      plain.push({ path: hostPath, tag: value(nodes.nodeName![hostIndex]!), original: value(nodes.nodeValue![nodeIndex]!),
+        rendered: value(layout.text[layoutIndex]!),
+        styles: Object.fromEntries(textStyleNames.map((name, index) => [name, value(layout.styles[hostLayout]![index]!)])),
+        fragments: textBoxes.layoutIndex.flatMap((owner, index) => owner === layoutIndex
+          ? [{ start: textBoxes.start[index]!, length: textBoxes.length[index]!, bounds: viewport(textBoxes.bounds[index]!) }] : []),
+        platformFonts: await cdp.send('CSS.getPlatformFontsForNode', { nodeId: pushed.nodeIds[0]! }) })
+    }
+    return {
+      generated: result,
+      plain,
+      guard,
+      async verify() {
+        // This also drains the CDP event stream through another renderer read.
+        // Equality is supplementary; the epochs above reject change-and-revert.
+        const after = await cdp.send('DOMSnapshot.captureSnapshot', { computedStyles: textStyleNames })
+        if (changes.length) throw new Error(`unresolved: generated snapshot changed during measurement (${[...new Set(changes)].join(', ')})`)
+        if (JSON.stringify(snapshot) !== JSON.stringify(after)) throw new Error('unresolved: generated snapshot changed during measurement (snapshot payload differs)')
+        return { cssOrFontEvents: changes.length, snapshotsMatch: true }
+      },
+      close,
+    }
+  }
+  catch (error) { await close(); throw error }
+}
+
+export async function measure(locator: Locator, pseudo: '::placeholder' | '::after' | null = null) {
   const engine = await paintEngine(locator)
-  const paint = await locator.evaluate((element, { pseudo, engine }) => {
+  const evaluate = (generated: GeneratedText[] | null, guard: JSHandle<GeneratedGuard> | null = null, plain: PlainText[] | null = null) => locator.evaluate((element, { pseudo, engine, generated, guard, plain }) => {
+    const consistency = guard?.check() || null
+    // No page task can interleave with the synchronous measurement below.
+    // Disconnect before our own temporary color parser mutates the DOM.
+    guard?.stop()
+    if (consistency && (consistency.domMutations || consistency.events || !consistency.geometryMatches)) throw new Error(`unresolved: generated snapshot changed before measurement (${JSON.stringify(consistency)})`)
     const target = element as HTMLElement
     const style = getComputedStyle(target, pseudo)
     const rect = target.getBoundingClientRect()
@@ -95,12 +250,88 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
       }
       return result
     }
-    const rawTextRect = input ? {
+    const fail = (reason: string): never => { throw new Error(`unresolved: ${reason}`) }
+    function canvasLanguage(context: CanvasRenderingContext2D, node: Element, css: CSSStyleDeclaration) {
+      const language = node.closest('[lang]')?.getAttribute('lang') || ''
+      const localized = context as CanvasRenderingContext2D & { lang?: string }
+      if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(language) || typeof localized.lang !== 'string'
+        || css.getPropertyValue('-webkit-locale') !== `"${language}"`) return null
+      localized.lang = language
+      return localized.lang === language ? language : null
+    }
+    function generatedProof(node: Element, name: string) {
+      if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1) fail('generated text engine or viewport is unverified')
+      if (generated === null) fail('generated text requires CDP layout')
+      const path: number[] = []
+      for (let current = node; current.parentElement; current = current.parentElement) path.unshift(Array.from(current.parentElement.children).indexOf(current))
+      const proof = generated!.find(item => item.pseudo === name && item.tag === node.tagName && JSON.stringify(item.path) === JSON.stringify(path))
+      if (!proof) fail('generated text has no single CDP text box')
+      const ps = getComputedStyle(node, name), box = node.getBoundingClientRect()
+      if (Object.entries(proof!.styles).some(([key, value]) => ps.getPropertyValue(key) !== value)
+        || [box.x, box.y, box.width, box.height].some((value, index) => value !== proof!.hostBounds[index])
+        || document.getAnimations().some(animation => animation.playState === 'running' || animation.pending)
+        || document.fonts.status !== 'loaded') fail('generated text layout is not stable')
+      // The text box is an actual generated asterisk, never its label's Range.
+      // Keep a 1px raster allowance and only ordinary inline text with no paint
+      // escaping that box. F-03 outline rejection still happens independently.
+      if (ps.content !== '"*"' || ps.display !== 'inline' || ps.position !== 'static'
+        || ps.visibility !== 'visible' || Number(ps.opacity) <= 0
+        || ps.fontStyle !== 'normal' || ps.writingMode !== 'horizontal-tb' || ps.direction !== 'ltr'
+        || ps.textShadow !== 'none' || ps.webkitTextStrokeWidth !== '0px' || ps.textDecorationLine !== 'none'
+        || ps.webkitTextFillColor !== ps.color || ps.getPropertyValue('-webkit-text-security') !== 'none'
+        || ps.textEmphasisStyle !== 'none' || ps.backgroundImage !== 'none' || ps.boxShadow !== 'none'
+        || ps.filter !== 'none' || ps.backdropFilter !== 'none' || ps.maskImage !== 'none' || ps.mixBlendMode !== 'normal'
+        || ps.transform !== 'none' || ps.translate !== 'none' || ps.rotate !== 'none' || ps.scale !== 'none'
+        || ps.textTransform !== 'none' || ps.fontFeatureSettings !== 'normal' || ps.fontVariationSettings !== 'normal'
+        || ps.fontVariant !== 'normal' || ps.fontStretch !== '100%' || ps.fontSizeAdjust !== 'none'
+        || ps.fontOpticalSizing !== 'auto' || ps.getPropertyValue('font-language-override') !== 'normal'
+        || ps.fontKerning !== 'auto' || ps.textRendering !== 'auto' || ps.letterSpacing !== 'normal'
+        || !['normal', '0px'].includes(ps.wordSpacing) || ps.textCombineUpright !== 'none'
+        || ps.backgroundColor !== 'rgba(0, 0, 0, 0)'
+        || [ps.borderTopWidth, ps.borderRightWidth, ps.borderBottomWidth, ps.borderLeftWidth].some(width => parseFloat(width) !== 0)
+        || transformed(node)) fail('unsupported generated text paint')
+      for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const css = getComputedStyle(ancestor)
+        if (ancestor.hasAttribute('xml:lang') || css.getPropertyValue('font-language-override') !== 'normal'
+          || css.translate !== 'none' || css.textDecorationLine !== 'none' || css.textEmphasisStyle !== 'none'
+          || css.webkitTextStrokeWidth !== '0px' || css.textShadow !== 'none') fail('unsupported generated text ancestor')
+        for (const name of ['::first-line', '::first-letter']) {
+          const first = getComputedStyle(ancestor, name)
+          if (['font-family', 'font-size', 'font-style', 'font-weight', 'font-feature-settings', 'font-variation-settings', 'text-shadow', '-webkit-text-stroke-width']
+            .some(key => first.getPropertyValue(key) !== css.getPropertyValue(key))) fail('unsupported generated first-line or first-letter')
+        }
+      }
+      const [x, y, width, height] = proof!.bounds
+      if (![x, y, width, height].every(value => Number.isFinite(value) && Math.abs(value!) < 2 ** 18) || width! <= 0 || height! <= 0) fail('invalid generated text bounds')
+      const canvas = document.createElement('canvas').getContext('2d')
+      if (!canvas) fail('generated text metrics unavailable')
+      const language = canvasLanguage(canvas!, node, ps)
+      if (!language) fail('generated text language is unverified')
+      canvas!.font = `${ps.fontWeight} ${ps.fontSize} ${ps.fontFamily}`
+      canvas!.direction = 'ltr'; canvas!.textBaseline = 'alphabetic'
+      const metric = canvas!.measureText('*')
+      const metrics = { width: metric.width, fontAscent: metric.fontBoundingBoxAscent, fontDescent: metric.fontBoundingBoxDescent,
+        left: metric.actualBoundingBoxLeft, right: metric.actualBoundingBoxRight,
+        ascent: metric.actualBoundingBoxAscent, descent: metric.actualBoundingBoxDescent }
+      if (!Object.values(metrics).every(Number.isFinite) || Math.abs(metrics.width - width!) > 1 / 64
+        || Math.abs(metrics.fontAscent + metrics.fontDescent - height!) > 1) fail('generated text DOM and Canvas metrics differ')
+      // Retain the whole CDP range; widen it if ink overhangs its advance/font
+      // box. The verified Blink baseline differs by at most 0.5px; add 1px
+      // raster allowance as in the existing singleGlyphTop proof.
+      return { ...proof!, language, metrics, box: {
+        left: Math.floor(Math.min(x!, x! - metrics.left) - 1),
+        right: Math.ceil(Math.max(x! + width!, x! + metrics.right) + 1),
+        top: Math.floor(Math.min(y!, y! + metrics.fontAscent - metrics.ascent - 0.5) - 1),
+        bottom: Math.ceil(Math.max(y! + height!, y! + metrics.fontAscent + metrics.descent + 0.5) + 1),
+      } }
+    }
+    const generatedTarget = pseudo === '::after' ? generatedProof(target, pseudo) : null
+    const rawTextRect = generatedTarget?.box || (input ? {
       left: rect.left + parseFloat(host.borderLeftWidth) + parseFloat(host.paddingLeft),
       right: rect.right - parseFloat(host.borderRightWidth) - parseFloat(host.paddingRight),
       top: rect.top + parseFloat(host.borderTopWidth) + parseFloat(host.paddingTop),
       bottom: rect.bottom - parseFloat(host.borderBottomWidth) - parseFloat(host.paddingBottom),
-    } : range.getBoundingClientRect()
+    } : range.getBoundingClientRect())
     function singleGlyphTop() {
       // A text Range includes font leading. Only this isolated, ordinary glyph
       // path has the same shaping/font metrics in DOM and Canvas. Every other
@@ -157,12 +388,8 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
           || face.sizeAdjust !== '100%') return null
         const context = document.createElement('canvas').getContext('2d')
         if (!context) return null
-        const language = target.closest('[lang]')?.getAttribute('lang') || ''
-        const localized = context as CanvasRenderingContext2D & { lang?: string }
-        if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(language) || typeof localized.lang !== 'string'
-          || host.getPropertyValue('-webkit-locale') !== `\"${language}\"`) return null
-        localized.lang = language
-        if (localized.lang !== language) return null
+        const language = canvasLanguage(context, target, host)
+        if (!language) return null
         context.direction = 'ltr'
         context.font = `${weight.value} ${size.value}px ${host.fontFamily}`
         context.textBaseline = 'alphabetic'
@@ -186,10 +413,9 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     const glyphBounds = singleGlyphTop()
     const textRect = clipped({ left: rawTextRect.left, right: rawTextRect.right, top: glyphBounds?.top ?? rawTextRect.top,
       bottom: rawTextRect.bottom }, target)
-    const text = pseudo ? (target as HTMLInputElement).placeholder : ((target as HTMLInputElement).value || target.textContent?.trim())
-    const fail = (reason: string): never => { throw new Error(`unresolved: ${reason}`) }
+    const text = generatedTarget?.text || (pseudo === '::placeholder' ? (target as HTMLInputElement).placeholder : ((target as HTMLInputElement).value || target.textContent?.trim()))
     if (!text || !rect.width || !rect.height || textRect.right <= textRect.left || textRect.bottom <= textRect.top || getComputedStyle(target).visibility !== 'visible') fail('empty or hidden target')
-    if (pseudo && (target as HTMLInputElement).value) fail('placeholder is not visible')
+    if (pseudo === '::placeholder' && (target as HTMLInputElement).value) fail('placeholder is not visible')
     const probe = document.createElement('span')
     probe.style.position = 'fixed'
     probe.style.visibility = 'hidden'
@@ -445,6 +671,13 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         const emptyContent = ps.content === '""' || ps.content === "''"
         const borderPaint = [ps.borderTopWidth, ps.borderRightWidth, ps.borderBottomWidth, ps.borderLeftWidth].some(value => parseFloat(value) > 0)
         if (emptyContent && !borderPaint && background[3] === 0 && ps.backgroundImage === 'none' && ps.boxShadow === 'none' && ps.filter === 'none' && ps.backdropFilter === 'none') continue
+        if (!emptyContent && ps.content === '"*"') {
+          const proof = generatedProof(node, pseudoName)
+          if (node === target && pseudo === pseudoName) continue
+          if (overlapsText(clipped(proof.box, node))) fail(`overlapping generated text ${pseudoName}`)
+          excludedPaint.push({ node: node.tagName, reason: 'outside verified CDP generated text bounds', ...proof })
+          continue
+        }
         const current = getComputedStyle(node)
         // A pseudo has no DOM rect. Only a bounded absolute box in this
         // positioned host permits geometric exclusion; zero-sized/static
@@ -501,6 +734,134 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     const excludedPaint: any[] = []
     const overlapsText = (box: { left: number, right: number, top: number, bottom: number }) =>
       box.left < box.right && box.top < box.bottom && box.left < textRect.right && box.right > textRect.left && box.top < textRect.bottom && box.bottom > textRect.top
+
+    function plainTextInk(node: Element) {
+      // This is only an exclusion proof for ordinary sibling text. Background,
+      // border, pseudo, shadow and outline checks keep the original union.
+      if (!engine.boundedShadow || devicePixelRatio !== 1 || visualViewport?.scale !== 1 || document.fonts.status !== 'loaded'
+        || document.getAnimations().some(animation => animation.playState === 'running' || animation.pending)
+        || node.childNodes.length !== 1 || node.firstChild?.nodeType !== Node.TEXT_NODE || transformed(node)) return null
+      const css = getComputedStyle(node), original = node.firstChild.textContent || ''
+      if (!/^[!-~]+(?: [!-~]+)*$/.test(original) || original.length > 256 || css.display !== 'inline' || css.position !== 'static'
+        || css.visibility !== 'visible' || css.writingMode !== 'horizontal-tb' || css.direction !== 'ltr' || css.unicodeBidi !== 'normal'
+        || css.fontStyle !== 'normal' || css.fontVariant !== 'normal' || css.fontFeatureSettings !== 'normal'
+        || css.fontVariationSettings !== 'normal' || css.fontStretch !== '100%' || css.fontSizeAdjust !== 'none'
+        || css.fontOpticalSizing !== 'auto' || css.fontKerning !== 'auto' || css.textRendering !== 'auto'
+        || !['normal', '0px'].includes(css.wordSpacing) || !['none', 'uppercase'].includes(css.textTransform)
+        || css.whiteSpace !== 'normal' || css.textCombineUpright !== 'none' || css.verticalAlign !== 'baseline'
+        || !['start', 'left'].includes(css.textAlign) || css.textAlignLast !== 'auto' || css.textIndent !== '0px'
+        || css.getPropertyValue('text-justify') !== 'auto' || css.wordBreak !== 'normal' || css.overflowWrap !== 'normal'
+        || css.hyphens !== 'manual' || css.getPropertyValue('text-wrap-style') !== 'auto'
+        || css.getPropertyValue('text-spacing-trim') !== 'normal' || css.getPropertyValue('text-autospace') !== 'no-autospace'
+        || css.textShadow !== 'none' || css.webkitTextStrokeWidth !== '0px' || css.textDecorationLine !== 'none'
+        || css.webkitTextFillColor !== css.color || css.getPropertyValue('-webkit-text-security') !== 'none'
+        || css.textEmphasisStyle !== 'none') return null
+      const typography = ['font-family', 'font-size', 'font-weight', 'font-style', 'font-stretch', 'font-variant',
+        'font-feature-settings', 'font-variation-settings', 'font-size-adjust', 'font-optical-sizing', 'font-language-override',
+        'font-kerning', 'text-rendering', 'letter-spacing', 'word-spacing', 'text-transform', 'text-shadow',
+        '-webkit-text-stroke-width', '-webkit-text-fill-color', 'text-decoration-line', 'text-emphasis-style', '-webkit-locale']
+      for (let ancestor: Element | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const current = getComputedStyle(ancestor)
+        if (ancestor.hasAttribute('xml:lang') || current.getPropertyValue('font-language-override') !== 'normal'
+          || current.translate !== 'none' || current.textShadow !== 'none' || current.webkitTextStrokeWidth !== '0px'
+          || current.textDecorationLine !== 'none' || current.textEmphasisStyle !== 'none'
+          || current.getPropertyValue('dominant-baseline') !== 'auto' || current.getPropertyValue('text-fit') !== 'none'
+          || current.getPropertyValue('text-box-trim') !== 'none' || current.getPropertyValue('text-box-edge') !== 'auto') return null
+        for (const name of ['::first-line', '::first-letter']) {
+          const first = getComputedStyle(ancestor, name)
+          if (typography.some(key => first.getPropertyValue(key) !== current.getPropertyValue(key))) return null
+        }
+      }
+      if (plain === null) fail('plain text ink requires CDP layout')
+      const path: number[] = []
+      for (let current = node; current.parentElement; current = current.parentElement) path.unshift(Array.from(current.parentElement.children).indexOf(current))
+      const proof = plain!.find(item => item.tag === node.tagName && JSON.stringify(item.path) === JSON.stringify(path))
+      if (!proof || proof.original !== original || proof.rendered.length !== original.length
+        || !/^[!-~]+(?: [!-~]+)*$/.test(proof.rendered)
+        || Object.entries(proof.styles).some(([key, value]) => css.getPropertyValue(key) !== value)) return null
+      const range = document.createRange(); range.selectNodeContents(node)
+      const ranges = Array.from(range.getClientRects()), fonts = proof.platformFonts.fonts
+      if (ranges.length !== proof.fragments.length || !ranges.length || ranges.length > 8
+        || fonts.length !== 1 || !fonts[0]!.isCustomFont
+        || fonts[0]!.glyphCount !== proof.fragments.reduce((total, fragment) => total + fragment.length, 0)) return null
+      const familyMatch = /^(?:"([^"\\]+)"|([A-Za-z][A-Za-z0-9_-]*))(?:,|$)/.exec(css.fontFamily)
+      const family = familyMatch?.[1] || familyMatch?.[2]
+      const size = Number.parseFloat(css.fontSize), weight = Number(css.fontWeight)
+      if (!family || fonts[0]!.familyName !== family || !Number.isFinite(size) || size <= 4 || size > 256
+        || !Number.isInteger(weight) || weight < 100 || weight > 900) return null
+      const covers = (face: FontFace) => {
+        const ranges = face.unicodeRange.split(',').map(part => /^\s*U\+([0-9A-F]+)(?:-([0-9A-F]+))?\s*$/i.exec(part))
+        return ranges.every(match => match) && Array.from(proof.rendered).every(char => ranges.some(match => char.codePointAt(0)! >= parseInt(match![1]!, 16)
+          && char.codePointAt(0)! <= parseInt(match![2] || match![1]!, 16)))
+      }
+      const faces = Array.from(document.fonts).filter(face => face.family.replace(/^"|"$/g, '') === family && face.style === 'normal'
+        && Number(face.weight === 'normal' ? 400 : face.weight) === weight && ['normal', '100%'].includes(face.stretch) && covers(face))
+      if (faces.length !== 1) return null
+      const face = faces[0]! as FontFace & { variationSettings?: string, variant?: string, sizeAdjust?: string }
+      if (face.status !== 'loaded' || face.featureSettings !== 'normal' || face.variationSettings !== 'normal' || face.variant !== 'normal'
+        || face.sizeAdjust !== '100%' || face.ascentOverride !== 'normal' || face.descentOverride !== 'normal' || face.lineGapOverride !== 'normal') return null
+      const canvas = document.createElement('canvas').getContext('2d')
+      if (!canvas) return null
+      const language = canvasLanguage(canvas, node, css)
+      if (!language) return null
+      canvas.font = `${weight} ${size}px "${family}"`
+      const selected = /^(?:(\d+) )?([\d.]+)px (.+)$/.exec(canvas.font)
+      if (!selected || Number(selected[1] || 400) !== weight || Number(selected[2]) !== size
+        || ![family, `"${family}"`].includes(selected[3]!)) return null
+      const properties = { direction: 'ltr', textAlign: 'left', textBaseline: 'alphabetic', fontKerning: 'auto',
+        fontStretch: 'normal', fontVariantCaps: 'normal', textRendering: 'auto', wordSpacing: '0px',
+        letterSpacing: css.letterSpacing === 'normal' ? '0px' : css.letterSpacing }
+      for (const [key, value] of Object.entries(properties)) {
+        if (typeof (canvas as any)[key] !== 'string') return null
+        ;(canvas as any)[key] = value
+        if ((canvas as any)[key] !== value) return null
+      }
+      const equal = (rect: DOMRect, bounds: number[]) => [rect.x, rect.y, rect.width, rect.height].every((value, index) => value === bounds[index])
+      let end = 0
+      const fragments: Array<{ text: string, bounds: number[], box: Bounds, metrics: Record<string, number> }> = []
+      for (const [index, fragment] of proof.fragments.entries()) {
+        if (!Number.isSafeInteger(fragment.start) || !Number.isSafeInteger(fragment.length) || fragment.length <= 0
+          || fragment.start < end || fragment.start + fragment.length > original.length || !equal(ranges[index]!, fragment.bounds)) return null
+        if (fragment.start !== end) {
+          // The only unpainted source character accepted is one soft-wrap
+          // separator omitted by CDP. Blink returns zero-width caret boxes at
+          // one or both line ends; their union is not a text paint rectangle.
+          if (fragment.start !== end + 1 || original[end] !== ' ' || index === 0) return null
+          range.setStart(node.firstChild!, end); range.setEnd(node.firstChild!, end + 1)
+          const separators = Array.from(range.getClientRects()), previous = proof.fragments[index - 1]!.bounds
+          if (!separators.length || separators.length > 2 || separators.some(box => box.width !== 0
+            || ![previous, fragment.bounds].some(bounds => box.top === bounds[1] && box.height === bounds[3]
+              && (Math.abs(box.left - bounds[0]!) <= 1 / 64 || Math.abs(box.left - bounds[0]! - bounds[2]!) <= 1 / 64)))) return null
+        }
+        end = fragment.start + fragment.length
+        range.setStart(node.firstChild!, fragment.start); range.setEnd(node.firstChild!, end)
+        if (range.getClientRects().length !== 1 || !equal(range.getBoundingClientRect(), fragment.bounds)) return null
+        const text = proof.rendered.slice(fragment.start, end)
+        if (text.startsWith(' ') || text.endsWith(' ')) return null
+        const [x, y, width, height] = fragment.bounds as [number, number, number, number]
+        if (fragment.bounds.some(value => !Number.isFinite(value) || Math.abs(value) >= 2 ** 18) || width <= 0 || height <= 0) return null
+        const m = canvas.measureText(text), metrics = { width: m.width, fontAscent: m.fontBoundingBoxAscent, fontDescent: m.fontBoundingBoxDescent,
+          left: m.actualBoundingBoxLeft, right: m.actualBoundingBoxRight, ascent: m.actualBoundingBoxAscent, descent: m.actualBoundingBoxDescent }
+        if (!Object.values(metrics).every(Number.isFinite) || Math.abs(metrics.width - width) > 1 / 64
+          || Math.abs(metrics.fontAscent + metrics.fontDescent - height) > 1) return null
+        fragments.push({ text, bounds: fragment.bounds, metrics, box: {
+          left: Math.floor(Math.min(x, x - metrics.left) - 1), right: Math.ceil(Math.max(x + width, x + metrics.right) + 1),
+          top: Math.floor(Math.min(y, y + metrics.fontAscent - metrics.ascent - 0.5) - 1),
+          bottom: Math.ceil(Math.max(y + height, y + metrics.fontAscent + metrics.descent + 0.5) + 1),
+        } })
+      }
+      if (end !== original.length) return null
+      return { path, original, rendered: proof.rendered, language, font: canvas.font, letterSpacing: canvas.letterSpacing,
+        platformFonts: proof.platformFonts, fragments, baselineAllowance: 0.5, rasterAllowance: 1 }
+    }
+    function disjointSiblingText(sibling: Element) {
+      if (pseudo || input || target.parentElement !== sibling.parentElement || range.getClientRects().length < 2) return false
+      const targetInk = plainTextInk(target), siblingInk = plainTextInk(sibling)
+      if (!targetInk || !siblingInk || targetInk.fragments.some(a => siblingInk.fragments.some(b =>
+        a.box.left < b.box.right && a.box.right > b.box.left && a.box.top < b.box.bottom && a.box.bottom > b.box.top))) return false
+      excludedPaint.push({ node: sibling.tagName, reason: 'outside verified CDP text ink fragments', targetInk, siblingInk })
+      return true
+    }
 
     // Only use a bounded, provable part of CSS painting order. A positioned
     // stacking context is atomic: descendants cannot escape its stack level.
@@ -582,6 +943,14 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         supported(node, current)
         if (current.display === 'none') fail('display:none ancestor')
         const underlays = supportedPseudos(node, true)
+        if (node === target && generatedTarget) {
+          for (const child of node.childNodes) {
+            if (child.nodeType === Node.COMMENT_NODE || (child.nodeType === Node.TEXT_NODE && !child.textContent?.trim())) continue
+            if (child.nodeType !== Node.TEXT_NODE) fail('generated target host has unsupported children')
+            const hostRange = document.createRange(); hostRange.selectNode(child)
+            if (Array.from(hostRange.getClientRects()).some(box => overlapsText(box))) fail('generated text overlaps its host text')
+          }
+        }
         if (branch) for (const siblingRoot of node.children) {
           if (siblingRoot === branch || siblingRoot === probe) continue
           for (const sibling of renderedSubtree(siblingRoot)) {
@@ -604,12 +973,34 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
               if (child.nodeType !== Node.TEXT_NODE || !child.textContent?.trim()) continue
               const range = document.createRange()
               range.selectNode(child)
-              if (Array.from(range.getClientRects()).some(box => overlapsText(clipped(box, sibling)))) fail(`unmodeled overlapping text ${sibling.tagName}`)
+              if (Array.from(range.getClientRects()).some(box => overlapsText(clipped(box, sibling))) && !disjointSiblingText(sibling)) fail(`unmodeled overlapping text ${sibling.tagName}`)
             }
             if (!painted) continue
             const isIndicator = sibling.getAttribute('data-slot') === 'indicator' && target.closest('[role="tab"]')
             const isArrival = sibling.hasAttribute('data-field-arrival-cue')
-            if (!isIndicator && !isArrival) fail(`unmodeled overlapping sibling ${sibling.tagName}.${sibling.className}`)
+            // A stretched link can paint below a later positioned text branch.
+            // Prove the complete CSS ordering/coverage contract; classes, ARIA
+            // state and the SidebarNav component name confer no permission.
+            const branchStyle = getComputedStyle(branch)
+            const isAbsoluteUnderlay = sibling === siblingRoot
+              && Array.from(sibling.childNodes).every(child => child.nodeType === Node.COMMENT_NODE
+                || (child.nodeType === Node.TEXT_NODE && (child as Text).data.length === 0))
+              && sibling instanceof HTMLAnchorElement && siblingStyle.position === 'absolute'
+              && current.position === 'relative' && ['block', 'list-item', 'flow-root'].includes(current.display)
+              && branchStyle.display !== 'contents' && branch.getClientRects().length === 1
+              && siblingStyle.zIndex === 'auto' && branchStyle.position === 'relative' && branchStyle.zIndex === 'auto'
+              && Number(siblingStyle.opacity) === 1 && Number(branchStyle.opacity) === 1
+              && siblingStyle.isolation === 'auto' && branchStyle.isolation === 'auto'
+              && siblingStyle.mixBlendMode === 'normal' && branchStyle.mixBlendMode === 'normal'
+              && siblingStyle.contain === 'none' && branchStyle.contain === 'none'
+              && siblingStyle.willChange === 'auto' && branchStyle.willChange === 'auto'
+              && !transformed(sibling) && !transformed(branch)
+              && siblingStyle.translate === 'none' && branchStyle.translate === 'none'
+              && branchStyle.filter === 'none' && branchStyle.backdropFilter === 'none'
+              && branchStyle.maskImage === 'none' && branchStyle.clipPath === 'none'
+              && positionedContext(target, node)?.node === null
+              && coversText(sibling, siblingStyle)
+            if (!isIndicator && !isArrival && !isAbsoluteUnderlay) fail(`unmodeled overlapping sibling ${sibling.tagName}.${sibling.className}`)
             // Both accepted layers precede the positioned content in DOM paint
             // order. Reject a changed stacking contract instead of guessing.
             if (sibling !== siblingRoot || !(sibling.compareDocumentPosition(branch) & Node.DOCUMENT_POSITION_FOLLOWING)
@@ -617,7 +1008,7 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
               || getComputedStyle(branch).position === 'static') fail('unverified sibling stacking order')
             if (box.left > rect.left + 1 || box.right < rect.right - 1 || box.top > rect.top + 1 || box.bottom < rect.bottom - 1) fail('partial sibling coverage')
             background[3] *= Number(siblingStyle.opacity)
-            underlays.push({ kind: isIndicator ? 'tabs-indicator' : 'arrival-cue', background, raw: siblingStyle.backgroundColor, opacity: Number(siblingStyle.opacity), box: box.toJSON() })
+            underlays.push({ kind: isIndicator ? 'tabs-indicator' : isArrival ? 'arrival-cue' : 'absolute-link-underlay', background, raw: siblingStyle.backgroundColor, opacity: Number(siblingStyle.opacity), box: box.toJSON() })
           }
         }
         if (Number(current.opacity) !== 1) opaqueSurface = null
@@ -625,10 +1016,24 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
         chain.push({ node: node.tagName + (node.id ? `#${node.id}` : ''), background: color(current.backgroundColor), rawBackground: current.backgroundColor, opacity: Number(current.opacity), underlays })
       }
       layers.push(...chain)
-      return { text, textBounds: { raw: { left: rawTextRect.left, right: rawTextRect.right, top: rawTextRect.top, bottom: rawTextRect.bottom }, used: textRect, glyph: glyphBounds }, rawForeground: style.color, foreground, layers, excludedPaint, engine, rect: rect.toJSON(), pseudo, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
+      return { text, textBounds: { raw: { left: rawTextRect.left, right: rawTextRect.right, top: rawTextRect.top, bottom: rawTextRect.bottom }, used: textRect, glyph: glyphBounds }, rawForeground: style.color, foreground, layers, excludedPaint, engine, rect: rect.toJSON(), pseudo, generatedText: generatedTarget, generatedConsistency: consistency, fontFamily: style.fontFamily, fontSize: style.fontSize, ownOpacity: own.opacity }
     }
     finally { probe.remove() }
-  }, { pseudo, engine })
+  }, { pseudo, engine, generated, guard, plain })
+  let snapshotConsistency: { cssOrFontEvents: number, snapshotsMatch: boolean } | null = null
+  let paint: Awaited<ReturnType<typeof evaluate>>
+  try { paint = await evaluate(null) }
+  catch (error) {
+    if (!(error instanceof Error) || !['unresolved: generated text requires CDP layout', 'unresolved: plain text ink requires CDP layout'].some(reason => error.message.includes(reason))) throw error
+    // A second read only fills a missing proof. It does not retry an unsafe
+    // paint or relax a rejection; missing/changed CDP evidence still fails.
+    const proof = await generatedTextLayout(locator)
+    try {
+      paint = await evaluate(proof.generated, proof.guard, proof.plain)
+      snapshotConsistency = await proof.verify()
+    }
+    finally { await proof.close() }
+  }
   let background = [0, 0, 0, 0]
   let foreground = paint.foreground
   for (const layer of paint.layers) {
@@ -640,5 +1045,5 @@ export async function measure(locator: Locator, pseudo: '::placeholder' | null =
     foreground[3] *= layer.opacity
   }
   if (background[3] !== 1 || foreground[3] !== 1) throw new Error('unresolved: no opaque canvas in the actual ancestor chain')
-  return { ...paint, effectiveForeground: foreground, effectiveBackground: background, ratio: contrastRatio(foreground, background) }
+  return { ...paint, snapshotConsistency, effectiveForeground: foreground, effectiveBackground: background, ratio: contrastRatio(foreground, background) }
 }
