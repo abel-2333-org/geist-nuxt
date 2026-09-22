@@ -50,13 +50,13 @@
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-17T05:41:12.753Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "b10b13eb1d83edbd77766025320cfdd5fa6d5518",
-        "headSha": "3f1f7aaeefd32429fabc3f18658549eb15e44db5",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -67,7 +67,7 @@
           "references/foundations/typography.md",
           "tests/component/inline-code.spec.ts"
         ],
-        "scopeDigest": "fe14631f3a05dd5d9c1d84aba09f68a898048a6b95cd38fcebbde00487e1b6d1",
+        "scopeDigest": "1432e44a162d0859d975cb56c9da98069e9e3e9b090b52c36a50c32da29ed9f4",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -96,7 +96,7 @@
           }
         ]
       },
-      "notes": "co-review:本次功能 diff 命中本 item scope 的只有 references/foundations/typography.md——在「裸元素只写其一」一句后补充说明该约束已由 pnpm test:registry 的 tests/type-scale-pairing.test.mjs 自动守卫(同一 class 字符串里无 variant 前缀的 text-code 与主题字号并写即失败,md:text-sm 等响应式切换放行)。InlineCode 源码、inline-code.spec、gallery、data-display.md、main.css、app.ts 零 diff;守卫在当前仓库扫描零违规,并经三次变异(页面静态 class 的 important 写法、app.ts 字符串字面量、FieldAnnotation 的数组化 :trigger-class)验证会报红,并经一次反向变异(往 Foundations.vue 字号表补合法 text-code 数据行)验证不误报;检测范围与已知限制写在测试文件头注释。既有 resolved finding f-4b98b0623a0a 原样保留,依赖证据前提不变。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
@@ -330,13 +330,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -351,20 +351,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "465723b76770756658abdb0b6cb019632a9c4696dcaa50ad6cab78c4994921bb"
+        "scopeDigest": "cc595eef3e6ed802f70a0be942c79d49a0de329c0f40d1f7cedbdb293ec68abc"
       },
-      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -383,9 +383,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "b7b9adf43ffbdd9fc2db397b87e487452db1c835b01dcaf97938e932fb93aa2e"
+        "scopeDigest": "ec842fdc7b184a587ed20b069f777316551b626b14699b387716e60239d78862"
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -490,13 +490,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -513,20 +513,20 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "5a092b755de965b02d370333b94e8b9370923b6012c5aaef9493b52e8beef113"
+        "scopeDigest": "2c3b70d68a783e666471b28afa1a9914b8766954b816d400f9853bc1d0c036d0"
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md、api-docs-type-compat.ts）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；`api-docs-type-compat.ts` 只新增 condition 列表形态锚点与「条目必须是 string」的 `@ts-expect-error`，本组件类型锚点未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -545,7 +545,7 @@
           "references/kits/api-docs/sidebar-nav.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "b87c1c80e6fcfd821e01955463987e995b8fd45f2b3f885adb6473dad84fa174",
+        "scopeDigest": "9e8a1d0b4c9bc02dd171d3172fa74a023e1bd25e4e7b77fef30cf88752d2102c",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -559,18 +559,18 @@
           }
         ]
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -583,20 +583,20 @@
           "tests/component/enum-table.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "7042d3df2057db92fe8a9f7185458ec7df2946e5d9271c4c7734cb20ae051035"
+        "scopeDigest": "4ae5f34f032134f51ab46dd136fa95699c45a402c101d16b121f52f5b8f0de22"
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -605,24 +605,25 @@
           "kits/api-docs/components/WebhookProtocol.vue",
           "references/kits/api-docs/index.md"
         ],
-        "scopeDigest": "6b49d791f44d4e6d9248572a707187d95cb26ae1abf4beb9a1ca56bea68e09eb"
+        "scopeDigest": "962bf37202c67f98718c94c42c40de42157e650ba59f60e2eb6a27ba35a50872"
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "365a28b929abbf9fbbb3ade1527b7efe42d41eaf91a9170f79ccd967020abea4",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
           "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
           "kits/api-docs/internal/ConditionEntries.vue",
@@ -636,32 +637,35 @@
           "tests/component/field-item-structure.spec.ts",
           "tests/component/field-presence.spec.ts",
           "tests/component/field-value-structure.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/nuxt/api-docs-type-compat.ts"
         ],
-        "scopeDigest": "1ca5e3ed67f4985356c570ee4179e85176bd4559dc18e1061c518ee2f4c5d010"
+        "scopeDigest": "78f3ff321ea2a1783017acc12f73bba60ee1d349936b5d9311e073161546277b"
       },
-      "notes": "#145 条件列表功能复审（命中：endpoint-reference.vue、index.vue、FieldItem.vue、ConditionEntries.vue、FieldValueRequirements.vue、field.ts、index.md、field-condition.spec.ts、field-presence.spec.ts、api-docs-type-compat.ts）：`FieldNode.condition` / `FieldPresence.condition` 统一为 `ConditionText = string | readonly string[]`（`ValuePresence` 随派生），`conditionEntries()` 为唯一归一化入口（忽略空白与非 string 条目、保持顺序、返回 `ConditionEntryList`），`fieldRequiredState` / `hasDetail` / `describeFieldPresence`（`PresenceNotation.condition` 变为恒有只读数组）/ `hasValueDetail` / `describeValueRequirements` 全部改读归一化结果，空列表不再从 truthy 推出 Conditional；新增内部 `ConditionEntries.vue`（1 条与字符串等价，≥2 条在同一 rule 内渲染 `<ul role=\"list\">`，`list-disc space-y-1 ps-4 marker:text-muted`，0 条不渲染）挂入本 item files，被 FieldItem 两条 rule 与 FieldValueRequirements 共用；新增 `field-condition.spec.ts` 覆盖归一化（含非 string 条目）、判定优先级、字段行 / 递归子字段 / presence / 值节点渲染与两侧「单条列表 ≡ 字符串」等价、FieldAnnotation popover 标记，`field-presence.spec` 按新契约更新并修正值节点 `compact` 恒真断言，`api-docs-type-compat.ts` 钉住列表形态；gallery 四处条件列表实例（`receiptUrl` 3 条 / `url` 2 条 / `gitSource` 请求侧 2 条 / `refunds` 元素值节点 2 条）+ 字段区记号说明句同步；本地 gallery 明 / 暗、桌面 / 320px、EN 长 token 实测单一 rule 内列表、无横向溢出、链接可键盘聚焦；三轮 opus 复审（契约与规范 / 正确性 / 修复复核）finding 全部处置；无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-schema-composition": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
-        "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
+        "itemDigest": "bc85d101464309dd4df732304a874c1732efc5a85ec632a5640b357e34b496b4",
         "scope": [
           "app/pages/kits/api-docs/schema-composition.vue",
+          "foundation/assets/css/main.css",
           "kits/api-docs/components/SchemaComposition.vue",
           "kits/api-docs/utils/field.ts",
           "references/kits/api-docs/schema-composition.md",
           "tests/component/chrome-labels.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/component/schema-composition.spec.ts"
         ],
-        "scopeDigest": "61967a5d0c389baa5be5d12fba434aa3ce7c7adf52f341c5b6ed07e7fa8dd91a",
+        "scopeDigest": "a7b6d2748e2d4efc83b444ef15ce4e35de70501c82447513fc9a0e3721d8c0d4",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -675,18 +679,18 @@
           }
         ]
       },
-      "notes": "#145 条件列表复审（命中：field.ts）：`utils/field.ts` 改动仅限 condition 类型、`conditionEntries()` 与 presence / 值节点判定，composition 模型（`CompositionNode` / variants / discriminator）与 `collectCompositionPaths` 未变，SchemaComposition 不读 `condition`；变体内字段行经 FieldItem 渲染，由 field-item 复审覆盖；无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -697,9 +701,9 @@
           "tests/component/annotation-forms.spec.ts",
           "tests/component/field-condition.spec.ts"
         ],
-        "scopeDigest": "fb4e98ad0301682776cd2c686ae1291cf78f53680cb3666d94da270b50d939c7"
+        "scopeDigest": "365ab83c0bd06b5744bac73472de8e0a4015c2d536554121fbe659feabb3f410"
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md、field-condition.spec.ts）：popover 经 `fieldRequiredState` 共用判定，列表条件出 Conditional、空列表不出，由新纳入 scope 的 `field-condition.spec.ts` 钉住；`describeFieldPresence().condition` 变为数组但 popover 不预览 presence 条件句，无读取；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -719,13 +723,13 @@
     },
     "api-docs-event-badge": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -738,7 +742,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/http-method-badge.spec.ts"
         ],
-        "scopeDigest": "56390cce7afec152bd1de85da59f8b0f55c95520f5757cdce92a676c1be85d9d",
+        "scopeDigest": "c03156e2dbfd7215fb5bceb49429837cb01d604e8d3a2e78ecd0f536a5be1da1",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -752,18 +756,18 @@
           }
         ]
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/pages/kits/api-docs/index.vue",
@@ -775,20 +779,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/chrome-labels.spec.ts"
         ],
-        "scopeDigest": "1f6b7e147ddd98fae1f0fb517031103710eb245ec1d7407a82756b4aeefdf8b4"
+        "scopeDigest": "beb7b96b52e366ba6d1209f617086668d73b42b108b0852dd13e7528338b270d"
       },
-      "notes": "#145 条件列表复审（命中：index.vue、index.md）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-operation-target": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/pages/kits/api-docs/endpoint-reference.vue",
@@ -800,20 +804,20 @@
           "references/kits/api-docs/index.md",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "bb12cd867da1986bd1d8f2ba6ae30250a69e9f7a19ca67cca02d132bca513d5c"
+        "scopeDigest": "f4cd8ce82ed63d59ff8e8e4a8c702278c079cdf1391acff473ae63a496dc8259"
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -828,20 +832,20 @@
           "tests/component/chrome-labels.spec.ts",
           "tests/component/operation-header.spec.ts"
         ],
-        "scopeDigest": "86ebfd0a1bab2ca1ddbef80d4476a298321fac264acdac286e1cd0cc3de45a98"
+        "scopeDigest": "8981e84a7e308b9c1de54f5fa59541d07b3f136bcb12245ee050ff827fbcf75b"
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -859,20 +863,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "3af94166e1d9d85dbb792805d879e540a50dd175077f2568ef4f29d0757f6a54"
+        "scopeDigest": "c844e74d929d55cecd32da2cbf8e3767c5ed086a56e90738efde0b5669f44416"
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.md）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/components/demo/api-docs/DocsShell.vue",
@@ -882,7 +886,7 @@
           "references/kits/api-docs/index.md",
           "tests/component/site-search.spec.ts"
         ],
-        "scopeDigest": "f4508304cf7f9e09f9337b4cc935ad3baf51c10700854974c6abb9bf02fc6bf6",
+        "scopeDigest": "696ae2163a6cb791cb7f31e2c5a5178e8803a92be97c92109170b4fcd838b25a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -896,7 +900,7 @@
           }
         ]
       },
-      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -909,13 +913,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -930,9 +934,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "73a8f414672e18465d4db05e230c0995b638efea037d8c8d525c45a6c96d5484"
+        "scopeDigest": "f888e090c4baa26a30c564fd7985398990aabaf4f62c9cac7558f3358cf59d9d"
       },
-      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -993,13 +997,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "lastAuditedAt": "2026-09-22T01:56:02.923Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "d4cb0ec1ca48c1d81200293673d0be229fb88e9f",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/pages/kits/api-docs/structured-relations.vue",
@@ -1009,9 +1013,9 @@
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts"
         ],
-        "scopeDigest": "9ef01846575594966b8aa4d24a1e2a809f28ce584016c43f5ef9cf89d17a07c4"
+        "scopeDigest": "9afc2aa14351497b1e4000bc61edf6dd3140f9a8e9763a2b53e98f44e76c5825"
       },
-      "notes": "#145 条件列表复审（命中：index.md）：`references/kits/api-docs/index.md` 命中为 FieldItem 行、必填标记派生段、琥珀阶梯段、输出存在性段与源码参考清单的条件列表描述，本组件条款未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "PR153 保留原 PR A 实现。本轮独立复核共享 references 的 ARIA 生命周期更正，不改变此 owner 的其他契约；组件全量464项、registry160项及agent20项通过。CSS结构门禁与浏览器补验见2026-09-22-pr153报告；历史视觉与未验证项明确分开。",
       "findings": []
     }
   }
