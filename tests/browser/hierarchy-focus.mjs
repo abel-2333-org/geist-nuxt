@@ -168,6 +168,14 @@ async function runStrict() {
         } else {
           await settledClosed(button)
         }
+        // Keep collecting all immediate/frame samples while the newly focused
+        // anchor's own fade completes. With reduced motion the panel may settle
+        // first; that does not make the focus transition a settled UI state.
+        await page.evaluate(async () => {
+          await Promise.all(document.activeElement.getAnimations()
+            .filter(animation => Number.isFinite(animation.effect.getComputedTiming().endTime))
+            .map(animation => animation.finished.catch(() => {})))
+        })
         result.samples = await page.evaluate(() => window.__focusProbe.stop())
         // Ignore capture-phase keyup/animation events before Vue commits its focus recovery.
         // Frames, focusin, Tab keydown and explicit checkpoints cover observable focus states.
@@ -194,6 +202,8 @@ async function runStrict() {
           assert.ok(samples.every(s => s.isExternalFocus), `${label}: external focus must not be stolen even transiently`)
           assert.ok(await page.evaluate(() => document.activeElement === window.__externalFocus), `${label}: external focus must not be stolen`)
         }
+        await page.evaluate(() => document.activeElement.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' }))
+        result.screenshotScroll = 'Focused control centered only after all focus assertions; full outline retained'
         result.screenshot = `strict-${label}-${motion}-${mode}-settled.png`
         await page.screenshot({ path: path.join(output, result.screenshot) })
         if (mode === 'rapid-reopen') {
