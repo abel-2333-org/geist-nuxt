@@ -19,6 +19,7 @@ export type {
 </script>
 
 <script setup lang="ts">
+import { vCollapseFocus } from '../internal/collapseFocus'
 // Domain component (API docs): renders one field row of an endpoint's schema —
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
 // constraints, example, lifecycle), and recursive object/array subfields.
@@ -654,7 +655,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <template #content>
         <!-- Subtree of this row: the structural line and indent come from the
              foundation `subtree` utility, never hand-written here. -->
-        <div class="mt-1 subtree">
+        <div v-collapse-focus="open" class="mt-1 subtree">
           <FieldItem
             v-for="child in children"
             :key="child.path ?? child.name"

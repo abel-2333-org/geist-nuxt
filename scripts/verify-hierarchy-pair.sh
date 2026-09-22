@@ -50,9 +50,11 @@ for url in http://127.0.0.1:3016/__hierarchy http://127.0.0.1:3018/__hierarchy; 
 done
 BASE_URL=http://127.0.0.1:3016 EVIDENCE_DIR="$EVIDENCE_ROOT/head-fixture" node tests/browser/hierarchy-fixture.mjs
 (cd "$BASE_DIR" && BASE_URL=http://127.0.0.1:3018 REPORT_ONLY=1 EVIDENCE_DIR="$EVIDENCE_ROOT/base-fixture" node tests/browser/hierarchy-fixture.mjs)
-BASE_URL=http://127.0.0.1:3016 SOURCE_SHA="$SOURCE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/head-focus" node tests/browser/hierarchy-focus.mjs
+HEAD_STRICT=1 BASE_URL=http://127.0.0.1:3016 SOURCE_SHA="$SOURCE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/head-focus" node tests/browser/hierarchy-focus.mjs
 BASE_URL=http://127.0.0.1:3018 SOURCE_SHA="$BASELINE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/base-focus" node tests/browser/hierarchy-focus.mjs
-EVIDENCE_DIR="$EVIDENCE_ROOT" node tests/browser/hierarchy-focus-compare.mjs
+HEAD_STRICT=1 EVIDENCE_DIR="$EVIDENCE_ROOT" node tests/browser/hierarchy-focus-compare.mjs
+BASE_URL=http://127.0.0.1:3016 SOURCE_SHA="$SOURCE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/head-discovery" node tests/browser/hierarchy-discovery.mjs
+DISCOVERY_ONLY=1 BASE_URL=http://127.0.0.1:3018 SOURCE_SHA="$BASELINE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/base-discovery" node tests/browser/hierarchy-discovery.mjs
 BASE_URL=http://127.0.0.1:3016 BASELINE_URL=http://127.0.0.1:3018 SOURCE_SHA="$SOURCE_SHA" BASELINE_SHA="$BASELINE_SHA" EVIDENCE_DIR="$EVIDENCE_ROOT/paired" node tests/browser/hierarchy-compare.mjs
 cp .output/hierarchy/source.json "$EVIDENCE_ROOT/head-source.json"
 cp "$BASE_DIR/.output/hierarchy/source.json" "$EVIDENCE_ROOT/base-source.json"

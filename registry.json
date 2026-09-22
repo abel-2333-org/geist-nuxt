@@ -362,6 +362,7 @@
         { "path": "kits/api-docs/internal/ConditionEntries.vue", "target": "app/internal/ConditionEntries.vue" },
         { "path": "kits/api-docs/internal/FieldValueRequirements.vue", "target": "app/internal/FieldValueRequirements.vue" },
         { "path": "kits/api-docs/internal/FieldValueStructure.vue", "target": "app/internal/FieldValueStructure.vue" },
+        { "path": "kits/api-docs/internal/collapseFocus.ts", "target": "app/internal/collapseFocus.ts" },
         { "path": "kits/api-docs/composables/useFieldAnchor.ts", "target": "app/composables/useFieldAnchor.ts" },
         { "path": "kits/api-docs/utils/field.ts", "target": "app/utils/field.ts" }
       ]

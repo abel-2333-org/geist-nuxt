@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vCollapseFocus } from '../internal/collapseFocus'
 // Domain component (API docs): SchemaComposition.
 // Renders an OpenAPI / JSON Schema composition block faithfully:
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
@@ -337,6 +338,7 @@ function toggleVariant(variantId: string) {
           <template #content>
             <div
               :id="contentId(view.variant.id)"
+              v-collapse-focus="open[view.variant.id]"
               class="@container/field flex flex-col gap-3 px-3 pb-3 ps-9"
             >
               <p v-if="view.variant.description" class="text-sm leading-relaxed text-toned">

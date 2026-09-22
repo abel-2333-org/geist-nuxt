@@ -6,6 +6,16 @@ const read = async label => JSON.parse(await readFile(path.join(root, `${label}-
 const base = await read('base'), head = await read('head')
 const report = { base: base.sourceSha, head: head.sourceSha, browser: head.browser, cases: [], status: 'running' }
 try {
+  if (process.env.HEAD_STRICT === '1') {
+    assert.equal(head.strictRequested, true, 'HEAD must execute strict focus gates')
+    assert.equal(head.strictPassed, true, 'HEAD must pass strict focus gates; inherited findings are not accepted')
+    for (const motion of ['no-preference', 'reduce']) for (const label of ['children', 'value', 'anyOf']) for (const mode of ['rapid-tab', 'ancestor-programmatic-activation', 'external-focus', 'rapid-reopen']) {
+      const matches = head.strictCases.filter(row => row.motion === motion && row.label === label && row.mode === mode)
+      assert.equal(matches.length, 1, `strict scenario required: ${label}/${motion}/${mode}`)
+      assert.equal(matches[0].status, 'passed', `strict scenario must pass: ${label}/${motion}/${mode}`)
+    }
+    report.strictPassed = true
+  }
   assert.equal(head.browser, base.browser, 'same browser')
   assert.deepEqual(head.viewport, base.viewport, 'same viewport')
   for (const source of [base, head]) {

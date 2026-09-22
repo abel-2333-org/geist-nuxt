@@ -123,3 +123,11 @@ pnpm test:browser:hierarchy-pair
 - `head-source.json`、`base-source.json`：生产 SHA 与包含测试 harness 的源码 digest。基线是主线生产源码加同一测试 harness，不能把 harness 说成历史主线自带的文件。
 
 单独调试可先 `pnpm build:hierarchy`，运行 `.output/hierarchy/server/index.mjs`，再通过 `BASE_URL` 执行 `test:browser:hierarchy-fixture`。基线 fixture 的 `REPORT_ONLY=1` 仅记录已预期的旧样式差异；head 使用严格断言。正式证据应使用未改动的最终 HEAD 重新构建，不复用调试期报告。
+
+### PR153 V2 正向焦点门禁
+
+`HEAD_STRICT=1 BASE_URL=http://127.0.0.1:3017 pnpm test:browser:hierarchy-focus` 保留六个历史归因场景，并增加三入口 × 正常/减少动画 × 快速 Tab、内部焦点关闭、外部焦点关闭、快速重开。`verify-hierarchy-pair.sh` 强制 HEAD 严格通过；基线仍记录原始失败。JSON 包含逐帧/事件焦点与裁剪、动画状态，严格场景另存截图。复制锚点自身的淡入仅在可见几何、focus-visible outline、真实 opacity 向 1 的 CSS transition 同时成立时单独记录；关闭区域、BODY 和完全裁剪始终失败，稳态仍须可见。
+
+`BASE_URL=http://127.0.0.1:3017 node tests/browser/hierarchy-discovery.mjs` 验证真实片段 `beforematch`、区域根焦点及嵌套同时关闭；`DISCOVERY_ONLY=1` 只跑基线可发现性对照。`window.find` 是单列观察结果，不替代 Chrome 查找界面验收，也不以脚本总体 passed 宣称 Find 通过。
+
+快速反向场景由真实 Space 关闭、浏览器内下一帧程序化 `HTMLButtonElement.click()` 重开，记录当时退出动画确实 running，避免驱动往返耗尽窗口。之后立即真实 Tab，整个展开过程仍断言无完全裁剪/隐藏/退出内容焦点或 BODY；动画稳态后再验证后代可 Tab。展开时的几何限制是维护者补充授权的行为修复，不以等待代替即时探针。

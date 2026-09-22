@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vCollapseFocus } from './collapseFocus'
 // Renders "what this field's VALUE requires and contains", for values that are
 // array elements, record members, or the content inside an encoded string.
 // Internal helper of FieldItem: distributed with the api-docs-field-item
@@ -226,6 +227,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
              row's. -->
         <div
           :id="value.path"
+          v-collapse-focus="open"
           data-value-structure-region
           class="subtree relative mt-2 flex flex-col gap-3 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
           :class="anchor.SCROLL_MARGIN_CLASS"
