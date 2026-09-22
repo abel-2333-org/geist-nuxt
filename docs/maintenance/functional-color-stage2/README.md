@@ -37,6 +37,8 @@
 - 独立复审复现快照取回后宿主正文换行、宿主尺寸不变时，旧星号位置被误用的竞态。生成内容须额外证明快照与测量一致，不能仅核对宿主矩形及伪元素样式。
 - 独立复审复现 `dark:hover` 背景分支压过普通实例 hover 覆盖。正式实现以按钮内部变量切换混色方向，并保留普通 hover / active 修饰符；同时验证 `ui.base` 与 `class` 的明暗真实绘制结果，不能只检查 class 字符串。
 - 部分窄屏节点被真实 sticky header 遮挡、Popover 尚在离场，检测器保留 unresolved。测试应在正常交互形成的可见稳定状态测量，不删除 header、浮层或失败节点。
+- 临时 consumer 的实际 app 类型检查发现新增测试页面的两个 inline 赋值回调返回 string，不符合 Button 的 void 事件类型。测试页面改为 void 回调，并加入根 Nuxt 的既有 fixture 类型检查入口；不能以根检查未报错代替消费端验证。
+- 新 dark primary 使两个展开 owner 的旧 `/75` 在默认背景上实际达到 `4.774395043767927`，原“此默认背景必红”的测试前提失效。`cf7b5aa9e60abf6ed4832fc4f8cf60f0774521c5` 独立浏览器探针保留 48 条实测：dark muted/elevated/accented 的同一 `/75` 分别为 `4.429641507771985`、`4.265787748798075`、`3.892098225709601`，全部 before/restored 通过。因此保留默认样本和真实通过结果，扩展四种正式背景的 owner 状态与独立负控；每个 owner/主题仍要求至少一个真实 `<4.5`，源码变异仍必须在真实 hover owner 上触发数值失败。没有降低阈值、修改已采纳色值、删原状态，或把未解析当成有效红；阶段 1 计划的历史内容不改写。
 - `audit:verify` 当前失败：共享主题改动使 `api-docs-enum-table`、`api-docs-field-item`、`foundation-annotation-popover`、`foundation-inline-code`、`foundation-split-pane-handle`、`foundation-theme-toggle` 的 scope 摘要失效。按本轮限制不重录 ledger；七个 deferred owner 保留。这一失败与浏览器数值验证分别报告。
 
 历史 Webhook 页 F9 零节点源于该页没有 ResponseExample。阶段 1 原始记录保持不变，本轮按实际组件存在性列为不适用；不得以静态 HTTP `200` 文本冒充 F9。

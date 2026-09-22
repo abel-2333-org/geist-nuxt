@@ -23,8 +23,21 @@ await setup({
 })
 
 type Theme = 'light' | 'dark'
-type Check = (target: Locator, id: string, owner: string, state?: string, pseudo?: '::placeholder') => Promise<any[]>
+type Check = (target: Locator, id: string, owner: string, state?: string, pseudo?: '::placeholder', surface?: string) => Promise<any[]>
 const settle = (page: Page) => page.waitForTimeout(300)
+const documentationSurfaces = ['default', 'muted', 'elevated', 'accented'] as const
+
+async function selectDocumentationSurface(page: Page, theme: Theme, surface: string) {
+  const url = new URL(page.url())
+  if (surface === 'default') url.searchParams.delete('docsSurface')
+  else url.searchParams.set('docsSurface', surface)
+  await page.goto(url.href)
+  await page.evaluate(theme => { (window as any).useNuxtApp().$colorMode.preference = theme }, theme)
+  await expect.poll(() => page.locator('html').getAttribute('class')).toContain(theme)
+  await page.evaluate(() => document.fonts.ready)
+  await expect.poll(() => page.getByTestId('documentation-states').getAttribute('data-expand-surface')).toBe(surface)
+  await page.mouse.move(0, 0)
+}
 
 async function optionalTooltipReady(page: Page, trigger: Locator, artifact: string) {
   // Opening is delayed independently of the pointer action. A fixed delay can
@@ -78,7 +91,7 @@ async function scenario(theme: Theme, id: string, run: (page: Page, check: Check
     platformFonts = await cdp.send('CSS.getPlatformFontsForNode', { nodeId: fontNode.nodeId })
     expect((platformFonts as any).fonts.some((f: any) => f.isCustomFont && f.familyName.includes('Geist')), 'actual rendered Geist font').toBe(true)
     await cdp.detach()
-    const check: Check = async (target, name, owner, state = 'idle', pseudo) => {
+    const check: Check = async (target, name, owner, state = 'idle', pseudo, surface) => {
       const start = records.length
       const count = await target.count()
       expect(count, `${name}: required nonempty selector`).toBeGreaterThan(0)
@@ -86,7 +99,7 @@ async function scenario(theme: Theme, id: string, run: (page: Page, check: Check
         const node = target.nth(i)
         await node.scrollIntoViewIfNeeded()
         const result = await measure(node, pseudo || null)
-        records.push({ id: name, owner, route, theme, state, index: i, ...result })
+        records.push({ id: name, owner, route, theme, state, ...(surface ? { surface } : {}), index: i, ...result })
         expect(result.ratio, `${theme}/${name}/${state}: ${result.ratio} < 4.5`).toBeGreaterThanOrEqual(4.5)
       }
       return records.slice(start)
@@ -145,21 +158,38 @@ for (const theme of ['light', 'dark'] as const) {
       { id: 'value-expand/verb', selector: '[data-testid="value-expand"] [data-value-structure-toggle]', variable: '--ui-primary', alpha: '75%', hover: true },
     ]
     for (const [index, item] of cases.entries()) {
-      const node = page.locator(item.selector)
-      const label = item.hover ? node.locator('span').filter({ hasText: /Show|Hide/ }) : node
-      await check(label, `${item.id} before mutation`, 'detector positive control')
-      // This is the generated declaration of the original Tailwind alpha
-      // utility. Inject the declaration, not a class that may be tree-shaken.
-      const style = await page.addStyleTag({ content: `${item.selector}${item.hover ? ':hover' : ''} { color: color-mix(in oklab, var(${item.variable}) ${item.alpha}, transparent) !important; }` })
-      if (item.hover) await node.hover()
-      await settle(page)
-      const result = await measure(label)
-      expect(result.foreground[3], `${item.id}: mutation changed alpha`).toBeCloseTo(item.hover ? 0.75 : 0.7, 5)
-      expect(result.ratio, `${item.id}: detector must catch old alpha`).toBeLessThan(4.5)
-      await writeFile(resolve(artifacts, `${theme}-negative-alpha-${index}.json`), JSON.stringify({ source, id: item.id, classification: 'expected detector failure; not a positive suite red run', ...result }, null, 2))
-      await style.evaluate(el => el.parentNode!.removeChild(el))
-      await page.mouse.move(0, 0); await settle(page)
-      await check(label, `${item.id} restored`, 'detector positive control')
+      const results: { surface: string, ratio: number }[] = []
+      for (const surface of item.hover ? documentationSurfaces : ['default']) {
+        if (item.hover) await selectDocumentationSurface(page, theme, surface)
+        const node = page.locator(item.selector)
+        const label = item.hover ? node.locator('span').filter({ hasText: /Show|Hide/ }) : node
+        await check(label, `${item.id} before mutation`, 'detector positive control', 'idle', undefined, surface)
+        // This is the generated declaration of the original Tailwind alpha
+        // utility. Inject the declaration, not a class that may be tree-shaken.
+        const style = await page.addStyleTag({ content: `${item.selector}${item.hover ? ':hover' : ''} { color: color-mix(in oklab, var(${item.variable}) ${item.alpha}, transparent) !important; }` })
+        const artifact = resolve(artifacts, `${theme}-negative-alpha-${index}${surface === 'default' ? '' : `-${surface}`}.json`)
+        try {
+          if (item.hover) await node.hover()
+          await settle(page)
+          const result = await measure(label)
+          const outcome = result.ratio >= 4.5 ? 'pass' : 'fail'
+          await writeFile(artifact, JSON.stringify({ source, id: item.id, surface,
+            classification: 'original alpha diagnostic; actual outcome retained, not a positive suite red run', outcome, ...result }, null, 2))
+          expect(result.foreground[3], `${item.id}: mutation changed alpha`).toBeCloseTo(item.hover ? 0.75 : 0.7, 5)
+          results.push({ surface, ratio: result.ratio })
+        }
+        catch (error) {
+          if (String(error).includes('unresolved:')) await writeFile(artifact, JSON.stringify({ source, id: item.id, surface, outcome: 'unresolved', reason: String(error) }, null, 2))
+          throw error
+        }
+        finally { await style.evaluate(el => el.parentNode!.removeChild(el)) }
+        await page.mouse.move(0, 0); await settle(page)
+        await check(label, `${item.id} restored`, 'detector positive control', 'idle', undefined, surface)
+      }
+      // The adopted dark primary makes /75 readable on bg-default. Preserve
+      // that sample and its actual pass; the same historical declaration must
+      // still be caught on a real supported surface, independently per owner.
+      expect(results.some(result => result.ratio < 4.5), `${item.id}: old alpha must fail on at least one supported surface`).toBe(true)
     }
   }))
 
@@ -817,13 +847,32 @@ for (const theme of ['light', 'dark'] as const) {
     ]) {
       const button = page.getByTestId(id!).locator(selector!)
       const label = button.locator('span').filter({ hasText: /Show|Hide/ })
-      await check(label, `${id}/verb`, owner!)
+      await check(label, `${id}/verb`, owner!, 'idle', undefined, 'default')
       await button.hover(); await settle(page)
-      await check(label, `${id}/verb`, owner!, 'hover')
+      await check(label, `${id}/verb`, owner!, 'hover', undefined, 'default')
       await button.click(); await settle(page)
-      await check(label, `${id}/verb`, owner!, 'expanded-hover')
+      await check(label, `${id}/verb`, owner!, 'expanded-hover', undefined, 'default')
     }
   }))
+
+  for (const surface of documentationSurfaces.filter(surface => surface !== 'default')) {
+    test(`${theme}/${surface}: both expand owners on supported surface`, () => scenario(theme, `docs-${surface}`, async (page, check) => {
+      expect(await page.getByTestId('documentation-states').getAttribute('data-expand-surface')).toBe(surface)
+      for (const [id, selector, owner] of [
+        ['field-expand', 'button[aria-expanded]', 'kits/api-docs/components/FieldItem.vue'],
+        ['value-expand', '[data-value-structure-toggle]', 'kits/api-docs/internal/FieldValueStructure.vue'],
+      ]) {
+        const button = page.getByTestId(id!).locator(selector!)
+        const label = button.locator('span').filter({ hasText: /Show|Hide/ })
+        await page.mouse.move(0, 0)
+        await check(label, `${id}/verb`, owner!, 'idle', undefined, surface)
+        await button.hover(); await settle(page)
+        await check(label, `${id}/verb`, owner!, 'hover', undefined, surface)
+        await button.click(); await settle(page)
+        await check(label, `${id}/verb`, owner!, 'expanded-hover', undefined, surface)
+      }
+    }, `/__contrast?docsSurface=${surface}`))
+  }
 
   test(`${theme}: selected indicator and arrival paint`, () => scenario(theme, 'paint', async (page, check) => {
     for (const variant of ['pill', 'link']) {

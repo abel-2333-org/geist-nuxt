@@ -31,8 +31,8 @@ const visibleSurface = computed(() => surfaces.find(surface => surface.name === 
         <div class="flex gap-2" aria-label="Color mode">
           <USelect v-if="!required && !api && !overrides" v-model="selectedRole" :items="[...roles]" aria-label="Role" data-testid="role-picker" />
           <USelect v-model="selectedSurface" :items="surfaces.map(surface => surface.name)" aria-label="Surface" data-testid="surface-picker" />
-          <UButton color="neutral" variant="outline" data-theme="light" @click="colorMode.preference = 'light'">Light</UButton>
-          <UButton color="neutral" variant="outline" data-theme="dark" @click="colorMode.preference = 'dark'">Dark</UButton>
+          <UButton color="neutral" variant="outline" data-theme="light" @click="() => { colorMode.preference = 'light' }">Light</UButton>
+          <UButton color="neutral" variant="outline" data-theme="dark" @click="() => { colorMode.preference = 'dark' }">Dark</UButton>
         </div>
       </header>
       <section :key="visibleSurface.name" :data-surface="visibleSurface.name" :class="visibleSurface.class" class="space-y-6 rounded-lg border border-default p-4 sm:p-6">

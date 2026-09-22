@@ -4,6 +4,12 @@ import { fieldValueLabelDefaults } from '../../../kits/api-docs/utils/field'
 import type { FieldNode, FieldValueChrome, FieldValueNode } from '../../../kits/api-docs/utils/field'
 
 const anchor = useFieldAnchor()
+const route = useRoute()
+const surfaceClasses = { default: '', muted: 'bg-muted', elevated: 'bg-elevated', accented: 'bg-accented' } as const
+const surface = computed<keyof typeof surfaceClasses>(() => {
+  const value = route.query.docsSurface
+  return value === 'muted' || value === 'elevated' || value === 'accented' ? value : 'default'
+})
 const countedField: FieldNode = {
   path: 'contrast-counted-field', name: 'counted', type: 'string',
   notes: [{ text: 'First requirement.' }, { text: 'Second requirement.' }],
@@ -30,7 +36,7 @@ onMounted(() => anchor.initFromHash())
 </script>
 
 <template>
-  <section data-testid="documentation-states" class="space-y-8">
+  <section data-testid="documentation-states" :data-expand-surface="surface" class="space-y-8" :class="surfaceClasses[surface]">
     <div data-testid="field-count"><FieldItem v-bind="countedField" /></div>
     <div data-testid="enum-count"><EnumTable :values="enumValues" /></div>
     <div data-testid="field-expand"><FieldItem v-bind="expandableField" /></div>
