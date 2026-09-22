@@ -11,6 +11,7 @@
 import { defineComponent, nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 import {
@@ -489,6 +490,32 @@ describe('FieldItem with a value shape', () => {
       value: { ...primitiveItem, path: 'inner-root' },
     }],
   ] satisfies [string, FieldValueNode][])('preserves every %s value anchor with its own arrival cue and focus target', async (_, value) => {
+    // happy-dom has no layout. Deliver the completed expansion explicitly so
+    // the real collapse-focus directive can release inert before focus lands.
+    const observers: LayoutResizeObserver[] = []
+    class LayoutResizeObserver implements ResizeObserver {
+      private targets = new Set<Element>()
+      constructor(private callback: ResizeObserverCallback) {
+        observers.push(this)
+      }
+
+      observe(target: Element) { this.targets.add(target) }
+      unobserve(target: Element) { this.targets.delete(target) }
+      disconnect() { this.targets.clear() }
+
+      completeExpansion() {
+        for (const target of this.targets) {
+          if (!target.matches('[data-slot="content"][data-state="open"][inert]')) continue
+          expect(target.hasAttribute('hidden')).toBe(false)
+          const region = target.firstElementChild!
+          Object.defineProperty(target, 'clientHeight', { configurable: true, get: () => 100 })
+          Object.defineProperty(region, 'offsetHeight', { configurable: true, get: () => 100 })
+          this.callback([], this)
+        }
+      }
+    }
+    const originalResizeObserver = globalThis.ResizeObserver
+    globalThis.ResizeObserver = LayoutResizeObserver
     let anchor!: ReturnType<typeof useFieldAnchor>
     const field: FieldNode = { name: 'payload', type: 'string', value }
     const Host = defineComponent({
@@ -500,12 +527,14 @@ describe('FieldItem with a value shape', () => {
       },
       template: '<FieldItem v-bind="field" />',
     })
-    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+    let wrapper: VueWrapper | undefined
     try {
+      wrapper = await mountSuspended(Host, { attachTo: document.body })
       for (const path of collectFieldPaths([field]).filter(path => path.endsWith('-root'))) {
         anchor.active.value = path
-        await nextTick()
-        await nextTick()
+        // Reka Presence also awaits nextTick before removing hidden.
+        await flushPromises()
+        for (const observer of observers) observer.completeExpansion()
         const targets = wrapper.findAll('[id]').filter(node => node.attributes('id') === path)
         expect(targets, `DOM anchor for ${path}`).toHaveLength(1)
         const target = targets[0]!
@@ -521,7 +550,8 @@ describe('FieldItem with a value shape', () => {
       }
     }
     finally {
-      wrapper.unmount()
+      wrapper?.unmount()
+      globalThis.ResizeObserver = originalResizeObserver
     }
   })
 
