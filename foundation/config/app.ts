@@ -14,6 +14,65 @@ export default {
       error: 'red',        // error scale in main.css
       neutral: 'neutral',  // true-gray semantic values in main.css
     },
+    // Opaque solid states keep the parent surface out of the color pairing.
+    // Full class literals are intentional: Tailwind scans this copy-in file.
+    // Preserve upstream inverse text, disabled behavior and focus indicators.
+    button: {
+      compoundVariants: [
+        {
+          color: ['primary', 'secondary', 'success', 'info', 'warning', 'error'],
+          variant: 'solid',
+          // Mixed-color endpoints interpolate through Oklab in Chromium and
+          // can leave sRGB between states. Keep the accepted opaque state
+          // feedback without introducing unverified intermediate paint.
+          // Keep the mix direction local so ordinary instance hover/active
+          // utilities still override the same modifiers in both themes.
+          class: 'transition-none [--geist-button-state-mix:black] dark:[--geist-button-state-mix:white]',
+        },
+        {
+          color: 'primary', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-primary)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-primary)_80%,var(--geist-button-state-mix))]',
+        },
+        {
+          color: 'secondary', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-secondary)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-secondary)_80%,var(--geist-button-state-mix))]',
+        },
+        {
+          color: 'success', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-success)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-success)_80%,var(--geist-button-state-mix))]',
+        },
+        {
+          color: 'info', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-info)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-info)_80%,var(--geist-button-state-mix))]',
+        },
+        {
+          color: 'warning', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-warning)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-warning)_80%,var(--geist-button-state-mix))]',
+        },
+        {
+          color: 'error', variant: 'solid',
+          class: 'hover:bg-[color-mix(in_srgb,var(--ui-error)_90%,var(--geist-button-state-mix))] active:bg-[color-mix(in_srgb,var(--ui-error)_80%,var(--geist-button-state-mix))]',
+        },
+        // Link state is communicated by decoration without fading its text.
+        { color: 'primary', variant: 'link', class: 'hover:text-primary active:text-primary' },
+        { color: 'secondary', variant: 'link', class: 'hover:text-secondary active:text-secondary' },
+        { color: 'success', variant: 'link', class: 'hover:text-success active:text-success' },
+        { color: 'info', variant: 'link', class: 'hover:text-info active:text-info' },
+        { color: 'warning', variant: 'link', class: 'hover:text-warning active:text-warning' },
+        { color: 'error', variant: 'link', class: 'hover:text-error active:text-error' },
+        {
+          color: ['primary', 'secondary', 'success', 'info', 'warning', 'error'],
+          variant: 'link',
+          class: 'hover:underline active:underline disabled:no-underline aria-disabled:no-underline',
+        },
+      ],
+    },
+    alert: {
+      compoundVariants: [{
+        color: ['primary', 'secondary', 'success', 'info', 'warning', 'error'],
+        class: { description: 'opacity-100' },
+      }],
+    },
     // Elevation: modals and slideovers use the heavier `shadow-xl` tier from
     // main.css; tailwind-merge dedupes the default `shadow-lg` class.
     modal: {

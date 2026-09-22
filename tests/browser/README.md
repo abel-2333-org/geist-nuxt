@@ -1,6 +1,6 @@
 # 文字对比度回归
 
-这些用例验证 #144 的中性文字契约与有限伴随修复。#147 的功能色 F1–F9 仍独立跟踪并阻止 #140 关闭；本套测试不是整页 WCAG 合规声明。
+这些用例保留 #144 的中性文字契约与 #148 的绘制、focus/motion 回归，并加入 #147 功能色 F1–F9、真实消费者与动态状态证据。各自的来源、数值、反例和验收边界独立记录；浏览器通过不代替视觉或 owner 验收，本套测试不是整页 WCAG 合规声明。
 
 ## 构建与执行
 
@@ -16,7 +16,7 @@ pnpm test:browser
 
 `vitest.browser.config.ts` 是独立 Node 配置，不继承 Nuxt runtime 组件配置，不调用 `mountSuspended`。`@nuxt/test-utils/e2e` 启动本地生产 Nitro 和锁定的 Chromium；`build:false` 显式指向 `.output/contrast`。空测试集、缺构建、源码摘要或 HEAD 不匹配、启动失败均阻断。摘要同时覆盖生产源码、fixture、`tests/browser/`、浏览器配置和颜色计算依赖；测量器变化也必须重新构建，不能沿用旧检测器的来源标记。
 
-`build:contrast` 使用根 Nuxt 配置、真实 foundation CSS/config 和 kit 组件，单独添加 `/__contrast` 路由及 fixture 扫描入口。fixture 在 `tests/fixtures/contrast/`，通过 `tests/nuxt/contrast-fixture.ts` 接入已有类型检查；不进入 registry，也不注册到正常 gallery 构建。正常页面的实际回归仍使用三个已有 API Docs 路由。
+`build:contrast` 使用根 Nuxt 配置、真实 foundation CSS/config 和 kit 组件，单独添加 `/__contrast` 与 `/__functional-contrast` 测试路由及 fixture 扫描入口。fixture 在 `tests/fixtures/contrast/`，通过 `tests/nuxt/contrast-fixture.ts` 接入已有类型检查；不进入 registry，也不注册到正常 gallery 构建。正常页面的实际回归仍使用三个已有 API Docs 路由。
 
 按 [源码快照与 runtime 边界](../../references/maintenance/sync.md#源码快照与-runtime-边界)，release / v0 完整根源码 snapshot 保留测试和 fixture 源文件，供接收方复现验证；上述隔离约束正常 gallery 的运行时注册与 registry copy-in。测试截图、trace 和日志保存在被排除的构建产物目录或仓库外部证据目录，不进入源码快照。
 
@@ -73,3 +73,9 @@ F-03 单独检查 `::before` / `::after` 的 computed outline；宿主的 outlin
 gallery 的 `?` hover/focus 样本等待实际 trigger 打开、对应 Tooltip 可见、入场动画及按钮自身颜色过渡结束，再测稳定态文字；不以固定延迟假定 Tooltip 已打开，也不关闭真实浮层或捕获 `unresolved` 重试。就绪 sidecar 保存两侧动画计数、浮层 opacity / transform 与状态，它只证明采样状态，随后仍由原始测量与完整命令判断对比度。
 
 `optional-trigger-motion.spec.ts` 在真实键盘输入前开始观察 `?`，独立覆盖明暗主题、普通与 reduced motion、无 hover 的 Tab 进入/退出、hover 与 focus 交叠及快速反向切换。它记录 computed transition 配置、实际颜色 transition 事件、运行中的相关动画和每个恢复端点的颜色合成；不会等 `optionalTooltipReady()` 返回才开始观察，也不以少量中间帧代替无颜色插值的证明。Tooltip 自身入场动画继续运行，稳定端点仍须通过原测量器。此处承接 #148 的具体 trigger 过渡问题，#147 其余功能色及 owner 未决范围保持独立。
+
+#147 的 required marker 通过 `measure(label, '::after')` 单独测量。只有出现可见单星号且同步读取明确缺少几何证据时，外层才进入 Chromium [`DOMSnapshot.captureSnapshot`](https://chromedevtools.github.io/devtools-protocol/tot/DOMSnapshot/#method-captureSnapshot)；普通文字不做全页快照，不缓存动态绘制。证据必须指向实际伪元素的唯一 generated textBox，文字确为 `*`，并保留 backendNodeId、computed style、宿主位置与 `CSS.getPlatformFontsForNode` readback。快照前安装 document subtree MutationObserver，并持续监听滚动、resize、资源、字体和动画事件；CSS CDP session 保持到同步测量后，捕获 stylesheet/CSSOM 与 fontsUpdated 变化。最终同步读取前检查未消费的 mutation records，以及 viewport、各元素几何/滚动、图片尺寸和字体集合状态；立即断开页面观察，避免将测量器自己的隐藏颜色解析节点计入变化。结束后第二次快照须完全一致，且 CDP 变化计数为零；第二次快照仅作补充，不能代替拒绝“修改后恢复”的事件计数。缺失、多片、不稳定或任何变化均 unresolved，不重试恢复成通过。同步读取仍逐项核对伪元素样式、宿主几何、字体/动画状态。仅支持同一已核验引擎与 DPR 下、无变换和外扩绘制的普通 inline 星号。保留整个真实 textBox，并用相同字体 Canvas ink metrics 向外扩展可能的 overhang；Canvas.lang 必须与最近声明的 DOM lang 及实际 `-webkit-locale` 一致，未知语言、xml:lang 和 font-language-override 拒绝，不以相同 advance/行高推断字形相同。保留 baseline 0.5px 与 raster 1px 余量；不以 label 正文 Range 代替星号。轮廓继续先执行 F-03 拒绝；`-webkit-text-fill-color` 必须等于实际 color，其他文字填充与 text-security、shadow、描边、装饰、斜体、字体特性等未支持路径仍 unresolved。required+error 只在星号的保守绘制范围不碰 error 文字时排除星号。
+
+SidebarNav 的 stretched link 背景仅在实际结构满足受限 CSS 绘制顺序时参与合成：同一 relative 的 block/list-item/flow-root 容器内，直接 absolute `<a>` 仅含注释、严格零长度 Text 或无子节点，位于具有真实单盒的 relative 内容分支之前；任何非空 Text（包括空白）及元素子节点、flex/grid 共同父布局和 display:contents 内容分支均拒绝。二者 z-index auto、opacity 1，被测文字到共同父节点之间不产生独立 stacking context，且无额外 transform、isolation、contain、will-change 等层叠条件。链接背景必须完整覆盖被测文字、圆角透明区不触及文字，并继续经过原有伪元素、border、shadow、outline、filter 检查。组件名、class 或 aria-current 均不构成放行条件。记录 `absolute-link-underlay` 的实际颜色、透明度与几何；顺序、层级、覆盖或内容变化必须重新证明。
+
+`generated-paint.spec.ts` 独立执行明暗控制：真实生成星号的正常、低对比数值、文字填充色、外扩绘制、斜体、多字符、正文/error重叠、未知/xml语言、移除恢复；以及绝对背景的正常、前置高层、后置顺序、flex/grid重排、无盒分支、纯注释/严格零长度Text对照、空白/非空Text与空元素拒绝、局部覆盖、圆角、变换、附加内容与移除恢复。最小自制 [locale 字体](../fixtures/contrast/generated-paint-locale/README.md) 保留相同 advance/垂直 metrics 的语言相关越界字形：英语分离通过、土耳其语真实覆盖拒绝，再移除/恢复；字体与生成源均进入源码摘要，不用于生产。快照竞争控制在真实 DOMSnapshot 返回后修改真实页面：newline 移动星号、DOM 改后恢复、CSSOM 改后恢复、FontFaceSet 改后恢复都必须拒绝；普通非竞争、fresh overlap 与恢复另记。每次保存 computed style、几何、测量/拒绝、截图与 trace。F-01/F-02/F-03 原有用例继续完整保留；该控制 spec 通过只证明测量边界，不替代真实组件正向矩阵或视觉验收。

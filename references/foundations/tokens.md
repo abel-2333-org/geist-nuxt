@@ -27,20 +27,43 @@ geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）�
 500 #7a3ce2  600 #6b30cf  700 #5925b1  800 #4a2290  900 #3d1d74  950 #261047
 ```
 
-- `--ui-primary` 浅色 = `var(--ui-color-primary-500)`，深色 = `var(--ui-color-primary-400)`（近黑背景上对比更好）。
+- 原始 ramp 保留；实际 `--ui-primary` 独立采用下方功能色配对表，不再默认取 500 / 400。
 
 ### 功能色阶（`main.css` 的 `:root`）— success / info / warning / error / secondary
 
-值取自 **Geist 官方 `geist-colors` 包**（green / blue / red / teal 的亮色阶），与 primary 同款机制注册成 `--ui-color-{role}-{shade}`，并设 `--ui-{role}` 浅色取 `500`、深色取 `400`。**例外：`warning` 用项目自定义 amber 阶（非 Geist），50–950 全档手工指定。**
+原始色阶取自 **Geist 官方 `geist-colors` 包**（green / blue / red / teal 的亮色阶），与 primary 同款机制注册成 `--ui-color-{role}-{shade}`。**例外：`warning` 用项目自定义 amber 阶（非 Geist），50–950 全档手工指定。** 实际 `--ui-{role}` 的明暗配对独立校准，见下表；不重做原始色阶。
 
-**关键：Geist 是「意图编档」的 100–1000（`700` = solid fill 高对比主色档），Nuxt UI 是「亮度编档」的 50–950（浅色默认取 `500`）。** 映射时把 **Geist-700 对到 Tailwind-500**（锚点），使功能色默认渲染即为 Geist 的实心填充色；`500` 各角色实际值：
+原始 ramp 的导入把 **Geist-700 对到 Tailwind-500**（锚点）。这描述色阶来源，不构成文字对比度保证，也不意味着更高编号必然更暗；保留的 `500` 各角色实际值为：
 
 ```
 success #45a557  info #0072f5  warning #e99b18（自定义）  error #e5484d  secondary #12a594
 ```
 
-- **只用单套亮色 ramp、暗色靠 Nuxt 自动取 400 档**（与 primary 一致）。**不为功能色单拆明/暗两套 ramp**：Geist 暗色功能阶是「100 最暗→1000 最亮」的升序结构，与 Nuxt UI「50 最浅→950 最深 + 暗色取 400」的引擎模型冲突，硬拆会导致 soft 徽章底色等错位。灰阶之所以能明暗分拆，是因为它覆盖的是语义 token（`--ui-bg/text/border`）而非数字 ramp。
+- **保留单套原始 ramp，不另拆明暗色阶**。明暗差异只在现有六个 `--ui-{role}` 语义别名表达；不新增平行色系或要求消费者迁移组件 API。
 - 补全 `900/950` 深档时对 Geist-1000 做等比压暗（这些深档 Nuxt 语义 token 基本不消费，精度影响可忽略）。
+
+### 功能色语义配对与组件状态
+
+以下为 #147 已采纳的映射；warning 正文、浅底与实底统一使用深琥珀语义色，实底沿用 `text-inverted`。
+
+| 角色 | light | dark |
+| --- | --- | --- |
+| primary | `#6b30cf`（原始 600） | `#bb8cff` |
+| secondary | `#06695e` | `#45dec5`（原始 400） |
+| success | `#246a32` | `#6cda75`（原始 400） |
+| info | `#0058bd` | `#52aeff`（原始 400） |
+| warning | `#7b4207`（原始 800） | `#f4b740`（原始 400） |
+| error | `#b52329` | `#ff8588` |
+
+`foundation/config/app.ts` 在 Nuxt UI 的准确主题分支统一约束：
+
+- 六角色 Button `solid`：idle 为角色实底；hover / active 分别将角色色以 sRGB 向 light 黑色 / dark 白色混合 10% / 20%，背景保持不透明。状态填充直接切换，使用 `transition-none` 避免浏览器在混色端点之间经 Oklab 插值产生未建模的色域外中间帧；保留上游文字、focus 与 disabled 行为。
+- 六角色 Button `link`：hover / active 保持完整角色色，使用 underline 表达状态；neutral 与其他 Button 变体保持上游行为。
+- 六角色 Alert：description 使用完整不透明度；neutral Alert 保留上游 `opacity-90`。
+
+Button 的黑/白混色方向由按钮内部变量选择，hover / active 保持普通修饰符，避免暗色专用背景分支压过已有实例 `ui.base` / `class` 状态覆盖。实例自定义颜色的对比度仍由其消费者负责；集中主题的验证不外推到任意覆盖。
+
+正常文字仍按实际未舍入合成结果 >= 4.5 判定。支持配对覆盖两主题四种中性父表面、Button solid/link 的真实状态、Badge 与 Alert 的 solid/outline/soft/subtle、FormField error/required 和 API Docs 的功能色消费者。透明浅底、portal、叠层、动画、实例级覆盖及其他 Button 变体不能仅凭角色映射外推通过；具体覆盖与未解析项以 SHA / 内容摘要绑定的浏览器证据为准。颜色规则采纳与维护者对正式实现的最终视觉确认分别记录。
 
 ### 中性灰阶 — Geist 表面与可读文字映射（`main.css`）
 
@@ -94,7 +117,7 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 
 **几乎不需要直接写 shade 数字。** Nuxt UI 用两层抽象把 shade 隐藏掉：
 
-1. **彩色别名**（`primary`/`success`/`error`…）：`DEFAULT` 浅色取 `500`、深色取 `400`，hover/active 等状态由组件变体内部在相邻档间切换。你只写 `color="primary"`，不写 `primary-500`。
+1. **彩色别名**（`primary`/`success`/`error`…）：`DEFAULT` 使用上表明暗语义配对；状态由组件主题定义，Button solid/link 采用上述集中覆盖。你只写 `color="primary"`，不写 `primary-500`。
 2. **中性语义 token**（`--ui-*`）：文字/背景/边框各有语义 token，映射到 neutral 档（Nuxt UI 默认映射如下，本系统用上面的明暗值覆盖具体色值，但**语义角色不变**）：
 
    | 语义 token（类名） | 默认映射档 | 用途 |

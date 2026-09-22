@@ -91,9 +91,8 @@
  *
  * Brand primary: a custom violet ramp. We register the full 50–950 scale so
  * every `primary`-colored component (and the Foundations swatches, which read
- * `--ui-color-primary-{shade}`) resolves against it. `--ui-primary` follows
- * Nuxt UI's convention: shade 500 in light, 400 in dark for contrast on the
- * near-black surface.
+ * `--ui-color-primary-{shade}`) resolves against it. The actual `--ui-primary`
+ * alias is calibrated separately below for normal text and component states.
  */
 :root {
   --ui-color-primary-50: #f6f0ff;
@@ -193,14 +192,14 @@
    */
   --ui-container: 100%;
 
-  --ui-primary: var(--ui-color-primary-500);
-
-  /* Functional roles — light picks the solid-fill 500 step. */
-  --ui-secondary: var(--ui-color-secondary-500);
-  --ui-success: var(--ui-color-success-500);
-  --ui-info: var(--ui-color-info-500);
-  --ui-warning: var(--ui-color-warning-500);
-  --ui-error: var(--ui-color-error-500);
+  /* Functional aliases support normal text, tinted surfaces and inverse
+     solid text. Keep the original ramps independent of these pairings. */
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-secondary: #06695e;
+  --ui-success: #246a32;
+  --ui-info: #0058bd;
+  --ui-warning: var(--ui-color-warning-800);
+  --ui-error: #b52329;
 
   /*
    * Neutral gray — Geist surfaces and borders with independently calibrated
@@ -228,15 +227,14 @@
 }
 
 .dark {
-  --ui-primary: var(--ui-color-primary-400);
-
-  /* Functional roles — dark uses the lighter 400 step for contrast on the
-     near-black surface (mirrors primary). */
+  /* The same six roles on dark surfaces; calibrated aliases do not change
+     numeric ramps or the component color API. */
+  --ui-primary: #bb8cff;
   --ui-secondary: var(--ui-color-secondary-400);
   --ui-success: var(--ui-color-success-400);
   --ui-info: var(--ui-color-info-400);
   --ui-warning: var(--ui-color-warning-400);
-  --ui-error: var(--ui-color-error-400);
+  --ui-error: #ff8588;
 
   /*
    * Neutral gray — the same normal-text contract on all four dark neutral

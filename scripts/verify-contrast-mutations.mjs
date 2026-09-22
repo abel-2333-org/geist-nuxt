@@ -74,7 +74,9 @@ async function runCommand(cwd, command, args, logFile, environment = {}) {
   const result = await new Promise(resolve => {
     const child = spawn(command, args, {
       cwd, env: { ...process.env, ...environment }, stdio: ['ignore', 'pipe', 'pipe'],
-      timeout: 20 * 60_000,
+      // Each mutation runs the full neutral + functional browser matrix.
+      // Preserve every case and its own timeout as the matrix grows.
+      timeout: command === 'pnpm' && args[0] === 'test:browser' ? 60 * 60_000 : 20 * 60_000,
     })
     child.stdout.pipe(log, { end: false })
     child.stderr.pipe(log, { end: false })
