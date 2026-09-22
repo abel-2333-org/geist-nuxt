@@ -341,6 +341,8 @@ await copyLink(path, {
 
 **现状不一致的处置**：composition 区固定 `ps-4` 与子字段区随容器收紧——已统一到 `subtree`。历史 V1 记录了 `UCollapsible` 默认槽与 anyOf 显式按钮的 ARIA 生命周期差异，但不足以得出“`DisclosureTrigger` 必须自带 `aria-controls`”的实现结论。当前 Nuxt UI 4.9.0 / Reka UI 2.9.10 默认槽已由 `CollapsibleTrigger as-child` 注入属性；Root 的 `contentId` 初始为空字符串，Content setup 后赋值，触发器再次渲染才可能取得该 ID。PR A 保留现有实现；PR B 应验证 SSR、hydration 初始关闭、首次展开及再次关闭的 ID 关联，再决定复用原语、ID 持有位置与接口。关闭状态须区分初始渲染与退出动画完成；`hidden` / computed style、键盘可达性和辅助技术树是不同证据，不能互相代替。
 
+**补验与保留问题（2026-09-22）**：稳态截图须等待字体与正常动画完成，并核对 tab 选中项、面板和指示条；按钮截图保留外侧焦点环空间。同视口 383/384/385px content-box 的真实 props fixture、anyOf 内嵌 composition、长记号及 main `19a1075` 对照由 `tests/browser/README.md` 的补验入口复现。正常动画下快速 Tab 和内部已有焦点时程序化激活祖先触发器，已在 main 与 PR 两侧复现内部焦点被收起内容裁剪、最终落到 BODY；这属于基线已有、尚未修复的焦点问题，稳定关闭后 Tab 跳过内容不能替代此项验证。原生 `HTMLButtonElement.click()` 只是现有 handler 的程序化激活，不代表用户界面具有祖先关闭快捷键。最小修复方向是在关闭开始时管理后代可聚焦性，并仅在焦点原在内部时恢复到对应触发器；实现归属需另行裁定，本轮没有新增折叠引擎或实施 PR B。各轮 exact SHA、测量、历史记录和未验收项分别见 PR #153 及维护报告，不将 CI 成功等同于全面焦点或人工视觉验收。
+
 **保持不变**：各模式计数语义（子字段恒显 `(N)`、值区域只在直接揭示真实字段时显示、anyOf / allOf 为 `fields.length + (composition ? 1 : 0)` 且为 0 不显示、`WebhookProtocol` 显示被隐藏条数、约束表 `(N)`）、默认开合、深链接自动展开与 arrival cue、`unmount-on-hide=false`、动词与 labels 契约、anyOf 卡片 / oneOf tabs / allOf 全展开三个既有决策、字段行自身的 presence 记号与 rule / caveat 形态。不纳入 `SidebarNav`、`EnumTable` 切换、`ResponseExample` 面板、gallery 外壳。
 
 ### FieldAnnotation 的字段引用约束

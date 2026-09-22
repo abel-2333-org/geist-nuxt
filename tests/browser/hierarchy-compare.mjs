@@ -26,7 +26,7 @@ try {
         await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
         await page.evaluate(theme => document.documentElement.classList.toggle('dark', theme === 'dark'), theme)
         for (let n = 0; n < 40; n++) {
-          const buttons = await page.locator('[data-value-structure-toggle][aria-expanded="false"], [data-schema-composition] button[aria-expanded="false"]').all()
+          const buttons = await page.locator(route.endsWith('schema-composition') ? 'main button[aria-expanded="false"]' : '[data-value-structure-toggle][aria-expanded="false"]').all()
           let changed = false
           for (const button of buttons) if (await button.isVisible()) { await button.click(); await settle(page); changed = true; break }
           if (!changed) break

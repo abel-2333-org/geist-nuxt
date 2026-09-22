@@ -65,11 +65,13 @@ try {
       for (const article of document.querySelectorAll('[data-field-width]')) {
         const row = document.getElementById(`field-${article.dataset.fieldWidth}`)
         // Field composition's wrapper is stable before and after the refactor.
-        const composition = row.querySelector('[data-schema-composition]')
+        const composition = row.querySelector('section.space-y-3')
         regions.push(region(composition.parentElement, 'field-composition', Number(article.dataset.fieldWidth)))
       }
       for (const article of document.querySelectorAll('[data-page-width]')) {
-        const nested = article.querySelector('[data-schema-composition] [data-schema-composition]')
+        // The historical baseline predates data-schema-composition. Both versions
+        // use the same SchemaComposition root section; avoid HEAD-only hooks.
+        const nested = article.querySelector('section.space-y-3 section.space-y-3')
         regions.push(region(nested, `page-${article.closest('[data-page-kind]').dataset.pageKind}`, Number(article.dataset.pageWidth)))
       }
       const notation = document.querySelector('#notation-value [data-value-presence]')
@@ -104,7 +106,8 @@ try {
   }
 }
 catch (error) {
-  report.failures.push(error.stack || String(error))
+  report.executionError = error.stack || String(error)
+  report.failures.push(report.executionError)
 }
 finally {
   await browser.close()
@@ -112,5 +115,7 @@ finally {
 }
 // Baseline captures retain identical assertions and report failures without
 // stopping a before/after evidence run. The default verification is strict.
+assert.equal(report.executionError, undefined, 'baseline observation mode must not hide execution errors')
+assert.equal(report.measurements.length, 6, 'all theme/viewport cases executed')
 if (process.env.REPORT_ONLY !== '1') assert.deepEqual(report.failures, [])
 console.log(JSON.stringify({ evidence: output, cases: report.measurements.length, failures: report.failures.length }))
