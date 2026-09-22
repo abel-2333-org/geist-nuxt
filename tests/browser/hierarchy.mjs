@@ -2,14 +2,14 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
-import { chromium } from 'playwright'
+import { chromium } from 'playwright-core'
 
 // Run against a locally built gallery: BASE_URL=http://127.0.0.1:3015 pnpm test:browser:hierarchy
 const base = process.env.BASE_URL || 'http://127.0.0.1:3015'
 const output = path.resolve(process.env.EVIDENCE_DIR || 'output/playwright/pr153')
 await mkdir(output, { recursive: true })
 const report = { head: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), base, browser: '', measurements: [], lifecycle: [], checks: [] }
-const browser = await chromium.launch({ headless: true })
+const browser = await chromium.launch({ headless: true, channel: 'chromium' })
 report.browser = browser.version()
 const page = await browser.newPage({ viewport: { width: 1024, height: 900 } })
 const screenshotStyle = 'header, #nuxt-devtools-container { visibility: hidden !important; }'

@@ -177,7 +177,7 @@ const filterAnnouncement = computed(() => {
            `LABEL (N)` grammar — the two tabular blocks read as one language. -->
       <p class="text-xs font-medium uppercase tracking-wide text-dimmed">
         {{ label }}
-        <span v-if="totalCount" class="text-dimmed/70">({{ totalCount }})</span>
+        <span v-if="totalCount" class="text-dimmed">({{ totalCount }})</span>
       </p>
       <UInput
         v-if="filterable"

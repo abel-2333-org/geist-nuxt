@@ -203,7 +203,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         <button
           type="button"
           data-value-structure-toggle
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary transition-colors hover:text-primary/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"

@@ -22,6 +22,36 @@ export default {
     slideover: {
       slots: { content: 'shadow-xl' },
     },
+    // Normal text roles target neutral surfaces. Solid variants use an inverse
+    // surface, so these supporting slots must follow text-inverted too. Keep
+    // each slot's upstream typography/layout and every other variant intact.
+    card: {
+      variants: { variant: { solid: { description: 'text-inverted' } } },
+    },
+    empty: {
+      variants: { variant: { solid: { description: 'text-inverted' } } },
+    },
+    pageCTA: {
+      variants: { variant: { solid: { description: 'text-inverted' } } },
+    },
+    pageCard: {
+      variants: { variant: { solid: { description: 'text-inverted' } } },
+    },
+    pricingPlan: {
+      variants: {
+        variant: {
+          solid: {
+            description: 'text-inverted',
+            discount: 'text-inverted',
+            billingCycle: 'text-inverted',
+            billingPeriod: 'text-inverted',
+            featureTitle: 'text-inverted',
+            tagline: 'text-inverted',
+            terms: 'text-inverted',
+          },
+        },
+      },
+    },
     // Class merging: Nuxt UI feeds this into tailwind-variants' createTV, which
     // builds every component's tailwind-merge instance from it. tailwind-merge
     // only recognises the stock t-shirt sizes (text-xs/sm/…) as font-size

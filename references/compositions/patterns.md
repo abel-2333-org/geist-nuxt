@@ -79,7 +79,7 @@
 - [ ] 图标按钮有可访问名称（`ThemeToggle` 由 `UColorModeButton` 从根 `UApp` locale 提供）。
 - [ ] 表单字段用 `UFormField` 关联 label / 错误信息。
 - [ ] 颜色不作为唯一信息载体（状态同时用图标/文字）。
-- [ ] 明暗两套都验证对比度（Geist 灰阶已按明暗分别调过，用语义 token 即可继承）。
+- [ ] 明暗两套都验证实际文字对比度：正常中性文字在四种中性背景上至少 4.5:1；透明度、反色、叠加层及 hover/focus 按实际合成结果检查。`text-muted` / `text-dimmed` 可用于正常可读文字，不能因角色名豁免；真实 disabled 与纯装饰内容单独记录。
 - [ ] 图片有 `alt`；装饰性图标 `aria-hidden`。
 
 ## 不要做

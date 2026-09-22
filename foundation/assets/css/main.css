@@ -203,12 +203,10 @@
   --ui-error: var(--ui-color-error-500);
 
   /*
-   * Neutral gray — light semantic surfaces, borders, and text use an achromatic
-   * source scale. Nuxt UI normally derives these roles from one shared ramp;
-   * direct `--ui-*` overrides preserve independent light and dark values.
-   *   bg-100 #fff · bg-200 #fafafa · gray-100 #f2f2f2 · gray-200 #ebebeb
-   *   gray-500 #c9c9c9 · gray-600 #a8a8a8 · gray-700 #8f8f8f
-   *   gray-900 #666 (secondary text) · gray-1000 #171717 (primary text)
+   * Neutral gray — Geist surfaces and borders with independently calibrated
+   * text roles. All five normal text roles meet 4.5:1 on the four neutral
+   * surfaces at full opacity; muted and dimmed remain readable hierarchy.
+   * Direct `--ui-*` overrides preserve independent light and dark values.
    */
   --ui-bg: #ffffff;             /* canvas */
   --ui-bg-muted: #fafafa;       /* muted surface */
@@ -219,9 +217,9 @@
   --ui-border: #ebebeb;         /* default border */
   --ui-border-accented: #c9c9c9;/* hover border */
 
-  --ui-text-dimmed: #a8a8a8;    /* dimmed text */
-  --ui-text-muted: #8f8f8f;     /* muted text */
-  --ui-text-toned: #666666;     /* secondary text */
+  --ui-text-dimmed: #666666;    /* lowest-emphasis readable text */
+  --ui-text-muted: #5c5c5c;     /* supporting text */
+  --ui-text-toned: #525252;     /* secondary text */
   --ui-text: #171717;           /* primary text */
   --ui-text-highlighted: #171717;
 
@@ -241,12 +239,9 @@
   --ui-error: var(--ui-color-error-400);
 
   /*
-   * Neutral gray — dark semantic roles step up from the near-black canvas to
-   * preserve surface, border, and text contrast instead of inheriting Nuxt UI's
-   * single neutral-ramp defaults.
-   *   bg-100 #0a0a0a · gray-100 #1a1a1a · gray-200 #1f1f1f · gray-300 #292929
-   *   gray-400 #2e2e2e · gray-500 #454545 · gray-600 #878787 · gray-700 #8f8f8f
-   *   gray-900 #a1a1a1 (secondary text) · gray-1000 #ededed (primary text)
+   * Neutral gray — the same normal-text contract on all four dark neutral
+   * surfaces. Text roles retain distinct emphasis while surfaces and borders
+   * keep their Geist values; inverse surfaces use text-inverted instead.
    */
   --ui-bg: #0a0a0a;             /* canvas */
   --ui-bg-muted: #1a1a1a;       /* muted surface */
@@ -257,8 +252,8 @@
   --ui-border: #2e2e2e;         /* default border */
   --ui-border-accented: #454545;/* hover border */
 
-  --ui-text-dimmed: #878787;    /* dimmed text */
-  --ui-text-muted: #8f8f8f;     /* muted text */
+  --ui-text-dimmed: #949494;    /* lowest-emphasis readable text */
+  --ui-text-muted: #9b9b9b;     /* supporting text */
   --ui-text-toned: #a1a1a1;     /* secondary text */
   --ui-text: #ededed;           /* primary text */
   --ui-text-highlighted: #ffffff;

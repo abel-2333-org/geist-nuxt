@@ -77,8 +77,8 @@ jobs:
       - name: Build root gallery
         run: pnpm build
 
-      - name: Install browser for hierarchy regression
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Chromium for browser verification
+        run: pnpm exec playwright-core install --with-deps --no-shell chromium
 
       - name: Verify hierarchy in the built gallery
         env:
@@ -97,12 +97,25 @@ jobs:
 
       - name: Upload hierarchy screenshots and measurements
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: hierarchy-browser-${{ github.sha }}
           path: output/playwright/pr153/
           if-no-files-found: ignore
           retention-days: 30
+      - name: Build isolated contrast fixtures from production sources
+        run: pnpm build:contrast
+
+      - name: Verify rendered text contrast
+        run: pnpm test:browser
+
+      - name: Preserve contrast evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: text-contrast-${{ github.sha }}
+          path: .output/contrast-artifacts/
+          if-no-files-found: warn
 
   verify-consumer-runtime-shards:
     name: Verify consumer runtime shard (${{ matrix.shard }}/${{ strategy.job-total }})

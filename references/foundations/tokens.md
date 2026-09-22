@@ -1,12 +1,12 @@
 # Foundations — 设计 token
 
-geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）之上，并用 Geist 品牌值做覆盖。全部覆盖集中在 `foundation/assets/css/main.css`，且**不放进 `@layer`**，因此稳定地胜过 Nuxt UI `@layer theme` 默认值。
+geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）之上，并以 Geist 为视觉基线校准色值。全部覆盖集中在 `foundation/assets/css/main.css`，且**不放进 `@layer`**，因此稳定地胜过 Nuxt UI `@layer theme` 默认值。
 
 ## 颜色
 
 ### 语义别名 → Tailwind 调色板（`app/app.config.ts` 的 `ui.colors`）
 
-> 每个别名的 app config 值只是「回退调色板名」；**实际色值全部由 `main.css` 用 Geist 值覆盖**（primary 紫 ramp、灰阶、以及 5 条 Geist 功能色阶），因此没有任何角色渲染成 Tailwind 原色。
+> 每个别名的 app config 值只是「回退调色板名」；**实际色值由 `main.css` 覆盖**（primary 紫 ramp、中性灰阶、以及下述 5 条功能色阶）。中性文字独立校准，功能色来源与自定义边界见下文。
 
 | 别名 | 回退调色板 | Geist 色值覆盖 | 说明 |
 |---|---|---|---|
@@ -16,7 +16,7 @@ geist-nuxt 建立在 Nuxt UI v4 的语义 token 系统（`--ui-*` CSS 变量）�
 | `info` | blue | **Geist blue 阶** | Geist 招牌蓝 `#0072f5` |
 | `warning` | amber | **自定义 amber 阶** | 项目自定义琥珀（非 Geist 官方 amber） |
 | `error` | red | **Geist red 阶** | |
-| `neutral` | neutral | **Geist 灰（语义 token）** | **真中性灰**（非 slate），Geist 的无彩色表面 |
+| `neutral` | neutral | **中性灰（语义 token）** | **真中性灰**（非 slate），Geist 表面与独立校准的文字 |
 
 ### 紫色 primary ramp（`main.css` 的 `:root`）
 
@@ -42,11 +42,11 @@ success #45a557  info #0072f5  warning #e99b18（自定义）  error #e5484d  se
 - **只用单套亮色 ramp、暗色靠 Nuxt 自动取 400 档**（与 primary 一致）。**不为功能色单拆明/暗两套 ramp**：Geist 暗色功能阶是「100 最暗→1000 最亮」的升序结构，与 Nuxt UI「50 最浅→950 最深 + 暗色取 400」的引擎模型冲突，硬拆会导致 soft 徽章底色等错位。灰阶之所以能明暗分拆，是因为它覆盖的是语义 token（`--ui-bg/text/border`）而非数字 ramp。
 - 补全 `900/950` 深档时对 Geist-1000 做等比压暗（这些深档 Nuxt 语义 token 基本不消费，精度影响可忽略）。
 
-### 中性灰阶 — Geist 灰值映射到 Nuxt UI 语义 token（`main.css`）
+### 中性灰阶 — Geist 表面与可读文字映射（`main.css`）
 
-Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hue 0、饱和 0），但 Geist 明/暗是两套独立色值。Nuxt UI 的 text/bg/border 语义 token 默认都从单一 neutral ramp 按档位派生，无法同时精准命中 Geist 的明暗两套，因此我们**直接覆盖 Nuxt UI 的语义 `--ui-*` token**：在 `:root`/`.light` 与 `.dark` 里各自赋值（色值取自 Geist 灰阶，但**消费方式仍是 Nuxt UI 的语义 token，不引入任何 Geist scale 命名**）。
+Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hue 0、饱和 0），但 Geist 明/暗是两套独立色值。Nuxt UI 的 text/bg/border 语义 token 默认都从单一 neutral ramp 按档位派生，因此我们**直接覆盖 Nuxt UI 的语义 `--ui-*` token**：在 `:root`/`.light` 与 `.dark` 里各自赋值。表面与边框保留 Geist 灰值，正常文字独立校准以满足可读性；**消费方式仍是 Nuxt UI 的语义 token，不引入平行色系或 Geist scale 命名**。
 
-浅色（`:root, .light`）——注释为**语义角色**（值取自 Geist 灰阶）：
+浅色（`:root, .light`）——注释为**语义角色**：
 
 ```
 --ui-bg:           #ffffff   （页面底）
@@ -56,9 +56,9 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 --ui-border-muted: #ebebeb   （弱边框/分隔线）
 --ui-border:       #ebebeb   （默认边框）
 --ui-border-accented: #c9c9c9（hover 边框）
---ui-text-dimmed:  #a8a8a8   （最弱文字）
---ui-text-muted:   #8f8f8f   （弱化/占位/禁用）
---ui-text-toned:   #666666   （次要文字）
+--ui-text-dimmed:  #666666   （低强调的可读辅助文字）
+--ui-text-muted:   #5c5c5c   （说明、标签、占位）
+--ui-text-toned:   #525252   （次要文字）
 --ui-text:         #171717   （主要正文，near-black）
 --ui-text-highlighted: #171717（强调文字）
 ```
@@ -73,14 +73,20 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 --ui-border-muted: #1f1f1f   （弱边框/分隔线）
 --ui-border:       #2e2e2e   （默认边框）
 --ui-border-accented: #454545（hover 边框）
---ui-text-dimmed:  #878787   （最弱文字）
---ui-text-muted:   #8f8f8f   （弱化/占位/禁用）
+--ui-text-dimmed:  #949494   （低强调的可读辅助文字）
+--ui-text-muted:   #9b9b9b   （说明、标签、占位）
 --ui-text-toned:   #a1a1a1   （次要文字）
 --ui-text:         #ededed   （主要正文）
 --ui-text-highlighted: #ffffff（强调文字）
 ```
 
 > `app/app.config.ts` 里的 `neutral` 别名仍指向 Tailwind `neutral`（用于原始 neutral swatch 展示）；实际 background/text/border 一律走上面的语义覆盖，二者都是无彩色纯灰，不冲突。
+
+正常可读文字的契约是 **明暗两主题 × 五个文字角色（highlighted/default/toned/muted/dimmed）× 四个背景（default/muted/elevated/accented），完整 40 对均不低于 4.5:1**，用未舍入值判定。该契约适用于完整不透明度下的 description、help、hint、type、format、count、constraint 和普通 placeholder；`muted` / `dimmed` 是可读层级，不是禁用态的同义词。真实 disabled 控件和纯装饰内容单独记录；readonly、失焦、未选中、deprecated、普通 placeholder 不因此豁免。
+
+透明度、叠加层、hover/focus、功能色与其他背景需要按实际合成结果验证，不能由这 40 对推定通过。文字层级优先选择已有语义角色，再用字号、字重与间距表达；额外 alpha 必须重新验证，既有 neutral Alert 的 `opacity-90` 保留其独立实测依据。
+
+反色 `bg-inverted` 使用 `text-inverted`。`foundation/config/app.ts` 仅在 `variants.variant.solid` 覆盖 `card`、`empty`、`pageCTA`、`pageCard` 的 `description`，以及 `pricingPlan` 的 `description`、`discount`、`billingCycle`、`billingPeriod`、`featureTitle`、`tagline`、`terms`。保留上游排版、布局和其他 variant 的角色；实例级 `ui` 或自定义 slot 内的显式文字色仍需独立验证。
 
 ### 色阶体系：Nuxt UI / Tailwind 50–950（**不是** Geist 的 100–1000）
 
@@ -89,15 +95,15 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 **几乎不需要直接写 shade 数字。** Nuxt UI 用两层抽象把 shade 隐藏掉：
 
 1. **彩色别名**（`primary`/`success`/`error`…）：`DEFAULT` 浅色取 `500`、深色取 `400`，hover/active 等状态由组件变体内部在相邻档间切换。你只写 `color="primary"`，不写 `primary-500`。
-2. **中性语义 token**（`--ui-*`）：文字/背景/边框各有语义 token，映射到 neutral 档（Nuxt UI 默认映射如下，本系统用 Geist 灰值覆盖了具体色值，但**语义角色不变**）：
+2. **中性语义 token**（`--ui-*`）：文字/背景/边框各有语义 token，映射到 neutral 档（Nuxt UI 默认映射如下，本系统用上面的明暗值覆盖具体色值，但**语义角色不变**）：
 
    | 语义 token（类名） | 默认映射档 | 用途 |
    |---|---|---|
    | `text-highlighted` | neutral-900 | 强调/主标题文字 |
    | `text`（`text-default`） | neutral-700 | 主要正文 |
    | `text-toned` | neutral-600 | 次要文字 |
-   | `text-muted` | neutral-500 | 弱化文字、占位、禁用 |
-   | `text-dimmed` | neutral-400 | 最弱文字 |
+   | `text-muted` | neutral-500 | 说明、标签、占位 |
+   | `text-dimmed` | neutral-400 | 低强调的可读辅助文字 |
    | `bg`（`bg-default`） | white / neutral-900 | 页面底 |
    | `bg-muted` | neutral-50 | 次级表面 |
    | `bg-elevated` | neutral-100 | 卡片/输入表面 |
@@ -109,7 +115,7 @@ Geist 灰阶与 Nuxt UI 默认的 Tailwind `neutral` 同为**纯中性灰**（hu
 
 - **永远用语义类 / token**，不要写死颜色，也不要手拼 shade 数字：文字用 `text-highlighted` `text-default` `text-toned` `text-muted` `text-dimmed`；背景用 `bg-default` `bg-muted` `bg-elevated` `bg-accented`；边框用 `border-default` `border-accented`。
 - 组件的 `color` prop 取语义别名：`<UButton color="primary">`、`<UBadge color="success">`。状态递进（hover/active）由变体内置，无需手写。
-- 信息层级按语义 token 排序：主文字 `text-default`、次要 `text-toned`、弱化/禁用 `text-muted`。
+- 信息层级按语义 token 排序：强调 `text-highlighted`、主文字 `text-default`、次要 `text-toned`、说明 `text-muted`、低强调辅助 `text-dimmed`；禁用行为使用组件的 `disabled` 契约。
 - **用颜色表达状态时务必配图标或文字**（不要仅靠红/绿区分），见 `focus-a11y.md`。
 
 ## 排版
