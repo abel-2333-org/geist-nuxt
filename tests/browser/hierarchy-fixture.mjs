@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { chromium } from 'playwright-core'
+import { settle } from './hierarchy-evidence.mjs'
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:3016'
 const output = path.resolve(process.env.EVIDENCE_DIR || 'output/playwright/hierarchy-fixture')
@@ -48,6 +49,7 @@ try {
     await page.locator(`[data-theme="${theme}"]`).click()
     await page.waitForFunction(theme => document.documentElement.classList.contains('dark') === (theme === 'dark'), theme)
     await expandAll()
+    await settle(page)
     const measurement = await page.evaluate(() => {
       function contentWidth(element) {
         const style = getComputedStyle(element)
@@ -71,7 +73,8 @@ try {
       for (const article of document.querySelectorAll('[data-page-width]')) {
         // The historical baseline predates data-schema-composition. Both versions
         // use the same SchemaComposition root section; avoid HEAD-only hooks.
-        const nested = article.querySelector('section.space-y-3 section.space-y-3')
+        const root = article.querySelector('section.space-y-3')
+        const nested = root.querySelector('section.space-y-3')
         regions.push(region(nested, `page-${article.closest('[data-page-kind]').dataset.pageKind}`, Number(article.dataset.pageWidth)))
       }
       const notation = document.querySelector('#notation-value [data-value-presence]')
