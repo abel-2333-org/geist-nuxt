@@ -11,12 +11,18 @@ BASE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/geist-hierarchy-base.XXXXXX")
 HEAD_PID=''
 BASE_PID=''
 cleanup() {
-  if [ -n "$HEAD_PID" ]; then kill "$HEAD_PID" 2>/dev/null || true; fi
-  if [ -n "$BASE_PID" ]; then kill "$BASE_PID" 2>/dev/null || true; fi
+  if [ -n "$HEAD_PID" ]; then kill "$HEAD_PID" 2>/dev/null || true; wait "$HEAD_PID" 2>/dev/null || true; fi
+  if [ -n "$BASE_PID" ]; then kill "$BASE_PID" 2>/dev/null || true; wait "$BASE_PID" 2>/dev/null || true; fi
   git worktree remove --force "$BASE_DIR" >/dev/null 2>&1 || true
+  rmdir "$BASE_DIR" 2>/dev/null || true
 }
 trap cleanup EXIT
 # Copy only the test harness onto the unmodified production baseline.
+for url in http://127.0.0.1:3016 http://127.0.0.1:3018; do
+  if curl --silent --max-time 2 "$url" >/dev/null; then
+    echo "Refusing an occupied comparison port: $url" >&2; exit 1
+  fi
+done
 git worktree add --detach "$BASE_DIR" "$BASELINE_SHA"
 mkdir -p "$BASE_DIR/tests/fixtures/hierarchy"
 cp tests/fixtures/hierarchy/* "$BASE_DIR/tests/fixtures/hierarchy/"
@@ -32,7 +38,7 @@ fi
 node scripts/build-hierarchy.mjs
 PORT=3016 HOST=127.0.0.1 node .output/hierarchy/server/index.mjs > "$EVIDENCE_ROOT/head-server.log" 2>&1 &
 HEAD_PID=$!
-(cd "$BASE_DIR" && PORT=3018 HOST=127.0.0.1 node .output/hierarchy/server/index.mjs) > "$EVIDENCE_ROOT/base-server.log" 2>&1 &
+(cd "$BASE_DIR" && exec env PORT=3018 HOST=127.0.0.1 node .output/hierarchy/server/index.mjs) > "$EVIDENCE_ROOT/base-server.log" 2>&1 &
 BASE_PID=$!
 for url in http://127.0.0.1:3016/__hierarchy http://127.0.0.1:3018/__hierarchy; do
   ready=false

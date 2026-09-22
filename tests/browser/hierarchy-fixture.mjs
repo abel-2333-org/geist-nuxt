@@ -8,13 +8,13 @@ const base = process.env.BASE_URL || 'http://127.0.0.1:3016'
 const output = path.resolve(process.env.EVIDENCE_DIR || 'output/playwright/hierarchy-fixture')
 await mkdir(output, { recursive: true })
 const source = JSON.parse(await readFile(new URL('../../.output/hierarchy/source.json', import.meta.url), 'utf8'))
-const report = { source, base, browser: '', measurements: [], failures: [] }
+const report = { source, base, browser: '', measurements: [], failures: [], runtimeErrors: [] }
 const browser = await chromium.launch({ headless: true, channel: 'chromium' })
 report.browser = browser.version()
 const page = await browser.newPage()
-page.on('pageerror', error => report.failures.push(error.message))
+page.on('pageerror', error => report.runtimeErrors.push(error.message))
 page.on('console', message => {
-  if (['warning', 'error'].includes(message.type()) && /hydrat/i.test(message.text())) report.failures.push(message.text())
+  if (['warning', 'error'].includes(message.type()) && /hydrat/i.test(message.text())) report.runtimeErrors.push(message.text())
 })
 
 function check(condition, message) {
@@ -118,6 +118,7 @@ finally {
 }
 // Baseline captures retain identical assertions and report failures without
 // stopping a before/after evidence run. The default verification is strict.
+assert.deepEqual(report.runtimeErrors, [], 'no runtime or hydration errors in either version')
 assert.equal(report.executionError, undefined, 'baseline observation mode must not hide execution errors')
 assert.equal(report.measurements.length, 6, 'all theme/viewport cases executed')
 if (process.env.REPORT_ONLY !== '1') assert.deepEqual(report.failures, [])
