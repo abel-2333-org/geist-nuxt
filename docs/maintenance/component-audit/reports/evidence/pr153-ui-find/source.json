@@ -1,0 +1,42 @@
+{
+  "testedBranchHead": "cf2f88a3dab459d3993564ead543340244623be8",
+  "renderedHead": {
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "digest": "414720d9273a6f39228bf60e6233f5d9ab8ed09d95d7551045923dc69a71825e",
+    "builtAt": "2026-09-22T13:53:05.179Z"
+  },
+  "base": {
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "digest": "df3342c0952c84f81698322264eb9f8015eff94d9cd3f8ad3ea2fe0d8bb20806",
+    "builtAt": "2026-09-22T13:53:37.680Z"
+  },
+  "identityNote": "cf2f88a 与 3afdc3d 仅维护报告差异，渲染源相同；复用来源已绑定的生产构建。",
+  "chromeVersion": "153.0.8010.53 (Official Build) (arm64)",
+  "os": "macOS Version 26.6.2 (Build 25G83)",
+  "chromeCommandLine": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome --flag-switches-begin --enable-features=GlicActor,GlicActorUi --enable-features=GlicActor,GlicActorUi,Glic --flag-switches-end --origin-trial-disabled-features=CanvasTextNg|WebAssemblyCustomDescriptors",
+  "versionSource": "真实 chrome://version 原生 AX 读取；本机原始截图与 AX 存于 output/playwright/pr153-ui-find/chrome-version.*，公共记录仅保留任务相关版本/配置。",
+  "interaction": "同一真实 Chrome 专用窗口；Cmd+F、键入现有文字、Escape、Tab；HEAD value/anyOf 额外 Enter，children 独立重跑额外 Enter。未修改生产动画、样式或浏览器设置。",
+  "observer": "document.addEventListener(\"beforematch\", e => console.info(\"PR153_BEFOREMATCH\", JSON.stringify({id:e.target.id,isTrusted:e.isTrusted})), true)",
+  "observerScope": "每次重新加载后安装只读日志监听；只记录事件，不 preventDefault、不揭示、不改属性、不改变焦点。",
+  "firstFindBarSource": "原生 AX 实际观察；value/anyOf 的最终截图是额外 Enter 后，首次 No results 由当次原生 AX 工具输出记录，不能把截图1/1冒充首次输入结果。",
+  "excludedAttempts": "早期记录函数捕获旧对象的试跑未纳入；一次基线 anyOf 原生窗口与 DOM 观测标签不一致的尝试作废，重新独立执行并核对截图地址后替换。原试跑保留本机 output/playwright/pr153-ui-find，不作行为反例或公开有效证据。",
+  "format": "原生截图返回 JPEG，原始字节未加工，仅使用正确 .jpg 扩展名；14 张截图约1.5MB。",
+  "filesSha256": {
+    "base-value-opened-then-closed.jpg": "270be36ca8241b667e71aa26c4afc2f043ea79ca989cd33da7a8ca029b441f0a",
+    "HEAD-value-initial-closed.jpg": "8acde452e3bc8a6b2de58b86c89f75ada483bcbf77a367d2ba72451dc61ab56a",
+    "base-value-initial-closed.jpg": "a6889c21412386e05d002b863b9b82eac14114e5a68e2ff132d3aaf61ccf4adf",
+    "HEAD-children-initial-closed.jpg": "757b8fa57997a5eeeabda2bdf5ad0ac0a6c6a166a5b3ae626ac7508ceed9cca4",
+    "base-anyOf-initial-closed.jpg": "5e82a4a56bd8179b4b08fdbdf3e2176e81f0106943f3d7931f9e8cb017fda2db",
+    "HEAD-children-opened-then-closed.jpg": "f8dc91cca650bddc68996500a02028a9f5c6546fe8b3e71aaf21759332fdef29",
+    "base-anyOf-opened-then-closed.jpg": "f1953052f00227166c19ca9fb8f1ffddb4360bbd90f308334736c47d0ab3c75b",
+    "HEAD-anyOf-initial-closed.jpg": "8358fa3c831a50ea10c8ebdf0c1010935289d61f9ea76354fd764ff9e90a1e32",
+    "HEAD-value-opened-then-closed.jpg": "8887afb1c1cb0f43871af8158c7c386889b3b60a767fe85bfe6dff4f4e8dda96",
+    "base-children-opened-then-closed.jpg": "229f9af1f63436f4dafa7c12a08cc2265c4b42d6cfd392ab4cd35d519a87e479",
+    "observations.json": "904e054ca53ad2d1409fd198f24ea27d84ca5011688b46cc6e71e77e20817f59",
+    "HEAD-children-repeat-next-match.jpg": "6bbdba8bda268f3aa82844f98bf0cfa669ec2e6761757eec96bf50aad0365b10",
+    "base-children-initial-closed.jpg": "34fdf7b5e92564dcdddbc58f7e582be1e6f0318ad2f8c7df96aa9623c577f6b6",
+    "HEAD-children-repeat-first-find.jpg": "9b3c70c984966ec8d32b7359164fb65764603d829cbf7f3e1e3cd5b9a7a52030",
+    "HEAD-anyOf-opened-then-closed.jpg": "023aa8930f6d046cb109d7496e45a5556d09992284619e1e3ed8dd91e9ba8452",
+    "children-repeat.json": "b8b06910f1507b75a83e20d9eae453849b72bc623ee68586abd5543af39dd7c3"
+  }
+}
