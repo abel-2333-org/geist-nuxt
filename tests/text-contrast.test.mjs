@@ -173,6 +173,44 @@ test('unknown, conditional, late, nested imports and escaped token names are rej
   ]) assert.throws(() => checkTextContrast(css))
 })
 
+test('the exact subtree layout utility leaves the text-token matrix unchanged', () => {
+  const without = postcss.parse(sourceCss)
+  let removed = 0
+  without.walkAtRules('utility', node => { node.remove(); removed++ })
+  assert.equal(removed, 1, 'fixture includes the real subtree utility')
+  assert.deepEqual(checkTextContrast(sourceCss), checkTextContrast(without.toString()))
+})
+
+test('subtree compatibility rejects unknown utilities and every unrecognized child', () => {
+  const cases = [
+    ['unknown utility', node => { node.params = 'custom' }],
+    ['conditional utility', node => { const wrapper = postcss.atRule({ name: 'media', params: 'print' }); node.replaceWith(wrapper); wrapper.append(node) }],
+    ['text token', node => node.append('--ui-text-muted: #fff')],
+    ['color', node => node.append('color: red')],
+    ['opacity', node => node.append('opacity: .5')],
+    ['background', node => node.append('background: red')],
+    ['unknown variable', node => node.append('--related: #fff')],
+    ['nested token override', node => node.nodes.find(child => child.type === 'atrule').append('--ui-text-muted: #fff')],
+    ['nested opacity', node => node.nodes.find(child => child.type === 'atrule').append('opacity: .5')],
+    ['nested rule injection', node => node.nodes.find(child => child.type === 'atrule').append('.light { --ui-text-muted: #fff }')],
+    ['nested preprocessor injection', node => node.nodes.find(child => child.type === 'atrule').append('@apply text-white;')],
+    ['extra query', node => node.append('@container field (width >= theme(--container-sm)) { --ui-text-muted: #fff; }')],
+    ['wrong query', node => { node.nodes.find(child => child.type === 'atrule').params = 'other (width >= theme(--container-sm))' }],
+    ['layout variable substitution', node => { node.nodes.find(child => child.prop === 'padding-inline-start').value = 'var(--ui-text)' }],
+    ['important layout', node => { node.nodes.find(child => child.prop === 'padding-inline-start').important = true }],
+    ['duplicate layout', node => node.append('padding-inline-start: --spacing(3)')],
+  ]
+  for (const [label, mutate] of cases) {
+    const root = postcss.parse(sourceCss)
+    const utility = root.nodes.find(node => node.type === 'atrule' && node.name === 'utility')
+    assert.ok(utility)
+    mutate(utility)
+    assert.throws(() => checkTextContrast(root.toString()), /Unsupported subtree utility structure/, label)
+  }
+  assert.throws(() => checkTextContrast(sourceCss + '\n@utility unknown { padding: 0; }'), /Unsupported subtree utility structure/)
+  assert.throws(() => checkTextContrast(sourceCss + '\n@container field (width >= 24rem) { .light { --ui-text-muted: #fff; } }'), /Unsupported foundation at-rule/)
+})
+
 test('non-ASCII whitespace cannot turn an unrelated selector or invalid color into a passing token', () => {
   for (const whitespace of ['\u00a0', '\u2003', '\u2028', '\ufeff']) {
     const misleading = oldTokenCss() + `\n.light${whitespace} { --ui-text-muted: #000; --ui-text-dimmed: #000; } .dark${whitespace} { --ui-text-muted: #fff; --ui-text-dimmed: #fff; }`

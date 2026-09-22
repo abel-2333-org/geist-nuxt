@@ -45,7 +45,7 @@ CI 保留原有三个 required check 名称，浏览器步骤位于 `Verify Sour
 
 ### 计算边界与负向证据
 
-Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS 变量依赖；条件覆盖、未知选择器、缺失或循环变量、fallback、非法/超范围颜色及非 CSS 空白明确拒绝。它不是通用 CSS cascade 引擎。消费者验证同样读取实际复制到 consumer 的 CSS。
+Node checker 只解释生产 token 所需的明确 CSS 子集，读取真实 CSS 变量依赖；条件覆盖、未知选择器、缺失或循环变量、fallback、非法/超范围颜色及非 CSS 空白明确拒绝。它不是通用 CSS cascade 引擎。整合层级样式后，仅额外识别 `@utility subtree` 的已知结构声明及其具名容器步进；不会泛化放行未知 utility、嵌套 token 覆盖或文字颜色/透明度声明。消费者验证同样读取实际复制到 consumer 的 CSS。
 
 浏览器使用 computed style，并由 Chromium 的相对颜色序列化转为浮点 sRGB；不对截图抗锯齿边缘取色，也不先量化为 8-bit 像素。测量合成背景和祖先 opacity，针对已验证结构处理 Tabs indicator、arrival cue、portal item 的 `::before`，核对几何与层叠。零偏移/零模糊的 inset ring 只有完全位于文字区域之外才可排除；未知渐变、滤镜、mask、混合模式、伪元素或重叠层不默认通过。判定直接使用未舍入 ratio >= 4.5。
 

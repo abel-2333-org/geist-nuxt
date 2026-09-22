@@ -112,6 +112,34 @@ function declarationThemes(declaration) {
   throw declaration.error(`Unsupported token selector: ${rule.selector}`)
 }
 
+// Recognize this one source utility, not an extensible preprocessor language.
+// Its complete tree is checked before allowing the nested container at-rule.
+function validateSubtreeUtility(node) {
+  const fail = () => { throw node.error('Unsupported subtree utility structure') }
+  if (node.parent.type !== 'root' || node.params !== 'subtree') fail()
+  const children = node.nodes?.filter(child => child.type !== 'comment') ?? []
+  const query = children.find(child => child.type === 'atrule')
+  if (!query || query.name !== 'container'
+    || !/^field[\t\n\f\r ]+\([\t\n\f\r ]*width[\t\n\f\r ]*>=[\t\n\f\r ]*theme\(--container-sm\)[\t\n\f\r ]*\)$/.test(query.params)) fail()
+  const checkDeclarations = (nodes, expected) => {
+    if (nodes.length !== expected.size) fail()
+    for (const declaration of nodes) {
+      if (declaration.type !== 'decl' || declaration.important
+        || expected.get(declaration.prop) !== trimCssWhitespace(declaration.value)) fail()
+      expected.delete(declaration.prop)
+    }
+  }
+  checkDeclarations(children.filter(child => child !== query), new Map([
+    ['border-inline-start-style', 'solid'],
+    ['border-inline-start-width', '1px'],
+    ['border-inline-start-color', 'var(--ui-border)'],
+    ['padding-inline-start', '--spacing(3)'],
+  ]))
+  checkDeclarations(query.nodes?.filter(child => child.type !== 'comment') ?? [],
+    new Map([['padding-inline-start', '--spacing(4)']]))
+  return query
+}
+
 /**
  * This checks the SOURCE foundation token contract, not arbitrary CSS or a
  * browser cascade. Only top-level :root, .light, :root/.light, and .dark
@@ -124,7 +152,8 @@ function declarationThemes(declaration) {
  * The only imports accepted are the existing bare tailwindcss/@nuxt/ui
  * imports at the start of the source; their layered defaults are not expanded.
  * Other at-rules are limited to theme/media/supports/layer/keyframes/property;
- * no CSS preprocessor directive may synthesize additional token declarations.
+ * only the exact layout-only subtree utility is additionally recognized. No
+ * accepted preprocessor directive may synthesize additional token declarations.
  * This contract is intentionally independent from the built-CSS/browser gate.
  * Unrelated font/layout/functional-color declarations are outside this matrix.
  */
@@ -132,7 +161,13 @@ export function checkTextContrast(css, { from } = {}) {
   const root = postcss.parse(css, { from })
   const definitions = new Map()
   const supportedAtRules = new Set(['import', 'theme', 'media', 'supports', 'layer', 'keyframes', 'property'])
+  const subtreeQueries = new Set()
   root.walkAtRules(node => {
+    if (node.name === 'utility') {
+      subtreeQueries.add(validateSubtreeUtility(node))
+      return
+    }
+    if (subtreeQueries.has(node)) return
     if (!supportedAtRules.has(node.name.toLowerCase())) throw node.error(`Unsupported foundation at-rule: @${node.name}`)
     if (node.name.toLowerCase() === 'import' && node.parent.type !== 'root') throw node.error('Nested imports are unsupported')
   })
