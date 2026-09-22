@@ -103,3 +103,23 @@ BASE_URL=http://127.0.0.1:3015 pnpm test:browser:hierarchy
 覆盖范围以脚本断言和报告为准：真实 Tab / Enter / Space、焦点环、折叠目标显隐、重复深链接、浏览器 arrival cue、明暗 × 1024/375/320 布局，以及 compact 长记号压力样例。长记号通过明确的 DOM 替换构造，仅证明当前样式的换行能力，不等于作者 fixture 的渲染测试。
 
 SSR 通过禁用 JavaScript 的独立浏览器 context 读取；客户端阶段另等 Nuxt hydration 完成。`aria-controls` 初始空值只作观测，不固化为必须保持的行为。隐藏属性、焦点行为与辅助技术树不是同一层证据。本脚本不代表 VoiceOver/NVDA 实测、不代替人工视觉采纳，也不验证真实消费项目安装。历史截图和旧 agent 的通过记录不是本次输出。
+
+### PR #153 补验：稳态、真实 fixture 与成对基线
+
+`hierarchy-evidence.mjs` 等字体就绪和正常有限动画结束后，再量选中 tab、可见 panel 与 indicator 的最终几何；未关闭生产动画。焦点截图在按钮周围留出空间，不能用按钮裁剪图证明外侧 outline 未被遮挡。
+
+```sh
+pnpm test:browser:hierarchy-pair
+```
+
+该命令创建临时 detached worktree，默认基线为整合 main `19a107527d1226585611f4547619320b430fab2a`（可用 `BASELINE_SHA` 指定），把同一测试 harness 覆盖到基线，分别构建两侧真实生产组件与隔离 `/__hierarchy` 路由。它不改两侧生产源码，结束后清理临时 worktree/服务。两侧必须有各自锁定依赖；Nuxt 字体 URL 缓存可复用。固定历史基线的 CI 步骤仅用于 PR #153，不加入未来所有 PR/main 的永久构建成本。
+
+默认输出 `output/playwright/pr153/supplement/`，可用 `EVIDENCE_DIR` 指定绝对输出目录：
+
+- `head-fixture/`、`base-fixture/`：同一 fixture 的 light/dark × 1440/375/320 截图、content-box 与 padding；桌面同时覆盖 383/384/385px 的 field 容器，字段与页面 composition 两入口，以及 anyOf 内部嵌套 composition。长 notation 通过真实 FieldValueNode props 渲染。
+- `head-focus/`、`base-focus/`：正常动画下逐帧/键盘事件、焦点与祖先裁剪几何、前后视口图。快速 Tab 必须实测落在关闭动画内，否则报告 coverage-gap 并失败。祖先关闭使用原生 `HTMLButtonElement.click()` 激活现有 handler，保留内部焦点；它是程序化激活，不代表界面存在祖先关闭快捷键。
+- `focus-comparison.json`：配对分类。基线继承的问题记录为 `inherited-finding-not-fixed`；新增不可见焦点及新增稳态隐藏焦点失败。`verified-with-inherited-findings` 不等于焦点验收通过，也不授权实现 PR B。
+- `paired/`：refunds、extra、txn、composition 的同数据/主题/视口/展开状态前后图。实际渲染文字摘要必须一致；差异代表布局变化，不能混入不同 fixture。
+- `head-source.json`、`base-source.json`：生产 SHA 与包含测试 harness 的源码 digest。基线是主线生产源码加同一测试 harness，不能把 harness 说成历史主线自带的文件。
+
+单独调试可先 `pnpm build:hierarchy`，运行 `.output/hierarchy/server/index.mjs`，再通过 `BASE_URL` 执行 `test:browser:hierarchy-fixture`。基线 fixture 的 `REPORT_ONLY=1` 仅记录已预期的旧样式差异；head 使用严格断言。正式证据应使用未改动的最终 HEAD 重新构建，不复用调试期报告。

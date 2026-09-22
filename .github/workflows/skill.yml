@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Guard against mojibake (U+FFFD)
         run: |
@@ -94,6 +95,12 @@ jobs:
             sleep 1
           done
           pnpm test:browser:hierarchy
+
+      # Historical base/head evidence is specific to this review; do not rebuild
+      # a frozen 19a1075 baseline for unrelated PRs or future main pushes.
+      - name: Verify paired hierarchy fixtures and transition focus
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 153
+        run: bash scripts/verify-hierarchy-pair.sh
 
       - name: Upload hierarchy screenshots and measurements
         if: always()

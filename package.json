@@ -27,7 +27,11 @@
     "test:consumer:upgrade": "node scripts/check-registry-consumer.mjs",
     "build:contrast": "node scripts/build-contrast.mjs",
     "test:browser": "tsc -p tests/browser/tsconfig.json && vitest run --config vitest.browser.config.ts",
-    "test:browser:hierarchy": "node tests/browser/hierarchy.mjs"
+    "test:browser:hierarchy": "node tests/browser/hierarchy.mjs",
+    "build:hierarchy": "node scripts/build-hierarchy.mjs",
+    "test:browser:hierarchy-fixture": "node tests/browser/hierarchy-fixture.mjs",
+    "test:browser:hierarchy-focus": "node tests/browser/hierarchy-focus.mjs",
+    "test:browser:hierarchy-pair": "bash scripts/verify-hierarchy-pair.sh"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.116",

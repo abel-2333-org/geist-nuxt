@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { chromium } from 'playwright-core'
+import { settle, tabsEvidence, focusScreenshot } from './hierarchy-evidence.mjs'
 
 // Run against a locally built gallery: BASE_URL=http://127.0.0.1:3015 pnpm test:browser:hierarchy
 const base = process.env.BASE_URL || 'http://127.0.0.1:3015'
@@ -64,7 +65,7 @@ async function keyboardCase(label, selector) {
   assert.equal(opened.hidden, null)
   assert.match(opened.outline, /solid [1-9]/)
   report.lifecycle.push({ label, stage: 'opened', ...opened })
-  await button.screenshot({ style: screenshotStyle, path: path.join(output, `${label}-keyboard-focus.png`) })
+  await focusScreenshot(page, button, { style: screenshotStyle, path: path.join(output, `${label}-keyboard-focus.png`) })
   await page.keyboard.press('Space')
   await waitForDisclosure(button, false)
   const closed = await state(button)
@@ -140,6 +141,7 @@ async function checkComposition() {
       if (!await tab.isVisible() || visited.has(id)) continue
       visited.add(id)
       await tab.click()
+      await settle(page)
       await collect(`tab:${id}`)
       changed = true
       break
@@ -240,7 +242,7 @@ try {
     for (const id of ['out_refunds', 'out_extra', 'tx_txnOrderMsg']) await page.locator(`#${id}`).screenshot({ style: screenshotStyle, path: path.join(output, `${theme}-${width}-${id}.png`) })
     await load('/kits/api-docs/schema-composition')
     await page.evaluate(theme => document.documentElement.classList.toggle('dark', theme === 'dark'), theme)
-    report.measurements.push({ theme, width, composition: await checkComposition() })
+    report.measurements.push({ theme, width, composition: await checkComposition(), tabs: await tabsEvidence(page) })
     await page.screenshot({ style: screenshotStyle, path: path.join(output, `${theme}-${width}-composition.png`), fullPage: true })
   }
   assert.deepEqual(failures, [], 'no browser runtime errors')
