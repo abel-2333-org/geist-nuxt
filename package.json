@@ -24,7 +24,8 @@
     "test:registry": "node --test tests/gallery-nav.test.mjs tests/registry-tools.test.mjs tests/check-root-css.test.mjs tests/type-scale-pairing.test.mjs tests/webhook-protocol.test.mjs tests/audit-plan.test.mjs",
     "test:component": "vitest run",
     "test:consumer": "node scripts/check-registry-consumer.mjs",
-    "test:consumer:upgrade": "node scripts/check-registry-consumer.mjs"
+    "test:consumer:upgrade": "node scripts/check-registry-consumer.mjs",
+    "test:browser:hierarchy": "node tests/browser/hierarchy.mjs"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.116",
@@ -44,13 +45,14 @@
     "@vue/compiler-sfc": "^3.5.39",
     "@vue/test-utils": "^2.4.11",
     "happy-dom": "^20.11.0",
+    "playwright": "1.60.0",
     "postcss": "8.5.16",
     "semver": "^7.8.0",
     "tailwindcss": "^4.3.2",
     "typescript": "~5.9.0",
     "vitest": "^4.1.10",
-    "yaml": "^2.9.0",
-    "vue-tsc": "^3.3.6"
+    "vue-tsc": "^3.3.6",
+    "yaml": "^2.9.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

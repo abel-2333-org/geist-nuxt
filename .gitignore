@@ -15,3 +15,6 @@ node_modules/
 !/.agents/skills/
 /.agents/skills/*
 !/.agents/skills/geist-nuxt/
+
+# 可重复浏览器验证产物由 CI artifact 保存，不进入 Source-first 分发。
+/output/playwright/

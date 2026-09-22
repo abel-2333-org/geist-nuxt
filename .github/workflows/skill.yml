@@ -77,6 +77,33 @@ jobs:
       - name: Build root gallery
         run: pnpm build
 
+      - name: Install browser for hierarchy regression
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Verify hierarchy in the built gallery
+        env:
+          BASE_URL: http://127.0.0.1:3015
+          PORT: 3015
+          HOST: 127.0.0.1
+        run: |
+          node .output/server/index.mjs > /tmp/hierarchy-gallery.log 2>&1 &
+          GALLERY_PID=$!
+          trap 'kill "$GALLERY_PID"' EXIT
+          for attempt in {1..30}; do
+            if curl --silent --fail "$BASE_URL" > /dev/null; then break; fi
+            sleep 1
+          done
+          pnpm test:browser:hierarchy
+
+      - name: Upload hierarchy screenshots and measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hierarchy-browser-${{ github.sha }}
+          path: output/playwright/pr153/
+          if-no-files-found: ignore
+          retention-days: 30
+
   verify-consumer-runtime-shards:
     name: Verify consumer runtime shard (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest

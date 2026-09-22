@@ -24,7 +24,7 @@ import {
   sha256,
   validateRegistry,
 } from './lib/registry.mjs'
-import { subtreeCssMarkers } from './check-root-css.mjs'
+import { checkSubtreeCss } from './check-root-css.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const fixtureRoot = path.join(repoRoot, 'tests/fixtures/consumer')
@@ -594,11 +594,8 @@ async function loadGuide() {
     label: 'api-docs-field-item',
     item: 'api-docs-field-item',
     build: true,
-    // scroll-mt-24 proves the composable's class reached the build; the
-    // subtree markers prove the foundation hierarchy utility (line + container
-    // step) is generated for this closure on its own, not only in the gallery.
-    // The anchor class plus the two subtree markers: one array, all must match.
-    cssMarker: ['scroll-mt-24', ...subtreeCssMarkers],
+    cssMarker: 'scroll-mt-24',
+    checkCss: checkSubtreeCss,
     renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -664,9 +661,8 @@ provideFieldSource({
     build: true,
     // ps-9 is the discriminator row's indent — unique to this component's
     // template, so its presence proves the SchemaComposition source was copied.
-    // The subtree markers prove the nested-composition line + container step
-    // are generated for this closure too.
-    cssMarker: ['ps-9', ...subtreeCssMarkers],
+    cssMarker: 'ps-9',
+    checkCss: checkSubtreeCss,
     renderedMarkers: ['One of', 'Card', 'brand'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -999,6 +995,7 @@ try {
                 throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${marker}`)
               }
             }
+            scenario.checkCss?.(builtCss)
             if (scenario.renderedMarkers || scenario.forbiddenRuntimeOutput) {
               const runtime = await renderBuiltPage(consumerRoot)
               const rendered = runtime.html

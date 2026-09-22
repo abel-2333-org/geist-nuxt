@@ -2,6 +2,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import postcss from 'postcss'
 
 const scriptPath = fileURLToPath(import.meta.url)
 const repoRoot = path.resolve(path.dirname(scriptPath), '..')
@@ -21,23 +22,36 @@ async function readCssTree(directory) {
   return chunks.join('\n')
 }
 
-/**
- * The shared hierarchy utility (`@utility subtree` in foundation main.css):
- * the 1px neutral line + base indent, and the container-query step that widens
- * it. Both must reach every build that copies a subtree caller, so the
- * consumer smoke (scripts/check-registry-consumer.mjs) reuses these exact
- * strings for the api-docs-field-item and api-docs-schema-composition closures.
- * The query condition's syntax is deliberately not part of a marker: the
- * gallery build lowers it to `(min-width:24rem)` while a consumer build keeps
- * the range form `(width>=24rem)`. Both end in `24rem)`, so the second
- * marker pins the threshold and the nested step without pinning the syntax.
- * (`@container field (` alone would not discriminate: FieldItem's own
- * `@md/field:` utilities emit the same prefix.)
- */
+/** Shared base marker and responsive check for gallery and consumer builds. */
 export const subtreeCssMarkers = [
   '.subtree{border-inline-start-style:solid;border-inline-start-width:1px;border-inline-start-color:var(--ui-border);padding-inline-start:calc(var(--spacing)*3)}',
-  '24rem){.subtree{padding-inline-start:calc(var(--spacing)*4)}}',
 ]
+
+export function checkSubtreeCss(builtCss) {
+  if (!subtreeCssMarkers.every(marker => builtCss.includes(marker))) {
+    throw new Error('Built CSS is missing the subtree base line and indent')
+  }
+
+  let hasContainerStep = false
+  postcss.parse(builtCss).walkAtRules('container', (query) => {
+    // Match the complete positive condition, in either compiler output syntax.
+    // A suffix match would also accept @media, max-width or another container.
+    if (!/^field\s*\(\s*(?:min-width\s*:\s*24rem|width\s*>=\s*24rem|24rem\s*<=\s*width)\s*\)$/.test(query.params)) return
+    // A media/supports/second container wrapper would restrict this contract.
+    for (let parent = query.parent; parent?.type !== 'root'; parent = parent.parent) {
+      if (parent.type !== 'atrule' || parent.name !== 'layer') return
+    }
+    for (const rule of query.nodes ?? []) {
+      if (rule.type !== 'rule' || !rule.selectors.includes('.subtree')) continue
+      const indent = rule.nodes.filter(node => node.type === 'decl' && node.prop === 'padding-inline-start').at(-1)
+      if (indent?.value.replace(/\s+/g, '') === 'calc(var(--spacing)*4)') hasContainerStep = true
+    }
+  })
+
+  if (!hasContainerStep) {
+    throw new Error('Built CSS is missing the subtree indent step in @container field (width >= 24rem)')
+  }
+}
 
 export const requiredMarkers = [
   { marker: '--breakpoint-sm:401px', source: 'foundation/assets/css/main.css' },
@@ -78,7 +92,9 @@ export async function checkRootCss(options) {
     throw new Error(`Root gallery CSS is missing source-owned markers: ${details}`)
   }
 
-  return { publicRoot, markerCount: requiredMarkers.length }
+  checkSubtreeCss(builtCss)
+
+  return { publicRoot, markerCount: requiredMarkers.length + 1 }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === scriptPath) {
