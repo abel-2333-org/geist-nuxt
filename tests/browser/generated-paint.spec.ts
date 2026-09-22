@@ -316,6 +316,164 @@ for (const theme of ['light', 'dark'] as const) {
   })
 
 
+  test(`${theme}: multiline sibling text requires complete per-line ink proof`, async () => {
+    const page = await createPage('/__contrast'), evidence: Array<Record<string, unknown>> = []
+    const context = page.context(), originalSession = context.newCDPSession.bind(context)
+    let injection: string | null = null, injected = false
+    context.newCDPSession = async target => {
+      const session = await originalSession(target), send = session.send.bind(session)
+      session.send = (async (method: string, params: Record<string, unknown>) => {
+        const result = await send(method as any, params as any)
+        if (method === 'DOMSnapshot.captureSnapshot' && injection && !injected) {
+          injected = true
+          await page.evaluate(mode => {
+            if (mode === 'dom-roundtrip') {
+              const text = document.getElementById('multiline-target')!.firstChild as Text, original = text.data
+              text.data += ' '; text.data = original
+            }
+            if (mode === 'cssom-roundtrip') {
+              const sheet = (document.getElementById('multiline-style') as HTMLStyleElement).sheet!
+              const index = sheet.insertRule('#multiline-target { letter-spacing: 1px; }', sheet.cssRules.length)
+              sheet.deleteRule(index)
+            }
+          }, injection)
+        }
+        return result
+      }) as typeof session.send
+      return session
+    }
+    await context.tracing.start({ screenshots: true, snapshots: true })
+    try {
+      await page.setViewportSize({ width: 1440, height: 1000 })
+      await page.evaluate(theme => { (window as any).useNuxtApp().$colorMode.preference = theme }, theme)
+      await expect.poll(() => page.locator('html').getAttribute('class')).toContain(theme)
+      await page.evaluate(() => {
+        const control = document.createElement('section'); control.id = 'multiline-control'; control.lang = 'en'
+        control.innerHTML = '<p id="multiline-row"><span id="multiline-prefix">Caveat</span><span id="multiline-target">This reference is visible in exported reports.</span></p><div id="multiline-locale" lang="en"><span id="multiline-stars">******* *</span><span id="multiline-white">*</span></div>'
+        document.querySelector('[data-testid="contrast-fixture"]')!.prepend(control)
+      })
+      const sheet = await page.addStyleTag({ content: `
+        @font-face { font-family: ReviewLocale; src: url(data:font/ttf;base64,${localeFont}); font-style: normal; font-weight: 400; }
+        #multiline-control { padding: 40px; margin: 20px; width: 430px; color: black; background: white; font: 400 14px/23.8px Geist; }
+        #multiline-row { width: 296px; }
+        #multiline-prefix { font: 500 12px/16px Geist; text-transform: uppercase; letter-spacing: .3px; margin-right: 8px; }
+        #multiline-locale { margin-top: 30px; width: 75px; font: 400 20px/30px ReviewLocale; }
+        #multiline-white { color: white; margin-left: 8px; }
+      ` })
+      await sheet.evaluate(node => (node as Element).id = 'multiline-style')
+      await page.evaluate(() => document.fonts.ready)
+      const region = page.locator('#multiline-control'), target = page.locator('#multiline-target'), prefix = page.locator('#multiline-prefix')
+      const stars = page.locator('#multiline-stars'), white = page.locator('#multiline-white'), locale = page.locator('#multiline-locale')
+      await region.scrollIntoViewIfNeeded()
+      const computed = () => page.evaluate(() => {
+        const describe = (id: string) => {
+          const node = document.getElementById(id)!, range = document.createRange(); range.selectNodeContents(node)
+          const css = getComputedStyle(node)
+          return { html: node.outerHTML, union: range.getBoundingClientRect().toJSON(), fragments: Array.from(range.getClientRects(), box => box.toJSON()),
+            font: css.font, locale: css.getPropertyValue('-webkit-locale'), letterSpacing: css.letterSpacing, textTransform: css.textTransform }
+        }
+        const canvas = document.createElement('canvas').getContext('2d')! as CanvasRenderingContext2D & { lang: string }
+        canvas.font = '400 20px ReviewLocale'
+        const ink = ['en', 'tr'].map(lang => { canvas.lang = lang; const m = canvas.measureText('*'); return { lang, width: m.width, left: m.actualBoundingBoxLeft, right: m.actualBoundingBoxRight } })
+        return { target: describe('multiline-target'), prefix: describe('multiline-prefix'), stars: describe('multiline-stars'), white: describe('multiline-white'), ink }
+      })
+      const capture = async (state: string, details: Record<string, unknown>) => {
+        const record = { state, source, theme, computed: await computed(), ...details }; evidence.push(record)
+        await writeFile(resolve(artifacts, `${theme}-generated-multiline-${state}.json`), JSON.stringify(record, null, 2))
+        await region.screenshot({ path: resolve(artifacts, `${theme}-generated-multiline-${state}.png`) })
+      }
+      const positive = async (state: string, locator = target) => {
+        const measurement = await measure(locator)
+        await capture(state, { classification: 'positive detector control', measurement })
+        expect(measurement.ratio).toBe(21)
+        return measurement
+      }
+      const reject = async (state: string, locator = target, reason = 'unresolved:') => {
+        let measurement: Measurement | null = null, rejection: string | null = null
+        try { measurement = await measure(locator) }
+        catch (error) { rejection = error instanceof Error ? error.message : String(error) }
+        await capture(state, { classification: 'negative detector control', measurement, rejection, injected })
+        expect(measurement).toBeNull(); expect(rejection).toContain(reason)
+      }
+      const normal = await positive('normal')
+      const ink = normal.excludedPaint.find(paint => paint.reason === 'outside verified CDP text ink fragments')
+      expect(ink.targetInk.fragments).toHaveLength(2)
+      expect(ink.siblingInk.rendered).toBe('CAVEAT')
+      expect(ink.siblingInk.letterSpacing).toBe('0.3px')
+      expect(normal.snapshotConsistency).toEqual({ cssOrFontEvents: 0, snapshotsMatch: true })
+      for (const [state, styles] of [
+        ['first-line-overlap', 'position:relative;left:100px'],
+        ['second-line-overlap', 'position:relative;top:24px'],
+        ['gap-solid-background', 'background:white'],
+        ['gap-outline', 'outline:1px solid black'],
+        ['gap-shadow', 'text-shadow:60px 0 white'],
+      ] as const) {
+        await prefix.evaluate((node, styles) => node.setAttribute('style', styles), styles)
+        if (state.endsWith('-overlap')) {
+          const actual = await computed()
+          expect(actual.target.fragments.some(a => actual.prefix.fragments.some(b =>
+            a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top))).toBe(true)
+        }
+        await reject(state)
+        await prefix.evaluate(node => node.removeAttribute('style'))
+        await positive(`${state}-restored`)
+      }
+      for (const [state, styles] of [
+        ['unknown-font', 'font-family:Arial'], ['font-feature', 'font-feature-settings:"liga" 0'],
+        ['justified-text', 'text-align:justify'], ['unknown-spacing', 'word-spacing:1px'],
+      ] as const) {
+        await target.evaluate((node, styles) => node.setAttribute('style', styles), styles)
+        await reject(state)
+        await target.evaluate(node => node.removeAttribute('style'))
+        await positive(`${state}-restored`)
+      }
+      await target.evaluate(node => node.setAttribute('xml:lang', 'tr'))
+      await reject('xml-language')
+      await target.evaluate(node => node.removeAttribute('xml:lang'))
+      await positive('xml-language-restored')
+      await prefix.evaluate(node => { node.textContent = 'civit'; node.setAttribute('lang', 'tr') })
+      await reject('locale-uppercase-expansion')
+      await prefix.evaluate(node => { node.textContent = 'Caveat'; node.removeAttribute('lang') })
+      await positive('locale-uppercase-restored')
+      await target.evaluate(node => { node.firstChild!.textContent = 'This  reference is visible in exported reports.' })
+      await reject('ambiguous-whitespace')
+      await target.evaluate(node => { node.firstChild!.textContent = 'This reference is visible in exported reports.' })
+      await positive('whitespace-restored')
+      for (const mode of ['dom-roundtrip', 'cssom-roundtrip']) {
+        injection = mode; injected = false
+        await reject(mode, target, 'snapshot changed')
+        injection = null
+        expect(injected).toBe(true)
+        await positive(`${mode}-restored`)
+      }
+      const english = await positive('english-inline-stars', stars)
+      expect(english.excludedPaint.find(paint => paint.reason === 'outside verified CDP text ink fragments').targetInk.language).toBe('en')
+      await locale.evaluate(node => node.setAttribute('lang', 'tr'))
+      const actual = await computed()
+      expect(actual.ink[0]!.width).toBe(actual.ink[1]!.width)
+      expect(actual.ink[1]!.right).toBeGreaterThan(actual.ink[0]!.right)
+      expect(actual.stars.fragments.some(a => actual.white.fragments.some(b =>
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top))).toBe(false)
+      await reject('turkish-inline-ink-overlap', stars, 'overlapping text')
+      // Also preserve the reviewer's zero-gap, same-parent ordinary-inline
+      // counterexample; both target and sibling ink escape their advances.
+      await white.evaluate(node => (node as HTMLElement).style.marginLeft = '0px')
+      await reject('turkish-zero-gap-ink-overlap', stars, 'overlapping text')
+      await white.evaluate(node => { node.textContent = '' })
+      await positive('turkish-white-star-removed', stars)
+      await white.evaluate(node => { node.textContent = '*'; node.removeAttribute('style') })
+      await locale.evaluate(node => node.setAttribute('lang', 'en'))
+      await positive('english-inline-restored', stars)
+    }
+    finally {
+      context.newCDPSession = originalSession
+      await writeFile(resolve(artifacts, `${theme}-generated-multiline.json`), JSON.stringify({ source, theme, evidence }, null, 2))
+      await context.tracing.stop({ path: resolve(artifacts, `${theme}-generated-multiline-trace.zip`) })
+      await page.close()
+    }
+  })
+
+
   test(`${theme}: generated snapshot rejects interleaved DOM CSSOM and font changes`, async () => {
     const page = await createPage('/__contrast')
     const evidence: Array<Record<string, unknown>> = []

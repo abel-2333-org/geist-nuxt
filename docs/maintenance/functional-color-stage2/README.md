@@ -39,6 +39,10 @@
 - 部分窄屏节点被真实 sticky header 遮挡、Popover 尚在离场，检测器保留 unresolved。测试应在正常交互形成的可见稳定状态测量，不删除 header、浮层或失败节点。
 - 临时 consumer 的实际 app 类型检查发现新增测试页面的两个 inline 赋值回调返回 string，不符合 Button 的 void 事件类型。测试页面改为 void 回调，并加入根 Nuxt 的既有 fixture 类型检查入口；不能以根检查未报错代替消费端验证。
 - 新 dark primary 使两个展开 owner 的旧 `/75` 在默认背景上实际达到 `4.774395043767927`，原“此默认背景必红”的测试前提失效。`cf7b5aa9e60abf6ed4832fc4f8cf60f0774521c5` 独立浏览器探针保留 48 条实测：dark muted/elevated/accented 的同一 `/75` 分别为 `4.429641507771985`、`4.265787748798075`、`3.892098225709601`，全部 before/restored 通过。因此保留默认样本和真实通过结果，扩展四种正式背景的 owner 状态与独立负控；每个 owner/主题仍要求至少一个真实 `<4.5`，源码变异仍必须在真实 hover owner 上触发数值失败。没有降低阈值、修改已采纳色值、删原状态，或把未解析当成有效红；阶段 1 计划的历史内容不改写。
+- `d150780f7cdeba6eed295962e9ed9036f61a62b3` 的完整浏览器运行实际为 108 pass / 8 fail；功能矩阵包含 3960 pass / 16 unresolved。未解析项均为 390px 两处 caveat 正文：整体 Range 包围框包含首行前缀所在的空白，但真实两行片段与前缀没有相交。独立复审证明单纯改用行片段仍会漏掉越出 advance 的字体字形，不能据此放宽检测。该轮原始失败保持其原始 SHA，不改标为后续结果。
+- 同一 SHA 的源码变异链在 `00-green-A` 停止，没有有效红→绿结论。旧证据 reader 把 optional-trigger motion 的嵌套记录当作直接颜色记录，也未递归功能矩阵目录；修复须完整识别报告类型、独立复算普通测量、分列预期反例并拒绝未知结构。数值变异不能因首个低对比样本提前停止其余采集；测量未解析或结构错误仍立即拒绝。
+- 多行修复仅在同父普通 inline 单 Text 的文字冲突中使用真实 CDP 断行和双侧字形外扩；其他绘制保持原 union。加入正常、真实重叠、字体语言越界及 DOM/CSSOM 竞态反例与恢复，并由未参与实现者独立复现。未知字体、排版或变化仍拒绝，不以 class 名或名义行框放行。
+- Sidebar 的 idle/hover 覆盖保持，并扩展为逐个点击实际存在的接口目的地；每次导航后通过正常操作重新展开分组，核对 URL 与 `aria-current` 后才测 active。现有页面的七行不等于七种 HTTP method，覆盖以真实 DOM 与逐条记录为准。
 - `audit:verify` 当前失败：共享主题改动使 `api-docs-enum-table`、`api-docs-field-item`、`foundation-annotation-popover`、`foundation-inline-code`、`foundation-split-pane-handle`、`foundation-theme-toggle` 的 scope 摘要失效。按本轮限制不重录 ledger；七个 deferred owner 保留。这一失败与浏览器数值验证分别报告。
 
 历史 Webhook 页 F9 零节点源于该页没有 ResponseExample。阶段 1 原始记录保持不变，本轮按实际组件存在性列为不适用；不得以静态 HTTP `200` 文本冒充 F9。

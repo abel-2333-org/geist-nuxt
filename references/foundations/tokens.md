@@ -44,7 +44,7 @@ success #45a557  info #0072f5  warning #e99b18（自定义）  error #e5484d  se
 
 ### 功能色语义配对与组件状态
 
-以下为 #147 已采纳的映射；warning 正文、浅底与实底统一使用深琥珀语义色，实底沿用 `text-inverted`。
+以下为 #147 已采纳的映射；light 主题的 warning 正文、浅底与实底统一使用深琥珀语义色，实底沿用 `text-inverted`。
 
 | 角色 | light | dark |
 | --- | --- | --- |

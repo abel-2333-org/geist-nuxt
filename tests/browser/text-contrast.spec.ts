@@ -100,12 +100,14 @@ async function scenario(theme: Theme, id: string, run: (page: Page, check: Check
         await node.scrollIntoViewIfNeeded()
         const result = await measure(node, pseudo || null)
         records.push({ id: name, owner, route, theme, state, ...(surface ? { surface } : {}), index: i, ...result })
-        expect(result.ratio, `${theme}/${name}/${state}: ${result.ratio} < 4.5`).toBeGreaterThanOrEqual(4.5)
       }
       return records.slice(start)
     }
     await run(page, check)
     expect(records.length, 'scenario must measure real nodes').toBeGreaterThan(0)
+    // Keep every ordinary sample and supporting control in source-mutation
+    // runs. Unresolved paint and structural assertions still reject at once.
+    expect(records.filter(record => record.ratio < 4.5), 'ordinary text contrast: one or more raw ratios < 4.5').toEqual([])
   }
   catch (error) { failure = String(error); throw error }
   finally {
@@ -932,7 +934,7 @@ for (const theme of ['light', 'dark'] as const) {
       return { frames: effect.getKeyframes(), timing: effect.getTiming(), progress: effect.getComputedTiming().progress, time: animation.currentTime, opacity: getComputedStyle(el).opacity }
     })
     expect(Number(peak.opacity)).toBeCloseTo(1, 5)
-    await writeFile(resolve(artifacts, `${theme}-arrival-animation.json`), JSON.stringify(peak, null, 2))
+    await writeFile(resolve(artifacts, `${theme}-arrival-animation.json`), JSON.stringify({ source, ...peak }, null, 2))
     const peakRows = await check(arrival.locator('[data-field-type]'), 'arrival/type', 'FieldItem + useFieldAnchor', 'animation-peak')
     expect(peakRows.every(row => row.layers.some((layer: any) => layer.underlays.some((underlay: any) => underlay.kind === 'arrival-cue')))).toBe(true)
   }))
