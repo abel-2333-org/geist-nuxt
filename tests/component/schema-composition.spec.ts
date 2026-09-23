@@ -53,6 +53,89 @@ describe('SchemaComposition', () => {
     expect(wrapper.text()).toContain('Required')
   })
 
+  it.each([
+    ['`x`', '`x`'],
+    ['a`[go](https://example.com)`b', 'a`[go](https://example.com)`b'],
+    ['a``b`c', 'a``b`c'],
+    [' x ', ' x '],
+    ['', '""'],
+    ['   ', '"   "'],
+    ['a\nb', '"a\\nb"'],
+    ['a\tb', '"a\\tb"'],
+  ])('keeps discriminator value %j literal in its field description', async (value, display) => {
+    const wrapper = await mountSuspended(SchemaComposition, {
+      props: {
+        kind: 'oneOf',
+        discriminator: { propertyName: 'kind', mapping: [{ value, variantId: 'choice' }] },
+        variants: [{ id: 'choice', label: 'Choice', fields: [] }],
+      },
+    })
+    const description = wrapper.get('.inline-markdown')
+    expect(description.findAll('code')).toHaveLength(1)
+    expect(description.get('code').element.textContent).toBe(display)
+    expect(description.find('a').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty', '__v_isRef', '__v_raw'])('keeps anyOf state independent for variant id %j', async (id) => {
+    const wrapper = await mountSuspended(SchemaComposition, {
+      props: {
+        kind: 'anyOf',
+        variants: [
+          { id, label: 'Special', fields: [] },
+          { id: 'ordinary', label: 'Ordinary', fields: [] },
+        ],
+      },
+    })
+    const buttons = wrapper.findAll('h4 > button')
+    expect(buttons.map(button => button.attributes('aria-expanded'))).toEqual(['false', 'false'])
+    await buttons[0]!.trigger('click')
+    expect(buttons.map(button => button.attributes('aria-expanded'))).toEqual(['true', 'false'])
+    await buttons[0]!.trigger('click')
+    expect(buttons.map(button => button.attributes('aria-expanded'))).toEqual(['false', 'false'])
+    wrapper.unmount()
+  })
+
+  it.each(['oneOf', 'anyOf'] as const)('reveals an empty variant id in %s by its field path', async (kind) => {
+    const Host = defineComponent({
+      components: { SchemaComposition },
+      setup() {
+        const active = useActiveFieldPath()
+        active.value = ''
+        return { active, node: {
+          kind,
+          variants: [
+            { id: 'first', label: 'First', fields: [] },
+            { id: '', label: 'Empty id', fields: [{ path: 'empty-id-target', name: 'target', type: 'string' }] },
+          ],
+        } }
+      },
+      template: '<SchemaComposition v-bind="node" />',
+    })
+    const wrapper = await mountSuspended(Host)
+    if (kind === 'oneOf') expect(wrapper.get('[role=tab][aria-selected=true]').text()).toContain('First')
+    wrapper.vm.active = 'empty-id-target'
+    await wrapper.vm.$nextTick()
+    if (kind === 'oneOf') expect(wrapper.get('[role=tab][aria-selected=true]').text()).toContain('Empty id')
+    else expect(wrapper.findAll('h4 > button')[1]!.attributes('aria-expanded')).toBe('true')
+    wrapper.vm.active = ''
+    wrapper.unmount()
+  })
+
+  it('selects the first variant after empty lists without confusing an empty id with no selection', async () => {
+    const wrapper = await mountSuspended(SchemaComposition, { props: { kind: 'oneOf', variants: [] } })
+    const variants = [
+      { id: 'first', label: 'First', fields: [] },
+      { id: '', label: 'Empty id', fields: [] },
+    ]
+    await wrapper.setProps({ variants })
+    expect(wrapper.get('[role=tab][aria-selected=true]').text()).toContain('First')
+    await wrapper.setProps({ variants: [] })
+    await wrapper.setProps({ variants })
+    expect(wrapper.get('[role=tab][aria-selected=true]').text()).toContain('First')
+    wrapper.unmount()
+  })
+
   it('keeps invalid runtime discriminator data out of allOf fields', async () => {
     const wrapper = await mountSuspended(SchemaComposition, {
       props: {

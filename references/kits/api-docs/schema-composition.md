@@ -31,7 +31,7 @@
 
 **discriminator 渲染为真实字段行**（Stripe 同款），不额外发明词汇：它本就是 payload property，故合成一个 `FieldNode` 插到每个 mapped variant 的**首行**。
 
-- 单值映射 → `type` · string · required · description "Always \`google_pay\`."；N:1 映射**聚合全部 wire values**（含空字符串 `""`）按 mapping 顺序显示为 "One of …"。`discriminatorDescription(values)` label factory 可覆盖。
+- 单值映射 → `type` · string · required · description "Always \`google_pay\`."；N:1 映射**聚合全部 wire values**（含空字符串 `""`）按 mapping 顺序显示为 "One of …"。`discriminatorDescription(values)` label factory 可覆盖。默认文案将值作为 literal code 呈现，反引号不参与 Markdown 解析；空字符串、纯空格和控制字符使用 JSON 字面量以显式区分。自定义 factory 接收原始值，并负责其 Markdown 表示。
 - 若 caller 已提供同名字段，**保留**其 path / type / examples 等 richer metadata，把 mapping 说明并入 description，并把该行移到首行；不重复合成第二行。
 - 合成行**不带 `path`**（跨 variant 重复，不可单独 deep link）；`(N)` 计数包含该行。
 - 当前显示模型不表达 OpenAPI 3.2 的 `defaultMapping`：映射到 variant 的 discriminator property 一律按 OAS 3.0 / 3.1 契约**归一为 required**（caller 传 `required: false` 也会被忽略）。若未来要支持 3.2 可选 discriminator，必须先扩展模型显式表达 `defaultMapping`，不能复用这个布尔暗示版本语义。
