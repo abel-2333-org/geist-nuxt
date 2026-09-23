@@ -1,36 +1,45 @@
 {
   "version": 2,
   "round": 4,
-  "lastRunAt": "2026-09-23T08:01:03.122Z",
+  "lastRunAt": "2026-09-23T09:28:56.298Z",
   "lastPicked": [
-    "api-docs-field-annotation",
-    "api-docs-schema-composition",
-    "api-docs-relation-source-path"
+    "api-docs-code-block",
+    "api-docs-response-example",
+    "api-docs-request-example",
+    "foundation-copy-button"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T09:28:56.298Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1",
+        "headSha": "229b7770b81025f8f541b9ce96ffeefd51ce6281",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/gallery/Buttons.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "nuxt.config.ts",
           "references/architecture-decisions.md",
           "references/components/buttons.md",
           "references/components/index.md",
+          "references/foundations/focus-a11y.md",
           "references/kits/api-docs/code-sample.md",
+          "scripts/lib/contrast-build.mjs",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/copy-button.spec.ts",
           "tests/component/operation-target.spec.ts"
         ],
-        "scopeDigest": "0abccc4ffdc7791b9b14209bb73c127cfc9f346a3c3d9126688e5f226eda5fd7",
+        "scopeDigest": "0ff00513ab4244c41cdeaeca718ea6da64954b1edf95ced9a52c86f3cd372218",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -38,13 +47,28 @@
             "reason": "useCopy 成功 toast 的 type:background 经 Nuxt UI Toast 转发到 Reka；组件不另建 live region，依赖变化需复核转发与挂载。"
           },
           {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "Nuxt UI useToast的共享state/app注入与组件composable auto-import；实际UApp/Toaster集成依赖Nuxt运行时。"
+          },
+          {
             "name": "reka-ui",
             "version": "2.9.10",
             "reason": "ToastAnnounce 对 background 产生 aria-live=polite；真实集成测试断言每次复制只有一个匹配的 polite region。依赖变化需复核播报行为。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "production semantic CSS扫描与focus-visible/touch/disabled等类生成，CopyButton及其Nuxt UI原语的实际UI样式基础。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "useCopy shallowRef成功态、scope dispose清理timeout；CopyButton reactive props/icon/label分支更新。"
           }
         ]
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:CopyButton.vue, copy-button.spec.ts, operation-target.spec.ts):tooltip / 非 tooltip 两分支 `UButton` 均补 `touch-manipulation`,`copy-button.spec` 新增 it.each 用例;toast 播报与 attrs 契约未触及;复核无回归。",
+      "notes": "完整affected owner co-review，base 8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1→功能HEAD 229b7770b81025f8f541b9ce96ffeefd51ce6281；实际命中原scope的references/kits/api-docs/code-sample.md，新说明仅补CodeBlock语言identity/empty-id/own-key语义，CopyButton与useCopy运行时代码逐blob未改。原10scope全部保留，现18scope覆盖gallery、完整attrs/props默认、tooltip/non-tooltip、raw clipboard、成功瞬态/失败、全句i18n、共享契约与实际CSS/config/focus/digest支撑。原findings=[]保留；原@nuxt/ui/reka-ui依赖reason完整保留，追加Vue/Nuxt/Tailwind实际依赖。读取当前Toast转发与Reka background→polite、双rAF挂载链；component506包含copy-button/chrome-labels/operation-target成功、失败fallback与单一polite region，registry160/typecheck/build通过。真实Chrome四组CodeBlock内部CopyButton剪贴板实测raw EMPTY LANGUAGE、两主题两宽度样式/keyboard通过。browser build保持原base SHA dirty工作树来源，digest=7ca26a80283b96213c188b4a365f3cc3ed81a2033260e4914fdebfaa5e4586ff与当前commit相同；非本commit新构建声明。未新测所有OS/iframe拒绝权限fallback及consumer配置，no new finding。",
       "findings": []
     },
     "foundation-inline-code": {
@@ -417,26 +441,69 @@
       "findings": []
     },
     "api-docs-code-block": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T09:28:56.298Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
-        "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
+        "baseSha": "8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1",
+        "headSha": "229b7770b81025f8f541b9ce96ffeefd51ce6281",
+        "itemDigest": "a217494d573c8acce1eefe5ec689e7a21b398667eee2e3df02ea3d5d076c9a00",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/composables/useCodeWrap.ts",
+          "kits/api-docs/utils/example-select-value.ts",
           "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
           "references/kits/api-docs/code-sample.md",
-          "tests/component/code-block.spec.ts"
+          "references/kits/api-docs/index.md",
+          "scripts/lib/contrast-build.mjs",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
+          "tests/fixtures/consumer/app/pages/index.vue"
         ],
-        "scopeDigest": "d1f3ca565f8396ed01cd4f20c25224f01a361914216d1ca26a25305b64cf45bd"
+        "scopeDigest": "c2f35996cc7e67110f73259cce2348793aaec15494756d55d7892cb2eecf2093",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "USelect受控model、缺失值displayValue fallback、portal与语义class；UButton focus/aria fallthrough和CopyButton的polite toast。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "useCodeWrap依赖useState同key共享、SSR payload初始化与useCookie的boolean编解码/写回；组件/composable auto-import与app配置。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "SelectRoot受控值、SelectTrigger combobox与键盘打开、SelectContent Arrow/Home/End/typeahead，不能由静态markup替代上游行为。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "@theme/@source语义token生成、工具栏min-w-0/flex-nowrap/overflow、focus-visible/dark utility，影响响应式与可读性。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "CodeBlock computed current及language identity watch对原位mutation的依赖追踪、props/slot响应式与默认raw模板转义；useCopy scope cleanup。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：index.vue）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "完整CodeBlock owner复审并修复本轮发现，功能HEAD 229b7770b81025f8f541b9ce96ffeefd51ce6281，base 8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1。原6个scope全部保留，扩展到22个实际源码/复制依赖/配置/契约/测试与构建身份支撑路径。逐项复核变体选择、原位重排/删除/重填/改id、空数据、raw copy、共享wrap、slot优先级、trusted HTML边界、语言label、keyboard/响应式。修复language identity未跟踪原位移除而导致选择器与正文/复制不一致及回插复活；langLabel仅读取override/preset自有属性；空字符串language带明确label经UI-only numeric0适配，与string0独立，未改公开ID或新增label fallback规则。原f-0c1cd3397501完整原对象保留resolved，本轮发现→修复证据留外部审查，不新增已解决finding。code-red原3fail/18pass保留，最终component36files/506与registry160通过，typecheck/normal build通过；真实Chrome light/dark×390/1440四组实际USelect选项点击/键盘、rawclipboard及sharedwrap通过。browser build原sha8a9310 dirty内容digest=7ca26a80283b96213c188b4a365f3cc3ed81a2033260e4914fdebfaa5e4586ff与本功能commit独立重算相同；不改标为当前SHA新构建。trusted HTML仍要求caller构建期预消毒，任意palette对比度/consumer安全管线不由本组件保证；本轮不冒充旧130完整browser重跑。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -448,57 +515,168 @@
       ]
     },
     "api-docs-request-example": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T09:28:56.298Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1",
+        "headSha": "229b7770b81025f8f541b9ce96ffeefd51ce6281",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
+          "kits/api-docs/composables/useCodeWrap.ts",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
+          "kits/api-docs/utils/example-select-value.ts",
+          "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/tokens.md",
+          "references/kits/api-docs/code-sample.md",
+          "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
+          "scripts/lib/contrast-build.mjs",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
           "tests/component/request-example.spec.ts",
-          "tests/component/use-example-scenario-selection.spec.ts"
+          "tests/component/use-example-scenario-selection.spec.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "39bfe1426344c04c675979419ffb679e0b68d5ee7fc628c00359f31c7e437bda"
+        "scopeDigest": "c82825f9b6fcce80df30c8b13faa042c940d8b4c1d9c7965701b1fb81faacc20",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "USelect 必须保留数值 0 与字符串 '0' 的区别、model-value 事件、可访问名称及键盘/portal 选项；UButton 与 toast 承载复制反馈。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "组件/utils 自动导入、useState/useCookie 共享换行状态及 UApp/config 接线是 Source-first 和 copy-in 运行前提。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "SelectItem 禁止空字符串；局部适配依赖数值零可选、严格值比较、选项键盘/焦点行为。升级后复核空标识与字面 '0' 的实际弹层选择。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "语义 CSS 扫描及响应式/focus/touch utilities 决定单行工具栏、可聚焦代码滚动面与窄屏回流。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "computed 及 pre-flush identity watch 必须保持受控/非受控收敛、原位重排/删除后的选择与 raw code 一致，并保持原始场景事件。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "基于8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1对RequestExample完整owner复审，绑定最终功能229b7770b81025f8f541b9ce96ffeefd51ce6281。由原scope内CodeBlock实际改动触发必要co-review，且本组件增加局部Select空id适配。核对受控/非受控、显式undefined、父级更新、一次原始id事件、未知id静默fallback、原位重排/移除/重新加入后的收敛；current variants/title/labels/languageLabels/maxHeight/defaultWrap/显式trusted HTML全部按契约透传，空态保留可恢复场景入口，CodeBlock复制始终取raw code。空字符串ID在无name文档Select内部映射数值0，外部''/'0'保持独立，undefined不选；不将该helper当通用原生表单适配器。CodeBlock identity watcher及langLabel自有属性修复的影响同步核对。保留原8项scope，补实际组件/共享copy与wrap/helper/config/CSS/契约/测试，合计28项；绑定Nuxt UI/Reka/Vue/Nuxt/Tailwind实际行为依赖。最终组件36files506/506、registry160/160、typecheck与production build通过；真实Chrome light/dark×1440/390外置测试路由直接import当前生产组件，真实popup点击/键盘证明空/'0'选项、raw clipboard、共享wrap与原始scenario事件，CLI四组原值与保存JSON一致且无pageerror/横向溢出。浏览器构建保留base dirty来源，source digest7ca26a80283b96213c188b4a365f3cc3ed81a2033260e4914fdebfaa5e4586ff与最终head重算相同；外置fixture另有hash。旧findings为空且保持；本轮新发现及修复写reviewResolutions，不新增resolved ledger finding。此为本机源码/契约/回归验收，不替代远端CI、外部consumer/真实辅助技术或维护者视觉采纳。",
       "findings": []
     },
     "api-docs-response-example": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T09:28:56.298Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "8a9310bc43dcb2ac51a92d83f5b8fdab7a578aa1",
+        "headSha": "229b7770b81025f8f541b9ce96ffeefd51ce6281",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/composables/useCodeWrap.ts",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
+          "kits/api-docs/utils/example-select-value.ts",
+          "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
+          "references/kits/api-docs/code-sample.md",
+          "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
           "references/kits/api-docs/response-example.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts",
-          "tests/nuxt/response-example-contract.ts"
+          "tests/fixtures/contrast/main.css",
+          "tests/nuxt/response-example-contract.ts",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "a9e15d44b4b4f0eb040da006d87fe410e2b9a33aea896e5075ac2d32d8bdfa19"
+        "scopeDigest": "1c09da13846f2b114e5ae0ed9ab718802dfcc84a8d0c0b3386bd97a7784588ac",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "Response的USelect/URadioGroup/UPopover/UFormField保留typed模型、labels/legend/portal语义；Radio normalizeItem强制生成DOM id故业务id须隔离；下载UButton为真实a+download，状态UBadge使用subtle主题，委托CopyButton通过Nuxt UI toast独立播报复制结果。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "utils/composables/components auto-import、useState/useCookie和runtime组件注册是Response委托CodeBlock及共享wrap的真实运行前提。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "Reka SelectItem禁止空字符串且区分number 0/string \"0\"；Radio会把DOM id直接插入CSS selector。三级选择依赖typed值、radio roving focus、Popover Escape/外部点击/焦点恢复与available-height，升级须回归空/零/引号身份键与真实label点击。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "Nuxt UI tv合并实例class/ui与主题冲突类，必须保留触发器touch/宽度和popover高度限制实际输出。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI各原语用tv组合size/variant/color主题与实例ui覆盖，支撑status badge和selector/popover实际样式。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "命名@container/response与@xl/response必须按容器宽度切换控制器；UI隐藏/portal关闭及真实semantic token样式依赖其编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "pre-flush watchers、computed和稳定id收敛必须在原地reverse/sort后只按最终列表收敛；受控fallback不回写且显式选择只emit一次。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "完整owner独立复审，功能SHA 229b7770b81025f8f541b9ce96ffeefd51ce6281；保留旧12 scope及2个resolved finding，补实际选择适配、语言标签、复制依赖、主题/响应式契约与测试构建scope。修复langLabel继承属性、空scenario/body id触发Select guard、含引号body id进入Radio DOM selector三项本轮发现；公开原始字符串identity与受控事件不变，Radio安全位置值在重排后仍按业务id选择。三级选择、code/empty/unavailable/file、label回退、persistent live region、下载链接和响应式关闭均完成源码/测试审阅。组件506/506、registry160/160、typecheck/build通过；临时真实Chrome light/dark×1440/390四组通过，实际label点击/唯一radio id、原始事件和键盘切换均通过。浏览器原buildSourceSha 8a9310b保留，最终content digest 7ca26a80283b96213c188b4a365f3cc3ed81a2033260e4914fdebfaa5e4586ff一致；不是新SHA重跑旧130套件或consumer下载/设备/读屏验收。新发现及resolution详见geist-147-batch4/response-review.json，正式finding仅保留原两项resolved。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
