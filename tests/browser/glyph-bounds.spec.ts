@@ -231,6 +231,29 @@ async function glyphScenario(theme: Theme) {
     const translationRestored = await check('individual-translate-restored')
     expect(translationRestored.textBounds.used).toEqual(normal.textBounds.used)
 
+    // Natural Tooltip shadows can miss even the raw Range by a fraction of a
+    // pixel. On the same Tooltip, place an unblurred shadow bottom strictly
+    // between raw and refined tops to test the font-feature guard deliberately.
+    const guardShadow = await tooltip.evaluate((node, { bounds, shade }) => {
+      const rect = node.getBoundingClientRect()
+      const x = (bounds.raw.left + bounds.raw.right - rect.left - rect.right) / 2
+      const y = (bounds.raw.top + bounds.used.top) / 2 - rect.bottom
+      ;(node as HTMLElement).style.setProperty('box-shadow', `${x}px ${y}px 0px 0px ${shade}`, 'important')
+      const boxShadow = getComputedStyle(node).boxShadow
+      const lengths = Array.from(boxShadow.matchAll(/(-?[\d.]+)px/g), match => Number(match[1]))
+      if (lengths.length !== 4) throw new Error('Controlled guard shadow must expose four lengths')
+      return { boxShadow, lengths, caster: rect.toJSON(), bounds: { left: rect.left + lengths[0]!, right: rect.right + lengths[0]!, top: rect.top + lengths[1]!, bottom: rect.bottom + lengths[1]! } }
+    }, { bounds: normal.textBounds, shade: normal.rawForeground })
+    expect(guardShadow.lengths.slice(2)).toEqual([0, 0])
+    expect(guardShadow.bounds.left).toBeLessThan(normal.textBounds.raw.right)
+    expect(guardShadow.bounds.right).toBeGreaterThan(normal.textBounds.raw.left)
+    expect(guardShadow.bounds.top).toBeLessThan(normal.textBounds.raw.bottom)
+    expect(guardShadow.bounds.bottom).toBeGreaterThan(normal.textBounds.raw.top)
+    expect(guardShadow.bounds.bottom).toBeLessThan(normal.textBounds.used.top)
+    await capture('font-feature-controlled-shadow-geometry', { guardShadow, normalBounds: normal.textBounds })
+    const guardedNormal = await check('font-feature-controlled-shadow-refined')
+    expect(guardedNormal.textBounds.used).toEqual(normal.textBounds.used)
+
     const originalFeature = await target.evaluate((node) => {
       const style = (node as HTMLElement).style
       const original = { value: style.getPropertyValue('font-feature-settings'), priority: style.getPropertyPriority('font-feature-settings') }
@@ -242,18 +265,24 @@ async function glyphScenario(theme: Theme) {
     expect((await describe(target, tooltip)).target.fontFeatureSettings).not.toBe('normal')
     expect(raw.textBounds.glyph, 'an unsupported font feature must disable glyph refinement').toBeNull()
     expect(raw.textBounds.used, 'guard fallback must retain the original unclipped Range').toEqual(raw.textBounds.raw)
+    expect(raw.textBounds.raw, 'font-feature fallback uses the geometrically verified Range').toEqual(normal.textBounds.raw)
+    await tooltip.evaluate((node, shadow) => (node as HTMLElement).style.setProperty('box-shadow', shadow, 'important'), guardShadow.boxShadow)
+    expect((await describe(target, tooltip)).tooltip.boxShadow).toBe(guardShadow.boxShadow)
+    await reject('font-feature-guard-with-controlled-shadow', { guardShadow, fallbackBounds: raw.textBounds })
+    await target.evaluate((node, original) => {
+      const style = (node as HTMLElement).style
+      if (original.value) style.setProperty('font-feature-settings', original.value, original.priority)
+      else style.removeProperty('font-feature-settings')
+    }, originalFeature)
+    const controlledRestored = await check('font-feature-restored-with-controlled-shadow')
+    expect(controlledRestored.textBounds.glyph).not.toBeNull()
+    expect(controlledRestored.textBounds.used).toEqual(normal.textBounds.used)
     await tooltip.evaluate((node, original) => {
       const style = (node as HTMLElement).style
       if (original.value) style.setProperty('box-shadow', original.value, original.priority)
       else style.removeProperty('box-shadow')
     }, shifted.original)
     expect((await describe(target, tooltip)).tooltip.boxShadow).toBe(original.tooltip.boxShadow)
-    await reject('font-feature-guard-with-original-shadow', { fallbackBounds: raw.textBounds })
-    await target.evaluate((node, original) => {
-      const style = (node as HTMLElement).style
-      if (original.value) style.setProperty('font-feature-settings', original.value, original.priority)
-      else style.removeProperty('font-feature-settings')
-    }, originalFeature)
     const restored = await check('font-feature-restored')
     expect(restored.textBounds.glyph).not.toBeNull()
     expect(restored.textBounds.used).toEqual(normal.textBounds.used)
