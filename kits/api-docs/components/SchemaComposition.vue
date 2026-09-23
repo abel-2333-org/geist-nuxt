@@ -55,7 +55,15 @@ const props = withDefaults(
 // Merge caller copy over neutral English defaults. Chrome text only —
 // variant labels/descriptions are data and render verbatim.
 function discriminatorValue(value: string) {
-  return value === '' ? '`""`' : `\`${value}\``
+  // Code spans normalize line breaks and trim boundary spaces. Make invisible
+  // values explicit, then keep data backticks from becoming Markdown syntax.
+  const display = value === '' || /^ +$/.test(value) || /[\u0000-\u001f\u007f]/.test(value)
+    ? JSON.stringify(value)
+    : value
+  const longestRun = Array.from(display.matchAll(/`+/g))
+    .reduce((length, match) => Math.max(length, match[0].length), 0)
+  const fence = '`'.repeat(longestRun + 1)
+  return `${fence} ${display} ${fence}`
 }
 
 const t = computed<Required<SchemaCompositionLabels>>(() => ({
@@ -114,7 +122,7 @@ const anchor = useFieldAnchor()
 // find rows inside unselected variants; switching the tab reactively makes
 // the target visible before the composable's stable-layout scroll runs.
 // ---------------------------------------------------------------------------
-const activeTab = shallowRef('')
+const activeTab = shallowRef<string>()
 
 const variantIds = computed(() => props.variants.map(v => v.id))
 
@@ -124,31 +132,32 @@ const variantIds = computed(() => props.variants.map(v => v.id))
 // descendant-active pattern: a real mutation on/after mount, not a computed
 // getter, so SSR renders closed and hydration animates reliably.
 // ---------------------------------------------------------------------------
-const open = reactive<Record<string, boolean>>({})
+// Map keys remain data even for prototype names or Vue-reserved property names.
+const open = reactive(new Map<string, boolean>())
 
 function syncOpen(ids: string[]) {
   const current = new Set(ids)
-  for (const id of Object.keys(open)) {
-    if (!current.has(id)) delete open[id]
+  for (const id of open.keys()) {
+    if (!current.has(id)) open.delete(id)
   }
   for (const id of ids) {
-    if (!(id in open)) open[id] = false
+    if (!open.has(id)) open.set(id, false)
   }
 }
 
 function reveal(active: string) {
   const id = containingVariantId(active)
-  if (!id) return
+  if (id === undefined) return
   if (props.kind === 'oneOf') activeTab.value = id
-  else if (props.kind === 'anyOf') open[id] = true
+  else if (props.kind === 'anyOf') open.set(id, true)
 }
 
 watch(
   [() => props.kind, variantIds, variantPaths, anchor.active, anchor.revision],
   ([kind, ids, _paths, active]) => {
     syncOpen(ids)
-    if (kind === 'oneOf' && !ids.includes(activeTab.value)) {
-      activeTab.value = ids[0] ?? ''
+    if (kind === 'oneOf' && (activeTab.value === undefined || !ids.includes(activeTab.value))) {
+      activeTab.value = ids[0]
     }
     reveal(active)
   },
@@ -230,7 +239,7 @@ function contentId(variantId: string) {
 }
 
 function toggleVariant(variantId: string) {
-  open[variantId] = !open[variantId]
+  open.set(variantId, !open.get(variantId))
 }
 </script>
 
@@ -312,14 +321,14 @@ function toggleVariant(variantId: string) {
           <button
             type="button"
             class="flex w-full touch-manipulation flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2.5 text-start transition-colors hover:bg-muted/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-            :aria-expanded="open[view.variant.id] ?? false"
+            :aria-expanded="open.get(view.variant.id) ?? false"
             :aria-controls="contentId(view.variant.id)"
             @click="toggleVariant(view.variant.id)"
           >
             <UIcon
               name="i-lucide-chevron-right"
               class="size-4 shrink-0 text-dimmed transition-transform duration-200"
-              :class="{ 'rotate-90': open[view.variant.id] }"
+              :class="{ 'rotate-90': open.get(view.variant.id) }"
               aria-hidden="true"
             />
             <span class="text-sm font-medium text-highlighted">{{ view.variant.label }}</span>
@@ -328,7 +337,8 @@ function toggleVariant(variantId: string) {
           </button>
         </component>
         <UCollapsible
-          v-model:open="open[view.variant.id]"
+          :open="open.get(view.variant.id)"
+          @update:open="open.set(view.variant.id, $event)"
           :unmount-on-hide="false"
         >
           <template #content>
