@@ -77,26 +77,40 @@ try {
         const nested = root.querySelector('section.space-y-3')
         regions.push(region(nested, `page-${article.closest('[data-page-kind]').dataset.pageKind}`, Number(article.dataset.pageWidth)))
       }
-      const notation = document.querySelector('#notation-value [data-value-presence]')
-      const notationContainer = document.querySelector('[data-notation-fixture]')
-      const rect = notation.getBoundingClientRect()
-      const range = document.createRange()
-      range.selectNodeContents(notation)
-      const textRects = [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }))
+      function notationIn(selector) {
+        const container = document.querySelector(selector)
+        // Real FieldItem may put the type in the header (current) or scoped
+        // value requirements (baseline). Select the rendered text, not its
+        // obsolete location; the independent probe still checks compact kind.
+        const candidates = [...container.querySelectorAll('[data-field-type], [data-value-presence] p, dd[data-value-presence]')]
+          .filter(element => element.textContent.includes('Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>>'))
+        if (candidates.length !== 1) throw new Error(`${selector}: expected one long notation, got ${candidates.length}`)
+        const notation = candidates[0]
+        const rect = notation.getBoundingClientRect()
+        const range = document.createRange()
+        range.selectNodeContents(notation)
+        const textRects = [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }))
+        return { text: notation.textContent, left: rect.left, right: rect.right, width: rect.width, height: rect.height,
+          clientWidth: notation.clientWidth, scrollWidth: notation.scrollWidth,
+          sectionWidth: container.clientWidth, sectionScrollWidth: container.scrollWidth, textRects,
+          compact: notation.closest('[data-compact]')?.getAttribute('data-compact') ?? null }
+      }
       return { threshold: parseFloat(getComputedStyle(document.documentElement).fontSize) * 24,
         viewport: innerWidth, scrollWidth: document.documentElement.scrollWidth, regions,
-        notation: { text: notation.textContent, width: rect.width, height: rect.height,
-          clientWidth: notation.clientWidth, scrollWidth: notation.scrollWidth,
-          sectionWidth: notationContainer.clientWidth, sectionScrollWidth: notationContainer.scrollWidth, textRects,
-          compact: notation.closest('[data-compact]')?.getAttribute('data-compact') ?? null } }
+        notation: notationIn('[data-notation-fixture]'),
+        presenceNotation: notationIn('[data-presence-fixture]') }
     })
     report.measurements.push({ theme, ...measurement })
     check(measurement.scrollWidth <= viewport, `${theme}/${viewport}: page overflow`)
     // Check the notation itself. FieldItem's mobile copy hit target has an
     // intentional -me-1 outside the section; it is unrelated to text wrapping.
-    check(measurement.notation.scrollWidth <= measurement.notation.clientWidth, `${theme}/${viewport}: notation overflow`)
-    check(measurement.notation.text.includes('Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>>'), 'Real prop notation preserved')
-    check(measurement.notation.compact === 'presence', `${theme}/${viewport}: presence compact form`)
+    for (const [name, notation] of [['field', measurement.notation], ['presence', measurement.presenceNotation]]) {
+      check(notation.scrollWidth <= notation.clientWidth, `${theme}/${viewport}: ${name} notation overflow`)
+      check(notation.text.includes('Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>>'), `${name}: real prop notation preserved`)
+      check(notation.textRects.every(rect => rect.left >= notation.left - 1 && rect.right <= notation.right + 1), `${theme}/${viewport}: ${name} text remains inside notation`)
+      if (viewport <= 375) check(new Set(notation.textRects.map(rect => rect.top)).size > 1, `${theme}/${viewport}: ${name} long notation wraps`)
+    }
+    check(measurement.presenceNotation.compact === 'presence', `${theme}/${viewport}: presence compact form`)
     check(measurement.regions.length === 12, `${theme}/${viewport}: all fixture contexts covered`)
     for (const region of measurement.regions) {
       check(region.visible, `${theme}/${viewport}/${region.context}: region visible`)

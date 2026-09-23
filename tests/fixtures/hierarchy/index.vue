@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { CompositionNode, FieldNode } from '../../../kits/api-docs/utils/field'
+import type { CompositionNode, FieldNode, FieldValueChrome } from '../../../kits/api-docs/utils/field'
+import { describeValueRequirements, fieldValueLabelDefaults } from '../../../kits/api-docs/utils/field'
+import FieldValueRequirements from '../../../kits/api-docs/internal/FieldValueRequirements.vue'
 
 definePageMeta({ layout: false })
 
@@ -35,6 +37,16 @@ const stress: FieldNode = {
   name: 'entries', type: 'array', path: 'notation-field',
   value: { relation: 'item', path: 'notation-value', type: longType, presence: { nullable: true, empty: '{}' } },
 }
+
+// The field can summarize this simple value in its identity line. Exercise
+// the requirements renderer separately, using its own model factory so the
+// identical fixture also observes the historical heading form on baseline.
+const valueChrome: FieldValueChrome = {
+  ...fieldValueLabelDefaults,
+  caveat: 'Caveat', note: 'Note', default: 'Default', example: 'Example',
+  showChildren: 'Show Child Parameters', hideChildren: 'Hide Child Parameters',
+}
+const presenceBlock = describeValueRequirements(stress.value!, valueChrome)
 </script>
 
 <template>
@@ -64,6 +76,10 @@ const stress: FieldNode = {
     <section data-notation-fixture class="w-full max-w-sm">
       <h2 class="text-lg font-semibold">Long value notation</h2>
       <FieldItem v-bind="stress" />
+    </section>
+    <section data-presence-fixture class="w-full max-w-sm">
+      <h2 class="text-lg font-semibold">Long presence requirements</h2>
+      <FieldValueRequirements v-if="presenceBlock" :block="presenceBlock" :chrome="valueChrome" />
     </section>
   </main>
 </template>
