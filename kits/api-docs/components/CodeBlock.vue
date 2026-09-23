@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { fromExampleSelectValue, toExampleSelectValue } from '../utils/example-select-value'
+
 // Domain component (API docs) — a self-contained, multi-language code block.
 //
 // This is NOT a Markdown code fence or a ProsePre. It renders structured
@@ -122,6 +124,10 @@ const t = computed<ResolvedApiCodeLabels>(() => ({
  * ------------------------------------------------------------------ */
 const variants = computed(() => props.variants ?? [])
 const activeLanguage = ref<string | undefined>()
+const selectedLanguage = computed({
+  get: () => toExampleSelectValue(activeLanguage.value),
+  set: (value) => { activeLanguage.value = fromExampleSelectValue(value) },
+})
 
 const current = computed<CodeVariant | undefined>(
   () => variants.value.find(v => v.language === activeLanguage.value) ?? variants.value[0],
@@ -135,10 +141,10 @@ const trustedHighlightedHtml = computed(() =>
 // Preserve the chosen language across data changes when it still exists;
 // otherwise fall back to the first available language.
 watch(
-  variants,
-  (set) => {
-    if (!set.some(v => v.language === activeLanguage.value)) {
-      activeLanguage.value = set[0]?.language
+  () => variants.value.map(variant => variant.language),
+  (languages) => {
+    if (activeLanguage.value === undefined || !languages.includes(activeLanguage.value)) {
+      activeLanguage.value = languages[0]
     }
   },
   { immediate: true },
@@ -153,7 +159,7 @@ watch(
 const languageItems = computed(() =>
   variants.value.map(v => ({
     label: v.label ?? langLabel(v.language, props.languageLabels),
-    value: v.language,
+    value: toExampleSelectValue(v.language),
   })),
 )
 
@@ -201,7 +207,7 @@ const wrap = useCodeWrap(props.defaultWrap)
         <!-- Language -->
         <USelect
           v-if="languageItems.length > 1"
-          v-model="activeLanguage"
+          v-model="selectedLanguage"
           :items="languageItems"
           icon="i-lucide-code"
           size="xs"

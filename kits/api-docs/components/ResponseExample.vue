@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { fromExampleSelectValue, toExampleSelectValue } from '../utils/example-select-value'
+
 // Domain component (API docs) — an interactive RESPONSE example that switches
 // between business scenarios, HTTP statuses (200 / 400 / 'default' …) and body
 // forms (media types), showing a color-coded status badge, and delegating code
@@ -277,8 +279,16 @@ watch(
 )
 
 const scenarioItems = computed(() =>
-  scenarios.value.map(s => ({ label: s.label, value: s.id })),
+  scenarios.value.map(s => ({ label: s.label, value: toExampleSelectValue(s.id) })),
 )
+const selectedScenarioValue = computed({
+  get: () => toExampleSelectValue(selectedScenario.value),
+  set: (value) => { selectedScenario.value = fromExampleSelectValue(value) },
+})
+const selectedBodyValue = computed({
+  get: () => toExampleSelectValue(selectedBody.value),
+  set: (value) => { selectedBody.value = fromExampleSelectValue(value) },
+})
 
 // Every option is self-contained. The toolbar badge may repeat the active code,
 // but dropdown/radio choices remain distinguishable when labels are identical.
@@ -318,6 +328,26 @@ const bodyItems = computed(() =>
     value: b.id,
   })),
 )
+const bodySelectItems = computed(() =>
+  bodyItems.value.map(item => ({ ...item, value: toExampleSelectValue(item.value) })),
+)
+// Nuxt UI incorporates radio values into DOM ids; Reka reads those ids through
+// a CSS selector. Use local positions for this presentation layer so arbitrary
+// business ids never enter selectors. Selection itself remains keyed by body id
+// and the displayed position is derived again whenever the list is reordered.
+const bodyRadioItems = computed(() =>
+  bodyItems.value.map((item, index) => ({ label: item.label, value: String(index) })),
+)
+const selectedBodyRadioValue = computed<string | undefined>({
+  get: () => {
+    const index = bodyItems.value.findIndex(item => item.value === selectedBody.value)
+    return index < 0 ? undefined : String(index)
+  },
+  set: (value) => {
+    const index = bodyRadioItems.value.findIndex(item => item.value === value)
+    selectedBody.value = bodyItems.value[index]?.value
+  },
+})
 
 const hasResponseControls = computed(() =>
   scenarioItems.value.length > 1
@@ -486,7 +516,7 @@ const panelAnnouncement = computed(() => {
         >
           <USelect
             v-if="scenarioItems.length > 1"
-            v-model="selectedScenario"
+            v-model="selectedScenarioValue"
             :items="scenarioItems"
             icon="i-lucide-layers"
             size="xs"
@@ -516,8 +546,8 @@ const panelAnnouncement = computed(() => {
           </USelect>
           <USelect
             v-if="bodyItems.length > 1"
-            v-model="selectedBody"
-            :items="bodyItems"
+            v-model="selectedBodyValue"
+            :items="bodySelectItems"
             icon="i-lucide-file-type"
             size="xs"
             color="neutral"
@@ -556,7 +586,7 @@ const panelAnnouncement = computed(() => {
             >
               <UFormField v-if="scenarioItems.length > 1" :label="t.scenario" size="xs">
                 <USelect
-                  v-model="selectedScenario"
+                  v-model="selectedScenarioValue"
                   :items="scenarioItems"
                   icon="i-lucide-layers"
                   size="xs"
@@ -578,8 +608,8 @@ const panelAnnouncement = computed(() => {
               />
               <URadioGroup
                 v-if="bodyItems.length > 1"
-                v-model="selectedBody"
-                :items="bodyItems"
+                v-model="selectedBodyRadioValue"
+                :items="bodyRadioItems"
                 :legend="t.mediaType"
                 size="xs"
                 color="neutral"

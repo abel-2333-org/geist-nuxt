@@ -12,6 +12,7 @@
 // A11y:     scenario select is labelled; the rest is inherited.
 
 import type { CodeVariant, ApiCodeLabels } from './CodeBlock.vue'
+import { fromExampleSelectValue, toExampleSelectValue } from '../utils/example-select-value'
 
 export interface RequestScenario {
   /** Stable id for selection. */
@@ -80,8 +81,12 @@ const {
 })
 
 const scenarioItems = computed(() =>
-  scenarios.value.map(s => ({ label: s.label, value: s.id })),
+  scenarios.value.map(s => ({ label: s.label, value: toExampleSelectValue(s.id) })),
 )
+const selectedScenarioValue = computed({
+  get: () => toExampleSelectValue(selected.value),
+  set: (value) => { selected.value = fromExampleSelectValue(value) },
+})
 </script>
 
 <template>
@@ -96,7 +101,7 @@ const scenarioItems = computed(() =>
   >
     <template v-if="scenarioItems.length > 1" #controls>
       <USelect
-        v-model="selected"
+        v-model="selectedScenarioValue"
         :items="scenarioItems"
         icon="i-lucide-layers"
         size="xs"
