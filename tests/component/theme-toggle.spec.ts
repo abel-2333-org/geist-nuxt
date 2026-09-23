@@ -17,4 +17,24 @@ describe('ThemeToggle touch contract', () => {
     wrapper = await mountSuspended(ThemeToggle)
     expect(wrapper.get('button').classes()).toContain('touch-manipulation')
   })
+
+  it('forwards caller attributes and merges its touch class onto the button', async () => {
+    wrapper = await mountSuspended(ThemeToggle, {
+      attrs: { id: 'theme-action', 'data-owner': 'header', class: 'caller-theme' },
+    })
+
+    const button = wrapper.get('button')
+    expect(button.attributes('id')).toBe('theme-action')
+    expect(button.attributes('data-owner')).toBe('header')
+    expect(button.classes()).toContain('caller-theme')
+    expect(button.classes()).toContain('touch-manipulation')
+  })
+
+  it('preserves an explicit accessible-name override', async () => {
+    wrapper = await mountSuspended(ThemeToggle, {
+      attrs: { 'aria-label': 'Change appearance' },
+    })
+
+    expect(wrapper.get('button').attributes('aria-label')).toBe('Change appearance')
+  })
 })
