@@ -1,0 +1,1168 @@
+{
+  "source": {
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "digest": "38523e134a36e10b452ee22fbd122fa03527f81862ca60df318f57dac6fcfa35",
+    "builtAt": "2026-09-23T16:06:07.203Z"
+  },
+  "base": "http://127.0.0.1:3018",
+  "browser": "153.0.8010.12",
+  "measurements": [
+    {
+      "theme": "light",
+      "threshold": 384,
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 383,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 384,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 385,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 400,
+        "width": 371,
+        "height": 61.171875,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "sectionWidth": 384,
+        "sectionScrollWidth": 384,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 916.609375,
+            "bottom": 932.609375
+          },
+          {
+            "left": 29,
+            "right": 396.203125,
+            "top": 937,
+            "bottom": 953
+          },
+          {
+            "left": 29,
+            "right": 165.8125,
+            "top": 957.390625,
+            "bottom": 973.390625
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 400,
+        "width": 371,
+        "height": 61.171875,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "sectionWidth": 384,
+        "sectionScrollWidth": 384,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1080.171875,
+            "bottom": 1096.171875
+          },
+          {
+            "left": 29,
+            "right": 396.203125,
+            "top": 1100.5625,
+            "bottom": 1116.5625
+          },
+          {
+            "left": 29,
+            "right": 165.8125,
+            "top": 1120.953125,
+            "bottom": 1136.953125
+          }
+        ],
+        "compact": null
+      }
+    },
+    {
+      "theme": "light",
+      "threshold": 384,
+      "viewport": 375,
+      "scrollWidth": 375,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 359,
+        "width": 330,
+        "height": 61.171875,
+        "clientWidth": 330,
+        "scrollWidth": 330,
+        "sectionWidth": 343,
+        "sectionScrollWidth": 347,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1181.40625,
+            "bottom": 1197.40625
+          },
+          {
+            "left": 29,
+            "right": 353,
+            "top": 1201.796875,
+            "bottom": 1217.796875
+          },
+          {
+            "left": 29,
+            "right": 209,
+            "top": 1222.1875,
+            "bottom": 1238.1875
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 359,
+        "width": 330,
+        "height": 61.171875,
+        "clientWidth": 330,
+        "scrollWidth": 330,
+        "sectionWidth": 343,
+        "sectionScrollWidth": 343,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1344.96875,
+            "bottom": 1360.96875
+          },
+          {
+            "left": 29,
+            "right": 353,
+            "top": 1365.359375,
+            "bottom": 1381.359375
+          },
+          {
+            "left": 29,
+            "right": 209,
+            "top": 1385.75,
+            "bottom": 1401.75
+          }
+        ],
+        "compact": null
+      }
+    },
+    {
+      "theme": "light",
+      "threshold": 384,
+      "viewport": 320,
+      "scrollWidth": 320,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 304,
+        "width": 275,
+        "height": 61.171875,
+        "clientWidth": 275,
+        "scrollWidth": 275,
+        "sectionWidth": 288,
+        "sectionScrollWidth": 292,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1181.390625,
+            "bottom": 1197.390625
+          },
+          {
+            "left": 29,
+            "right": 302.609375,
+            "top": 1201.78125,
+            "bottom": 1217.78125
+          },
+          {
+            "left": 29,
+            "right": 259.40625,
+            "top": 1222.171875,
+            "bottom": 1238.171875
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 304,
+        "width": 275,
+        "height": 61.171875,
+        "clientWidth": 275,
+        "scrollWidth": 275,
+        "sectionWidth": 288,
+        "sectionScrollWidth": 288,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1344.953125,
+            "bottom": 1360.953125
+          },
+          {
+            "left": 29,
+            "right": 302.609375,
+            "top": 1365.34375,
+            "bottom": 1381.34375
+          },
+          {
+            "left": 29,
+            "right": 259.40625,
+            "top": 1385.734375,
+            "bottom": 1401.734375
+          }
+        ],
+        "compact": null
+      }
+    },
+    {
+      "theme": "dark",
+      "threshold": 384,
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 383,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 384,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 385,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 400,
+        "width": 371,
+        "height": 61.171875,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "sectionWidth": 384,
+        "sectionScrollWidth": 384,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 916.609375,
+            "bottom": 932.609375
+          },
+          {
+            "left": 29,
+            "right": 396.203125,
+            "top": 937,
+            "bottom": 953
+          },
+          {
+            "left": 29,
+            "right": 165.8125,
+            "top": 957.390625,
+            "bottom": 973.390625
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 400,
+        "width": 371,
+        "height": 61.171875,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "sectionWidth": 384,
+        "sectionScrollWidth": 384,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1080.171875,
+            "bottom": 1096.171875
+          },
+          {
+            "left": 29,
+            "right": 396.203125,
+            "top": 1100.5625,
+            "bottom": 1116.5625
+          },
+          {
+            "left": 29,
+            "right": 165.8125,
+            "top": 1120.953125,
+            "bottom": 1136.953125
+          }
+        ],
+        "compact": null
+      }
+    },
+    {
+      "theme": "dark",
+      "threshold": 384,
+      "viewport": 375,
+      "scrollWidth": 375,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 343,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 359,
+        "width": 330,
+        "height": 61.171875,
+        "clientWidth": 330,
+        "scrollWidth": 330,
+        "sectionWidth": 343,
+        "sectionScrollWidth": 347,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1181.40625,
+            "bottom": 1197.40625
+          },
+          {
+            "left": 29,
+            "right": 353,
+            "top": 1201.796875,
+            "bottom": 1217.796875
+          },
+          {
+            "left": 29,
+            "right": 209,
+            "top": 1222.1875,
+            "bottom": 1238.1875
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 359,
+        "width": 330,
+        "height": 61.171875,
+        "clientWidth": 330,
+        "scrollWidth": 330,
+        "sectionWidth": 343,
+        "sectionScrollWidth": 343,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1344.96875,
+            "bottom": 1360.96875
+          },
+          {
+            "left": 29,
+            "right": 353,
+            "top": 1365.359375,
+            "bottom": 1381.359375
+          },
+          {
+            "left": 29,
+            "right": 209,
+            "top": 1385.75,
+            "bottom": 1401.75
+          }
+        ],
+        "compact": null
+      }
+    },
+    {
+      "theme": "dark",
+      "threshold": 384,
+      "viewport": 320,
+      "scrollWidth": 320,
+      "regions": [
+        {
+          "context": "field-composition",
+          "target": 383,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 384,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "field-composition",
+          "target": 385,
+          "containerWidth": 288,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-oneOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-anyOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "0px",
+          "border": "0px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 383,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 384,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        },
+        {
+          "context": "page-allOf",
+          "target": 385,
+          "containerWidth": null,
+          "padding": "16px",
+          "border": "1px",
+          "visible": true
+        }
+      ],
+      "notation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 304,
+        "width": 275,
+        "height": 61.171875,
+        "clientWidth": 275,
+        "scrollWidth": 275,
+        "sectionWidth": 288,
+        "sectionScrollWidth": 292,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1181.390625,
+            "bottom": 1197.390625
+          },
+          {
+            "left": 29,
+            "right": 302.609375,
+            "top": 1201.78125,
+            "bottom": 1217.78125
+          },
+          {
+            "left": 29,
+            "right": 259.40625,
+            "top": 1222.171875,
+            "bottom": 1238.171875
+          }
+        ],
+        "compact": null
+      },
+      "presenceNotation": {
+        "text": "Record<string, Array<PaymentTransactionMetadataWithAdditionalProperties>> | null | {}",
+        "left": 29,
+        "right": 304,
+        "width": 275,
+        "height": 61.171875,
+        "clientWidth": 275,
+        "scrollWidth": 275,
+        "sectionWidth": 288,
+        "sectionScrollWidth": 288,
+        "textRects": [
+          {
+            "left": 29,
+            "right": 129.8125,
+            "top": 1344.953125,
+            "bottom": 1360.953125
+          },
+          {
+            "left": 29,
+            "right": 302.609375,
+            "top": 1365.34375,
+            "bottom": 1381.34375
+          },
+          {
+            "left": 29,
+            "right": 259.40625,
+            "top": 1385.734375,
+            "bottom": 1401.734375
+          }
+        ],
+        "compact": null
+      }
+    }
+  ],
+  "failures": [
+    "light/1440: presence compact form",
+    "light/1440/field-composition/383: padding 16px, expected 12px; border 1px",
+    "light/1440/page-oneOf: named field container missing",
+    "light/page-oneOf: content box null != 383",
+    "light/1440/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "light/1440/page-oneOf: named field container missing",
+    "light/page-oneOf: content box null != 384",
+    "light/1440/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "light/1440/page-oneOf: named field container missing",
+    "light/page-oneOf: content box null != 385",
+    "light/1440/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "light/1440/page-anyOf: named field container missing",
+    "light/page-anyOf: content box null != 383",
+    "light/1440/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "light/1440/page-anyOf: named field container missing",
+    "light/page-anyOf: content box null != 384",
+    "light/1440/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "light/1440/page-anyOf: named field container missing",
+    "light/page-anyOf: content box null != 385",
+    "light/1440/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "light/1440/page-allOf: named field container missing",
+    "light/page-allOf: content box null != 383",
+    "light/1440/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "light/1440/page-allOf: named field container missing",
+    "light/page-allOf: content box null != 384",
+    "light/1440/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "light/1440/page-allOf: named field container missing",
+    "light/page-allOf: content box null != 385",
+    "light/1440/page-allOf/385: padding 16px, expected 12px; border 1px",
+    "light/375: presence compact form",
+    "light/375/field-composition/383: padding 16px, expected 12px; border 1px",
+    "light/375/field-composition/384: padding 16px, expected 12px; border 1px",
+    "light/375/field-composition/385: padding 16px, expected 12px; border 1px",
+    "light/375/page-oneOf: named field container missing",
+    "light/375/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "light/375/page-oneOf: named field container missing",
+    "light/375/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "light/375/page-oneOf: named field container missing",
+    "light/375/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "light/375/page-anyOf: named field container missing",
+    "light/375/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "light/375/page-anyOf: named field container missing",
+    "light/375/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "light/375/page-anyOf: named field container missing",
+    "light/375/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "light/375/page-allOf: named field container missing",
+    "light/375/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "light/375/page-allOf: named field container missing",
+    "light/375/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "light/375/page-allOf: named field container missing",
+    "light/375/page-allOf/385: padding 16px, expected 12px; border 1px",
+    "light/320: presence compact form",
+    "light/320/field-composition/383: padding 16px, expected 12px; border 1px",
+    "light/320/field-composition/384: padding 16px, expected 12px; border 1px",
+    "light/320/field-composition/385: padding 16px, expected 12px; border 1px",
+    "light/320/page-oneOf: named field container missing",
+    "light/320/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "light/320/page-oneOf: named field container missing",
+    "light/320/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "light/320/page-oneOf: named field container missing",
+    "light/320/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "light/320/page-anyOf: named field container missing",
+    "light/320/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "light/320/page-anyOf: named field container missing",
+    "light/320/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "light/320/page-anyOf: named field container missing",
+    "light/320/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "light/320/page-allOf: named field container missing",
+    "light/320/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "light/320/page-allOf: named field container missing",
+    "light/320/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "light/320/page-allOf: named field container missing",
+    "light/320/page-allOf/385: padding 16px, expected 12px; border 1px",
+    "dark/1440: presence compact form",
+    "dark/1440/field-composition/383: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-oneOf: named field container missing",
+    "dark/page-oneOf: content box null != 383",
+    "dark/1440/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-oneOf: named field container missing",
+    "dark/page-oneOf: content box null != 384",
+    "dark/1440/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-oneOf: named field container missing",
+    "dark/page-oneOf: content box null != 385",
+    "dark/1440/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-anyOf: named field container missing",
+    "dark/page-anyOf: content box null != 383",
+    "dark/1440/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "dark/1440/page-anyOf: named field container missing",
+    "dark/page-anyOf: content box null != 384",
+    "dark/1440/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "dark/1440/page-anyOf: named field container missing",
+    "dark/page-anyOf: content box null != 385",
+    "dark/1440/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "dark/1440/page-allOf: named field container missing",
+    "dark/page-allOf: content box null != 383",
+    "dark/1440/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-allOf: named field container missing",
+    "dark/page-allOf: content box null != 384",
+    "dark/1440/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "dark/1440/page-allOf: named field container missing",
+    "dark/page-allOf: content box null != 385",
+    "dark/1440/page-allOf/385: padding 16px, expected 12px; border 1px",
+    "dark/375: presence compact form",
+    "dark/375/field-composition/383: padding 16px, expected 12px; border 1px",
+    "dark/375/field-composition/384: padding 16px, expected 12px; border 1px",
+    "dark/375/field-composition/385: padding 16px, expected 12px; border 1px",
+    "dark/375/page-oneOf: named field container missing",
+    "dark/375/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "dark/375/page-oneOf: named field container missing",
+    "dark/375/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "dark/375/page-oneOf: named field container missing",
+    "dark/375/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "dark/375/page-anyOf: named field container missing",
+    "dark/375/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "dark/375/page-anyOf: named field container missing",
+    "dark/375/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "dark/375/page-anyOf: named field container missing",
+    "dark/375/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "dark/375/page-allOf: named field container missing",
+    "dark/375/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "dark/375/page-allOf: named field container missing",
+    "dark/375/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "dark/375/page-allOf: named field container missing",
+    "dark/375/page-allOf/385: padding 16px, expected 12px; border 1px",
+    "dark/320: presence compact form",
+    "dark/320/field-composition/383: padding 16px, expected 12px; border 1px",
+    "dark/320/field-composition/384: padding 16px, expected 12px; border 1px",
+    "dark/320/field-composition/385: padding 16px, expected 12px; border 1px",
+    "dark/320/page-oneOf: named field container missing",
+    "dark/320/page-oneOf/383: padding 16px, expected 12px; border 1px",
+    "dark/320/page-oneOf: named field container missing",
+    "dark/320/page-oneOf/384: padding 16px, expected 12px; border 1px",
+    "dark/320/page-oneOf: named field container missing",
+    "dark/320/page-oneOf/385: padding 16px, expected 12px; border 1px",
+    "dark/320/page-anyOf: named field container missing",
+    "dark/320/page-anyOf/383: padding 0px, expected 12px; border 0px",
+    "dark/320/page-anyOf: named field container missing",
+    "dark/320/page-anyOf/384: padding 0px, expected 12px; border 0px",
+    "dark/320/page-anyOf: named field container missing",
+    "dark/320/page-anyOf/385: padding 0px, expected 12px; border 0px",
+    "dark/320/page-allOf: named field container missing",
+    "dark/320/page-allOf/383: padding 16px, expected 12px; border 1px",
+    "dark/320/page-allOf: named field container missing",
+    "dark/320/page-allOf/384: padding 16px, expected 12px; border 1px",
+    "dark/320/page-allOf: named field container missing",
+    "dark/320/page-allOf/385: padding 16px, expected 12px; border 1px"
+  ],
+  "runtimeErrors": []
+}
