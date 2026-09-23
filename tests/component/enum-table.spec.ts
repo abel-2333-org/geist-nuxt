@@ -4,6 +4,7 @@
 // filter pass shared by tab badges and the rendered body.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { nextTick, reactive } from 'vue'
 import EnumTable from '../../kits/api-docs/components/EnumTable.vue'
 
 let scrollHeight = 0
@@ -293,6 +294,50 @@ describe('filter live region', () => {
 })
 
 describe('variant selection', () => {
+  it.each(['reverse', 'sort'] as const)('preserves identity through an in-place %s and discards a removed selection', async (method) => {
+    const choices = reactive(variants.map(variant => ({ ...variant })))
+    const wrapper = await mountSuspended(EnumTable, { props: { variants: choices } })
+    const tabs = () => wrapper.findComponent({ name: 'UTabs' })
+
+    if (method === 'reverse') choices.reverse()
+    else choices.sort((left, right) => right.id.localeCompare(left.id))
+    await nextTick()
+
+    expect(tabs().props('modelValue')).toBe('git')
+    expect(wrapper.text()).toContain('BUILDING')
+    const removed = choices.splice(choices.findIndex(variant => variant.id === 'git'), 1)[0]!
+    await nextTick()
+    expect(tabs().props('modelValue')).toBe('prebuilt')
+    choices.push(removed)
+    await nextTick()
+    expect(tabs().props('modelValue')).toBe('prebuilt')
+    expect(wrapper.text()).toContain('UPLOADING')
+    wrapper.unmount()
+  })
+
+  it.each(['reverse', 'sort'] as const)('keeps a query through an in-place %s but clears it when the final list is too short', async (method) => {
+    const choices = reactive([
+      { id: 'large', title: 'Large', values: manyValues.slice(0, 7) },
+      { id: 'small', title: 'Small', values: [{ value: 'only', description: 'One value.' }] },
+    ])
+    const wrapper = await mountSuspended(EnumTable, { props: { variants: choices } })
+    const input = () => wrapper.findComponent({ name: 'UInput' })
+    await input().get('input').setValue('value_1')
+
+    if (method === 'reverse') choices.reverse()
+    else choices.sort((left, right) => right.id.localeCompare(left.id))
+    await nextTick()
+
+    expect(input().props('modelValue')).toBe('value_1')
+    expect(wrapper.findAll('dt').map(row => row.text())).toEqual(['value_1'])
+    choices.splice(choices.findIndex(variant => variant.id === 'small'), 1)
+    await nextTick()
+    expect(input().exists()).toBe(false)
+    expect(wrapper.findAll('dt')).toHaveLength(7)
+    expect(wrapper.find('[role="status"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('links every tab to its tabpanel', async () => {
     const wrapper = await mountSuspended(EnumTable, { props: { variants } })
     await wrapper.vm.$nextTick()

@@ -60,11 +60,11 @@ useHead({
 
 ## 明暗切换（`ThemeToggle`，foundation 提供）
 
-`ThemeToggle` 是稳定的 foundation 组件名，内部直接委托 Nuxt UI 的 `<UColorModeButton>`。切换状态、SSR 处理、图标和可访问名称都由 Nuxt UI 维护；可访问名称会读取根 `<UApp :locale="...">` 的 locale。不要在这里重复实现 `useColorMode()`、`ClientOnly`、class 或 localStorage 逻辑。
+`ThemeToggle` 是稳定的 foundation 组件名，内部用 `ClientOnly` 包裹 Nuxt UI 的 `<UColorModeButton>`，在浏览器解析主题偏好后渲染按钮，避免首次 hydration 保留与当前主题不符的 SSR 可访问名称。SSR 阶段不显示按钮；切换状态、图标、locale 和偏好存储仍由上游原语维护，可访问名称读取根 `<UApp :locale="...">` 的 locale。调用方的 attrs、class 和显式 `aria-label` 透传到按钮；消费方直接使用 `ThemeToggle`，无需重复实现主题或存储逻辑。
 
 ```vue
 <template>
-  <UColorModeButton />
+  <ThemeToggle />
 </template>
 ```
 

@@ -93,7 +93,7 @@ watch(
   (ids) => {
     if (!activeId.value || !ids.includes(activeId.value)) activeId.value = ids[0]
   },
-  { flush: 'sync', immediate: true },
+  { immediate: true },
 )
 
 // Tab per variant, badged with its *filtered* count so an active search reveals
@@ -152,7 +152,7 @@ const bounded = computed(() => activeTotalCount.value >= props.filterThreshold)
 // Never retain a filter the reader can no longer see or clear.
 watch(filterable, (value) => {
   if (!value) query.value = ''
-}, { flush: 'sync' })
+})
 
 // Filtering rewrites every variant silently, so announce the aggregate result
 // — the same scope as the input and the tab badges. Empty while idle so
