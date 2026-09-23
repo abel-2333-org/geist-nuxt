@@ -17,7 +17,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, nextTick } from 'vue'
 import { UApp, UTooltip } from '#components'
 import OperationTarget from '../../kits/api-docs/components/OperationTarget.vue'
 
@@ -351,5 +351,88 @@ describe('OperationTarget chrome localization', () => {
     expect(names).toContain('Copy host https://api.example.com')
     expect(names).toContain('Copy path /v1/deployments')
     expect(names).toContain('Copy endpoint')
+  })
+})
+
+
+describe('OperationTarget environment identity', () => {
+  const picker = (wrapper: Mounted) => wrapper.findComponent({ name: 'USelect' })
+  const address = (wrapper: Mounted) => copyButtons(wrapper)[0]!.props('value')
+
+  it('derives the same fallback for a controlled unknown id without writing back', async () => {
+    const update = vi.fn()
+    const wrapper = await mountTarget({ props: {
+      ...base, modelValue: 'missing', 'onUpdate:modelValue': update,
+    } })
+    expect(picker(wrapper).get('button').text()).toContain('生产')
+    expect(address(wrapper)).toBe('https://api.example.com/v1/deployments')
+    expect(update).not.toHaveBeenCalled()
+    await wrapper.setProps({ hosts: [...hosts, { id: 'missing', label: 'Later', baseUrl: 'https://later.example' }] })
+    expect(picker(wrapper).get('button').text()).toContain('Later')
+    expect(address(wrapper)).toBe('https://later.example/v1/deployments')
+    expect(update).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('preserves local identity on reorder and discards it on removal and rename', async () => {
+    const choices = reactive([...hosts.map(host => ({ ...host })), { id: 'third', label: 'Third', baseUrl: 'https://third.example' }])
+    const wrapper = await mountTarget({ props: { ...base, hosts: choices } })
+    const select = async (label: string) => {
+      const item = picker(wrapper).props('items').find((item: { label: string }) => item.label === label)
+      picker(wrapper).vm.$emit('update:modelValue', item.value)
+      await nextTick()
+    }
+    await select('沙箱')
+    choices.reverse()
+    await nextTick()
+    expect(picker(wrapper).get('button').text()).toContain('沙箱')
+    expect(address(wrapper)).toBe('https://sandbox.example.com/v1/deployments')
+    const removed = choices.splice(1, 1)[0]!
+    await nextTick()
+    expect(picker(wrapper).get('button').text()).toContain('Third')
+    expect(address(wrapper)).toBe('https://third.example/v1/deployments')
+    choices.push(removed)
+    await nextTick()
+    expect(address(wrapper)).toBe('https://third.example/v1/deployments')
+    choices[0]!.id = 'renamed'
+    await nextTick()
+    choices.push({ id: 'third', label: 'Old identity', baseUrl: 'https://old.example' })
+    await nextTick()
+    expect(address(wrapper)).toBe('https://third.example/v1/deployments')
+    expect(picker(wrapper).get('button').text()).toContain('Third')
+    wrapper.unmount()
+  })
+
+  it('keeps props-only model usage locally selectable', async () => {
+    const wrapper = await mountTarget({ props: { ...base, modelValue: 'sandbox' } })
+    const item = picker(wrapper).props('items').find((item: { label: string }) => item.label === '生产')
+    picker(wrapper).vm.$emit('update:modelValue', item.value)
+    await nextTick()
+    expect(address(wrapper)).toBe('https://api.example.com/v1/deployments')
+    wrapper.unmount()
+  })
+
+  it('keeps empty and literal zero ids distinct at the select boundary and emits raw ids', async () => {
+    const update = vi.fn()
+    const choices = [
+      { id: '', label: 'Empty identity', baseUrl: 'https://empty.example' },
+      { id: '0', label: 'Zero identity', baseUrl: 'https://zero.example' },
+    ]
+    const wrapper = await mountTarget({ props: { ...base, hosts: choices, modelValue: '', 'onUpdate:modelValue': update } })
+    const items = picker(wrapper).props('items')
+    // Reka reserves an empty item value for clearing the Select.
+    expect(items.every((item: { value: unknown }) => item.value !== '')).toBe(true)
+    expect(new Set(items.map((item: { value: unknown }) => item.value)).size).toBe(2)
+    expect(picker(wrapper).get('button').text()).toContain('Empty identity')
+    expect(address(wrapper)).toBe('https://empty.example/v1/deployments')
+    picker(wrapper).vm.$emit('update:modelValue', items[1].value)
+    await nextTick()
+    expect(update).toHaveBeenLastCalledWith('0')
+    await wrapper.setProps({ modelValue: '0' })
+    expect(address(wrapper)).toBe('https://zero.example/v1/deployments')
+    picker(wrapper).vm.$emit('update:modelValue', items[0].value)
+    await nextTick()
+    expect(update).toHaveBeenLastCalledWith('')
+    wrapper.unmount()
   })
 })
