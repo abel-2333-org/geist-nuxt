@@ -507,13 +507,13 @@
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -532,9 +532,9 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "4b0e21e8514de7694fb13ae986014f18404cbb921d93ecdc1762179a2765f1cb"
+        "scopeDigest": "542eb79453dd512a32a57603d3832c7486ce176a11c4643d921dd4c4fe7bc382"
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #146 响应式、断点与组合结构结论；#151 条件示例调用参数未变的既有审阅保留。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
       "findings": []
     },
     "api-docs-code-block": {
@@ -1161,7 +1161,7 @@
       "round": 4,
       "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
@@ -1273,13 +1273,6 @@
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 F1 Required=3.913738950339162、F2 Conditional=2.2909619612053143、F5 warning caveat lead-in=2.1157592604952824（阶段1 light 浏览器实测）。当前 requiredness/caveat/lifecycle 路径及功能色未改；FieldValueRequirements warning caveat 独立节点仍待 #147 补验。候选 A 仅修正常中性文字与指定 hover，不能把 FieldItem 全部正常文字标为通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
           "disposition": "resolved"
-        },
-        {
-          "id": "f-909f4f270010",
-          "severity": "medium",
-          "claim": "关闭动画期间及内部焦点下祖先关闭不应使键盘焦点进入或留在被裁剪的内容中。",
-          "evidence": "PR153补验：Chromium153，1024×900，正常200ms动画。main19a107527d1226585611f4547619320b430fab2a与PR两侧children/value/anyOf均复现：真实Tab到触发器，Enter展开后Space收起并立即Tab；动画中焦点进入后代、被overflow完全裁剪，稳态落BODY。内部真实Tab聚焦后HTMLButtonElement.click()激活祖先既有handler亦复现；后者为程序化激活，非UI快捷键。复现脚本tests/browser/hierarchy-focus.mjs与hierarchy-focus-compare.mjs；报告docs/maintenance/component-audit/reports/2026-09-22-pr153.md；跟踪PR https://github.com/abel-2333-org/geist-nuxt/pull/153 。基线已有但未修复，不计作PR新增回归或完整焦点通过。",
-          "disposition": "open"
         }
       ]
     },
@@ -1287,7 +1280,7 @@
       "round": 4,
       "lastAuditedAt": "2026-09-23T08:01:03.122Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "9ac9d7373af5350df6f964e3de1d72b4a907ee9f",
@@ -1348,15 +1341,7 @@
         ]
       },
       "notes": "基于9ac9d737完成完整owner审计，在6e88427独立复审修复：anyOf改Map以支持prototype/Vue保留名id；空id deep link与空列表首次/再次加载选中状态区分undefined；discriminator安全code span保留反引号/首尾空格，空或控制字符使用JSON字面量，factory参数仍是原始值。原findings为空；本轮3个发现及红绿证据保留在外部schema-review且均已修复，不以新resolved finding写入ledger。保留原6scope/原NuxtUI+Reka依赖，补实际渲染/anchor/parser/配置/契约/测试scope与Vue/Nuxt/marked行为依赖。最终功能树component36files494（Schema30）、typecheck/build通过；原始precommit构建来源不改标，其digest与6e88427重算一致。无本reviewer新增browser/native-touch/consumer实测声明。 主线程在相同构建输入的真实Chrome生产页面完成light/dark×1440/390四组核验：键盘tabs/独立折叠、隐藏子tab定位并聚焦、收起后重复深链接、无水平溢出，截图检查通过；这是当前本机浏览器回归，不是外部consumer或维护者视觉验收。",
-      "findings": [
-        {
-          "id": "f-fea517d9f1ac",
-          "severity": "medium",
-          "claim": "关闭动画期间及内部焦点下祖先关闭不应使键盘焦点进入或留在被裁剪的内容中。",
-          "evidence": "PR153补验：Chromium153，1024×900，正常200ms动画。main19a107527d1226585611f4547619320b430fab2a与PR两侧children/value/anyOf均复现：真实Tab到触发器，Enter展开后Space收起并立即Tab；动画中焦点进入后代、被overflow完全裁剪，稳态落BODY。内部真实Tab聚焦后HTMLButtonElement.click()激活祖先既有handler亦复现；后者为程序化激活，非UI快捷键。复现脚本tests/browser/hierarchy-focus.mjs与hierarchy-focus-compare.mjs；报告docs/maintenance/component-audit/reports/2026-09-22-pr153.md；跟踪PR https://github.com/abel-2333-org/geist-nuxt/pull/153 。基线已有但未修复，不计作PR新增回归或完整焦点通过。",
-          "disposition": "open"
-        }
-      ]
+      "findings": []
     },
     "api-docs-field-annotation": {
       "round": 4,
@@ -1823,13 +1808,13 @@
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -1847,9 +1832,9 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "73a344e14482f4b9f837e36e8efb81c4bd346468da1ca3d06f23936d436abf28"
+        "scopeDigest": "2f43fe650c7df404b5648ebea353eaf2be78c40bda06e7b14e1909ea79979e4a"
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #146/#151 CodeRail 的 SplitPane/Handle、useBreakpointGate/useRafTask、breakpoints.ts 与组合测试 scope；先前仅共享条件示例/reference 命中不改调用契约的结论保留。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
       "findings": []
     },
     "api-docs-site-search": {
@@ -1929,13 +1914,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
+        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -1950,9 +1935,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "9642aa75b8c2fe2673c3a7f346bb8e446a0ec5ed6240418001d75fc6d47a876f"
+        "scopeDigest": "4115a280b3c1ec47f354d38bf18d8b71ab13eaef5d4c63deb50723e209d4e34c"
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 canonical #150/#151 的组件结构、调用/reference 审阅结论与全部 scope/依赖；本次 scope 命中不扩大公开契约。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
