@@ -1192,24 +1192,24 @@ onMounted(() => anchor.initFromHash())
             有条件行即有条件。不带 presence 的行就是「始终存在」；数组元素与解码内容的存在性只在各自
             作用域下显示（<code class="font-mono text-code">object | null</code>），不与外层字段互相继承。
           </p>
-          <FieldGroup label="Request Body" :count="fields.length">
+          <FieldGroup :heading-level="4" label="Request Body" :count="fields.length">
             <FieldItem v-for="f in fields" :key="f.path ?? f.name" v-bind="f" />
           </FieldGroup>
 
           <div class="mt-8">
-            <FieldGroup label="Settlement Payload" :count="denseFields.length">
+            <FieldGroup :heading-level="4" label="Settlement Payload" :count="denseFields.length">
               <FieldItem v-for="f in denseFields" :key="f.path ?? f.name" v-bind="f" />
             </FieldGroup>
           </div>
 
           <div class="mt-8">
-            <FieldGroup label="doTransaction · 编码内容与数组元素" :count="valueFields.length">
+            <FieldGroup :heading-level="4" label="doTransaction · 编码内容与数组元素" :count="valueFields.length">
               <FieldItem v-for="f in valueFields" :key="f.path ?? f.name" v-bind="f" :labels="valueLabels" />
             </FieldGroup>
           </div>
 
           <div class="mt-8">
-            <FieldGroup label="Response · 输出字段存在性" :count="presenceFields.length">
+            <FieldGroup :heading-level="4" label="Response · 输出字段存在性" :count="presenceFields.length">
               <FieldItem v-for="f in presenceFields" :key="f.path ?? f.name" v-bind="f" :labels="valueLabels" />
             </FieldGroup>
           </div>
