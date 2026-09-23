@@ -108,6 +108,79 @@ function selectByIcon(wrapper: VueWrapper<InstanceType<typeof ResponseExample>>,
     .find(c => c.props('icon') === icon)
 }
 
+describe('ResponseExample empty identity selection', () => {
+  it('opens compact body choices with quoted ids and keeps label targets unique', async () => {
+    const bodies = reactive([
+      { id: '', kind: 'empty' as const, mediaType: 'text/plain', note: 'EMPTY BODY' },
+      { id: '0', kind: 'empty' as const, mediaType: 'text/csv', note: 'ZERO BODY' },
+      { id: 'quote"id', kind: 'empty' as const, mediaType: 'application/json', note: 'QUOTE BODY' },
+    ])
+    const wrapper = await mountSuspended(ResponseExample, {
+      attachTo: document.body,
+      props: { scenarios: [{ id: 'body', label: 'Bodies', statuses: [{ status: 200, bodies }] }] },
+    })
+    await wrapper.get('[data-response-compact-trigger]').trigger('click')
+    await wrapper.vm.$nextTick()
+    const radios = Array.from(document.querySelectorAll('[role="radio"]'))
+    expect(radios).toHaveLength(3)
+    const ids = radios.map(radio => radio.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const id of ids) {
+      expect(document.querySelectorAll(`[for="${CSS.escape(id)}"]`)).toHaveLength(1)
+    }
+    for (const body of [bodies[1]!, bodies[2]!, bodies[0]!]) {
+      const label = Array.from(document.querySelectorAll<HTMLLabelElement>('label[for]'))
+        .find(label => label.textContent?.trim() === body.mediaType)!
+      label.click()
+      await vi.waitFor(() => expect(wrapper.text()).toContain(body.note))
+      expect(document.getElementById(label.htmlFor)?.getAttribute('aria-checked')).toBe('true')
+    }
+    bodies.reverse()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('EMPTY BODY')
+    const selectedLabel = Array.from(document.querySelectorAll<HTMLLabelElement>('label[for]'))
+      .find(label => label.textContent?.trim() === 'text/plain')!
+    expect(document.getElementById(selectedLabel.htmlFor)?.getAttribute('aria-checked')).toBe('true')
+    wrapper.unmount()
+  })
+
+  it('preserves original empty and literal-zero scenario ids through selection', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: { scenarios: [
+        { id: '', label: 'Empty id', statuses: [{ status: 200, bodies: jsonBody('EMPTY SCENARIO') }] },
+        { id: '0', label: 'Zero id', statuses: [{ status: 200, bodies: jsonBody('ZERO SCENARIO') }] },
+      ] },
+    })
+    const select = selectByIcon(wrapper, 'i-lucide-layers')!
+    for (const [label, code] of [['Zero id', 'ZERO SCENARIO'], ['Empty id', 'EMPTY SCENARIO']]) {
+      const item = select.props('items').find((item: { label: string }) => item.label === label)
+      select.vm.$emit('update:modelValue', item.value)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.get('pre').text()).toBe(code)
+    }
+    expect(wrapper.emitted('update:scenario')).toEqual([['0'], ['']])
+    wrapper.unmount()
+  })
+
+  it('keeps empty and literal-zero body ids distinct', async () => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: { scenarios: [{ id: 'body', label: 'Bodies', statuses: [{ status: 200, bodies: [
+        { id: '', kind: 'code', mediaType: 'text/plain', variants: [{ language: 'text', code: 'EMPTY BODY' }] },
+        { id: '0', kind: 'code', mediaType: 'text/csv', variants: [{ language: 'text', code: 'ZERO BODY' }] },
+      ] }] }] },
+    })
+    const select = selectByIcon(wrapper, 'i-lucide-file-type')!
+    for (const [label, code] of [['text/csv', 'ZERO BODY'], ['text/plain', 'EMPTY BODY']]) {
+      const item = select.props('items').find((item: { label: string }) => item.label === label)
+      select.vm.$emit('update:modelValue', item.value)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.get('pre').text()).toBe(code)
+      expect(wrapper.get('[data-response-compact-trigger]').attributes('aria-label')).toContain(label)
+    }
+    wrapper.unmount()
+  })
+})
+
 afterEach(() => {
   vi.restoreAllMocks()
 })
@@ -454,6 +527,30 @@ describe('ResponseExample body selection', () => {
       { label: 'JSON', value: 'json' },
       { label: 'Code example', value: 'mystery' },
     ])
+  })
+
+  it.each(['constructor', '__proto__'])('renders the custom language %s as a readable media label', async (language) => {
+    const wrapper = await mountSuspended(ResponseExample, {
+      props: {
+        scenarios: [{
+          id: 'custom-language',
+          label: 'Custom language',
+          statuses: [{
+            status: 200,
+            bodies: [
+              { id: 'custom', kind: 'code', variants: [{ language, code: 'RAW' }] },
+              { id: 'json', kind: 'code', variants: [{ language: 'json', code: '{}' }] },
+            ],
+          }],
+        }],
+      },
+    })
+    expect(selectByIcon(wrapper, 'i-lucide-file-type')?.props('items')).toEqual([
+      { label: language === 'constructor' ? 'Constructor' : '__proto__', value: 'custom' },
+      { label: 'JSON', value: 'json' },
+    ])
+    expect(wrapper.get('pre').text()).toBe('RAW')
+    wrapper.unmount()
   })
 
   it('preserves the default body by id across same-context reorder', async () => {

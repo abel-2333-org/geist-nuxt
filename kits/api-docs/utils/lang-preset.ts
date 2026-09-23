@@ -34,7 +34,8 @@ export const langPreset: Record<string, string> = {
  */
 export function langLabel(id: string, overrides: Record<string, string> = {}): string {
   const key = id.toLowerCase()
-  const override = overrides[key]
+  const override = (Object.hasOwn(overrides, key) ? overrides[key] : undefined)
     ?? Object.entries(overrides).find(([candidate]) => candidate.toLowerCase() === key)?.[1]
-  return override ?? langPreset[key] ?? id.charAt(0).toUpperCase() + id.slice(1)
+  const preset = Object.hasOwn(langPreset, key) ? langPreset[key] : undefined
+  return override ?? preset ?? id.charAt(0).toUpperCase() + id.slice(1)
 }
