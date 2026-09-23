@@ -1,0 +1,11 @@
+{
+  "sha": "00d2b3bee459b5b1732ae44615da7821fe9949f2",
+  "digest": "03cec907ad8f5324374569ca2127948245f746af9f9b502814308d26671f94fa",
+  "baselineSha": "19a107527d1226585611f4547619320b430fab2a",
+  "baselineDigest": "df3342c0952c84f81698322264eb9f8015eff94d9cd3f8ad3ea2fe0d8bb20806",
+  "browser": "Chrome 153.0.8010.53",
+  "browserVersionSource": "Installed application CFBundleShortVersionString",
+  "configuration": "Same running Chrome profile and process for both ports; no browser restart or launch flag change. Native Cmd+F; normal production animations. Sidebar collapsed for final published screenshots.",
+  "build": "pnpm build; source digest identical before and after build; 3033 server restarted before final HEAD measurements. Baseline reused verified hierarchy production artifact on 3028.",
+  "observer": "Passive capture-phase beforematch listener logs target id and isTrusted; removed by next full navigation. No hidden/inert/hash mutation or synthetic event."
+}
