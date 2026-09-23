@@ -58,37 +58,34 @@ const node = computed(() => props.block.node)
 
   <!-- Heading: the level also has a condition, a description, values, an
        example or a default. One row cannot hold that, so the scope becomes a
-       heading and the facts sit under it in the same information column —
+       heading with its short notation; the remaining facts sit under it —
        a list, not a subtree, hence no line and no indent of its own. -->
   <section v-else data-value-requirements class="flex flex-col gap-2">
-    <p class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ block.label }}</p>
-
-    <div class="flex flex-col gap-3">
-      <!-- This VALUE's presence (an element may be null, decoded content may
-           be `[]`), as the same type notation the owner's identity line uses
-           — `object | null` — but scoped under this heading, which is the
-           whole point: the owner row never shows it, and the owner's own
-           `| null` never lands here. A value has no key, so `?` cannot
-           appear (typed out and stripped at runtime). -->
+    <div class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-2">
+      <p class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ block.label }}</p>
+      <!-- The notation and conditions belong to this value level, never to
+           the owner's field identity. Keep one presence scope for both. -->
       <div
         v-if="block.presence.unionTail.length || block.presence.condition.length"
         data-value-presence
-        class="flex flex-col gap-2"
+        class="contents"
       >
         <p
           v-if="block.presence.unionTail.length"
-          class="wrap-anywhere font-mono text-xs text-muted"
+          class="wrap-anywhere min-w-0 font-mono text-xs text-muted"
           translate="no"
         >{{ presenceTypeExpression(node.type, block.presence.unionTail) }}</p>
         <div
           v-if="block.presence.condition.length"
           data-value-presence-condition
-          class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
+          class="min-w-0 basis-full border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
         >
           <ConditionEntries :entries="block.presence.condition" />
         </div>
       </div>
+    </div>
 
+    <div class="flex flex-col gap-3">
       <p v-if="node.description" class="text-sm leading-relaxed text-toned">
         <InlineMarkdown :text="node.description" />
       </p>

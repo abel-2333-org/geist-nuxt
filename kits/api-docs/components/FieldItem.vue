@@ -635,7 +635,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <template #default="{ open }">
         <button
           type="button"
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"

@@ -679,7 +679,7 @@ describe('FieldItem with a value shape', () => {
     })
 
     const region = wrapper.get('[data-value-structure-region]')
-    const scopes = region.findAll('[data-value-requirements] dt, [data-value-requirements] > p').map(n => n.text())
+    const scopes = region.findAll('[data-value-requirements] dt, [data-value-requirements] > div > p:first-child').map(n => n.text())
     // Decode boundary and element boundary share the region but keep their
     // own scope, so "at least 1 element" never reads as a rule about one item.
     expect(scopes).toEqual(['Array', 'Each item'])
