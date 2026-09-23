@@ -74,7 +74,9 @@ async function runCommand(cwd, command, args, logFile, environment = {}) {
   const result = await new Promise(resolve => {
     const child = spawn(command, args, {
       cwd, env: { ...process.env, ...environment }, stdio: ['ignore', 'pipe', 'pipe'],
-      timeout: 20 * 60_000,
+      // Each mutation runs the full neutral + functional browser matrix.
+      // Preserve every case and its own timeout as the matrix grows.
+      timeout: command === 'pnpm' && args[0] === 'test:browser' ? 60 * 60_000 : 20 * 60_000,
     })
     child.stdout.pipe(log, { end: false })
     child.stderr.pipe(log, { end: false })
@@ -122,22 +124,231 @@ async function verifySourceIsolation(snapshot) {
   return { components, sourceFilesAreIndependent: true, originalCheckoutReferences: 0 }
 }
 
-async function readBrowserEvidence(directory, source, expectedFiles) {
-  const reports = []
-  for (const file of (await readdir(directory)).filter(file => file.endsWith('.json')).sort()) {
-    const report = JSON.parse(await readFile(path.join(directory, file), 'utf8'))
-    if (!Array.isArray(report.records)) continue // e.g. the arrival animation timeline
-    if (report.source?.sha !== source.sha || report.source?.digest !== source.digest) throw new Error(`Mismatched browser source: ${file}`)
-    for (const record of report.records) {
-      const ratio = contrastRatio(record.effectiveForeground, record.effectiveBackground)
-      if (!Number.isFinite(record.ratio) || Math.abs(ratio - record.ratio) > 1e-10) throw new Error(`Unresolved or invalid contrast record: ${file}`)
-    }
-    reports.push({ file, ...report })
+const measurementKeys = 'text textBounds rawForeground foreground layers excludedPaint engine rect pseudo generatedText generatedConsistency fontFamily fontSize ownOpacity snapshotConsistency effectiveForeground effectiveBackground ratio'.split(' ')
+const metadataKeys = 'id owner route theme state index surface component role slot variant width triggerSurface routeState scenario selectedStatus selectedBody compact motion computed actual host link result status reason destination'.split(' ')
+const detailKeys = 'source theme route state classification computed kind id surface outcome expected motion readinessFailure measurement measurements rejection injected errorMovedForGeometry originalErrorBounds fallbackBounds projected normalBounds shifted'.split(' ')
+const positiveClassifications = new Set(['positive detector control', 'positive glyph measurement', 'generated glyph geometry control', 'actual trigger endpoint and composed contrast'])
+const rejectionClassifications = new Set(['negative detector control', 'expected detector rejection; not a positive suite red run'])
+const numericMessage = 'ordinary text contrast: one or more raw ratios < 4.5'
+const functionalNumericMessage = 'all ordinary text must resolve at >= 4.5 without rounding'
+
+function object(value, location) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`Unknown evidence structure: ${location}`)
+}
+function onlyKeys(value, keys, location) {
+  object(value, location)
+  const unknown = Object.keys(value).filter(key => !keys.includes(key))
+  if (unknown.length) throw new Error(`Unknown evidence fields at ${location}: ${unknown.join(', ')}`)
+}
+function noFaults(value, location) {
+  for (const key of ['readinessFailure', 'rejection', 'infrastructureError', 'pageError']) {
+    if (value[key] != null) throw new Error(`Unresolved ${key}: ${location}`)
   }
-  const files = reports.map(report => report.file)
+  for (const key of ['pageErrors', 'violations']) {
+    if (key in value && (!Array.isArray(value[key]) || value[key].length)) throw new Error(`Unresolved ${key}: ${location}`)
+  }
+  if ('status' in value && !['pass', 'fail'].includes(value.status)) throw new Error(`Unresolved status: ${location}`)
+}
+function noNestedFaults(value, location) {
+  if (!value || typeof value !== 'object') return
+  if (!Array.isArray(value)) {
+    const { status: _status, ...fields } = value
+    noFaults(fields, location)
+  }
+  for (const [key, child] of Object.entries(value)) noNestedFaults(child, `${location}.${key}`)
+}
+function sourceMatches(value, source, location) {
+  if (value?.sha !== source.sha || value?.digest !== source.digest) throw new Error(`Mismatched browser source: ${location}`)
+}
+function recompute(value, location) {
+  noFaults(value, location)
+  const ratio = contrastRatio(value.effectiveForeground, value.effectiveBackground)
+  if (!Number.isFinite(value.ratio) || Math.abs(ratio - value.ratio) > 1e-10) throw new Error(`Invalid contrast ratio: ${location}`)
+  if ('status' in value && (value.status === 'pass') !== (ratio >= 4.5)) throw new Error(`Mismatched contrast status: ${location}`)
+}
+
+// Do not search arbitrary objects for a ratio: every measurement container and
+// every intentional negative control has an explicit schema. Sidecars stay in
+// the inventory even when they are diagnostic rather than ordinary acceptance.
+export async function readBrowserEvidence(directory, source, expectedManifest) {
+  const files = []
+  async function visit(relative = '') {
+    for (const entry of await readdir(path.join(directory, relative), { withFileTypes: true })) {
+      const file = path.posix.join(relative, entry.name)
+      if (entry.isDirectory()) await visit(file)
+      else if (entry.isSymbolicLink()) throw new Error(`Symlinked browser evidence: ${file}`)
+      else if (entry.isFile() && file.endsWith('.json')) files.push(file)
+    }
+  }
+  await visit()
+  files.sort()
+  const reports = [], controls = [], auxiliary = [], identities = []
+  for (const file of files) {
+    const report = JSON.parse(await readFile(path.join(directory, file), 'utf8'))
+    object(report, file)
+    sourceMatches(report.source, source, file)
+    noFaults(rejectionClassifications.has(report.classification) ? { ...report, rejection: null } : report, file)
+    const { records: _records, evidence: _evidence, rejections: _rejections, rejection: _rejection, ...reportMetadata } = report
+    noNestedFaults(reportMetadata, file)
+    const theme = /^(light|dark)-/.exec(path.basename(file))?.[1]
+    if (!theme || (report.theme !== undefined && report.theme !== theme)) throw new Error(`Unknown or inconsistent browser theme: ${file}`)
+    const rows = []
+    const context = (value, location) => {
+      if ('source' in value) sourceMatches(value.source, source, location)
+      if ('theme' in value && value.theme !== theme) throw new Error(`Mismatched record theme: ${location}`)
+    }
+    const ordinary = (value, location, metadata = {}) => {
+      onlyKeys(value, [...measurementKeys, ...metadataKeys], location)
+      context(value, location)
+      noNestedFaults(value, `${file}/${location}`)
+      recompute(value, location)
+      const row = { theme, ...metadata, ...value }
+      rows.push(row)
+      identities.push({ file, location, ...Object.fromEntries(['theme', 'id', 'owner', 'state', 'index', 'surface', 'component', 'role', 'slot', 'variant', 'width', 'motion', 'route', 'routeState', 'scenario', 'selectedStatus', 'selectedBody', 'compact', 'destination'].filter(key => row[key] !== undefined).map(key => [key, row[key]])) })
+    }
+    const reject = (value, location, classification) => {
+      if (value.measurement != null || value.measurements !== undefined || typeof value.rejection !== 'string' || !value.rejection.includes('unresolved:')) throw new Error(`Invalid expected detector rejection: ${location}`)
+      noFaults({ ...value, rejection: null }, location)
+      noNestedFaults({ ...value, rejection: null }, `${file}/${location}`)
+      controls.push({ file, location, theme, state: value.state, classification, rejection: value.rejection })
+    }
+    const detail = (value, location) => {
+      const directDiagnostic = ['original alpha diagnostic; actual outcome retained, not a positive suite red run', 'native disabled exception; not normal-text acceptance'].includes(value.classification)
+      onlyKeys(value, directDiagnostic ? [...detailKeys.filter(key => !['measurement', 'measurements'].includes(key)), ...measurementKeys] : detailKeys, location)
+      context(value, location)
+      const classification = value.classification
+      if (rejectionClassifications.has(classification)) {
+        reject(value, location, classification)
+      }
+      else if (positiveClassifications.has(classification)) {
+        noFaults(value, location)
+        noNestedFaults(value, `${file}/${location}`)
+        if ('measurement' in value && !('measurements' in value)) ordinary(value.measurement, `${location}.measurement`, { state: value.state, motion: value.motion })
+        else if (Array.isArray(value.measurements) && value.measurements.length && !('measurement' in value)) value.measurements.forEach((row, index) => ordinary(row, `${location}.measurements[${index}]`))
+        else throw new Error(`Missing positive measurement: ${location}`)
+      }
+      else if (['numeric negative control', 'original alpha diagnostic; actual outcome retained, not a positive suite red run', 'native disabled exception; not normal-text acceptance'].includes(classification)) {
+        noFaults(value, location)
+        if (classification === 'numeric negative control' && 'measurements' in value) throw new Error(`Mixed numeric control measurement shapes: ${location}`)
+        const measurement = classification === 'numeric negative control' ? value.measurement : Object.fromEntries(measurementKeys.filter(key => key in value).map(key => [key, value[key]]))
+        onlyKeys(measurement, measurementKeys, location)
+        recompute(measurement, location)
+        if (classification === 'numeric negative control' && measurement.ratio >= 4.5) throw new Error(`Numeric negative control did not fail: ${location}`)
+        if (classification.startsWith('original alpha') && value.outcome !== (measurement.ratio >= 4.5 ? 'pass' : 'fail')) throw new Error(`Mismatched alpha diagnostic outcome: ${location}`)
+        controls.push({ file, location, theme, state: value.state, classification, ratio: measurement.ratio })
+      }
+      else throw new Error(`Unknown measurement classification: ${location}`)
+    }
+    if ('records' in report) {
+      onlyKeys(report, 'source browser theme width route fonts platformFonts failure infrastructureError pageErrors summary records evidence actions observation rejections'.split(' '), file)
+      if (!Array.isArray(report.records) || !report.records.length) throw new Error(`Empty browser scenario: ${file}`)
+      report.records.forEach((record, index) => {
+        const location = `records[${index}]`
+        object(record, `${file}/${location}`)
+        if ('measurement' in record) {
+          onlyKeys(record, 'state motion expected computed readinessFailure measurement rejection'.split(' '), `${file}/${location}`)
+          noFaults(record, `${file}/${location}`)
+          noNestedFaults(record, `${file}/${location}`)
+          ordinary(record.measurement, `${location}.measurement`, { state: record.state, motion: record.motion })
+        }
+        else ordinary(record, location)
+      })
+      if (report.summary) {
+        onlyKeys(report.summary, ['pass', 'fail', 'unresolved', 'unverified'], `${file}/summary`)
+        for (const status of ['pass', 'fail', 'unresolved', 'unverified']) if (report.summary[status] !== report.records.filter(row => row.status === status).length) throw new Error(`Mismatched record summary: ${file}`)
+      }
+      if (report.rejections) {
+        if (!Array.isArray(report.rejections)) throw new Error(`Unknown rejection list: ${file}`)
+        report.rejections.forEach((value, index) => {
+          onlyKeys(value, ['state', 'measurement', 'rejection'], `${file}/rejections[${index}]`)
+          reject(value, `rejections[${index}]`, 'expected detector rejection; not a positive suite red run')
+        })
+      }
+      if (report.evidence) {
+        if (!Array.isArray(report.evidence)) throw new Error(`Unknown functional evidence: ${file}`)
+        report.evidence.forEach((value, index) => {
+          const location = `${file}/evidence[${index}]`
+          noFaults(value, location)
+          noNestedFaults(value, location)
+          if (value.classification === 'motion proof violations') onlyKeys(value, ['classification', 'violations'], location)
+          else if ('observation' in value) onlyKeys(value, ['component', 'role', 'variant', 'motion', 'observation'], location)
+          else if ('applicability' in value) onlyKeys(value, ['id', 'route', 'applicability', 'matched', 'history'], location)
+          else if ('measuredHighlightedMethodRows' in value) onlyKeys(value, ['component', 'route', 'measuredHighlightedMethodRows'], location)
+          else onlyKeys(value, ['id', 'component', 'state', 'scenario', 'selectedStatus', 'selectedBody', 'compact', 'actualStatus', 'announcement'], location)
+        })
+      }
+      if (report.failure && !(report.failure.startsWith(`AssertionError: ${numericMessage}:`) && rows.some(row => row.ratio < 4.5))) throw new Error(`Non-numeric browser failure: ${file}`)
+    }
+    else if ('evidence' in report) {
+      onlyKeys(report, ['source', 'theme', 'evidence'], file)
+      if (!Array.isArray(report.evidence) || !report.evidence.length) throw new Error(`Empty detector evidence: ${file}`)
+      report.evidence.forEach((value, index) => detail(value, `evidence[${index}]`))
+    }
+    else if (report.classification === 'Tooltip state readiness; not a contrast measurement') {
+      onlyKeys(report, ['source', 'classification', 'label', 'triggerState', 'tooltipState', 'computed'], file)
+      const computed = report.computed
+      if (!report.label || !/^(delayed|instant)-open$/.test(report.triggerState) || !/^(delayed|instant)-open$/.test(report.tooltipState) || computed?.pendingAnimations !== 0 || computed?.triggerPendingAnimations !== 0 || computed?.opacity !== '1' || computed?.transform !== 'none') throw new Error(`Unready Tooltip sidecar: ${file}`)
+      auxiliary.push({ file, kind: 'tooltip readiness' })
+    }
+    else if (/^(light|dark)-arrival-animation\.json$/.test(file)) {
+      onlyKeys(report, ['source', 'frames', 'timing', 'progress', 'time', 'opacity'], file)
+      if (!Array.isArray(report.frames) || !report.frames.length || !Number.isFinite(report.progress) || !Number.isFinite(report.time) || Math.abs(Number(report.opacity) - 1) > 1e-5) throw new Error(`Invalid arrival animation sidecar: ${file}`)
+      auxiliary.push({ file, kind: 'arrival animation' })
+    }
+    else if (/^(light|dark)-tabs-(pill|link)-\d+\.json$/.test(file)) {
+      onlyKeys(report, ['source', 'box', 'label', 'color', 'normalizedColor', 'alpha', 'opacity', 'overlaps'], file)
+      if (report.alpha !== 1 || report.opacity !== 1 || report.box?.width <= 0 || report.box?.height <= 0 || report.overlaps !== file.includes('-pill-')) throw new Error(`Invalid Tabs sidecar: ${file}`)
+      auxiliary.push({ file, kind: 'tabs indicator' })
+    }
+    else detail(report, 'detail')
+    if (rows.length) reports.push({ file, failure: report.failure, records: rows })
+  }
   if (!files.length || !['light', 'dark'].every(theme => reports.some(report => report.records.some(record => record.theme === theme)))) throw new Error('Browser evidence must include both themes and nonempty measurements')
-  if (expectedFiles && JSON.stringify(files) !== JSON.stringify(expectedFiles)) throw new Error('Browser scenario set changed or some scenarios did not produce evidence')
-  return { files, reports }
+  for (const file of files) {
+    const counterpart = path.posix.join(path.posix.dirname(file), path.posix.basename(file).replace(/^(light|dark)-/, theme => theme === 'light-' ? 'dark-' : 'light-'))
+    if (!files.includes(counterpart)) throw new Error(`Missing other-theme report: ${file}`)
+  }
+  const manifest = { files, measurements: identities, controls: controls.map(({ file, location, theme, state, classification }) => ({ file, location, theme, state, classification })), auxiliary }
+  if (expectedManifest && JSON.stringify(manifest) !== JSON.stringify(expectedManifest)) throw new Error('Browser scenario set or measurement identity changed between phases')
+  return { files, reports, controls, auxiliary, manifest }
+}
+
+// The JSON reporter exposes each error separately. A numeric substring in one
+// error must not hide an unrelated hook, runtime error, or second assertion.
+export function validateBrowserResults(result, evidence, snapshot, expectedCases) {
+  if (!Array.isArray(result.testResults) || !result.testResults.length) throw new Error('Missing Vitest test results')
+  const cases = [], failures = [], suites = new Map()
+  for (const suite of result.testResults) {
+    const file = path.relative(snapshot, suite.name).split(path.sep).join('/')
+    if (!/^tests\/browser\/[^/]+\.spec\.ts$/.test(file) || suite.message || !Array.isArray(suite.assertionResults) || !suite.assertionResults.length) throw new Error(`Invalid Vitest suite: ${suite.name}`)
+    for (const test of suite.assertionResults) {
+      if (!['passed', 'failed'].includes(test.status) || typeof test.title !== 'string' || !test.title || !Array.isArray(test.ancestorTitles) || test.ancestorTitles.some(title => typeof title !== 'string' || !title) || test.fullName !== [...test.ancestorTitles, test.title].join(' ') || !Array.isArray(test.failureMessages)) throw new Error(`Incomplete Vitest test: ${file}`)
+      cases.push(`${file}::${test.fullName}`)
+      for (let depth = 0; depth <= test.ancestorTitles.length; depth++) {
+        const identity = JSON.stringify([file, ...test.ancestorTitles.slice(0, depth)])
+        suites.set(identity, suites.get(identity) === 'failed' || test.status === 'failed' ? 'failed' : 'passed')
+      }
+      if (test.status === 'passed' && test.failureMessages.length) throw new Error(`Passed test contains failures: ${test.fullName}`)
+      if (test.status === 'failed') {
+        if (!test.failureMessages.length) throw new Error(`Failed test has no assertion evidence: ${test.fullName}`)
+        for (const message of test.failureMessages) {
+          const firstLine = message.split('\n')[0]
+          const label = file === 'tests/browser/text-contrast.spec.ts' ? numericMessage
+            : ['tests/browser/functional-colors.spec.ts', 'tests/browser/functional-consumers.spec.ts', 'tests/browser/functional-motion.spec.ts'].includes(file) ? functionalNumericMessage : null
+          const assertionFile = file === 'tests/browser/text-contrast.spec.ts' ? file : 'tests/browser/functional-support.ts'
+          if (!label || !firstLine.startsWith(`AssertionError: ${label}: expected `) || !firstLine.endsWith(' to deeply equal []') || !message.split('\n').some(line => /^\s+at /.test(line) && line.includes(`${path.join(snapshot, assertionFile)}:`))) throw new Error(`Non-numeric Vitest failure: ${test.fullName}`)
+        }
+        failures.push({ file, name: test.fullName, messages: test.failureMessages })
+      }
+    }
+    if (suite.status !== (suite.assertionResults.some(test => test.status === 'failed') ? 'failed' : 'passed')) throw new Error(`Inconsistent Vitest suite status: ${file}`)
+  }
+  cases.sort()
+  if (new Set(cases).size !== cases.length || (expectedCases && JSON.stringify(cases) !== JSON.stringify(expectedCases))) throw new Error('Vitest case identity changed between phases')
+  const failedSuites = [...suites.values()].filter(status => status === 'failed').length
+  if (result.numTotalTestSuites !== suites.size || result.numFailedTestSuites !== failedSuites || result.numPassedTestSuites !== suites.size - failedSuites || result.numTotalTests !== cases.length || result.numFailedTests !== failures.length || result.numPassedTests !== cases.length - failures.length || result.numPendingTests !== 0 || result.numTodoTests !== 0 || result.numPendingTestSuites !== 0 || result.success !== (failures.length === 0)) throw new Error('Incomplete or inconsistent Vitest result counts')
+  if (failures.length && !evidence.reports.some(report => report.records.some(row => row.ratio < 4.5))) throw new Error('Vitest numeric failure has no measured failing ratio')
+  return { cases, failures }
 }
 
 async function main(artifactsBase) {
@@ -178,7 +389,8 @@ async function main(artifactsBase) {
       { id: '05-value-hover-alpha', file: structureFile, transform: source => replaceOnce(source, hoverBefore, hoverAfter), target: record => record.owner === structureFile && record.id === 'value-expand/verb' && record.state === 'hover' },
       { id: '06-green-restored-A' },
     ]
-    let expectedBrowserFiles
+    let expectedBrowserManifest
+    let expectedBrowserCases
     let acceptedDigest
     for (const phase of phases) {
       const phaseDirectory = path.join(artifacts, phase.id)
@@ -215,25 +427,28 @@ async function main(artifactsBase) {
         }
         else requireSuccess(node)
       }
-      const browser = await runCommand(snapshot, 'pnpm', ['test:browser'], path.join(phaseDirectory, 'browser.log'), { GEIST_CONTRAST_ARTIFACTS: browserDirectory })
+      const resultsFile = path.join(phaseDirectory, 'vitest-results.json')
+      const browser = await runCommand(snapshot, 'pnpm', ['test:browser', '--reporter=default', '--reporter=json', `--outputFile=${resultsFile}`], path.join(phaseDirectory, 'browser.log'), { GEIST_CONTRAST_ARTIFACTS: browserDirectory })
       record.commands.push(browser)
       await saveSummary()
-      const evidence = await readBrowserEvidence(browserDirectory, source, expectedBrowserFiles)
+      const evidence = await readBrowserEvidence(browserDirectory, source, expectedBrowserManifest)
+      const resultsText = await readFile(resultsFile, 'utf8')
+      const results = validateBrowserResults(JSON.parse(resultsText), evidence, snapshot, expectedBrowserCases)
+      record.browserResults = { file: resultsFile, sha256: sha256(resultsText), source, cases: results.cases, failedCases: results.failures.map(({ file, name }) => ({ file, name })) }
+      await writeFile(path.join(phaseDirectory, 'browser-evidence.json'), JSON.stringify({ source, manifest: evidence.manifest, controls: evidence.controls, results: record.browserResults }, null, 2))
       if (!phase.file) {
         requireSuccess(browser)
         if (evidence.reports.some(report => report.failure || !report.records.length || report.records.some(record => record.ratio < 4.5))) throw new Error('Green run contains a failed or empty scenario')
         if (acceptedDigest && source.digest !== acceptedDigest) throw new Error('Restored A source differs from initial A')
         acceptedDigest = source.digest
-        expectedBrowserFiles = evidence.files
+        expectedBrowserManifest = evidence.manifest
+        expectedBrowserCases = results.cases
       }
       else {
         if (browser.exitCode !== 1 || browser.signal || browser.error) throw new Error(`Mutation did not produce an ordinary failing test exit: ${phase.id}`)
         const log = await readFile(browser.logFile, 'utf8')
         if (/unresolved:|Unhandled Errors|Unhandled Rejection|Hook timed out|Test timed out|TimeoutError|browserType\.launch:|Failed to load/i.test(log)) throw new Error(`Infrastructure or unresolved failure invalidates ${phase.id}; see browser.log`)
-        for (const report of evidence.reports.filter(report => report.failure)) {
-          if (!/<\s*4\.5/.test(report.failure) || !report.records.some(record => record.ratio < 4.5)) throw new Error(`Non-contrast failure invalidates ${phase.id}: ${report.file}`)
-        }
-        const targets = evidence.reports.filter(report => report.failure && /<\s*4\.5/.test(report.failure)).flatMap(report => report.records).filter(record => phase.target(record) && record.ratio < 4.5)
+        const targets = evidence.reports.flatMap(report => report.records).filter(record => phase.target(record) && record.ratio < 4.5)
         if (!['light', 'dark'].every(theme => targets.some(record => record.theme === theme))) throw new Error(`Both themes must fail at the intended target: ${phase.id}`)
         record.detected = targets.map(({ id, owner, state, theme, ratio, rawForeground, effectiveForeground, effectiveBackground }) => ({ id, owner, state, theme, ratio, rawForeground, effectiveForeground, effectiveBackground }))
       }
@@ -260,11 +475,13 @@ async function main(artifactsBase) {
   }
 }
 
-try {
-  const artifacts = artifactOption()
-  if (artifacts) await main(artifacts)
-}
-catch (error) {
-  console.error(error instanceof Error ? error.message : error)
-  process.exitCode = 1
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try {
+    const artifacts = artifactOption()
+    if (artifacts) await main(artifacts)
+  }
+  catch (error) {
+    console.error(error instanceof Error ? error.message : error)
+    process.exitCode = 1
+  }
 }

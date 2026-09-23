@@ -21,6 +21,24 @@ function scenarioSelect(wrapper: VueWrapper<InstanceType<typeof RequestExample>>
 }
 
 describe('RequestExample scenario selection', () => {
+  it('keeps empty and literal-zero ids distinct and emits the original scenario id', async () => {
+    const wrapper = await mountSuspended(RequestExample, {
+      props: { scenarios: [
+        { id: '', label: 'Empty id', variants: [{ language: 'text', code: 'EMPTY SCENARIO' }] },
+        { id: '0', label: 'Zero id', variants: [{ language: 'text', code: 'ZERO SCENARIO' }] },
+      ] },
+    })
+    const select = scenarioSelect(wrapper)!
+    for (const [label, code] of [['Zero id', 'ZERO SCENARIO'], ['Empty id', 'EMPTY SCENARIO']]) {
+      const item = select.props('items').find((item: { label: string }) => item.label === label)
+      select.vm.$emit('update:modelValue', item.value)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.get('pre').text()).toBe(code)
+    }
+    expect(wrapper.emitted('update:scenario')).toEqual([['0'], ['']])
+    wrapper.unmount()
+  })
+
   it('uncontrolled: renders the first scenario by default', async () => {
     const wrapper = await mountSuspended(RequestExample, { props: { scenarios } })
     expect(wrapper.text()).toContain('CODE-BASIC')

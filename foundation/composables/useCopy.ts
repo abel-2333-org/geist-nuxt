@@ -34,6 +34,7 @@ async function writeClipboardText(text: string): Promise<boolean> {
     return false
   }
 
+  const previousFocus = globalThis.document.activeElement
   const textarea = globalThis.document.createElement('textarea')
   textarea.value = text
   textarea.style.position = 'fixed'
@@ -47,7 +48,14 @@ async function writeClipboardText(text: string): Promise<boolean> {
   } catch {
     return false
   } finally {
+    // select() takes focus in browsers. Preserve an explicit focus move made
+    // by a copy handler, and never restore a control that has been removed.
+    const focus = globalThis.document.activeElement
+    const restoreFocus = focus === textarea || focus === globalThis.document.body || focus === null
     textarea.remove()
+    if (restoreFocus && previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+      previousFocus.focus({ preventScroll: true })
+    }
   }
 }
 

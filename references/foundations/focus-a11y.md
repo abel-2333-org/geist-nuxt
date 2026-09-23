@@ -6,16 +6,16 @@
 
 ## Focus 规格
 
-Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
+实际安装的 Nuxt UI 4.9.0 主题（组件之间不共用一个固定几何规格）：
 
-- **实底控件**（如主按钮）：`focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-{color}` —— 2px 描边 + 2px 偏移，颜色为组件语义色。
-- **outline/输入类**（input、select、textarea）：`focus-visible:ring-2 focus-visible:ring-{color}` —— 2px 内环。
+- **Button solid / link**：`outline-{color}/25 focus-visible:outline-3`；neutral 使用 `outline-inverted/25`。#147 只覆盖实底状态背景与 link 状态文字，不替换这套 focus 样式。不能把文字 4.5:1 结果当作焦点非文字 3:1 证明。
+- **输入类**（input、select、textarea）：按实际变体保留上游 focus ring；具体触发选择器与层叠需由对应组件实测，不能由 Button 样式外推。
 
 规则：
 
 - **一律用 `:focus-visible`，不要用 `:focus`** —— 避免鼠标点击也冒出 focus 环，只在键盘导航时显示。
 - **绝不 `outline: none` 而不给可见替代** —— 这是硬性无障碍要求。
-- 自建交互组件时，套用与 Nuxt UI 一致的 focus：实底用 `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`，输入类用 `focus-visible:ring-2 focus-visible:ring-primary`。不要各写各的。
+- 自建交互组件沿用本项目已有的显式配方：实底用 `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary`，输入类用 `focus-visible:ring-2 focus-visible:ring-primary`。这是项目配方，不声称与当前 Nuxt UI Button 的描边几何完全相同；实际背景配对仍须验证。
 
 ```vue
 <!-- 自建可点击卡片：套用系统 focus 规格 -->
@@ -39,6 +39,7 @@ Nuxt UI 组件的 focus 表现（源码 `src/theme/*.ts`）：
 ## 语义色的可及性
 
 - 使用语义 token，不要手挑 hex；token 名称不等于所有搭配都通过。功能色、反色、透明度、叠加层及 hover/focus 必须验证实际前景与背景的合成对比，不能用正常中性文字的 40 对结果替代。
+- 六角色映射、Button solid/link 状态与彩色 Alert description 配对见 [tokens.md](tokens.md#功能色语义配对与组件状态)。required `::after` 必须测生成星号本身；真实 portal、Sidebar 背景和动态响应徽章按实际绘制验证，未知绘制保持 unresolved。
 - 反色容器的正常文字用 `text-inverted`，排版承担层级；已有五类 solid slot 覆盖见 `tokens.md`。自定义 slot 或实例覆盖需单独检查。
 - 真正不可操作的 disabled 控件与纯装饰内容可单独记录例外；用 Nuxt UI 的 `:disabled` 表达禁用行为，不能仅靠 `text-muted` 或 `text-dimmed` 判断。readonly、失焦、未选中、deprecated 和普通 placeholder 仍需满足正常文字对比度。
 

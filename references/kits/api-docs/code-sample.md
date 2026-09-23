@@ -30,6 +30,7 @@
 - **无运行时语法高亮器**：默认用转义后的 `<pre><code>` 直出，不引入 Shiki runtime。消费项目可在构建期用 Shiki 等工具生成 `highlightedHtml`，但必须先消毒并显式传 `trust-highlighted-html`；用户输入、运行时 API 返回的 HTML 禁止直接传入。组件不负责解析 Markdown 或执行高亮。双主题 fragment 的暗色切换见下方「双主题高亮 fragment」。
 - **raw code 永远是真源**：复制按钮始终写入 `variant.code`，`highlightedHtml` 只影响展示；未开启信任或 HTML 缺失时自动回退到转义后的 `code`。
 - **多语言用 `variants`**（不是 `samples`；每个 variant 一个 `language`+`code`，可选 `label`）。空 `variants` 渲染空态。
+- **语言按标识保持选择**：列表替换或原位重排保留仍存在的语言；移除已选语言时回退首项，之后重新加入旧语言不会恢复旧选择。空字符串语言标识与字面 `"0"` 独立，空标识应提供可读的 `label`。未知语言名称只读取调用方映射的自有属性，再回退到预设或首字母大写的标识。
 - **语言切换用 `USelect`**（不是 UTabs）——单行工具栏内与其它控件对齐，窄容器下可收缩+截断触发器，下拉面板仍开满内容宽度。语言数 >1 时选择器**始终可见**（含当前语言暂无 code 的空态）——它和 `#controls` 一样是选择控件，读者永远能切回有内容的语言；只有内容相关控件（换行/复制）在无 code 时隐藏。
 - **代码滚动区键盘可达**：body 是 `tabindex="0"` 的命名 group（可访问名取 `title`，缺省 `labels.codeRegion`），带 focus-visible 描边——内部滚动的内容必须能被键盘用户滚到底，同时不会把每个代码块加入 landmark 导航。`<pre>` 标记 `translate="no"`，机器翻译不改写代码。
 - **换行状态共享+持久化**：所有 CodeBlock 共用 `useCodeWrap`（同一 `useState` key + cookie），切一个全联动，SSR 安全、无 localStorage。

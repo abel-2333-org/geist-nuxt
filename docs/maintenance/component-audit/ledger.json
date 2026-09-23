@@ -1,37 +1,58 @@
 {
   "version": 2,
-  "round": 4,
-  "lastRunAt": "2026-09-19T23:48:05.159Z",
+  "round": 5,
+  "lastRunAt": "2026-09-23T14:02:15.742Z",
   "lastPicked": [
-    "api-docs-site-search",
-    "api-docs-operation-header",
+    "api-docs-lifecycle-notice",
+    "api-docs-field-group",
+    "foundation-theme-toggle",
+    "api-docs-code-block",
+    "api-docs-enum-table",
+    "api-docs-event-badge",
+    "api-docs-field-annotation",
+    "api-docs-field-item",
     "api-docs-lifecycle-badge",
-    "api-docs-method-badge"
+    "api-docs-method-badge",
+    "api-docs-operation-header",
+    "api-docs-operation-target",
+    "api-docs-response-example",
+    "foundation-semantic-badge"
   ],
   "items": {
     "foundation-copy-button": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T04:57:21.910Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9b67249978a7faa2ab333d0dfad1516ae353e564",
-        "headSha": "92f87c503a8437264299a002601f8b74b2855d8a",
+        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
+        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/gallery/Buttons.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "kits/api-docs/components/OperationTarget.vue",
+          "nuxt.config.ts",
           "references/architecture-decisions.md",
           "references/components/buttons.md",
           "references/components/index.md",
+          "references/foundations/focus-a11y.md",
           "references/kits/api-docs/code-sample.md",
+          "references/kits/api-docs/index.md",
+          "scripts/lib/contrast-build.mjs",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/copy-button.spec.ts",
-          "tests/component/operation-target.spec.ts"
+          "tests/component/operation-target.spec.ts",
+          "tests/component/use-copy.spec.ts"
         ],
-        "scopeDigest": "0abccc4ffdc7791b9b14209bb73c127cfc9f346a3c3d9126688e5f226eda5fd7",
+        "scopeDigest": "9fecec9fa31f92ce442db4b4ab19bbe5b95755155eb993af027f20d78c47fa43",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -39,24 +60,39 @@
             "reason": "useCopy 成功 toast 的 type:background 经 Nuxt UI Toast 转发到 Reka；组件不另建 live region，依赖变化需复核转发与挂载。"
           },
           {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "Nuxt UI useToast的共享state/app注入与组件composable auto-import；实际UApp/Toaster集成依赖Nuxt运行时。"
+          },
+          {
             "name": "reka-ui",
             "version": "2.9.10",
             "reason": "ToastAnnounce 对 background 产生 aria-live=polite；真实集成测试断言每次复制只有一个匹配的 polite region。依赖变化需复核播报行为。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "production semantic CSS扫描与focus-visible/touch/disabled等类生成，CopyButton及其Nuxt UI原语的实际UI样式基础。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "useCopy shallowRef成功态、scope dispose清理timeout；CopyButton reactive props/icon/label分支更新。"
           }
         ]
       },
-      "notes": "touch 契约 + gallery identity 换行复审(命中:CopyButton.vue, copy-button.spec.ts, operation-target.spec.ts):tooltip / 非 tooltip 两分支 `UButton` 均补 `touch-manipulation`,`copy-button.spec` 新增 it.each 用例;toast 播报与 attrs 契约未触及;复核无回归。",
+      "notes": "完整 CopyButton required co-review，base cdd1956c38b2be5eb0788e1c5d38460e26adb458 → 功能HEAD 71eb8ca81d7c7f72050d634ef71a26570ac649f4。原18scope与5依赖name/reason、旧findings=[]全部保留，新增useCopy直接回归测试、OperationTarget消费者与kit契约，共21scope。完整复核props/attrs、tooltip分支、原文复制、成功/失败状态及单一polite toast、focus/CSS/config。修复本轮发现的fallback textarea移除导致键盘焦点落到BODY；成功/false/throw恢复原仍连接控件，显式转移焦点不抢回、原节点移除不恢复。真实Chrome隔离函数红绿5场景及新5case、全组件515/registry160/typecheck/build通过；working-tree probe源码hash与本功能提交相同，原来源标记保留。最终组件Chrome明暗×1440/390四组Select真实选项/Enter、Tab顺序及三复制意图native clipboard断言通过；真实组件fallback三结果焦点恢复、零textarea与0pageerror/overflow。browser build真实SHA71eb8ca及digest0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算一致；fallback结果被stub边界保留。不声称旧130完整browser重跑或消费端/全部系统权限覆盖。",
       "findings": []
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-22T10:43:45.250Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "headSha": "471c52305386fc37e27ee5df647f8c4bb1a6df73",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -73,11 +109,18 @@
           "scripts/lib/contrast-build.mjs",
           "scripts/lib/text-contrast.mjs",
           "scripts/verify-contrast-mutations.mjs",
+          "tests/browser/README.md",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-motion.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/generated-paint.spec.ts",
           "tests/browser/glyph-bounds.spec.ts",
           "tests/browser/measure.ts",
           "tests/browser/optional-trigger-motion.spec.ts",
           "tests/browser/pseudo-outline.spec.ts",
           "tests/browser/text-contrast.spec.ts",
+          "tests/component/functional-theme.spec.ts",
           "tests/component/inline-code.spec.ts",
           "tests/fixtures/contrast/ContainerVariants.vue",
           "tests/fixtures/contrast/DocumentationStates.vue",
@@ -89,7 +132,7 @@
           "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "03fe68110a287d5cd0280e64c75b18561b522ddd43ded201eb3f60c8f71e7cc6",
+        "scopeDigest": "c9ee030b50d644929865c42d2e9de29a3389ff419c6c878dbcc27c32acf27aab",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -118,7 +161,7 @@
           }
         ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "本轮 post-visual affected co-review：base 19a107527d1226585611f4547619320b430fab2a → 功能 HEAD 471c52305386fc37e27ee5df647f8c4bb1a6df73，source digest 092599529aedee0662bc8b62ed831076d514c913c67b6bdf0c13f693338e8ac2。维护者于本会话明确表示“我视觉验收没问题”；此为新增采纳记录，不改写旧 SHA 的原始证据。已核对本轮 exact-HEAD 36 files/477 component、typecheck、normal build、contrast build、118/118 browser（544 JSON/5224 ordinary-positive）与独立证据完整性复审；本次没有重跑 browser/build。\n组件代码、ProseCode 的 Copy 13 Mono/rounded-sm/translate 覆盖契约、tv font-size 分组、90 项原始 ramp、中性及背景/边框声明和字号/字体未变。scope 实际命中全局 CSS/app config、tokens/focus 文档、build-contrast、mutation runner、measure/spec/fixture/node guards。新 app config 只追加 Button/Alert 分支，保留现有 tv 配置。\n477 component 全量通过含 InlineCode 的单根 code、translate override、ProseCode 默认字号去重、text-error 保留 text-code、text-xs 覆盖，以及 20 个 functional-theme composition 测试；typecheck、正常 build、contrast build、118 browser、旧 806 neutral 身份、4000 功能色样本及完整七阶段 mutation 均已有 exact-471 成功证据。版本/字体及旧主题真实对比已独立核实。\n保留 f-4b98b0623a0a 原 resolved finding 对象；不声称任意消费者 class/slot override 的对比度通过，也不把 glyph/文字结果当作整站 WCAG 或 focus 3:1。\n保留原 scope 的全部路径和依赖声明；该 owner 原 scope 已绑定全局 CSS/app config、构建器、mutation runner 和测量器。本轮只补与主题组合/真实状态/瞬态/生成绘制防线直接相关的新 spec/helper 及 browser README；不把所有测试目录纳入。旧 findings 全部保持原 id/severity/claim/evidence/disposition；本次不清除任何 deferred finding。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
@@ -174,33 +217,88 @@
       ]
     },
     "foundation-semantic-badge": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-17T02:40:05.143Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "36eabfb88bc6a167ac1dfb5806341730640d8d2b",
-        "headSha": "7198057ba8749df6580092d30a09ee15fbc9db4b",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/gallery/DataDisplay.vue",
+          "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "foundation/utils/badge.ts",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/LifecycleBadge.vue",
+          "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/WebhookBadge.vue",
+          "kits/api-docs/utils/lifecycle-preset.ts",
+          "kits/api-docs/utils/method-preset.ts",
+          "nuxt.config.ts",
           "references/components/data-display.md",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
           "references/method/component-reflow.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
           "tests/component/chrome-labels.spec.ts",
-          "tests/component/http-method-badge.spec.ts"
+          "tests/component/http-method-badge.spec.ts",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/FunctionalRoleMatrix.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "53307f1b405464a58e3e975c940d5e4312ede959bbfd8bfeb286e6cb0fea2f07",
+        "scopeDigest": "6b6447151e866f9c93dfdaed9ad42ae99ad618d43745c59dec549f51186e2ea8",
         "dependencies": [
+          {
+            "name": "@nuxt/icon",
+            "version": "2.3.1",
+            "reason": "SemanticBadge公开可选icon经UBadge/UIcon调用NuxtIcon的CSS/SVG渲染；icon作为可选强化，非空label独立承载语义，升级核对加载与输出形态。"
+          },
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
             "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发，使 wrapper 属性落到可见 badge。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实组件auto-registration、preset utils导入及useAppConfig/theme/colorMode接入。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "UBadge用Primitive将as=span及attrs传递到最终DOM；纯展示默认无tabindex/交互role。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "tv合并wrapper font-medium及调用方class，保持Webhook mono与实例布局类；升级应核对冲突类最终输出。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI tv按color/variant/size组合准确badge分支并合并theme/实例ui。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "Badge的semantic text/bg、transparent10%背景与ring类、xs/sm/xl字号及mono类实际编译，颜色证据依赖完整CSS输出。"
           },
           {
             "name": "vue",
@@ -209,7 +307,7 @@
           }
         ]
       },
-      "notes": "co-review:本次功能 diff 命中共享 scope 的只有 references/components/data-display.md 的 InlineCode 段落(补充 text-code 经 tailwind-merge 真正替换 ProseCode 主题、颜色/字号可正常覆盖的说明),本 item 的组件源码、tests、gallery 与自身 reference 段落零 diff;SemanticBadge 不使用 text-code(字号由 UBadge size 决定),twMergeConfig 扩展只影响含 text-code 的 class 合并,对 badge 无行为变化;既有两条 resolved finding 原样保留。",
+      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -228,25 +326,39 @@
       ]
     },
     "foundation-theme-toggle": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
-        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
+          "app/app.config.ts",
+          "app/app.vue",
+          "app/assets/css/main.css",
           "app/layouts/default.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/ThemeToggle.vue",
           "foundation/compositions/AppHeader.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "nuxt.config.ts",
           "references/compositions/page-shell.md",
           "references/foundations/focus-a11y.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/browser/theme-toggle.spec.ts",
           "tests/component/app-header.spec.ts",
-          "tests/component/theme-toggle.spec.ts"
+          "tests/component/theme-toggle.spec.ts",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts"
         ],
-        "scopeDigest": "abb2590eabe9a7fddadb2e3bff43c141f181d3ed0724fe323fc4bd3ddd645c4c",
+        "scopeDigest": "ebc6f95191b95d4ac4685a21b57a86745c19b93b9869349ddcebb599375f27fc",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -257,21 +369,36 @@
             "name": "@nuxtjs/color-mode",
             "version": "4.0.1",
             "reason": "依赖 useColorMode 的 SSR 状态与 preference/value 行为"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "ClientOnly SSR占位与onMounted后渲染原UColorModeButton，UApp locale提供、useState hydration与color-mode插件接线。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "dark/light icon CSS显示、neutral ghost focus与touch-manipulation实际编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "根组件attribute/class fallthrough及上游computed颜色值、locale反应更新。"
           }
         ]
       },
-      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/foundations/focus-a11y.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #150 tap-target/class 转发结论与 theme-toggle.spec.ts scope。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
+      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27。保留全部旧 scope/findings/dependencies，并补本轮 SSR 行为回归和实际执行/构建支持。真实 dark 首载曾在 value=dark/unknown=false 时保留 SSR switchToDark 名称（theme-label-reproduction.log，来源 ea1dc10b）；修复仅内部 ClientOnly 延后原 UColorModeButton、显式 attrs 透传，locale/状态/存储仍交原语，SSR 阶段不显示按钮。521 component、typecheck、normal build、browser typecheck、160 registry 通过；theme-red/green 都3/3，只是 attrs/name 兼容回归，非SSR红绿。新增普通 gallery SSR 回归4/4，light/dark×1440/390共32个实读步骤，覆盖首次hydration名称、Enter/Space、reload持久化、system跟随与显式偏好权威，无failure/pageerror；source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b。联合targeted20通过，24未选中测试不算全量。原始失败/旧SHA保留，无新consumer安装或人工视觉验收主张；本次已修复的新发现不新增resolved ledger finding。 最终CLI4组及普通gallery同样验证主题键盘/持久化通过，独立review的7文件hash已与最终head等价绑定。",
       "findings": []
     },
     "foundation-annotation-popover": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
+      "lastAuditedAt": "2026-09-22T10:43:45.250Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
-        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
+        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
+        "headSha": "471c52305386fc37e27ee5df647f8c4bb1a6df73",
         "itemDigest": "efbbf96e60850675f3e59cf61d8e830346b190f3cb003dd803234940ff091a4b",
         "scope": [
           "app/components/gallery/Overlays.vue",
@@ -281,7 +408,7 @@
           "references/foundations/focus-a11y.md",
           "tests/component/annotation-popover.spec.ts"
         ],
-        "scopeDigest": "d61fc0d03eff414313255f21e96f49d7c36821dd01b6c028bd2f82af16798cbd",
+        "scopeDigest": "5e34e17a5239f94fe265de8588d8e1a2e606cbc0a34ec4644564334afb5cf8a3",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -295,7 +422,7 @@
           }
         ]
       },
-      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/foundations/focus-a11y.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #150 trigger/retry tap-target 与焦点状态机结论、全部依赖声明。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
+      "notes": "本轮 post-visual affected co-review：base 19a107527d1226585611f4547619320b430fab2a → 功能 HEAD 471c52305386fc37e27ee5df647f8c4bb1a6df73，source digest 092599529aedee0662bc8b62ed831076d514c913c67b6bdf0c13f693338e8ac2。维护者于本会话明确表示“我视觉验收没问题”；此为新增采纳记录，不改写旧 SHA 的原始证据。已核对本轮 exact-HEAD 36 files/477 component、typecheck、normal build、contrast build、118/118 browser（544 JSON/5224 ordinary-positive）与独立证据完整性复审；本次没有重跑 browser/build。\n唯一 scope 命中是 focus-a11y：修正 Nuxt UI Button 的真实 outline-3/25 样式，并明确项目自建 outline-2/offset-2 配方仍有效。AnnotationPopover 的 hover/click/keyboard 来源、focus handoff、Escape/outside-click 回焦、loading/error/disabled 状态、触控样式均未改。\n477 component 全量通过包含 annotation-popover 的 keyboard 首次打开/无 action fallback、Escape 恢复、外部点击不抢焦、hover 延迟、Tab/ShiftTab、disabled 与 loading/error 测试；root 16 个实际 FieldAnnotation portal API 场景达标，consumer 安装/类型/build/check 结果可作组合验证。@nuxt/ui 4.9.0/reka-ui 2.9.10 内容身份未变。\n保留现有 focus 行为契约，不把 portal 文字对比度当作自建 trigger/panel outline 非文字 3:1 的实测。\n保留原 scope 的全部路径和依赖声明；仅 focus-a11y 文档措辞命中；现有 scope 已覆盖实际组件、直接 gallery、公开 overlay/focus 契约及组件测试，无新增 scope。旧 findings 全部保持原 id/severity/claim/evidence/disposition；本次不清除任何 deferred finding。",
       "findings": []
     },
     "foundation-term-annotation": {
@@ -352,13 +479,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-22T10:43:45.250Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
         "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "headSha": "471c52305386fc37e27ee5df647f8c4bb1a6df73",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -373,9 +500,9 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "c138f25e8d95edfc0d4a156dcdef8e7a3c44a91a50bcb542b318fbae3037820a"
+        "scopeDigest": "7350cf4ec390aab9b29ea2d0e1ba62ad70675f3ad553b56038e4ac85bad5f9fe"
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "本轮 post-visual affected co-review：base 19a107527d1226585611f4547619320b430fab2a → 功能 HEAD 471c52305386fc37e27ee5df647f8c4bb1a6df73，source digest 092599529aedee0662bc8b62ed831076d514c913c67b6bdf0c13f693338e8ac2。维护者于本会话明确表示“我视觉验收没问题”；此为新增采纳记录，不改写旧 SHA 的原始证据。已核对本轮 exact-HEAD 36 files/477 component、typecheck、normal build、contrast build、118/118 browser（544 JSON/5224 ordinary-positive）与独立证据完整性复审；本次没有重跑 browser/build。\n唯一 scope 命中为 focus-a11y 规格归属纠正。handle 的 separator/aria bounds、键盘步进、Shift 粗步进、Home/End/Enter、拖动、disabled、edge 厚度反馈、默认 outline-2/offset-2 和上游 SplitPane/CodeRail/SidebarNav 未改。\n477 component 全量通过含 split-pane-handle 和 code-rail：纵横语义、键盘/边界/reset、拖动、失效 inert、live defaultSize 更新、有效 bounds/响应式堆叠/动态重测；正式 source consumer runtime/isolated/upgrade 亦通过。未产生需要重跑 browser 的新行为改变。\n本轮没有针对 handle 绘制新的 focus-ring 非文字 3:1 浏览器记录；本次 co-review 仅维持既有交互和项目 focus 配方，不能追加该数值断言。\n保留原 scope 的全部路径和依赖声明；仅 focus-a11y 文档措辞命中；现有 scope 已覆盖 SplitPane/handle/composable、CodeRail/SidebarNav 直接消费、相关测试和契约，无新增 scope。旧 findings 全部保持原 id/severity/claim/evidence/disposition；本次不清除任何 deferred finding。",
       "findings": []
     },
     "foundation-split-pane": {
@@ -411,26 +538,82 @@
       "findings": []
     },
     "api-docs-code-block": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
-        "itemDigest": "d987a877781fc17242bb2505cd6d099ae7c361c063c6e5c3c3bae412f4a30b2c",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "itemDigest": "a217494d573c8acce1eefe5ec689e7a21b398667eee2e3df02ea3d5d076c9a00",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/composables/useCodeWrap.ts",
+          "kits/api-docs/utils/example-select-value.ts",
           "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/code-sample.md",
-          "tests/component/code-block.spec.ts"
+          "references/kits/api-docs/index.md",
+          "scripts/lib/contrast-build.mjs",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
+          "tests/component/use-copy.spec.ts",
+          "tests/fixtures/consumer/app/pages/index.vue",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "d1f3ca565f8396ed01cd4f20c25224f01a361914216d1ca26a25305b64cf45bd"
+        "scopeDigest": "3da6dd2c1a9f76ab4a2a0b7452873cf1ff73c270b1badf1361e066dcda31753b",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "USelect受控model、缺失值displayValue fallback、portal与语义class；UButton focus/aria fallthrough和CopyButton的polite toast。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "useCodeWrap依赖useState同key共享、SSR payload初始化与useCookie的boolean编解码/写回；组件/composable auto-import与app配置。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "SelectRoot受控值、SelectTrigger combobox与键盘打开、SelectContent Arrow/Home/End/typeahead，不能由静态markup替代上游行为。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "Nuxt UI合并实例class/ui，保留控件min-w/overflow/touch/focus及弹层宽度覆盖。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI tv组合USelect/UButton与CodeBlock控件size/variant/theme，影响focus与真实class输出。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "@theme/@source语义token生成、工具栏min-w-0/flex-nowrap/overflow、focus-visible/dark utility，影响响应式与可读性。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "CodeBlock computed current及language identity watch对原位mutation的依赖追踪、props/slot响应式与默认raw模板转义；useCopy scope cleanup。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：index.vue）：`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读props/defaults/labels、language identity watch原位变更、empty与literal0私有Select映射、langLabel own-key、空code保留language/controls、raw复制与trusted HTML安全边界、Shiki dark单一约定、named可键盘滚动group、slots优先级、共享cookie/state wrap及稳定aria-pressed标签。旧f-0c1cd3397501的已解决状态由稳定wrap名和测试保持。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -442,57 +625,181 @@
       ]
     },
     "api-docs-request-example": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
+        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
+          "kits/api-docs/composables/useCodeWrap.ts",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
+          "kits/api-docs/utils/example-select-value.ts",
+          "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
+          "references/kits/api-docs/code-sample.md",
+          "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
+          "scripts/lib/contrast-build.mjs",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
           "tests/component/request-example.spec.ts",
-          "tests/component/use-example-scenario-selection.spec.ts"
+          "tests/component/use-copy.spec.ts",
+          "tests/component/use-example-scenario-selection.spec.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "39bfe1426344c04c675979419ffb679e0b68d5ee7fc628c00359f31c7e437bda"
+        "scopeDigest": "7036c2212045f8ff9df0a7f241cc68b4297f3871b9d01baa6f7503b655a3f2c9",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "USelect 必须保留数值 0 与字符串 '0' 的区别、model-value 事件、可访问名称及键盘/portal 选项；UButton 与 toast 承载复制反馈。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "组件/utils 自动导入、useState/useCookie 共享换行状态及 UApp/config 接线是 Source-first 和 copy-in 运行前提。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "SelectItem 禁止空字符串；局部适配依赖数值零可选、严格值比较、选项键盘/焦点行为。升级后复核空标识与字面 '0' 的实际弹层选择。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "Nuxt UI合并实例class/ui，保留控件min-w/overflow/touch/focus及弹层宽度覆盖。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI tv组合USelect/UButton与CodeBlock控件size/variant/theme，影响focus与真实class输出。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "语义 CSS 扫描及响应式/focus/touch utilities 决定单行工具栏、可聚焦代码滚动面与窄屏回流。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "computed 及 pre-flush identity watch 必须保持受控/非受控收敛、原位重排/删除后的选择与 raw code 一致，并保持原始场景事件。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "完整required owner co-review，base cdd1956c38b2be5eb0788e1c5d38460e26adb458→功能HEAD 71eb8ca81d7c7f72050d634ef71a26570ac649f4；因原scope共享useCopy实际修改，coReview:true/change:modified。重新审核该owner全部公开选择/空态/原始复制/labels/受控与响应式契约及完整依赖链，原28scope逐blob与前批229b777相等，保留全部旧finding原对象和依赖reason，补独立use-copy.spec.ts及相关契约/config共30scope。修复仅在fallback finally恢复进入fallback前仍连接HTMLElement焦点，不夺取handler已移动到其他control的焦点；原始text、execCommand返回值、toast/copied/timer行为未变。前批语言/空ID/Radio/own-key修复与旧resolved findings均未回归。最终37files515、registry160、typecheck/build通过；共享函数Chrome red/green五分支，真实OperationTarget组件native clipboard与三stub fallback focus分支通过，copy green source hash与本commit精确相等。新browser基于本HEAD构建，digest 0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算匹配；不冒称三Example完整browser本轮重跑，前批raw保持原来源。无剩余finding；细节和所有逐scope blob见batch5/examples-co-review.json。",
       "findings": []
     },
     "api-docs-response-example": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-21T06:21:57.778Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "2c553dced71c234626a410766f27043a4eae0a3b",
-        "headSha": "79819d5cf9a4c003989de629b343ae7cd45bc67a",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/CopyButton.vue",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/CodeBlock.vue",
           "kits/api-docs/components/RequestExample.vue",
           "kits/api-docs/components/ResponseExample.vue",
+          "kits/api-docs/composables/useCodeWrap.ts",
           "kits/api-docs/composables/useExampleScenarioSelection.ts",
+          "kits/api-docs/utils/example-select-value.ts",
+          "kits/api-docs/utils/lang-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
+          "references/kits/api-docs/code-sample.md",
+          "references/kits/api-docs/index.md",
           "references/kits/api-docs/request-example.md",
           "references/kits/api-docs/response-example.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/code-block.spec.ts",
+          "tests/component/copy-button.spec.ts",
           "tests/component/request-example.spec.ts",
           "tests/component/response-example.spec.ts",
+          "tests/component/use-copy.spec.ts",
           "tests/component/use-example-scenario-selection.spec.ts",
-          "tests/nuxt/response-example-contract.ts"
+          "tests/fixtures/contrast/main.css",
+          "tests/nuxt/response-example-contract.ts",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "a9e15d44b4b4f0eb040da006d87fe410e2b9a33aea896e5075ac2d32d8bdfa19"
+        "scopeDigest": "82878f36acecc9789953a054856b9d3e2b068bfd788d1a1310720c396178fcc4",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "Response的USelect/URadioGroup/UPopover/UFormField保留typed模型、labels/legend/portal语义；Radio normalizeItem强制生成DOM id故业务id须隔离；下载UButton为真实a+download，状态UBadge使用subtle主题，委托CopyButton通过Nuxt UI toast独立播报复制结果。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "utils/composables/components auto-import、useState/useCookie和runtime组件注册是Response委托CodeBlock及共享wrap的真实运行前提。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "Reka SelectItem禁止空字符串且区分number 0/string \"0\"；Radio会把DOM id直接插入CSS selector。三级选择依赖typed值、radio roving focus、Popover Escape/外部点击/焦点恢复与available-height，升级须回归空/零/引号身份键与真实label点击。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "Nuxt UI tv合并实例class/ui与主题冲突类，必须保留触发器touch/宽度和popover高度限制实际输出。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI各原语用tv组合size/variant/color主题与实例ui覆盖，支撑status badge和selector/popover实际样式。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "命名@container/response与@xl/response必须按容器宽度切换控制器；UI隐藏/portal关闭及真实semantic token样式依赖其编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "pre-flush watchers、computed和稳定id收敛必须在原地reverse/sort后只按最终列表收敛；受控fallback不回写且显式选择只emit一次。"
+          }
+        ]
       },
-      "notes": "#145 条件列表复审（命中：endpoint-reference.vue、index.vue）：`endpoint-reference.vue` 命中为示例数据字面量与注释：`url.presence.condition` 由分号拼接改为 2 条列表、`gitSource.condition` 新增请求侧 2 条、两处注释改中文，页面对本组件的调用参数与用法未变；`index.vue` 命中为示例数据字面量与字段区说明句：`receiptUrl.presence.condition` 由分号拼接改为 3 条列表、`refunds` 元素值节点 presence 条件改为 2 条列表、`refunds` 字段条件由分号复句改单句、字段区记号说明句补「多条独立事实各写一句、同一条 rule」，页面对本组件的调用参数与用法未变；本组件源码、spec 与契约未变，无回归。",
+      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读scenario/status/body三级状态、mount-time受控presence及共享seam、未知值fallback不emit、body原位重排/移除/有效context重置、empty/zero选择与安全radio局部index映射、duplicate全树去重警告、blank media/variant fallback、单状态badge文案、code/empty/unavailable/file四body语义、真实download链接、persistent announcement、responsive popover的ResizeObserver关闭及scope清理、所有透传CodeBlock与可访问label。两条旧finding的label fallback/shared seam仍解决。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -512,204 +819,460 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/utils/demo/api-docs/docs-shell-data.ts",
+          "foundation/assets/css/main.css",
           "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "foundation/utils/badge.ts",
+          "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/LifecycleNotice.vue",
+          "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/utils/lifecycle-preset.ts",
+          "nuxt.config.ts",
+          "references/components/data-display.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/field-item-structure.spec.ts",
-          "tests/nuxt/api-docs-type-compat.ts"
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/FunctionalOwnerReview.vue",
+          "tests/fixtures/contrast/main.css",
+          "tests/nuxt/api-docs-type-compat.ts",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "07925e17eba8ae38a25be8082e2961f96419d7a6f85e0009acabbeb1730cf523"
+        "scopeDigest": "7334bcb1ff252f0b3394fb2689775e68d4b91ac8aa7820b6c95c7d9ee04017e2",
+        "dependencies": [
+          {
+            "name": "@nuxt/icon",
+            "version": "2.3.1",
+            "reason": "生命周期preset icon经SemanticBadge/UBadge/UIcon真实渲染；非空文字独立传达状态，图标为补充。"
+          },
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "LifecycleBadge经UBadge呈现success/warning/neutral subtle与sunset error solid、图标和sm尺寸。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实contrast build复用生产component/utils自动导入、app.config及CSS入口；版本内容影响被测DOM/样式构建。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "UBadge的Primitive span实际承载徽章文字、图标及attrs。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "UBadge的tv类合并使SemanticBadge的默认类和调用方class覆盖按最终类生效；不依赖UAlert opacity。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "UBadge通过tv实际选择LifecycleBadge的variant/size并生成slot与compound类；不依赖UAlert行为。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "实际生成语义token、subtle /10颜色与size/neutral/inverted工具类，构成功能色browser证据。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "status/label computed与单根class/size透传到SemanticBadge/UBadge。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
       "findings": [
         {
           "id": "f-aab0322ebade",
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 阶段1 light 实测 New/Active=2.80531469993018，Beta/Maintenance=2.1157592604952824，Sunsetting solid=3.913738950339162。LifecycleBadge、lifecycle-preset 与功能色均未改，既有失败仍未解决；中性 deprecated 和其他结构测试通过不构成所有 lifecycle 状态通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/sidebar-nav.vue",
+          "app/pages/kits/api-docs/structured-relations.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "foundation/utils/badge.ts",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/SidebarNav.vue",
           "kits/api-docs/components/SiteSearch.vue",
           "kits/api-docs/utils/method-preset.ts",
+          "nuxt.config.ts",
           "references/components/data-display.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/sidebar-nav.md",
-          "tests/component/http-method-badge.spec.ts"
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/http-method-badge.spec.ts",
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/FunctionalOwnerReview.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "0cd775ffe8247a770efbeb085c1725cf0376f777068f146b1ce4a5411cc4af0e",
+        "scopeDigest": "d8e37adcedbf0657fea0e0b4d962f09af560c27282b5478f78d723e9a1cefa14",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发,使 translate 属性落到可见 method badge。"
+            "reason": "UBadge单根、sm默认尺寸、五方法subtle与未知neutral背景、默认slot文本。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实contrast build复用生产component/utils自动导入、app.config及CSS入口；版本内容影响被测DOM/样式构建。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "UBadge的Primitive as=span和attrs显式转发。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "UBadge tv 合并 theme、font-medium 与实例class 的冲突类；准确输出构成已审DOM与色彩前提。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "UBadge 通过 tv 选择实际 color/variant/size 与slot类，影响本owner默认徽章及调用方class合并。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "实际生成语义token、subtle /10颜色与size/neutral/inverted工具类，构成功能色browser证据。"
           },
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "依赖 Vue 单根组件的 fallthrough attr 透传,使 HttpMethodBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
+            "reason": "HttpMethodBadge经SemanticBadge单根fallthrough使translate=no和mono类抵达UBadge。"
           }
         ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
       "findings": [
         {
           "id": "f-8c9c3be3a38e",
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 阶段1 light 实测 GET=3.883174676343794、POST=2.80531469993018、PUT=2.1157592604952824、PATCH=2.7650887960103243、DELETE=3.440013159877681。method-preset、HttpMethodBadge、SemanticBadge 与功能色均未改；这些失败不受候选 A 中性色阶修复。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/InlineCode.vue",
+          "foundation/components/InlineMarkdown.vue",
+          "foundation/components/inline-markdown/parse.ts",
           "foundation/composables/useRafTask.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/EnumTable.vue",
           "kits/api-docs/internal/EnumTablePanel.vue",
           "kits/api-docs/utils/enum.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
           "references/kits/api-docs/index.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/generated-paint.spec.ts",
           "tests/browser/measure.ts",
           "tests/browser/text-contrast.spec.ts",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/enum-table.spec.ts",
+          "tests/component/inline-code.spec.ts",
+          "tests/component/inline-markdown.spec.ts",
           "tests/component/use-raf-task.spec.ts",
-          "tests/fixtures/contrast/DocumentationStates.vue"
+          "tests/fixtures/contrast/DocumentationStates.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts"
         ],
-        "scopeDigest": "eb112b63c46eb42381eb95adb689becbf7703db2d1d060a5361579b76b12c16b"
+        "scopeDigest": "40837dc5f831ad140c85cfcc32ad4f531b254c12a2a753e31ec1b9000c20597d",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UTabs按valueKey传id、content插槽及默认unmountOnHide:true；UInput与ProseCode/ProseA及文本字号合并行为。"
+          },
+          {
+            "name": "@vueuse/core",
+            "version": "14.3.0",
+            "reason": "EnumTablePanel useResizeObserver条件观察DOM并释放，决定真实overflow focusability。"
+          },
+          {
+            "name": "marked",
+            "version": "17.0.6",
+            "reason": "InlineMarkdown Lexer.lexInline的safe VNode子集，用于when与description，rawHTML及不安全协议不执行。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "utils enum类型/组件/RAF composable自动导入和真实prose配置接线。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "TabsTrigger与TabsContent实际id/aria-controls关系、RovingFocus及Enter/Space/自动激活键盘行为。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "bounded scroll region、subgrid/fit-content、focus-visible与语义颜色须真实扫描编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "身份/query归一watch必须pre批处理原位数组变化，computed分组/过滤与shallowRef状态、nextTick更新。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 完整owning组件/Panel/utils、过滤/计数/defaultValue/稳定id/移除归一/locale/键盘/overflow与RAF已审。两个watch取消sync改默认pre，避免原位reverse/sort中间态误换选择及清query；新4条mounted回归红4fail22pass、绿26/26，CLI实测原位重排保留身份与query、删除回退/再加不复活、最终低阈值清query及Tabs键盘。没有复制按钮/useCopy；不把原生文本选择误写成复制功能。旧mock尺寸scroll tests仅状态验证，本轮未额外宣称真实长表overflow阈值矩阵。",
       "findings": []
     },
     "api-docs-field-group": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-protocol.vue",
+          "foundation/assets/css/main.css",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/FieldGroup.vue",
           "kits/api-docs/components/WebhookProtocol.vue",
-          "references/kits/api-docs/index.md"
+          "nuxt.config.ts",
+          "references/kits/api-docs/index.md",
+          "scripts/lib/contrast-build.mjs"
         ],
-        "scopeDigest": "65b5ba9c1d0b89497b2d7fc5c84957d59401ea85659c8792e814c315bb859ddf"
+        "scopeDigest": "07bb69dd178dd60e83eb209338e9412bd0cbc525e9ebda1306a89cdd7be76f29",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "foundation CSS的语义色token别名与实际NuxtUI样式入口。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "FieldGroup及WebhookProtocol通过源目录自动注册，真实gallery/consumer组件解析与SSR。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "原生heading/count语义文字类、边框/spacing与slot布局由实际CSS扫描编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "withDefaults的h2默认、count0条件、动态原生h2/h3/h4、slot和根section attrs继承。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 本轮仅gallery字段树h3之下四调用明确headingLevel4，默认2及2|3|4契约不变。CLI验证0显示/undefined省略/非零计数、默认h2及h3/h4、attrs/class/default slot，实际/kits/api-docs四个H4仍从属字段树H3。新发现已修复，不新增resolved finding。无新consumer安装或人工视觉验收主张。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
-        "itemDigest": "3118c0a484317248cb3321b6d0c7ed6083493ebaf5055a7f86c1e3cbf715f806",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "itemDigest": "365a28b929abbf9fbbb3ade1527b7efe42d41eaf91a9170f79ccd967020abea4",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
           "foundation/assets/css/main.css",
+          "foundation/components/InlineCode.vue",
+          "foundation/components/InlineMarkdown.vue",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/components/inline-markdown/parse.ts",
+          "foundation/composables/useCopy.ts",
+          "foundation/composables/useRafTask.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/EnumTable.vue",
           "kits/api-docs/components/FieldItem.vue",
+          "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
           "kits/api-docs/internal/ConditionEntries.vue",
+          "kits/api-docs/internal/EnumTablePanel.vue",
           "kits/api-docs/internal/FieldValueRequirements.vue",
           "kits/api-docs/internal/FieldValueStructure.vue",
-          "kits/api-docs/internal/collapseFocus.ts",
+          "kits/api-docs/utils/enum.ts",
           "kits/api-docs/utils/field.ts",
+          "kits/api-docs/utils/lifecycle-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
-          "scripts/build-hierarchy.mjs",
-          "scripts/verify-hierarchy-pair.sh",
-          "tests/browser/hierarchy-compare.mjs",
-          "tests/browser/hierarchy-discovery.mjs",
-          "tests/browser/hierarchy-evidence.mjs",
-          "tests/browser/hierarchy-fixture.mjs",
-          "tests/browser/hierarchy-focus-compare.mjs",
-          "tests/browser/hierarchy-focus.mjs",
-          "tests/browser/hierarchy.mjs",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/generated-paint.spec.ts",
           "tests/browser/measure.ts",
           "tests/browser/optional-trigger-motion.spec.ts",
           "tests/browser/text-contrast.spec.ts",
           "tests/component/chrome-labels.spec.ts",
-          "tests/component/collapse-focus.spec.ts",
+          "tests/component/enum-table.spec.ts",
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-condition.spec.ts",
           "tests/component/field-item-structure.spec.ts",
           "tests/component/field-presence.spec.ts",
           "tests/component/field-value-structure.spec.ts",
-          "tests/component/hierarchy-subtree.spec.ts",
+          "tests/component/inline-code.spec.ts",
+          "tests/component/inline-markdown.spec.ts",
+          "tests/component/use-copy.spec.ts",
+          "tests/component/use-raf-task.spec.ts",
           "tests/fixtures/contrast/DocumentationStates.vue",
-          "tests/fixtures/hierarchy/index.vue",
-          "tests/fixtures/hierarchy/main.css",
-          "tests/nuxt/api-docs-type-compat.ts"
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/main.css",
+          "tests/nuxt/api-docs-type-compat.ts",
+          "vitest.browser.config.ts"
         ],
-        "scopeDigest": "7446a4277c32c023458998bd19ba66ec9fe33976aa342aee1db884c81c93e2ef"
+        "scopeDigest": "2f9c3dd9214541e95809877559d555707b0aa1d2e65c5e0e7e7821531fea4957",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UTooltip attrs/as-child及UCollapsible unmountOnHide透传"
+          },
+          {
+            "name": "@vueuse/core",
+            "version": "14.3.0",
+            "reason": "FieldItem内嵌EnumTablePanel的useResizeObserver影响overflow焦点区域，依赖真实挂载/销毁行为。"
+          },
+          {
+            "name": "marked",
+            "version": "17.0.6",
+            "reason": "InlineMarkdown直接parser使用Lexer.lexInline的raw/escape/codespan/nested token；条件、描述和caveat正文的VNode子集依赖此token形状，当前17.0.6。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "useFieldAnchor.ts:13–29 的 useState 共享状态及 Nuxt auto-import；nuxt.config.ts 与 app/app.config.ts 的实际配置接线/组件扫描决定可选 SchemaComposition 与公开 FieldItem 安装行为。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "Tooltip触摸忽略、键盘focus/disableClosingTrigger；Collapsible隐藏内容与controlled展开"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "foundation/assets/css/main.css:1–11 的 @theme 与 app/assets/css/main.css:9–11、fixtures main.css 的 @source 扫描，决定真实语义颜色、alpha 和 variant class 的 CSS 生成；对比度结论依赖该生成结果。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "FieldItem.vue:83–87 resolveComponent 缺失时返回字符串的可选 composition 分支、159–166 watch/shallowRef 控制折叠，以及 useFieldAnchor.ts nextTick 与重复导航 revision 语义；复审依赖实际响应式渲染与生命周期行为。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 required co-review：原51scope完整继承且相对已封存batch5完整review逐blob等价；gallery外围4个h4及直接内嵌EnumTable调度修复为本轮影响，补真实Enum/Panel/utils/useRafTask及对应tests六路径和VueUse依赖。原finding f73feb0baf6dd 完整保留且resolved不改。fresh16 API fixture中requiredness/caveat96样本全部pass，最小ratio4.551121906832344；旧功能/consumer矩阵保留原SHA，非本轮新consumer安装或人工视觉采纳。",
       "findings": [
         {
           "id": "f-73feb0baf6dd",
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 F1 Required=3.913738950339162、F2 Conditional=2.2909619612053143、F5 warning caveat lead-in=2.1157592604952824（阶段1 light 浏览器实测）。当前 requiredness/caveat/lifecycle 路径及功能色未改；FieldValueRequirements warning caveat 独立节点仍待 #147 补验。候选 A 仅修正常中性文字与指定 hover，不能把 FieldItem 全部正常文字标为通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         },
         {
           "id": "f-909f4f270010",
@@ -721,39 +1284,41 @@
       ]
     },
     "api-docs-schema-composition": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T08:01:03.122Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
-        "itemDigest": "bc85d101464309dd4df732304a874c1732efc5a85ec632a5640b357e34b496b4",
+        "baseSha": "9ac9d7373af5350df6f964e3de1d72b4a907ee9f",
+        "headSha": "6e88427a4974ec5d0577fdc1b1f617f9e0b535da",
+        "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/schema-composition.vue",
           "foundation/assets/css/main.css",
+          "foundation/components/InlineMarkdown.vue",
+          "foundation/components/inline-markdown/parse.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/SchemaComposition.vue",
-          "kits/api-docs/internal/collapseFocus.ts",
+          "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/internal/FieldValueStructure.vue",
           "kits/api-docs/utils/field.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/tokens.md",
+          "references/kits/api-docs/index.md",
           "references/kits/api-docs/schema-composition.md",
-          "scripts/build-hierarchy.mjs",
-          "scripts/verify-hierarchy-pair.sh",
-          "tests/browser/hierarchy-compare.mjs",
-          "tests/browser/hierarchy-discovery.mjs",
-          "tests/browser/hierarchy-evidence.mjs",
-          "tests/browser/hierarchy-fixture.mjs",
-          "tests/browser/hierarchy-focus-compare.mjs",
-          "tests/browser/hierarchy-focus.mjs",
-          "tests/browser/hierarchy.mjs",
           "tests/component/chrome-labels.spec.ts",
-          "tests/component/collapse-focus.spec.ts",
-          "tests/component/hierarchy-subtree.spec.ts",
+          "tests/component/field-anchor.spec.ts",
+          "tests/component/field-value-structure.spec.ts",
           "tests/component/schema-composition.spec.ts",
-          "tests/fixtures/hierarchy/index.vue",
-          "tests/fixtures/hierarchy/main.css"
+          "vitest.config.ts"
         ],
-        "scopeDigest": "6c4429fc604677a501cb5320a0b0f42f8e2ddfc58724142f32c532326bd890e9",
+        "scopeDigest": "f306dd03c968b066b2f5836afaac0f7d426bdd0bcbc718c7fd99d15633838604",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -761,13 +1326,28 @@
             "reason": "UTabs / UCollapsible 必须继续转发 unmountOnHide=false，保留隐藏 variant 的 DOM 以支持 deep link；升级后复查 SchemaComposition 的隐藏 panel 与重复揭示行为。"
           },
           {
+            "name": "marked",
+            "version": "17.0.6",
+            "reason": "默认 discriminator 描述经 InlineMarkdown 代码跨度解析；升级后核查反引号、首尾空白、换行/控制符 wire values 保真且不被重新解释为链接。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "copy-in kit 的组件及 utils/composables auto-import、useState 共享 anchor 与 setup/route 生命周期是字段级和嵌套组合工作前提。"
+          },
+          {
             "name": "reka-ui",
             "version": "2.9.10",
             "reason": "TabsContent / CollapsibleContent 在 unmountOnHide=false 时必须保留隐藏内容 DOM；升级后复查隐藏字段可寻址及 deep link 展开、滚动链路。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "watch/响应式 id 状态、组件递归与 optional resolveComponent 必须继续支持重复 deep-link reveal、有效 tab 保留及按 id 独立展开。"
           }
         ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "基于9ac9d737完成完整owner审计，在6e88427独立复审修复：anyOf改Map以支持prototype/Vue保留名id；空id deep link与空列表首次/再次加载选中状态区分undefined；discriminator安全code span保留反引号/首尾空格，空或控制字符使用JSON字面量，factory参数仍是原始值。原findings为空；本轮3个发现及红绿证据保留在外部schema-review且均已修复，不以新resolved finding写入ledger。保留原6scope/原NuxtUI+Reka依赖，补实际渲染/anchor/parser/配置/契约/测试scope与Vue/Nuxt/marked行为依赖。最终功能树component36files494（Schema30）、typecheck/build通过；原始precommit构建来源不改标，其digest与6e88427重算一致。无本reviewer新增browser/native-touch/consumer实测声明。 主线程在相同构建输入的真实Chrome生产页面完成light/dark×1440/390四组核验：键盘tabs/独立折叠、隐藏子tab定位并聚焦、收起后重复深链接、无水平溢出，截图检查通过；这是当前本机浏览器回归，不是外部consumer或维护者视觉验收。",
       "findings": [
         {
           "id": "f-fea517d9f1ac",
@@ -780,26 +1360,90 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/AnnotationPopover.vue",
+          "foundation/components/InlineCode.vue",
+          "foundation/components/InlineMarkdown.vue",
+          "foundation/components/inline-markdown/parse.ts",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "foundation/utils/annotation.ts",
           "kits/api-docs/components/FieldAnnotation.vue",
+          "kits/api-docs/composables/useFieldAnchor.ts",
           "kits/api-docs/composables/useFieldSource.ts",
+          "kits/api-docs/utils/field.ts",
+          "nuxt.config.ts",
           "references/components/overlays.md",
+          "references/foundations/focus-a11y.md",
           "references/kits/api-docs/index.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
           "tests/component/annotation-forms.spec.ts",
-          "tests/component/field-condition.spec.ts"
+          "tests/component/annotation-popover.spec.ts",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/field-anchor.spec.ts",
+          "tests/component/field-condition.spec.ts",
+          "tests/component/field-presence.spec.ts",
+          "tests/component/inline-code.spec.ts",
+          "tests/component/inline-markdown.spec.ts",
+          "tests/component/use-copy.spec.ts",
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts"
         ],
-        "scopeDigest": "3f5bdf002ab29f07669449e636a78275c5a4a83f0641e3ac3fa0ff12f7db1af3"
+        "scopeDigest": "d594e67513b921bae593af11f9baf05806e4bbba0ee9f19811c09918cf92cfed",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UPopover click/portal hooks与UButton行为"
+          },
+          {
+            "name": "marked",
+            "version": "17.0.6",
+            "reason": "InlineMarkdown直接parser使用Lexer.lexInline的raw/escape/codespan/nested token；条件、描述和caveat正文的VNode子集依赖此token形状，当前17.0.6。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "FieldAnnotation 的 useRoute 与 useFieldAnchor useState 及自动导入/类型暴露依赖 Nuxt；app.app config/prose/components 接线保证 source-first 与当前实际渲染一致。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "Popover/FocusScope键盘入口、关闭焦点恢复、portal生命周期"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "foundation CSS 的 @theme static、app/fixture CSS 的 @source 扫描及 variant/alpha utilities 生成，决定真实 requiredness 前景、portal背景与响应式宽度。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "useFieldSource provide/inject 最近源解析、computed props优先级，以及 AnnotationPopover watch flush:post、template ref和nextTick焦点恢复均依赖Vue实际响应式及生命周期行为。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 required co-review：全部原39scope保留，与已封存batch5完整review逐blob等价；本轮仅外围gallery字段分组h4改变，field/source/requiredness摘要与同页/跨页导航/Popover焦点不变。fresh16 API fixture中真实open portal32样本pass，最小ratio6.487119947951175。原fa41a8fce8a19 resolved及f31f690a2dbaa/ffd7282669072两个wont-fix完整保留；没有把FieldItem复制操作当作本owner独立复制UI验证，无新consumer/人工视觉采纳主张。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -813,7 +1457,7 @@
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 C 明确列出 FieldAnnotation requiredness 的 error/warning 同类消费尚待独立浮层实测；当前 FieldAnnotation.vue requiredState 仍为 text-error/text-warning，主 CSS 功能色没有改动。F1/F2 在白底分别为 3.913738950339162 / 2.2909619612053143（阶段1实测，非本节点本轮实测）。保留未收敛 finding，不以中性40对或组件单测宣称浮层所有文字通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         },
         {
           "id": "f-fd7282669072",
@@ -825,32 +1469,79 @@
       ]
     },
     "api-docs-event-badge": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "app/pages/kits/api-docs/structured-relations.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "foundation/utils/badge.ts",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/WebhookBadge.vue",
+          "kits/api-docs/utils/method-preset.ts",
+          "nuxt.config.ts",
+          "references/components/data-display.md",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/responsiveness.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
-          "tests/component/http-method-badge.spec.ts"
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/http-method-badge.spec.ts",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "4bafe08d3dc1539c741e769293a9bc477af2dce2dc2f52604bb472836ff097ec",
+        "scopeDigest": "81cd00cd6b4bd85e9fa04be4d9274d47523975779dd51a19294914eb689155d4",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
             "reason": "依赖 UBadge 的单一 DOM 根节点与全局 attrs 转发,使 translate 属性落到可见 badge。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实组件auto-registration、preset utils导入及useAppConfig/theme/colorMode接入。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "UBadge用Primitive将as=span及attrs传递到最终DOM；纯展示默认无tabindex/交互role。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "tv合并wrapper font-medium及调用方class，保持Webhook mono与实例布局类；升级应核对冲突类最终输出。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "Nuxt UI tv按color/variant/size组合准确badge分支并合并theme/实例ui。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "Badge的semantic text/bg、transparent10%背景与ring类、xs/sm/xl字号及mono类实际编译，颜色证据依赖完整CSS输出。"
           },
           {
             "name": "vue",
@@ -859,100 +1550,274 @@
           }
         ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "foundation/utils/badge.ts",
           "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/LifecycleNotice.vue",
           "kits/api-docs/utils/lifecycle-preset.ts",
+          "nuxt.config.ts",
           "references/components/data-display.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
-          "tests/component/chrome-labels.spec.ts"
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "d08aa5b14c7a3fbbc2ba3ca9884f041ddf2d26c6715b0f7e231c5272838c97af"
+        "scopeDigest": "99d8bbb4cfe43fa6cf0057251fb9dd0dd300855f8c9115b3d6de0ce5b2fa5455",
+        "dependencies": [
+          {
+            "name": "@nuxt/icon",
+            "version": "2.3.1",
+            "reason": "LifecycleNotice 的 preset icon 经 UAlert/UIcon 调用 NuxtIcon；核对图标输出而非用图标替代非空 title 文本。"
+          },
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "UAlert subtle 的实际彩色/neutral背景、description默认opacity-90、description slot优先与默认close省略。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实contrast build复用生产component/utils自动导入、app.config及CSS入口；版本内容影响被测DOM/样式构建。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "UAlert Primitive 将attrs转发到真实div。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "确保 colored description 的 opacity-100 替换上游 opacity-90。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "UAlert appConfig compoundVariants 与上游 description slot 类合并。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "实际生成语义token、subtle /10颜色与size/neutral/inverted工具类，构成功能色browser证据。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "LifecycleNotice 单根 fallthrough attrs 与 computed title/color。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整复审LifecycleNotice五状态、title默认/空白回退/本地化、description/default slot优先、attrs与默认无close；本批gallery四处heading-level修复命中既有scope，change=modified。最终90dfa0c003c124b1605e8e99db62116d5aa18f27的16组实际Notice颜色测试160标题/正文节点全部通过，min=4.651883902576909；四组真实浏览器补验slot链接/attrs/动态状态，两主题两宽度截图已复核。f-b96f3407acc1保留原ID/severity/claim/evidence并标resolved。521组件/160registry/typecheck/build通过；旧9674ef与中间ea1dc10原始证据保留各自来源，不泛化任意slot颜色或外部consumer。",
       "findings": [
         {
           "id": "f-b96f3407acc1",
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 C 将 LifecycleNotice 的 colored UAlert subtle 明确列为待验范围。当前源码仍选 success/warning/error，Nuxt UI 4.9.0 subtle root 为 bg-{color}/10 text-{color}，description 另有 opacity-90；已知基础功能色与同类浅底配对失败，尚无本 notice 节点独立 ratio。此处记录未闭合功能色验收，不冒称本节点已获浏览器失败数值或整体 verified。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
     "api-docs-operation-target": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
+          "foundation/assets/css/main.css",
           "foundation/components/CopyButton.vue",
           "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
           "kits/api-docs/components/OperationTarget.vue",
+          "nuxt.config.ts",
+          "references/components/buttons.md",
+          "references/foundations/focus-a11y.md",
           "references/foundations/responsiveness.md",
           "references/kits/api-docs/index.md",
-          "tests/component/operation-target.spec.ts"
+          "scripts/lib/contrast-build.mjs",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/copy-button.spec.ts",
+          "tests/component/operation-target.spec.ts",
+          "tests/component/use-copy.spec.ts",
+          "tests/fixtures/consumer/app/pages/index.vue"
         ],
-        "scopeDigest": "fa6e04cdb9225b4b6a6667d2ce45eee76baf20fc2df6972461754ed3e04b50a2"
+        "scopeDigest": "2381de8a2f4c31e3ed99f37b26dfc594ca57c1c091d751c6b1ef2f8943834694",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "USelect 的 value/label 映射、无效值显示、trigger 属性转发及 UTooltip/CopyButton/Toast 的实际渲染。"
+          },
+          {
+            "name": "@vueuse/core",
+            "version": "14.3.0",
+            "reason": "useResizeObserver 在 SSR 不访问不存在的 window，mount 后观察 pathTrack，scope dispose 断开。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "source roots 自动注册、useCopy/useToast 注入与 SSR/客户端组件挂载。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "SelectItem 禁止空字符串，Select 选择/键盘语义；background Toast 唯一 polite 播报。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "两个 flex-nowrap 原子单元、auto basis、容器密度、path overflow/fade 与语义 token 编译。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "defineModel 与 computed 的受控/非受控身份响应性、原位 hosts 数据变化及 nextTick 测量。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读defineModel prop+listener控制与props-only局部选择、hosts.map(id)原位收敛、activeHost统一trigger/host/完整地址、私有numeric index原始ID回传、空及literal0区别；三复制意图/完整句i18n/包含值的aria-label、真实文本选区结束跳过且keyboard不吞、两原子布局单元与DOM/Tab同序、host先截断/path内部滚动/copy不滚走、SSR deterministic overflow与ResizeObserver、单host降级；上批focus修复与五场景测试不变。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
+        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/components/demo/api-docs/DocsShellReference.vue",
           "app/pages/kits/api-docs/endpoint-reference.vue",
           "app/pages/kits/api-docs/index.vue",
           "app/pages/kits/api-docs/webhook-reference.vue",
+          "foundation/assets/css/main.css",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "foundation/utils/badge.ts",
           "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/LifecycleBadge.vue",
           "kits/api-docs/components/OperationHeader.vue",
           "kits/api-docs/components/WebhookBadge.vue",
+          "kits/api-docs/utils/lifecycle-preset.ts",
+          "kits/api-docs/utils/method-preset.ts",
+          "nuxt.config.ts",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-colors.spec.ts",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
           "tests/component/chrome-labels.spec.ts",
-          "tests/component/operation-header.spec.ts"
+          "tests/component/operation-header.spec.ts",
+          "tests/fixtures/contrast/FunctionalApiMatrix.vue",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/FunctionalOwnerReview.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "acdc41bfaf07bae4d9ba8112c87a5d5f6f5719a176fd67bc07518a4636b33cc9"
+        "scopeDigest": "55f1b123c0916c5550aa4e6106505f33eb7628facbfc69ba0b28d5dc6a38206b",
+        "dependencies": [
+          {
+            "name": "@nuxt/icon",
+            "version": "2.3.1",
+            "reason": "生命周期preset icon经SemanticBadge/UBadge/UIcon真实渲染；非空文字独立传达状态，图标为补充。"
+          },
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "Header嵌入的HttpMethodBadge/LifecycleBadge/WebhookBadge最终UBadge subtle/solid/neutral真实绘制与sm尺寸。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "真实contrast build复用生产component/utils自动导入、app.config及CSS入口；版本内容影响被测DOM/样式构建。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "嵌入UBadge以Primitive形成可见span及attrs转发。"
+          },
+          {
+            "name": "tailwind-merge",
+            "version": "3.6.0",
+            "reason": "UBadge tv 合并 theme、font-medium 与实例class 的冲突类；准确输出构成已审DOM与色彩前提。"
+          },
+          {
+            "name": "tailwind-variants",
+            "version": "3.2.2",
+            "reason": "UBadge 通过 tv 选择实际 color/variant/size 与slot类，影响本owner默认徽章及调用方class合并。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "实际生成语义token、subtle /10颜色与size/neutral/inverted工具类，构成功能色browser证据。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "Header kind/lifecycle条件分支、headingLevel默认值与子badge的单根attrs透传。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
       "findings": [
         {
           "id": "f-0fd303fa92c4",
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "OperationHeader.vue 直接嵌入 #147 已知失败的 HttpMethodBadge 与 LifecycleBadge；endpoint-reference 的阶段1样本含该链路，组件和功能色本轮未改。此 owner 可确认中性 identifier/summary/description 的 scoped 修复，但不能宣称含方法/生命周期的完整 header 正常文字全通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
@@ -989,23 +1854,43 @@
     },
     "api-docs-site-search": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "lastAuditedAt": "2026-09-23T03:45:07.633Z",
       "change": "modified",
-      "status": "deferred",
+      "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "23bed8705a425300e6dcc9d2c81ae54a6285e29a",
+        "headSha": "9674ef684769fe0eec1acc05b6422ea519867edd",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
+          "app/assets/css/main.css",
           "app/components/demo/api-docs/DocsShell.vue",
           "app/pages/kits/api-docs/sidebar-nav.vue",
           "app/utils/demo/api-docs/docs-shell-data.ts",
+          "foundation/assets/css/main.css",
+          "foundation/components/SemanticBadge.vue",
+          "foundation/config/app.ts",
+          "foundation/utils/badge.ts",
+          "kits/api-docs/components/HttpMethodBadge.vue",
           "kits/api-docs/components/SiteSearch.vue",
+          "kits/api-docs/utils/method-preset.ts",
+          "nuxt.config.ts",
           "references/kits/api-docs/index.md",
-          "tests/component/site-search.spec.ts"
+          "scripts/build-contrast.mjs",
+          "scripts/lib/contrast-build.mjs",
+          "scripts/lib/text-contrast.mjs",
+          "tests/browser/functional-consumers.spec.ts",
+          "tests/browser/functional-owner-review.spec.ts",
+          "tests/browser/functional-support.ts",
+          "tests/browser/measure.ts",
+          "tests/component/http-method-badge.spec.ts",
+          "tests/component/site-search.spec.ts",
+          "tests/fixtures/contrast/FunctionalMatrix.vue",
+          "tests/fixtures/contrast/FunctionalOwnerReview.vue",
+          "tests/fixtures/contrast/main.css",
+          "vitest.browser.config.ts"
         ],
-        "scopeDigest": "8f9dab55423f37ca556b030b3281aa66195dc76a64642330f585c37b6ca9c2ad",
+        "scopeDigest": "8db68854bb20f1cff78794fe349fe9dc714100be85544366f293937ddbb47f7f",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1016,10 +1901,15 @@
             "name": "fuse.js",
             "version": "7.4.2",
             "reason": "依赖 Fuse 7.4 的多字段模糊搜索、全局 resultLimit 与 matches 结果契约。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "Listbox data-highlighted/aria-selected与Dialog focus/closeAutoFocus实际行为"
           }
         ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "复审完整公开默认行为与Nuxt UI/Fuse/Reka依赖；保留旧GET/POST/PATCH/DELETE导航168条，并补真实PUT的24个明暗/视口/路由/原生交互状态。真实ariaSelected=false与before背景分开记录，不将高亮改称持久选中。 本次测试补验来源9674ef684769fe0eec1acc05b6422ea519867edd，digest=6f1814dd7ec5e26bd3381eb3c5b18a656f54d41fcba0a8f7e41589ca4028e415；普通文字使用未舍入>=4.5判定。旧证据保留471c523/ec18ef4各自来源；完整scope/原findings及依赖已独立复审。消费端缺失的Search/Header/Method场景不冒称已验证。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -1033,7 +1923,7 @@
           "severity": "medium",
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "SiteSearch.vue #item-leading 对 item.method 渲染 HttpMethodBadge，该方法组件在 #147 F3-F7 有已确认失败且本轮未改。搜索门户/selected 背景尚未独立测量，不复用其他页面的 ratio 冒称本节点实测；该交付仍保留方法文字功能色验收缺口，应 deferred。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
-          "disposition": "open"
+          "disposition": "resolved"
         }
       ]
     },
@@ -1122,26 +2012,73 @@
       ]
     },
     "api-docs-relation-source-path": {
-      "round": 3,
-      "lastAuditedAt": "2026-09-22T12:00:06.876Z",
+      "round": 4,
+      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "8828b6f1376806a49e14b20e448977cbe69ff9c6",
+        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
+        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
+          "app/app.config.ts",
+          "app/assets/css/main.css",
           "app/pages/kits/api-docs/structured-relations.vue",
+          "foundation/assets/css/main.css",
+          "foundation/composables/useCopy.ts",
+          "foundation/config/app.ts",
+          "foundation/config/nuxt.ts",
+          "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/RelationSourcePath.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/utils/field.ts",
+          "nuxt.config.ts",
+          "references/foundations/focus-a11y.md",
+          "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
+          "tests/component/chrome-labels.spec.ts",
+          "tests/component/field-anchor.spec.ts",
           "tests/component/relation-source-path.spec.ts",
-          "tests/component/structured-relations-recipe.spec.ts"
+          "tests/component/structured-relations-recipe.spec.ts",
+          "tests/component/use-copy.spec.ts",
+          "vitest.config.ts"
         ],
-        "scopeDigest": "350f03af58fc38a6d12f8f525e8e8a44274621533470a5ee4ee5977975f1b08b"
+        "scopeDigest": "70c63b9e3affb55c72fe50cc16239277bf64dfd86c0ff963fcc2635898a40edd",
+        "dependencies": [
+          {
+            "name": "@nuxt/ui",
+            "version": "4.9.0",
+            "reason": "ULink 必须保持 to 对 NuxtLink 的路由转发与根 anchor attrs/classes；跨页链接的可访问名称、focus-visible 和 touch-manipulation 由实际根承载。"
+          },
+          {
+            "name": "nuxt",
+            "version": "4.4.8",
+            "reason": "useState/nextTick 自动导入、NuxtLink 与页面挂载生命周期驱动字段导航；升级复核 hash 初始化、焦点及卸载清理。"
+          },
+          {
+            "name": "reka-ui",
+            "version": "2.9.10",
+            "reason": "ULinkBase 的 Primitive 必须按 href 渲染原生 anchor 并保留 children/attrs；同页 FieldItem 的 Collapsible 依赖受控展开。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "flex-wrap/min-w-0/wrap-anywhere 与 focus-visible 语义类必须由真源扫描编译；升级复核长路径回流和焦点样式。"
+          },
+          {
+            "name": "vue",
+            "version": "3.5.39",
+            "reason": "computed 与受控组件响应更新、scope disposal 保持路径/labels 和导航 owner 生命周期一致。"
+          },
+          {
+            "name": "vue-router",
+            "version": "5.1.0",
+            "reason": "跨页 NuxtLink 的 href/导航与 modifier click 行为依赖路由；fragment 单次编解码与实际 DOM id 必须一致。"
+          }
+        ]
       },
-      "notes": "PR153 V2最小修复：三入口共享内部关闭焦点生命周期与动画裁剪期间inert；保留subtree/compact和全部既有finding。严格HEAD焦点门禁、原生片段/查找分列及最终exact SHA、CI和残余限制见PR153本轮评论与维护报告。两条focus finding因当前recorder不能在同PR关闭新finding而保留open历史，不改#147裁定。",
+      "notes": "完整required co-review，functional 71eb8ca81d7c7f72050d634ef71a26570ac649f4：原scope/依赖/历史finding完整保留，base对封存完整owner复审逐blob等价；本轮仅共享useCopy fallback焦点修复改变其行为依赖。已审完整owning契约、调用链和5分支fallback回归，37spec515组件项、160registry及typecheck/build通过。FieldItem copyLink仅复制不导航；Annotation/Relation的goTo导航不调用fallback，副作用边界保持。旧#147色彩/browser证据保留原SHA，不冒充本轮重测；最终71eb8ca8 production browser的OperationTarget→useCopy三个故障注入fallback恢复focus，0pageerror，source digest0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算一致。此为共享useCopy浏览器证据，不声称本轮重跑FieldItem/Annotation/Relation本节点浏览器或consumer。",
       "findings": []
     }
   }

@@ -277,7 +277,8 @@
       "registryDependencies": ["geist-foundation", "foundation-copy-button", "api-docs-use-code-wrap"],
       "files": [
         { "path": "kits/api-docs/components/CodeBlock.vue", "target": "app/components/CodeBlock.vue" },
-        { "path": "kits/api-docs/utils/lang-preset.ts", "target": "app/utils/lang-preset.ts" }
+        { "path": "kits/api-docs/utils/lang-preset.ts", "target": "app/utils/lang-preset.ts" },
+        { "path": "kits/api-docs/utils/example-select-value.ts", "target": "app/utils/example-select-value.ts" }
       ]
     },
     {

@@ -17,6 +17,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { defineComponent, reactive } from 'vue'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import CodeBlock from '../../kits/api-docs/components/CodeBlock.vue'
@@ -36,6 +37,24 @@ function languageSelect(wrapper: VueWrapper<InstanceType<typeof CodeBlock>>) {
 }
 
 describe('CodeBlock language select visibility', () => {
+  it('selects empty and literal-zero language ids independently', async () => {
+    const wrapper = await mountSuspended(CodeBlock, {
+      props: { variants: [
+        { language: '', label: 'Plain source', code: 'EMPTY ID' },
+        { language: '0', label: 'Zero language', code: 'ZERO ID' },
+      ] },
+    })
+    const select = languageSelect(wrapper)!
+    for (const [label, code] of [['Zero language', 'ZERO ID'], ['Plain source', 'EMPTY ID']]) {
+      const item = select.props('items').find((item: { label: string }) => item.label === label)
+      select.vm.$emit('update:modelValue', item.value)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.get('pre').text()).toBe(code)
+      expect(wrapper.getComponent(CopyButton).props('value')).toBe(code)
+    }
+    wrapper.unmount()
+  })
+
   it('keeps the select visible when the active variant has no code', async () => {
     const wrapper = await mountSuspended(CodeBlock, {
       props: { variants: twoLanguages },
@@ -65,6 +84,51 @@ describe('CodeBlock language select visibility', () => {
   })
 })
 
+describe('CodeBlock reactive language identity', () => {
+  it('keeps selection and copy aligned through in-place reorder, removal, and reinsertion', async () => {
+    const variants = reactive([
+      { language: 'curl', code: 'CURL' },
+      { language: 'node', code: 'NODE' },
+      { language: 'python', code: 'PYTHON' },
+    ])
+    const Host = defineComponent({
+      components: { CodeBlock },
+      setup: () => ({ variants }),
+      template: '<CodeBlock :variants="variants" />',
+    })
+    const host = await mountSuspended(Host)
+    const block = host.getComponent(CodeBlock)
+    const assertLanguage = (language: string, code: string) => {
+      expect(languageSelect(block)!.props('modelValue')).toBe(language)
+      expect(block.get('pre').text()).toBe(code)
+      expect(block.getComponent(CopyButton).props('value')).toBe(code)
+    }
+    languageSelect(block)!.vm.$emit('update:modelValue', 'node')
+    await host.vm.$nextTick()
+    variants.reverse()
+    await host.vm.$nextTick()
+    assertLanguage('node', 'NODE')
+
+    variants.splice(1, 1)
+    await host.vm.$nextTick()
+    assertLanguage('python', 'PYTHON')
+    variants.push({ language: 'node', code: 'RETURNED NODE' })
+    await host.vm.$nextTick()
+    assertLanguage('python', 'PYTHON')
+
+    variants[0]!.language = 'ruby'
+    await host.vm.$nextTick()
+    assertLanguage('ruby', 'PYTHON')
+    variants.splice(0)
+    await host.vm.$nextTick()
+    expect(block.find('pre').exists()).toBe(false)
+    variants.push({ language: 'go', code: 'GO' }, { language: 'ruby', code: 'RETURNED RUBY' })
+    await host.vm.$nextTick()
+    assertLanguage('go', 'GO')
+    host.unmount()
+  })
+})
+
 // `languageLabels` is documented as "overrides win over the preset". Ids are
 // matched case-insensitively, so a caller's override must not be dropped just
 // because its key casing differs from the variant's `language` id.
@@ -75,6 +139,10 @@ describe('CodeBlock language label overrides', () => {
     { id: 'python', overrides: { Python: 'Py', python: 'Python 3' }, expected: 'Python 3' },
     { id: 'JSON', overrides: {}, expected: 'JSON' },
     { id: 'rust', overrides: {}, expected: 'Rust' },
+    { id: 'constructor', overrides: {}, expected: 'Constructor' },
+    { id: '__proto__', overrides: {}, expected: '__proto__' },
+    { id: 'constructor', overrides: { constructor: 'Custom language' }, expected: 'Custom language' },
+    { id: '__proto__', overrides: { ['__proto__']: 'Proto language' }, expected: 'Proto language' },
   ])('resolves $id with $overrides to $expected', ({ id, overrides, expected }) => {
     expect(langLabel(id, overrides)).toBe(expected)
   })

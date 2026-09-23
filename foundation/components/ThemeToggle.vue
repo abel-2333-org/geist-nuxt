@@ -1,6 +1,11 @@
+<script setup lang="ts">
+defineOptions({ inheritAttrs: false })
+</script>
+
 <template>
-  <!-- Tap-target touch contract (references/foundations/focus-a11y.md).
-       UColorModeButton declares `class` as a prop (inheritAttrs: false) and
-       forwards it to the root UButton via useForwardProps. -->
-  <UColorModeButton class="touch-manipulation" />
+  <!-- Browser preference must resolve before the button's localized name renders.
+       Forward caller attrs to the button, keeping the tap-target touch contract. -->
+  <ClientOnly>
+    <UColorModeButton v-bind="$attrs" class="touch-manipulation" />
+  </ClientOnly>
 </template>

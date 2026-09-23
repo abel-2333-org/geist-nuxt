@@ -1,0 +1,1136 @@
+{
+  "summary": [
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "pass": 73,
+      "fail": 692,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 1.64322359194803,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "pass": 664,
+      "fail": 101,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 3.09583458269204,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "pass": 765,
+      "fail": 0,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 4.651883902576909,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "pass": 765,
+      "fail": 0,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 4.551121906832344,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "pass": 765,
+      "fail": 0,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 4.651883902576909,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "pass": 765,
+      "fail": 0,
+      "unresolved": 4,
+      "unverified": 5,
+      "minimumRatio": 4.551121906832344,
+      "source": {
+        "sha": "19a107527d1226585611f4547619320b430fab2a",
+        "digest": "65532b3baa99bf2d45e239515068ae61fe4e8b0effea20ea2d9a978e6191d2b9",
+        "builtAt": "2026-09-22T00:41:37.373Z",
+        "purpose": "Issue 147 stage 1 only; production sources unchanged"
+      },
+      "infrastructureError": null,
+      "consoleErrors": []
+    }
+  ],
+  "solidSubtlePairs": [
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 5.878968459850046
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.290503244723411
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 3.072241707809382
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 2.3461792726084236
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 3.100673742889534
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 2.381079584889289
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 4.444029662122568
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 3.2886236830310924
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 2.290963597687398
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 1.7982167790244699
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 3.913739873944556
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 2.914503500662066
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 5.426370197465054
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 3.861616767179577
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.669366559133293
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.979252580237736
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.170583825139756
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.670867594290186
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.555341088832712
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.162312272573353
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 9.975230931282981
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.547852437480224
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.529928466029159
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.572187817715733
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.121203584676938
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.131635806016833
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.583058146676685
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.794325338025732
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.598209505797759
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.8224578533887295
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.70773789005006
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.855291432565066
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 8.001378676368077
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.774227725939664
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.651883902576909
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.087039252728687
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.864057685586142
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.669366559133293
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.979252580237736
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.170583825139756
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.670867594290186
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.555341088832712
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.162312272573353
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 9.975230931282981
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.547852437480224
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.645198451741413
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.228967043872988
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.121203584676938
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.131635806016833
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.583058146676685
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.794325338025732
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.598209505797759
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.8224578533887295
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.70773789005006
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.855291432565066
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.825457958425116
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.774227725939664
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.651883902576909
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.087039252728687
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "primary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 4.864057685586142
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.669366559133293
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "secondary",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.979252580237736
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 10.170583825139756
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "success",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.670867594290186
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.555341088832712
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "info",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.162312272573353
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 9.975230931282981
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "warning",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 6.547852437480224
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "solid",
+      "surfaces": 4,
+      "minimumRatio": 7.645198451741413
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "role": "error",
+      "component": "Badge",
+      "variant": "subtle",
+      "surfaces": 4,
+      "minimumRatio": 5.228967043872988
+    }
+  ],
+  "F1-F9ActualPages": [
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 3.913739873944556
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 2.290963597687398
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 3.883132249349551
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 2.8053050668193693
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 2.1157693687024035
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 2.765026299210927
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 3.4400331348716318
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 3.913739873944556
+    },
+    {
+      "mode": "baseline",
+      "theme": "light",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 2.6261666632783154
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 7.216980674443314
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 11.024783690770832
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 7.385846572542687
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 9.663333524293087
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 9.48682753567006
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 10.108178889571581
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 6.4826706645512076
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 6.529928466029159
+    },
+    {
+      "mode": "baseline",
+      "theme": "dark",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 7.9054395961421475
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 8.001378676368077
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 5.740959326668835
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 5.6988948297528665
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 6.828971228184585
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 5.666809152561764
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 5.503473649450167
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "recommended",
+      "theme": "light",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 5.328570108307233
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 8.449594779719497
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 11.024783690770832
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 7.385846572542687
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 9.663333524293087
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 9.48682753567006
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 10.108178889571581
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 7.475920865733439
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 7.645198451741413
+    },
+    {
+      "mode": "recommended",
+      "theme": "dark",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 7.9054395961421475
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 8.001378676368077
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 5.740959326668835
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 5.6988948297528665
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 6.828971228184585
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 5.666809152561764
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 5.503473649450167
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 6.487119947951175
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "light",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 5.328570108307233
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F1",
+      "actualPageSamples": 21,
+      "minimumRatio": 8.449594779719497
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F2",
+      "actualPageSamples": 5,
+      "minimumRatio": 11.024783690770832
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F3",
+      "actualPageSamples": 3,
+      "minimumRatio": 7.385846572542687
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F4",
+      "actualPageSamples": 9,
+      "minimumRatio": 9.663333524293087
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F5",
+      "actualPageSamples": 6,
+      "minimumRatio": 9.48682753567006
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F6",
+      "actualPageSamples": 1,
+      "minimumRatio": 10.108178889571581
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F7",
+      "actualPageSamples": 1,
+      "minimumRatio": 7.475920865733439
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F8",
+      "actualPageSamples": 1,
+      "minimumRatio": 7.645198451741413
+    },
+    {
+      "mode": "amber-solid",
+      "theme": "dark",
+      "id": "F9",
+      "actualPageSamples": 4,
+      "minimumRatio": 7.9054395961421475
+    }
+  ]
+}

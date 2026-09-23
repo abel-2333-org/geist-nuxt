@@ -17,6 +17,7 @@ const nuxt = await loadNuxt({
     hooks: {
       'pages:extend'(pages) {
         pages.push({ name: 'contrast-verification', path: '/__contrast', file: path.join(root, 'tests/fixtures/contrast/index.vue') })
+        pages.push({ name: 'functional-contrast-verification', path: '/__functional-contrast', file: path.join(root, 'tests/fixtures/contrast/FunctionalMatrix.vue') })
       },
     },
   },
