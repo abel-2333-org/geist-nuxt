@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import FunctionalRoleMatrix from './FunctionalRoleMatrix.vue'
 import FunctionalApiMatrix from './FunctionalApiMatrix.vue'
+import FunctionalOwnerReview from './FunctionalOwnerReview.vue'
 
 definePageMeta({ layout: false })
 const colorMode = useColorMode()
 const route = useRoute()
 const api = computed(() => route.query.case === 'api')
 const overrides = computed(() => route.query.case === 'instance-overrides')
+const ownerReview = computed(() => route.query.case === 'owner-review')
 const roles = ['primary', 'secondary', 'success', 'info', 'warning', 'error'] as const
 const selectedRole = shallowRef<(typeof roles)[number]>('primary')
 const required = computed(() => route.query.case === 'required-marker')
@@ -29,7 +31,7 @@ const visibleSurface = computed(() => surfaces.find(surface => surface.name === 
           <p class="text-sm text-muted">Six roles · four surfaces · native component states</p>
         </div>
         <div class="flex gap-2" aria-label="Color mode">
-          <USelect v-if="!required && !api && !overrides" v-model="selectedRole" :items="[...roles]" aria-label="Role" data-testid="role-picker" />
+          <USelect v-if="!required && !api && !overrides && !ownerReview" v-model="selectedRole" :items="[...roles]" aria-label="Role" data-testid="role-picker" />
           <USelect v-model="selectedSurface" :items="surfaces.map(surface => surface.name)" aria-label="Surface" data-testid="surface-picker" />
           <UButton color="neutral" variant="outline" data-theme="light" @click="() => { colorMode.preference = 'light' }">Light</UButton>
           <UButton color="neutral" variant="outline" data-theme="dark" @click="() => { colorMode.preference = 'dark' }">Dark</UButton>
@@ -41,6 +43,7 @@ const visibleSurface = computed(() => surfaces.find(surface => surface.name === 
           <UInput placeholder="Value" aria-label="Required field" />
         </UFormField>
         <FunctionalApiMatrix v-else-if="api" :surface="visibleSurface.name" />
+        <FunctionalOwnerReview v-else-if="ownerReview" />
         <div v-else-if="overrides" class="flex flex-wrap gap-4">
           <UButton color="primary" :ui="{ base: 'hover:bg-error active:bg-success' }" data-audit="button-ui-override">
             <span data-label>UI override</span>
