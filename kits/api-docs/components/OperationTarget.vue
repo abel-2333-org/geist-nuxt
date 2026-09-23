@@ -91,18 +91,38 @@ const t = computed<Required<ApiTargetLabels>>(() => ({
   ...props.labels,
 }))
 
-/** Never-undefined id for the select binding; falls back to the first host. */
-const selectedId = computed({
-  get: () => selected.value ?? props.hosts[0]?.id ?? '',
-  set: (v: string) => { selected.value = v },
-})
-
-const activeHost = computed(
-  () => props.hosts.find(h => h.id === selectedId.value) ?? props.hosts[0],
+// Keep defineModel's controlled/props-only behavior. Only discard a removed
+// identity when Vue owns the local value; a controlled parent remains authority.
+const instance = getCurrentInstance()
+watch(
+  () => props.hosts.map(host => host.id),
+  (ids, previousIds) => {
+    const rawProps = instance?.vnode.props ?? {}
+    const controlled = ('modelValue' in rawProps || 'model-value' in rawProps)
+      && ('onUpdate:modelValue' in rawProps || 'onUpdate:model-value' in rawProps)
+    if (controlled) return
+    const id = selected.value ?? previousIds[0]
+    selected.value = id !== undefined && ids.includes(id) ? id : ids[0]
+  },
 )
 
+// Trigger, visible host and all copy actions share one resolved identity.
+const activeHost = computed(
+  () => props.hosts.find(host => host.id === selected.value) ?? props.hosts[0],
+)
+
+// Positions are private Select values, never stored business identities. Reka
+// reserves '' for clearing, whereas OperationHost.id accepts any string.
+const selectedValue = computed<number | undefined>({
+  get: () => activeHost.value ? props.hosts.indexOf(activeHost.value) : undefined,
+  set: (index) => {
+    if (index === undefined || !Number.isInteger(index)) return
+    const host = props.hosts[index]
+    if (host) selected.value = host.id
+  },
+})
 const selectItems = computed(() =>
-  props.hosts.map(h => ({ label: h.label, value: h.id })),
+  props.hosts.map((host, index) => ({ label: host.label, value: index })),
 )
 
 /** Host-only copy value. Always the FULL baseUrl, even while truncated. */
@@ -224,7 +244,7 @@ const pathSegment = 'min-w-0 flex-[0_1_auto] overflow-x-auto text-highlighted [s
     <div data-target-origin :class="originGroup">
       <USelect
         v-if="props.hosts.length > 1"
-        v-model="selectedId"
+        v-model="selectedValue"
         :items="selectItems"
         :aria-label="props.selectLabel ?? 'Environment'"
         size="sm"
