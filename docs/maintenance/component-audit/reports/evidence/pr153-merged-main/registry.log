@@ -1,0 +1,1093 @@
+
+> geist-nuxt@0.1.0 test:registry /Users/abel.wang/projects/geist-nuxt
+> node --test tests/gallery-nav.test.mjs tests/registry-tools.test.mjs tests/check-root-css.test.mjs tests/type-scale-pairing.test.mjs tests/webhook-protocol.test.mjs tests/audit-plan.test.mjs tests/text-contrast.test.mjs
+
+TAP version 13
+# Subtest: v1 迁移保留 legacy provenance,并由 open finding 决定 deferred
+ok 1 - v1 迁移保留 legacy provenance,并由 open finding 决定 deferred
+  ---
+  duration_ms: 1.270625
+  type: 'test'
+  ...
+# Subtest: v1 迁移拒绝未知 verdict 与损坏 finding
+ok 2 - v1 迁移拒绝未知 verdict 与损坏 finding
+  ---
+  duration_ms: 0.2025
+  type: 'test'
+  ...
+# Subtest: ledger 状态机拒绝 verified+open、deferred 无 open、重复 finding 与空 scope
+ok 3 - ledger 状态机拒绝 verified+open、deferred 无 open、重复 finding 与空 scope
+  ---
+  duration_ms: 7.785917
+  type: 'test'
+  ...
+# Subtest: dependency evidence 解析直接或唯一传递 resolution 并 fail closed
+ok 4 - dependency evidence 解析直接或唯一传递 resolution 并 fail closed
+  ---
+  duration_ms: 9.473208
+  type: 'test'
+  ...
+# Subtest: loadLedger 对缺失、损坏和未知版本 fail closed
+ok 5 - loadLedger 对缺失、损坏和未知版本 fail closed
+  ---
+  duration_ms: 9.03075
+  type: 'test'
+  ...
+# Subtest: planNext 让 open finding 重回 pool,critical/high 优先
+ok 6 - planNext 让 open finding 重回 pool,critical/high 优先
+  ---
+  duration_ms: 5.573625
+  type: 'test'
+  ...
+# Subtest: planNext 不会因 LOC 预算跳过第二个 high finding 去填普通组件
+ok 7 - planNext 不会因 LOC 预算跳过第二个 high finding 去填普通组件
+  ---
+  duration_ms: 5.710208
+  type: 'test'
+  ...
+# Subtest: resolveScope 规范化去重并拒绝簿记与越界
+ok 8 - resolveScope 规范化去重并拒绝簿记与越界
+  ---
+  duration_ms: 0.272666
+  type: 'test'
+  ...
+# Subtest: scope digest 内容敏感且拒绝 symlink;Git digest 固定到提交
+ok 9 - scope digest 内容敏感且拒绝 symlink;Git digest 固定到提交
+  ---
+  duration_ms: 462.301084
+  type: 'test'
+  ...
+# Subtest: base 锚定实时 origin/main,record 锚定 audit 分支精确分叉点
+ok 10 - base 锚定实时 origin/main,record 锚定 audit 分支精确分叉点
+  ---
+  duration_ms: 430.023667
+  type: 'test'
+  ...
+# Subtest: recordResults 从 base 计划记账,证据绑定 Git HEAD、item 与 scope
+ok 11 - recordResults 从 base 计划记账,证据绑定 Git HEAD、item 与 scope
+  ---
+  duration_ms: 527.985583
+  type: 'test'
+  ...
+# Subtest: recordResults 要求显式完整 co-review 所有被功能 diff 命中的 evidence owner
+ok 12 - recordResults 要求显式完整 co-review 所有被功能 diff 命中的 evidence owner
+  ---
+  duration_ms: 1377.674834
+  type: 'test'
+  ...
+# Subtest: recordResults --affected 只刷新精确 owner 集合且不推进排程
+ok 13 - recordResults --affected 只刷新精确 owner 集合且不推进排程
+  ---
+  duration_ms: 855.704042
+  type: 'test'
+  ...
+# Subtest: recordResults --affected 无 evidence owner 时拒绝空记账
+ok 14 - recordResults --affected 无 evidence owner 时拒绝空记账
+  ---
+  duration_ms: 194.037416
+  type: 'test'
+  ...
+# Subtest: recordResults --affected 接受 planned 与 affected 交集但拒绝未受影响计划项
+ok 15 - recordResults --affected 接受 planned 与 affected 交集但拒绝未受影响计划项
+  ---
+  duration_ms: 900.622333
+  type: 'test'
+  ...
+# Subtest: recordResults 允许 co-review 移除 HEAD 已删除的旧 scope 路径
+ok 16 - recordResults 允许 co-review 移除 HEAD 已删除的旧 scope 路径
+  ---
+  duration_ms: 584.470292
+  type: 'test'
+  ...
+# Subtest: recordResults 对仅 registry itemDigest 变化的 owner 也要求 co-review
+ok 17 - recordResults 对仅 registry itemDigest 变化的 owner 也要求 co-review
+  ---
+  duration_ms: 480.267125
+  type: 'test'
+  ...
+# Subtest: dependency-only 升级只要求绑定 owner co-review,且 recorder 自动更新版本
+ok 18 - dependency-only 升级只要求绑定 owner co-review,且 recorder 自动更新版本
+  ---
+  duration_ms: 756.237458
+  type: 'test'
+  ...
+# Subtest: dependency patch_hash 变化也要求 owner co-review,且 recorder 自动更新内容标识
+ok 19 - dependency patch_hash 变化也要求 owner co-review,且 recorder 自动更新内容标识
+  ---
+  duration_ms: 492.310458
+  type: 'test'
+  ...
+# Subtest: recordResults 将完整 co-review 计入当前 round 并正常 rollover
+ok 20 - recordResults 将完整 co-review 计入当前 round 并正常 rollover
+  ---
+  duration_ms: 772.091333
+  type: 'test'
+  ...
+# Subtest: recordResults 拒绝脏工作区、计划集合漂移与非祖先 base
+ok 21 - recordResults 拒绝脏工作区、计划集合漂移与非祖先 base
+  ---
+  duration_ms: 252.083083
+  type: 'test'
+  ...
+# Subtest: recordResults 不允许静默删除 open finding,关闭必须显式,wont-fix 需授权
+ok 22 - recordResults 不允许静默删除 open finding,关闭必须显式,wont-fix 需授权
+  ---
+  duration_ms: 359.719625
+  type: 'test'
+  ...
+# Subtest: recordResults 拒绝 verified+open、deferred 无 open与新建 closed finding
+ok 23 - recordResults 拒绝 verified+open、deferred 无 open与新建 closed finding
+  ---
+  duration_ms: 429.814541
+  type: 'test'
+  ...
+# Subtest: writeLedgerAtomic 原子发布完整 owner,不自动回收残留锁并保留较新状态
+ok 24 - writeLedgerAtomic 原子发布完整 owner,不自动回收残留锁并保留较新状态
+  ---
+  duration_ms: 119.482417
+  type: 'test'
+  ...
+# Subtest: verifyLedger 同时校验 scope 内容与 registry item 拓扑
+ok 25 - verifyLedger 同时校验 scope 内容与 registry item 拓扑
+  ---
+  duration_ms: 168.995667
+  type: 'test'
+  ...
+# Subtest: verifyLedger 对 deferred scope-v1 也重算 digest
+ok 26 - verifyLedger 对 deferred scope-v1 也重算 digest
+  ---
+  duration_ms: 129.4255
+  type: 'test'
+  ...
+# Subtest: verifyLedger 把 registry 删除或改名判为 stale,包括 deferred 条目
+ok 27 - verifyLedger 把 registry 删除或改名判为 stale,包括 deferred 条目
+  ---
+  duration_ms: 126.337916
+  type: 'test'
+  ...
+# Subtest: verifyLedger 只让 dependency version 变化的绑定 owner stale
+ok 28 - verifyLedger 只让 dependency version 变化的绑定 owner stale
+  ---
+  duration_ms: 213.388375
+  type: 'test'
+  ...
+# Subtest: verifyLedger 将同 semver 的 dependency patch_hash 变化判为 stale
+ok 29 - verifyLedger 将同 semver 的 dependency patch_hash 变化判为 stale
+  ---
+  duration_ms: 132.191208
+  type: 'test'
+  ...
+# Subtest: CLI 对未知参数和混合模式 fail closed
+ok 30 - CLI 对未知参数和混合模式 fail closed
+  ---
+  duration_ms: 1127.177625
+  type: 'test'
+  ...
+# Subtest: itemDigest 忽略 verification tags,新增或调整 tags 不使既有 evidence 失效
+ok 31 - itemDigest 忽略 verification tags,新增或调整 tags 不使既有 evidence 失效
+  ---
+  duration_ms: 0.205417
+  type: 'test'
+  ...
+# Subtest: checks the default Nitro public output
+ok 32 - checks the default Nitro public output
+  ---
+  duration_ms: 24.039125
+  type: 'test'
+  ...
+# Subtest: checks the Vercel Nitro static output
+ok 33 - checks the Vercel Nitro static output
+  ---
+  duration_ms: 2.224292
+  type: 'test'
+  ...
+# Subtest: fails when Nitro produced no public output
+ok 34 - fails when Nitro produced no public output
+  ---
+  duration_ms: 1.592041
+  type: 'test'
+  ...
+# Subtest: shared subtree check accepts field (min-width:24rem)
+ok 35 - shared subtree check accepts field (min-width:24rem)
+  ---
+  duration_ms: 0.360084
+  type: 'test'
+  ...
+# Subtest: shared subtree check accepts field (width>=24rem)
+ok 36 - shared subtree check accepts field (width>=24rem)
+  ---
+  duration_ms: 0.108375
+  type: 'test'
+  ...
+# Subtest: shared subtree check accepts field (24rem <= width)
+ok 37 - shared subtree check accepts field (24rem <= width)
+  ---
+  duration_ms: 0.412791
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject viewport media query
+ok 38 - root and shared consumer check reject viewport media query
+  ---
+  duration_ms: 2.647333
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject wrong container
+ok 39 - root and shared consumer check reject wrong container
+  ---
+  duration_ms: 1.937
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject unnamed container
+ok 40 - root and shared consumer check reject unnamed container
+  ---
+  duration_ms: 2.151875
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject maximum width
+ok 41 - root and shared consumer check reject maximum width
+  ---
+  duration_ms: 2.721334
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject reverse range
+ok 42 - root and shared consumer check reject reverse range
+  ---
+  duration_ms: 2.408208
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject reverse operand range
+ok 43 - root and shared consumer check reject reverse operand range
+  ---
+  duration_ms: 1.799333
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject exclusive range
+ok 44 - root and shared consumer check reject exclusive range
+  ---
+  duration_ms: 3.590208
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject wrong threshold
+ok 45 - root and shared consumer check reject wrong threshold
+  ---
+  duration_ms: 1.416833
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject missing step
+ok 46 - root and shared consumer check reject missing step
+  ---
+  duration_ms: 2.412792
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject unrelated selector
+ok 47 - root and shared consumer check reject unrelated selector
+  ---
+  duration_ms: 39.850167
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject wrong indent
+ok 48 - root and shared consumer check reject wrong indent
+  ---
+  duration_ms: 34.418875
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject commented query
+ok 49 - root and shared consumer check reject commented query
+  ---
+  duration_ms: 5.367916
+  type: 'test'
+  ...
+# Subtest: root and shared consumer check reject extra media constraint
+ok 50 - root and shared consumer check reject extra media constraint
+  ---
+  duration_ms: 6.477958
+  type: 'test'
+  ...
+# Subtest: shared consumer check rejects a missing subtree base rule
+ok 51 - shared consumer check rejects a missing subtree base rule
+  ---
+  duration_ms: 0.35875
+  type: 'test'
+  ...
+# Subtest: builds a stable two-level tree from static visible routes
+ok 52 - builds a stable two-level tree from static visible routes
+  ---
+  duration_ms: 10.93075
+  type: 'test'
+  ...
+# Subtest: marks the kit and longest static page for dynamic descendants
+ok 53 - marks the kit and longest static page for dynamic descendants
+  ---
+  duration_ms: 0.935
+  type: 'test'
+  ...
+# Subtest: keeps repository links on the live endpoint reference route
+ok 54 - keeps repository links on the live endpoint reference route
+  ---
+  duration_ms: 8.839166
+  type: 'test'
+  ...
+# Subtest: accepts the pnpm argument separator
+ok 55 - accepts the pnpm argument separator
+  ---
+  duration_ms: 1.3055
+  type: 'test'
+  ...
+# Subtest: canonical plan ordering is independent of the process locale
+ok 56 - canonical plan ordering is independent of the process locale
+  ---
+  duration_ms: 0.386959
+  type: 'test'
+  ...
+# Subtest: partitions consumer scenarios into complete deterministic shards
+ok 57 - partitions consumer scenarios into complete deterministic shards
+  ---
+  duration_ms: 0.386458
+  type: 'test'
+  ...
+# Subtest: rejects malformed or out-of-range consumer shards
+ok 58 - rejects malformed or out-of-range consumer shards
+  ---
+  duration_ms: 0.261792
+  type: 'test'
+  ...
+# Subtest: validates a complete registry and resolves dependency-first closure
+ok 59 - validates a complete registry and resolves dependency-first closure
+  ---
+  duration_ms: 18.462584
+  type: 'test'
+  ...
+# Subtest: fails closed on missing, empty, unknown, or duplicate verification metadata
+    # Subtest: missing verification
+    ok 1 - missing verification
+      ---
+      duration_ms: 2.858708
+      type: 'test'
+      ...
+    # Subtest: empty verification
+    ok 2 - empty verification
+      ---
+      duration_ms: 3.451125
+      type: 'test'
+      ...
+    # Subtest: non-array verification
+    ok 3 - non-array verification
+      ---
+      duration_ms: 2.1065
+      type: 'test'
+      ...
+    # Subtest: unknown tag
+    ok 4 - unknown tag
+      ---
+      duration_ms: 2.340542
+      type: 'test'
+      ...
+    # Subtest: non-string tag
+    ok 5 - non-string tag
+      ---
+      duration_ms: 3.465916
+      type: 'test'
+      ...
+    # Subtest: duplicate tags
+    ok 6 - duplicate tags
+      ---
+      duration_ms: 1.697709
+      type: 'test'
+      ...
+    # Subtest: package dependencies without dependency verification
+    ok 7 - package dependencies without dependency verification
+      ---
+      duration_ms: 2.453416
+      type: 'test'
+      ...
+    1..7
+ok 60 - fails closed on missing, empty, unknown, or duplicate verification metadata
+  ---
+  duration_ms: 19.172958
+  type: 'test'
+  ...
+# Subtest: real registry items declare complete verification metadata from the stable vocabulary
+ok 61 - real registry items declare complete verification metadata from the stable vocabulary
+  ---
+  duration_ms: 1.134292
+  type: 'test'
+  ...
+# Subtest: keeps compatibility and external package requirements equivalent
+    # Subtest: accepts semantically equivalent ranges
+    ok 1 - accepts semantically equivalent ranges
+      ---
+      duration_ms: 2.458125
+      type: 'test'
+      ...
+    # Subtest: accepts an empty OR branch when another branch is satisfiable
+    ok 2 - accepts an empty OR branch when another branch is satisfiable
+      ---
+      duration_ms: 1.766
+      type: 'test'
+      ...
+    # Subtest: rejects an invalid compatibility range
+    ok 3 - rejects an invalid compatibility range
+      ---
+      duration_ms: 2.021209
+      type: 'test'
+      ...
+    # Subtest: rejects an unsatisfiable compatibility range
+    ok 4 - rejects an unsatisfiable compatibility range
+      ---
+      duration_ms: 1.78925
+      type: 'test'
+      ...
+    # Subtest: rejects an unsatisfiable external package range
+    ok 5 - rejects an unsatisfiable external package range
+      ---
+      duration_ms: 2.52825
+      type: 'test'
+      ...
+    # Subtest: rejects a missing mapped package
+    ok 6 - rejects a missing mapped package
+      ---
+      duration_ms: 1.412625
+      type: 'test'
+      ...
+    # Subtest: rejects a narrower external package range
+    ok 7 - rejects a narrower external package range
+      ---
+      duration_ms: 1.798
+      type: 'test'
+      ...
+    # Subtest: rejects a broader external package range
+    ok 8 - rejects a broader external package range
+      ---
+      duration_ms: 1.318667
+      type: 'test'
+      ...
+    1..8
+ok 62 - keeps compatibility and external package requirements equivalent
+  ---
+  duration_ms: 15.626167
+  type: 'test'
+  ...
+# Subtest: supports Nuxt 4.5 consumers in the real registry contract
+ok 63 - supports Nuxt 4.5 consumers in the real registry contract
+  ---
+  duration_ms: 0.393708
+  type: 'test'
+  ...
+# Subtest: keeps the real managed config surface vendor-neutral
+ok 64 - keeps the real managed config surface vendor-neutral
+  ---
+  duration_ms: 1.094667
+  type: 'test'
+  ...
+# Subtest: keeps the real public component surface flat, neutral, and unique
+ok 65 - keeps the real public component surface flat, neutral, and unique
+  ---
+  duration_ms: 150.474792
+  type: 'test'
+  ...
+# Subtest: rejects undeclared files, duplicate targets, cycles, and undeclared relative imports
+    # Subtest: undeclared source file
+    ok 1 - undeclared source file
+      ---
+      duration_ms: 2.372291
+      type: 'test'
+      ...
+    # Subtest: source file outside declared source roots
+    ok 2 - source file outside declared source roots
+      ---
+      duration_ms: 1.595459
+      type: 'test'
+      ...
+    # Subtest: symlinked canonical source root
+    ok 3 - symlinked canonical source root
+      ---
+      duration_ms: 1.523084
+      type: 'test'
+      ...
+    # Subtest: duplicate target
+    ok 4 - duplicate target
+      ---
+      duration_ms: 3.734208
+      type: 'test'
+      ...
+    # Subtest: dependency cycle
+    ok 5 - dependency cycle
+      ---
+      duration_ms: 1.327
+      type: 'test'
+      ...
+    # Subtest: invalid item package dependency
+    ok 6 - invalid item package dependency
+      ---
+      duration_ms: 1.442833
+      type: 'test'
+      ...
+    # Subtest: invalid item package range
+    ok 7 - invalid item package range
+      ---
+      duration_ms: 1.913209
+      type: 'test'
+      ...
+    # Subtest: conflicting package dependency
+    ok 8 - conflicting package dependency
+      ---
+      duration_ms: 1.725583
+      type: 'test'
+      ...
+    # Subtest: independent items may use incompatible ranges until selected together
+    ok 9 - independent items may use incompatible ranges until selected together
+      ---
+      duration_ms: 2.165625
+      type: 'test'
+      ...
+    # Subtest: package names cannot collide with object prototype keys
+    ok 10 - package names cannot collide with object prototype keys
+      ---
+      duration_ms: 1.325083
+      type: 'test'
+      ...
+    # Subtest: bare imports require a package declaration in the item closure
+    ok 11 - bare imports require a package declaration in the item closure
+      ---
+      duration_ms: 1.49825
+      type: 'test'
+      ...
+    # Subtest: comments, strings, and Node builtins do not create package requirements
+    ok 12 - comments, strings, and Node builtins do not create package requirements
+      ---
+      duration_ms: 1.461709
+      type: 'test'
+      ...
+    # Subtest: CSS imports resolve packages without treating comments or URLs as packages
+    ok 13 - CSS imports resolve packages without treating comments or URLs as packages
+      ---
+      duration_ms: 3.426
+      type: 'test'
+      ...
+    # Subtest: missing dependency declaration for a relative import
+    ok 14 - missing dependency declaration for a relative import
+      ---
+      duration_ms: 1.327084
+      type: 'test'
+      ...
+    # Subtest: relative import outside the declared distribution
+    ok 15 - relative import outside the declared distribution
+      ---
+      duration_ms: 1.406334
+      type: 'test'
+      ...
+    # Subtest: relative import whose copied targets no longer preserve the source layout
+    ok 16 - relative import whose copied targets no longer preserve the source layout
+      ---
+      duration_ms: 1.313416
+      type: 'test'
+      ...
+    # Subtest: rendering item with a nested public target
+    ok 17 - rendering item with a nested public target
+      ---
+      duration_ms: 1.431042
+      type: 'test'
+      ...
+    # Subtest: rendering item whose title differs from its public component
+    ok 18 - rendering item whose title differs from its public component
+      ---
+      duration_ms: 2.006042
+      type: 'test'
+      ...
+    # Subtest: dynamic relative import still requires its owning item dependency
+    ok 19 - dynamic relative import still requires its owning item dependency
+      ---
+      duration_ms: 1.80325
+      type: 'test'
+      ...
+    1..19
+ok 66 - rejects undeclared files, duplicate targets, cycles, and undeclared relative imports
+  ---
+  duration_ms: 35.977875
+  type: 'test'
+  ...
+# Subtest: emits a versioned machine-readable runtime plan with deterministic digest
+ok 67 - emits a versioned machine-readable runtime plan with deterministic digest
+  ---
+  duration_ms: 2.541458
+  type: 'test'
+  ...
+# Subtest: sorts runtime plan operations by locale-independent code-unit order
+ok 68 - sorts runtime plan operations by locale-independent code-unit order
+  ---
+  duration_ms: 0.170584
+  type: 'test'
+  ...
+# Subtest: expected plan digest gate validates format and fails closed on drift
+ok 69 - expected plan digest gate validates format and fails closed on drift
+  ---
+  duration_ms: 0.091417
+  type: 'test'
+  ...
+# Subtest: apply result echoes the plan digest and per-operation outcomes
+ok 70 - apply result echoes the plan digest and per-operation outcomes
+  ---
+  duration_ms: 0.069458
+  type: 'test'
+  ...
+# Subtest: json mode structures every error, including unexpected ones
+ok 71 - json mode structures every error, including unexpected ones
+  ---
+  duration_ms: 0.274958
+  type: 'test'
+  ...
+# Subtest: apply re-verifies every planned before-state and stops with zero writes on drift
+ok 72 - apply re-verifies every planned before-state and stops with zero writes on drift
+  ---
+  duration_ms: 2.150583
+  type: 'test'
+  ...
+# Subtest: apply re-verifies the planned lock before mutating or overwriting it
+ok 73 - apply re-verifies the planned lock before mutating or overwriting it
+  ---
+  duration_ms: 5.950709
+  type: 'test'
+  ...
+# Subtest: runtime CLI performs guarded apply end to end against the real registry
+ok 74 - runtime CLI performs guarded apply end to end against the real registry
+  ---
+  duration_ms: 2567.236583
+  type: 'test'
+  ...
+# Subtest: sourceSha-only rewrite keeps operations unchanged and creates no runtime impact
+ok 75 - sourceSha-only rewrite keeps operations unchanged and creates no runtime impact
+  ---
+  duration_ms: 4.883042
+  type: 'test'
+  ...
+# Subtest: resolves delete operation verification from registry, then lock, then vocabulary fallback
+    # Subtest: config migration keeps registry-resolved tags and reports the relocation
+    ok 1 - config migration keeps registry-resolved tags and reports the relocation
+      ---
+      duration_ms: 4.522708
+      type: 'test'
+      ...
+    # Subtest: removed item falls back to lock-recorded tags, then the full vocabulary
+    ok 2 - removed item falls back to lock-recorded tags, then the full vocabulary
+      ---
+      duration_ms: 9.589791
+      type: 'test'
+      ...
+    1..2
+ok 76 - resolves delete operation verification from registry, then lock, then vocabulary fallback
+  ---
+  duration_ms: 14.388083
+  type: 'test'
+  ...
+# Subtest: package and consumer setup changes surface as typed plan operations
+ok 77 - package and consumer setup changes surface as typed plan operations
+  ---
+  duration_ms: 3.417208
+  type: 'test'
+  ...
+# Subtest: lock records canonical verification tags and check flags tampering
+ok 78 - lock records canonical verification tags and check flags tampering
+  ---
+  duration_ms: 9.152708
+  type: 'test'
+  ...
+# Subtest: rejects unsafe paths and protected consumer files while allowing the managed foundation main.css
+ok 79 - rejects unsafe paths and protected consumer files while allowing the managed foundation main.css
+  ---
+  duration_ms: 0.257125
+  type: 'test'
+  ...
+# Subtest: copy planning rejects a symlink anywhere in the consumer target path
+ok 80 - copy planning rejects a symlink anywhere in the consumer target path
+  ---
+  duration_ms: 2.201333
+  type: 'test'
+  ...
+# Subtest: exact-SHA resolution refuses dirty distributable source
+ok 81 - exact-SHA resolution refuses dirty distributable source
+  ---
+  duration_ms: 156.20325
+  type: 'test'
+  ...
+# Subtest: source SHA falls back to release metadata when the snapshot has no .git
+ok 82 - source SHA falls back to release metadata when the snapshot has no .git
+  ---
+  duration_ms: 0.996208
+  type: 'test'
+  ...
+# Subtest: dry-run planning writes nothing; write records exact SHA and source/target hashes
+ok 83 - dry-run planning writes nothing; write records exact SHA and source/target hashes
+  ---
+  duration_ms: 4.2585
+  type: 'test'
+  ...
+# Subtest: renames managed config targets and rewrites their lock records
+ok 84 - renames managed config targets and rewrites their lock records
+  ---
+  duration_ms: 7.101792
+  type: 'test'
+  ...
+# Subtest: stops a managed config rename before creating replacements when an old target drifted
+ok 85 - stops a managed config rename before creating replacements when an old target drifted
+  ---
+  duration_ms: 3.516333
+  type: 'test'
+  ...
+# Subtest: stops a managed config rename before deleting old targets when a new target conflicts
+ok 86 - stops a managed config rename before deleting old targets when a new target conflicts
+  ---
+  duration_ms: 3.827042
+  type: 'test'
+  ...
+# Subtest: reconcile rejects a lock issued by another registry before trusting managed hashes
+ok 87 - reconcile rejects a lock issued by another registry before trusting managed hashes
+  ---
+  duration_ms: 3.676417
+  type: 'test'
+  ...
+# Subtest: consumer check requires one exact source SHA and matching installed hashes
+    # Subtest: item source SHA matches registry source SHA
+    ok 1 - item source SHA matches registry source SHA
+      ---
+      duration_ms: 1.247958
+      type: 'test'
+      ...
+    # Subtest: file source SHA matches registry source SHA
+    ok 2 - file source SHA matches registry source SHA
+      ---
+      duration_ms: 1.591375
+      type: 'test'
+      ...
+    # Subtest: source and installed hashes remain identical
+    ok 3 - source and installed hashes remain identical
+      ---
+      duration_ms: 1.320375
+      type: 'test'
+      ...
+    # Subtest: installed source SHA matches the checked-out source
+    ok 4 - installed source SHA matches the checked-out source
+      ---
+      duration_ms: 1.389041
+      type: 'test'
+      ...
+    # Subtest: source metadata is required outside a Git checkout
+    ok 5 - source metadata is required outside a Git checkout
+      ---
+      duration_ms: 0.824458
+      type: 'test'
+      ...
+    # Subtest: source metadata must be valid JSON
+    ok 6 - source metadata must be valid JSON
+      ---
+      duration_ms: 0.925625
+      type: 'test'
+      ...
+    # Subtest: source metadata must contain an exact SHA
+    ok 7 - source metadata must contain an exact SHA
+      ---
+      duration_ms: 2.131541
+      type: 'test'
+      ...
+    1..7
+ok 88 - consumer check requires one exact source SHA and matching installed hashes
+  ---
+  duration_ms: 12.122375
+  type: 'test'
+  ...
+# Subtest: copy into an existing lock reconciles the full request set and prunes removed locked items
+ok 89 - copy into an existing lock reconciles the full request set and prunes removed locked items
+  ---
+  duration_ms: 9.719167
+  type: 'test'
+  ...
+# Subtest: updates an unmodified managed target and stops the whole batch on conflict
+ok 90 - updates an unmodified managed target and stops the whole batch on conflict
+  ---
+  duration_ms: 20.235792
+  type: 'test'
+  ...
+# Subtest: consumer check detects target drift
+ok 91 - consumer check detects target drift
+  ---
+  duration_ms: 9.022875
+  type: 'test'
+  ...
+# Subtest: consumer check detects registry metadata and dependency-closure drift
+ok 92 - consumer check detects registry metadata and dependency-closure drift
+  ---
+  duration_ms: 19.3185
+  type: 'test'
+  ...
+# Subtest: lock reader rejects array-shaped item/file maps
+ok 93 - lock reader rejects array-shaped item/file maps
+  ---
+  duration_ms: 3.388333
+  type: 'test'
+  ...
+# Subtest: lock reader accepts v1 item records created before packageDependencies
+ok 94 - lock reader accepts v1 item records created before packageDependencies
+  ---
+  duration_ms: 3.770792
+  type: 'test'
+  ...
+# Subtest: empty reconcile still rejects a symlinked lock target before writing
+ok 95 - empty reconcile still rejects a symlinked lock target before writing
+  ---
+  duration_ms: 5.38875
+  type: 'test'
+  ...
+# Subtest: update removes stale managed files but refuses to remove locally modified stale files
+ok 96 - update removes stale managed files but refuses to remove locally modified stale files
+  ---
+  duration_ms: 7.10575
+  type: 'test'
+  ...
+# Subtest: actual production CSS covers every normal-text/background/theme pair at raw 4.5:1
+ok 97 - actual production CSS covers every normal-text/background/theme pair at raw 4.5:1
+  ---
+  duration_ms: 62.282
+  type: 'test'
+  ...
+# Subtest: restoring the old muted/dimmed tokens catches all ten known failing pairs
+ok 98 - restoring the old muted/dimmed tokens catches all ten known failing pairs
+  ---
+  duration_ms: 16.320959
+  type: 'test'
+  ...
+# Subtest: the CLI reads its requested CSS and exits nonzero for the old production mapping
+ok 99 - the CLI reads its requested CSS and exits nonzero for the old production mapping
+  ---
+  duration_ms: 158.4985
+  type: 'test'
+  ...
+# Subtest: a ratio that rounds to 4.50 still fails the raw threshold
+ok 100 - a ratio that rounds to 4.50 still fails the raw threshold
+  ---
+  duration_ms: 2.055291
+  type: 'test'
+  ...
+# Subtest: accepts supported hex and numeric sRGB forms without losing alpha
+ok 101 - accepts supported hex and numeric sRGB forms without losing alpha
+  ---
+  duration_ms: 1.457959
+  type: 'test'
+  ...
+# Subtest: color parsing rejects negative, out-of-range, and unsupported values rather than clamping
+ok 102 - color parsing rejects negative, out-of-range, and unsupported values rather than clamping
+  ---
+  duration_ms: 0.4635
+  type: 'test'
+  ...
+# Subtest: composites alpha before contrast and rejects unresolved/non-finite inputs
+ok 103 - composites alpha before contrast and rejects unresolved/non-finite inputs
+  ---
+  duration_ms: 0.45
+  type: 'test'
+  ...
+# Subtest: resolves full var aliases and applies equal-specificity root declarations in source order
+ok 104 - resolves full var aliases and applies equal-specificity root declarations in source order
+  ---
+  duration_ms: 6.832709
+  type: 'test'
+  ...
+# Subtest: missing tokens, missing theme aliases, cycles and var fallbacks fail closed
+ok 105 - missing tokens, missing theme aliases, cycles and var fallbacks fail closed
+  ---
+  duration_ms: 15.535333
+  type: 'test'
+  ...
+# Subtest: related conditional, nested, selector, important, and registered-property overrides fail closed
+ok 106 - related conditional, nested, selector, important, and registered-property overrides fail closed
+  ---
+  duration_ms: 9.172959
+  type: 'test'
+  ...
+# Subtest: invalid values in shadowed declarations cannot be silently skipped
+ok 107 - invalid values in shadowed declarations cannot be silently skipped
+  ---
+  duration_ms: 4.384416
+  type: 'test'
+  ...
+# Subtest: unknown, conditional, late, nested imports and escaped token names are rejected
+ok 108 - unknown, conditional, late, nested imports and escaped token names are rejected
+  ---
+  duration_ms: 3.22525
+  type: 'test'
+  ...
+# Subtest: the exact subtree layout utility leaves the text-token matrix unchanged
+ok 109 - the exact subtree layout utility leaves the text-token matrix unchanged
+  ---
+  duration_ms: 2.52475
+  type: 'test'
+  ...
+# Subtest: subtree compatibility rejects unknown utilities and every unrecognized child
+ok 110 - subtree compatibility rejects unknown utilities and every unrecognized child
+  ---
+  duration_ms: 33.250625
+  type: 'test'
+  ...
+# Subtest: non-ASCII whitespace cannot turn an unrelated selector or invalid color into a passing token
+ok 111 - non-ASCII whitespace cannot turn an unrelated selector or invalid color into a passing token
+  ---
+  duration_ms: 6.529209
+  type: 'test'
+  ...
+# Subtest: mutation reader retains direct, nested motion, functional and detector evidence with source identity
+ok 112 - mutation reader retains direct, nested motion, functional and detector evidence with source identity
+  ---
+  duration_ms: 17.070583
+  type: 'test'
+  ...
+# Subtest: mutation reader rejects malformed, unresolved and falsely classified measurements
+ok 113 - mutation reader rejects malformed, unresolved and falsely classified measurements
+  ---
+  duration_ms: 66.497208
+  type: 'test'
+  ...
+# Subtest: mutation reader keeps numeric failures and notices missing samples between complete phases
+ok 114 - mutation reader keeps numeric failures and notices missing samples between complete phases
+  ---
+  duration_ms: 1.686833
+  type: 'test'
+  ...
+# Subtest: mutation verifier accepts only complete Vitest cases with individually proven numeric failures
+ok 115 - mutation verifier accepts only complete Vitest cases with individually proven numeric failures
+  ---
+  duration_ms: 1.345375
+  type: 'test'
+  ...
+# Subtest: flags text-code paired with a stock size in a static class attribute
+ok 116 - flags text-code paired with a stock size in a static class attribute
+  ---
+  duration_ms: 3.899208
+  type: 'test'
+  ...
+# Subtest: flags important modifiers on either tier
+ok 117 - flags important modifiers on either tier
+  ---
+  duration_ms: 0.333708
+  type: 'test'
+  ...
+# Subtest: flags pairings inside bound class attributes
+ok 118 - flags pairings inside bound class attributes
+  ---
+  duration_ms: 1.1655
+  type: 'test'
+  ...
+# Subtest: joins the plain members of arrays that also hold objects or interpolations
+ok 119 - joins the plain members of arrays that also hold objects or interpolations
+  ---
+  duration_ms: 0.948667
+  type: 'test'
+  ...
+# Subtest: flags pairings in script and .ts string literals
+ok 120 - flags pairings in script and .ts string literals
+  ---
+  duration_ms: 0.56225
+  type: 'test'
+  ...
+# Subtest: allows single tiers, exclusive branches and responsive switches
+ok 121 - allows single tiers, exclusive branches and responsive switches
+  ---
+  duration_ms: 0.276542
+  type: 'test'
+  ...
+# Subtest: documents accepted misses so tightening the guard is a deliberate change
+ok 122 - documents accepted misses so tightening the guard is a deliberate change
+  ---
+  duration_ms: 0.794292
+  type: 'test'
+  ...
+# Subtest: skips an array when a string member keeps an unpaired brace
+ok 123 - skips an array when a string member keeps an unpaired brace
+  ---
+  duration_ms: 0.108
+  type: 'test'
+  ...
+# Subtest: never joins data arrays or separate slots into one class list
+ok 124 - never joins data arrays or separate slots into one class list
+  ---
+  duration_ms: 0.605167
+  type: 'test'
+  ...
+# Subtest: ignores non-class attributes, handlers and template prose
+ok 125 - ignores non-class attributes, handlers and template prose
+  ---
+  duration_ms: 1.374875
+  type: 'test'
+  ...
+# Subtest: ignores comments without letting them hide a real pairing
+ok 126 - ignores comments without letting them hide a real pairing
+  ---
+  duration_ms: 0.553583
+  type: 'test'
+  ...
+# Subtest: no source file pairs text-code with a stock size tier
+ok 127 - no source file pairs text-code with a stock size tier
+  ---
+  duration_ms: 184.276291
+  type: 'test'
+  ...
+# Subtest: 总数不超过阈值时全铺、不折叠
+ok 128 - 总数不超过阈值时全铺、不折叠
+  ---
+  duration_ms: 1.278708
+  type: 'test'
+  ...
+# Subtest: 空序列返回空且不折叠
+ok 129 - 空序列返回空且不折叠
+  ---
+  duration_ms: 0.132291
+  type: 'test'
+  ...
+# Subtest: 超过阈值时铺前 max-1 个，其余折进 overflow
+ok 130 - 超过阈值时铺前 max-1 个，其余折进 overflow
+  ---
+  duration_ms: 0.0735
+  type: 'test'
+  ...
+# Subtest: 阈值为 1 时不铺 chip，全部 steps 由展开按钮揭示
+ok 131 - 阈值为 1 时不铺 chip，全部 steps 由展开按钮揭示
+  ---
+  duration_ms: 0.1095
+  type: 'test'
+  ...
+# Subtest: 折叠时 overflow 至少为 2（不存在 +1 换 1 的无谓折叠）
+ok 132 - 折叠时 overflow 至少为 2（不存在 +1 换 1 的无谓折叠）
+  ---
+  duration_ms: 0.09175
+  type: 'test'
+  ...
+# Subtest: visible 数量 + overflow 恒等于总数
+ok 133 - visible 数量 + overflow 恒等于总数
+  ---
+  duration_ms: 0.058917
+  type: 'test'
+  ...
+# Subtest: 非法阈值时不折叠，原样返回
+ok 134 - 非法阈值时不折叠，原样返回
+  ---
+  duration_ms: 0.1115
+  type: 'test'
+  ...
+# Subtest: 只传标题或空 facts 的 section 不进入文档大纲
+ok 135 - 只传标题或空 facts 的 section 不进入文档大纲
+  ---
+  duration_ms: 0.057959
+  type: 'test'
+  ...
+# Subtest: description、facts、ACK example 或 delivery schedule 均算真实内容
+ok 136 - description、facts、ACK example 或 delivery schedule 均算真实内容
+  ---
+  duration_ms: 0.221875
+  type: 'test'
+  ...
+1..136
+# tests 179
+# suites 0
+# pass 179
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11491.117625

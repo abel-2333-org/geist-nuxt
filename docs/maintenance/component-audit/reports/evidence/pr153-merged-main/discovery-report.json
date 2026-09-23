@@ -1,0 +1,241 @@
+{
+  "sourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+  "base": "http://127.0.0.1:3033",
+  "discoveryOnly": false,
+  "cases": [
+    {
+      "label": "children",
+      "mode": "native-fragment",
+      "status": "passed",
+      "closed": {
+        "hidden": "until-found",
+        "inert": false,
+        "display": "block",
+        "contentVisibility": "hidden",
+        "visibility": "visible"
+      },
+      "events": [
+        {
+          "trusted": true,
+          "id": "reka-collapsible-content-v-0-18",
+          "hidden": "until-found"
+        }
+      ],
+      "target": {
+        "visible": true,
+        "hiddenAncestor": false
+      }
+    },
+    {
+      "label": "value",
+      "mode": "native-fragment",
+      "status": "passed",
+      "closed": {
+        "hidden": "until-found",
+        "inert": false,
+        "display": "block",
+        "contentVisibility": "hidden",
+        "visibility": "visible"
+      },
+      "events": [
+        {
+          "trusted": true,
+          "id": "reka-collapsible-content-v-0-25",
+          "hidden": "until-found"
+        }
+      ],
+      "target": {
+        "visible": true,
+        "hiddenAncestor": false
+      }
+    },
+    {
+      "label": "anyOf",
+      "mode": "native-fragment",
+      "status": "passed",
+      "closed": {
+        "hidden": "until-found",
+        "inert": false,
+        "display": "block",
+        "contentVisibility": "hidden",
+        "visibility": "visible"
+      },
+      "events": [
+        {
+          "trusted": true,
+          "id": "reka-collapsible-content-v-0-11",
+          "hidden": "until-found"
+        }
+      ],
+      "target": {
+        "visible": true,
+        "hiddenAncestor": false
+      }
+    },
+    {
+      "label": "children",
+      "mode": "window-find-observation",
+      "state": "initial-closed",
+      "status": "observed",
+      "observation": {
+        "api": "window.find, not browser UI Find",
+        "events": [],
+        "matches": [
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          }
+        ],
+        "expanded": "false",
+        "discoveredHiddenTarget": false
+      }
+    },
+    {
+      "label": "children",
+      "mode": "window-find-observation",
+      "state": "closed-after-open",
+      "status": "observed",
+      "observation": {
+        "api": "window.find, not browser UI Find",
+        "events": [],
+        "matches": [
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "",
+            "field": "body_meta",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "",
+            "field": "body_meta",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "api-docs",
+            "insideTarget": false
+          },
+          {
+            "found": true,
+            "text": "repoId",
+            "field": "reka-popover-trigger-v-0-16",
+            "insideTarget": false
+          }
+        ],
+        "expanded": "false",
+        "discoveredHiddenTarget": false
+      }
+    },
+    {
+      "label": "children",
+      "mode": "region-root-focus",
+      "status": "passed",
+      "region": {
+        "id": "",
+        "previousTabindex": null
+      }
+    },
+    {
+      "label": "value",
+      "mode": "region-root-focus",
+      "status": "passed",
+      "region": {
+        "id": "",
+        "previousTabindex": null
+      }
+    },
+    {
+      "label": "anyOf",
+      "mode": "region-root-focus",
+      "status": "passed",
+      "region": {
+        "id": "v-0-9-composition-phone",
+        "previousTabindex": null
+      }
+    },
+    {
+      "label": "value",
+      "mode": "nested-same-turn-close",
+      "status": "passed",
+      "activation": {
+        "order": "child then parent",
+        "sameTask": true
+      },
+      "childStateAfterReopen": "false"
+    }
+  ],
+  "errors": [],
+  "scope": "Real Chromium fragment navigation through location.hash; trusted beforematch events are observed, never synthesized. No Vue private instances or goTo/reveal calls. Nested closure uses real trigger click handlers through HTMLButtonElement.click(), not pointer input. Region-root cases add tabindex=-1 solely to focus the existing root; this is an explicit focus-boundary probe. Browser UI Find is not covered by this script.",
+  "browser": "153.0.8010.12",
+  "status": "passed"
+}

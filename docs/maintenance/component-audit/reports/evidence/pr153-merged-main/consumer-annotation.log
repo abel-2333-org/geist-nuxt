@@ -1,0 +1,1399 @@
+
+> geist-nuxt@0.1.0 test:consumer /Users/abel.wang/projects/geist-nuxt
+> node scripts/check-registry-consumer.mjs -- --scenario isolated-api-docs-field-annotation --skip-install
+
+> /Users/abel.wang/.nvm/versions/node/v22.23.1/bin/node /Users/abel.wang/projects/geist-nuxt/scripts/copy-registry.mjs api-docs-field-annotation --target /var/folders/yr/bzngrhyj2sb4wkbb_v8grfbm0000gn/T/geist-consumer-isolated-api-docs-field-annotation-4DDHx2 --sha 821a884cd979c825a4e118f10dce00c989130ff9 --json
+{
+  "planSchemaVersion": 1,
+  "kind": "runtime",
+  "registry": {
+    "name": "geist-nuxt",
+    "repository": "https://github.com/abel-2333-org/geist-nuxt.git"
+  },
+  "sourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+  "consumer": {
+    "lockPresent": false,
+    "lockSourceSha": null,
+    "lockHash": null
+  },
+  "operations": [
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/assets/css/main.css",
+      "target": "app/assets/css/main.css",
+      "beforeHash": null,
+      "afterHash": "868809b54bc939beb80efbb40a222159b49a604c85649a7809efe6eb77e880d8",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/components/AnnotationPopover.vue",
+      "target": "app/components/AnnotationPopover.vue",
+      "beforeHash": null,
+      "afterHash": "c996feb7aac0f28cb5e5ac1da5b7703c5abe4a1d42660ab12cc475c96d96f944",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/components/EnumTable.vue",
+      "target": "app/components/EnumTable.vue",
+      "beforeHash": null,
+      "afterHash": "f21179701357855ac2b16fd38a6c836a743a7afc1b00d91a96daa47fa4a198d1",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/components/FieldAnnotation.vue",
+      "target": "app/components/FieldAnnotation.vue",
+      "beforeHash": null,
+      "afterHash": "a7debc0dca37c307fc264728504fe9506aa0ec51d7b3f1dff49a0a1cbeb38379",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/components/FieldItem.vue",
+      "target": "app/components/FieldItem.vue",
+      "beforeHash": null,
+      "afterHash": "49c4a91b05c2f5362a97115e2db0fd94ff5c21dc98b8c652d469cbc9cec34b5b",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-code",
+      "source": "foundation/components/InlineCode.vue",
+      "target": "app/components/InlineCode.vue",
+      "beforeHash": null,
+      "afterHash": "82f46dd752c4f96db85573123bfb62ef3fb7fed77d5cc5651c864ed608f1f608",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/InlineMarkdown.vue",
+      "target": "app/components/InlineMarkdown.vue",
+      "beforeHash": null,
+      "afterHash": "c27157164c2aabf03bd408326f19c1c4cc4d68679f287967667575c01060fd73",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/components/LifecycleBadge.vue",
+      "target": "app/components/LifecycleBadge.vue",
+      "beforeHash": null,
+      "afterHash": "081231dc99638938914659daa9da773133409abd772205282ad9143fe19f3d2c",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-semantic-badge",
+      "source": "foundation/components/SemanticBadge.vue",
+      "target": "app/components/SemanticBadge.vue",
+      "beforeHash": null,
+      "afterHash": "030a4e820f729df43372cf589a551b3ca7efb0714ff9d7c13de7e43a7df0e7ec",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/inline-markdown/parse.ts",
+      "target": "app/components/inline-markdown/parse.ts",
+      "beforeHash": null,
+      "afterHash": "3dc7e53941cd1545bb064ef7957091896cacec14d3a2dd1da84f023176360cd7",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-use-copy",
+      "source": "foundation/composables/useCopy.ts",
+      "target": "app/composables/useCopy.ts",
+      "beforeHash": null,
+      "afterHash": "c88254d53caaa5ab74f73034df652ffbb4564b7393ae3a7f838323bba9148fd6",
+      "verification": [
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/composables/useFieldAnchor.ts",
+      "target": "app/composables/useFieldAnchor.ts",
+      "beforeHash": null,
+      "afterHash": "3a7a2c7dc15c4f934860ce9f35eafc9517cee9fd26faa31ebd03deb9bf856bb9",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/composables/useFieldSource.ts",
+      "target": "app/composables/useFieldSource.ts",
+      "beforeHash": null,
+      "afterHash": "cb3921815a99a9955c1583ea22c82c259ba7b1d458c54c4885cc34c1c2991e13",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-use-raf-task",
+      "source": "foundation/composables/useRafTask.ts",
+      "target": "app/composables/useRafTask.ts",
+      "beforeHash": null,
+      "afterHash": "009b3516c28f630787ad023a3096875bead066f5edb89fae46a92290cd74abe6",
+      "verification": [
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/app.ts",
+      "target": "app/config/foundation/app.ts",
+      "beforeHash": null,
+      "afterHash": "da0f318ed55e6b62adc3a972230e5d42f8119e908b3bb6a8c120d54099dc116f",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/nuxt.ts",
+      "target": "app/config/foundation/nuxt.ts",
+      "beforeHash": null,
+      "afterHash": "906485117badc3b63b9e87fde562af690b44f7b9675aad80894476e07c5cb0b4",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/ConditionEntries.vue",
+      "target": "app/internal/ConditionEntries.vue",
+      "beforeHash": null,
+      "afterHash": "850b1fd618892a96ddf2173134abd2a7c5c5d9bf8f68ba6dba48f511ea1677a5",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/internal/EnumTablePanel.vue",
+      "target": "app/internal/EnumTablePanel.vue",
+      "beforeHash": null,
+      "afterHash": "18cbecaa3a6c285e6da3ca9b919dc00627670d31952d53a5a1c6ed815bfdc242",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueRequirements.vue",
+      "target": "app/internal/FieldValueRequirements.vue",
+      "beforeHash": null,
+      "afterHash": "01d1bd9b39a663b49bc0f8734f26092f165027b9cd71138cffc73da2c7bbb59c",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueStructure.vue",
+      "target": "app/internal/FieldValueStructure.vue",
+      "beforeHash": null,
+      "afterHash": "76e9cca674c54eb47eebd1489a100b6c7b8e7dda6bb27d45696b952282daf1df",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/collapseFocus.ts",
+      "target": "app/internal/collapseFocus.ts",
+      "beforeHash": null,
+      "afterHash": "f7ad59a107d754af874da9716f116990e1c4693f83b64b503ec3138cf6f872fd",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/utils/annotation.ts",
+      "target": "app/utils/annotation.ts",
+      "beforeHash": null,
+      "afterHash": "3b9854dab78284254cad1e66b909832be1abf9e81d3a209a2f9abfdba5015aa6",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-badge-utils",
+      "source": "foundation/utils/badge.ts",
+      "target": "app/utils/badge.ts",
+      "beforeHash": null,
+      "afterHash": "0a251509462318eadc365e3ecfe7b28bc03d309fe1e8a899c911060a0c521d08",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/utils/enum.ts",
+      "target": "app/utils/enum.ts",
+      "beforeHash": null,
+      "afterHash": "163879b20b1c1f3d611d79b7e40ef479b713d0e10e0a3c2b880a0efbcad86aa4",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/utils/field.ts",
+      "target": "app/utils/field.ts",
+      "beforeHash": null,
+      "afterHash": "5560f50b769f5b61f7d4e6f416e8aebc29098568cd4ba1298342c0c4701f53c0",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/utils/lifecycle-preset.ts",
+      "target": "app/utils/lifecycle-preset.ts",
+      "beforeHash": null,
+      "afterHash": "1c05d967c160519924a1e86d27807f0f24f09a7c36f296f743f81eb9eee7203f",
+      "verification": [
+        "visual"
+      ]
+    }
+  ],
+  "packageOperations": [
+    {
+      "action": "add",
+      "name": "@iconify-json/lucide",
+      "before": null,
+      "after": "^1.2.116"
+    },
+    {
+      "action": "add",
+      "name": "@nuxt/ui",
+      "before": null,
+      "after": ">=4.9.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "@vueuse/core",
+      "before": null,
+      "after": "^14.3.0"
+    },
+    {
+      "action": "add",
+      "name": "marked",
+      "before": null,
+      "after": "^17.0.6"
+    },
+    {
+      "action": "add",
+      "name": "nuxt",
+      "before": null,
+      "after": ">=4.4.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "tailwindcss",
+      "before": null,
+      "after": ">=4.3.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "vue",
+      "before": null,
+      "after": "^3.5.39"
+    },
+    {
+      "action": "add",
+      "name": "vue-router",
+      "before": null,
+      "after": "^5.1.0"
+    }
+  ],
+  "consumerSetupOperations": [
+    {
+      "action": "add",
+      "instruction": "Wrap the application in UApp."
+    },
+    {
+      "action": "add",
+      "instruction": "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts."
+    },
+    {
+      "action": "add",
+      "instruction": "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts."
+    },
+    {
+      "action": "add",
+      "instruction": "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry."
+    },
+    {
+      "action": "add",
+      "instruction": "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css."
+    },
+    {
+      "action": "add",
+      "instruction": "Keep Nuxt color mode enabled through @nuxt/ui."
+    }
+  ],
+  "configMigrations": [],
+  "requirements": {
+    "packages": {
+      "@iconify-json/lucide": "^1.2.116",
+      "@nuxt/ui": ">=4.9.0 <5",
+      "@vueuse/core": "^14.3.0",
+      "marked": "^17.0.6",
+      "nuxt": ">=4.4.0 <5",
+      "tailwindcss": ">=4.3.0 <5",
+      "vue": "^3.5.39",
+      "vue-router": "^5.1.0"
+    },
+    "consumerSetup": [
+      "Wrap the application in UApp.",
+      "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts.",
+      "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry.",
+      "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
+      "Keep Nuxt color mode enabled through @nuxt/ui."
+    ]
+  },
+  "summary": {
+    "create": 26,
+    "update": 0,
+    "delete": 0,
+    "unchanged": 0,
+    "verification": [
+      "visual",
+      "interaction",
+      "responsive",
+      "foundation",
+      "config",
+      "dependency"
+    ]
+  },
+  "planDigest": "2d9cbcc2e00195827597065d1757bc6fbfd088d1704c077f8c4e48d3503726f3"
+}
+> /Users/abel.wang/.nvm/versions/node/v22.23.1/bin/node /Users/abel.wang/projects/geist-nuxt/scripts/copy-registry.mjs api-docs-field-annotation --target /var/folders/yr/bzngrhyj2sb4wkbb_v8grfbm0000gn/T/geist-consumer-isolated-api-docs-field-annotation-4DDHx2 --sha 821a884cd979c825a4e118f10dce00c989130ff9 --write --expect-plan 2d9cbcc2e00195827597065d1757bc6fbfd088d1704c077f8c4e48d3503726f3 --json
+{
+  "planSchemaVersion": 1,
+  "kind": "runtime",
+  "registry": {
+    "name": "geist-nuxt",
+    "repository": "https://github.com/abel-2333-org/geist-nuxt.git"
+  },
+  "sourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+  "consumer": {
+    "lockPresent": false,
+    "lockSourceSha": null,
+    "lockHash": null
+  },
+  "operations": [
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/assets/css/main.css",
+      "target": "app/assets/css/main.css",
+      "beforeHash": null,
+      "afterHash": "868809b54bc939beb80efbb40a222159b49a604c85649a7809efe6eb77e880d8",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/components/AnnotationPopover.vue",
+      "target": "app/components/AnnotationPopover.vue",
+      "beforeHash": null,
+      "afterHash": "c996feb7aac0f28cb5e5ac1da5b7703c5abe4a1d42660ab12cc475c96d96f944",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/components/EnumTable.vue",
+      "target": "app/components/EnumTable.vue",
+      "beforeHash": null,
+      "afterHash": "f21179701357855ac2b16fd38a6c836a743a7afc1b00d91a96daa47fa4a198d1",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/components/FieldAnnotation.vue",
+      "target": "app/components/FieldAnnotation.vue",
+      "beforeHash": null,
+      "afterHash": "a7debc0dca37c307fc264728504fe9506aa0ec51d7b3f1dff49a0a1cbeb38379",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/components/FieldItem.vue",
+      "target": "app/components/FieldItem.vue",
+      "beforeHash": null,
+      "afterHash": "49c4a91b05c2f5362a97115e2db0fd94ff5c21dc98b8c652d469cbc9cec34b5b",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-code",
+      "source": "foundation/components/InlineCode.vue",
+      "target": "app/components/InlineCode.vue",
+      "beforeHash": null,
+      "afterHash": "82f46dd752c4f96db85573123bfb62ef3fb7fed77d5cc5651c864ed608f1f608",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/InlineMarkdown.vue",
+      "target": "app/components/InlineMarkdown.vue",
+      "beforeHash": null,
+      "afterHash": "c27157164c2aabf03bd408326f19c1c4cc4d68679f287967667575c01060fd73",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/components/LifecycleBadge.vue",
+      "target": "app/components/LifecycleBadge.vue",
+      "beforeHash": null,
+      "afterHash": "081231dc99638938914659daa9da773133409abd772205282ad9143fe19f3d2c",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-semantic-badge",
+      "source": "foundation/components/SemanticBadge.vue",
+      "target": "app/components/SemanticBadge.vue",
+      "beforeHash": null,
+      "afterHash": "030a4e820f729df43372cf589a551b3ca7efb0714ff9d7c13de7e43a7df0e7ec",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/inline-markdown/parse.ts",
+      "target": "app/components/inline-markdown/parse.ts",
+      "beforeHash": null,
+      "afterHash": "3dc7e53941cd1545bb064ef7957091896cacec14d3a2dd1da84f023176360cd7",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-use-copy",
+      "source": "foundation/composables/useCopy.ts",
+      "target": "app/composables/useCopy.ts",
+      "beforeHash": null,
+      "afterHash": "c88254d53caaa5ab74f73034df652ffbb4564b7393ae3a7f838323bba9148fd6",
+      "verification": [
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/composables/useFieldAnchor.ts",
+      "target": "app/composables/useFieldAnchor.ts",
+      "beforeHash": null,
+      "afterHash": "3a7a2c7dc15c4f934860ce9f35eafc9517cee9fd26faa31ebd03deb9bf856bb9",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/composables/useFieldSource.ts",
+      "target": "app/composables/useFieldSource.ts",
+      "beforeHash": null,
+      "afterHash": "cb3921815a99a9955c1583ea22c82c259ba7b1d458c54c4885cc34c1c2991e13",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-use-raf-task",
+      "source": "foundation/composables/useRafTask.ts",
+      "target": "app/composables/useRafTask.ts",
+      "beforeHash": null,
+      "afterHash": "009b3516c28f630787ad023a3096875bead066f5edb89fae46a92290cd74abe6",
+      "verification": [
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/app.ts",
+      "target": "app/config/foundation/app.ts",
+      "beforeHash": null,
+      "afterHash": "da0f318ed55e6b62adc3a972230e5d42f8119e908b3bb6a8c120d54099dc116f",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/nuxt.ts",
+      "target": "app/config/foundation/nuxt.ts",
+      "beforeHash": null,
+      "afterHash": "906485117badc3b63b9e87fde562af690b44f7b9675aad80894476e07c5cb0b4",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/ConditionEntries.vue",
+      "target": "app/internal/ConditionEntries.vue",
+      "beforeHash": null,
+      "afterHash": "850b1fd618892a96ddf2173134abd2a7c5c5d9bf8f68ba6dba48f511ea1677a5",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/internal/EnumTablePanel.vue",
+      "target": "app/internal/EnumTablePanel.vue",
+      "beforeHash": null,
+      "afterHash": "18cbecaa3a6c285e6da3ca9b919dc00627670d31952d53a5a1c6ed815bfdc242",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueRequirements.vue",
+      "target": "app/internal/FieldValueRequirements.vue",
+      "beforeHash": null,
+      "afterHash": "01d1bd9b39a663b49bc0f8734f26092f165027b9cd71138cffc73da2c7bbb59c",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueStructure.vue",
+      "target": "app/internal/FieldValueStructure.vue",
+      "beforeHash": null,
+      "afterHash": "76e9cca674c54eb47eebd1489a100b6c7b8e7dda6bb27d45696b952282daf1df",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/collapseFocus.ts",
+      "target": "app/internal/collapseFocus.ts",
+      "beforeHash": null,
+      "afterHash": "f7ad59a107d754af874da9716f116990e1c4693f83b64b503ec3138cf6f872fd",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/utils/annotation.ts",
+      "target": "app/utils/annotation.ts",
+      "beforeHash": null,
+      "afterHash": "3b9854dab78284254cad1e66b909832be1abf9e81d3a209a2f9abfdba5015aa6",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:foundation-badge-utils",
+      "source": "foundation/utils/badge.ts",
+      "target": "app/utils/badge.ts",
+      "beforeHash": null,
+      "afterHash": "0a251509462318eadc365e3ecfe7b28bc03d309fe1e8a899c911060a0c521d08",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/utils/enum.ts",
+      "target": "app/utils/enum.ts",
+      "beforeHash": null,
+      "afterHash": "163879b20b1c1f3d611d79b7e40ef479b713d0e10e0a3c2b880a0efbcad86aa4",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/utils/field.ts",
+      "target": "app/utils/field.ts",
+      "beforeHash": null,
+      "afterHash": "5560f50b769f5b61f7d4e6f416e8aebc29098568cd4ba1298342c0c4701f53c0",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "create",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/utils/lifecycle-preset.ts",
+      "target": "app/utils/lifecycle-preset.ts",
+      "beforeHash": null,
+      "afterHash": "1c05d967c160519924a1e86d27807f0f24f09a7c36f296f743f81eb9eee7203f",
+      "verification": [
+        "visual"
+      ]
+    }
+  ],
+  "packageOperations": [
+    {
+      "action": "add",
+      "name": "@iconify-json/lucide",
+      "before": null,
+      "after": "^1.2.116"
+    },
+    {
+      "action": "add",
+      "name": "@nuxt/ui",
+      "before": null,
+      "after": ">=4.9.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "@vueuse/core",
+      "before": null,
+      "after": "^14.3.0"
+    },
+    {
+      "action": "add",
+      "name": "marked",
+      "before": null,
+      "after": "^17.0.6"
+    },
+    {
+      "action": "add",
+      "name": "nuxt",
+      "before": null,
+      "after": ">=4.4.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "tailwindcss",
+      "before": null,
+      "after": ">=4.3.0 <5"
+    },
+    {
+      "action": "add",
+      "name": "vue",
+      "before": null,
+      "after": "^3.5.39"
+    },
+    {
+      "action": "add",
+      "name": "vue-router",
+      "before": null,
+      "after": "^5.1.0"
+    }
+  ],
+  "consumerSetupOperations": [
+    {
+      "action": "add",
+      "instruction": "Wrap the application in UApp."
+    },
+    {
+      "action": "add",
+      "instruction": "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts."
+    },
+    {
+      "action": "add",
+      "instruction": "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts."
+    },
+    {
+      "action": "add",
+      "instruction": "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry."
+    },
+    {
+      "action": "add",
+      "instruction": "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css."
+    },
+    {
+      "action": "add",
+      "instruction": "Keep Nuxt color mode enabled through @nuxt/ui."
+    }
+  ],
+  "configMigrations": [],
+  "requirements": {
+    "packages": {
+      "@iconify-json/lucide": "^1.2.116",
+      "@nuxt/ui": ">=4.9.0 <5",
+      "@vueuse/core": "^14.3.0",
+      "marked": "^17.0.6",
+      "nuxt": ">=4.4.0 <5",
+      "tailwindcss": ">=4.3.0 <5",
+      "vue": "^3.5.39",
+      "vue-router": "^5.1.0"
+    },
+    "consumerSetup": [
+      "Wrap the application in UApp.",
+      "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts.",
+      "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry.",
+      "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
+      "Keep Nuxt color mode enabled through @nuxt/ui."
+    ]
+  },
+  "summary": {
+    "create": 26,
+    "update": 0,
+    "delete": 0,
+    "unchanged": 0,
+    "verification": [
+      "visual",
+      "interaction",
+      "responsive",
+      "foundation",
+      "config",
+      "dependency"
+    ]
+  },
+  "planDigest": "2d9cbcc2e00195827597065d1757bc6fbfd088d1704c077f8c4e48d3503726f3",
+  "apply": {
+    "expectedPlanDigest": "2d9cbcc2e00195827597065d1757bc6fbfd088d1704c077f8c4e48d3503726f3",
+    "lockSourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+    "operations": [
+      {
+        "target": "app/assets/css/main.css",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/AnnotationPopover.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/EnumTable.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/FieldAnnotation.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/FieldItem.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/InlineCode.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/InlineMarkdown.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/LifecycleBadge.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/SemanticBadge.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/components/inline-markdown/parse.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/composables/useCopy.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/composables/useFieldAnchor.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/composables/useFieldSource.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/composables/useRafTask.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/config/foundation/app.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/config/foundation/nuxt.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/internal/ConditionEntries.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/internal/EnumTablePanel.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/internal/FieldValueRequirements.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/internal/FieldValueStructure.vue",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/internal/collapseFocus.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/utils/annotation.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/utils/badge.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/utils/enum.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/utils/field.ts",
+        "action": "create",
+        "outcome": "applied"
+      },
+      {
+        "target": "app/utils/lifecycle-preset.ts",
+        "action": "create",
+        "outcome": "applied"
+      }
+    ]
+  }
+}
+> /Users/abel.wang/.nvm/versions/node/v22.23.1/bin/node /Users/abel.wang/projects/geist-nuxt/scripts/copy-registry.mjs api-docs-field-annotation --target /var/folders/yr/bzngrhyj2sb4wkbb_v8grfbm0000gn/T/geist-consumer-isolated-api-docs-field-annotation-4DDHx2 --sha 821a884cd979c825a4e118f10dce00c989130ff9 --json
+{
+  "planSchemaVersion": 1,
+  "kind": "runtime",
+  "registry": {
+    "name": "geist-nuxt",
+    "repository": "https://github.com/abel-2333-org/geist-nuxt.git"
+  },
+  "sourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+  "consumer": {
+    "lockPresent": true,
+    "lockSourceSha": "821a884cd979c825a4e118f10dce00c989130ff9",
+    "lockHash": "f57fe6e1781dab0a3e418c27a224665253107a16b1f6fbee9d09b06f93d17cf9"
+  },
+  "operations": [
+    {
+      "action": "unchanged",
+      "owner": "item:geist-foundation",
+      "source": "foundation/assets/css/main.css",
+      "target": "app/assets/css/main.css",
+      "beforeHash": "868809b54bc939beb80efbb40a222159b49a604c85649a7809efe6eb77e880d8",
+      "afterHash": "868809b54bc939beb80efbb40a222159b49a604c85649a7809efe6eb77e880d8",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/components/AnnotationPopover.vue",
+      "target": "app/components/AnnotationPopover.vue",
+      "beforeHash": "c996feb7aac0f28cb5e5ac1da5b7703c5abe4a1d42660ab12cc475c96d96f944",
+      "afterHash": "c996feb7aac0f28cb5e5ac1da5b7703c5abe4a1d42660ab12cc475c96d96f944",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/components/EnumTable.vue",
+      "target": "app/components/EnumTable.vue",
+      "beforeHash": "f21179701357855ac2b16fd38a6c836a743a7afc1b00d91a96daa47fa4a198d1",
+      "afterHash": "f21179701357855ac2b16fd38a6c836a743a7afc1b00d91a96daa47fa4a198d1",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/components/FieldAnnotation.vue",
+      "target": "app/components/FieldAnnotation.vue",
+      "beforeHash": "a7debc0dca37c307fc264728504fe9506aa0ec51d7b3f1dff49a0a1cbeb38379",
+      "afterHash": "a7debc0dca37c307fc264728504fe9506aa0ec51d7b3f1dff49a0a1cbeb38379",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/components/FieldItem.vue",
+      "target": "app/components/FieldItem.vue",
+      "beforeHash": "49c4a91b05c2f5362a97115e2db0fd94ff5c21dc98b8c652d469cbc9cec34b5b",
+      "afterHash": "49c4a91b05c2f5362a97115e2db0fd94ff5c21dc98b8c652d469cbc9cec34b5b",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-inline-code",
+      "source": "foundation/components/InlineCode.vue",
+      "target": "app/components/InlineCode.vue",
+      "beforeHash": "82f46dd752c4f96db85573123bfb62ef3fb7fed77d5cc5651c864ed608f1f608",
+      "afterHash": "82f46dd752c4f96db85573123bfb62ef3fb7fed77d5cc5651c864ed608f1f608",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/InlineMarkdown.vue",
+      "target": "app/components/InlineMarkdown.vue",
+      "beforeHash": "c27157164c2aabf03bd408326f19c1c4cc4d68679f287967667575c01060fd73",
+      "afterHash": "c27157164c2aabf03bd408326f19c1c4cc4d68679f287967667575c01060fd73",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/components/LifecycleBadge.vue",
+      "target": "app/components/LifecycleBadge.vue",
+      "beforeHash": "081231dc99638938914659daa9da773133409abd772205282ad9143fe19f3d2c",
+      "afterHash": "081231dc99638938914659daa9da773133409abd772205282ad9143fe19f3d2c",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-semantic-badge",
+      "source": "foundation/components/SemanticBadge.vue",
+      "target": "app/components/SemanticBadge.vue",
+      "beforeHash": "030a4e820f729df43372cf589a551b3ca7efb0714ff9d7c13de7e43a7df0e7ec",
+      "afterHash": "030a4e820f729df43372cf589a551b3ca7efb0714ff9d7c13de7e43a7df0e7ec",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-inline-markdown",
+      "source": "foundation/components/inline-markdown/parse.ts",
+      "target": "app/components/inline-markdown/parse.ts",
+      "beforeHash": "3dc7e53941cd1545bb064ef7957091896cacec14d3a2dd1da84f023176360cd7",
+      "afterHash": "3dc7e53941cd1545bb064ef7957091896cacec14d3a2dd1da84f023176360cd7",
+      "verification": [
+        "visual",
+        "dependency"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-use-copy",
+      "source": "foundation/composables/useCopy.ts",
+      "target": "app/composables/useCopy.ts",
+      "beforeHash": "c88254d53caaa5ab74f73034df652ffbb4564b7393ae3a7f838323bba9148fd6",
+      "afterHash": "c88254d53caaa5ab74f73034df652ffbb4564b7393ae3a7f838323bba9148fd6",
+      "verification": [
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/composables/useFieldAnchor.ts",
+      "target": "app/composables/useFieldAnchor.ts",
+      "beforeHash": "3a7a2c7dc15c4f934860ce9f35eafc9517cee9fd26faa31ebd03deb9bf856bb9",
+      "afterHash": "3a7a2c7dc15c4f934860ce9f35eafc9517cee9fd26faa31ebd03deb9bf856bb9",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-annotation",
+      "source": "kits/api-docs/composables/useFieldSource.ts",
+      "target": "app/composables/useFieldSource.ts",
+      "beforeHash": "cb3921815a99a9955c1583ea22c82c259ba7b1d458c54c4885cc34c1c2991e13",
+      "afterHash": "cb3921815a99a9955c1583ea22c82c259ba7b1d458c54c4885cc34c1c2991e13",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-use-raf-task",
+      "source": "foundation/composables/useRafTask.ts",
+      "target": "app/composables/useRafTask.ts",
+      "beforeHash": "009b3516c28f630787ad023a3096875bead066f5edb89fae46a92290cd74abe6",
+      "afterHash": "009b3516c28f630787ad023a3096875bead066f5edb89fae46a92290cd74abe6",
+      "verification": [
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/app.ts",
+      "target": "app/config/foundation/app.ts",
+      "beforeHash": "da0f318ed55e6b62adc3a972230e5d42f8119e908b3bb6a8c120d54099dc116f",
+      "afterHash": "da0f318ed55e6b62adc3a972230e5d42f8119e908b3bb6a8c120d54099dc116f",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:geist-foundation",
+      "source": "foundation/config/nuxt.ts",
+      "target": "app/config/foundation/nuxt.ts",
+      "beforeHash": "906485117badc3b63b9e87fde562af690b44f7b9675aad80894476e07c5cb0b4",
+      "afterHash": "906485117badc3b63b9e87fde562af690b44f7b9675aad80894476e07c5cb0b4",
+      "verification": [
+        "visual",
+        "foundation",
+        "config"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/ConditionEntries.vue",
+      "target": "app/internal/ConditionEntries.vue",
+      "beforeHash": "850b1fd618892a96ddf2173134abd2a7c5c5d9bf8f68ba6dba48f511ea1677a5",
+      "afterHash": "850b1fd618892a96ddf2173134abd2a7c5c5d9bf8f68ba6dba48f511ea1677a5",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/internal/EnumTablePanel.vue",
+      "target": "app/internal/EnumTablePanel.vue",
+      "beforeHash": "18cbecaa3a6c285e6da3ca9b919dc00627670d31952d53a5a1c6ed815bfdc242",
+      "afterHash": "18cbecaa3a6c285e6da3ca9b919dc00627670d31952d53a5a1c6ed815bfdc242",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueRequirements.vue",
+      "target": "app/internal/FieldValueRequirements.vue",
+      "beforeHash": "01d1bd9b39a663b49bc0f8734f26092f165027b9cd71138cffc73da2c7bbb59c",
+      "afterHash": "01d1bd9b39a663b49bc0f8734f26092f165027b9cd71138cffc73da2c7bbb59c",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/FieldValueStructure.vue",
+      "target": "app/internal/FieldValueStructure.vue",
+      "beforeHash": "76e9cca674c54eb47eebd1489a100b6c7b8e7dda6bb27d45696b952282daf1df",
+      "afterHash": "76e9cca674c54eb47eebd1489a100b6c7b8e7dda6bb27d45696b952282daf1df",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/internal/collapseFocus.ts",
+      "target": "app/internal/collapseFocus.ts",
+      "beforeHash": "f7ad59a107d754af874da9716f116990e1c4693f83b64b503ec3138cf6f872fd",
+      "afterHash": "f7ad59a107d754af874da9716f116990e1c4693f83b64b503ec3138cf6f872fd",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-annotation-popover",
+      "source": "foundation/utils/annotation.ts",
+      "target": "app/utils/annotation.ts",
+      "beforeHash": "3b9854dab78284254cad1e66b909832be1abf9e81d3a209a2f9abfdba5015aa6",
+      "afterHash": "3b9854dab78284254cad1e66b909832be1abf9e81d3a209a2f9abfdba5015aa6",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:foundation-badge-utils",
+      "source": "foundation/utils/badge.ts",
+      "target": "app/utils/badge.ts",
+      "beforeHash": "0a251509462318eadc365e3ecfe7b28bc03d309fe1e8a899c911060a0c521d08",
+      "afterHash": "0a251509462318eadc365e3ecfe7b28bc03d309fe1e8a899c911060a0c521d08",
+      "verification": [
+        "visual"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-enum-table",
+      "source": "kits/api-docs/utils/enum.ts",
+      "target": "app/utils/enum.ts",
+      "beforeHash": "163879b20b1c1f3d611d79b7e40ef479b713d0e10e0a3c2b880a0efbcad86aa4",
+      "afterHash": "163879b20b1c1f3d611d79b7e40ef479b713d0e10e0a3c2b880a0efbcad86aa4",
+      "verification": [
+        "visual",
+        "interaction"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-field-item",
+      "source": "kits/api-docs/utils/field.ts",
+      "target": "app/utils/field.ts",
+      "beforeHash": "5560f50b769f5b61f7d4e6f416e8aebc29098568cd4ba1298342c0c4701f53c0",
+      "afterHash": "5560f50b769f5b61f7d4e6f416e8aebc29098568cd4ba1298342c0c4701f53c0",
+      "verification": [
+        "visual",
+        "interaction",
+        "responsive"
+      ]
+    },
+    {
+      "action": "unchanged",
+      "owner": "item:api-docs-lifecycle-badge",
+      "source": "kits/api-docs/utils/lifecycle-preset.ts",
+      "target": "app/utils/lifecycle-preset.ts",
+      "beforeHash": "1c05d967c160519924a1e86d27807f0f24f09a7c36f296f743f81eb9eee7203f",
+      "afterHash": "1c05d967c160519924a1e86d27807f0f24f09a7c36f296f743f81eb9eee7203f",
+      "verification": [
+        "visual"
+      ]
+    }
+  ],
+  "packageOperations": [],
+  "consumerSetupOperations": [],
+  "configMigrations": [],
+  "requirements": {
+    "packages": {
+      "@iconify-json/lucide": "^1.2.116",
+      "@nuxt/ui": ">=4.9.0 <5",
+      "@vueuse/core": "^14.3.0",
+      "marked": "^17.0.6",
+      "nuxt": ">=4.4.0 <5",
+      "tailwindcss": ">=4.3.0 <5",
+      "vue": "^3.5.39",
+      "vue-router": "^5.1.0"
+    },
+    "consumerSetup": [
+      "Wrap the application in UApp.",
+      "Merge the default export from app/config/foundation/app.ts into the consumer app/app.config.ts.",
+      "Merge the default export from app/config/foundation/nuxt.ts into the consumer nuxt.config.ts.",
+      "Use the copied app/assets/css/main.css as the Tailwind, Nuxt UI, and design foundation entry.",
+      "Keep consumer-specific CSS overrides after the foundation declarations in app/assets/css/main.css.",
+      "Keep Nuxt color mode enabled through @nuxt/ui."
+    ]
+  },
+  "summary": {
+    "create": 0,
+    "update": 0,
+    "delete": 0,
+    "unchanged": 26,
+    "verification": []
+  },
+  "planDigest": "a73acbfd17a8ba29683ce76cbf9e0ccf16f766dd66bb12332e08bf5c8874f228"
+}
+> pnpm run typecheck
+
+> geist-registry-consumer-smoke@ typecheck /private/var/folders/yr/bzngrhyj2sb4wkbb_v8grfbm0000gn/T/geist-consumer-isolated-api-docs-field-annotation-4DDHx2
+> nuxt typecheck
+
+ℹ Nuxt Icon server bundle mode is set to local
+[nuxt:icon] ✔ Nuxt Icon discovered local-installed 2 collections: lucide, simple-icons
+Consumer closure smoke passed (isolated-api-docs-field-annotation): /var/folders/yr/bzngrhyj2sb4wkbb_v8grfbm0000gn/T/geist-consumer-isolated-api-docs-field-annotation-4DDHx2

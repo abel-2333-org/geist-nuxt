@@ -1,0 +1,13 @@
+
+> geist-nuxt@0.1.0 test:component /Users/abel.wang/projects/geist-nuxt
+> vitest run
+
+
+ RUN  v4.1.10 /Users/abel.wang/projects/geist-nuxt
+
+
+ Test Files  40 passed (40)
+      Tests  578 passed (578)
+   Start at  23:47:18
+   Duration  16.38s (transform 23.89s, setup 4.03s, import 42.72s, tests 47.07s, environment 12.96s)
+

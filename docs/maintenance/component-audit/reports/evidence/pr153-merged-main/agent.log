@@ -1,0 +1,134 @@
+
+> geist-nuxt@0.1.0 test:agent /Users/abel.wang/projects/geist-nuxt
+> node --test tests/agent-config.test.mjs tests/agent-skill.test.mjs
+
+TAP version 13
+# Subtest: tracks Claude Code links for every locked agent skill
+ok 1 - tracks Claude Code links for every locked agent skill
+  ---
+  duration_ms: 3.635375
+  type: 'test'
+  ...
+# Subtest: resolves first-party skill assets from both agent entrypoints
+ok 2 - resolves first-party skill assets from both agent entrypoints
+  ---
+  duration_ms: 3.056541
+  type: 'test'
+  ...
+# Subtest: tracks only the first-party skill under .agents
+ok 3 - tracks only the first-party skill under .agents
+  ---
+  duration_ms: 16.338041
+  type: 'test'
+  ...
+# Subtest: loads shared repository instructions from the Claude entrypoint
+ok 4 - loads shared repository instructions from the Claude entrypoint
+  ---
+  duration_ms: 0.90175
+  type: 'test'
+  ...
+# Subtest: reports U+FFFD and stays silent for clean or pathless events
+ok 5 - reports U+FFFD and stays silent for clean or pathless events
+  ---
+  duration_ms: 51.656708
+  type: 'test'
+  ...
+# Subtest: fails visibly when the hook cannot validate its input
+ok 6 - fails visibly when the hook cannot validate its input
+  ---
+  duration_ms: 11.699542
+  type: 'test'
+  ...
+# Subtest: locks the root-only agent snapshot boundary
+ok 7 - locks the root-only agent snapshot boundary
+  ---
+  duration_ms: 1.145417
+  type: 'test'
+  ...
+# Subtest: locks the Source-first repository boundary
+ok 8 - locks the Source-first repository boundary
+  ---
+  duration_ms: 0.874041
+  type: 'test'
+  ...
+# Subtest: parses only the narrow geist:skill CLI contract
+ok 9 - parses only the narrow geist:skill CLI contract
+  ---
+  duration_ms: 1.139166
+  type: 'test'
+  ...
+# Subtest: installs the consumer skill through dry-run and remains idempotent
+ok 10 - installs the consumer skill through dry-run and remains idempotent
+  ---
+  duration_ms: 901.913792
+  type: 'test'
+  ...
+# Subtest: emits a versioned machine-readable skill plan without writing files
+ok 11 - emits a versioned machine-readable skill plan without writing files
+  ---
+  duration_ms: 1183.978125
+  type: 'test'
+  ...
+# Subtest: guarded skill apply verifies the expected digest and fails closed on PLAN_CHANGED
+ok 12 - guarded skill apply verifies the expected digest and fails closed on PLAN_CHANGED
+  ---
+  duration_ms: 1723.100042
+  type: 'test'
+  ...
+# Subtest: ignores OS artifacts like .DS_Store under the installed skill
+ok 13 - ignores OS artifacts like .DS_Store under the installed skill
+  ---
+  duration_ms: 918.999125
+  type: 'test'
+  ...
+# Subtest: stops the complete batch when an installed file drifted
+ok 14 - stops the complete batch when an installed file drifted
+  ---
+  duration_ms: 602.160375
+  type: 'test'
+  ...
+# Subtest: updates and deletes managed files without churning the source SHA for identical content
+ok 15 - updates and deletes managed files without churning the source SHA for identical content
+  ---
+  duration_ms: 28.627542
+  type: 'test'
+  ...
+# Subtest: resumes an interrupted update after a new source file reached the consumer
+ok 16 - resumes an interrupted update after a new source file reached the consumer
+  ---
+  duration_ms: 10.615584
+  type: 'test'
+  ...
+# Subtest: rejects unmanaged files, wrong adapters, and symlinked target ancestors
+ok 17 - rejects unmanaged files, wrong adapters, and symlinked target ancestors
+  ---
+  duration_ms: 7.606542
+  type: 'test'
+  ...
+# Subtest: refuses to reconcile a skill owned by a different repository
+ok 18 - refuses to reconcile a skill owned by a different repository
+  ---
+  duration_ms: 5.603416
+  type: 'test'
+  ...
+# Subtest: rechecks target state before the first write
+ok 19 - rechecks target state before the first write
+  ---
+  duration_ms: 3.329792
+  type: 'test'
+  ...
+# Subtest: checks exact source identity for skill inputs without coupling foundation changes
+ok 20 - checks exact source identity for skill inputs without coupling foundation changes
+  ---
+  duration_ms: 166.368042
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5859.4805

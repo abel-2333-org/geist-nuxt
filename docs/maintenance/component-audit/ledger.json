@@ -21,13 +21,13 @@
   "items": {
     "foundation-copy-button": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
-        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/app.config.ts",
@@ -52,7 +52,7 @@
           "tests/component/operation-target.spec.ts",
           "tests/component/use-copy.spec.ts"
         ],
-        "scopeDigest": "9fecec9fa31f92ce442db4b4ab19bbe5b95755155eb993af027f20d78c47fa43",
+        "scopeDigest": "d488825d8179328984f2eaa8b6eb9585369c1d84ade068b801ad8b185e5b8294",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -81,18 +81,18 @@
           }
         ]
       },
-      "notes": "完整 CopyButton required co-review，base cdd1956c38b2be5eb0788e1c5d38460e26adb458 → 功能HEAD 71eb8ca81d7c7f72050d634ef71a26570ac649f4。原18scope与5依赖name/reason、旧findings=[]全部保留，新增useCopy直接回归测试、OperationTarget消费者与kit契约，共21scope。完整复核props/attrs、tooltip分支、原文复制、成功/失败状态及单一polite toast、focus/CSS/config。修复本轮发现的fallback textarea移除导致键盘焦点落到BODY；成功/false/throw恢复原仍连接控件，显式转移焦点不抢回、原节点移除不恢复。真实Chrome隔离函数红绿5场景及新5case、全组件515/registry160/typecheck/build通过；working-tree probe源码hash与本功能提交相同，原来源标记保留。最终组件Chrome明暗×1440/390四组Select真实选项/Enter、Tab顺序及三复制意图native clipboard断言通过；真实组件fallback三结果焦点恢复、零textarea与0pageerror/overflow。browser build真实SHA71eb8ca及digest0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算一致；fallback结果被stub边界保留。不声称旧130完整browser重跑或消费端/全部系统权限覆盖。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 CopyButton 的 tooltip/非 tooltip 分支、inheritAttrs:false 契约、原文复制、成功/失败反馈及 useCopy 的 fallback 焦点恢复、scope dispose。唯一实现前提仍是 UButton/UTooltip 与 background Toast 的单一 polite 播报；组件、useCopy、UApp/config 与依赖锁内容相对 main 未变。新增 subtree 不命中本按钮，API Docs 文档修改在字段层级章节，未改复制接口或反馈契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重做原生剪贴板权限、各系统 fallback 或全部 consumer；既有实测保持原 SHA，不能据静态样式等价新增这些覆盖。 历史浏览器证据维持原来源 71eb8ca81d7c7f72050d634ef71a26570ac649f4，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T10:43:45.250Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "471c52305386fc37e27ee5df647f8c4bb1a6df73",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -132,7 +132,7 @@
           "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "c9ee030b50d644929865c42d2e9de29a3389ff419c6c878dbcc27c32acf27aab",
+        "scopeDigest": "d975e49e969ee55a42475f0a2592e30274f29d8ff0bc7077ed1aa7f1bf542e31",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -161,7 +161,7 @@
           }
         ]
       },
-      "notes": "本轮 post-visual affected co-review：base 19a107527d1226585611f4547619320b430fab2a → 功能 HEAD 471c52305386fc37e27ee5df647f8c4bb1a6df73，source digest 092599529aedee0662bc8b62ed831076d514c913c67b6bdf0c13f693338e8ac2。维护者于本会话明确表示“我视觉验收没问题”；此为新增采纳记录，不改写旧 SHA 的原始证据。已核对本轮 exact-HEAD 36 files/477 component、typecheck、normal build、contrast build、118/118 browser（544 JSON/5224 ordinary-positive）与独立证据完整性复审；本次没有重跑 browser/build。\n组件代码、ProseCode 的 Copy 13 Mono/rounded-sm/translate 覆盖契约、tv font-size 分组、90 项原始 ramp、中性及背景/边框声明和字号/字体未变。scope 实际命中全局 CSS/app config、tokens/focus 文档、build-contrast、mutation runner、measure/spec/fixture/node guards。新 app config 只追加 Button/Alert 分支，保留现有 tv 配置。\n477 component 全量通过含 InlineCode 的单根 code、translate override、ProseCode 默认字号去重、text-error 保留 text-code、text-xs 覆盖，以及 20 个 functional-theme composition 测试；typecheck、正常 build、contrast build、118 browser、旧 806 neutral 身份、4000 功能色样本及完整七阶段 mutation 均已有 exact-471 成功证据。版本/字体及旧主题真实对比已独立核实。\n保留 f-4b98b0623a0a 原 resolved finding 对象；不声称任意消费者 class/slot override 的对比度通过，也不把 glyph/文字结果当作整站 WCAG 或 focus 3:1。\n保留原 scope 的全部路径和依赖声明；该 owner 原 scope 已绑定全局 CSS/app config、构建器、mutation runner 和测量器。本轮只补与主题组合/真实状态/瞬态/生成绘制防线直接相关的新 spec/helper 及 browser README；不把所有测试目录纳入。旧 findings 全部保持原 id/severity/claim/evidence/disposition；本次不清除任何 deferred finding。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、scripts/lib/text-contrast.mjs、tests/browser/README.md、tests/text-contrast.test.mjs。\n复核单根 ProseCode、rounded-sm/text-code、translate 默认及 attrs 覆盖，读取 tv font-size 扩展与上游 class 合并前提。组件与配置未变；CSS 仅新增布局 subtree，text-contrast parser 仅接受完整白名单结构，追加测试拒绝 color/opacity/background/token/重复属性等注入。browser README 新增层级验证说明，不改变 InlineCode 契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新运行整套 glyph/生成绘制/mutation browser 矩阵，未声称任意调用方 class/slot override 均满足对比度；历史 resolved finding 原对象保持。 历史浏览器证据维持原来源 471c52305386fc37e27ee5df647f8c4bb1a6df73，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
@@ -218,13 +218,13 @@
     },
     "foundation-semantic-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/app.config.ts",
@@ -263,7 +263,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "6b6447151e866f9c93dfdaed9ad42ae99ad618d43745c59dec549f51186e2ea8",
+        "scopeDigest": "56e359c59ada0fe19dc7722ac65f881ddfc382b7cde1ca0d015afa2efc8e7b42",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -307,7 +307,7 @@
           }
         ]
       },
-      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、scripts/lib/text-contrast.mjs。\n复核 tone→BADGE_TONE_COLOR、subtle/sm 默认、可选 icon 与非空 label 调用方契约、单根 UBadge attrs。badge/presets/config 均未变；gallery 差异仅 decoded labels 与字段说明，不改徽章输入；新增 subtree 不命中本组件；parser 白名单不改变色值。已核对 Method/Webhook/Lifecycle 的文本语义路径。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留 main 徽章色彩及消费者证据原来源；未追加全尺寸/任意 attrs/外部 consumer 的浏览器视觉保证。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -327,13 +327,13 @@
     },
     "foundation-theme-toggle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
           "app/app.config.ts",
@@ -358,7 +358,7 @@
           "tests/fixtures/contrast/main.css",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "ebc6f95191b95d4ac4685a21b57a86745c19b93b9869349ddcebb599375f27fc",
+        "scopeDigest": "0d9bc19f580b86cbfbc5eddbf7a25e8f9b8d902bf5587eeeac73a1fc19ab1858",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -387,7 +387,7 @@
           }
         ]
       },
-      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27。保留全部旧 scope/findings/dependencies，并补本轮 SSR 行为回归和实际执行/构建支持。真实 dark 首载曾在 value=dark/unknown=false 时保留 SSR switchToDark 名称（theme-label-reproduction.log，来源 ea1dc10b）；修复仅内部 ClientOnly 延后原 UColorModeButton、显式 attrs 透传，locale/状态/存储仍交原语，SSR 阶段不显示按钮。521 component、typecheck、normal build、browser typecheck、160 registry 通过；theme-red/green 都3/3，只是 attrs/name 兼容回归，非SSR红绿。新增普通 gallery SSR 回归4/4，light/dark×1440/390共32个实读步骤，覆盖首次hydration名称、Enter/Space、reload持久化、system跟随与显式偏好权威，无failure/pageerror；source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b。联合targeted20通过，24未选中测试不算全量。原始失败/旧SHA保留，无新consumer安装或人工视觉验收主张；本次已修复的新发现不新增resolved ledger finding。 最终CLI4组及普通gallery同样验证主题键盘/持久化通过，独立review的7文件hash已与最终head等价绑定。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css。\n复核 ClientOnly 内原 UColorModeButton 与显式 attrs 透传、SSR 不显示按钮、locale 名称及 preference 切换均由上游持有；读取锁定 ColorModeButton 的 isDark、locale 和 attrs 覆盖实现。唯一命中为 foundation CSS 新增 subtree，本组件/壳/AppConfig/color-mode 插件与 lock 未变，新增 selector 不命中按钮。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重做主题首次 hydration、系统主题跟随与 reload 持久化浏览器矩阵；沿用 main 既有独立实测，不将本轮编译通过代替此类行为测试。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "foundation-annotation-popover": {
@@ -479,13 +479,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-22T10:43:45.250Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "19a107527d1226585611f4547619320b430fab2a",
-        "headSha": "471c52305386fc37e27ee5df647f8c4bb1a6df73",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -500,20 +500,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "7350cf4ec390aab9b29ea2d0e1ba62ad70675f3ad553b56038e4ac85bad5f9fe"
+        "scopeDigest": "93697112ee58ab92020853acc90c98ebc2520b0e488a3d66aa1ccaa2e16d93f1"
       },
-      "notes": "本轮 post-visual affected co-review：base 19a107527d1226585611f4547619320b430fab2a → 功能 HEAD 471c52305386fc37e27ee5df647f8c4bb1a6df73，source digest 092599529aedee0662bc8b62ed831076d514c913c67b6bdf0c13f693338e8ac2。维护者于本会话明确表示“我视觉验收没问题”；此为新增采纳记录，不改写旧 SHA 的原始证据。已核对本轮 exact-HEAD 36 files/477 component、typecheck、normal build、contrast build、118/118 browser（544 JSON/5224 ordinary-positive）与独立证据完整性复审；本次没有重跑 browser/build。\n唯一 scope 命中为 focus-a11y 规格归属纠正。handle 的 separator/aria bounds、键盘步进、Shift 粗步进、Home/End/Enter、拖动、disabled、edge 厚度反馈、默认 outline-2/offset-2 和上游 SplitPane/CodeRail/SidebarNav 未改。\n477 component 全量通过含 split-pane-handle 和 code-rail：纵横语义、键盘/边界/reset、拖动、失效 inert、live defaultSize 更新、有效 bounds/响应式堆叠/动态重测；正式 source consumer runtime/isolated/upgrade 亦通过。未产生需要重跑 browser 的新行为改变。\n本轮没有针对 handle 绘制新的 focus-ring 非文字 3:1 浏览器记录；本次 co-review 仅维持既有交互和项目 focus 配方，不能追加该数值断言。\n保留原 scope 的全部路径和依赖声明；仅 focus-a11y 文档措辞命中；现有 scope 已覆盖 SplitPane/handle/composable、CodeRail/SidebarNav 直接消费、相关测试和契约，无新增 scope。旧 findings 全部保持原 id/severity/claim/evidence/disposition；本次不清除任何 deferred finding。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核 separator 的 direction/ARIA bounds/controls、disabled 降级、箭头与 Shift coarse、Home/End/Enter/doubleclick、grip/edge feedback 与 touch-none 例外。原 scope 唯一命中为 API Docs index 的字段层级章节；可拖分栏章节、Handle/父级 SplitPane/CodeRail/SidebarNav 及其测试均未改，未把 subtree 应用于拖拽把手。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新增触摸设备实测或 focus ring 非文字 3:1 数值断言；保留已有交互与 focus 配方的边界。 历史浏览器证据维持原来源 471c52305386fc37e27ee5df647f8c4bb1a6df73，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
-        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -532,20 +532,20 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "542eb79453dd512a32a57603d3832c7486ce176a11c4643d921dd4c4fe7bc382"
+        "scopeDigest": "e0774e00b95f4b96d80fecf99b8693d644ac80ebf905ff2b8691d2b746767d80"
       },
-      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #146 响应式、断点与组合结构结论；#151 条件示例调用参数未变的既有审阅保留。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核 fixed/ratio、row/column、fixedPane/minOpposite、受控尺寸 clamp、ARIA 百分比/有限 bounds、sticky row、SSR stacked 与 live breakpoint、useSplitPane cookie/键盘/拖动清理及 useRafTask 合帧。唯一 scope 命中是 API Docs index 中不改变分栏契约的字段层级说明；所有分栏 owning files、上游 helper、消费者与相关测试相对 main 原样。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新跑真实拖动设备或全部 slot 布局组合；API Docs 内容改动不被误记为新分栏行为验证。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-code-block": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "a217494d573c8acce1eefe5ec689e7a21b398667eee2e3df02ea3d5d076c9a00",
         "scope": [
           "app/app.config.ts",
@@ -574,7 +574,7 @@
           "tests/fixtures/consumer/app/pages/index.vue",
           "vitest.config.ts"
         ],
-        "scopeDigest": "3da6dd2c1a9f76ab4a2a0b7452873cf1ff73c270b1badf1361e066dcda31753b",
+        "scopeDigest": "a58912e1a6bc8bf0eab03de7369443fe532e7319a1510b7386a68d8a26aadd0d",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -613,7 +613,7 @@
           }
         ]
       },
-      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读props/defaults/labels、language identity watch原位变更、empty与literal0私有Select映射、langLabel own-key、空code保留language/controls、raw复制与trusted HTML安全边界、Shiki dark单一约定、named可键盘滚动group、slots优先级、共享cookie/state wrap及稳定aria-pressed标签。旧f-0c1cd3397501的已解决状态由稳定wrap名和测试保持。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 language 稳定身份/移除回退、空字符串与字面0映射、raw code 复制、trustHighlightedHtml 显式信任边界、共享cookie wrap、命名可聚焦滚动group及空态保留选择器；langLabel 只读自有属性、暗色 Shiki fragment 边界保留。组件/helper/config 相对 main 未变；gallery 两处文字变更不改 CodeBlock props，新增 subtree 不命中 code-surface，文档改动不扩 HTML 信任。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未验证任意外部高亮palette/HTML管线；既有 CodeBlock 浏览器和剪贴板证据保留来源，本轮不声称全部新视觉验收。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -626,13 +626,13 @@
     },
     "api-docs-request-example": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
-        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/app.config.ts",
@@ -666,7 +666,7 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "7036c2212045f8ff9df0a7f241cc68b4297f3871b9d01baa6f7503b655a3f2c9",
+        "scopeDigest": "850b62a7230c8fb13ddf17f419d1e2b67f32f034816948ab655e043ae027c21b",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -705,18 +705,18 @@
           }
         ]
       },
-      "notes": "完整required owner co-review，base cdd1956c38b2be5eb0788e1c5d38460e26adb458→功能HEAD 71eb8ca81d7c7f72050d634ef71a26570ac649f4；因原scope共享useCopy实际修改，coReview:true/change:modified。重新审核该owner全部公开选择/空态/原始复制/labels/受控与响应式契约及完整依赖链，原28scope逐blob与前批229b777相等，保留全部旧finding原对象和依赖reason，补独立use-copy.spec.ts及相关契约/config共30scope。修复仅在fallback finally恢复进入fallback前仍连接HTMLElement焦点，不夺取handler已移动到其他control的焦点；原始text、execCommand返回值、toast/copied/timer行为未变。前批语言/空ID/Radio/own-key修复与旧resolved findings均未回归。最终37files515、registry160、typecheck/build通过；共享函数Chrome red/green五分支，真实OperationTarget组件native clipboard与三stub fallback focus分支通过，copy green source hash与本commit精确相等。新browser基于本HEAD构建，digest 0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算匹配；不冒称三Example完整browser本轮重跑，前批raw保持原来源。无剩余finding；细节和所有逐scope blob见batch5/examples-co-review.json。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 mount-time scenario 受控判定、fallback 派生不emit、uncontrolled 身份收敛、原位重排/删除、空与0映射，controls slot 委托 CodeBlock，空 variants 时仍可换场景。owning源码、shared selection/useCodeWrap、CodeBlock 与依赖锁均未变；scope 仅共享布局 CSS 和 API Docs 字段说明改变，未影响请求场景接口。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新执行所有 consumer 的请求响应联动或原生select交互；已存在的这些证据保持 main 来源，不扩大到运行时受控模式切换。 历史浏览器证据维持原来源 71eb8ca81d7c7f72050d634ef71a26570ac649f4，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/app.config.ts",
@@ -760,7 +760,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "82878f36acecc9789953a054856b9d3e2b068bfd788d1a1310720c396178fcc4",
+        "scopeDigest": "fe2dc6e814f7332de39facfe185ed8c0f586eab457d26a13bde835b59d59cc73",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -799,7 +799,7 @@
           }
         ]
       },
-      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读scenario/status/body三级状态、mount-time受控presence及共享seam、未知值fallback不emit、body原位重排/移除/有效context重置、empty/zero选择与安全radio局部index映射、duplicate全树去重警告、blank media/variant fallback、单状态badge文案、code/empty/unavailable/file四body语义、真实download链接、persistent announcement、responsive popover的ResizeObserver关闭及scope清理、所有透传CodeBlock与可访问label。两条旧finding的label fallback/shared seam仍解决。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 scenario/status/body 三级选择、body context 重置与稳定id、空/0和安全radio索引映射、code/empty/unavailable/file 区分、状态色/文案、持久status播报、下载真链接及窄容器popover关闭。shared helper和组件保持 main；gallery仅字段类型说明改变；subtree与response容器名称不同，不改选项断点；parser白名单不改status语义色。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新执行所有portal/第三方文件链接/外部消费者组合；既有响应浏览器矩阵保持原SHA。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -819,13 +819,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/app.config.ts",
@@ -846,6 +846,7 @@
           "kits/api-docs/utils/lifecycle-preset.ts",
           "nuxt.config.ts",
           "references/components/data-display.md",
+          "references/foundations/spacing-layout.md",
           "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
           "scripts/build-contrast.mjs",
@@ -858,15 +859,18 @@
           "tests/browser/measure.ts",
           "tests/component/chrome-labels.spec.ts",
           "tests/component/field-item-structure.spec.ts",
+          "tests/component/field-type-summary.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/fixtures/contrast/FunctionalApiMatrix.vue",
           "tests/fixtures/contrast/FunctionalMatrix.vue",
           "tests/fixtures/contrast/FunctionalOwnerReview.vue",
           "tests/fixtures/contrast/main.css",
           "tests/nuxt/api-docs-type-compat.ts",
+          "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "7334bcb1ff252f0b3394fb2689775e68d4b91ac8aa7820b6c95c7d9ee04017e2",
+        "scopeDigest": "085b1e3cbdc82d4817b1fff00d3068dd52c88187dfc06730d8281a092417ec61",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -910,7 +914,7 @@
           }
         ]
       },
-      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
+      "notes": "已审 LifecycleBadge/preset/SemanticBadge 的 status、label、size/variant 契约及 FieldItem 消费者；这些本体和颜色定义相对 base 未改，影响来自共享 FieldItem/detail/hierarchy、gallery、CSS 新 subtree 和严格限定该 utility 的 contrast parser。原 resolved finding 全对象保留，不把旧颜色测量改标本轮 SHA，不宣称新增 badge 对比度实测。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-aab0322ebade",
@@ -923,13 +927,13 @@
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/app.config.ts",
@@ -970,7 +974,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "d8e37adcedbf0657fea0e0b4d962f09af560c27282b5478f78d723e9a1cefa14",
+        "scopeDigest": "78796655566dc21a7ff6b5da3a1321ca715c4862feb7de6d89d2bc6272084da2",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1009,7 +1013,7 @@
           }
         ]
       },
-      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 method trim/uppercase/UNKNOWN、五方法 preset、未知 neutral fallback、mono/translate=no 单根透传及 Header/Search/Sidebar 的消费链。方法组件、preset、SemanticBadge、配置与 lock 未变；gallery差异没有变方法输入；subtree仅用于字段/组合区域，parser对新增utility完整校验，基础色矩阵与main相同。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：main 的 #147 方法色finding已 resolved，原对象保留；不将旧失败重新打开，也不宣称本轮重测了所有导航状态与任意消费端。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-8c9c3be3a38e",
@@ -1022,13 +1026,13 @@
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/app.config.ts",
@@ -1064,7 +1068,7 @@
           "tests/fixtures/contrast/main.css",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "40837dc5f831ad140c85cfcc32ad4f531b254c12a2a753e31ec1b9000c20597d",
+        "scopeDigest": "d207efcabdac58ab8a60c38bd5adaf4ba1bb605302a945188b29686b8cc4755a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1103,18 +1107,18 @@
           }
         ]
       },
-      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 完整owning组件/Panel/utils、过滤/计数/defaultValue/稳定id/移除归一/locale/键盘/overflow与RAF已审。两个watch取消sync改默认pre，避免原位reverse/sort中间态误换选择及清query；新4条mounted回归红4fail22pass、绿26/26，CLI实测原位重排保留身份与query、删除回退/再加不复活、最终低阈值清query及Tabs键盘。没有复制按钮/useCopy；不把原生文本选择误写成复制功能。旧mock尺寸scroll tests仅状态验证，本轮未额外宣称真实长表overflow阈值矩阵。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核稳定variant.id与locale/reorder保留、删除回退、全组filter计数及polite播报、active组bounded、EnumTablePanel的实测overflow焦点门槛、RO→RAF清理、when/description的安全InlineMarkdown。owning三个文件和helpers未变，gallery没有改enum数据；新增subtree只作用于外部字段结构容器，不改tabs/content identity或Enum自身滚动判定。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：外层宽度可能随字段层级变化，本轮主代理hierarchy验证承担该组合回流；不借此声称重跑全部Enum视觉/读屏器或任意长值consumer。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/app.config.ts",
@@ -1130,7 +1134,7 @@
           "references/kits/api-docs/index.md",
           "scripts/lib/contrast-build.mjs"
         ],
-        "scopeDigest": "07bb69dd178dd60e83eb209338e9412bd0cbc525e9ebda1306a89cdd7be76f29",
+        "scopeDigest": "e060aa1bce78b84705cb262c27cee62215a219dbdd8b7c6900a0528bf970e814",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1154,19 +1158,19 @@
           }
         ]
       },
-      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 本轮仅gallery字段树h3之下四调用明确headingLevel4，默认2及2|3|4契约不变。CLI验证0显示/undefined省略/非零计数、默认h2及h3/h4、attrs/class/default slot，实际/kits/api-docs四个H4仍从属字段树H3。新发现已修复，不新增resolved finding。无新consumer安装或人工视觉验收主张。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核原生h2/h3/h4默认层级、count=0保留、section与slot语义；FieldGroup与WebhookProtocol源码未变。gallery本次仅decoded labels和字段说明变化，main已修复的四处heading-level=4未被回退；新增subtree只给字段/组合子树，分组标题原边框和spacing不改。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：不新声称完整页面大纲/所有consumer可访问性验收；字段slot内部的新类型/焦点行为由对应owner另行复审。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
-      "status": "verified",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
-        "itemDigest": "365a28b929abbf9fbbb3ade1527b7efe42d41eaf91a9170f79ccd967020abea4",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
+        "itemDigest": "3118c0a484317248cb3321b6d0c7ed6083493ebaf5055a7f86c1e3cbf715f806",
         "scope": [
           "app/app.config.ts",
           "app/assets/css/main.css",
@@ -1191,30 +1195,42 @@
           "kits/api-docs/internal/EnumTablePanel.vue",
           "kits/api-docs/internal/FieldValueRequirements.vue",
           "kits/api-docs/internal/FieldValueStructure.vue",
+          "kits/api-docs/internal/collapseFocus.ts",
           "kits/api-docs/utils/enum.ts",
           "kits/api-docs/utils/field.ts",
           "kits/api-docs/utils/lifecycle-preset.ts",
           "nuxt.config.ts",
           "references/foundations/focus-a11y.md",
+          "references/foundations/spacing-layout.md",
           "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
           "scripts/build-contrast.mjs",
+          "scripts/build-hierarchy.mjs",
           "scripts/lib/contrast-build.mjs",
           "scripts/lib/text-contrast.mjs",
+          "tests/browser/README.md",
           "tests/browser/functional-colors.spec.ts",
           "tests/browser/functional-consumers.spec.ts",
           "tests/browser/functional-support.ts",
           "tests/browser/generated-paint.spec.ts",
+          "tests/browser/hierarchy-discovery.mjs",
+          "tests/browser/hierarchy-evidence.mjs",
+          "tests/browser/hierarchy-fixture.mjs",
+          "tests/browser/hierarchy-focus.mjs",
+          "tests/browser/hierarchy.mjs",
           "tests/browser/measure.ts",
           "tests/browser/optional-trigger-motion.spec.ts",
           "tests/browser/text-contrast.spec.ts",
           "tests/component/chrome-labels.spec.ts",
+          "tests/component/collapse-focus.spec.ts",
           "tests/component/enum-table.spec.ts",
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-condition.spec.ts",
           "tests/component/field-item-structure.spec.ts",
           "tests/component/field-presence.spec.ts",
+          "tests/component/field-type-summary.spec.ts",
           "tests/component/field-value-structure.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/component/inline-code.spec.ts",
           "tests/component/inline-markdown.spec.ts",
           "tests/component/use-copy.spec.ts",
@@ -1223,15 +1239,19 @@
           "tests/fixtures/contrast/FunctionalApiMatrix.vue",
           "tests/fixtures/contrast/FunctionalMatrix.vue",
           "tests/fixtures/contrast/main.css",
+          "tests/fixtures/hierarchy/index.vue",
+          "tests/fixtures/hierarchy/main.css",
           "tests/nuxt/api-docs-type-compat.ts",
+          "tests/nuxt/hierarchy-fixture.ts",
+          "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "2f9c3dd9214541e95809877559d555707b0aa1d2e65c5e0e7e7821531fea4957",
+        "scopeDigest": "4dbee3dec64ec2a876601df80cf457d962b71c80b92ee1cfa67dee6722997d4b",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "UTooltip attrs/as-child及UCollapsible unmountOnHide透传"
+            "reason": "UTooltip attrs/as-child及UCollapsible unmountOnHide透传 本轮核对 UCollapsible content slot 直接位于 Reka CollapsibleContent 内，collapseFocus parentElement 定位依赖此 DOM 关系。"
           },
           {
             "name": "@vueuse/core",
@@ -1251,7 +1271,7 @@
           {
             "name": "reka-ui",
             "version": "2.9.10",
-            "reason": "Tooltip触摸忽略、键盘focus/disableClosingTrigger；Collapsible隐藏内容与controlled展开"
+            "reason": "Tooltip触摸忽略、键盘focus/disableClosingTrigger；Collapsible隐藏内容与controlled展开 本轮核对 hidden=until-found、Presence 退出动画及 beforematch 后 RAF 展开语义；升级须复验 focus 和真实 UI Find。"
           },
           {
             "name": "tailwindcss",
@@ -1261,11 +1281,11 @@
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "FieldItem.vue:83–87 resolveComponent 缺失时返回字符串的可选 composition 分支、159–166 watch/shallowRef 控制折叠，以及 useFieldAnchor.ts nextTick 与重复导航 revision 语义；复审依赖实际响应式渲染与生命周期行为。"
+            "reason": "FieldItem.vue:83–87 resolveComponent 缺失时返回字符串的可选 composition 分支、159–166 watch/shallowRef 控制折叠，以及 useFieldAnchor.ts nextTick 与重复导航 revision 语义；复审依赖实际响应式渲染与生命周期行为。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           }
         ]
       },
-      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 required co-review：原51scope完整继承且相对已封存batch5完整review逐blob等价；gallery外围4个h4及直接内嵌EnumTable调度修复为本轮影响，补真实Enum/Panel/utils/useRafTask及对应tests六路径和VueUse依赖。原finding f73feb0baf6dd 完整保留且resolved不改。fresh16 API fixture中requiredness/caveat96样本全部pass，最小ratio4.551121906832344；旧功能/consumer矩阵保留原SHA，非本轮新consumer安装或人工视觉采纳。",
+      "notes": "已审类型摘要、simple/rich 值信息分流、原始值锚点与结构边界、subtree 容器、指令更新/清理及 registry 分发闭包。外层与值层存在性分别派生，未改原图路径/计数，丰富值要求保持原 renderer。f-909f4f270010 全对象及 open 状态完整保留，不能以自动 focus 结果代替 UI Find 补验与完整验收。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-73feb0baf6dd",
@@ -1273,19 +1293,26 @@
           "claim": "正常可读文字须满足实际前景/背景至少4.5:1；中性40对通过不能替代功能色与组合状态验收。",
           "evidence": "#147 F1 Required=3.913738950339162、F2 Conditional=2.2909619612053143、F5 warning caveat lead-in=2.1157592604952824（阶段1 light 浏览器实测）。当前 requiredness/caveat/lifecycle 路径及功能色未改；FieldValueRequirements warning caveat 独立节点仍待 #147 补验。候选 A 仅修正常中性文字与指定 hover，不能把 FieldItem 全部正常文字标为通过。 跟踪：https://github.com/abel-2333-org/geist-nuxt/issues/147。",
           "disposition": "resolved"
+        },
+        {
+          "id": "f-909f4f270010",
+          "severity": "medium",
+          "claim": "关闭动画期间及内部焦点下祖先关闭不应使键盘焦点进入或留在被裁剪的内容中。",
+          "evidence": "PR153补验：Chromium153，1024×900，正常200ms动画。main19a107527d1226585611f4547619320b430fab2a与PR两侧children/value/anyOf均复现：真实Tab到触发器，Enter展开后Space收起并立即Tab；动画中焦点进入后代、被overflow完全裁剪，稳态落BODY。内部真实Tab聚焦后HTMLButtonElement.click()激活祖先既有handler亦复现；后者为程序化激活，非UI快捷键。复现脚本tests/browser/hierarchy-focus.mjs与hierarchy-focus-compare.mjs；报告docs/maintenance/component-audit/reports/2026-09-22-pr153.md；跟踪PR https://github.com/abel-2333-org/geist-nuxt/pull/153 。基线已有但未修复，不计作PR新增回归或完整焦点通过。",
+          "disposition": "open"
         }
       ]
     },
     "api-docs-schema-composition": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T08:01:03.122Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
-      "status": "verified",
+      "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9ac9d7373af5350df6f964e3de1d72b4a907ee9f",
-        "headSha": "6e88427a4974ec5d0577fdc1b1f617f9e0b535da",
-        "itemDigest": "e4ffc24ec0534ff5f51032c21be7b32641d1f28593fb4ea33e2d2642d6fa0bae",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
+        "itemDigest": "bc85d101464309dd4df732304a874c1732efc5a85ec632a5640b357e34b496b4",
         "scope": [
           "app/app.config.ts",
           "app/assets/css/main.css",
@@ -1298,25 +1325,43 @@
           "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/SchemaComposition.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/internal/FieldValueRequirements.vue",
           "kits/api-docs/internal/FieldValueStructure.vue",
+          "kits/api-docs/internal/collapseFocus.ts",
           "kits/api-docs/utils/field.ts",
           "nuxt.config.ts",
           "references/foundations/focus-a11y.md",
+          "references/foundations/spacing-layout.md",
           "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
           "references/kits/api-docs/schema-composition.md",
+          "scripts/build-hierarchy.mjs",
+          "tests/browser/README.md",
+          "tests/browser/hierarchy-discovery.mjs",
+          "tests/browser/hierarchy-evidence.mjs",
+          "tests/browser/hierarchy-fixture.mjs",
+          "tests/browser/hierarchy-focus.mjs",
+          "tests/browser/hierarchy.mjs",
           "tests/component/chrome-labels.spec.ts",
+          "tests/component/collapse-focus.spec.ts",
           "tests/component/field-anchor.spec.ts",
+          "tests/component/field-condition.spec.ts",
+          "tests/component/field-presence.spec.ts",
+          "tests/component/field-type-summary.spec.ts",
           "tests/component/field-value-structure.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/component/schema-composition.spec.ts",
+          "tests/fixtures/hierarchy/index.vue",
+          "tests/fixtures/hierarchy/main.css",
+          "tests/nuxt/hierarchy-fixture.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "f306dd03c968b066b2f5836afaac0f7d426bdd0bcbc718c7fd99d15633838604",
+        "scopeDigest": "818c45e5e896c93870b8860340f012e9f0968b86c50334ff8a64c6682445faa0",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "UTabs / UCollapsible 必须继续转发 unmountOnHide=false，保留隐藏 variant 的 DOM 以支持 deep link；升级后复查 SchemaComposition 的隐藏 panel 与重复揭示行为。"
+            "reason": "UTabs / UCollapsible 必须继续转发 unmountOnHide=false，保留隐藏 variant 的 DOM 以支持 deep link；升级后复查 SchemaComposition 的隐藏 panel 与重复揭示行为。 本轮核对 UCollapsible content slot 直接位于 Reka CollapsibleContent 内，collapseFocus parentElement 定位依赖此 DOM 关系。"
           },
           {
             "name": "marked",
@@ -1331,27 +1376,40 @@
           {
             "name": "reka-ui",
             "version": "2.9.10",
-            "reason": "TabsContent / CollapsibleContent 在 unmountOnHide=false 时必须保留隐藏内容 DOM；升级后复查隐藏字段可寻址及 deep link 展开、滚动链路。"
+            "reason": "TabsContent / CollapsibleContent 在 unmountOnHide=false 时必须保留隐藏内容 DOM；升级后复查隐藏字段可寻址及 deep link 展开、滚动链路。 本轮核对 hidden=until-found、Presence 退出动画及 beforematch 后 RAF 展开语义；升级须复验 focus 和真实 UI Find。"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "4.3.2",
+            "reason": "subtree @utility 的具名 field 容器查询、逻辑缩进与 animate-none! 依赖实际 CSS 扫描生成；影响嵌套 composition 和 trusted native reveal 动画抑制。"
           },
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "watch/响应式 id 状态、组件递归与 optional resolveComponent 必须继续支持重复 deep-link reveal、有效 tab 保留及按 id 独立展开。"
+            "reason": "watch/响应式 id 状态、组件递归与 optional resolveComponent 必须继续支持重复 deep-link reveal、有效 tab 保留及按 id 独立展开。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           }
         ]
       },
-      "notes": "基于9ac9d737完成完整owner审计，在6e88427独立复审修复：anyOf改Map以支持prototype/Vue保留名id；空id deep link与空列表首次/再次加载选中状态区分undefined；discriminator安全code span保留反引号/首尾空格，空或控制字符使用JSON字面量，factory参数仍是原始值。原findings为空；本轮3个发现及红绿证据保留在外部schema-review且均已修复，不以新resolved finding写入ledger。保留原6scope/原NuxtUI+Reka依赖，补实际渲染/anchor/parser/配置/契约/测试scope与Vue/Nuxt/marked行为依赖。最终功能树component36files494（Schema30）、typecheck/build通过；原始precommit构建来源不改标，其digest与6e88427重算一致。无本reviewer新增browser/native-touch/consumer实测声明。 主线程在相同构建输入的真实Chrome生产页面完成light/dark×1440/390四组核验：键盘tabs/独立折叠、隐藏子tab定位并聚焦、收起后重复深链接、无水平溢出，截图检查通过；这是当前本机浏览器回归，不是外部consumer或维护者视觉验收。",
-      "findings": []
+      "notes": "已审 oneOf/anyOf/allOf 的容器与 subtree、anyOf Map 状态及 v-collapse-focus=open.get(view.variant.id) 绑定、重复 deep link、原 discriminator/variant identity 逻辑和 FieldItem 依赖闭包。f-fea517d9f1ac 全对象及 open 状态完整保留；focus 祖先关闭为既有 handler 程序化激活，不代表用户祖先关闭快捷键。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
+      "findings": [
+        {
+          "id": "f-fea517d9f1ac",
+          "severity": "medium",
+          "claim": "关闭动画期间及内部焦点下祖先关闭不应使键盘焦点进入或留在被裁剪的内容中。",
+          "evidence": "PR153补验：Chromium153，1024×900，正常200ms动画。main19a107527d1226585611f4547619320b430fab2a与PR两侧children/value/anyOf均复现：真实Tab到触发器，Enter展开后Space收起并立即Tab；动画中焦点进入后代、被overflow完全裁剪，稳态落BODY。内部真实Tab聚焦后HTMLButtonElement.click()激活祖先既有handler亦复现；后者为程序化激活，非UI快捷键。复现脚本tests/browser/hierarchy-focus.mjs与hierarchy-focus-compare.mjs；报告docs/maintenance/component-audit/reports/2026-09-22-pr153.md；跟踪PR https://github.com/abel-2333-org/geist-nuxt/pull/153 。基线已有但未修复，不计作PR新增回归或完整焦点通过。",
+          "disposition": "open"
+        }
+      ]
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/app.config.ts",
@@ -1386,15 +1444,17 @@
           "tests/component/field-anchor.spec.ts",
           "tests/component/field-condition.spec.ts",
           "tests/component/field-presence.spec.ts",
+          "tests/component/field-type-summary.spec.ts",
           "tests/component/inline-code.spec.ts",
           "tests/component/inline-markdown.spec.ts",
           "tests/component/use-copy.spec.ts",
           "tests/fixtures/contrast/FunctionalApiMatrix.vue",
           "tests/fixtures/contrast/FunctionalMatrix.vue",
           "tests/fixtures/contrast/main.css",
+          "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "d594e67513b921bae593af11f9baf05806e4bbba0ee9f19811c09918cf92cfed",
+        "scopeDigest": "40c3685f07016aead5914caac43b14b517e3a17fea0339ee3726bb63589bb900",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1428,7 +1488,7 @@
           }
         ]
       },
-      "notes": "完整 owner 复审绑定功能 HEAD 90dfa0c003c124b1605e8e99db62116d5aa18f27，base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f。保留全部原 scope/findings/dependencies；逐路径 Git blob 绑定见本报告。521 component、160 registry、31 audit、typecheck、normal build、browser typecheck通过，功能差异已由未参与修复者独立复审；提交前review内7文件SHA256与最终head核对相同。最终source digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b，targeted20/20（24未选中不算全量），另CLI真实Chrome light/dark×1440/390四组通过、零errors/overflow。 required co-review：全部原39scope保留，与已封存batch5完整review逐blob等价；本轮仅外围gallery字段分组h4改变，field/source/requiredness摘要与同页/跨页导航/Popover焦点不变。fresh16 API fixture中真实open portal32样本pass，最小ratio6.487119947951175。原fa41a8fce8a19 resolved及f31f690a2dbaa/ffd7282669072两个wont-fix完整保留；没有把FieldItem复制操作当作本owner独立复制UI验证，无新consumer/人工视觉采纳主张。",
+      "notes": "已审 field/source 选择、fallback、popover 摘要、同页/跨页动作与共享 fieldTypeSummary。新增 array/map 短类型与 FieldItem 使用同一纯函数，再独立附加外层 union，原路由/requiredness/焦点逻辑未改。所有既有 resolved/wont-fix finding 全对象及状态保留。无本 reviewer 新增 annotation portal 浏览器验证。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -1455,13 +1515,13 @@
     },
     "api-docs-event-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/app.config.ts",
@@ -1496,7 +1556,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "81cd00cd6b4bd85e9fa04be4d9274d47523975779dd51a19294914eb689155d4",
+        "scopeDigest": "ac6fae662a1ca7ca7223fe1a0089800bc687e80873c218dbc1df555d28d7bd46",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1535,18 +1595,18 @@
           }
         ]
       },
-      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核唯一EVENT常量、neutral/subtle默认、size透传、mono/translate=no经SemanticBadge抵达UBadge，未建立新词表或按事件动词着色。组件/原子/preset/config未变，gallery字段说明不影响event示例输入；共享subtree无本组件选择器，parser不改语义色。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：不新增任意slot/attrs/全部consumer视觉保证；保持原main事件徽章证据与语义边界。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/app.config.ts",
@@ -1578,7 +1638,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "99d8bbb4cfe43fa6cf0057251fb9dd0dd300855f8c9115b3d6de0ce5b2fa5455",
+        "scopeDigest": "fc71c33f0474db51aef731c4f7f4b4ee1c50ba08ac65b3e9da70a1b6c668de36",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -1622,7 +1682,7 @@
           }
         ]
       },
-      "notes": "完整复审LifecycleNotice五状态、title默认/空白回退/本地化、description/default slot优先、attrs与默认无close；本批gallery四处heading-level修复命中既有scope，change=modified。最终90dfa0c003c124b1605e8e99db62116d5aa18f27的16组实际Notice颜色测试160标题/正文节点全部通过，min=4.651883902576909；四组真实浏览器补验slot链接/attrs/动态状态，两主题两宽度截图已复核。f-b96f3407acc1保留原ID/severity/claim/evidence并标resolved。521组件/160registry/typecheck/build通过；旧9674ef与中间ea1dc10原始证据保留各自来源，不泛化任意slot颜色或外部consumer。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核五endpoint状态共用preset、非空title默认/空白回退、description/default slot优先、UAlert subtle/attrs及默认无close。读取appConfig colored description opacity-100覆盖与UAlert slot前提；组件、preset、config、lock保持main，gallery不改notice输入，CSS新增subtree及parser白名单不改alert绘制。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留 #147 notice resolved finding 原对象及main实测原SHA；不声称本轮重跑16组颜色/slot浏览器矩阵或所有外部slot组合。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-b96f3407acc1",
@@ -1635,13 +1695,13 @@
     },
     "api-docs-operation-target": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/app.config.ts",
@@ -1666,7 +1726,7 @@
           "tests/component/use-copy.spec.ts",
           "tests/fixtures/consumer/app/pages/index.vue"
         ],
-        "scopeDigest": "2381de8a2f4c31e3ed99f37b26dfc594ca57c1c091d751c6b1ef2f8943834694",
+        "scopeDigest": "6fd50114b71e1c6920f0bb0fbef954ea886eada297785a5314c7d92865d1e602",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1700,18 +1760,18 @@
           }
         ]
       },
-      "notes": "完整required co-review；base a1ff6c6b803464a14b8211cb6c1943f9dcd5326f，本轮真实改动app/pages/kits/api-docs/index.vue命中原scope。保留全部原scope/依赖name+reason/历史findings对象，不只是digest刷新。完整通读defineModel prop+listener控制与props-only局部选择、hosts.map(id)原位收敛、activeHost统一trigger/host/完整地址、私有numeric index原始ID回传、空及literal0区别；三复制意图/完整句i18n/包含值的aria-label、真实文本选区结束跳过且keyboard不吞、两原子布局单元与DOM/Tab同序、host先截断/path内部滚动/copy不滚走、SSR deterministic overflow与ResizeObserver、单host降级；上批focus修复与五场景测试不变。 当前组件/契约/测试/lock与上批已审71eb8ca逐scope blob相同；gallery四处FieldGroup标题由h2变h4归入h3字段树，不改变本owner props/状态/样式/复制或周边示例。已有原始实测保持原SHA，不能冒称本轮重跑；最终功能SHA 90dfa0c003c124b1605e8e99db62116d5aa18f27，521组件/160registry/typecheck/productionbuild及browser typecheck通过；20项定向browser通过（16API消费者+4Theme，非全套），真实Chrome四矩阵gallery标题/Enum状态/Theme键盘与SSR行为通过。构建sourceSHA及digest e59aa5b7c4797941ada200fb15fb9d6f64a560b10820290c47ee6022101d4a1b独立重算一致。本owner原scope中仅gallery发生改变，其余路径逐blob保持；所有历史finding及依赖reason原样保留。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 defineModel受控/非受控、host稳定身份与私有numeric index、三个复制意图、真实选区结束不复制/keyboard可激活、完整句反馈、DOM/Tab顺序、两个flex-nowrap原子组、host截断/path滚动及RO渐隐。owning组件/useCopy/USelect前提与lock未变；gallery两处字段说明无target props改动，subtree不会应用于target容器。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重复原生clipboard、fallback与各host交互四矩阵；沿用main已修复focus evidence的原来源，不与本PR字段导航混为同一行为。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T14:02:15.742Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "a1ff6c6b803464a14b8211cb6c1943f9dcd5326f",
-        "headSha": "90dfa0c003c124b1605e8e99db62116d5aa18f27",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/app.config.ts",
@@ -1751,7 +1811,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "55f1b123c0916c5550aa4e6106505f33eb7628facbfc69ba0b28d5dc6a38206b",
+        "scopeDigest": "8964450cfd6d8db2cfa08af6cc5d1607811d83ca8ee78f934b9c742f065516b1",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -1795,7 +1855,7 @@
           }
         ]
       },
-      "notes": "共享gallery四处FieldGroup heading-level=4实际修复触发完整owner co-review；已逐项复核当前组件/preset/公开默认与响应分支、真实消费者、registry、全部既存scope/上游依赖，保留原finding及dependency reason。功能SHA=90dfa0c003c124b1605e8e99db62116d5aa18f27；521组件/160registry/typecheck/build通过，新四组browser证实gallery四处H4。旧9674ef颜色/Header116节点与71eb8ca徽章19实例×4组通过逐blob/lock等价沿用，源码/CSS/默认行为未改，旧raw不改标新SHA；无新增缺陷，任意slot/attrs覆盖和外部consumer不作穷举保证。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 endpoint/webhook discriminated identity、method/path与EVENT/event、headingLevel、summary/lifecycle/action/description slots，读取徽章/preset链路。Header与所依赖徽章源码/config/lock均未变；gallery decoded标签/说明不改其props，新增subtree位于字段/组合内部，不改变Header布局或色值；parser保持同一色矩阵。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：main #147 Header resolved裁定与原证据完整保留；未声称重新执行全部Header116节点/所有slot与consumer视觉验收。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-0fd303fa92c4",
@@ -1808,13 +1868,13 @@
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
-        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -1832,20 +1892,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "2f43fe650c7df404b5648ebea353eaf2be78c40bda06e7b14e1909ea79979e4a"
+        "scopeDigest": "c080a18afeedcb881c8687c6dc7266ea0ce7fbe94988f5be21bda00f610723db"
       },
-      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 #146/#151 CodeRail 的 SplitPane/Handle、useBreakpointGate/useRafTask、breakpoints.ts 与组合测试 scope；先前仅共享条件示例/reference 命中不改调用契约的结论保留。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核fit与overflow两态、MIN_PANE和内容优先预算、effective ARIA ratio/bounds、disabled handle、按当前预算对齐拖动、breakpoint gate、pre/section DOM测量、动态重绑RO/MO、RAF合帧及卸载清理。原scope唯一变化为API Docs字段层级文字，CodeRail/分栏helpers/endpoint与webhook装配和测试不变；内容重分配契约未改变。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新执行多实例真实拖动与所有代码卡内容组合；不把字段subtree样式验收作为CodeRail新布局设计采纳。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T03:45:07.633Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "23bed8705a425300e6dcc9d2c81ae54a6285e29a",
-        "headSha": "9674ef684769fe0eec1acc05b6422ea519867edd",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/assets/css/main.css",
@@ -1875,7 +1935,7 @@
           "tests/fixtures/contrast/main.css",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "8db68854bb20f1cff78794fe349fe9dc714100be85544366f293937ddbb47f7f",
+        "scopeDigest": "b28aa9a8d8de989c06aa563f389d84b23893e2619fd9361e17e65a758722e040",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1894,7 +1954,7 @@
           }
         ]
       },
-      "notes": "复审完整公开默认行为与Nuxt UI/Fuse/Reka依赖；保留旧GET/POST/PATCH/DELETE导航168条，并补真实PUT的24个明暗/视口/路由/原生交互状态。真实ariaSelected=false与before背景分开记录，不将高亮改称持久选中。 本次测试补验来源9674ef684769fe0eec1acc05b6422ea519867edd，digest=6f1814dd7ec5e26bd3381eb3c5b18a656f54d41fcba0a8f7e41589ca4028e415；普通文字使用未舍入>=4.5判定。旧证据保留471c523/ec18ef4各自来源；完整scope/原findings及依赖已独立复审。消费端缺失的Search/Header/Method场景不冒称已验证。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核Fuse静态过滤/全局limit、ignoreFilter与postFilter、异步debounce和stale cleanup、emptyRef驱动持久polite三态、UModal可访问名、关闭清空query与同页hash焦点分工；读取CommandPalette input attrs及Modal title上游实现。Search/MethodBadge/config/lock均未变；subtree不命中搜索门户，文档变更在字段章节，parser不改搜索所用色值。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留两条main resolved finding原对象；未重新运行所有GET/POST/PUT/PATCH/DELETE门户状态或真实读屏器，不以静态矩阵替代这些历史实测。 历史浏览器证据维持原来源 9674ef684769fe0eec1acc05b6422ea519867edd，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -1914,13 +1974,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-21T12:45:52.900Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "72b82646b2b941ceae1244fa607309cd86a10463",
-        "headSha": "c02de4625ec6f82a26e2f48fdb78e332720f8be0",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -1935,9 +1995,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "4115a280b3c1ec47f354d38bf18d8b71ab13eaef5d4c63deb50723e209d4e34c"
+        "scopeDigest": "5ee5f3df408d45880a25e652287bed374e312dac0a37a4cc7dabfb261975e84b"
       },
-      "notes": "本轮功能证据 c02de4625ec6f82a26e2f48fdb78e332720f8be0，合格红基线 3e96f93c68531cc7d11fe703937e4117dc59a188；真实 M 八项 gate 全部 exit 0：registry 40 items/59 files；registry tests 156、agent 20、component 35 files/457 tests（明确使用 pnpm test:component --maxWorkers=2）；typecheck、normal build、contrast build 通过；完整 browser 36/36。独立 raw 审计通过：806 主条目=原 34 场景/762 身份完整保留+两主题各22 motion端点；928 测量对象（含侧车）复算最大 ratio差1.7763568394002505e-15，全部正常条目原始最低4.795896291213259；M digest83c73dcc1e77f3018105d16444266d70f2bf3a845497190a73f20fdd5786f02f。R2完整命令34pass/2fail仅motion断言，红绿四份spec和measure同字节；原F03双主题四反例仍拒绝、16个正常控制/恢复及所有旧rejection侧车均保留。正常M gallery实际 /200、/__contrast404；双主题normal-motion原始录屏/readback各12状态，未剪辑；视频字节/记录来源已核，维护者人工视觉批准未完成。reviewComplete仅指本轮source技术证据及owner scope审阅，不是外部独立复审或维护者验收。\n相对 canonical 72b 的实际命中：references/kits/api-docs/index.md。相对上一轮 a122，本 owner scope 命中：无新增组件源码变化；继承历史 review 并以本轮适用回归复核。\n保留 canonical #150/#151 的组件结构、调用/reference 审阅结论与全部 scope/依赖；本次 scope 命中不扩大公开契约。\n相对 a122，本 owner 的既有 scope 没有本轮新增文件改动；仍因累计 PR 相对 72b 的原共享 reference/组件改动属于 required affected。保留 canonical #150/#151 结构事实与 F03 复审 scope/deps；本轮 M 的 457 组件项及完整 36 browser 场景已实际通过，独立复核原34场景/762身份、F03反例与控制完整；当前M实际consumer来源/安装更新及normal-gallery隔离/录屏材料已补齐；旧SHA记录保持原身份，各证据不替代维护者视觉验收。\nverified 只表达本 owner 已审 scope 的结论；独立任务复审/维护者视觉验收仍独立待完成。\n消费者范围：实际在独立source clone对M运行fresh api-docs-field-item（10 items/21 files，独立install/check/typecheck/build/SSR通过）及官方all-items a122→M upgrade（40 items/59→59 files，独立install/check/typecheck/build通过）；两条命令exit0，无--skip-install。三个lock一致快照共139个受管文件逐字节对照各自Git source，upgrade仅FieldItem 1 update/58 unchanged；fresh与upgrade FieldItem SHA256均6dffa9363efd2c9874583c8cd5a9981297feabbe2838e4f0a7b9abe99ead3c00，实际两份编译CSS均含.transition-none{transition-property:none}。两个consumer独立依赖目录使用Nuxt4.5.2/@nuxt/ui4.11.1/Tailwind4.3.3/Vue3.5.43；这与仓库锁定测量依赖分列，台账dependency仍由M lock自动解析。默认consumer页面无presence.optional：未追加consumer浏览器、键盘、主题/瞬态或视觉验收，upgrade也无额外SSR；不将这些安装证据等同于root browser motion验证。原53/M2/N历史证据不改绑。",
+      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核三段独立正文省略、ACK literal/echo/intentional-empty建模、fact format显式opt-in与安全InlineMarkdown、FactList/FactRow dl语义、schedule总结句真源/chips隐藏、阈值和Show N more可见可访问名。owning四文件、专属reference/示例/tests均不变；唯一命中为API Docs index新增字段层级章节，不改变协议事实或重试展示契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留已resolved的schedule命名finding原对象；不验证签名/网络重试业务，也未新增实际业务consumer或整套视觉验收。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -1998,13 +2058,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 4,
-      "lastAuditedAt": "2026-09-23T11:51:01.028Z",
+      "lastAuditedAt": "2026-09-23T15:51:16.833Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "cdd1956c38b2be5eb0788e1c5d38460e26adb458",
-        "headSha": "71eb8ca81d7c7f72050d634ef71a26570ac649f4",
+        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
+        "headSha": "70d2dc0b0b3f8f923bd642f14540160db323eeb8",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/app.config.ts",
@@ -2017,24 +2077,41 @@
           "kits/api-docs/components/FieldItem.vue",
           "kits/api-docs/components/RelationSourcePath.vue",
           "kits/api-docs/composables/useFieldAnchor.ts",
+          "kits/api-docs/internal/FieldValueRequirements.vue",
+          "kits/api-docs/internal/FieldValueStructure.vue",
+          "kits/api-docs/internal/collapseFocus.ts",
           "kits/api-docs/utils/field.ts",
           "nuxt.config.ts",
           "references/foundations/focus-a11y.md",
+          "references/foundations/spacing-layout.md",
           "references/foundations/tokens.md",
           "references/kits/api-docs/index.md",
+          "scripts/build-hierarchy.mjs",
+          "tests/browser/README.md",
+          "tests/browser/hierarchy-discovery.mjs",
+          "tests/browser/hierarchy-evidence.mjs",
+          "tests/browser/hierarchy-fixture.mjs",
+          "tests/browser/hierarchy-focus.mjs",
+          "tests/browser/hierarchy.mjs",
           "tests/component/chrome-labels.spec.ts",
+          "tests/component/collapse-focus.spec.ts",
           "tests/component/field-anchor.spec.ts",
+          "tests/component/field-type-summary.spec.ts",
+          "tests/component/hierarchy-subtree.spec.ts",
           "tests/component/relation-source-path.spec.ts",
           "tests/component/structured-relations-recipe.spec.ts",
           "tests/component/use-copy.spec.ts",
+          "tests/fixtures/hierarchy/index.vue",
+          "tests/fixtures/hierarchy/main.css",
+          "tests/nuxt/hierarchy-fixture.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "70c63b9e3affb55c72fe50cc16239277bf64dfd86c0ff963fcc2635898a40edd",
+        "scopeDigest": "ad7005216c8caf6580262bef0e07ccc0b3d5a481dc716ab08651f904d67fd8de",
         "dependencies": [
           {
             "name": "@nuxt/ui",
             "version": "4.9.0",
-            "reason": "ULink 必须保持 to 对 NuxtLink 的路由转发与根 anchor attrs/classes；跨页链接的可访问名称、focus-visible 和 touch-manipulation 由实际根承载。"
+            "reason": "ULink 必须保持 to 对 NuxtLink 的路由转发与根 anchor attrs/classes；跨页链接的可访问名称、focus-visible 和 touch-manipulation 由实际根承载。 本轮核对 UCollapsible content slot 直接位于 Reka CollapsibleContent 内，collapseFocus parentElement 定位依赖此 DOM 关系。"
           },
           {
             "name": "nuxt",
@@ -2044,7 +2121,7 @@
           {
             "name": "reka-ui",
             "version": "2.9.10",
-            "reason": "ULinkBase 的 Primitive 必须按 href 渲染原生 anchor 并保留 children/attrs；同页 FieldItem 的 Collapsible 依赖受控展开。"
+            "reason": "ULinkBase 的 Primitive 必须按 href 渲染原生 anchor 并保留 children/attrs；同页 FieldItem 的 Collapsible 依赖受控展开。 本轮核对 hidden=until-found、Presence 退出动画及 beforematch 后 RAF 展开语义；升级须复验 focus 和真实 UI Find。"
           },
           {
             "name": "tailwindcss",
@@ -2054,7 +2131,7 @@
           {
             "name": "vue",
             "version": "3.5.39",
-            "reason": "computed 与受控组件响应更新、scope disposal 保持路径/labels 和导航 owner 生命周期一致。"
+            "reason": "computed 与受控组件响应更新、scope disposal 保持路径/labels 和导航 owner 生命周期一致。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           },
           {
             "name": "vue-router",
@@ -2063,7 +2140,7 @@
           }
         ]
       },
-      "notes": "完整required co-review，functional 71eb8ca81d7c7f72050d634ef71a26570ac649f4：原scope/依赖/历史finding完整保留，base对封存完整owner复审逐blob等价；本轮仅共享useCopy fallback焦点修复改变其行为依赖。已审完整owning契约、调用链和5分支fallback回归，37spec515组件项、160registry及typecheck/build通过。FieldItem copyLink仅复制不导航；Annotation/Relation的goTo导航不调用fallback，副作用边界保持。旧#147色彩/browser证据保留原SHA，不冒充本轮重测；最终71eb8ca8 production browser的OperationTarget→useCopy三个故障注入fallback恢复focus，0pageerror，source digest0424671ce217a911e3a2effd5dfe8135110cc68bb30c51d504429c5edcd1b2b7独立重算一致。此为共享useCopy浏览器证据，不声称本轮重跑FieldItem/Annotation/Relation本节点浏览器或consumer。",
+      "notes": "已审 RelationSourcePath 的跨页优先、同页 modifier click、opaque hash 单次编码与 useFieldAnchor 链路；本体与 anchor 相对 base 未改，共享 FieldItem/field utils/CSS 的层级调整及值摘要不改目标身份，value 根/中间节点仍保留独立锚点。补被导航折叠区域/helper/测试 scope。无本 reviewer 新增本节点 browser 或 consumer 验证。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。",
       "findings": []
     }
   }
