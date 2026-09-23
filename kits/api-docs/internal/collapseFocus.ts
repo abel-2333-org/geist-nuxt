@@ -2,8 +2,19 @@ import type { ObjectDirective } from 'vue'
 
 // Limit inert to collapsing and clipped expansion. Stable hidden-until-found content must stay
 // discoverable by native find and fragment navigation, which emit beforematch.
-type FocusState = { opening: boolean, hidden: MutationObserver, size: ResizeObserver }
+type FocusState = {
+  content: HTMLElement
+  opening: boolean
+  nativeReveal: boolean
+  frame: number
+  beforematch: (event: Event) => void
+  hidden: MutationObserver
+  size: ResizeObserver
+}
 const states = new WeakMap<HTMLElement, FocusState>()
+// A class avoids contaminating Reka's cached inline animationName. Keep it
+// until this open cycle ends: removing it while open restarts the keyframes.
+const nativeRevealAnimation = 'animate-none!'
 
 // Each directive sits on the existing content-slot root: Nuxt UI 4.9 renders
 // that slot directly inside Reka CollapsibleContent. Recheck on dependency upgrades.
@@ -34,7 +45,25 @@ export const vCollapseFocus: ObjectDirective<HTMLElement, boolean | undefined> =
       else releaseExpanded()
     })
     const size = new ResizeObserver(releaseExpanded)
-    states.set(region, { opening: false, hidden, size })
+    const beforematch = (event: Event) => {
+      if (!event.isTrusted || event.target !== content || content.getAttribute('hidden') !== 'until-found') return
+      const state = states.get(region)!
+      state.nativeReveal = true
+      content.classList.add(nativeRevealAnimation)
+      cancelAnimationFrame(state.frame)
+      // Reka toggles open in its own RAF. Allow that frame and Vue's patch
+      // before discarding a reveal which never became an open transition.
+      state.frame = requestAnimationFrame(() => {
+        state.frame = requestAnimationFrame(() => {
+          state.frame = 0
+          if (states.get(region) !== state || !state.nativeReveal) return
+          state.nativeReveal = false
+          content.classList.remove(nativeRevealAnimation)
+        })
+      })
+    }
+    states.set(region, { content, opening: false, nativeReveal: false, frame: 0, beforematch, hidden, size })
+    content.addEventListener('beforematch', beforematch)
     hidden.observe(content, { attributes: true, attributeFilter: ['hidden'] })
     size.observe(content)
   },
@@ -44,6 +73,14 @@ export const vCollapseFocus: ObjectDirective<HTMLElement, boolean | undefined> =
     const state = states.get(region)
     if (state) state.opening = Boolean(value)
     if (value) {
+      if (state?.nativeReveal) {
+        state.nativeReveal = false
+        state.opening = false
+        cancelAnimationFrame(state.frame)
+        state.frame = 0
+        release(content)
+        return
+      }
       content.setAttribute('inert', '')
       return
     }
@@ -61,9 +98,23 @@ export const vCollapseFocus: ObjectDirective<HTMLElement, boolean | undefined> =
     }
     if (content.hasAttribute('hidden')) release(content)
     else content.setAttribute('inert', '')
+    if (state) {
+      state.nativeReveal = false
+      cancelAnimationFrame(state.frame)
+      state.frame = 0
+    }
+  },
+  updated(region, { value, oldValue }) {
+    // The content's closed data-state is patched before resuming keyframes.
+    if (!value && oldValue) contentFor(region).classList.remove(nativeRevealAnimation)
   },
   unmounted(region) {
     const state = states.get(region)
+    if (state) {
+      cancelAnimationFrame(state.frame)
+      state.content.removeEventListener('beforematch', state.beforematch)
+      state.content.classList.remove(nativeRevealAnimation)
+    }
     state?.hidden.disconnect()
     state?.size.disconnect()
     states.delete(region)

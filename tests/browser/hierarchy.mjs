@@ -199,11 +199,16 @@ try {
     await page.evaluate(theme => { localStorage.setItem('nuxt-color-mode', theme); document.documentElement.classList.toggle('dark', theme === 'dark') }, theme)
     await expandValues()
     const measurements = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, viewport: innerWidth,
-      compact: document.querySelector('#out_extra [data-compact]')?.getAttribute('data-compact') }))
+      wireType: document.querySelector('#out_extra [data-field-type]')?.textContent.trim(),
+      valueSummary: document.querySelector('#out_extra [data-value-shape-summary]')?.textContent.trim(),
+      valueNotation: document.querySelector('#out_extra [data-value-shape-summary] [translate="no"]')?.textContent.trim() }))
     measurements.regions = await measureSubtrees('[data-value-structure-region]')
     measurements.nested = await measureSubtrees('#tx_txnOrderMsg .subtree')
     assert.ok(measurements.scrollWidth <= width)
-    assert.equal(measurements.compact, 'presence')
+    assert.equal(measurements.wireType, 'string | null')
+    assert.ok(measurements.valueSummary.includes(measurements.valueNotation))
+    assert.equal((measurements.valueSummary.match(/\bjson\b/g) ?? []).length, 1)
+    assert.equal(measurements.valueNotation, 'object | "{}"')
     assertSubtrees(measurements.regions, 'value regions')
     assertSubtrees(measurements.nested, 'nested transaction values')
     // Closing an ancestor preserves the independently chosen inner disclosure state.
@@ -223,11 +228,13 @@ try {
     report.checks.push(`${theme}/${width}: parent reopen preserves both open and closed child state`)
     if (width === 320) {
       // DOM-only stress substitution, deliberately not represented as a real source fixture.
-      const notation = page.locator('#out_extra [data-value-presence]').first()
+      const notation = page.locator('#out_extra [data-value-shape-summary] [translate="no"]').first()
       const original = await notation.textContent()
-      const notationBoxes = () => page.locator('#out_extra [data-compact]').first().evaluate(el => {
+      const notationBoxes = () => page.locator('#out_extra [data-value-shape-summary]').first().evaluate(el => {
         const box = node => { const r = node.getBoundingClientRect(); return { tag: node.tagName, width: r.width, height: r.height } }
-        return { container: box(el), cells: [...el.querySelectorAll('dt, dd, dl')].map(box), scrollWidth: document.documentElement.scrollWidth, viewport: innerWidth }
+        return { container: box(el.parentElement), summary: box(el), spans: [...el.querySelectorAll('span')].map(box),
+          notation: el.querySelector('[translate="no"]').textContent,
+          scrollWidth: document.documentElement.scrollWidth, viewport: innerWidth }
       })
       const before = await notationBoxes()
       await notation.evaluate(el => { el.textContent = 'json<object_with_an_intentionally_long_unbroken_presence_notation[]> | null | "{}"' })
@@ -236,6 +243,7 @@ try {
       assert.ok(after.scrollWidth <= after.viewport)
       await page.locator('#out_extra').screenshot({ style: screenshotStyle, path: path.join(output, `${theme}-320-dom-stress-notation.png`) })
       await notation.evaluate((el, text) => { el.textContent = text }, original)
+      assert.equal(await notation.textContent(), measurements.valueNotation)
       report.checks.push(`${theme}/320: DOM-only long-notation stress, no horizontal page overflow`)
     }
     report.measurements.push({ theme, width, ...measurements })

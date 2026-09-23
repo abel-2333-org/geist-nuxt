@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fieldTypeSummary } from '../utils/field'
 // Field form of the Annotation family (kits/api-docs → FieldAnnotation):
 // previews a FieldNode summary (name / type / requiredness / description) and
 // deep-links into the reference field row.
@@ -81,7 +82,7 @@ const requiredState = computed(() => (node.value ? fieldRequiredState(node.value
 // popover previews the row, so it must show exactly the notation the row
 // shows (`name?`, `string | null | ""`).
 const presence = computed(() => describeFieldPresence(node.value?.presence))
-const typeExpression = computed(() => presenceTypeExpression(node.value?.type, presence.value.unionTail))
+const typeExpression = computed(() => presenceTypeExpression(node.value ? fieldTypeSummary(node.value) : undefined, presence.value.unionTail))
 
 const route = useRoute()
 const anchor = useFieldAnchor()

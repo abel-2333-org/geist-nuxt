@@ -93,6 +93,67 @@ afterEach(() => {
 })
 
 describe('collapse focus lifecycle', () => {
+  // Unit-level event provenance stub only. Real Chrome UI Find separately
+  // verifies browser-issued isTrusted and first-match highlighting.
+  function reveal(content: HTMLElement, trusted = true) {
+    const event = new Event('beforematch', { bubbles: true })
+    Object.defineProperty(event, 'isTrusted', { value: trusted })
+    content.dispatchEvent(event)
+  }
+
+  it('keeps one native reveal discoverable, then restores ordinary animation and focus protection', async () => {
+    const view = render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', 'until-found')
+    reveal(content)
+    expect(content.classList.contains('animate-none!')).toBe(true)
+    // An unrelated update while Reka's native-open RAF is pending must not
+    // clear animation suppression yet leave the reveal permission live.
+    await view.setProps({ controlRegion: true })
+    expect(content.classList.contains('animate-none!')).toBe(true)
+    content.removeAttribute('hidden')
+    await view.setProps({ open: true })
+    expect(content.hasAttribute('inert')).toBe(false)
+    expect(content.classList.contains('animate-none!')).toBe(true)
+    element('inside').focus()
+    await view.setProps({ open: false })
+    expect(document.activeElement).toBe(element('trigger'))
+    expect(content.hasAttribute('inert')).toBe(true)
+    expect(content.classList.contains('animate-none!')).toBe(false)
+    await view.setProps({ open: true })
+    expect(content.hasAttribute('inert')).toBe(true)
+    resizeContent(100, 100)
+    expect(content.hasAttribute('inert')).toBe(false)
+  })
+
+  it('ignores synthetic events and child events outside the revealed content identity', async () => {
+    const view = render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', 'until-found')
+    reveal(content, false)
+    reveal(element('inside'))
+    expect(content.classList.contains('animate-none!')).toBe(false)
+    await view.setProps({ open: true })
+    expect(content.hasAttribute('inert')).toBe(true)
+  })
+
+  it('discards an unconsumed reveal and clears its listener on unmount', async () => {
+    vi.useFakeTimers()
+    const view = render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', 'until-found')
+    reveal(content)
+    await vi.runAllTimersAsync()
+    expect(content.classList.contains('animate-none!')).toBe(false)
+    reveal(content)
+    view.unmount()
+    wrapper = undefined
+    expect(content.classList.contains('animate-none!')).toBe(false)
+    reveal(content)
+    expect(content.classList.contains('animate-none!')).toBe(false)
+    await vi.runAllTimersAsync()
+  })
+
   it.each([false, true])('restores internal focus using the ARIA relation (region control: %s)', async (controlRegion) => {
     const view = render({ controlRegion })
     element('inside').focus()

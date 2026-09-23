@@ -702,6 +702,27 @@ export function describeValueRequirements(
   }
 }
 
+/** A short wire-type signature. Only an explicit, single value level is folded
+ * into the signature; nested and encoded boundaries remain visible in prose.
+ * Opaque author type strings are never parsed or rewritten. */
+export function fieldTypeSummary(node: Pick<FieldNode, 'type' | 'value'>): string | undefined {
+  const value = node.value
+  if (!value?.type || value.value) return node.type
+  const expression = presenceTypeExpression(value.type, describeValuePresence(value.presence).unionTail)
+  if (node.type === 'array' && value.relation === 'item') return `array<${expression}>`
+  if (node.type === 'object' && value.relation === 'member') return `map<string, ${expression}>`
+  return node.type
+}
+
+/** Presentation only: preserve node identities and the navigation graph.
+ * Rich requirements keep the existing scoped renderer and compact union.
+ * Simple type/presence/constraint facts can be read before opening properties. */
+export function summarizeFieldValue(node: FieldValueNode): boolean {
+  return !node.description && !node.enumValues?.length && !node.enumVariants?.length
+    && !node.examples?.length && node.defaultValue === undefined
+    && !(node.notes ?? []).some(note => note.kind === 'caveat' || !note.label)
+}
+
 /** Outline level of variant section headings. Nested compositions render one
  *  level deeper, capped at 6. */
 export type HeadingLevel = 3 | 4 | 5 | 6

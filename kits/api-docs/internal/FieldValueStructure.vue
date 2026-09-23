@@ -39,6 +39,8 @@ const props = defineProps<{
   value: FieldValueNode
   /** Decode boundaries already represented by the owner or an ancestor token. */
   representedCodecs?: readonly FieldValueNode[]
+  /** Facts already visible in the owner overview; anchors remain here. */
+  summarizedNodes?: readonly FieldValueNode[]
   /**
    * Chrome already resolved by the owner FieldItem against its defaults, so
    * every default string exists once. The fold reuses `showChildren` /
@@ -128,17 +130,17 @@ const requirementBlocks = computed(() => {
 // rule (one constraint → one row) is the same fact whether it is rendered here
 // or asserted in a test.
 const inlineBlocks = computed(() =>
-  inlineNodes.value.flatMap(n => requirementBlocks.value.get(n) ?? []))
+  inlineNodes.value.flatMap(n => props.summarizedNodes?.includes(n) ? [] : requirementBlocks.value.get(n) ?? []))
 // Identity-only nodes still own public anchors. They overlay the containing
 // field (or enclosing value region) without creating an empty requirements row.
 const inlineAnchorNodes = computed(() => inlineNodes.value.filter(node =>
-  node.path && !describeValueRequirements(node, props.chrome)))
+  node.path && (props.summarizedNodes?.includes(node) || !describeValueRequirements(node, props.chrome))))
 const regionEntries = computed(() => regionNodes.value.map(node => ({
   node,
-  block: requirementBlocks.value.get(node),
+  block: props.summarizedNodes?.includes(node) ? null : requirementBlocks.value.get(node),
 })).filter(entry => entry.block || entry.node === regionLast.value))
 const regionAnchorNodes = computed(() => regionNodes.value.filter(node =>
-  node !== props.value && node !== regionLast.value && node.path && !describeValueRequirements(node, props.chrome)))
+  node !== props.value && node !== regionLast.value && node.path && (props.summarizedNodes?.includes(node) || !describeValueRequirements(node, props.chrome))))
 
 // Deep linking, same contract as the field row: a link into a collapsed value
 // root or one of its properties must reveal itself. Membership in the collected
@@ -191,7 +193,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
         aria-hidden="true"
       />
-      <FieldValueRequirements :block="block" :chrome="chrome" :labels="labels" />
+      <FieldValueRequirements v-if="!summarizedNodes?.includes(block.node)" :block="block" :chrome="chrome" :labels="labels" />
     </div>
 
     <!-- Structure region. One disclosure per boundary the reader crosses. -->
@@ -204,7 +206,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         <button
           type="button"
           data-value-structure-toggle
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex min-h-8 touch-manipulation items-center gap-1.5 rounded-sm px-2 text-sm font-medium text-primary hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"
@@ -278,7 +280,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
               aria-hidden="true"
             />
             <FieldValueRequirements
-              v-if="entry.block"
+              v-if="entry.block && !summarizedNodes?.includes(entry.node)"
               :block="entry.block"
               :chrome="chrome"
               :labels="labels"

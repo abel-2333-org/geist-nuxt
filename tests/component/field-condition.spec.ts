@@ -229,10 +229,15 @@ describe('FieldItem presence condition list', () => {
         fields: [{ path: 'sku', name: 'sku', type: 'string' }],
       },
     })
-    const scope = wrapper.get('[data-value-requirements] [data-value-presence]')
-    expect(scope.get('p').text()).toBe('object | null')
-    expect(scope.findAll('[data-value-presence-condition]')).toHaveLength(1)
-    expect(scope.findAll('[data-value-presence-condition] li')).toHaveLength(2)
+    const scope = wrapper.get('[data-value-summary-condition]')
+    expect(wrapper.get('[data-field-type]').text()).toBe('array<object | null>')
+    expect(wrapper.findAll('[data-value-summary-condition]')).toHaveLength(1)
+    expect(scope.findAll('li').map(entry => entry.text())).toEqual([
+      'Each item: null when the SKU was retired.',
+      'Each item: null while the item is being re-priced.',
+    ])
+    expect(scope.findAll('code')).toHaveLength(2)
+    expect(scope.element.closest('[hidden]')).toBeNull()
     expect(wrapper.find('[data-field-presence-condition]').exists()).toBe(false)
   })
 })
