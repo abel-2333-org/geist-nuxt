@@ -1,0 +1,143 @@
+{
+  "source": {
+    "sha": "ec28ece66fb16d94143af81df997fe26a14eb372",
+    "digest": "4892ee6facb93d3e78a5af2ed642dc96d169be838cfe68b2a98cdc1085f63e3d",
+    "builtAt": "2026-09-23T16:57:50.546Z"
+  },
+  "route": "/kits/api-docs",
+  "theme": "light",
+  "state": "font-feature-controlled-shadow-geometry",
+  "computed": {
+    "target": {
+      "text": "?",
+      "rect": {
+        "x": 124.40625,
+        "y": 492.1875,
+        "width": 12.40625,
+        "height": 16,
+        "top": 492.1875,
+        "right": 136.8125,
+        "bottom": 508.1875,
+        "left": 124.40625
+      },
+      "range": {
+        "x": 126.40625,
+        "y": 491.1875,
+        "width": 8.40625,
+        "height": 18,
+        "top": 491.1875,
+        "right": 134.8125,
+        "bottom": 509.1875,
+        "left": 126.40625
+      },
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(107, 48, 207)",
+      "fontFamily": "\"Geist Mono\", \"Geist Mono Fallback: Courier New\", \"Geist Mono Fallback: Roboto Mono\", \"Geist Mono Fallback: Noto Sans Mono\", ui-monospace, \"SF Mono\", Menlo, monospace",
+      "fontSize": "14px",
+      "fontFeatureSettings": "normal",
+      "fontVariationSettings": "normal",
+      "display": "inline-block",
+      "lineHeight": "16px",
+      "focused": true
+    },
+    "tooltip": {
+      "rect": {
+        "x": 55,
+        "y": 460,
+        "width": 152,
+        "height": 24,
+        "top": 460,
+        "right": 207,
+        "bottom": 484,
+        "left": 55
+      },
+      "state": "instant-open",
+      "side": "top",
+      "boxShadow": "rgb(255, 255, 255) -0.390625px 8.09375px 0px 0px",
+      "outline": {
+        "style": "none",
+        "width": "3px",
+        "offset": "0px",
+        "color": "rgb(23, 23, 23)"
+      },
+      "color": "rgb(23, 23, 23)",
+      "opacity": "1",
+      "transform": "none",
+      "translate": "none",
+      "scale": "none",
+      "rotate": "none",
+      "inlineStyle": "--reka-tooltip-content-transform-origin: var(--reka-popper-transform-origin); --reka-tooltip-content-available-width: var(--reka-popper-available-width); --reka-tooltip-content-available-height: var(--reka-popper-available-height); --reka-tooltip-trigger-width: var(--reka-popper-anchor-width); --reka-tooltip-trigger-height: var(--reka-popper-anchor-height); box-shadow: rgb(255, 255, 255) -0.390625px 8.09375px 0px 0px !important;",
+      "popper": {
+        "rect": {
+          "x": 55,
+          "y": 460,
+          "width": 152,
+          "height": 24,
+          "top": 460,
+          "right": 207,
+          "bottom": 484,
+          "left": 55
+        },
+        "translate": "none",
+        "transform": "matrix(1, 0, 0, 1, 55, 460)",
+        "scale": "none",
+        "rotate": "none",
+        "inlineStyle": "position: fixed; left: 0px; top: 0px; transform: translate(55px, 460px); min-width: max-content; --reka-popper-transform-origin: 50% 24px; z-index: auto; --reka-popper-available-width: 1424px; --reka-popper-available-height: 476.1875px; --reka-popper-anchor-width: 12.40625px; --reka-popper-anchor-height: 16px;"
+      }
+    }
+  },
+  "guardShadow": {
+    "boxShadow": "rgb(255, 255, 255) -0.390625px 8.09375px 0px 0px",
+    "lengths": [
+      -0.390625,
+      8.09375,
+      0,
+      0
+    ],
+    "caster": {
+      "x": 55,
+      "y": 460,
+      "width": 152,
+      "height": 24,
+      "top": 460,
+      "right": 207,
+      "bottom": 484,
+      "left": 55
+    },
+    "bounds": {
+      "left": 54.609375,
+      "right": 206.609375,
+      "top": 468.09375,
+      "bottom": 492.09375
+    }
+  },
+  "normalBounds": {
+    "raw": {
+      "left": 126.40625,
+      "right": 134.8125,
+      "top": 491.1875,
+      "bottom": 509.1875
+    },
+    "used": {
+      "left": 126.40625,
+      "right": 134.8125,
+      "top": 493,
+      "bottom": 509.1875
+    },
+    "glyph": {
+      "top": 493,
+      "glyph": "?",
+      "font": "14px \"Geist Mono\", \"Geist Mono Fallback: Courier New\", \"Geist Mono Fallback: Roboto Mono\", \"Geist Mono Fallback: Noto Sans Mono\", ui-monospace, \"SF Mono\", Menlo, monospace",
+      "language": "zh-CN",
+      "primaryFace": {
+        "family": "Geist Mono",
+        "status": "loaded",
+        "unicodeRange": "U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD"
+      },
+      "fontBoundingBoxAscent": 14,
+      "actualBoundingBoxAscent": 10.164000511169434,
+      "baselineAllowance": 0.5,
+      "rasterAllowance": 1
+    }
+  }
+}
