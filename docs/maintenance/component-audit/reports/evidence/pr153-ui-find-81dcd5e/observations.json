@@ -1,0 +1,586 @@
+[
+  {
+    "side": "base",
+    "entry": "children",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3028/kits/api-docs",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-18",
+        "isTrusted": true,
+        "time": 78944.5
+      }
+    ],
+    "expanded": "true",
+    "target": "body_gitSource_repoId",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-18",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档API 文档场景 API 文档场景的领域组件："
+    },
+    "afterTab": {
+      "url": "http://127.0.0.1:3028/kits/api-docs",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "isTrusted": true,
+          "time": 78944.5
+        }
+      ],
+      "expanded": "true",
+      "target": "body_gitSource_repoId",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BODY",
+        "label": null,
+        "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档API 文档场景 API 文档场景的领域组件："
+      }
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3028/kits/api-docs",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "isTrusted": true,
+          "time": 78944.5
+        }
+      ],
+      "expanded": "true",
+      "target": "body_gitSource_repoId",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to ref",
+        "text": ""
+      }
+    }
+  },
+  {
+    "side": "base",
+    "entry": "children",
+    "state": "initial",
+    "match": "0/0",
+    "expanded": "false",
+    "hidden": "",
+    "inert": false,
+    "events": [],
+    "keyboard": "not revealed; not accepted"
+  },
+  {
+    "side": "base",
+    "entry": "value",
+    "state": "initial",
+    "match": "0/0",
+    "url": "http://127.0.0.1:3028/kits/api-docs",
+    "events": [],
+    "expanded": "false",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "hidden": "",
+        "inert": false,
+        "state": "closed"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "closed"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档API 文档场景 API 文档场景的领域组件："
+    }
+  },
+  {
+    "side": "base",
+    "entry": "value",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3028/kits/api-docs",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "isTrusted": true,
+        "time": 30478.299999952316
+      }
+    ],
+    "expanded": "true",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档API 文档场景 API 文档场景的领域组件："
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3028/kits/api-docs",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-25",
+          "isTrusted": true,
+          "time": 30478.299999952316
+        }
+      ],
+      "expanded": "true",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-25",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to products",
+        "text": ""
+      }
+    }
+  },
+  {
+    "side": "base",
+    "entry": "anyOf",
+    "state": "initial",
+    "match": "0/0",
+    "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition",
+    "events": [],
+    "expanded": "false",
+    "target": "contact_phone_number",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "hidden": "",
+        "inert": false,
+        "state": "closed"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "closed"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档Schema 组合SchemaComposit"
+    }
+  },
+  {
+    "side": "base",
+    "entry": "anyOf",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "isTrusted": true,
+        "time": 44816
+      }
+    ],
+    "expanded": "true",
+    "target": "contact_phone_number",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositions__hierarchyApi Docs文档Schema 组合SchemaComposit"
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-11",
+          "isTrusted": true,
+          "time": 44816
+        }
+      ],
+      "expanded": "false",
+      "target": "contact_phone_number",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-11",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to sms_opt_in",
+        "text": ""
+      }
+    }
+  },
+  {
+    "side": "head",
+    "entry": "children",
+    "state": "initial",
+    "match": "0/0",
+    "url": "http://127.0.0.1:3033/kits/api-docs",
+    "events": [],
+    "expanded": "false",
+    "target": "body_gitSource_repoId",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-18",
+        "hidden": "",
+        "inert": false,
+        "state": "closed"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "closed"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档API 文档场景 API 文档场景的领域组件：代码块 CodeBlo"
+    }
+  },
+  {
+    "side": "head",
+    "entry": "children",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3033/kits/api-docs",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-18",
+        "isTrusted": true,
+        "time": 42481.299999952316
+      }
+    ],
+    "expanded": "true",
+    "target": "body_gitSource_repoId",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-18",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档API 文档场景 API 文档场景的领域组件：代码块 CodeBlo"
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3033/kits/api-docs",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "isTrusted": true,
+          "time": 42481.299999952316
+        }
+      ],
+      "expanded": "true",
+      "target": "body_gitSource_repoId",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-18",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to ref",
+        "text": ""
+      }
+    }
+  },
+  {
+    "side": "head",
+    "entry": "value",
+    "state": "initial",
+    "match": "0/0",
+    "url": "http://127.0.0.1:3033/kits/api-docs",
+    "events": [],
+    "expanded": "false",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "hidden": "",
+        "inert": false,
+        "state": "closed"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "closed"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档API 文档场景 API 文档场景的领域组件：代码块 CodeBlo"
+    }
+  },
+  {
+    "side": "head",
+    "entry": "value",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3033/kits/api-docs",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "isTrusted": true,
+        "time": 30355.700000047684
+      }
+    ],
+    "expanded": "true",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-25",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档API 文档场景 API 文档场景的领域组件：代码块 CodeBlo"
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3033/kits/api-docs",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-25",
+          "isTrusted": true,
+          "time": 30355.700000047684
+        }
+      ],
+      "expanded": "true",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-25",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to products",
+        "text": ""
+      }
+    }
+  },
+  {
+    "side": "head",
+    "entry": "anyOf",
+    "state": "initial",
+    "match": "0/0",
+    "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition",
+    "events": [],
+    "expanded": "false",
+    "target": "contact_phone_number",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "hidden": "",
+        "inert": false,
+        "state": "closed"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "closed"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档Schema 组合SchemaComposition：忠实呈现 Op"
+    }
+  },
+  {
+    "side": "head",
+    "entry": "anyOf",
+    "state": "opened-closed",
+    "match": "1/1",
+    "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition",
+    "events": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "isTrusted": true,
+        "time": 34521.89999985695
+      }
+    ],
+    "expanded": "true",
+    "target": "contact_phone_number",
+    "ancestors": [
+      {
+        "id": "reka-collapsible-content-v-0-11",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      },
+      {
+        "id": "",
+        "hidden": null,
+        "inert": false,
+        "state": "open"
+      }
+    ],
+    "active": {
+      "tag": "BODY",
+      "label": null,
+      "text": "geist-nuxt Nuxt · Nuxt UI OverviewComponentsCompositionsApi Docs文档Schema 组合SchemaComposition：忠实呈现 Op"
+    },
+    "keyboardProbe": {
+      "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition",
+      "events": [
+        {
+          "id": "reka-collapsible-content-v-0-11",
+          "isTrusted": true,
+          "time": 34521.89999985695
+        }
+      ],
+      "expanded": "false",
+      "target": "contact_phone_number",
+      "ancestors": [
+        {
+          "id": "reka-collapsible-content-v-0-11",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        },
+        {
+          "id": "",
+          "hidden": null,
+          "inert": false,
+          "state": "open"
+        }
+      ],
+      "active": {
+        "tag": "BUTTON",
+        "label": "Copy link to sms_opt_in",
+        "text": ""
+      },
+      "phoneExpanded": "true"
+    }
+  }
+]
