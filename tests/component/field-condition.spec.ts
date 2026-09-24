@@ -206,8 +206,8 @@ describe('FieldItem presence condition list', () => {
 
     const rules = wrapper.findAll('[data-field-presence-condition]')
     expect(rules).toHaveLength(1)
-    expect(rules[0]!.classes()).toContain('border-accented')
-    expect(rules[0]!.classes()).not.toContain('border-warning')
+    expect(wrapper.get('[data-presence-rules]').classes()).toContain('border-accented')
+    expect(wrapper.get('[data-presence-rules]').classes()).not.toContain('border-warning')
     expect(rules[0]!.findAll('[data-condition-list] li')).toHaveLength(3)
     expect(wrapper.find('[data-field-requiredness]').exists()).toBe(false)
   })
