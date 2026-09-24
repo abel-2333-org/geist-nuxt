@@ -499,21 +499,21 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            band — where a consumer used to shove it — because a constraint is
            an input boundary and this is output behaviour. -->
       <div
-        v-if="presenceCondition.length"
-        data-field-presence-condition
-        class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
+        v-if="presenceCondition.length || overview.some(entry => entry.simple && entry.conditions.length)"
+        data-presence-rules
+        class="space-y-2 border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
       >
-        <ConditionEntries :entries="presenceCondition" />
-      </div>
-
-      <!-- Scope is part of each sentence, not another anonymous heading.
-           Consumer prose is opaque: do not guess whether it names a subject. -->
-      <template v-for="(entry, index) in overview" :key="index">
-        <div v-if="entry.simple && entry.conditions.length" data-value-summary-condition
-          class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned">
-          <ConditionEntries :entries="entry.conditions.map(text => `${entry.scope}: ${text}`)" />
+        <div v-if="presenceCondition.length" data-field-presence-condition>
+          <ConditionEntries :entries="presenceCondition" />
         </div>
-      </template>
+
+        <!-- Share the rule surface, but keep each condition's scope explicit. -->
+        <template v-for="(entry, index) in overview" :key="index">
+          <div v-if="entry.simple && entry.conditions.length" data-value-summary-condition>
+            <ConditionEntries :entries="entry.conditions.map(text => `${entry.scope}: ${text}`)" />
+          </div>
+        </template>
+      </div>
 
       <!-- Short shape clauses share the description paragraph. They supply
            nested/decoded type facts even when the author supplies no prose. -->

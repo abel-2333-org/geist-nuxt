@@ -328,7 +328,7 @@ await copyLink(path, {
 ### 已采纳的类型整合与简单事实去重
 
 - `FieldItem` 仅派生展示，不把 value 转成 children，不改变 path、计数、默认开合、状态或导航图。
-- 当前匿名区域内，只有 type / presence / 带 label 的普通 constraint 的节点可由 `summarizeFieldValue` 移至折叠外。条件句加本地化作用域前缀，并维持原有中性 rule；不猜测自然语言已经包含哪个主体，不增加独立匿名标题。补充类型说明与 description 共用正文段落，约束进入事实带并保留作用域。
+- 当前匿名区域内，只有 type / presence / 带 label 的普通 constraint 的节点可由 `summarizeFieldValue` 移至折叠外。条件句加本地化作用域前缀；同一字段的 presence 条件与整合后的值条件共用一个中性 rule 外框，内部保留各自段落或列表；不猜测自然语言已经包含哪个主体，不增加独立匿名标题。补充类型说明与 description 共用正文段落，约束进入事实带并保留作用域。
 - description / enum / example / default / caveat 或无 label constraint 的节点继续使用原有 scoped requirements；`compact` 的 constraint / presence 可辨识联合与纯函数保留。已在头部或正文完整展示的简单 presence 不再重复生成 compact 标题。
 - 所有原始 value 锚点仍在原来的结构区域中，具有唯一 DOM、独立 arrival cue；无内容的中间节点保留锚点而不制造空行。复杂类型简化不是删掉字段或重置子区域状态。
 - children / value 触发器沿用背景悬停反馈，使用系统 `min-h-8 px-2`，不改变原语或焦点环。

@@ -170,8 +170,8 @@ describe('FieldItem output presence', () => {
     const rule = wrapper.get('[data-field-presence-condition]')
     expect(rule.text()).toContain('Omitted until')
     // Neutral border: presence is a payload fact, not the amber required-strength axis.
-    expect(rule.classes()).toContain('border-accented')
-    expect(rule.classes()).not.toContain('border-warning')
+    expect(wrapper.get('[data-presence-rules]').classes()).toContain('border-accented')
+    expect(wrapper.get('[data-presence-rules]').classes()).not.toContain('border-warning')
     // Exactly one occurrence — not repeated in the constraints band or anywhere else.
     expect(wrapper.text().split('Omitted until')).toHaveLength(2)
     expect(wrapper.get('[data-field-constraints]').text()).not.toContain('Omitted until')
@@ -199,7 +199,7 @@ describe('FieldItem output presence', () => {
     expect(wrapper.get('[data-field-requiredness]').text()).toBe('Conditional')
     expect(typeText(wrapper)).toBe('integer | null')
     expect(wrapper.get('[data-field-condition]').classes()).toContain('border-warning')
-    expect(wrapper.get('[data-field-presence-condition]').classes()).toContain('border-accented')
+    expect(wrapper.get('[data-presence-rules]').classes()).toContain('border-accented')
   })
 
   it('keeps the field / value boundary in both directions', async () => {
