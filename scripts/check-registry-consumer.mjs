@@ -25,6 +25,7 @@ import {
   sha256,
   validateRegistry,
 } from './lib/registry.mjs'
+import { checkSubtreeCss } from './check-root-css.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const fixtureRoot = path.join(repoRoot, 'tests/fixtures/consumer')
@@ -597,6 +598,7 @@ async function loadGuide() {
     item: 'api-docs-field-item',
     build: true,
     cssMarker: 'scroll-mt-24',
+    checkCss: checkSubtreeCss,
     renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -663,6 +665,7 @@ provideFieldSource({
     // ps-9 is the discriminator row's indent — unique to this component's
     // template, so its presence proves the SchemaComposition source was copied.
     cssMarker: 'ps-9',
+    checkCss: checkSubtreeCss,
     renderedMarkers: ['One of', 'Card', 'brand'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
@@ -987,9 +990,17 @@ try {
             if (scenario.all && !builtCss.includes('var(--shiki-dark')) {
               throw new Error(`${scenario.label}: built CSS did not contain the CodeBlock dark token switch (#79)`)
             }
-            if (scenario.cssMarker && !builtCss.includes(scenario.cssMarker)) {
-              throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${scenario.cssMarker}`)
+            const markers = [scenario.cssMarker ?? []].flat()
+            if (scenario.cssMarker !== undefined && markers.length === 0) {
+              throw new Error(`${scenario.label}: cssMarker is an empty list, nothing would be checked`)
             }
+            for (const marker of markers) {
+              if (!marker) throw new Error(`${scenario.label}: empty CSS marker would match any output`)
+              if (!builtCss.includes(marker)) {
+                throw new Error(`${scenario.label}: built output did not contain copied-source CSS marker ${marker}`)
+              }
+            }
+            scenario.checkCss?.(builtCss)
             if (scenario.renderedMarkers || scenario.forbiddenRuntimeOutput) {
               const runtime = await renderBuiltPage(consumerRoot)
               const rendered = runtime.html

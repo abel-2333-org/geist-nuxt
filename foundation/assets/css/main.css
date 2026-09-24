@@ -267,6 +267,38 @@ body {
 }
 
 /*
+ * Hierarchy — the ONE shared source of a subtree's structural line.
+ * `subtree` marks content that belongs to the row above it (api-docs: child
+ * fields, a value region, a field-level composition, a composition nested in
+ * a variant): a 1px neutral start border plus one indent step. It is the only
+ * place a structural line is allowed — group headings, fact lists and
+ * semantic rules never draw one — and it says nothing about whether the
+ * subtree can collapse (references/kits/api-docs/index.md «折叠与层级语法»).
+ *
+ * The indent follows the ACTUAL container width, not the viewport: below a
+ * `@container/field` ancestor (a FieldItem row, or a composition variant
+ * panel that declares the same name) it widens from spacing 3 to 4 once that
+ * container reaches `--container-sm`; with no such ancestor the query never
+ * matches and the tighter step stays. Callers own everything else — vertical
+ * spacing, anchors, focus targets, state — and must not pair `subtree` with
+ * `ps-*` / `border-s*` (tailwind-merge does not know they conflict).
+ * Like `--text-code` above it is a foundation-owned semantic utility that
+ * ships with geist-foundation, instead of the same class string typed into
+ * every caller. The border style is declared here so the line does not
+ * depend on Preflight's `border: 0 solid` reset surviving in a consumer.
+ */
+@utility subtree {
+  border-inline-start-style: solid;
+  border-inline-start-width: 1px;
+  border-inline-start-color: var(--ui-border);
+  padding-inline-start: --spacing(3);
+
+  @container field (width >= theme(--container-sm)) {
+    padding-inline-start: --spacing(4);
+  }
+}
+
+/*
  * Bilingual parity — CJK body copy needs more leading than Latin. The default
  * line-height feels cramped in multi-line Han script, so Chinese, Japanese,
  * and Korean paragraph-level text opts up to ~1.7.

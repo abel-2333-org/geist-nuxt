@@ -145,4 +145,5 @@ const destination: FieldNode = {
 ## 规格与源码
 
 - 规格模板见 `method/component-spec-template.md`。
-- 源码：`kits/api-docs/components/SchemaComposition.vue`；显示模型在 `kits/api-docs/utils/field.ts`（与 FieldItem 共用）。组件测试见 `tests/component/schema-composition.spec.ts`。
+- 源码：`kits/api-docs/components/SchemaComposition.vue`；显示模型在 `kits/api-docs/utils/field.ts`（与 FieldItem 共用）。组件测试见 `tests/component/schema-composition.spec.ts`；层级语法（变体内嵌套 composition 的 `subtree` 线、三种变体内容容器的 `@container/field`）由 `tests/component/hierarchy-subtree.spec.ts` 锁定，规则见 `index.md`「折叠与层级语法」。
+- 根元素带 `data-schema-composition`：稳定的 DOM hook，供测试与消费者定位一个 composition 块（递归渲染经全局注册解析，测试工具无法按 import 匹配组件实例）。不承载样式，不要拿它做选择器以外的用途。

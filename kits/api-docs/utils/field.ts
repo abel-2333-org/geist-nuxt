@@ -631,14 +631,29 @@ export function valueScopeLabelKey(value: FieldValueNode): keyof Omit<FieldValue
 }
 
 /**
+ * The one fact a value level may state as a single `SCOPE │ …` row instead of
+ * a heading with a list under it. Discriminated so the template renders by
+ * kind and never reaches into `constraints[0]`:
+ *   · `constraint` — exactly one unlabelled constraint and nothing else (the
+ *     same grammar the field band uses for a lone constraint).
+ *   · `presence`   — only a presence notation (`object | null`) and no
+ *     condition sentence; a condition renders as a rule, so it escalates.
+ * Both are lossless: the row moves a notation that already exists, it never
+ * drops author input. The row may wrap — compact is not "single line".
+ */
+export type ValueRequirementsCompact =
+  | { kind: 'constraint', text: string }
+  | { kind: 'presence', expression: string }
+
+/**
  * One value level's requirements, resolved for rendering.
  *
- * `compact` is the density rule: one unlabelled constraint and nothing else
- * becomes a single `SCOPE │ text` row, the same grammar the field band already
- * uses for a lone constraint. The moment a level says a second thing — the
- * author's own category label on that constraint, a description, enum,
- * example, default or caveat — one row can no longer hold it and the block
- * gets a heading instead, so no author-supplied label is ever dropped.
+ * `compact` is the density rule (references «折叠与层级语法», rule 4): a level
+ * that states ONE thing becomes a single `SCOPE │ …` row. The moment it says
+ * a second thing — the author's own category label on that constraint, a
+ * condition sentence, a description, enum, example, default or caveat — one
+ * row can no longer hold it and the block gets a heading instead, so no
+ * author-supplied input is ever dropped.
  */
 export interface ValueRequirementsBlock {
   node: FieldValueNode
@@ -648,7 +663,8 @@ export interface ValueRequirementsBlock {
   presence: PresenceNotation
   constraints: FieldNote[]
   caveats: FieldNote[]
-  compact: boolean
+  /** `null` → heading form. */
+  compact: ValueRequirementsCompact | null
 }
 
 export function describeValueRequirements(
@@ -660,22 +676,51 @@ export function describeValueRequirements(
   const constraints = notes.filter(n => n.kind !== 'caveat')
   const caveats = notes.filter(n => n.kind === 'caveat')
   const presence = describeValuePresence(node.presence)
-  const extras = !!node.description
-    || presence.unionTail.length > 0
-    || presence.condition.length > 0
+  const details = !!node.description
     || (node.examples?.length ?? 0) > 0
     || (node.enumValues?.length ?? 0) > 0
     || (node.enumVariants?.length ?? 0) > 0
     || node.defaultValue !== undefined
     || caveats.length > 0
+  let compact: ValueRequirementsCompact | null = null
+  if (!details && presence.condition.length === 0) {
+    const lone = constraints.length === 1 ? constraints[0]! : undefined
+    if (lone && !lone.label && presence.unionTail.length === 0) {
+      compact = { kind: 'constraint', text: lone.text }
+    }
+    else if (constraints.length === 0 && presence.unionTail.length > 0) {
+      compact = { kind: 'presence', expression: presenceTypeExpression(node.type, presence.unionTail) }
+    }
+  }
   return {
     node,
     label: labels[valueScopeLabelKey(node)],
     presence,
     constraints,
     caveats,
-    compact: constraints.length === 1 && !constraints[0]!.label && !extras,
+    compact,
   }
+}
+
+/** A short wire-type signature. Only an explicit, single value level is folded
+ * into the signature; nested and encoded boundaries remain visible in prose.
+ * Opaque author type strings are never parsed or rewritten. */
+export function fieldTypeSummary(node: Pick<FieldNode, 'type' | 'value'>): string | undefined {
+  const value = node.value
+  if (!value?.type || value.value) return node.type
+  const expression = presenceTypeExpression(value.type, describeValuePresence(value.presence).unionTail)
+  if (node.type === 'array' && value.relation === 'item') return `array<${expression}>`
+  if (node.type === 'object' && value.relation === 'member') return `map<string, ${expression}>`
+  return node.type
+}
+
+/** Presentation only: preserve node identities and the navigation graph.
+ * Rich requirements keep the existing scoped renderer and compact union.
+ * Simple type/presence/constraint facts can be read before opening properties. */
+export function summarizeFieldValue(node: FieldValueNode): boolean {
+  return !node.description && !node.enumValues?.length && !node.enumVariants?.length
+    && !node.examples?.length && node.defaultValue === undefined
+    && !(node.notes ?? []).some(note => note.kind === 'caveat' || !note.label)
 }
 
 /** Outline level of variant section headings. Nested compositions render one

@@ -1,0 +1,2250 @@
+{
+  "head": "821a884cd979c825a4e118f10dce00c989130ff9",
+  "base": "http://127.0.0.1:3033",
+  "browser": "153.0.8010.12",
+  "measurements": [
+    {
+      "theme": "light",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 960,
+          "height": 281.328125,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 318.9375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 932.96875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 639.4375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 504.484375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 295.921875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 156.5625,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 73.78125,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 960,
+          "height": 932.96875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 639.4375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 1024,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 507.515625,
+            "y": -1545.9375,
+            "width": 480.484375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 508,
+            "y": -1545.9375,
+            "width": 480,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 516.796875,
+            "y": -1227.21875,
+            "width": 471.203125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 517,
+            "y": -1227.21875,
+            "width": 471,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 494.515625,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 494.515625,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 343,
+          "height": 299.375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 360.78125,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 1116.65625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 709.890625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 552.34375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 331.75,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 168.59375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 79.796875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 343,
+          "height": 1116.65625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 709.890625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 375,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 183.015625,
+            "y": -1805,
+            "width": 171.984375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 183,
+            "y": -1805,
+            "width": 172,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 190.296875,
+            "y": -1450.453125,
+            "width": 164.703125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 190,
+            "y": -1450.453125,
+            "width": 165,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 203.78125,
+            "y": 480.34375,
+            "width": 151.21875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 204,
+            "y": 480.34375,
+            "width": 151,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "domStressNotation": {
+        "before": {
+          "container": {
+            "tag": "P",
+            "width": 288,
+            "height": 73.578125
+          },
+          "summary": {
+            "tag": "SPAN",
+            "width": 193.765625,
+            "height": 18
+          },
+          "spans": [
+            {
+              "tag": "SPAN",
+              "width": 100.15625,
+              "height": 18
+            },
+            {
+              "tag": "SPAN",
+              "width": 93.609375,
+              "height": 16
+            }
+          ],
+          "notation": "object | \"{}\"",
+          "scrollWidth": 320,
+          "viewport": 320
+        },
+        "after": {
+          "container": {
+            "tag": "P",
+            "width": 288,
+            "height": 144.96875
+          },
+          "summary": {
+            "tag": "SPAN",
+            "width": 288,
+            "height": 89.390625
+          },
+          "spans": [
+            {
+              "tag": "SPAN",
+              "width": 96.65625,
+              "height": 18
+            },
+            {
+              "tag": "SPAN",
+              "width": 288,
+              "height": 63.59375
+            }
+          ],
+          "notation": "json<object_with_an_intentionally_long_unbroken_presence_notation[]> | null | \"{}\"",
+          "scrollWidth": 320,
+          "viewport": 320
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 288,
+          "height": 299.375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 384.578125,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 1134.640625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 727.875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 552.34375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 331.75,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 168.59375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 79.796875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 288,
+          "height": 1134.640625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 727.875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 155.515625,
+            "y": -1903.65625,
+            "width": 144.484375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 156,
+            "y": -1903.65625,
+            "width": 144,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 162.796875,
+            "y": -1525.3125,
+            "width": 137.203125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 163,
+            "y": -1525.3125,
+            "width": 137,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 176.28125,
+            "y": 481.015625,
+            "width": 123.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 176,
+            "y": 481.015625,
+            "width": 124,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 960,
+          "height": 281.328125,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 318.9375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 932.96875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 639.4375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 504.484375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 295.921875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 156.5625,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 960,
+          "height": 73.78125,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 960,
+          "height": 932.96875,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 960,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 943,
+          "height": 639.4375,
+          "padding": "16px",
+          "border": "1px",
+          "containerWidth": 943,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 1024,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 312.90625,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 960,
+              "height": 270.921875,
+              "padding": "16px",
+              "border": "1px",
+              "containerWidth": 960,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 507.515625,
+            "y": -1545.9375,
+            "width": 480.484375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 508,
+            "y": -1545.9375,
+            "width": 480,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 516.796875,
+            "y": -1227.21875,
+            "width": 471.203125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 517,
+            "y": -1227.21875,
+            "width": 471,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 494.515625,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 494.515625,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 343,
+          "height": 299.375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 360.78125,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 1116.65625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 709.890625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 552.34375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 331.75,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 168.59375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 343,
+          "height": 79.796875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 343,
+          "height": 1116.65625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 343,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 330,
+          "height": 709.890625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 330,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 375,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 343,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 343,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 183.015625,
+            "y": -1805,
+            "width": 171.984375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 183,
+            "y": -1805,
+            "width": 172,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 190.296875,
+            "y": -1450.453125,
+            "width": 164.703125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 190,
+            "y": -1450.453125,
+            "width": 165,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 203.78125,
+            "y": 480.34375,
+            "width": 151.21875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 204,
+            "y": 480.34375,
+            "width": 151,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "domStressNotation": {
+        "before": {
+          "container": {
+            "tag": "P",
+            "width": 288,
+            "height": 73.578125
+          },
+          "summary": {
+            "tag": "SPAN",
+            "width": 193.765625,
+            "height": 18
+          },
+          "spans": [
+            {
+              "tag": "SPAN",
+              "width": 100.15625,
+              "height": 18
+            },
+            {
+              "tag": "SPAN",
+              "width": 93.609375,
+              "height": 16
+            }
+          ],
+          "notation": "object | \"{}\"",
+          "scrollWidth": 320,
+          "viewport": 320
+        },
+        "after": {
+          "container": {
+            "tag": "P",
+            "width": 288,
+            "height": 144.96875
+          },
+          "summary": {
+            "tag": "SPAN",
+            "width": 288,
+            "height": 89.390625
+          },
+          "spans": [
+            {
+              "tag": "SPAN",
+              "width": 96.65625,
+              "height": 18
+            },
+            {
+              "tag": "SPAN",
+              "width": 288,
+              "height": 63.59375
+            }
+          ],
+          "notation": "json<object_with_an_intentionally_long_unbroken_presence_notation[]> | null | \"{}\"",
+          "scrollWidth": 320,
+          "viewport": 320
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "scrollWidth": 320,
+      "viewport": 320,
+      "wireType": "string | null",
+      "valueSummary": "解码内容 · json: object | \"{}\"",
+      "valueNotation": "object | \"{}\"",
+      "regions": [
+        {
+          "id": "",
+          "width": 288,
+          "height": 299.375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 384.578125,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 1134.640625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 727.875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 552.34375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 331.75,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 168.59375,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 288,
+          "height": 79.796875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        }
+      ],
+      "nested": [
+        {
+          "id": "",
+          "width": 288,
+          "height": 1134.640625,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 288,
+          "threshold": 384
+        },
+        {
+          "id": "",
+          "width": 275,
+          "height": 727.875,
+          "padding": "12px",
+          "border": "1px",
+          "containerWidth": 275,
+          "threshold": 384
+        }
+      ]
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "composition": [
+        {
+          "label": "initial variants",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-2-trigger-wallet",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-apple-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-6-trigger-google-pay",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-bank",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 318.921875,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        },
+        {
+          "label": "tab:reka-tabs-v-0-15-trigger-card",
+          "subtrees": [
+            {
+              "id": "",
+              "width": 288,
+              "height": 300.734375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            },
+            {
+              "id": "",
+              "width": 288,
+              "height": 276.9375,
+              "padding": "12px",
+              "border": "1px",
+              "containerWidth": 288,
+              "threshold": 384
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "selected": "Wallet payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 155.515625,
+            "y": -1903.65625,
+            "width": 144.484375,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 156,
+            "y": -1903.65625,
+            "width": 144,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a digital wallet. The wallet payload itself varies by provider (nested one-of).typestringRequiredAlways wallet. Selects the wallet payment shape.wallet_idstringRequiredIdentifier of the shopper wallet to charge.One of (2)Exactly one of the following applies.Apple PayGoogle PayproviderstringRequiredAlways apple_pay.device_tokenstringRequiredOpaque device payment token from PassKit.providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Google Pay",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 162.796875,
+            "y": -1525.3125,
+            "width": 137.203125,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 163,
+            "y": -1525.3125,
+            "width": 137,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "providerstringRequiredAlways google_pay.gateway_tokenstringRequiredGateway token returned by the Google Pay API.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 176.28125,
+            "y": 481.015625,
+            "width": 123.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 176,
+            "y": 481.015625,
+            "width": 124,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    }
+  ],
+  "lifecycle": [
+    {
+      "label": "children",
+      "stage": "SSR",
+      "expanded": "false",
+      "controls": "",
+      "targetExists": false,
+      "hidden": null,
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": null
+    },
+    {
+      "label": "value",
+      "stage": "SSR",
+      "expanded": "false",
+      "controls": "",
+      "targetExists": false,
+      "hidden": null,
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": null
+    },
+    {
+      "label": "anyOf",
+      "stage": "SSR",
+      "expanded": "false",
+      "controls": "v-0-9-composition-phone",
+      "targetExists": true,
+      "hidden": "",
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": "flex"
+    },
+    {
+      "label": "children",
+      "stage": "hydrated-closed",
+      "expanded": "false",
+      "controls": "",
+      "targetExists": false,
+      "hidden": null,
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": null
+    },
+    {
+      "label": "children",
+      "stage": "opened",
+      "expanded": "true",
+      "controls": "reka-collapsible-content-v-0-18",
+      "targetExists": true,
+      "hidden": null,
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "block"
+    },
+    {
+      "label": "children",
+      "stage": "closed-after-animation",
+      "expanded": "false",
+      "controls": "reka-collapsible-content-v-0-18",
+      "targetExists": true,
+      "hidden": "until-found",
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "block"
+    },
+    {
+      "label": "value",
+      "stage": "hydrated-closed",
+      "expanded": "false",
+      "controls": "",
+      "targetExists": false,
+      "hidden": null,
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": null
+    },
+    {
+      "label": "value",
+      "stage": "opened",
+      "expanded": "true",
+      "controls": "reka-collapsible-content-v-0-24",
+      "targetExists": true,
+      "hidden": null,
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "block"
+    },
+    {
+      "label": "value",
+      "stage": "closed-after-animation",
+      "expanded": "false",
+      "controls": "reka-collapsible-content-v-0-24",
+      "targetExists": true,
+      "hidden": "until-found",
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "block"
+    },
+    {
+      "label": "anyOf",
+      "stage": "hydrated-closed",
+      "expanded": "false",
+      "controls": "v-0-9-composition-phone",
+      "targetExists": true,
+      "hidden": "",
+      "focused": false,
+      "focusVisible": false,
+      "outline": "none 3px",
+      "display": "flex"
+    },
+    {
+      "label": "anyOf",
+      "stage": "opened",
+      "expanded": "true",
+      "controls": "v-0-9-composition-phone",
+      "targetExists": true,
+      "hidden": null,
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "flex"
+    },
+    {
+      "label": "anyOf",
+      "stage": "closed-after-animation",
+      "expanded": "false",
+      "controls": "v-0-9-composition-phone",
+      "targetExists": true,
+      "hidden": "until-found",
+      "focused": true,
+      "focusVisible": true,
+      "outline": "solid 2px",
+      "display": "flex"
+    }
+  ],
+  "checks": [
+    "children: Tab / Enter / Space / focus ring / Tab skips hidden content",
+    "value: Tab / Enter / Space / focus ring / Tab skips hidden content",
+    "anyOf: Tab / Enter / Space / focus ring / Tab skips hidden content",
+    "anyOf same-path deep link twice: reveal, focus, viewport landing, real cue animation",
+    "cold hash deep link reveals refund value region",
+    "light/1024: parent reopen preserves both open and closed child state",
+    "light/375: parent reopen preserves both open and closed child state",
+    "light/320: parent reopen preserves both open and closed child state",
+    "light/320: DOM-only long-notation stress, no horizontal page overflow",
+    "dark/1024: parent reopen preserves both open and closed child state",
+    "dark/375: parent reopen preserves both open and closed child state",
+    "dark/320: parent reopen preserves both open and closed child state",
+    "dark/320: DOM-only long-notation stress, no horizontal page overflow"
+  ],
+  "screenshotPresentation": "Only while capturing: hide headers and Nuxt devtools; measurements and interaction use unmodified presentation.",
+  "arrivalAnimations": [
+    {
+      "parent": "contact_phone_sms-opt-in",
+      "frames": [
+        {
+          "offset": 0,
+          "opacity": 0
+        },
+        {
+          "offset": 0.16666666666666666,
+          "opacity": 1
+        },
+        {
+          "offset": 0.3333333333333333,
+          "opacity": 0
+        },
+        {
+          "offset": 0.5,
+          "opacity": 1
+        },
+        {
+          "offset": 0.6666666666666666,
+          "opacity": 0
+        },
+        {
+          "offset": 0.8333333333333334,
+          "opacity": 1
+        },
+        {
+          "offset": 1,
+          "opacity": 0
+        }
+      ],
+      "options": {
+        "duration": 4200,
+        "easing": "ease-in-out"
+      }
+    },
+    {
+      "parent": "contact_phone_sms-opt-in",
+      "frames": [
+        {
+          "offset": 0,
+          "opacity": 0
+        },
+        {
+          "offset": 0.16666666666666666,
+          "opacity": 1
+        },
+        {
+          "offset": 0.3333333333333333,
+          "opacity": 0
+        },
+        {
+          "offset": 0.5,
+          "opacity": 1
+        },
+        {
+          "offset": 0.6666666666666666,
+          "opacity": 0
+        },
+        {
+          "offset": 0.8333333333333334,
+          "opacity": 1
+        },
+        {
+          "offset": 1,
+          "opacity": 0
+        }
+      ],
+      "options": {
+        "duration": 4200,
+        "easing": "ease-in-out"
+      }
+    }
+  ],
+  "status": "passed"
+}

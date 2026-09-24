@@ -1,0 +1,656 @@
+{
+  "source": {
+    "sha": "ec28ece66fb16d94143af81df997fe26a14eb372",
+    "digest": "6876b4495f638877c0c4728f1ed32a50761a3ab0fa1d367ac3b03e5507493c37",
+    "builtAt": "2026-09-23T16:55:37.712Z"
+  },
+  "route": "/kits/api-docs",
+  "theme": "light",
+  "state": "font-feature-guard-with-original-shadow",
+  "computed": {
+    "target": {
+      "text": "?",
+      "rect": {
+        "x": 124.40625,
+        "y": 492.1875,
+        "width": 12.40625,
+        "height": 16,
+        "top": 492.1875,
+        "right": 136.8125,
+        "bottom": 508.1875,
+        "left": 124.40625
+      },
+      "range": {
+        "x": 126.40625,
+        "y": 491.1875,
+        "width": 8.40625,
+        "height": 18,
+        "top": 491.1875,
+        "right": 134.8125,
+        "bottom": 509.1875,
+        "left": 126.40625
+      },
+      "color": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(107, 48, 207)",
+      "fontFamily": "\"Geist Mono\", \"Geist Mono Fallback: Courier New\", \"Geist Mono Fallback: Roboto Mono\", \"Geist Mono Fallback: Noto Sans Mono\", ui-monospace, \"SF Mono\", Menlo, monospace",
+      "fontSize": "14px",
+      "fontFeatureSettings": "\"liga\" 0",
+      "fontVariationSettings": "normal",
+      "display": "inline-block",
+      "lineHeight": "16px",
+      "focused": true
+    },
+    "tooltip": {
+      "rect": {
+        "x": 55,
+        "y": 460,
+        "width": 152,
+        "height": 24,
+        "top": 460,
+        "right": 207,
+        "bottom": 484,
+        "left": 55
+      },
+      "state": "instant-open",
+      "side": "top",
+      "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(235, 235, 235) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+      "outline": {
+        "style": "none",
+        "width": "3px",
+        "offset": "0px",
+        "color": "rgb(23, 23, 23)"
+      },
+      "color": "rgb(23, 23, 23)",
+      "opacity": "1",
+      "transform": "none",
+      "translate": "none",
+      "scale": "none",
+      "rotate": "none",
+      "inlineStyle": "--reka-tooltip-content-transform-origin: var(--reka-popper-transform-origin); --reka-tooltip-content-available-width: var(--reka-popper-available-width); --reka-tooltip-content-available-height: var(--reka-popper-available-height); --reka-tooltip-trigger-width: var(--reka-popper-anchor-width); --reka-tooltip-trigger-height: var(--reka-popper-anchor-height);",
+      "popper": {
+        "rect": {
+          "x": 55,
+          "y": 460,
+          "width": 152,
+          "height": 24,
+          "top": 460,
+          "right": 207,
+          "bottom": 484,
+          "left": 55
+        },
+        "translate": "none",
+        "transform": "matrix(1, 0, 0, 1, 55, 460)",
+        "scale": "none",
+        "rotate": "none",
+        "inlineStyle": "position: fixed; left: 0px; top: 0px; transform: translate(55px, 460px); min-width: max-content; --reka-popper-transform-origin: 50% 24px; z-index: auto; --reka-popper-available-width: 1424px; --reka-popper-available-height: 476.1875px; --reka-popper-anchor-width: 12.40625px; --reka-popper-anchor-height: 16px;"
+      }
+    }
+  },
+  "classification": "expected detector rejection; not a positive suite red run",
+  "fallbackBounds": {
+    "raw": {
+      "left": 126.40625,
+      "right": 134.8125,
+      "top": 491.1875,
+      "bottom": 509.1875
+    },
+    "used": {
+      "left": 126.40625,
+      "right": 134.8125,
+      "top": 491.1875,
+      "bottom": 509.1875
+    },
+    "glyph": null
+  },
+  "measurement": {
+    "text": "?",
+    "textBounds": {
+      "raw": {
+        "left": 126.40625,
+        "right": 134.8125,
+        "top": 491.1875,
+        "bottom": 509.1875
+      },
+      "used": {
+        "left": 126.40625,
+        "right": 134.8125,
+        "top": 491.1875,
+        "bottom": 509.1875
+      },
+      "glyph": null
+    },
+    "rawForeground": "rgb(255, 255, 255)",
+    "foreground": [
+      255,
+      255,
+      255,
+      1
+    ],
+    "layers": [
+      {
+        "node": "BUTTON",
+        "background": [
+          107.00004,
+          47.999925000000005,
+          207.00007499999998,
+          1
+        ],
+        "rawBackground": "rgb(107, 48, 207)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "CODE",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV#out_failureCode",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "SECTION",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "SECTION#api-docs",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "MAIN",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV",
+        "background": [
+          255,
+          255,
+          255,
+          1
+        ],
+        "rawBackground": "rgb(255, 255, 255)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "DIV#__nuxt",
+        "background": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "rawBackground": "rgba(0, 0, 0, 0)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "BODY",
+        "background": [
+          255,
+          255,
+          255,
+          1
+        ],
+        "rawBackground": "rgb(255, 255, 255)",
+        "opacity": 1,
+        "underlays": []
+      },
+      {
+        "node": "HTML",
+        "background": [
+          255,
+          255,
+          255,
+          1
+        ],
+        "rawBackground": "rgb(255, 255, 255)",
+        "opacity": 1,
+        "underlays": []
+      }
+    ],
+    "excludedPaint": [
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -5815,
+          "bottom": -5641
+        }
+      },
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -5509,
+          "bottom": -5359
+        }
+      },
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -5354,
+          "bottom": -5180
+        }
+      },
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -5043,
+          "bottom": -4732
+        }
+      },
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -4576,
+          "bottom": -4450
+        }
+      },
+      {
+        "node": "SECTION",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 28,
+          "right": 1412,
+          "top": -4445,
+          "bottom": -4343
+        }
+      },
+      {
+        "node": "DIV",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.0509804,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 1
+        },
+        "translationOutset": {
+          "x": 29,
+          "y": 0
+        },
+        "bounds": {
+          "left": 703,
+          "right": 1089,
+          "top": -3153,
+          "bottom": -3114
+        }
+      },
+      {
+        "node": "HEADER",
+        "reason": "outside backdrop-filter border-box clip",
+        "bounds": {
+          "left": -1,
+          "right": 1441,
+          "top": -1,
+          "bottom": 65
+        }
+      },
+      {
+        "node": "DIV",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 1,
+          "x": 0,
+          "y": 0,
+          "blur": 0,
+          "spread": 1
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 0
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 53,
+          "right": 209,
+          "top": 458,
+          "bottom": 486
+        }
+      },
+      {
+        "node": "DIV",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.101961,
+          "x": 0,
+          "y": 1,
+          "blur": 3,
+          "spread": 0
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 0
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 50,
+          "right": 212,
+          "top": 455,
+          "bottom": 491
+        }
+      },
+      {
+        "node": "DIV",
+        "reason": "outside verified Chromium box-shadow bounds",
+        "shadow": {
+          "inset": false,
+          "alpha": 0.101961,
+          "x": 0,
+          "y": 1,
+          "blur": 2,
+          "spread": -1
+        },
+        "snapMargin": {
+          "x": 0,
+          "y": 0
+        },
+        "translationOutset": {
+          "x": 0,
+          "y": 0
+        },
+        "bounds": {
+          "left": 51,
+          "right": 211,
+          "top": 456,
+          "bottom": 490
+        }
+      }
+    ],
+    "engine": {
+      "product": "Chrome/153.0.8010.12",
+      "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+      "boundedShadow": true
+    },
+    "rect": {
+      "x": 124.40625,
+      "y": 492.1875,
+      "width": 12.40625,
+      "height": 16,
+      "top": 492.1875,
+      "right": 136.8125,
+      "bottom": 508.1875,
+      "left": 124.40625
+    },
+    "pseudo": null,
+    "generatedText": null,
+    "generatedConsistency": null,
+    "fontFamily": "\"Geist Mono\", \"Geist Mono Fallback: Courier New\", \"Geist Mono Fallback: Roboto Mono\", \"Geist Mono Fallback: Noto Sans Mono\", ui-monospace, \"SF Mono\", Menlo, monospace",
+    "fontSize": "14px",
+    "ownOpacity": "1",
+    "snapshotConsistency": null,
+    "effectiveForeground": [
+      255,
+      255,
+      255,
+      1
+    ],
+    "effectiveBackground": [
+      107.00004,
+      47.999925000000005,
+      207.00007499999998,
+      1
+    ],
+    "ratio": 7.121203584676938
+  },
+  "rejection": null
+}

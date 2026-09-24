@@ -104,7 +104,7 @@ describe('describeFieldPresence', () => {
       chrome,
     )
     expect(block?.presence.unionTail).toEqual(['null'])
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
     const conditionOnly = describeValueRequirements(
       { relation: 'item', type: 'object', presence: { condition: 'Absent for drafts.' } },
       chrome,
@@ -170,8 +170,8 @@ describe('FieldItem output presence', () => {
     const rule = wrapper.get('[data-field-presence-condition]')
     expect(rule.text()).toContain('Omitted until')
     // Neutral border: presence is a payload fact, not the amber required-strength axis.
-    expect(rule.classes()).toContain('border-accented')
-    expect(rule.classes()).not.toContain('border-warning')
+    expect(wrapper.get('[data-presence-rules]').classes()).toContain('border-accented')
+    expect(wrapper.get('[data-presence-rules]').classes()).not.toContain('border-warning')
     // Exactly one occurrence — not repeated in the constraints band or anywhere else.
     expect(wrapper.text().split('Omitted until')).toHaveLength(2)
     expect(wrapper.get('[data-field-constraints]').text()).not.toContain('Omitted until')
@@ -199,7 +199,7 @@ describe('FieldItem output presence', () => {
     expect(wrapper.get('[data-field-requiredness]').text()).toBe('Conditional')
     expect(typeText(wrapper)).toBe('integer | null')
     expect(wrapper.get('[data-field-condition]').classes()).toContain('border-warning')
-    expect(wrapper.get('[data-field-presence-condition]').classes()).toContain('border-accented')
+    expect(wrapper.get('[data-presence-rules]').classes()).toContain('border-accented')
   })
 
   it('keeps the field / value boundary in both directions', async () => {
@@ -214,14 +214,16 @@ describe('FieldItem output presence', () => {
         fields: [{ path: 'sku', name: 'sku', type: 'string' }],
       },
     })
-    // The field row says only what the FIELD says.
+    // The generic parameter carries the element's null, never the array's.
     expect(nameText(wrapper)).toBe('items?')
-    expect(typeText(wrapper)).toBe('array')
+    expect(typeText(wrapper)).toBe('array<object | null>')
     expect(wrapper.find('[data-field-presence-condition]').exists()).toBe(false)
-    // The element's facts render under the element's scope, as the element's type.
-    const scope = wrapper.get('[data-value-requirements] [data-value-presence]')
-    expect(scope.get('p').text()).toBe('object | null')
-    expect(scope.get('[data-value-presence-condition]').text()).toContain('retired')
+    const scope = wrapper.get('[data-value-summary-condition]')
+    expect(scope.text()).toBe('Each item: An element is null when the SKU was retired.')
+    expect(scope.element.closest('[data-value-structure-region]')).toBeNull()
+    expect(scope.isVisible()).toBe(true)
+    expect(wrapper.get('[data-value-structure-toggle]').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.find('[data-value-requirements]').exists()).toBe(false)
     expect(scope.find('[data-field-optional]').exists()).toBe(false)
   })
 
@@ -235,10 +237,37 @@ describe('FieldItem output presence', () => {
       },
     })
     expect(typeText(wrapper)).toBe('string')
-    const scope = wrapper.get('[data-value-requirements]')
-    // Decoded root is an array, so the scope reads as the array's requirements.
-    expect(scope.text()).toContain('Array')
-    expect(scope.get('[data-value-presence] p').text()).toBe('object[] | "[]"')
+    const scope = wrapper.get('[data-value-shape-summary]')
+    expect(scope.text()).toBe('Array · json: object[] | "[]"')
+    const notation = scope.get('[translate="no"]')
+    expect(notation.text()).toBe('object[] | "[]"')
+    expect(notation.classes()).toContain('font-mono')
+    expect(wrapper.find('[data-value-requirements]').exists()).toBe(false)
+  })
+
+  it.each([
+    [true, false, 'string | null', 'object[] | []'],
+    [false, true, 'string', 'object[] | null | []'],
+  ])('keeps wire and decoded null and empty facts in their own scope', async (wireNullable, decodedNullable, wireType, decodedType) => {
+    const wrapper = await mountSuspended(FieldItem, { props: {
+      name: 'payload', type: 'string',
+      presence: { nullable: wireNullable, condition: 'Wire condition.' },
+      value: {
+        relation: 'decoded', codec: 'json', type: 'object[]',
+        presence: { nullable: decodedNullable, empty: '[]', condition: 'Decoded condition.' },
+        fields: [{ name: 'id', type: 'string' }],
+      },
+    } })
+    expect(typeText(wrapper)).toBe(wireType)
+    expect(wrapper.get('[data-value-shape-summary]').text()).toBe(`Array · json: ${decodedType}`)
+    expect(wrapper.get('[data-field-presence-condition]').text()).toBe('Wire condition.')
+    const decodedCondition = wrapper.get('[data-value-summary-condition]')
+    expect(decodedCondition.text()).toBe('Array: Decoded condition.')
+    expect(decodedCondition.element.closest('[data-value-structure-region]')).toBeNull()
+    expect(decodedCondition.isVisible()).toBe(true)
+    expect(wrapper.get('[data-value-structure-toggle]').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.find('[data-value-requirements]').exists()).toBe(false)
+    expect(wrapper.text().split('Decoded condition.')).toHaveLength(2)
   })
 
   it('needs one label at most: notation is language-neutral and reaches recursive rows unchanged', async () => {

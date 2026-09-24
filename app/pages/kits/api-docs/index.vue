@@ -804,8 +804,8 @@ const valueLabels: FieldItemLabels = {
   },
   eachItem: '每个元素',
   eachMember: '每个键',
-  decodedRequirements: '值要求',
-  decodedArrayRequirements: '数组要求',
+  decodedRequirements: '解码内容',
+  decodedArrayRequirements: '解码后数组',
   // 输出存在性只有这一个文案键：`?` 的 tooltip 正文与读屏名称共用这一句。
   mayBeOmitted: '响应中可能不返回此字段',
 }
@@ -1178,8 +1178,7 @@ onMounted(() => anchor.initFromHash())
             enum（触发内嵌 enum 表的筛选/滚动），用来验证真实规模下的排版。第三组转录自真实端点
             <code class="font-mono text-code">POST /v1/txn/doTransaction</code>：数组元素与
             JSON 编码内容是「值的形状」而非字段，经 <code class="font-mono text-code">value</code>
-            节点表达——身份行以 <code class="font-mono text-code">json&lt;object[]&gt;</code>
-            标出解码后的形状，折叠区复用子参数动词、只计真实属性，编码数组的解码边界与元素边界共用一个折叠区，
+            节点表达——身份行保留实际传输类型，解码后的形状在正文补充，折叠区复用子参数动词、只计真实属性，编码数组的解码边界与元素边界共用一个折叠区，
             双层编码（<code class="font-mono text-code">txnOrderMsg.products</code>）各自一区。
             第四组是响应字段的输出存在性（<code class="font-mono text-code">presence</code>）：
             可省略 / 可为 null / 可为空三个事实相互独立，用开发者熟悉的类型记号表达而非文字——

@@ -1,0 +1,1176 @@
+{
+  "endpoints": [
+    {
+      "label": "base",
+      "url": "http://127.0.0.1:3028",
+      "sha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "label": "head",
+      "url": "http://127.0.0.1:3033",
+      "sha": "cf07b2efaecfba5266d82c1226a5c6377bfb2e0a"
+    }
+  ],
+  "browser": "153.0.8010.12",
+  "samples": [
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 320,
+      "name": "out_refunds",
+      "file": "base-light-320-out_refunds.png",
+      "geometry": {
+        "width": 288,
+        "height": 555.015625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 320,
+      "name": "out_extra",
+      "file": "base-light-320-out_extra.png",
+      "geometry": {
+        "width": 288,
+        "height": 318.140625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\" channel string 渠道标识。",
+      "textHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 320,
+      "name": "tx_txnOrderMsg",
+      "file": "base-light-320-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 288,
+        "height": 1281.53125,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "txnOrderMsg string json<object> 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json<object[]> 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 320,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 20,
+            "y": -1700.65625,
+            "width": 135.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 20,
+            "y": -1700.65625,
+            "width": 136,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 178.28125,
+            "y": 651.390625,
+            "width": 121.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 178,
+            "y": 651.390625,
+            "width": 122,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 320,
+      "name": "composition",
+      "file": "base-light-320-composition.png",
+      "geometry": {
+        "width": 320,
+        "height": 3462.140625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 320,
+      "name": "out_refunds",
+      "file": "head-light-320-out_refunds.png",
+      "geometry": {
+        "width": 288,
+        "height": 514.25,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 320,
+      "name": "out_extra",
+      "file": "head-light-320-out_extra.png",
+      "geometry": {
+        "width": 288,
+        "height": 269.375,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "textHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 320,
+      "name": "tx_txnOrderMsg",
+      "file": "head-light-320-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 288,
+        "height": 1339.1875,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 320,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 20,
+            "y": -1706.65625,
+            "width": 135.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 20,
+            "y": -1706.65625,
+            "width": 136,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 176.28125,
+            "y": 657.40625,
+            "width": 123.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 176,
+            "y": 657.40625,
+            "width": 124,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 320,
+      "name": "composition",
+      "file": "head-light-320-composition.png",
+      "geometry": {
+        "width": 320,
+        "height": 3474.15625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 1024,
+      "name": "out_refunds",
+      "file": "base-light-1024-out_refunds.png",
+      "geometry": {
+        "width": 960,
+        "height": 442.828125,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 1024,
+      "name": "out_extra",
+      "file": "base-light-1024-out_extra.png",
+      "geometry": {
+        "width": 960,
+        "height": 258.515625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\" channel string 渠道标识。",
+      "textHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 1024,
+      "name": "tx_txnOrderMsg",
+      "file": "base-light-1024-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 960,
+        "height": 1045.90625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "txnOrderMsg string json<object> 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json<object[]> 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8"
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 1024,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 36,
+            "y": -1339.9375,
+            "width": 471.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 36,
+            "y": -1339.9375,
+            "width": 472,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 622.125,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 622.125,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "label": "base",
+      "theme": "light",
+      "width": 1024,
+      "name": "composition",
+      "file": "base-light-1024-composition.png",
+      "geometry": {
+        "width": 1024,
+        "height": 2859.859375,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 1024,
+      "name": "out_refunds",
+      "file": "head-light-1024-out_refunds.png",
+      "geometry": {
+        "width": 960,
+        "height": 402.0625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 1024,
+      "name": "out_extra",
+      "file": "head-light-1024-out_extra.png",
+      "geometry": {
+        "width": 960,
+        "height": 209.75,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "textHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 1024,
+      "name": "tx_txnOrderMsg",
+      "file": "head-light-1024-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 960,
+        "height": 1069.9375,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a"
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 1024,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 36,
+            "y": -1345.9375,
+            "width": 471.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 36,
+            "y": -1345.9375,
+            "width": 472,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 628.140625,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 628.140625,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "rgb(255, 255, 255)",
+          "indicatorColor": "oklch(0.205 0 0)"
+        }
+      ]
+    },
+    {
+      "label": "head",
+      "theme": "light",
+      "width": 1024,
+      "name": "composition",
+      "file": "head-light-1024-composition.png",
+      "geometry": {
+        "width": 1024,
+        "height": 2871.875,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 320,
+      "name": "out_refunds",
+      "file": "base-dark-320-out_refunds.png",
+      "geometry": {
+        "width": 288,
+        "height": 555.015625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 320,
+      "name": "out_extra",
+      "file": "base-dark-320-out_extra.png",
+      "geometry": {
+        "width": 288,
+        "height": 318.140625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\" channel string 渠道标识。",
+      "textHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 320,
+      "name": "tx_txnOrderMsg",
+      "file": "base-dark-320-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 288,
+        "height": 1281.53125,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "txnOrderMsg string json<object> 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json<object[]> 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 320,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 20,
+            "y": -1700.65625,
+            "width": 135.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 20,
+            "y": -1700.65625,
+            "width": 136,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 178.28125,
+            "y": 651.390625,
+            "width": 121.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 178,
+            "y": 651.390625,
+            "width": 122,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 320,
+      "name": "composition",
+      "file": "base-dark-320-composition.png",
+      "geometry": {
+        "width": 320,
+        "height": 3462.140625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 320,
+      "name": "out_refunds",
+      "file": "head-dark-320-out_refunds.png",
+      "geometry": {
+        "width": 288,
+        "height": 514.25,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 320,
+      "name": "out_extra",
+      "file": "head-dark-320-out_extra.png",
+      "geometry": {
+        "width": 288,
+        "height": 269.375,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "textHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 320,
+      "name": "tx_txnOrderMsg",
+      "file": "head-dark-320-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 288,
+        "height": 1339.1875,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 320,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 20,
+            "y": -1706.65625,
+            "width": 135.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 20,
+            "y": -1706.65625,
+            "width": 136,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 176.28125,
+            "y": 657.40625,
+            "width": 123.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 176,
+            "y": 657.40625,
+            "width": 124,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 320,
+      "name": "composition",
+      "file": "head-dark-320-composition.png",
+      "geometry": {
+        "width": 320,
+        "height": 3474.15625,
+        "scrollWidth": 320,
+        "viewport": 320
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 1024,
+      "name": "out_refunds",
+      "file": "base-dark-1024-out_refunds.png",
+      "geometry": {
+        "width": 960,
+        "height": 442.828125,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 1024,
+      "name": "out_extra",
+      "file": "base-dark-1024-out_extra.png",
+      "geometry": {
+        "width": 960,
+        "height": 258.515625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\" channel string 渠道标识。",
+      "textHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 1024,
+      "name": "tx_txnOrderMsg",
+      "file": "base-dark-1024-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 960,
+        "height": 1045.90625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "txnOrderMsg string json<object> 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json<object[]> 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8"
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 1024,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 36,
+            "y": -1339.9375,
+            "width": 471.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 36,
+            "y": -1339.9375,
+            "width": 472,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 622.125,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 622.125,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "label": "base",
+      "theme": "dark",
+      "width": 1024,
+      "name": "composition",
+      "file": "base-dark-1024-composition.png",
+      "geometry": {
+        "width": 1024,
+        "height": 2859.859375,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 1024,
+      "name": "out_refunds",
+      "file": "head-dark-1024-out_refunds.png",
+      "geometry": {
+        "width": 960,
+        "height": 402.0625,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "textHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 1024,
+      "name": "out_extra",
+      "file": "head-dark-1024-out_extra.png",
+      "geometry": {
+        "width": 960,
+        "height": 209.75,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "textHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 1024,
+      "name": "tx_txnOrderMsg",
+      "file": "head-dark-1024-tx_txnOrderMsg.png",
+      "geometry": {
+        "width": 960,
+        "height": 1069.9375,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "textHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a"
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 1024,
+      "route": "/kits/api-docs/schema-composition",
+      "tabs": [
+        {
+          "selected": "Card payment",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 36,
+            "y": -1345.9375,
+            "width": 471.515625,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 36,
+            "y": -1345.9375,
+            "width": 472,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "Charge a tokenized card. The token comes from the client-side SDK and is single-use.typestringRequiredOne of card, saved_card.tokenstringRequiredSingle-use card token issued by the client SDK.Exampletok_1NirD82eZvKYlo2Csave_for_futurebooleanDefaultfalseStore the card for later reuse after a successful charge.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        },
+        {
+          "selected": "Debit card",
+          "selectedCount": 1,
+          "selectedRect": {
+            "x": 530.28125,
+            "y": 628.140625,
+            "width": 457.71875,
+            "height": 23.984375
+          },
+          "indicatorRect": {
+            "x": 530,
+            "y": 628.140625,
+            "width": 458,
+            "height": 23.984375
+          },
+          "panelVisible": true,
+          "panelText": "kindstringRequiredAlways card.last4stringRequiredLast four digits of the destination card.",
+          "labelColor": "oklch(0.205 0 0)",
+          "indicatorColor": "rgb(255, 255, 255)"
+        }
+      ]
+    },
+    {
+      "label": "head",
+      "theme": "dark",
+      "width": 1024,
+      "name": "composition",
+      "file": "head-dark-1024-composition.png",
+      "geometry": {
+        "width": 1024,
+        "height": 2871.875,
+        "scrollWidth": 1024,
+        "viewport": 1024
+      },
+      "text": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "textHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679"
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "out_refunds",
+      "theme": "light",
+      "width": 320,
+      "baseTextHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27",
+      "headTextHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf",
+      "changes": [
+        {
+          "fact": "The array stays optional; object/null belongs to each item, with both item conditions and the two-field count retained.",
+          "from": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。",
+          "to": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2)"
+        }
+      ],
+      "expectedHeadText": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "matches": true
+    },
+    {
+      "name": "out_extra",
+      "theme": "light",
+      "width": 320,
+      "baseTextHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9",
+      "headTextHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9",
+      "changes": [
+        {
+          "fact": "Wire string/null and json_string format remain separate from decoded JSON object/encoded empty-object presence; child count remains one.",
+          "from": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\"",
+          "to": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1)"
+        }
+      ],
+      "expectedHeadText": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "matches": true
+    },
+    {
+      "name": "tx_txnOrderMsg",
+      "theme": "light",
+      "width": 320,
+      "baseTextHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8",
+      "headTextHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a",
+      "changes": [
+        {
+          "fact": "txnOrderMsg keeps required wire string and its declared json_string format.",
+          "from": "txnOrderMsg string json<object> 必填",
+          "to": "txnOrderMsg string json_string 必填"
+        },
+        {
+          "fact": "The txnOrderMsg decoded JSON object is explicit in the description.",
+          "from": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。",
+          "to": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object"
+        },
+        {
+          "fact": "products keeps required wire string and its declared json_string format.",
+          "from": "products string json<object[]> 必填",
+          "to": "products string json_string 必填"
+        },
+        {
+          "fact": "products retains decoded JSON object[] and explicitly names its object item; the amount constraint is unchanged.",
+          "from": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。",
+          "to": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object"
+        }
+      ],
+      "expectedHeadText": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "matches": true
+    },
+    {
+      "name": "composition",
+      "theme": "light",
+      "width": 320,
+      "baseTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "headTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "changes": [],
+      "expectedHeadText": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "matches": true
+    },
+    {
+      "name": "out_refunds",
+      "theme": "light",
+      "width": 1024,
+      "baseTextHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27",
+      "headTextHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf",
+      "changes": [
+        {
+          "fact": "The array stays optional; object/null belongs to each item, with both item conditions and the two-field count retained.",
+          "from": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。",
+          "to": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2)"
+        }
+      ],
+      "expectedHeadText": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "matches": true
+    },
+    {
+      "name": "out_extra",
+      "theme": "light",
+      "width": 1024,
+      "baseTextHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9",
+      "headTextHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9",
+      "changes": [
+        {
+          "fact": "Wire string/null and json_string format remain separate from decoded JSON object/encoded empty-object presence; child count remains one.",
+          "from": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\"",
+          "to": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1)"
+        }
+      ],
+      "expectedHeadText": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "matches": true
+    },
+    {
+      "name": "tx_txnOrderMsg",
+      "theme": "light",
+      "width": 1024,
+      "baseTextHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8",
+      "headTextHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a",
+      "changes": [
+        {
+          "fact": "txnOrderMsg keeps required wire string and its declared json_string format.",
+          "from": "txnOrderMsg string json<object> 必填",
+          "to": "txnOrderMsg string json_string 必填"
+        },
+        {
+          "fact": "The txnOrderMsg decoded JSON object is explicit in the description.",
+          "from": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。",
+          "to": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object"
+        },
+        {
+          "fact": "products keeps required wire string and its declared json_string format.",
+          "from": "products string json<object[]> 必填",
+          "to": "products string json_string 必填"
+        },
+        {
+          "fact": "products retains decoded JSON object[] and explicitly names its object item; the amount constraint is unchanged.",
+          "from": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。",
+          "to": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object"
+        }
+      ],
+      "expectedHeadText": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "matches": true
+    },
+    {
+      "name": "composition",
+      "theme": "light",
+      "width": 1024,
+      "baseTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "headTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "changes": [],
+      "expectedHeadText": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "matches": true
+    },
+    {
+      "name": "out_refunds",
+      "theme": "dark",
+      "width": 320,
+      "baseTextHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27",
+      "headTextHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf",
+      "changes": [
+        {
+          "fact": "The array stays optional; object/null belongs to each item, with both item conditions and the two-field count retained.",
+          "from": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。",
+          "to": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2)"
+        }
+      ],
+      "expectedHeadText": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "matches": true
+    },
+    {
+      "name": "out_extra",
+      "theme": "dark",
+      "width": 320,
+      "baseTextHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9",
+      "headTextHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9",
+      "changes": [
+        {
+          "fact": "Wire string/null and json_string format remain separate from decoded JSON object/encoded empty-object presence; child count remains one.",
+          "from": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\"",
+          "to": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1)"
+        }
+      ],
+      "expectedHeadText": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "matches": true
+    },
+    {
+      "name": "tx_txnOrderMsg",
+      "theme": "dark",
+      "width": 320,
+      "baseTextHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8",
+      "headTextHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a",
+      "changes": [
+        {
+          "fact": "txnOrderMsg keeps required wire string and its declared json_string format.",
+          "from": "txnOrderMsg string json<object> 必填",
+          "to": "txnOrderMsg string json_string 必填"
+        },
+        {
+          "fact": "The txnOrderMsg decoded JSON object is explicit in the description.",
+          "from": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。",
+          "to": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object"
+        },
+        {
+          "fact": "products keeps required wire string and its declared json_string format.",
+          "from": "products string json<object[]> 必填",
+          "to": "products string json_string 必填"
+        },
+        {
+          "fact": "products retains decoded JSON object[] and explicitly names its object item; the amount constraint is unchanged.",
+          "from": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。",
+          "to": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object"
+        }
+      ],
+      "expectedHeadText": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "matches": true
+    },
+    {
+      "name": "composition",
+      "theme": "dark",
+      "width": 320,
+      "baseTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "headTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "changes": [],
+      "expectedHeadText": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "matches": true
+    },
+    {
+      "name": "out_refunds",
+      "theme": "dark",
+      "width": 1024,
+      "baseTextHash": "24ddcf6522d196c4f1c565f382936a3d4f58e26022dd8c9374afe0b86f2a4a27",
+      "headTextHash": "1604945e5b5b11d4b6e6b058a71603635233dbfa1d096f2c20def4d8884a98cf",
+      "changes": [
+        {
+          "fact": "The array stays optional; object/null belongs to each item, with both item conditions and the two-field count retained.",
+          "from": "refunds? array 仅在发生过退款时返回，从未退款的交易没有这个键。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) 每个元素 object | null 退款被风控撤销后，对应位置保留为 null，数组长度不变。 退款仍在处理中时同样为 null，完成后原位替换为退款对象。",
+          "to": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2)"
+        }
+      ],
+      "expectedHeadText": "refunds? array<object | null> 仅在发生过退款时返回，从未退款的交易没有这个键。 每个元素: 退款被风控撤销后，对应位置保留为 null，数组长度不变。 每个元素: 退款仍在处理中时同样为 null，完成后原位替换为退款对象。 退款记录。字段可省略是字段自己的事实，不会下传给数组元素。 收起子参数 (2) id string 退款 id。 amount integer 退款金额（最小货币单位）。",
+      "matches": true
+    },
+    {
+      "name": "out_extra",
+      "theme": "dark",
+      "width": 1024,
+      "baseTextHash": "a69ae82a862e0722ee3c9c9c67514f6e57055d70d13827c944c3a854517d02f9",
+      "headTextHash": "9c6c9ace61e95c618d5fcccac14697ac9a18a071efe3473f754e8b4a426ee2e9",
+      "changes": [
+        {
+          "fact": "Wire string/null and json_string format remain separate from decoded JSON object/encoded empty-object presence; child count remains one.",
+          "from": "extra string | null json<object> 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 收起子参数 (1) 值要求 object | \"{}\"",
+          "to": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1)"
+        }
+      ],
+      "expectedHeadText": "extra string | null json_string 扩展信息。字段值可为 null；解码后内容可能是编码过的空对象——两个\"空\"分属两层，各标各的。 解码内容 · json: object | \"{}\" 收起子参数 (1) channel string 渠道标识。",
+      "matches": true
+    },
+    {
+      "name": "tx_txnOrderMsg",
+      "theme": "dark",
+      "width": 1024,
+      "baseTextHash": "d299c602aaad416dbab8100d56c42c44b67aa1dcf291106fe745f78712f0c6d8",
+      "headTextHash": "099acf9614b802863b84dc1119206c2721493e2666b8567f9b7087f67e74756a",
+      "changes": [
+        {
+          "fact": "txnOrderMsg keeps required wire string and its declared json_string format.",
+          "from": "txnOrderMsg string json<object> 必填",
+          "to": "txnOrderMsg string json_string 必填"
+        },
+        {
+          "fact": "The txnOrderMsg decoded JSON object is explicit in the description.",
+          "from": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。",
+          "to": "交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object"
+        },
+        {
+          "fact": "products keeps required wire string and its declared json_string format.",
+          "from": "products string json<object[]> 必填",
+          "to": "products string json_string 必填"
+        },
+        {
+          "fact": "products retains decoded JSON object[] and explicitly names its object item; the amount constraint is unchanged.",
+          "from": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。",
+          "to": "顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object"
+        }
+      ],
+      "expectedHeadText": "txnOrderMsg string json_string 必填 交易业务信息，包含 returnUrl、商品信息以及商户采集的浏览器与设备信息。 解码内容 · json: object 收起子参数 (3) returnUrl string 必填 同步回跳地址，主要用于 3DS challenge 等跳转场景。 products string json_string 必填 顾客购买的商品信息列表；商品金额、折扣和运费合计需要等于 orderAmount。 解码后数组 · json: object[]; 每个元素: object 收起子参数 (4) name string 必填 商品名称。 price string 必填 商品单价。 type string 商品类别；默认不填即普通商品。discount 商品金额需要传负数。 允许值 (4) virtual 虚拟商品。 physical 实物商品。 shipping_fee 运费商品项。 discount 折扣商品项，金额需要传负数。 retailerId string 条件必填 New 传入 retailers 时必填。 销售该商品的零售商标识。 SINCE 2026-08-10 transactionIp string 必填 持卡人交易 IP，应为终端用户 IP，而不是商户服务器 IP。",
+      "matches": true
+    },
+    {
+      "name": "composition",
+      "theme": "dark",
+      "width": 1024,
+      "baseTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "headTextHash": "9346d18d15c8a843f472d6b5e37028cca1f586505afa221a4aa59abf64fde679",
+      "changes": [],
+      "expectedHeadText": "Schema 组合 SchemaComposition：忠实呈现 OpenAPI / JSON Schema 的 oneOf / anyOf / allOf 组合—— oneOf 用 tabs（恰好一个成立）、anyOf 用独立开合的可折叠分区（至少一个成立）、 allOf 顺序全展开（全部成立），三种语义绝不互相误读。 discriminator 渲染为每个 variant 的首行真实字段（不虚构 wire path）， deep link 会自动揭示隐藏的 tab / 分区。字段级组合由 FieldItem 在子字段之后委托本组件渲染。 组件数据无关、locale-ready，所有文案由调用方注入。 深链接检查 card → token (other tab) wallet → Apple Pay device_token (nested tab) phone → sms_opt_in (collapsed section) destination → card last4 (field-level tab) oneOf + discriminator — 支付方式 REQUEST BODY ONE OF (2) Exactly one of the following applies. Card payment Wallet payment Charge a tokenized card. The token comes from the client-side SDK and is single-use. type string REQUIRED One of card, saved_card. token string REQUIRED Single-use card token issued by the client SDK. EXAMPLE tok_1NirD82eZvKYlo2C save_for_future boolean DEFAULT false Store the card for later reuse after a successful charge. anyOf — 联系渠道 CONTACT ANY OF (2) One or more of the following may apply. Email channel (1) Reach the customer by email. Can be combined with the phone channel. email string email REQUIRED EXAMPLE ada@example.com Phone channel (2) Reach the customer by phone or SMS. Can be combined with the email channel. phone_number string e164 REQUIRED EXAMPLE +14155550132 sms_opt_in boolean DEFAULT false Whether the customer agreed to receive SMS. allOf — 资源形态 RESPONSE BODY ALL OF (3) All of the following apply. Base resource (2) id string REQUIRED Globally unique resource identifier. created_at string date-time REQUIRED Audit fields (2) updated_at string date-time updated_by string Actor id of the last modification. Immutability rule Once created, id and created_at never change. Updates only touch audit fields. 字段级组合 — 委托自 FieldItem TRANSFER destination object REQUIRED Where the transfer lands. Concrete metadata plus a polymorphic target. Hide Child Parameters (1) reference string REQUIRED Idempotent client reference for this destination. ONE OF (2) Exactly one of the following applies. Bank account Debit card kind string REQUIRED Always card. last4 string REQUIRED Last four digits of the destination card.",
+      "matches": true
+    }
+  ],
+  "status": "passed"
+}

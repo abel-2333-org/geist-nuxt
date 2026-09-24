@@ -1,0 +1,870 @@
+{
+  "cases": [
+    {
+      "side": "head",
+      "kind": "children",
+      "opened": true,
+      "query": "Connected repository id.",
+      "target": "body_gitSource_repoId",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-18\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:46:32.908Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to ref",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "screenshot": "head-children-opened-closed.jpg",
+      "screenshotAvailable": true,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "head",
+      "kind": "children",
+      "opened": false,
+      "query": "Connected repository id.",
+      "target": "body_gitSource_repoId",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "screenshot": "head-children-initial.jpg",
+      "screenshotAvailable": true,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "head",
+      "kind": "value",
+      "opened": false,
+      "query": "3DS challenge",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": "geist-nuxt 首页",
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "screenshot": "head-value-initial.jpg",
+      "screenshotAvailable": true,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "head",
+      "kind": "value",
+      "opened": true,
+      "query": "3DS challenge",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-25\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:46:43.625Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to products",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs"
+      },
+      "screenshot": "head-value-opened-closed.jpg",
+      "screenshotAvailable": true,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "head",
+      "kind": "anyOf",
+      "opened": false,
+      "query": "+14155550132",
+      "target": "contact_phone_number",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": "geist-nuxt 首页",
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "screenshot": "head-anyOf-initial.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "head",
+      "kind": "anyOf",
+      "opened": true,
+      "query": "+14155550132",
+      "target": "contact_phone_number",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-11\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:45:21.407Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to sms_opt_in",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+      },
+      "screenshot": "head-anyOf-opened-closed.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "00d2b3bee459b5b1732ae44615da7821fe9949f2"
+    },
+    {
+      "side": "base",
+      "kind": "children",
+      "opened": false,
+      "query": "Connected repository id.",
+      "target": "body_gitSource_repoId",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "screenshot": "base-children-initial.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "side": "base",
+      "kind": "children",
+      "opened": true,
+      "query": "Connected repository id.",
+      "target": "body_gitSource_repoId",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-18\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:43:15.758Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to ref",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "screenshot": "base-children-opened-closed.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "side": "base",
+      "kind": "value",
+      "opened": false,
+      "query": "3DS challenge",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": "geist-nuxt 首页",
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "screenshot": "base-value-initial.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "side": "base",
+      "kind": "value",
+      "opened": true,
+      "query": "3DS challenge",
+      "target": "tx_txnOrderMsg_returnUrl",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-25\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:43:25.557Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to products",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs"
+      },
+      "screenshot": "base-value-opened-closed.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "side": "base",
+      "kind": "anyOf",
+      "opened": false,
+      "query": "+14155550132",
+      "target": "contact_phone_number",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+        "\t\t\t\t5 container No results",
+        "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "events": [],
+      "keyboard": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": "geist-nuxt 首页",
+          "tag": "A"
+        },
+        "hidden": "",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "screenshot": "base-anyOf-initial.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    },
+    {
+      "side": "base",
+      "kind": "anyOf",
+      "opened": true,
+      "query": "+14155550132",
+      "target": "contact_phone_number",
+      "before": {
+        "exists": true,
+        "expanded": "false",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BUTTON"
+        },
+        "hidden": "until-found",
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "findLines": [
+        "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+        "\t\t\t\t5 container Result 1 of 1",
+        "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+      ],
+      "after": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": null,
+          "tag": "BODY"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "events": [
+        {
+          "level": "log",
+          "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-11\",\"isTrusted\":true}",
+          "timestamp": "2026-09-23T14:44:25.488Z"
+        }
+      ],
+      "keyboard": {
+        "exists": true,
+        "expanded": "true",
+        "focus": {
+          "inert": false,
+          "label": "Copy link to sms_opt_in",
+          "tag": "BUTTON"
+        },
+        "hidden": null,
+        "inert": false,
+        "url": "http://127.0.0.1:3028/kits/api-docs/schema-composition"
+      },
+      "screenshot": "base-anyOf-opened-closed.jpg",
+      "screenshotAvailable": false,
+      "sourceSha": "19a107527d1226585611f4547619320b430fab2a"
+    }
+  ],
+  "excluded": {
+    "reason": "Last four rescreenshot attempts had native-window/tab mismatch. Not product findings. Raw attempts retained locally, never counted as pass or fail.",
+    "records": [
+      {
+        "side": "head",
+        "kind": "anyOf",
+        "opened": false,
+        "query": "+14155550132",
+        "target": "contact_phone_number",
+        "before": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BODY"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "findLines": [
+          "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+          "\t\t\t\t5 container No results",
+          "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+        ],
+        "after": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BODY"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "events": [],
+        "keyboard": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": "geist-nuxt 首页",
+            "tag": "A"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "screenshot": "head-anyOf-initial.jpg"
+      },
+      {
+        "side": "head",
+        "kind": "anyOf",
+        "opened": true,
+        "query": "+14155550132",
+        "target": "contact_phone_number",
+        "before": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "findLines": [
+          "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+          "\t\t\t\t5 container No results",
+          "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+        ],
+        "after": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "events": [],
+        "keyboard": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3033/kits/api-docs/schema-composition"
+        },
+        "screenshot": "head-anyOf-opened-closed.jpg"
+      },
+      {
+        "side": "base",
+        "kind": "children",
+        "opened": false,
+        "query": "Connected repository id.",
+        "target": "body_gitSource_repoId",
+        "before": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BODY"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "findLines": [
+          "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+          "\t\t\t\t5 container No results",
+          "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+        ],
+        "after": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BODY"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "events": [],
+        "keyboard": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BODY"
+          },
+          "hidden": "",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "screenshot": "base-children-initial.jpg"
+      },
+      {
+        "side": "base",
+        "kind": "children",
+        "opened": true,
+        "query": "Connected repository id.",
+        "target": "body_gitSource_repoId",
+        "before": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "findLines": [
+          "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+          "\t\t\t\t5 container No results",
+          "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+        ],
+        "after": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "events": [],
+        "keyboard": {
+          "exists": true,
+          "expanded": "false",
+          "focus": {
+            "inert": false,
+            "label": null,
+            "tag": "BUTTON"
+          },
+          "hidden": "until-found",
+          "inert": false,
+          "url": "http://127.0.0.1:3028/kits/api-docs"
+        },
+        "screenshot": "base-children-opened-closed.jpg"
+      }
+    ]
+  },
+  "limitation": "Four final HEAD children/value screenshots published. Other screenshots require renewed correctly bound capture; UI Find evidence acceptance remains pending."
+}

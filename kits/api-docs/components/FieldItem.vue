@@ -19,6 +19,7 @@ export type {
 </script>
 
 <script setup lang="ts">
+import { vCollapseFocus } from '../internal/collapseFocus'
 // Domain component (API docs): renders one field row of an endpoint's schema —
 // name/type/requiredness summary, a secondary metadata band (condition, enum,
 // constraints, example, lifecycle), and recursive object/array subfields.
@@ -57,6 +58,7 @@ export type {
 //           omittable-key `?` is a UTooltip trigger named by `mayBeOmitted`
 //           (hover + keyboard focus, Escape closes) — needs the app's <UApp>.
 
+import { fieldTypeSummary, summarizeFieldValue, collectValueRegion, valueScopeLabelKey, describeValuePresence } from '../utils/field'
 import ConditionEntries from '../internal/ConditionEntries.vue'
 import FieldValueStructure from '../internal/FieldValueStructure.vue'
 
@@ -182,11 +184,24 @@ const hasLifecycleDetail = computed(
 const constraints = computed(() => (props.notes ?? []).filter(n => n.kind !== 'caveat'))
 const caveats = computed(() => (props.notes ?? []).filter(n => n.kind === 'caveat'))
 
-// Share codec composition with the internal renderer; the covered nodes are
-// passed down explicitly, even when a later constraint opens a new region.
-const valueCodec = computed(() => describeValueCodec(props.value))
-const formatToken = computed(() => valueCodec.value?.token ?? props.format)
-const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== props.format)
+// Derive presentation without rebuilding the value graph. Real fields and
+// composition still define the existing disclosure boundaries.
+const formatToken = computed(() => props.format)
+const summaryType = computed(() => fieldTypeSummary(props))
+const overviewNodes = computed(() => props.value ? collectValueRegion(props.value) : [])
+const overview = computed(() => {
+  const depths = { item: 0, member: 0, decoded: 0 }
+  return overviewNodes.value.map(node => {
+    const depth = ++depths[node.relation]
+    const label = t.value[valueScopeLabelKey(node)]
+    const scope = depth > 1 ? t.value.nestedScope(label, node.relation, depth) : label
+    const represented = node === props.value && summaryType.value !== props.type
+    return { node, scope, represented, simple: summarizeFieldValue(node),
+      expression: presenceTypeExpression(node.type, describeValuePresence(node.presence).unionTail),
+      conditions: conditionEntries(node.presence?.condition),
+    }
+  })
+})
 
 // Output presence (may be omitted / null / empty), rendered as type notation:
 // `name?` and `string | null | ""`. Derived by the shared pure function so the
@@ -196,16 +211,24 @@ const shapeLeads = computed(() => !!valueCodec.value && formatToken.value !== pr
 // optional state is silent), and nothing is inferred from a missing `required`.
 const presence = computed(() => describeFieldPresence(props.presence))
 const presenceCondition = computed(() => presence.value.condition)
+const shapeOverview = computed(() => overview.value.filter(entry =>
+  !entry.represented && (entry.expression || entry.node.codec)))
+const valueConstraints = computed(() => overview.value.flatMap(entry => entry.simple
+  ? (entry.node.notes ?? []).map(note => ({ ...note, label: `${entry.scope} · ${note.label ?? t.value.note}` }))
+  : []))
 // The request condition, normalised through the single shared function
 // (`fieldRequiredState` calls it again for the marker); `conditionEntries` is
 // the one place that decides whether a string, a list or a list of blanks
 // says anything, so the marker, the detail gate and the rule cannot disagree.
 const conditions = computed(() => conditionEntries(props.condition))
-const typeExpression = computed(() => presenceTypeExpression(props.type, presence.value.unionTail))
+const typeExpression = computed(() => presenceTypeExpression(summaryType.value, presence.value.unionTail))
 
 const hasDetail = computed(
   () =>
     !!props.description
+    || shapeOverview.value.length > 0
+    || overview.value.some(entry => entry.simple && entry.conditions.length > 0)
+    || valueConstraints.value.length > 0
     || conditions.value.length > 0
     || presenceCondition.value.length > 0
     || (props.examples?.length ?? 0) > 0
@@ -236,6 +259,7 @@ const hasSecondary = computed(
   () =>
     hasEnum.value
     || constraints.value.length > 0
+    || valueConstraints.value.length > 0
     || (props.examples?.length ?? 0) > 0
     || (hasLifecycleDetail.value && !isDeprecated.value),
 )
@@ -339,12 +363,6 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
             class="cursor-help touch-manipulation select-none rounded-xs px-0.5 leading-4 font-normal text-toned transition-none hover:bg-elevated focus-visible:bg-primary focus-visible:text-inverted focus-visible:outline-2 focus-visible:outline-transparent"
             :class="{ 'line-through': isDeprecated }"
           >?</button></UTooltip></code>
-          <!-- When a field carries a decode boundary, the WIRE TYPE is the
-               least informative token on the row — on the consumer endpoint
-               that settled this, every structured field's type is `string`.
-               So the two swap weight: the shape the reader is scanning for
-               takes the type's own emphasis, and `string` steps back. A field
-               with no decode boundary keeps today's weighting exactly. -->
           <!-- Output presence rides on the type as notation — `string | null | ""`
                — in the same grey register, because it is a fact about the
                payload's shape, not a gate: the required-strength colours
@@ -353,14 +371,12 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                instead of overflowing a narrow column. -->
           <span
             data-field-type
-            class="wrap-anywhere min-w-0 font-mono text-xs"
-            :class="shapeLeads ? 'text-dimmed' : 'text-muted'"
+            class="wrap-anywhere min-w-0 font-mono text-xs text-muted"
             translate="no"
           >{{ typeExpression }}</span>
           <span
             v-if="formatToken"
-            class="wrap-anywhere font-mono text-xs"
-            :class="shapeLeads ? 'text-muted' : 'text-dimmed'"
+            class="wrap-anywhere font-mono text-xs text-dimmed"
             translate="no"
           >{{ formatToken }}</span>
           <span
@@ -416,7 +432,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     <!-- Leaf detail — always visible (no disclosure for non-object fields).
          Primary description sits closest to the summary row; a larger gap sets
          it apart from the secondary metadata band below. -->
-    <div v-if="hasDetail" class="mt-2.5 flex flex-col gap-4">
+    <div v-if="hasDetail" data-field-detail class="mt-2.5 flex flex-col gap-4">
       <!-- Gates come before the description, strongest first:
            1. Deprecation — "should I use this field at all?" outranks
               everything; a deprecated field's migration note must be the
@@ -483,15 +499,32 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
            band — where a consumer used to shove it — because a constraint is
            an input boundary and this is output behaviour. -->
       <div
-        v-if="presenceCondition.length"
-        data-field-presence-condition
-        class="border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
+        v-if="presenceCondition.length || overview.some(entry => entry.simple && entry.conditions.length)"
+        data-presence-rules
+        class="space-y-2 border-s-2 border-accented ps-3 text-sm leading-relaxed text-toned"
       >
-        <ConditionEntries :entries="presenceCondition" />
+        <div v-if="presenceCondition.length" data-field-presence-condition>
+          <ConditionEntries :entries="presenceCondition" />
+        </div>
+
+        <!-- Share the rule surface, but keep each condition's scope explicit. -->
+        <template v-for="(entry, index) in overview" :key="index">
+          <div v-if="entry.simple && entry.conditions.length" data-value-summary-condition>
+            <ConditionEntries :entries="entry.conditions.map(text => `${entry.scope}: ${text}`)" />
+          </div>
+        </template>
       </div>
 
-      <p v-if="description" class="text-sm leading-relaxed text-toned">
-        <InlineMarkdown :text="description" />
+      <!-- Short shape clauses share the description paragraph. They supply
+           nested/decoded type facts even when the author supplies no prose. -->
+      <p v-if="description || shapeOverview.length" class="wrap-anywhere text-sm leading-relaxed text-toned">
+        <InlineMarkdown v-if="description" :text="description" />
+        <template v-for="(entry, index) in shapeOverview" :key="index">
+          {{ description || index ? ' ' : '' }}<span data-value-shape-summary>
+            <span>{{ entry.scope }}<template v-if="entry.node.codec"> · {{ entry.node.codec }}</template>: </span>
+            <span class="font-mono text-xs text-muted" translate="no">{{ entry.expression }}</span>
+          </span>{{ index < shapeOverview.length - 1 ? ';' : '' }}
+        </template>
       </p>
 
       <!-- 3. Caveats — "the call will succeed, and you may still regret it".
@@ -581,6 +614,13 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
           </dl>
         </div>
 
+        <dl v-for="(note, index) in valueConstraints" :key="`value-${index}`"
+          data-value-summary-constraint
+          class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed">
+          <dt class="text-xs font-medium uppercase tracking-wide text-dimmed">{{ note.label }}</dt>
+          <dd class="wrap-anywhere min-w-0 text-toned"><InlineMarkdown :text="note.text" /></dd>
+        </dl>
+
         <dl
           v-if="examples?.length"
           class="grid min-w-0 grid-cols-[fit-content(8rem)_minmax(0,1fr)] items-baseline gap-x-3 text-sm leading-relaxed"
@@ -619,7 +659,8 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
     <FieldValueStructure
       v-if="value"
       :value="value"
-      :represented-codecs="valueCodec?.nodes"
+      :represented-codecs="overviewNodes.filter(node => node.relation === 'decoded')"
+      :summarized-nodes="overview.filter(entry => entry.simple).map(entry => entry.node)"
       :chrome="t"
       :labels="labels"
     />
@@ -634,7 +675,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       <template #default="{ open }">
         <button
           type="button"
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex min-h-8 touch-manipulation items-center gap-1.5 rounded-sm px-2 text-sm font-medium text-primary hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"
@@ -652,7 +693,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       </template>
 
       <template #content>
-        <div class="mt-1 border-s border-default ps-3 @sm/field:ps-4">
+        <!-- Subtree of this row: the structural line and indent come from the
+             foundation `subtree` utility, never hand-written here. -->
+        <div v-collapse-focus="open" class="mt-1 subtree">
           <FieldItem
             v-for="child in children"
             :key="child.path ?? child.name"
@@ -670,7 +713,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
          component (see script) so FieldItem installs standalone without a
          dependency cycle; the block only appears when that slice is present.
          FieldItem passes both its own chrome and `labels.composition` through. -->
-    <div v-if="composition && schemaComposition" class="mt-3 border-s border-default ps-4">
+    <div v-if="composition && schemaComposition" class="mt-3 subtree">
       <component
         :is="schemaComposition"
         v-bind="composition"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vCollapseFocus } from './collapseFocus'
 // Renders "what this field's VALUE requires and contains", for values that are
 // array elements, record members, or the content inside an encoded string.
 // Internal helper of FieldItem: distributed with the api-docs-field-item
@@ -38,6 +39,8 @@ const props = defineProps<{
   value: FieldValueNode
   /** Decode boundaries already represented by the owner or an ancestor token. */
   representedCodecs?: readonly FieldValueNode[]
+  /** Facts already visible in the owner overview; anchors remain here. */
+  summarizedNodes?: readonly FieldValueNode[]
   /**
    * Chrome already resolved by the owner FieldItem against its defaults, so
    * every default string exists once. The fold reuses `showChildren` /
@@ -127,17 +130,17 @@ const requirementBlocks = computed(() => {
 // rule (one constraint → one row) is the same fact whether it is rendered here
 // or asserted in a test.
 const inlineBlocks = computed(() =>
-  inlineNodes.value.flatMap(n => requirementBlocks.value.get(n) ?? []))
+  inlineNodes.value.flatMap(n => props.summarizedNodes?.includes(n) ? [] : requirementBlocks.value.get(n) ?? []))
 // Identity-only nodes still own public anchors. They overlay the containing
 // field (or enclosing value region) without creating an empty requirements row.
 const inlineAnchorNodes = computed(() => inlineNodes.value.filter(node =>
-  node.path && !describeValueRequirements(node, props.chrome)))
+  node.path && (props.summarizedNodes?.includes(node) || !describeValueRequirements(node, props.chrome))))
 const regionEntries = computed(() => regionNodes.value.map(node => ({
   node,
-  block: requirementBlocks.value.get(node),
+  block: props.summarizedNodes?.includes(node) ? null : requirementBlocks.value.get(node),
 })).filter(entry => entry.block || entry.node === regionLast.value))
 const regionAnchorNodes = computed(() => regionNodes.value.filter(node =>
-  node !== props.value && node !== regionLast.value && node.path && !describeValueRequirements(node, props.chrome)))
+  node !== props.value && node !== regionLast.value && node.path && (props.summarizedNodes?.includes(node) || !describeValueRequirements(node, props.chrome))))
 
 // Deep linking, same contract as the field row: a link into a collapsed value
 // root or one of its properties must reveal itself. Membership in the collected
@@ -190,7 +193,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
         aria-hidden="true"
       />
-      <FieldValueRequirements :block="block" :chrome="chrome" :labels="labels" />
+      <FieldValueRequirements v-if="!summarizedNodes?.includes(block.node)" :block="block" :chrome="chrome" :labels="labels" />
     </div>
 
     <!-- Structure region. One disclosure per boundary the reader crosses. -->
@@ -203,7 +206,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
         <button
           type="button"
           data-value-structure-toggle
-          class="flex touch-manipulation items-center gap-1.5 rounded-sm text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          class="flex min-h-8 touch-manipulation items-center gap-1.5 rounded-sm px-2 text-sm font-medium text-primary hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <UIcon
             name="i-lucide-chevron-right"
@@ -217,15 +220,18 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
       </template>
 
       <template #content>
-        <!-- The region is the value root's own anchor target (`value.path`),
+        <!-- The region is a subtree of the owner row (foundation `subtree`:
+             one structural line, container-driven indent) and the value
+             root's own anchor target (`value.path`),
              so it carries the same arrival cue overlay and focus outline as a
              field row: useFieldAnchor focuses the id'd element and flashes the
              first cue inside it, which must be this region's, not a nested
              row's. -->
         <div
           :id="value.path"
+          v-collapse-focus="open"
           data-value-structure-region
-          class="relative mt-2 flex flex-col gap-3 rounded-md border-s border-default ps-3 outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary @sm/field:ps-4"
+          class="subtree relative mt-2 flex flex-col gap-3 rounded-md outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-primary"
           :class="anchor.SCROLL_MARGIN_CLASS"
         >
           <span
@@ -274,7 +280,7 @@ watch([() => regionPaths.value.includes(anchor.active.value), anchor.revision], 
               aria-hidden="true"
             />
             <FieldValueRequirements
-              v-if="entry.block"
+              v-if="entry.block && !summarizedNodes?.includes(entry.node)"
               :block="entry.block"
               :chrome="chrome"
               :labels="labels"

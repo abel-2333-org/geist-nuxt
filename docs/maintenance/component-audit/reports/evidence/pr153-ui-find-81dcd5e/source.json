@@ -1,0 +1,20 @@
+{
+  "browser": "Chrome 153.0.8010.53",
+  "sameBrowserProcess": true,
+  "base": {
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "digest": "df3342c0952c84f81698322264eb9f8015eff94d9cd3f8ad3ea2fe0d8bb20806",
+    "builtAt": "2026-09-22T13:53:37.680Z",
+    "sourceDigestRechecked": true,
+    "port": 3028,
+    "build": "hierarchy production build; additional unused /__hierarchy route; tested regular gallery routes"
+  },
+  "head": {
+    "sha": "81dcd5ea916ec608a82ba8811978a95b513ec27b",
+    "digest": "364d77038d88740d50809f7b95318f5071a30b1b4f14d1add803c1699bfac0f7",
+    "port": 3033,
+    "build": "pnpm build; production .output/server/index.mjs; tracked source clean before and after build"
+  },
+  "animation": "normal production styles; no overrides",
+  "observer": "passive beforematch capture listener only; no preventDefault, synthetic event, hidden/inert removal or reveal calls"
+}

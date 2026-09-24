@@ -26,8 +26,8 @@ for (const theme of ['light', 'dark'] as const) {
           if (entry.name === 'index') {
             const shape = page.locator('#tx_billingInformation [data-field-identity]').first()
               .locator(':scope > ' + formatSelector)
-            await expect.poll(() => shape.textContent()).toBe('json<object>')
-            cases.push({ field: 'tx_billingInformation', branch: 'shape-leads', target: shape })
+            await expect.poll(() => shape.textContent()).toBe('json_string')
+            cases.push({ field: 'tx_billingInformation', branch: 'encoded-format', target: shape })
           }
           evidence.push({ kind: 'applicability', shapeLeads: entry.name === 'index'
             ? 'covered by tx_billingInformation' : 'not applicable: this page has no decoded-value field' })

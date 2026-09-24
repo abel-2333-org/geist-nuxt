@@ -1,0 +1,972 @@
+[
+  {
+    "side": "HEAD",
+    "entry": "children",
+    "state": "initial-closed",
+    "target": "body_gitSource_repoId",
+    "selector": "#body_gitSource button[aria-expanded]",
+    "query": "Connected repository id.",
+    "started": "2026-09-22T14:20:08.767Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+    ],
+    "beforematch": [],
+    "screenshot": "HEAD-children-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "route": "/kits/api-docs",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "HEAD",
+    "entry": "children",
+    "state": "opened-then-closed",
+    "target": "body_gitSource_repoId",
+    "selector": "#body_gitSource button[aria-expanded]",
+    "query": "Connected repository id.",
+    "started": "2026-09-22T14:20:22.679Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-18\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:20:22.880Z"
+      }
+    ],
+    "screenshot": "HEAD-children-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to ref",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "route": "/kits/api-docs",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  },
+  {
+    "side": "HEAD",
+    "entry": "value",
+    "state": "initial-closed",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "selector": "#tx_txnOrderMsg [data-value-structure-toggle]",
+    "query": "3DS challenge",
+    "started": "2026-09-22T14:20:38.561Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+    ],
+    "beforematch": [],
+    "screenshot": "HEAD-value-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "geist-nuxt 首页",
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "route": "/kits/api-docs",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "HEAD",
+    "entry": "value",
+    "state": "opened-then-closed",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "selector": "#tx_txnOrderMsg [data-value-structure-toggle]",
+    "query": "3DS challenge",
+    "started": "2026-09-22T14:21:41.176Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+      "\t\t\t\t5 container Result 1 of 1",
+      "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-25\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:21:41.290Z"
+      }
+    ],
+    "screenshot": "HEAD-value-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to products",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "firstFindState": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "route": "/kits/api-docs",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": true,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  },
+  {
+    "side": "HEAD",
+    "entry": "anyOf",
+    "state": "initial-closed",
+    "target": "contact_phone_number",
+    "selector": "button[aria-controls$=\"composition-phone\"]",
+    "query": "+14155550132",
+    "started": "2026-09-22T14:22:47.897Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs/schema-composition, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs/schema-composition, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+    ],
+    "beforematch": [],
+    "screenshot": "HEAD-anyOf-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "geist-nuxt 首页",
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "route": "/kits/api-docs/schema-composition",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "HEAD",
+    "entry": "anyOf",
+    "state": "opened-then-closed",
+    "target": "contact_phone_number",
+    "selector": "button[aria-controls$=\"composition-phone\"]",
+    "query": "+14155550132",
+    "started": "2026-09-22T14:22:58.126Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3027/kits/api-docs/schema-composition, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3027/kits/api-docs/schema-composition, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+      "\t\t\t\t5 container Result 1 of 1",
+      "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-11\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:22:58.263Z"
+      }
+    ],
+    "screenshot": "HEAD-anyOf-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to sms_opt_in",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [
+        {
+          "hidden": null,
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": true
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "firstFindState": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "route": "/kits/api-docs/schema-composition",
+    "sha": "3afdc3dc2433cbf45412581caac490366fda6211",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": true,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  },
+  {
+    "side": "base",
+    "entry": "children",
+    "state": "initial-closed",
+    "target": "body_gitSource_repoId",
+    "selector": "#body_gitSource button[aria-expanded]",
+    "query": "Connected repository id.",
+    "started": "2026-09-22T14:23:16.387Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+    ],
+    "beforematch": [],
+    "screenshot": "base-children-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "route": "/kits/api-docs",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "base",
+    "entry": "children",
+    "state": "opened-then-closed",
+    "target": "body_gitSource_repoId",
+    "selector": "#body_gitSource button[aria-expanded]",
+    "query": "Connected repository id.",
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "started": "2026-09-22T14:46:00.756Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-18",
+          "inert": false
+        }
+      ],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: Connected repository id.",
+      "\t\t\t\t5 container Result 1 of 1",
+      "The focused UI element is 4 text field (settable) Find, Value: Connected repository id."
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-18\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:46:00.951Z"
+      }
+    ],
+    "screenshot": "base-children-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to ref",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "body_gitSource_repoId",
+      "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+    },
+    "route": "/kits/api-docs",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "Result 1 of 1",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  },
+  {
+    "side": "base",
+    "entry": "value",
+    "state": "initial-closed",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "selector": "#tx_txnOrderMsg [data-value-structure-toggle]",
+    "query": "3DS challenge",
+    "started": "2026-09-22T14:46:22.917Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+    ],
+    "beforematch": [],
+    "screenshot": "base-value-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "geist-nuxt 首页",
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "route": "/kits/api-docs",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "base",
+    "entry": "value",
+    "state": "opened-then-closed",
+    "target": "tx_txnOrderMsg_returnUrl",
+    "selector": "#tx_txnOrderMsg [data-value-structure-toggle]",
+    "query": "3DS challenge",
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "started": "2026-09-22T14:46:52.334Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-25",
+          "inert": false
+        }
+      ],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: 3DS challenge",
+      "\t\t\t\t5 container Result 1 of 1",
+      "The focused UI element is 4 text field (settable) Find, Value: 3DS challenge"
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-25\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:46:52.448Z"
+      }
+    ],
+    "screenshot": "base-value-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to products",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "tx_txnOrderMsg_returnUrl",
+      "text": "returnUrlstring必填同步回跳地址，主要用于 3DS challenge 等跳转场景。"
+    },
+    "route": "/kits/api-docs",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "Result 1 of 1",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  },
+  {
+    "side": "base",
+    "entry": "anyOf",
+    "state": "initial-closed",
+    "target": "contact_phone_number",
+    "selector": "button[aria-controls$=\"composition-phone\"]",
+    "query": "+14155550132",
+    "started": "2026-09-22T14:47:12.332Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs/schema-composition, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs/schema-composition, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+      "\t\t\t\t5 container No results",
+      "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+    ],
+    "beforematch": [],
+    "screenshot": "base-anyOf-initial-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "geist-nuxt 首页",
+        "tag": "A"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "route": "/kits/api-docs/schema-composition",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "No results",
+    "keyboardAssessment": "目标未揭示，内容内键盘导航未完成；记录的 Tab 落点不算通过"
+  },
+  {
+    "side": "base",
+    "entry": "anyOf",
+    "state": "opened-then-closed",
+    "target": "contact_phone_number",
+    "selector": "button[aria-controls$=\"composition-phone\"]",
+    "query": "+14155550132",
+    "opened": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "started": "2026-09-22T14:49:24.517Z",
+    "before": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BUTTON"
+      },
+      "expanded": "false",
+      "parents": [
+        {
+          "hidden": "until-found",
+          "id": "reka-collapsible-content-v-0-11",
+          "inert": false
+        }
+      ],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "after": {
+      "active": {
+        "id": "",
+        "label": null,
+        "tag": "BODY"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "findBar": [
+      "0 standard window URL: 127.0.0.1:3028/kits/api-docs/schema-composition, Secondary Actions: Raise, Find in page",
+      "\t1 container URL: 127.0.0.1:3028/kits/api-docs/schema-composition, Find in page",
+      "\t\t2 container Find in page",
+      "\t\t\t\t4 text field (settable) Find, Value: +14155550132",
+      "\t\t\t\t5 container Result 1 of 1",
+      "The focused UI element is 4 text field (settable) Find, Value: +14155550132"
+    ],
+    "beforematch": [
+      {
+        "level": "info",
+        "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-11\",\"isTrusted\":true}",
+        "timestamp": "2026-09-22T14:49:24.669Z"
+      }
+    ],
+    "screenshot": "base-anyOf-opened-then-closed.jpg",
+    "afterTab": {
+      "active": {
+        "id": "",
+        "label": "Copy link to sms_opt_in",
+        "tag": "BUTTON"
+      },
+      "expanded": "true",
+      "parents": [],
+      "target": "contact_phone_number",
+      "text": "phone_numberstringe164RequiredExample+14155550132"
+    },
+    "route": "/kits/api-docs/schema-composition",
+    "sha": "19a107527d1226585611f4547619320b430fab2a",
+    "chromeVersion": "153.0.8010.53",
+    "additionalFindEnter": false,
+    "firstFindBarObserved": "Result 1 of 1",
+    "keyboardAssessment": "Escape 关闭查找栏后真实 Tab 到后续字段链接；目标区域无 hidden/inert 祖先，未单独采集焦点自身全部祖先"
+  }
+]

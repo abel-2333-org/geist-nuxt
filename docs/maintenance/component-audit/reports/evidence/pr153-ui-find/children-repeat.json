@@ -1,0 +1,74 @@
+{
+  "side": "HEAD",
+  "entry": "children",
+  "state": "opened-then-closed",
+  "target": "body_gitSource_repoId",
+  "selector": "#body_gitSource button[aria-expanded]",
+  "query": "Connected repository id.",
+  "opened": {
+    "active": {
+      "id": "",
+      "label": null,
+      "tag": "BUTTON"
+    },
+    "expanded": "true",
+    "parents": [],
+    "target": "body_gitSource_repoId",
+    "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+  },
+  "started": "2026-09-22T14:49:38.740Z",
+  "before": {
+    "active": {
+      "id": "",
+      "label": null,
+      "tag": "BUTTON"
+    },
+    "expanded": "false",
+    "parents": [
+      {
+        "hidden": "until-found",
+        "id": "reka-collapsible-content-v-0-18",
+        "inert": false
+      }
+    ],
+    "target": "body_gitSource_repoId",
+    "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+  },
+  "firstAfter": {
+    "active": {
+      "id": "",
+      "label": null,
+      "tag": "BODY"
+    },
+    "expanded": "true",
+    "parents": [],
+    "target": "body_gitSource_repoId",
+    "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+  },
+  "firstBar": [
+    "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+    "\t\t\t\t5 container No results"
+  ],
+  "nextBar": [
+    "0 standard window URL: 127.0.0.1:3027/kits/api-docs, Secondary Actions: Raise, Find in page",
+    "\t\t\t\t5 container Result 1 of 1"
+  ],
+  "afterTab": {
+    "active": {
+      "id": "",
+      "label": "Copy link to ref",
+      "tag": "BUTTON"
+    },
+    "expanded": "true",
+    "parents": [],
+    "target": "body_gitSource_repoId",
+    "text": "repoIdstringRequiredConnected repository id.Exampleghr_9f2a"
+  },
+  "events": [
+    {
+      "level": "info",
+      "message": "PR153_BEFOREMATCH {\"id\":\"reka-collapsible-content-v-0-18\",\"isTrusted\":true}",
+      "timestamp": "2026-09-22T14:49:38.953Z"
+    }
+  ]
+}

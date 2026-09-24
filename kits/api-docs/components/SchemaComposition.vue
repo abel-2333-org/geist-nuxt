@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vCollapseFocus } from '../internal/collapseFocus'
 // Domain component (API docs): SchemaComposition.
 // Renders an OpenAPI / JSON Schema composition block faithfully:
 //   oneOf  → exclusive alternatives   → UTabs (one variant at a time)
@@ -244,7 +245,7 @@ function toggleVariant(variantId: string) {
 </script>
 
 <template>
-  <section class="space-y-3">
+  <section data-schema-composition class="space-y-3">
     <!-- Semantic head: kind eyebrow in the FieldGroup `LABEL (N)` grammar,
          plus a visible assistive sentence so the composition rule is read,
          not inferred from layout. -->
@@ -281,7 +282,10 @@ function toggleVariant(variantId: string) {
       class="w-full gap-3"
     >
       <template #content="{ item }">
-        <div class="flex flex-col gap-3">
+        <!-- Variant content is a `field` container so a nested composition's
+             `subtree` indent resolves against the panel's real width, exactly
+             as it does under a FieldItem row (page-level use has no row). -->
+        <div class="@container/field flex flex-col gap-3">
           <p v-if="item.view.variant.description" class="text-sm leading-relaxed text-toned">
             <InlineMarkdown :text="item.view.variant.description" />
           </p>
@@ -301,7 +305,7 @@ function toggleVariant(variantId: string) {
             :labels="labels"
             :field-labels="fieldLabels"
             :heading-level="nestedHeadingLevel"
-            class="border-s border-default ps-4"
+            class="subtree"
           />
         </div>
       </template>
@@ -344,7 +348,8 @@ function toggleVariant(variantId: string) {
           <template #content>
             <div
               :id="contentId(view.variant.id)"
-              class="flex flex-col gap-3 px-3 pb-3 ps-9"
+              v-collapse-focus="open.get(view.variant.id)"
+              class="@container/field flex flex-col gap-3 px-3 pb-3 ps-9"
             >
               <p v-if="view.variant.description" class="text-sm leading-relaxed text-toned">
                 <InlineMarkdown :text="view.variant.description" />
@@ -357,12 +362,15 @@ function toggleVariant(variantId: string) {
                   :labels="itemLabels"
                 />
               </div>
+              <!-- The card is the collection's boundary; a composition nested
+                   inside a variant is still a real subtree of that variant. -->
               <SchemaComposition
                 v-if="view.variant.composition"
                 v-bind="view.variant.composition"
                 :labels="labels"
                 :field-labels="fieldLabels"
                 :heading-level="nestedHeadingLevel"
+                class="subtree"
               />
             </div>
           </template>
@@ -373,7 +381,7 @@ function toggleVariant(variantId: string) {
     <!-- allOf: conjunction → every part fully expanded in order. Never tabs,
          never collapsibles: nothing here is optional to read. -->
     <div v-else class="flex flex-col gap-5">
-      <section v-for="view in variantViews" :key="view.variant.id" class="space-y-2">
+      <section v-for="view in variantViews" :key="view.variant.id" class="@container/field space-y-2">
         <component
           :is="headingTag"
           class="flex flex-wrap items-baseline gap-x-2 border-b border-default pb-1.5 text-sm font-medium text-highlighted"
@@ -398,7 +406,7 @@ function toggleVariant(variantId: string) {
           :labels="labels"
           :field-labels="fieldLabels"
           :heading-level="nestedHeadingLevel"
-          class="border-s border-default ps-4"
+          class="subtree"
         />
       </section>
     </div>

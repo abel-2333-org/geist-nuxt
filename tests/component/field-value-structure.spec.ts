@@ -4,13 +4,15 @@
 //
 // The pure rules live in `utils/field.ts` and are asserted without a DOM; the
 // mounted cases below pin what the row itself promises: the identity-line
-// token, that value properties are never counted as children, and that a deep
+// wire type and scoped value summary, that value properties are never counted
+// as children, and that a deep
 // link into a doubly encoded payload reveals BOTH regions (the bug the
 // playground caught when value paths were collected beside, not inside,
 // `collectFieldPaths`).
 import { defineComponent, nextTick } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import FieldItem from '../../kits/api-docs/components/FieldItem.vue'
 import { useFieldAnchor } from '../../kits/api-docs/composables/useFieldAnchor'
 import {
@@ -158,8 +160,28 @@ describe('scope labels', () => {
 describe('requirement density', () => {
   it('renders one lone constraint as a single scope-labelled row', () => {
     const block = describeValueRequirements(primitiveItem, fieldValueLabelDefaults)
-    expect(block?.compact).toBe(true)
+    expect(block?.compact).toEqual({ kind: 'constraint', text: 'At least 1 character.' })
     expect(block?.label).toBe('Each item')
+  })
+
+  it('renders a lone presence notation as a single scope-labelled row', () => {
+    const presenceOnly: FieldValueNode = { relation: 'decoded', codec: 'json', type: 'object', presence: { empty: '"{}"' } }
+    expect(describeValueRequirements(presenceOnly, fieldValueLabelDefaults)?.compact)
+      .toEqual({ kind: 'presence', expression: 'object | "{}"' })
+    // A notation beside a lone constraint is two facts: neither kind fits.
+    const withConstraint = { ...presenceOnly, notes: [{ text: 'Keys are unique.' }] }
+    expect(describeValueRequirements(withConstraint, fieldValueLabelDefaults)?.compact).toBeNull()
+  })
+
+  it('keeps a presence notation out of the compact row once a condition sentence joins it', () => {
+    // Same fixture as the compact case above plus ONE condition: the rule has
+    // to render, so the level escalates to the heading form.
+    const block = describeValueRequirements(
+      { relation: 'decoded', codec: 'json', type: 'object', presence: { empty: '"{}"', condition: 'Empty until the order is confirmed.' } },
+      fieldValueLabelDefaults,
+    )
+    expect(block?.presence.unionTail).toEqual(['"{}"'])
+    expect(block?.compact).toBeNull()
   })
 
   it('escalates as soon as the level says more than one thing', () => {
@@ -167,7 +189,7 @@ describe('requirement density', () => {
       { ...primitiveItem, examples: ['abc'] },
       fieldValueLabelDefaults,
     )
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
   })
 
   it('never drops the author\'s own category label on a lone constraint', () => {
@@ -177,7 +199,7 @@ describe('requirement density', () => {
       { relation: 'item', type: 'object', notes: [{ label: 'Uniqueness', text: 'sku is unique.' }] },
       fieldValueLabelDefaults,
     )
-    expect(block?.compact).toBe(false)
+    expect(block?.compact).toBeNull()
   })
 
   it('says nothing when there is nothing to say', () => {
@@ -252,7 +274,7 @@ describe('recursive encoding boundaries', () => {
   // of its own to carry a token. Without one, the inner codec had nowhere to go
   // and the reader was never told the decoded result still needs parsing.
 
-  it('composes every consecutive codec onto the identity line', async () => {
+  it('shows every consecutive codec in decode order below the wire identity', async () => {
     const field: FieldNode = {
       name: 'token',
       type: 'string',
@@ -266,7 +288,10 @@ describe('recursive encoding boundaries', () => {
     }
     const w = await mountSuspended(FieldItem, { props: field })
     // base64-decode, then JSON.parse, then you hold an object — in that order.
-    expect(w.text()).toContain('base64<json<object>>')
+    expect(w.get('[data-field-type]').text()).toBe('string')
+    expect(w.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Value · base64: string', 'Value (2) · json: object',
+    ])
   })
 
   it('spells a codec the identity line cannot reach', async () => {
@@ -284,10 +309,12 @@ describe('recursive encoding boundaries', () => {
       },
     }
     const w = await mountSuspended(FieldItem, { props: field })
-    expect(w.find('[data-boundary-codec]').text()).toBe('json<object>')
+    expect(w.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Each item: string', 'Value · json: object',
+    ])
   })
 
-  it('never repeats a codec the identity line already composed', async () => {
+  it('never repeats overview codecs inside the structure region', async () => {
     const field: FieldNode = {
       name: 'token',
       type: 'string',
@@ -300,16 +327,20 @@ describe('recursive encoding boundaries', () => {
       },
     }
     const w = await mountSuspended(FieldItem, { props: field })
+    expect(w.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Value · base64: string', 'Value (2) · json: object',
+    ])
     expect(w.findAll('[data-boundary-codec]')).toHaveLength(0)
   })
 
   it.each([
-    [{ relation: 'decoded', codec: 'json' }, 'json'],
-    [{ relation: 'decoded', codec: 'base64', type: 'string', value: { relation: 'decoded', codec: 'json' } }, 'base64<json>'],
-  ] satisfies [FieldValueNode, string][])('renders supplied codecs with optional decoded types', async (value, token) => {
+    [{ relation: 'decoded', codec: 'json' }, ['Value · json:']],
+    [{ relation: 'decoded', codec: 'base64', type: 'string', value: { relation: 'decoded', codec: 'json' } }, ['Value · base64: string', 'Value (2) · json:']],
+  ] satisfies [FieldValueNode, string[]][])('renders supplied codecs with optional decoded types', async (value, summaries) => {
     const wrapper = await mountSuspended(FieldItem, { props: { name: 'payload', type: 'string', value } })
     expect(wrapper.get('[data-field-identity]').findAll('[translate="no"]').map(node => node.text()))
-      .toEqual(['payload', 'string', token])
+      .toEqual(['payload', 'string'])
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual(summaries)
     expect(wrapper.find('[data-boundary-codec]').exists()).toBe(false)
   })
 
@@ -320,7 +351,9 @@ describe('recursive encoding boundaries', () => {
         value: { relation: 'item', type: 'string', value: { relation: 'decoded', codec: 'json', type: 'number' } },
       },
     })
-    expect(wrapper.get('[data-boundary-codec]').text()).toBe('json<number>')
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Each item: string', 'Value · json: number',
+    ])
     expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
   })
 
@@ -343,7 +376,10 @@ describe('recursive encoding boundaries', () => {
     expect(wrapper.findAll('[data-value-structure-toggle]')).toHaveLength(1)
     // Kit tap-target touch contract (references/foundations/focus-a11y.md).
     expect(wrapper.get('[data-value-structure-toggle]').classes()).toContain('touch-manipulation')
-    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['base64<json<object>>'])
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Each item: string', 'Value · base64: string', 'Value (2) · json: object',
+    ])
+    expect(wrapper.findAll('[data-boundary-codec]')).toHaveLength(0)
   })
 
   it('qualifies equal scopes across a silent level without another disclosure', async () => {
@@ -383,7 +419,7 @@ describe('recursive encoding boundaries', () => {
     expect(wrapper.findAll('[data-value-requirements]')).toHaveLength(0)
   })
 
-  it('retains repeated equal tokens at different item boundaries on update', async () => {
+  it('retains repeated codecs and their item boundaries on update', async () => {
     const value: FieldValueNode = {
       relation: 'item', type: 'string',
       value: {
@@ -398,9 +434,14 @@ describe('recursive encoding boundaries', () => {
       },
     }
     const wrapper = await mountSuspended(FieldItem, { props: { name: 'layers', type: 'string[]', value } })
-    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['json<string[]>', 'json<string[]>'])
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Each item: string', 'Array · json: string[]', 'Each item (2): string',
+      'Array (2) · json: string[]', 'Each item (3): string',
+    ])
     await wrapper.setProps({ value: { ...value, value: value.value!.value } })
-    expect(wrapper.findAll('[data-boundary-codec]').map(node => node.text())).toEqual(['json<string[]>'])
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Each item: string', 'Each item (2): string', 'Array · json: string[]', 'Each item (3): string',
+    ])
   })
 
   it('spends one disclosure on a chain with nothing to inspect between levels', async () => {
@@ -469,6 +510,32 @@ describe('FieldItem with a value shape', () => {
       value: { ...primitiveItem, path: 'inner-root' },
     }],
   ] satisfies [string, FieldValueNode][])('preserves every %s value anchor with its own arrival cue and focus target', async (_, value) => {
+    // happy-dom has no layout. Deliver the completed expansion explicitly so
+    // the real collapse-focus directive can release inert before focus lands.
+    const observers: LayoutResizeObserver[] = []
+    class LayoutResizeObserver implements ResizeObserver {
+      private targets = new Set<Element>()
+      constructor(private callback: ResizeObserverCallback) {
+        observers.push(this)
+      }
+
+      observe(target: Element) { this.targets.add(target) }
+      unobserve(target: Element) { this.targets.delete(target) }
+      disconnect() { this.targets.clear() }
+
+      completeExpansion() {
+        for (const target of this.targets) {
+          if (!target.matches('[data-slot="content"][data-state="open"][inert]')) continue
+          expect(target.hasAttribute('hidden')).toBe(false)
+          const region = target.firstElementChild!
+          Object.defineProperty(target, 'clientHeight', { configurable: true, get: () => 100 })
+          Object.defineProperty(region, 'offsetHeight', { configurable: true, get: () => 100 })
+          this.callback([], this)
+        }
+      }
+    }
+    const originalResizeObserver = globalThis.ResizeObserver
+    globalThis.ResizeObserver = LayoutResizeObserver
     let anchor!: ReturnType<typeof useFieldAnchor>
     const field: FieldNode = { name: 'payload', type: 'string', value }
     const Host = defineComponent({
@@ -480,12 +547,14 @@ describe('FieldItem with a value shape', () => {
       },
       template: '<FieldItem v-bind="field" />',
     })
-    const wrapper = await mountSuspended(Host, { attachTo: document.body })
+    let wrapper: VueWrapper | undefined
     try {
+      wrapper = await mountSuspended(Host, { attachTo: document.body })
       for (const path of collectFieldPaths([field]).filter(path => path.endsWith('-root'))) {
         anchor.active.value = path
-        await nextTick()
-        await nextTick()
+        // Reka Presence also awaits nextTick before removing hidden.
+        await flushPromises()
+        for (const observer of observers) observer.completeExpansion()
         const targets = wrapper.findAll('[id]').filter(node => node.attributes('id') === path)
         expect(targets, `DOM anchor for ${path}`).toHaveLength(1)
         const target = targets[0]!
@@ -501,11 +570,12 @@ describe('FieldItem with a value shape', () => {
       }
     }
     finally {
-      wrapper.unmount()
+      wrapper?.unmount()
+      globalThis.ResizeObserver = originalResizeObserver
     }
   })
 
-  it('prints the decoded shape as `codec<shape>` and lets it lead the wire type', async () => {
+  it('retains wire type and format while showing decoded shape below the identity', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         path: 'retailers',
@@ -517,10 +587,12 @@ describe('FieldItem with a value shape', () => {
     })
 
     const tokens = wrapper.get('[data-field-identity]').findAll('[translate="no"]')
-    expect(tokens.map(node => node.text())).toEqual(['retailers', 'string', 'json<object[]>'])
-    // The shape takes the type's own emphasis; `string` steps back.
-    expect(tokens[1]!.classes()).toContain('text-dimmed')
-    expect(tokens[2]!.classes()).toContain('text-muted')
+    expect(tokens.map(node => node.text())).toEqual(['retailers', 'string', 'json_string'])
+    expect(tokens[1]!.classes()).toContain('text-muted')
+    expect(tokens[2]!.classes()).toContain('text-dimmed')
+    expect(wrapper.findAll('[data-value-shape-summary]').map(node => node.text())).toEqual([
+      'Array · json: object[]', 'Each item: object',
+    ])
   })
 
   it('keeps `format` and today\'s weighting for a field without a decode boundary', async () => {
@@ -629,7 +701,7 @@ describe('FieldItem with a value shape', () => {
     })
 
     const region = wrapper.get('[data-value-structure-region]')
-    const scopes = region.findAll('[data-value-requirements] dt, [data-value-requirements] > p').map(n => n.text())
+    const scopes = region.findAll('[data-value-requirements] dt, [data-value-requirements] > div > p:first-child').map(n => n.text())
     // Decode boundary and element boundary share the region but keep their
     // own scope, so "at least 1 element" never reads as a rule about one item.
     expect(scopes).toEqual(['Array', 'Each item'])
@@ -659,7 +731,7 @@ describe('FieldItem with a value shape', () => {
     expect(scopes).toEqual(['每个键', '数组要求'])
   })
 
-  it('adds nothing below the row when the value only states identity facts', async () => {
+  it('shows decoded identity facts without anonymous requirements or disclosure', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'metaData',
@@ -668,7 +740,8 @@ describe('FieldItem with a value shape', () => {
       },
     })
 
-    expect(wrapper.get('[data-field-identity]').text()).toContain('json<object>')
+    expect(wrapper.get('[data-field-type]').text()).toBe('string')
+    expect(wrapper.get('[data-value-shape-summary]').text()).toBe('Value · json: object')
     expect(wrapper.find('[data-value-requirements]').exists()).toBe(false)
     expect(wrapper.find('[data-value-structure-toggle]').exists()).toBe(false)
   })

@@ -1,0 +1,8 @@
+
+> geist-nuxt@0.1.0 audit:verify /Users/abel.wang/projects/geist-nuxt
+> node scripts/audit-plan.mjs --verify
+
+证据成立(在 canonical main 上即 landed):api-docs-code-block、api-docs-code-rail、api-docs-enum-table、api-docs-event-badge、api-docs-field-annotation、api-docs-field-group、api-docs-lifecycle-badge、api-docs-lifecycle-notice、api-docs-method-badge、api-docs-operation-header、api-docs-operation-target、api-docs-relation-source-path、api-docs-request-example、api-docs-response-example、api-docs-sidebar-nav、api-docs-site-search、api-docs-webhook-protocol、foundation-annotation-popover、foundation-copy-button、foundation-doc-annotation、foundation-inline-code、foundation-inline-markdown、foundation-semantic-badge、foundation-split-pane、foundation-split-pane-handle、foundation-term-annotation、foundation-theme-toggle
+legacy(v1 迁移,下次审计补齐):无
+deferred(仍有未解决 finding):api-docs-field-item(1)、api-docs-schema-composition(1)
+未审计:0 个
