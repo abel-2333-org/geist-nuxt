@@ -126,6 +126,12 @@ pnpm test:browser:hierarchy-pair
 
 ### PR153 V2 正向焦点门禁
 
+生产 gallery 的常规 CI 同时执行 `hierarchy.mjs` 与 `HEAD_STRICT=1` 的焦点门禁。
+层级回归先在禁用 JavaScript 的 SSR 页面检查 children、value、anyOf 与双层嵌套 value
+的初始 `hidden="until-found"` / 无 inert 状态，再完整加载页面检查 hydration 保持这些状态；
+未先打开折叠区，也没有客户端修补。此检查能拒绝旧 Vue 丢失 hidden 枚举值的服务器产物，
+但不代表浏览器原生查找已经验收；真实查找栏必须单独记录。
+
 `HEAD_STRICT=1 BASE_URL=http://127.0.0.1:3017 pnpm test:browser:hierarchy-focus` 保留六个历史归因场景，并增加三入口 × 正常/减少动画 × 快速 Tab、内部焦点关闭、外部焦点关闭、快速重开。`verify-hierarchy-pair.sh` 强制 HEAD 严格通过；基线仍记录原始失败。JSON 包含逐帧/事件焦点与裁剪、动画状态，严格场景另存截图。复制锚点自身的淡入仅在可见几何、focus-visible outline、真实 opacity 向 1 的 CSS transition 同时成立时单独记录；关闭区域、BODY 和完全裁剪始终失败，稳态仍须可见。
 
 `BASE_URL=http://127.0.0.1:3017 node tests/browser/hierarchy-discovery.mjs` 验证真实片段 `beforematch`、区域根焦点及嵌套同时关闭；`DISCOVERY_ONLY=1` 只跑基线可发现性对照。`window.find` 是单列观察结果，不替代 Chrome 查找界面验收，也不以脚本总体 passed 宣称 Find 通过。

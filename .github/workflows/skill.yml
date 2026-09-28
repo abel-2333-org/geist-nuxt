@@ -95,6 +95,7 @@ jobs:
             sleep 1
           done
           pnpm test:browser:hierarchy
+          HEAD_STRICT=1 EVIDENCE_DIR=output/playwright/pr153/focus pnpm test:browser:hierarchy-focus
 
       # Historical base/head evidence is specific to this review; do not rebuild
       # a frozen 19a1075 baseline for unrelated PRs or future main pushes.

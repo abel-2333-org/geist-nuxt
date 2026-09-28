@@ -21,13 +21,13 @@
   "items": {
     "foundation-copy-button": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "9ce2c220ebc8b5e60c8dfa49471c3a615b9621edf934cf5e56b984d42100eed3",
         "scope": [
           "app/app.config.ts",
@@ -52,7 +52,7 @@
           "tests/component/operation-target.spec.ts",
           "tests/component/use-copy.spec.ts"
         ],
-        "scopeDigest": "9244b66f77fcad188256db0adf14d5523213436b27e1dc6772360f68dc7e2830",
+        "scopeDigest": "60d6c15672189a2932b1ce1a16d7f8e4fcc1aa15c54454cf320c055837ff0e5a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -76,23 +76,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "useCopy shallowRef成功态、scope dispose清理timeout；CopyButton reactive props/icon/label分支更新。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 CopyButton 的 tooltip/非 tooltip 分支、inheritAttrs:false 契约、原文复制、成功/失败反馈及 useCopy 的 fallback 焦点恢复、scope dispose。唯一实现前提仍是 UButton/UTooltip 与 background Toast 的单一 polite 播报；组件、useCopy、UApp/config 与依赖锁内容相对 main 未变。新增 subtree 不命中本按钮，API Docs 文档修改在字段层级章节，未改复制接口或反馈契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重做原生剪贴板权限、各系统 fallback 或全部 consumer；既有实测保持原 SHA，不能据静态样式等价新增这些覆盖。 历史浏览器证据维持原来源 71eb8ca81d7c7f72050d634ef71a26570ac649f4，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 dependencies.reason 中 Vue shallowRef 成功态、props/icon/label 更新和 scope cleanup，以及 CopyButton/useCopy、OperationTarget 消费边界。copy-button/use-copy 测试覆盖 attrs 契约、单一 polite toast 与 fallback 焦点；计时器及原生剪贴板行为仍依主任务运行证据。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "foundation-inline-code": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "2de0e75c79b84ac9c576fcd7829f304bc7d53d982ab38e1e65d397ce66251a6f",
         "scope": [
           "app/components/gallery/DataDisplay.vue",
@@ -132,7 +132,7 @@
           "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "ae130e6b2d9c5c5db9acb38a3206fe5a76c8a42c2dac53d94eb09c73c94ca402",
+        "scopeDigest": "82490b390d01e639a5d8ebcdf0a59548a4098e65b7bcc1e45d554e68b053f1d5",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -156,12 +156,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "依赖 Vue 3 单根组件的 fallthrough attr 合并顺序,使调用方 translate 覆盖组件静态默认值。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、scripts/lib/text-contrast.mjs、tests/browser/README.md、tests/text-contrast.test.mjs。\n复核单根 ProseCode、rounded-sm/text-code、translate 默认及 attrs 覆盖，读取 tv font-size 扩展与上游 class 合并前提。组件与配置未变；CSS 仅新增布局 subtree，text-contrast parser 仅接受完整白名单结构，追加测试拒绝 color/opacity/background/token/重复属性等注入。browser README 新增层级验证说明，不改变 InlineCode 契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新运行整套 glyph/生成绘制/mutation browser 矩阵，未声称任意调用方 class/slot override 均满足对比度；历史 resolved finding 原对象保持。 历史浏览器证据维持原来源 471c52305386fc37e27ee5df647f8c4bb1a6df73，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24复审glyph-bounds：本地ec28ece真实反例light/dark原自然Tooltip阴影bottom=491，raw.top=491.1875，不相交0.1875px；旧负例前提失效。本次仅在实际Tooltip构造无blur/spread受控阴影，先断言与raw相交而与refined分离，再保留正常通过、font-feature fallback严格拒绝、恢复通过。自然阴影覆盖与测量器/生产源码/findings不变。独立源码复审通过，重建后定向light/dark两测试通过；完整CI另验。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue 单根 fallthrough 覆盖 translate 的 dependency reason、InlineCode/ProseCode 契约及 inline-code 测试；默认 translate=no、显式覆盖、text-code/尺寸与颜色合并断言具有针对性。真实字号/颜色须使用浏览器结果，静态类检查不替代。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": [
         {
           "id": "f-4b98b0623a0a",
@@ -218,13 +218,13 @@
     },
     "foundation-semantic-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "06f80428b8ba02f1249087e35474c4da0fc39262ef2524f27b28515c762bf1a0",
         "scope": [
           "app/app.config.ts",
@@ -302,12 +302,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "依赖 Vue 单根组件的 fallthrough attr 透传，使 SemanticBadge 接收的 translate 属性到达 UBadge。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、scripts/lib/text-contrast.mjs。\n复核 tone→BADGE_TONE_COLOR、subtle/sm 默认、可选 icon 与非空 label 调用方契约、单根 UBadge attrs。badge/presets/config 均未变；gallery 差异仅 decoded labels 与字段说明，不改徽章输入；新增 subtree 不命中本组件；parser 白名单不改变色值。已核对 Method/Webhook/Lifecycle 的文本语义路径。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留 main 徽章色彩及消费者证据原来源；未追加全尺寸/任意 attrs/外部 consumer 的浏览器视觉保证。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue 单根 attrs/translate 透传 reason、SemanticBadge、域 preset 包装及 http-method-badge/chrome-labels 测试。UBadge 文本与 tone 映射未变，无新增交互或 hidden 行为；真实明暗颜色和图标输出依全量浏览器。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": [
         {
           "id": "f-304490421051",
@@ -327,13 +327,13 @@
     },
     "foundation-theme-toggle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "ed7d0d02ef803074044b98f1403d492e304163d1007066dacfaa78879667c79b",
         "scope": [
           "app/app.config.ts",
@@ -382,12 +382,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "根组件attribute/class fallthrough及上游computed颜色值、locale反应更新。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css。\n复核 ClientOnly 内原 UColorModeButton 与显式 attrs 透传、SSR 不显示按钮、locale 名称及 preference 切换均由上游持有；读取锁定 ColorModeButton 的 isDark、locale 和 attrs 覆盖实现。唯一命中为 foundation CSS 新增 subtree，本组件/壳/AppConfig/color-mode 插件与 lock 未变，新增 selector 不命中按钮。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重做主题首次 hydration、系统主题跟随与 reload 持久化浏览器矩阵；沿用 main 既有独立实测，不将本轮编译通过代替此类行为测试。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue attrs/class fallthrough 与颜色/locale 反应更新 reason，以及 ClientOnly、显式 $attrs 和 touch 合并源码。theme-toggle/app-header 组件测试与 browser theme-toggle 是 SSR/hydration、accessible name 和实际主题切换验证边界；未独立浏览器复测。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "foundation-annotation-popover": {
@@ -479,13 +479,13 @@
     },
     "foundation-split-pane-handle": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "4cbc45b93d6646356bf9b54719c68b2544a10f4e091a93af1900a8d1cbedc229",
         "scope": [
           "foundation/components/SplitPane.vue",
@@ -500,20 +500,20 @@
           "tests/component/code-rail.spec.ts",
           "tests/component/split-pane-handle.spec.ts"
         ],
-        "scopeDigest": "ac85625ed9eaab9521fad0edfe6c2476c5a85b3e77503ed2fa366013a488ce0c"
+        "scopeDigest": "4baa3c10ebd9920b0ff238b49e4dc14160da1ca7133c5cae4d1d0793ab77577d"
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核 separator 的 direction/ARIA bounds/controls、disabled 降级、箭头与 Shift coarse、Home/End/Enter/doubleclick、grip/edge feedback 与 touch-none 例外。原 scope 唯一命中为 API Docs index 的字段层级章节；可拖分栏章节、Handle/父级 SplitPane/CodeRail/SidebarNav 及其测试均未改，未把 subtree 应用于拖拽把手。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新增触摸设备实测或 focus ring 非文字 3:1 数值断言；保留已有交互与 focus 配方的边界。 历史浏览器证据维持原来源 471c52305386fc37e27ee5df647f8c4bb1a6df73，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。既有 evidence 无 dependencies 字段。已按 scope 检查 SplitPaneHandle 及 SplitPane/CodeRail 接线，props/emit、separator ARIA、两方向键、Shift、Home/End/Enter、主指针与 disabled spacer 契约均未改。既有 split-pane-handle/code-rail 测试有对应断言；focus 可见几何需浏览器。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "foundation-split-pane": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "11f043397205c95de404e334235a53524be389b4e0aa4344a4ab64f695f738a7",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -532,20 +532,20 @@
           "tests/component/use-raf-task.spec.ts",
           "tests/component/use-split-pane.spec.ts"
         ],
-        "scopeDigest": "8e9467696c47f689593b63e2b797f23eca622fb77100169a6b25bb83f2c897f5"
+        "scopeDigest": "97fb4ed77208f0e30d0c862896a18fd92dcece82b62319dd01e6ac2ebac01a98"
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核 fixed/ratio、row/column、fixedPane/minOpposite、受控尺寸 clamp、ARIA 百分比/有限 bounds、sticky row、SSR stacked 与 live breakpoint、useSplitPane cookie/键盘/拖动清理及 useRafTask 合帧。唯一 scope 命中是 API Docs index 中不改变分栏契约的字段层级说明；所有分栏 owning files、上游 helper、消费者与相关测试相对 main 原样。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新跑真实拖动设备或全部 slot 布局组合；API Docs 内容改动不被误记为新分栏行为验证。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。既有 evidence 无 dependencies 字段。已按 scope 检查 SplitPane/useSplitPane/useBreakpointGate/useRafTask 的 useId、SSR stacked→mounted split、computed 对象样式、clamp、cookie 状态与生命周期；split-pane-handle 集成及关联 composable 测试覆盖键盘、动态 default、有限边界及 pointer ownership。真实尺寸/拖动待浏览器证据。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "api-docs-code-block": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "a217494d573c8acce1eefe5ec689e7a21b398667eee2e3df02ea3d5d076c9a00",
         "scope": [
           "app/app.config.ts",
@@ -574,7 +574,7 @@
           "tests/fixtures/consumer/app/pages/index.vue",
           "vitest.config.ts"
         ],
-        "scopeDigest": "719ee84ae1f0110e9417386a7165d51c582fe0b8810bf3cfda1959b6b9019f2d",
+        "scopeDigest": "d2a7e27b19cca6d6db1fff31f7094579edf7ed4266aa086c1d2350e106f9fa46",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -608,12 +608,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "CodeBlock computed current及language identity watch对原位mutation的依赖追踪、props/slot响应式与默认raw模板转义；useCopy scope cleanup。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 language 稳定身份/移除回退、空字符串与字面0映射、raw code 复制、trustHighlightedHtml 显式信任边界、共享cookie wrap、命名可聚焦滚动group及空态保留选择器；langLabel 只读自有属性、暗色 Shiki fragment 边界保留。组件/helper/config 相对 main 未变；gallery 两处文字变更不改 CodeBlock props，新增 subtree 不命中 code-surface，文档改动不扩 HTML 信任。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未验证任意外部高亮palette/HTML管线；既有 CodeBlock 浏览器和剪贴板证据保留来源，本轮不声称全部新视觉验收。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue computed current、language identity watch、props/slot、raw 模板转义与 cleanup 的 reason。code-block 测试直接覆盖原位重排/删除/重新加入后的选择与 copy 一致、空/零语言身份及可信 HTML opt-in；CodeBlock/useCodeWrap/CopyButton 契约未改，真实 select 键盘/portal 与换行布局依浏览器。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": [
         {
           "id": "f-0c1cd3397501",
@@ -626,13 +626,13 @@
     },
     "api-docs-request-example": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "b043f78997595e2642e63647467492b5d589cfce416b2ffb736c93de410d1664",
         "scope": [
           "app/app.config.ts",
@@ -666,7 +666,7 @@
           "tests/component/use-example-scenario-selection.spec.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "2f0d96cedfa183700eff654f478494a883febd1370e3540ea7d58f4c8a001b7f",
+        "scopeDigest": "f3440671a27e486c2fa2532d13bad99da8f4a2de6699fdfcf9741df92d181837",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -700,23 +700,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "computed 及 pre-flush identity watch 必须保持受控/非受控收敛、原位重排/删除后的选择与 raw code 一致，并保持原始场景事件。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 mount-time scenario 受控判定、fallback 派生不emit、uncontrolled 身份收敛、原位重排/删除、空与0映射，controls slot 委托 CodeBlock，空 variants 时仍可换场景。owning源码、shared selection/useCodeWrap、CodeBlock 与依赖锁均未变；scope 仅共享布局 CSS 和 API Docs 字段说明改变，未影响请求场景接口。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新执行所有 consumer 的请求响应联动或原生select交互；已存在的这些证据保持 main 来源，不扩大到运行时受控模式切换。 历史浏览器证据维持原来源 71eb8ca81d7c7f72050d634ef71a26570ac649f4，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue computed/pre-flush identity reason、RequestExample/useExampleScenarioSelection/CodeBlock 和 request-example 契约。既有测试覆盖原位重排/删除、受控 fallback 不回写、bound undefined、一次 emit 与空字符串/零 ID；控件原生键盘及窄工具栏表现依浏览器结果。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "api-docs-response-example": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "481242036e7e0f9142d75871b367b482862b5e2f36e614d107f6c220814b4840",
         "scope": [
           "app/app.config.ts",
@@ -760,7 +760,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "bb9c2eb6c06db3dd18798478af93337555673b333fa7fe120ae2313119cf1b8d",
+        "scopeDigest": "94e0d5c6eb9ac0b6604fbbe33322f92aa331dfa694c11ce96edcf0ac65c8962e",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -794,12 +794,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "pre-flush watchers、computed和稳定id收敛必须在原地reverse/sort后只按最终列表收敛；受控fallback不回写且显式选择只emit一次。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 scenario/status/body 三级选择、body context 重置与稳定id、空/0和安全radio索引映射、code/empty/unavailable/file 区分、状态色/文案、持久status播报、下载真链接及窄容器popover关闭。shared helper和组件保持 main；gallery仅字段类型说明改变；subtree与response容器名称不同，不改选项断点；parser白名单不改status语义色。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：没有重新执行所有portal/第三方文件链接/外部消费者组合；既有响应浏览器矩阵保持原SHA。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 pre-flush watchers/computed 稳定 ID reason、三级选择与 CodeBlock 委托、持久 live region、popover RO cleanup。response-example 测试覆盖 scenario 原位重排、body 保留/删除/上下文重置、受控单次 emit、空/零/带引号身份及 label targets。窄屏 portal 关闭、radio 原生焦点与布局仍依浏览器证据。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": [
         {
           "id": "f-985ff00a90aa",
@@ -819,13 +819,13 @@
     },
     "api-docs-lifecycle-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "6a180c5eabfa125703861e939e17fa7b82097ea531c5434862b50e19dbf0c4d5",
         "scope": [
           "app/app.config.ts",
@@ -870,7 +870,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "f82c2323272dd624204f1c35909f3a900e2d798a40bf1ef41a202f171b4bdcd6",
+        "scopeDigest": "f02c6b1e627e9002f6767955e40c7e29d9c1ccb71f24bc5bac371d43e156a556",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -909,12 +909,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "status/label computed与单根class/size透传到SemanticBadge/UBadge。"
           }
         ]
       },
-      "notes": "已审 LifecycleBadge/preset/SemanticBadge 的 status、label、size/variant 契约及 FieldItem 消费者；这些本体和颜色定义相对 base 未改，影响来自共享 FieldItem/detail/hierarchy、gallery、CSS 新 subtree 和严格限定该 utility 的 contrast parser。原 resolved finding 全对象保留，不把旧颜色测量改标本轮 SHA，不宣称新增 badge 对比度实测。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 status/label computed、空白 label 回退、preset icon/tone/variant/size 向 SemanticBadge 传递，以及 FieldItem/OperationHeader 消费；对应 chrome-labels 与字段组件测试覆盖主要语义。没有新增源码问题。限制：本轮没有重新测量所有生命周期颜色状态，原 finding 与历史色彩证据保持原来源。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-aab0322ebade",
@@ -927,13 +927,13 @@
     },
     "api-docs-method-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "04e8d01a33d738f6fe50fbe21e8caad385dc50a05bbf01672e1644c8214acca1",
         "scope": [
           "app/app.config.ts",
@@ -974,7 +974,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "4b7eed899d1e3141c61f7d524c5458013fa1cc2fcb2ab98ad341f8cf335876aa",
+        "scopeDigest": "2ec291da5a58dbba46ebe5302be2e07614f915768e8017b0c4fa6dfc2e3159c7",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1008,12 +1008,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "HttpMethodBadge经SemanticBadge单根fallthrough使translate=no和mono类抵达UBadge。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 method trim/uppercase/UNKNOWN、五方法 preset、未知 neutral fallback、mono/translate=no 单根透传及 Header/Search/Sidebar 的消费链。方法组件、preset、SemanticBadge、配置与 lock 未变；gallery差异没有变方法输入；subtree仅用于字段/组合区域，parser对新增utility完整校验，基础色矩阵与main相同。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：main 的 #147 方法色finding已 resolved，原对象保留；不将旧失败重新打开，也不宣称本轮重测了所有导航状态与任意消费端。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 HttpMethodBadge 的 trim/uppercase、空白 UNKNOWN、自定义方法 neutral fallback、SemanticBadge 单根 translate=no 与 mono class 透传，以及 header/search 的使用；http-method-badge 测试断言可见 token/variant/最终属性。没有新增源码问题。限制：未重新实测每种方法在全部消费者背景上的对比度，原 #147 findings 保持不变。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-8c9c3be3a38e",
@@ -1026,13 +1026,13 @@
     },
     "api-docs-enum-table": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "8e07aa82421f38ac284ace03b285d50ed707654ca48b0c15966dccf96b9d63a9",
         "scope": [
           "app/app.config.ts",
@@ -1068,7 +1068,7 @@
           "tests/fixtures/contrast/main.css",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "939781b05eea5eed02d23d6020be95f7d22d9f5ddefb298aa409b1755df43f25",
+        "scopeDigest": "c624698c69ddfe97e8a6cc16c02b125deb846216f3da8e00172626a005066cb8",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1102,23 +1102,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "身份/query归一watch必须pre批处理原位数组变化，computed分组/过滤与shallowRef状态、nextTick更新。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核稳定variant.id与locale/reorder保留、删除回退、全组filter计数及polite播报、active组bounded、EnumTablePanel的实测overflow焦点门槛、RO→RAF清理、when/description的安全InlineMarkdown。owning三个文件和helpers未变，gallery没有改enum数据；新增subtree只作用于外部字段结构容器，不改tabs/content identity或Enum自身滚动判定。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：外层宽度可能随字段层级变化，本轮主代理hierarchy验证承担该组合回流；不借此声称重跑全部Enum视觉/读屏器或任意长值consumer。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。已核对 Vue identity/query pre-batch/computed/shallowRef/nextTick reason、EnumTable/EnumTablePanel 的过滤、播报、post-flush overflow 测量与 RAF cleanup，以及 enum-table/inline-code/inline-markdown 测试。既有 reorder 用 setProps 替换列表，未直接覆盖原位 reverse/sort；建议补一次运行验证但非已证实 bug。真实 overflow tabindex 与 tabs 键盘须浏览器验收。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "api-docs-field-group": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "b63643244145f9332c1324a67576e16c6734aa21ee025a3f141efc97fb5517ce",
         "scope": [
           "app/app.config.ts",
@@ -1134,7 +1134,7 @@
           "references/kits/api-docs/index.md",
           "scripts/lib/contrast-build.mjs"
         ],
-        "scopeDigest": "40264763aabd57248e0219751573aad32962c169ec81c8d98702d1f3327f3b0f",
+        "scopeDigest": "51bbb0e5eb23fdc69da9f5003de46c8e45565cd7e3f6ba1645eaf6f34161f9fd",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1153,23 +1153,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "withDefaults的h2默认、count0条件、动态原生h2/h3/h4、slot和根section attrs继承。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核原生h2/h3/h4默认层级、count=0保留、section与slot语义；FieldGroup与WebhookProtocol源码未变。gallery本次仅decoded labels和字段说明变化，main已修复的四处heading-level=4未被回退；新增subtree只给字段/组合子树，分组标题原边框和spacing不改。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：不新声称完整页面大纲/所有consumer可访问性验收；字段slot内部的新类型/焦点行为由对应owner另行复审。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对原生 section、h2 默认及 h2/h3/h4 动态标题、count=0 保留、slot/attrs 继承和 WebhookProtocol 消费方式；没有新增源码问题。限制：无专属 FieldGroup 组件测试，本轮静态复核与 typecheck/build 不能宣称完整页面大纲浏览器验收。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": []
     },
     "api-docs-field-item": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "3118c0a484317248cb3321b6d0c7ed6083493ebaf5055a7f86c1e3cbf715f806",
         "scope": [
           "app/app.config.ts",
@@ -1247,7 +1247,7 @@
           "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "fb4280b55ad358d5129fd3205e39d4add401a2893318db308811adee7272e0e8",
+        "scopeDigest": "c3ef02f95d19a343233c25b9183946e78f587993470cfebc42633da448af184c",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1281,12 +1281,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "FieldItem.vue:83–87 resolveComponent 缺失时返回字符串的可选 composition 分支、159–166 watch/shallowRef 控制折叠，以及 useFieldAnchor.ts nextTick 与重复导航 revision 语义；复审依赖实际响应式渲染与生命周期行为。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           }
         ]
       },
-      "notes": "已审类型摘要、simple/rich 值信息分流、原始值锚点与结构边界、subtree 容器、指令更新/清理及 registry 分发闭包。外层与值层存在性分别派生，未改原图路径/计数，丰富值要求保持原 renderer。f-909f4f270010 全对象及 open 状态完整保留，不能以自动 focus 结果代替 UI Find 补验与完整验收。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24补充：仅修测试定位，真实FieldItem长类型与独立compact probe分别严格验收；6组HEAD fixture零失败，固定baseline记录146历史失败；24严格focus与baseline归因、双方discovery通过。对三个固定gallery案例仅允许6处精确批准的展示文本转换，其余全文严格相等，composition全文原样；16组实际文本对照通过，保留原text/hash。typecheck与79相关组件通过；无生产代码改动，UI Find仍未补齐。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 FieldItem children 与 FieldValueStructure value 的保留 DOM Collapsible、shallowRef/watch 开合、精确路径收集与重复导航 revision、可选 SchemaComposition 解析，以及 collapseFocus 的 beforeUpdate/updated/unmounted、几何 inert 释放与可信 beforematch 分支。升级只从 Vue 上游修复 SSR hidden 枚举，无 mounted 兼容补丁；新生产 SSR/hydration 回归覆盖初始关闭与嵌套关闭。没有新增源码问题。限制：属性回归不是原生 Find；其他首次/开后关闭查找、快速重开、深链接和后续键盘须由本轮准确 SHA 证据确认。保持 deferred，f-909f4f270010 原对象和 open disposition 不变；本次复核不做簿记结案。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-73feb0baf6dd",
@@ -1306,13 +1306,13 @@
     },
     "api-docs-schema-composition": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "deferred",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "bc85d101464309dd4df732304a874c1732efc5a85ec632a5640b357e34b496b4",
         "scope": [
           "app/app.config.ts",
@@ -1358,7 +1358,7 @@
           "tests/nuxt/hierarchy-fixture.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "df42c724253c8746d23f2cfb6dff97d309f7e0887ec57759e88b024e509b82d5",
+        "scopeDigest": "8a8fc232652ca18c89e5bda43debbe869bf490c50e12dc923cbd2449274a8575",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1387,12 +1387,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "watch/响应式 id 状态、组件递归与 optional resolveComponent 必须继续支持重复 deep-link reveal、有效 tab 保留及按 id 独立展开。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           }
         ]
       },
-      "notes": "已审 oneOf/anyOf/allOf 的容器与 subtree、anyOf Map 状态及 v-collapse-focus=open.get(view.variant.id) 绑定、重复 deep link、原 discriminator/variant identity 逻辑和 FieldItem 依赖闭包。f-fea517d9f1ac 全对象及 open 状态完整保留；focus 祖先关闭为既有 handler 程序化激活，不代表用户祖先关闭快捷键。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24补充：仅修测试定位，真实FieldItem长类型与独立compact probe分别严格验收；6组HEAD fixture零失败，固定baseline记录146历史失败；24严格focus与baseline归因、双方discovery通过。对三个固定gallery案例仅允许6处精确批准的展示文本转换，其余全文严格相等，composition全文原样；16组实际文本对照通过，保留原text/hash。typecheck与79相关组件通过；无生产代码改动，UI Find仍未补齐。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 oneOf 有效 tab 保留/移除回退、anyOf reactive Map 与 open.get(id) directive 绑定、allOf 全展开、递归 variant/path 收集、重复导航 revision、discriminator 字面值与 ARIA content id；新的 SSR/hydration 回归检查真实 anyOf 初始关闭枚举。没有新增源码问题。限制：SSR 属性不是原生 Find；需绑定本轮准确 SHA 下真实 Find、严格焦点、嵌套关闭、快速重开和深链接结果。保持 deferred，f-fea517d9f1ac 原对象和 open disposition 不变；不把本次静态复核当结案。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-fea517d9f1ac",
@@ -1405,13 +1405,13 @@
     },
     "api-docs-field-annotation": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "c61a8137fcfaf5c768785ff6267f95ee478e2979367b873833963e669978708c",
         "scope": [
           "app/app.config.ts",
@@ -1456,7 +1456,7 @@
           "tests/text-contrast.test.mjs",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "c67e006fd3309844befa0149bef7e56c51ddb9e984fb62f149973a5e02544af1",
+        "scopeDigest": "d6d253996abeec3ef303477af1ff060739aaff9aad06d084e3c20f938b0f7795",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1485,12 +1485,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "useFieldSource provide/inject 最近源解析、computed props优先级，以及 AnnotationPopover watch flush:post、template ref和nextTick焦点恢复均依赖Vue实际响应式及生命周期行为。"
           }
         ]
       },
-      "notes": "已审 field/source 选择、fallback、popover 摘要、同页/跨页动作与共享 fieldTypeSummary。新增 array/map 短类型与 FieldItem 使用同一纯函数，再独立附加外层 union，原路由/requiredness/焦点逻辑未改。所有既有 resolved/wont-fix finding 全对象及状态保留。无本 reviewer 新增 annotation portal 浏览器验证。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 FieldAnnotation 的显式 field 优先、useFieldSource 最近 provide/inject、未解析引用降级、requiredness/presence 同源派生、同页/跨页跳转以及 AnnotationPopover 的 post-flush/nextTick 焦点生命周期；已有 annotation-forms、annotation-popover、field-anchor 测试覆盖主要行为。没有新增源码问题。限制：本 reviewer 未做真实 portal 首次键盘打开、Escape 和 jump smoke，不把单测视为浏览器验收。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-31f690a2dbaa",
@@ -1517,13 +1517,13 @@
     },
     "api-docs-event-badge": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "e0ec763c1b7a3eb8231bc3892cb6fbc03fd75928a5716dba43936f5767f82830",
         "scope": [
           "app/app.config.ts",
@@ -1558,7 +1558,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "c345b3a25c51c7ddf063ce10051d0211d7cb77154743577f3d842a196789a3d9",
+        "scopeDigest": "81675b1eb3c0be560e9b4329e7f272ffe4824c2f672d2aca16646af66eaf05f2",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1592,23 +1592,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "依赖 Vue 单根组件的 fallthrough attr 透传,使 WebhookBadge 的 translate=no 经 SemanticBadge 到达 UBadge。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核唯一EVENT常量、neutral/subtle默认、size透传、mono/translate=no经SemanticBadge抵达UBadge，未建立新词表或按事件动词着色。组件/原子/preset/config未变，gallery字段说明不影响event示例输入；共享subtree无本组件选择器，parser不改语义色。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：不新增任意slot/attrs/全部consumer视觉保证；保持原main事件徽章证据与语义边界。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 WebhookBadge→SemanticBadge→UBadge 单根 attrs 透传、translate=no、EVENT 唯一词表、neutral/subtle 与 size 默认；对应 http-method-badge 组件断言覆盖最终 translate。没有新增源码问题。限制：未重测全部消费者色彩/字号，历史视觉证据保持原来源。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": []
     },
     "api-docs-lifecycle-notice": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "5954645ab31247f6c8e09442a6c5c9534ed63b5098afa05cf1ec04e1448b5713",
         "scope": [
           "app/app.config.ts",
@@ -1640,7 +1640,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "e2451699381933d1bbc71ec5ab8a7fa83c172566326773027f1ebc8d7db33984",
+        "scopeDigest": "d0abcb0d374abebd508fb00ddfc07dc9b57dd9017c49ff2f1e3a22738717902e",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -1679,12 +1679,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "LifecycleNotice 单根 fallthrough attrs 与 computed title/color。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核五endpoint状态共用preset、非空title默认/空白回退、description/default slot优先、UAlert subtle/attrs及默认无close。读取appConfig colored description opacity-100覆盖与UAlert slot前提；组件、preset、config、lock保持main，gallery不改notice输入，CSS新增subtree及parser白名单不改alert绘制。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留 #147 notice resolved finding 原对象及main实测原SHA；不声称本轮重跑16组颜色/slot浏览器矩阵或所有外部slot组合。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 LifecycleNotice preset 派生、空白 title 回退、默认 slot 优先于 description、不可 dismiss 的默认行为和 UAlert 单根 attrs；对应 chrome-labels 覆盖默认及本地化。没有新增源码问题。限制：未独立重测 UAlert 全颜色/slot 布局，基础组件实际类合并由共享 owner 复审及生产构建证据支持。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-b96f3407acc1",
@@ -1697,13 +1697,13 @@
     },
     "api-docs-operation-target": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "3371045fcb055ad42aafd3fe0cf5ca68fc697811258c09a403a6bf69f8370d12",
         "scope": [
           "app/app.config.ts",
@@ -1728,7 +1728,7 @@
           "tests/component/use-copy.spec.ts",
           "tests/fixtures/consumer/app/pages/index.vue"
         ],
-        "scopeDigest": "96dc316b9cd423843fd66ff7797059de67d4150ccb700e248afa917666ff6936",
+        "scopeDigest": "f4ba6cb9d91d66ddf22420dea0b66ab70d1a7c91e9baa5ae36620d15d3ccd27a",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1757,23 +1757,23 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "defineModel 与 computed 的受控/非受控身份响应性、原位 hosts 数据变化及 nextTick 测量。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md。\n复核 defineModel受控/非受控、host稳定身份与私有numeric index、三个复制意图、真实选区结束不复制/keyboard可激活、完整句反馈、DOM/Tab顺序、两个flex-nowrap原子组、host截断/path滚动及RO渐隐。owning组件/useCopy/USelect前提与lock未变；gallery两处字段说明无target props改动，subtree不会应用于target容器。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未重复原生clipboard、fallback与各host交互四矩阵；沿用main已修复focus evidence的原来源，不与本PR字段导航混为同一行为。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 defineModel 受控/本地状态判断、hosts 身份重排/删除、Select 内部数字值与业务 id 区分、完整 host/path/address 复制、选择文本抑制复制和 keyboard activation、useTemplateRef/ResizeObserver/nextTick 测量。operation-target/use-copy/copy-button 覆盖主要状态行为。没有新增源码问题。限制：本 reviewer 未运行真实 Select 键盘/复制及内容换行视觉 smoke，布局类断言不等于浏览器视觉验收。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": []
     },
     "api-docs-operation-header": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "a894ce09df5136be47c49558f634a6202e3c3b6f92b48447acf8b0860a6c857e",
         "scope": [
           "app/app.config.ts",
@@ -1813,7 +1813,7 @@
           "vitest.browser.config.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "ce9527f7f47e961603bc6235240370ca3e5f40a0d4657962bf91f48667315a1f",
+        "scopeDigest": "9830a5539ddafacc68c495f4f8b02dd03cfe60b468132b740cd3f7707e063fc7",
         "dependencies": [
           {
             "name": "@nuxt/icon",
@@ -1852,12 +1852,12 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "Header kind/lifecycle条件分支、headingLevel默认值与子badge的单根attrs透传。"
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：app/pages/kits/api-docs/index.vue、foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核 endpoint/webhook discriminated identity、method/path与EVENT/event、headingLevel、summary/lifecycle/action/description slots，读取徽章/preset链路。Header与所依赖徽章源码/config/lock均未变；gallery decoded标签/说明不改其props，新增subtree位于字段/组合内部，不改变Header布局或色值；parser保持同一色矩阵。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：main #147 Header resolved裁定与原证据完整保留；未声称重新执行全部Header116节点/所有slot与consumer视觉验收。 历史浏览器证据维持原来源 90dfa0c003c124b1605e8e99db62116d5aa18f27，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 endpoint/webhook 判别联合、identifier computed、方法/EVENT 子徽章选择、headingLevel 默认、lifecycle 条件分支与 actions/description/default slots；operation-header 与 chrome-labels 覆盖身份 token 及生命周期文案。没有新增源码问题。限制：未重新运行全部长路径/窄屏视觉场景，不改写既有视觉证据来源。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-0fd303fa92c4",
@@ -1870,13 +1870,13 @@
     },
     "api-docs-code-rail": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "f9529b9180b858c170cd4dda4cc985a555ed12a0ba1d9ef9ca526cd06857f843",
         "scope": [
           "app/components/demo/api-docs/DocsShellReference.vue",
@@ -1894,20 +1894,20 @@
           "tests/component/use-breakpoint-gate.spec.ts",
           "tests/component/use-raf-task.spec.ts"
         ],
-        "scopeDigest": "85a11ab0dbc656cca4e84b79c5a798ced004e42b1807113cf1d1e82e183c4171"
+        "scopeDigest": "986e62d23ee32df8f08e24821fbaa7c0d500924e1a4a235f8bf262599fc070c1"
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核fit与overflow两态、MIN_PANE和内容优先预算、effective ARIA ratio/bounds、disabled handle、按当前预算对齐拖动、breakpoint gate、pre/section DOM测量、动态重绑RO/MO、RAF合帧及卸载清理。原scope唯一变化为API Docs字段层级文字，CodeRail/分栏helpers/endpoint与webhook装配和测试不变；内容重分配契约未改变。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：未新执行多实例真实拖动与所有代码卡内容组合；不把字段subtree样式验收作为CodeRail新布局设计采纳。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "功能提交 b168a9fcf06d67d3a80336584aa9023a9eebfc1a 的独立静态复审无新增阻断。既有 evidence 无 dependencies 字段。已按 scope 检查 CodeRail 的 nextTick/RO/MO/RAF 生命周期、slot 内容替换、自然高度预算、effective bounds 与 handle 接线；code-rail 测试覆盖 stacked/fit/overflow、pre 重建、语义 body 替换与 ARIA。mock 几何不能替代真实响应式和拖动验收。 本轮578组件测试及SSR/水合、24严格焦点通过；完整浏览器套件由主任务汇总。原生Find三入口明暗12场1/1，详见本轮报告；不外推全部消费者。",
       "findings": []
     },
     "api-docs-site-search": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "51becd9c4dda6349e03ad6ab30f9a3c2c0134bc7d1ec2f8e29775ccdc1632d9b",
         "scope": [
           "app/assets/css/main.css",
@@ -1937,7 +1937,7 @@
           "tests/fixtures/contrast/main.css",
           "vitest.browser.config.ts"
         ],
-        "scopeDigest": "a696698eeaaf553dee6c24a6a98a7ff3bcb33a7f257ec9ff8ab9c7ec34bde74d",
+        "scopeDigest": "0bfe8411e6e51661b47bafa19397ec2e9774e9162aa5e05d9f2a9f65182bb8c6",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -1956,7 +1956,7 @@
           }
         ]
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：foundation/assets/css/main.css、references/kits/api-docs/index.md、scripts/lib/text-contrast.mjs。\n复核Fuse静态过滤/全局limit、ignoreFilter与postFilter、异步debounce和stale cleanup、emptyRef驱动持久polite三态、UModal可访问名、关闭清空query与同页hash焦点分工；读取CommandPalette input attrs及Modal title上游实现。Search/MethodBadge/config/lock均未变；subtree不命中搜索门户，文档变更在字段章节，parser不改搜索所用色值。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留两条main resolved finding原对象；未重新运行所有GET/POST/PUT/PATCH/DELETE门户状态或真实读屏器，不以静态矩阵替代这些历史实测。 历史浏览器证据维持原来源 9674ef684769fe0eec1acc05b6422ea519867edd，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 search watch cleanup/异步 stale response 丢弃、computed 同步分组过滤与全局 resultLimit、flush:post/empty ref 持久 polite 三态播报、关闭清空 query，以及同页 hash 的 closeAutoFocus/RAF 交接；site-search 组件测试覆盖上述主要行为。没有新增源码问题。限制：本 reviewer 未验证真实 Modal portal、Escape 焦点恢复或屏幕阅读器播报。既有 dependencies 未登记 Vue，建议补充 Vue 3.5.43 的 watch cleanup/computed/post-flush/template-ref 生命周期依赖理由；保持旧依赖理由和 findings。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-dd631c5b3977",
@@ -1976,13 +1976,13 @@
     },
     "api-docs-webhook-protocol": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "393faae5f84617435a679d5139e323f6b846cdb77f69b19a0bef5d6344c28bdb",
         "scope": [
           "app/pages/kits/api-docs/webhook-protocol.vue",
@@ -1997,9 +1997,9 @@
           "tests/component/webhook-protocol.spec.ts",
           "tests/webhook-protocol.test.mjs"
         ],
-        "scopeDigest": "9cde7cfc4e6da1ac367cc86157d8c663fbfd950c51c7e0fa092dab943fec6347"
+        "scopeDigest": "365d54620c50be0aa4af20735d0d840aaaa75a035ff7dfe1bdd7a90a2aa40bc5"
       },
-      "notes": "本次独立 affected co-review 基线 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b，受审合并功能快照 821a884cd979c825a4e118f10dce00c989130ff9。逐项保留原scope/历史findings/dependency name与reason；逐blob确认owning files及registry拓扑与main相同，原依赖经当前lock重算完全一致。\n本owner实际scope命中：references/kits/api-docs/index.md。\n复核三段独立正文省略、ACK literal/echo/intentional-empty建模、fact format显式opt-in与安全InlineMarkdown、FactList/FactRow dl语义、schedule总结句真源/chips隐藏、阈值和Show N more可见可访问名。owning四文件、专属reference/示例/tests均不变；唯一命中为API Docs index新增字段层级章节，不改变协议事实或重试展示契约。\n验证分层：本agent实际执行19项text-contrast测试通过，main/HEAD静态text-token矩阵完全相同。已读取主代理本轮日志：40 files/578组件通过（Map binding修复前）、修复后typecheck与production build/CSS 10 markers通过；严格focus 24场景与hierarchy通过。它们是各自来源的本轮证据，不把578项改标为修复后重跑，也不把此19项复审称为全站browser/人工视觉验收。日志由主对话在最终维护报告绑定，后续recorder应对已提交最终功能快照自动计算证据。\n限制：保留已resolved的schedule命名finding原对象；不验证签名/网络重试业务，也未新增实际业务consumer或整套视觉验收。 历史浏览器证据维持原来源 c02de4625ec6f82a26e2f48fdb78e332720f8be0，未改写原raw；本轮未发现新增finding。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 section 正文独立省略、ACK literal/echo/intentional-empty 边界、format 明确 opt-in 与安全 InlineMarkdown、FactList/FactRow dl/slots、schedule ref/computed、aria-expanded 和可见动作名称；webhook-protocol/fact-list 及纯函数测试覆盖主要语义。没有新增源码问题。限制：不验证签名/网络投递业务，也未重跑完整视觉矩阵。既有 ledger 无 dependencies，建议补充 Vue 3.5.43 的 computed sections/schedule、ref 展开、slot/v-for/ARIA 更新依赖理由；原 findings 不变。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": [
         {
           "id": "f-b1838c3b046a",
@@ -2060,13 +2060,13 @@
     },
     "api-docs-relation-source-path": {
       "round": 4,
-      "lastAuditedAt": "2026-09-24T02:38:06.800Z",
+      "lastAuditedAt": "2026-09-28T02:57:28.317Z",
       "change": "modified",
       "status": "verified",
       "evidence": {
         "kind": "scope-v1",
-        "baseSha": "9a0eb1680054a5e9a92e6fb1f957d71af55dd04b",
-        "headSha": "a8d11f63708053452b59ba742566402a16ded3d7",
+        "baseSha": "ca23616bbdbf948a73c5f55b74fdd095f9055538",
+        "headSha": "b168a9fcf06d67d3a80336584aa9023a9eebfc1a",
         "itemDigest": "7d60c920e120bb37eeb3e8a2fde9f93f6d79d6a45ae3e381ade42d36abb0ee0e",
         "scope": [
           "app/app.config.ts",
@@ -2109,7 +2109,7 @@
           "tests/nuxt/hierarchy-fixture.ts",
           "vitest.config.ts"
         ],
-        "scopeDigest": "96833ce23c08bd2602eeeac577e630a849f72ca1d631c587f222477bcbbccb26",
+        "scopeDigest": "b61f428c431248f951e98ae390bc979fe23845c5f17a4c981e1ccb7e891c992f",
         "dependencies": [
           {
             "name": "@nuxt/ui",
@@ -2133,7 +2133,7 @@
           },
           {
             "name": "vue",
-            "version": "3.5.39",
+            "version": "3.5.43",
             "reason": "computed 与受控组件响应更新、scope disposal 保持路径/labels 和导航 owner 生命周期一致。 本轮指令 beforeUpdate/updated/unmounted 与 reactive Map.get(id) 绑定是焦点保护前提。"
           },
           {
@@ -2143,7 +2143,7 @@
           }
         ]
       },
-      "notes": "已审 RelationSourcePath 的跨页优先、同页 modifier click、opaque hash 单次编码与 useFieldAnchor 链路；本体与 anchor 相对 base 未改，共享 FieldItem/field utils/CSS 的层级调整及值摘要不改目标身份，value 根/中间节点仍保留独立锚点。补被导航折叠区域/helper/测试 scope。无本 reviewer 新增本节点 browser 或 consumer 验证。 独立源码复审绑定 base 9a0eb1680054a5e9a92e6fb1f957d71af55dd04b、功能 HEAD 821a884cd979c825a4e118f10dce00c989130ff9。保留 base 与当前 ledger 全部既存 scope、当前全部 findings 和 dependency reasons，补本轮实际影响路径。已回读父代理日志 /tmp/pr153-merge-components.log：40文件578项为 Map binding 修复前结果，不冒充修复后 exact-head 组件复跑；/tmp/pr153-merge-typecheck-final.log、build-final.log 为修复后 typecheck/build 通过；focus.log strict24 cases 与 hierarchy.log 通过，执行和退出0由父代理确认。父代理另提供 consumer-{field,schema,annotation}.log 的三个 isolated consumer typecheck通过，discovery.log 通过；均以 /tmp/pr153-merge- 为路径前缀。UI Find 当前未补齐，不宣称原生 Find 通过；旧 raw/browser/contrast 证据保持原来源，不宣称人工视觉采纳或完整外部 consumer 验收。 补充：主代理随后在同一821a884功能代码上重新运行全部578项组件测试通过（/tmp/pr153-merge-components-final.log）。 2026-09-24补充：仅修测试定位，真实FieldItem长类型与独立compact probe分别严格验收；6组HEAD fixture零失败，固定baseline记录146历史失败；24严格focus与baseline归因、双方discovery通过。对三个固定gallery案例仅允许6处精确批准的展示文本转换，其余全文严格相等，composition全文原样；16组实际文本对照通过，保留原text/hash。typecheck与79相关组件通过；无生产代码改动，UI Find仍未补齐。 2026-09-24连续note增量复审：仅FieldItem条件外框与组间距合并，内部作用域、列表和data hooks保留；reference同步。56项相关组件与typecheck本轮通过；真实浏览器明暗窄屏检查及用户验收通过。上述较早SHA的全矩阵与consumer记录保持历史来源，不冒称本轮复跑；本轮完整CI另在最终PR记录回读。UI Find12场景仍未完成。 补充：首次CI35947667601检出field-condition旧边框归属断言，已改为公共外框；内容与列表断言不变，未改生产代码或放宽要求。最终CI另回读。",
+      "notes": "核对 to 优先跨页链接、field 同页链接、无目标纯文本三态；modifier click 保留、fragment 单次编码、computed labels/segments、可见节点同源 accessible name 和 useFieldAnchor scope disposal；关联字段闭包中的 Collapsible 揭示受本次 Vue 修复影响。relation-source-path/structured-relations-recipe/field-anchor 覆盖主要契约。没有新增源码问题。限制：本轮真实导航/焦点结论需绑定对应准确 SHA 浏览器证据，不宣称全 consumer 验收。\n本轮主代理补验：功能 b168a9fcf06d67d3a80336584aa9023a9eebfc1a；SSR/hydration 四场景、严格焦点24场景通过；Chrome153原生查找栏三入口×首次关闭/开后关闭×明暗共12场均1/1，截图保存在output/playwright/issue152/native。无window.find、片段导航或人工beforematch替代原生验收。上述执行结果覆盖本轮范围，不宣称全部外部消费者验收；全部既有finding对象与disposition保持不变。",
       "findings": []
     }
   }

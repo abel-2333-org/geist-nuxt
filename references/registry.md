@@ -6,6 +6,11 @@
 `externalRequirements.packages` 的 `nuxt`、`@nuxt/ui`、`tailwindcss` 表达语义等价的 semver
 集合。根 `package.json` 的精确版本只固定本仓库 gallery / 测试环境，不收窄 consumer 契约。
 
+Vue 最低要求为 `3.5.43`（`^3.5.43`）。此基线包含上游对 `hidden="until-found"`
+的 SSR / hydration 修复，保证初始关闭的 API Docs 内容保留浏览器原生查找语义。
+消费项目须更新实际安装的 Vue 及其配套 renderer / compiler；仅更新 copy-in 文件或
+`geist.lock.json` 不会升级 npm 依赖。依赖升级后仍需验证生产 SSR、hydration 和真实浏览器查找。
+
 ## 消费者与职责
 
 | 消费者 | 使用方式 |

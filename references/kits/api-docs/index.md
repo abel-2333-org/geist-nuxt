@@ -355,6 +355,18 @@ await copyLink(path, {
 
 **保持不变**：各模式计数语义（子字段恒显 `(N)`、值区域只在直接揭示真实字段时显示、anyOf / allOf 为 `fields.length + (composition ? 1 : 0)` 且为 0 不显示、`WebhookProtocol` 显示被隐藏条数、约束表 `(N)`）、默认开合、深链接自动展开与 arrival cue、`unmount-on-hide=false`、动词与 labels 契约、anyOf 卡片 / oneOf tabs / allOf 全展开三个既有决策、字段行自身的 presence 记号与 rule / caveat 形态。不纳入 `SidebarNav`、`EnumTable` 切换、`ResponseExample` 面板、gallery 外壳。
 
+### 初始关闭内容的原生查找
+
+消费端须满足 registry 的 Vue `^3.5.43` 要求。该版本基线包含 Vue 上游
+[#13125](https://github.com/vuejs/core/pull/13125) 的 SSR / hydration 修复：服务端就保留
+`hidden="until-found"`，hydration 不把它退化为普通 `hidden`。children、value、anyOf
+继续使用现有 Nuxt UI / Reka 原语与焦点处理，无挂载后改属性的兼容补丁。
+
+`tests/browser/hierarchy.mjs` 在真实生产页面分别检查禁用 JavaScript 的 SSR 与 hydration
+后的初始状态，覆盖三入口和嵌套关闭。这些属性检查只证明原生查找的前提；首次查找命中、
+可信揭示及后续键盘可用性仍须通过真实浏览器查找栏验证，不能用 `window.find`、片段导航
+或人工 `beforematch` 替代。依赖升级还须回归开后关闭查找、关闭焦点、快速重开与深链接。
+
 ### FieldAnnotation 的字段引用约束
 
 - `field-ref` 走 `useFieldSource` 的 provide/inject，与 `useGlossary`（foundation，服务 TermAnnotation）同构：页面/布局用 `provideFieldSource()` 注册 `id → { field, page? }`，叙事文本只引 id，不内联 `FieldNode`。同一份 `FieldNode` 应与下方字段树（`FieldItem`）共享单一真源。

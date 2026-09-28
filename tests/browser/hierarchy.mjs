@@ -25,6 +25,37 @@ async function load(route) {
   // Vue exposes its mounted app on the root; Nuxt attaches $nuxt to that app.
   await page.waitForFunction(() => document.querySelector('#__nuxt')?.__vue_app__?.$nuxt?.isHydrating === false)
 }
+// Check the actual gallery field trees before any disclosure interaction. A
+// mounted-only workaround must not mask SSR turning until-found into hidden="".
+// These are discoverability prerequisites, not evidence of browser UI Find.
+async function initialClosedState(probePage, targetId) {
+  return probePage.locator(`[id="${targetId}"]`).evaluate(target => {
+    const regions = []
+    for (let ancestor = target.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      if (!ancestor.matches('[data-slot="content"][data-state="open"], [data-slot="content"][data-state="closed"]')) continue
+      const style = getComputedStyle(ancestor)
+      regions.push({
+        state: ancestor.getAttribute('data-state'),
+        hidden: ancestor.getAttribute('hidden'),
+        display: style.display,
+        contentVisibility: style.contentVisibility,
+      })
+    }
+    return { textPresent: !!target.textContent.trim(), inert: !!target.closest('[inert]'), regions }
+  })
+}
+function assertInitiallyDiscoverable(snapshot, label, minimumRegions) {
+  assert.ok(snapshot.textPresent, `${label}: target content is present without opening`)
+  assert.equal(snapshot.inert, false, `${label}: initial content has no inert ancestor`)
+  assert.ok(snapshot.regions.length >= minimumRegions, `${label}: all expected disclosure levels exist`)
+  for (const [index, region] of snapshot.regions.entries()) {
+    const boundary = `${label}: ancestor ${index + 1}`
+    assert.equal(region.state, 'closed', `${boundary} stays initially closed`)
+    assert.equal(region.hidden, 'until-found', `${boundary} preserves the hidden enumeration`)
+    assert.notEqual(region.display, 'none', `${boundary} is not ordinary hidden content`)
+    assert.equal(region.contentVisibility, 'hidden', `${boundary} uses the browser's until-found hiding`)
+  }
+}
 async function state(button) {
   return button.evaluate(el => {
     const id = el.getAttribute('aria-controls')
@@ -153,14 +184,40 @@ async function checkComposition() {
 try {
   // Parse the actual server response with JavaScript disabled, separately from hydration.
   const ssrContext = await browser.newContext({ javaScriptEnabled: false })
-  const ssr = await ssrContext.newPage()
-  await ssr.goto(`${base}/kits/api-docs`)
-  for (const [label, selector] of [['children', '#body_gitSource button[aria-expanded]'], ['value', '#tx_retailers [data-value-structure-toggle]']]) {
-    report.lifecycle.push({ label, stage: 'SSR', ...await state(ssr.locator(selector).first()) })
+  try {
+    const ssr = await ssrContext.newPage()
+    const routes = [
+      { route: '/kits/api-docs', cases: [
+        { label: 'children', target: 'body_gitSource_repoId', minimumRegions: 1 },
+        { label: 'value', target: 'tx_retailers_retailerId', minimumRegions: 1 },
+        { label: 'nested-value', target: 'tx_products_name', minimumRegions: 2 },
+      ] },
+      { route: '/kits/api-docs/schema-composition', cases: [
+        { label: 'anyOf', target: 'contact_phone_number', minimumRegions: 1 },
+      ] },
+    ]
+    for (const { route, cases } of routes) {
+      const response = await ssr.goto(`${base}${route}`, { waitUntil: 'networkidle' })
+      assert.ok(response?.ok(), `${route}: production SSR response succeeds`)
+      const serverStates = new Map()
+      for (const scenario of cases) {
+        const snapshot = await initialClosedState(ssr, scenario.target)
+        report.lifecycle.push({ label: scenario.label, stage: 'SSR-initial-closed', ...snapshot })
+        assertInitiallyDiscoverable(snapshot, `${scenario.label}/SSR`, scenario.minimumRegions)
+        serverStates.set(scenario.target, snapshot)
+      }
+      await load(route)
+      for (const scenario of cases) {
+        const snapshot = await initialClosedState(page, scenario.target)
+        report.lifecycle.push({ label: scenario.label, stage: 'hydrated-initial-closed', ...snapshot })
+        assertInitiallyDiscoverable(snapshot, `${scenario.label}/hydrated`, scenario.minimumRegions)
+        assert.deepEqual(snapshot, serverStates.get(scenario.target), `${scenario.label}: hydration preserves initial discoverability`)
+        report.checks.push(`${scenario.label}: SSR and hydration preserve initially closed until-found content without inert; browser UI Find tested separately`)
+      }
+    }
+  } finally {
+    await ssrContext.close()
   }
-  await ssr.goto(`${base}/kits/api-docs/schema-composition`)
-  report.lifecycle.push({ label: 'anyOf', stage: 'SSR', ...await state(ssr.locator('button[aria-controls*="phone"]').first()) })
-  await ssrContext.close()
   await load('/kits/api-docs')
   await keyboardCase('children', '#body_gitSource button[aria-expanded]')
   await load('/kits/api-docs')
