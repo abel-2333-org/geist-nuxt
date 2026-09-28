@@ -101,6 +101,57 @@ describe('collapse focus lifecycle', () => {
     content.dispatchEvent(event)
   }
 
+  it('keeps native discovery visible to capture and same-node listeners without bubbling to ancestors', () => {
+    render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', 'until-found')
+    const capture = vi.fn()
+    const bubble = vi.fn()
+    const sameNode = vi.fn()
+    const parent = content.parentElement!
+    parent.addEventListener('beforematch', capture, { capture: true })
+    parent.addEventListener('beforematch', bubble)
+    // Registered after the directive: stopImmediatePropagation would break this.
+    content.addEventListener('beforematch', sameNode)
+
+    reveal(content)
+
+    expect(capture).toHaveBeenCalledOnce()
+    expect(sameNode).toHaveBeenCalledOnce()
+    expect(bubble).not.toHaveBeenCalled()
+    expect(content.classList.contains('animate-none!')).toBe(true)
+  })
+
+  it.each(['synthetic', 'descendant', 'not-until-found'])('does not intercept a %s event', (kind) => {
+    render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', kind === 'not-until-found' ? '' : 'until-found')
+    const bubble = vi.fn()
+    content.parentElement!.addEventListener('beforematch', bubble)
+
+    reveal(kind === 'descendant' ? element('inside') : content, kind !== 'synthetic')
+
+    expect(bubble).toHaveBeenCalledOnce()
+    expect(content.classList.contains('animate-none!')).toBe(false)
+  })
+
+  it('removes propagation interception from retained nodes on unmount', () => {
+    const view = render({ open: false })
+    const content = element('content')
+    content.setAttribute('hidden', 'until-found')
+    view.unmount()
+    wrapper = undefined
+    const parent = document.createElement('div')
+    parent.append(content)
+    const bubble = vi.fn()
+    parent.addEventListener('beforematch', bubble)
+
+    reveal(content)
+
+    expect(bubble).toHaveBeenCalledOnce()
+    expect(content.classList.contains('animate-none!')).toBe(false)
+  })
+
   it('keeps one native reveal discoverable, then restores ordinary animation and focus protection', async () => {
     const view = render({ open: false })
     const content = element('content')

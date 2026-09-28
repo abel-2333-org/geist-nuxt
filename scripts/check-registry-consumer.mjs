@@ -599,7 +599,7 @@ async function loadGuide() {
     build: true,
     cssMarker: 'scroll-mt-24',
     checkCss: checkSubtreeCss,
-    renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.'],
+    renderedMarkers: ['amount', 'string', 'Default constraint note.', 'Explicit caveat note.', 'Nested consumer needle.'],
     forbiddenRuntimeOutput: ['Failed to resolve component: SchemaComposition'],
     page: `<script setup lang="ts">
 import type { FieldNote } from '~/utils/field'
@@ -615,6 +615,11 @@ void legacyNote
 </script>
 <template>
   <FieldItem name="amount" type="string" :notes="notes" />
+  <FieldItem name="order" path="consumer_order" type="object" :children="[
+    { name: 'products', path: 'consumer_products', type: 'object', children: [
+      { name: 'name', path: 'consumer_name', type: 'string', description: 'Nested consumer needle.' },
+    ] },
+  ]" />
 </template>
 `,
   },

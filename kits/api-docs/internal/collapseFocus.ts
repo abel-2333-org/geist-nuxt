@@ -47,6 +47,9 @@ export const vCollapseFocus: ObjectDirective<HTMLElement, boolean | undefined> =
     const size = new ResizeObserver(releaseExpanded)
     const beforematch = (event: Event) => {
       if (!event.isTrusted || event.target !== content || content.getAttribute('hidden') !== 'until-found') return
+      // Every hidden ancestor receives its own native discovery event. Keep
+      // Reka's listener on this content, but do not toggle ancestors again.
+      event.stopPropagation()
       const state = states.get(region)!
       state.nativeReveal = true
       content.classList.add(nativeRevealAnimation)
