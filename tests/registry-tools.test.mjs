@@ -331,6 +331,16 @@ test('supports Nuxt 4.5 consumers in the real registry contract', async () => {
   assert.equal(semver.satisfies('4.5.0', registry.externalRequirements.packages.nuxt), true)
 })
 
+test('excludes Vue versions that lose hidden-until-found during SSR from copy-in requirements', async () => {
+  const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
+  for (const item of ['api-docs-field-item', 'api-docs-schema-composition']) {
+    const { externalRequirements } = resolveItems(registry, [item])
+    assert.equal(semver.satisfies('3.5.39', externalRequirements.packages.vue), false)
+    assert.equal(semver.satisfies('3.5.40', externalRequirements.packages.vue), false)
+    assert.equal(semver.satisfies('3.5.43', externalRequirements.packages.vue), true)
+  }
+})
+
 test('keeps the real managed config surface vendor-neutral', async () => {
   const registry = await loadRegistry(path.join(PROJECT_ROOT, 'registry.json'))
   const foundation = registry.items.find(item => item.name === 'geist-foundation')
