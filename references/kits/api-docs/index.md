@@ -353,6 +353,9 @@ await copyLink(path, {
 
 **V2 关闭焦点修复**：上述历史失败保留。children、值区域与 anyOf 共用 kit 内部 `collapseFocus.ts`，依附现有 content 槽根节点，不改变公共 API 或开合状态。关闭更新时，只有区域内部持有焦点才移到仍可见的对应 ARIA 触发器；退出期间 content 临时 `inert`，原语设置 `hidden="until-found"` 后释放，重新展开时由 ResizeObserver 在可见高度容纳内容后释放。可信浏览器 `beforematch` 揭示是例外：仅目标为该 content 且为 `hidden="until-found"` 时，该轮原生展开跳过展开动画和临时 inert，保留首次查找匹配；普通点击及快速重开仍使用几何焦点保护。标记、RAF 与动画覆盖在关闭、未消费揭示或卸载时清理。没有延迟焦点恢复、动画定时器或卸载。锁定 Nuxt UI 4.9 / Reka 2.9 的 content 槽直接父节点及 `hidden` 生命周期是此内部实现的依赖边界，升级必须重验。HEAD 验收须额外通过 `HEAD_STRICT=1`，不能仅凭 inherited finding 分类。原生片段导航、浏览器查找与焦点测试分开记录；详见维护报告及最终 CI 证据，不将片段揭示等同于查找成功。
 
+**嵌套原生发现**：可信 `beforematch` 以本 content 为目标且仍是 `hidden="until-found"` 时，`collapseFocus` 阻止该事件继续冒泡；同节点的 Reka listener 与浏览器默认揭示行为保留。浏览器为每个隐藏祖先分别发送的事件各自展开对应层，避免子层事件额外 toggle 祖先。祖先 capture 监听仍可观察事件，祖先 bubble 监听不再收到；不要以冒泡监听作为消费端揭示通知。此修复随现有 field-item 闭包 copy-in，不要求依赖补丁；不宣称解决重复自身事件的幂等性。升级 Reka 时重验嵌套首次查找、父开子闭、再次关闭查找及连续键盘流程。
+
+
 **保持不变**：各模式计数语义（子字段恒显 `(N)`、值区域只在直接揭示真实字段时显示、anyOf / allOf 为 `fields.length + (composition ? 1 : 0)` 且为 0 不显示、`WebhookProtocol` 显示被隐藏条数、约束表 `(N)`）、默认开合、深链接自动展开与 arrival cue、`unmount-on-hide=false`、动词与 labels 契约、anyOf 卡片 / oneOf tabs / allOf 全展开三个既有决策、字段行自身的 presence 记号与 rule / caveat 形态。不纳入 `SidebarNav`、`EnumTable` 切换、`ResponseExample` 面板、gallery 外壳。
 
 ### 初始关闭内容的原生查找

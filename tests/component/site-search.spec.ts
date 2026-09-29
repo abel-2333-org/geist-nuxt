@@ -240,9 +240,11 @@ describe('SiteSearch status announcements', () => {
     failed.reject(new Error('offline'))
     await flushPromises()
     await vi.waitFor(() => expect(status().text()).toBe('Lookup failed'))
+    // Count the source diagnostic, independently of Nuxt Icon load warnings.
     // The failure leaves an author diagnostic; the visible state alone must not.
-    expect(warn).toHaveBeenCalledOnce()
-    expect(warn.mock.calls[0]?.[0]).toContain('[SiteSearch] Search source failed')
+    const failures = warn.mock.calls.filter(([message]) => String(message).includes('[SiteSearch] Search source failed'))
+    expect(failures).toHaveLength(1)
+    expect(failures[0]?.[1]).toEqual(new Error('offline'))
 
     await query('found-query')
     await vi.waitFor(() => expect(status().text()).toBe('Looking…'))
@@ -270,7 +272,9 @@ describe('SiteSearch status announcements', () => {
     await flushPromises()
     expect(palette().text()).toContain('Authentication')
     expect(status().text()).toBe('')
-    expect(warn).toHaveBeenCalledOnce()
+    const failures = warn.mock.calls.filter(([message]) => String(message).includes('[SiteSearch] Search source failed'))
+    expect(failures).toHaveLength(1)
+    expect(failures[0]?.[1]).toEqual(new Error('offline'))
   })
 
   it('warns through the mounted component when search is provided without searchGroupLabel', async () => {
