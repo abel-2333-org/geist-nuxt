@@ -1,6 +1,6 @@
 // Structural contract for the FieldItem row — layout, not copy (chrome strings
 // live in chrome-labels.spec.ts): the container-width responsive summary
-// (identity vs trailing-fact zones, atomic qualifier cluster, compact badge
+// (one intrinsic metadata flow, atomic qualifier cluster, compact badge
 // tier) and the kind-based routing of notes into the constraints band vs the
 // caveat callout.
 import { describe, expect, it } from 'vitest'
@@ -81,13 +81,13 @@ describe('FieldItem summary layout', () => {
     expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
   })
 
-  it('keeps lifecycle with a long identity and separates only the default fact', async () => {
+  it('keeps lifecycle and a long default in the field metadata flow', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'an_uninterrupted_field_name_that_must_keep_its_own_width_budget',
         type: 'string',
         format: 'vendor-specific-format-with-a-long-name',
-        defaultValue: 'a-default-value-that-must-wrap-within-the-facts-zone',
+        defaultValue: 'a-default-value-that-must-wrap-within-the-available-width',
         lifecycle: { status: 'new' as const },
       },
     })
@@ -95,10 +95,18 @@ describe('FieldItem summary layout', () => {
     expect(wrapper.find('[data-field-identity] code').classes()).toContain('wrap-anywhere')
     expect(wrapper.find('[data-field-identity] [data-field-lifecycle]').exists()).toBe(true)
     expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
-    expect(wrapper.find('[data-field-summary]').classes()).toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
+    const identity = wrapper.get('[data-field-identity]')
+    const defaultFact = identity.get('[data-field-facts]')
+    const typeFacts = identity.get('[data-field-type-facts]')
+    expect(typeFacts.element.parentElement).toBe(identity.element)
+    expect(typeFacts.get('[data-field-type]').element.parentElement).toBe(typeFacts.element)
+    expect(typeFacts.text()).toContain('vendor-specific-format-with-a-long-name')
+    expect(defaultFact.element.parentElement).toBe(typeFacts.element)
+    expect(identity.get('[data-field-qualifiers]').element.parentElement).toBe(identity.element)
+    expect(defaultFact.text()).toContain('a-default-value-that-must-wrap-within-the-available-width')
   })
 
-  it('keeps a full-width identity column when no default fact is rendered', async () => {
+  it('omits the default fact when no default is declared', async () => {
     const wrapper = await mountSuspended(FieldItem, {
       props: {
         name: 'transactionSettlementInstruction',
@@ -108,7 +116,17 @@ describe('FieldItem summary layout', () => {
     })
 
     expect(wrapper.find('[data-field-facts]').exists()).toBe(false)
-    expect(wrapper.find('[data-field-summary]').classes()).not.toContain('@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]')
+    expect(wrapper.get('[data-field-identity]').text()).toContain('transactionSettlementInstruction')
+  })
+
+  it.each(['', '""', '0', 'false'])('preserves an explicitly supplied default: %j', async (defaultValue) => {
+    const wrapper = await mountSuspended(FieldItem, {
+      props: { name: 'value', type: 'string', defaultValue, labels: { default: '默认值' } },
+    })
+
+    const fact = wrapper.get('[data-field-identity] [data-field-facts]')
+    expect(fact.get('span').text()).toBe('默认值')
+    expect(fact.get('code').text()).toBe(defaultValue)
   })
 })
 

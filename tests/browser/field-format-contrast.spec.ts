@@ -10,9 +10,9 @@ const pages = [
   { name: 'webhook-reference', route: '/kits/api-docs/webhook-reference', ordinary: 'payload_createdAt' },
   { name: 'index', route: '/kits/api-docs', ordinary: 'out_settledAt' },
 ] as const
-// The adjacent translated-off span is the independent formatToken, not the
-// wire-type span, requiredness badge, or lifecycle badge later in the row.
-const formatSelector = '[data-field-type] + span[translate="no"]'
+// Within the type facts group, the adjacent translated-off span is the
+// independent formatToken, not the wire type, default, or lifecycle badge.
+const formatSelector = '[data-field-type-facts] > [data-field-type] + span[translate="no"]'
 
 for (const theme of ['light', 'dark'] as const) {
   for (const width of [1440, 390]) {
