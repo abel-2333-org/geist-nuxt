@@ -97,7 +97,12 @@ describe('FieldItem summary layout', () => {
     expect(wrapper.find('[data-field-facts] code').classes()).toContain('wrap-anywhere')
     const identity = wrapper.get('[data-field-identity]')
     const defaultFact = identity.get('[data-field-facts]')
-    expect(defaultFact.element.parentElement).toBe(identity.get('[data-field-type]').element.parentElement)
+    const typeFacts = identity.get('[data-field-type-facts]')
+    expect(typeFacts.element.parentElement).toBe(identity.element)
+    expect(typeFacts.get('[data-field-type]').element.parentElement).toBe(typeFacts.element)
+    expect(typeFacts.text()).toContain('vendor-specific-format-with-a-long-name')
+    expect(defaultFact.element.parentElement).toBe(typeFacts.element)
+    expect(identity.get('[data-field-qualifiers]').element.parentElement).toBe(identity.element)
     expect(defaultFact.text()).toContain('a-default-value-that-must-wrap-within-the-available-width')
   })
 
