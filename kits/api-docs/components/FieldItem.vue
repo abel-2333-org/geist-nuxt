@@ -39,9 +39,8 @@ import { vCollapseFocus } from '../internal/collapseFocus'
 //
 // Anatomy:  summary row  ── anchor · signature
 //                           (name[?]/type[| null | ""]/format/requiredness/
-//                           lifecycle) · trailing fallback fact (default);
-//                           container-width responsive, request-optional
-//                           remains unmarked
+//                           lifecycle · default) in one intrinsic wrapping flow;
+//                           request-optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → presence rule
 //                           → description →
 //                           caveat callout(s) → aligned fact band (enum →
@@ -288,10 +287,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
       aria-hidden="true"
     />
-    <!-- The summary follows the developer's scan order: identity answers what
-         the field is, whether it may be omitted and how mature it is; the
-         trailing fact covers fallback behavior (default). Container queries
-         respond to the actual column width, including recursive fields. -->
+    <!-- Field identity and fallback behavior share one wrapping flow. Short
+         defaults stay beside the signature when space permits; recursive and
+         narrow columns wrap by content rather than reserving a facts column. -->
     <div class="group/field relative flex items-start gap-2">
       <button
         v-if="path"
@@ -310,10 +308,7 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
 
       <div
         data-field-summary
-        class="grid min-w-0 flex-1 gap-2"
-        :class="defaultValue !== undefined
-          ? '@md/field:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] @md/field:items-start @md/field:gap-x-4'
-          : ''"
+        class="min-w-0 flex-1"
       >
         <div data-field-identity class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
           <code
@@ -399,14 +394,11 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
               class="shrink-0 rounded-sm"
             />
           </span>
-        </div>
-
-        <div
-          v-if="defaultValue !== undefined"
-          data-field-facts
-          class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 @md/field:justify-end"
-        >
-          <span class="inline-flex min-w-0 items-center gap-1.5">
+          <span
+            v-if="defaultValue !== undefined"
+            data-field-facts
+            class="inline-flex min-w-0 max-w-full items-baseline gap-1.5"
+          >
             <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
             <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
           </span>
