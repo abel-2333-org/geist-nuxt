@@ -39,7 +39,7 @@ import { vCollapseFocus } from '../internal/collapseFocus'
 //
 // Anatomy:  summary row  ── anchor · signature
 //                           (name[?]/type[| null | ""]/format/requiredness/
-//                           lifecycle · default) in one intrinsic wrapping flow;
+//                           default · lifecycle) in one intrinsic wrapping flow;
 //                           request-optional remains unmarked
 //           leaf detail  ── deprecation note → condition rule → presence rule
 //                           → description →
@@ -287,9 +287,9 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
       class="pointer-events-none absolute inset-0 rounded-md bg-primary/10 opacity-0 ring-1 ring-primary"
       aria-hidden="true"
     />
-    <!-- Field identity and fallback behavior share one wrapping flow. Short
-         defaults stay beside the signature when space permits; recursive and
-         narrow columns wrap by content rather than reserving a facts column. -->
+    <!-- Type and default form one metadata group, so a default keeps its
+         type context when the group wraps after a long field name. Values
+         can still wrap inside the group in recursive or narrow columns. -->
     <div class="group/field relative flex items-start gap-2">
       <button
         v-if="path"
@@ -365,15 +365,28 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
                span may shrink (no `shrink-0`) so a union breaks at its ` | `
                instead of overflowing a narrow column. -->
           <span
-            data-field-type
-            class="wrap-anywhere min-w-0 font-mono text-xs text-muted"
-            translate="no"
-          >{{ typeExpression }}</span>
-          <span
-            v-if="formatToken"
-            class="wrap-anywhere font-mono text-xs text-dimmed"
-            translate="no"
-          >{{ formatToken }}</span>
+            data-field-type-facts
+            class="inline-flex min-w-0 max-w-full flex-wrap items-baseline gap-x-2 gap-y-1"
+          >
+            <span
+              data-field-type
+              class="wrap-anywhere min-w-0 font-mono text-xs text-muted"
+              translate="no"
+            >{{ typeExpression }}</span>
+            <span
+              v-if="formatToken"
+              class="wrap-anywhere font-mono text-xs text-dimmed"
+              translate="no"
+            >{{ formatToken }}</span>
+            <span
+              v-if="defaultValue !== undefined"
+              data-field-facts
+              class="inline-flex min-w-0 max-w-full items-baseline gap-1.5"
+            >
+              <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
+              <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
+            </span>
+          </span>
           <span
             v-if="requiredState || lifecycle"
             data-field-qualifiers
@@ -393,14 +406,6 @@ const isDeprecated = computed(() => props.lifecycle?.status === 'deprecated')
               size="sm"
               class="shrink-0 rounded-sm"
             />
-          </span>
-          <span
-            v-if="defaultValue !== undefined"
-            data-field-facts
-            class="inline-flex min-w-0 max-w-full items-baseline gap-1.5"
-          >
-            <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-dimmed">{{ t.default }}</span>
-            <InlineCode class="wrap-anywhere min-w-0">{{ defaultValue }}</InlineCode>
           </span>
         </div>
       </div>
